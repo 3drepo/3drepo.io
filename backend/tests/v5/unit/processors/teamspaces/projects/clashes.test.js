@@ -467,7 +467,7 @@ const testProcessClashResults = () => {
 
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+				{ _id: corId }, { plan: 1, triggeredAt: 1 });
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 				{ _id: 1 }, { updatedAt: -1 });
@@ -490,7 +490,7 @@ const testProcessClashResults = () => {
 				teamspace,
 				project,
 				runId: corId,
-				planId: currentRun.plan._id,
+				plan: currentRun.plan,
 				results: result,
 			});
 		});
@@ -597,7 +597,7 @@ const testProcessClashResults = () => {
 
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+				{ _id: corId }, { plan: 1, triggeredAt: 1 });
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 				{ _id: 1 }, { updatedAt: -1 });
@@ -646,7 +646,7 @@ const testProcessClashResults = () => {
 
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+				{ _id: corId }, { plan: 1, triggeredAt: 1 });
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 				{ _id: 1 }, { updatedAt: -1 });
@@ -675,7 +675,7 @@ const testProcessClashResults = () => {
 				teamspace,
 				project,
 				runId: corId,
-				planId: currentRun.plan._id,
+				plan: currentRun.plan,
 				results: result,
 			});
 		});

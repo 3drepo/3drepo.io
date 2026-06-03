@@ -28,17 +28,30 @@ const ModelSettingsModel = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
+const TicketsGroups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
+
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
+const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
+
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/commons/tickets.clashes`);
 
 const {
 	basePropertyLabels,
+	clashElementTypes,
 	modulePropertyLabels,
 	presetModules,
 	statuses,
 	statusTypes,
+	viewGroups,
 } = require(`${src}/schemas/tickets/templates.constants`);
-const { CLASH_TYPES } = require(`${src}/models/clashes.constants`);
+const { CLASH_TYPES, clashObjectIdTypes } = require(`${src}/models/clashes.constants`);
 const { convertArrayUnits, units } = require(`${src}/utils/helper/units`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { CLOUD_CLASH } = presetModules;
 const {
@@ -83,8 +96,8 @@ const getTemplateWithoutCustomStatus = () => ({
 
 const getClash = (index = generateRandomString()) => ({
 	index,
-	a: { idType: 'internal', id: generateRandomString() },
-	b: { idType: 'ifc_guids', id: generateRandomString() },
+	a: { container: generateUUIDString(), idType: clashObjectIdTypes.INTERNAL, id: generateUUIDString() },
+	b: { container: generateUUIDString(), idType: clashObjectIdTypes.IFC, id: generateRandomString(22) },
 	positions: [
 		[1, 2, 3],
 		[4, 6, 3],
@@ -97,6 +110,8 @@ const getContext = () => ({
 	runId: generateUUIDString(),
 	clashType: CLASH_TYPES.HARD,
 	creator: generateRandomString(),
+	selectionA: { container: generateUUIDString(), revision: generateUUIDString() },
+	selectionB: { container: generateUUIDString(), revision: generateUUIDString() },
 });
 
 const getProcessOptions = (context, tickets = {}) => ({
@@ -105,6 +120,8 @@ const getProcessOptions = (context, tickets = {}) => ({
 		_id: context.planId,
 		name: context.planName,
 		type: context.clashType,
+		selectionA: context.selectionA,
+		selectionB: context.selectionB,
 		tickets: {
 			creator: context.creator,
 			...tickets,
@@ -136,12 +153,25 @@ describe(determineTestGroup(__filename), () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		TicketsModel.addTicketsWithTemplate.mockResolvedValue([]);
+		TicketsModel.addTicketsWithTemplate.mockImplementation((...args) => {
+			const tickets = args[4];
+			return Promise.resolve(tickets.map((ticket) => ({ ...ticket, _id: generateUUIDString() })));
+		});
 		TicketsModel.updateTickets.mockResolvedValue([]);
 		ModelSettingsModel.getFederationById.mockResolvedValue({ properties: { unit: units.MM } });
+		Scenes.getMeshesWithParentIds.mockImplementation((ts, p, container, revision, ids) => Promise.resolve(ids));
+		TicketsGroups.commitGroupChanges.mockResolvedValue();
+		TicketsGroups.processGroupsUpdate.mockImplementation((oldData, newData, fields, groupsState) => {
+			fields.forEach((fieldName) => {
+				const [, groupType] = fieldName.split('.');
+				newData?.state?.[groupType]?.forEach((entry) => {
+					groupsState.toAdd.push(entry.group);
+				});
+			});
+		});
 		const mockValidation = (t, p, m, tem, tickets, { existingData, processValidatedData = true } = {}) => (
 			Promise.resolve(tickets.map((ticket, i) => ({
-				newTicket: ticket,
+				newTicket: processValidatedData && !existingData?.[i] ? { ...ticket, type: tem._id } : ticket,
 				...(processValidatedData ? { existingData: existingData?.[i] } : {}),
 			})))
 		);
@@ -190,6 +220,7 @@ describe(determineTestGroup(__filename), () => {
 				},
 			},
 		};
+		const expectedSavedTicket = { ...expectedTicket, type: template._id };
 
 		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, federation, {
@@ -216,7 +247,16 @@ describe(determineTestGroup(__filename), () => {
 			[expectedTicket], { author: context.creator });
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
-			federation, template._id, [expectedTicket]);
+			federation, template._id, [expectedSavedTicket]);
+		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+		expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
+			{
+				teamspace,
+				project,
+				model: federation,
+				tickets: expect.arrayContaining([expect.objectContaining(expectedSavedTicket)]),
+				author: context.creator,
+			});
 		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
 
@@ -275,7 +315,87 @@ describe(determineTestGroup(__filename), () => {
 		expect(createdTicket.properties[PIN]).toEqual(clashPoint);
 	});
 
-	test('Should use the original id type for unknown clash id types and Unknown when missing', async () => {
+	test('Should create object override groups in the default view for new clash tickets if enabled', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const savedTicketId = generateUUIDString();
+		const meshIds = [generateUUIDString(), generateUUIDString()];
+		const results = { new: [clash], active: [], resolved: [] };
+		template.config.defaultView = true;
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+		TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce([{ _id: savedTicketId }]);
+		Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshIds);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const expectedView = {
+			state: {
+				[viewGroups.COLORED]: [
+					{
+						group: {
+							name: 'Object A',
+							objects: [{
+								container: clash.a.container,
+								_ids: meshIds,
+							}],
+						},
+						color: [255, 0, 0],
+					},
+					{
+						group: {
+							name: 'Object B',
+							objects: [{
+								container: clash.b.container,
+								[clashObjectIdTypes.IFC]: [clash.b.id],
+							}],
+						},
+						color: [0, 255, 0],
+					},
+				],
+			},
+		};
+
+		expect(TicketsGroups.processGroupsUpdate).toHaveBeenCalledTimes(1);
+		expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(1);
+		expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledWith(teamspace, project, clash.a.container,
+			context.selectionA.revision, [stringToUUID(clash.a.id)], true);
+		expect(TicketsGroups.processGroupsUpdate).toHaveBeenCalledWith(undefined, expectedView,
+			Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+			expect.objectContaining({
+				old: expect.any(Set),
+				stillUsed: expect.any(Set),
+				toAdd: expect.any(Array),
+			}));
+		expect(TicketsGroups.commitGroupChanges).toHaveBeenCalledTimes(1);
+		expect(TicketsGroups.commitGroupChanges).toHaveBeenCalledWith(teamspace, project, federation, savedTicketId,
+			expect.objectContaining({ toAdd: expect.any(Array) }));
+	});
+
+	test('Should create default view groups with revit ids for new clash tickets if enabled', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const revitId = 12345;
+		const results = { new: [clash], active: [], resolved: [] };
+		template.config.defaultView = true;
+		clash.a = { container: generateUUIDString(), idType: clashObjectIdTypes.REVIT, id: String(revitId) };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const defaultView = TicketsGroups.processGroupsUpdate.mock.calls[0][1];
+		expect(defaultView.state[viewGroups.COLORED][0].group.objects).toEqual([{
+			container: clash.a.container,
+			[clashObjectIdTypes.REVIT]: [clash.a.id],
+		}]);
+	});
+
+	test('Should use 3D Repo ID for unknown or missing clash id types', async () => {
 		const template = getTemplate();
 		const clash = getClash(generateRandomString());
 		const context = getContext();
@@ -290,8 +410,8 @@ describe(determineTestGroup(__filename), () => {
 			getProcessOptions(context));
 
 		const cloudClashData = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0].modules[CLOUD_CLASH];
-		expect(cloudClashData[OBJECT_A_ID_TYPE]).toEqual(customIdType);
-		expect(cloudClashData[OBJECT_B_ID_TYPE]).toEqual('Unknown');
+		expect(cloudClashData[OBJECT_A_ID_TYPE]).toEqual(clashElementTypes['3_D_REPO_ID']);
+		expect(cloudClashData[OBJECT_B_ID_TYPE]).toEqual(clashElementTypes['3_D_REPO_ID']);
 		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
 
@@ -342,7 +462,7 @@ describe(determineTestGroup(__filename), () => {
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
 		TicketSchema.validateTickets.mockImplementation((t, p, m, tem, tickets, options = {}) => {
 			if (options.processValidatedData !== false) {
-				return Promise.resolve(tickets.map((ticket) => ({ newTicket: ticket })));
+				return Promise.resolve(tickets.map((ticket) => ({ newTicket: { ...ticket, type: tem._id } })));
 			}
 
 			if (tickets[0].properties?.[invalidProperty]) return Promise.reject(new Error());
@@ -359,13 +479,14 @@ describe(determineTestGroup(__filename), () => {
 			}));
 
 		const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
+		const [{ type, ...ticketBeforeValidation }] = createdTickets;
 		expect(createdTickets[0].properties).toEqual({
 			[basePropertyLabels.PRIORITY]: priority,
 			[STATUS]: defaultStatus,
 		});
 		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(3);
 		expect(TicketSchema.validateTickets).toHaveBeenLastCalledWith(teamspace, project, federation, template,
-			createdTickets, { author: context.creator });
+			[ticketBeforeValidation], { author: context.creator });
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
 			federation, template._id, createdTickets);
 	});

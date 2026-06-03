@@ -62,21 +62,26 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 	}
 };
 
-const clashRunProcessed = async ({ teamspace, project, runId, planId, results }) => {
+const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun, results }) => {
 	try {
-		const plan = await getPlanById(teamspace, project, planId).catch(() => undefined);
-		if (!plan?.tickets?.federation) return;
+		const { tickets } = await getPlanById(teamspace, project, planFromRun._id, { tickets: 1 }).catch(() => ({}));
+		if (!tickets?.federation) return;
 
 		const fed = await getFederationById(teamspace,
-			plan.tickets.federation, { _id: 1 }).catch(() => undefined);
+			tickets.federation, { _id: 1 }).catch(() => undefined);
 		if (!fed) return;
 
-		const template = await getTemplateById(teamspace, plan.tickets.template).catch(() => undefined);
+		const template = await getTemplateById(teamspace, tickets.template).catch(() => undefined);
 		if (!template) return;
 
-		await processTicketClashResults(teamspace, project, fed._id, template, results, { plan, runId });
+		// Use the run's plan details, but keep current ticket settings from the latest plan data.
+		const plan = { ...planFromRun, tickets };
+
+		await processTicketClashResults(teamspace, project, fed._id, template, results,
+			{ plan, runId });
 	} catch (error) {
-		logger.logError(`Error processing clash run ${runId} for project ${project} in teamspace ${teamspace}: ${error.message}`);
+		logger.logError(`Error processing clash run ${UUIDToString(runId)} `
+			+ `for project ${UUIDToString(project)} in teamspace ${teamspace}: ${error.message}`);
 	}
 };
 

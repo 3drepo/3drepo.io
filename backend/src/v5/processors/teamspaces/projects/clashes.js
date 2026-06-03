@@ -145,7 +145,6 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
 	const { type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
 	const runId = await createClashRun(teamspace, project, plan, user);
-
 	const configStream = new PassThrough();
 	configStream.write('{');
 	configStream.write(`"type":${JSON.stringify(type)},`);
@@ -217,8 +216,10 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 };
 
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan: { _id: planId } } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
+	const { plan } = await getClashRunByQuery(teamspace, project,
+		{ _id: runId }, { plan: 1, triggeredAt: 1 });
+
+	const planId = plan._id;
 
 	const errorCounts = {};
 	let hasErrors = false;
@@ -294,7 +295,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		teamspace,
 		project,
 		runId,
-		planId,
+		plan,
 		results: categorizedClashes,
 	});
 };

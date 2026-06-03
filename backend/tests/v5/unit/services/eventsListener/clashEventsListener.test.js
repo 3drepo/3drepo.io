@@ -23,6 +23,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
@@ -198,9 +199,16 @@ const testClashRunCompleted = () => {
 
 const generateProcessedEventData = () => ({
 	teamspace: generateRandomString(),
-	project: generateRandomString(),
-	runId: generateRandomString(),
-	planId: generateRandomString(),
+	project: generateUUID(),
+	runId: generateUUID(),
+	plan: {
+		_id: generateUUID(),
+		name: generateRandomString(),
+		type: generateRandomString(),
+		selectionA: generateRandomObject(),
+		selectionB: generateRandomObject(),
+		tickets: generateRandomObject(),
+	},
 	results: generateRandomObject(),
 });
 
@@ -209,10 +217,8 @@ const testClashRunProcessed = () => {
 		test(`Should process clash tickets if there is a ${events.CLASH_RUN_PROCESSED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
 			const eventData = generateProcessedEventData();
-			const plan = {
-				_id: eventData.planId,
-				name: generateRandomString(),
-				type: generateRandomString(),
+			const planData = {
+				_id: eventData.plan._id,
 				tickets: {
 					federation: generateRandomString(),
 					template: generateRandomString(),
@@ -224,7 +230,7 @@ const testClashRunProcessed = () => {
 			const fed = { _id: generateRandomString() };
 			const template = generateRandomObject();
 
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(planData);
 			ModelSettingsModel.getFederationById.mockResolvedValueOnce(fed);
 			TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
 
@@ -234,16 +240,17 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.planId);
+				eventData.project, eventData.plan._id, { tickets: 1 });
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
-				plan.tickets.federation, { _id: 1 });
+				planData.tickets.federation, { _id: 1 });
 			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
 			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(eventData.teamspace,
-				plan.tickets.template);
+				planData.tickets.template);
 			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
 			expect(TicketsClashes.processClashResults).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, fed._id, template, eventData.results, { plan, runId: eventData.runId });
+				eventData.project, fed._id, template, eventData.results,
+				{ plan: { ...eventData.plan, tickets: planData.tickets }, runId: eventData.runId });
 		});
 
 		test('Should not process clash tickets if the plan cannot be found', async () => {
@@ -258,7 +265,7 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.planId);
+				eventData.project, eventData.plan._id, { tickets: 1 });
 			expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
 			expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
 			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
@@ -279,7 +286,7 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.planId);
+				eventData.project, eventData.plan._id, { tickets: 1 });
 			expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
 			expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
 			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
@@ -305,7 +312,7 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.planId);
+				eventData.project, eventData.plan._id, { tickets: 1 });
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
 				plan.tickets.federation, { _id: 1 });
@@ -335,7 +342,7 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.planId);
+				eventData.project, eventData.plan._id, { tickets: 1 });
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
 			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
 				plan.tickets.federation, { _id: 1 });
@@ -349,7 +356,7 @@ const testClashRunProcessed = () => {
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
 			const eventData = generateProcessedEventData();
 			const plan = {
-				_id: eventData.planId,
+				_id: eventData.plan._id,
 				name: generateRandomString(),
 				type: generateRandomString(),
 				tickets: {
@@ -374,7 +381,8 @@ const testClashRunProcessed = () => {
 			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 			expect(logger.logError).toHaveBeenCalledWith(
-				`Error processing clash run ${eventData.runId} for project ${eventData.project} in teamspace ${eventData.teamspace}: ${error.message}`,
+				`Error processing clash run ${UUIDToString(eventData.runId)} `
+				+ `for project ${UUIDToString(eventData.project)} in teamspace ${eventData.teamspace}: ${error.message}`,
 			);
 		});
 	});
