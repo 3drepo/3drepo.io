@@ -147,12 +147,6 @@ export const MessageInput = styled(FormTextAreaExpandable)`
 	padding: 8px 15px 0;
 	overflow: hidden;
 
-	:after {
-		content: '';
-		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
-		z-index: 1;
-	}
-
 	.MuiInputBase-multiline {
 		padding: 0;
 		line-height: 16px;
