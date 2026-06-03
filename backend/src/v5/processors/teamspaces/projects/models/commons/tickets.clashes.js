@@ -19,7 +19,7 @@ const { CLASH_TYPES, clashObjectIdTypes } = require('../../../../../models/clash
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const {
 	basePropertyLabels,
-	clashElementTypes,
+	idTypeLabels,
 	modulePropertyLabels,
 	presetModules,
 	statusTypes,
@@ -219,11 +219,11 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 	const baseNewTicket = await generateBaseNewTicket(
 		teamspace, project, federation, template, clashContext.valuesAtCreation,
 		clashContext.statusInfo.defaultStatuses.onNew);
-	const defaultClashIdType = clashElementTypes['3_D_REPO_ID'];
+	const defaultClashIdType = idTypeLabels['3_D_REPO_ID'];
 	const clashIdTypeToTicketType = {
 		[clashObjectIdTypes.INTERNAL]: defaultClashIdType,
-		[clashObjectIdTypes.IFC]: clashElementTypes.IFC,
-		[clashObjectIdTypes.REVIT]: clashElementTypes.REVIT,
+		[clashObjectIdTypes.IFC]: idTypeLabels.IFC,
+		[clashObjectIdTypes.REVIT]: idTypeLabels.REVIT,
 	};
 	const { clashIdToTicket } = clashContext;
 

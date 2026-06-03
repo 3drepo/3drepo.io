@@ -42,7 +42,7 @@ const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/com
 
 const {
 	basePropertyLabels,
-	clashElementTypes,
+	idTypeLabels,
 	modulePropertyLabels,
 	presetModules,
 	statuses,
@@ -445,8 +445,8 @@ describe(determineTestGroup(__filename), () => {
 			getProcessOptions(context));
 
 		const cloudClashData = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0].modules[CLOUD_CLASH];
-		expect(cloudClashData[OBJECT_A_ID_TYPE]).toEqual(clashElementTypes['3_D_REPO_ID']);
-		expect(cloudClashData[OBJECT_B_ID_TYPE]).toEqual(clashElementTypes['3_D_REPO_ID']);
+		expect(cloudClashData[OBJECT_A_ID_TYPE]).toEqual(idTypeLabels['3_D_REPO_ID']);
+		expect(cloudClashData[OBJECT_B_ID_TYPE]).toEqual(idTypeLabels['3_D_REPO_ID']);
 		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
 
