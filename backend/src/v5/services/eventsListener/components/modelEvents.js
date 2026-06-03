@@ -36,6 +36,7 @@ const { getCalibrationStatus } = require('../../../processors/teamspaces/project
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
 const { getRefEntryByQuery } = require('../../../models/fileRefs');
 const { getTemplateById } = require('../../../models/tickets.templates');
+const listenerErrorNotification = require('../listenerErrorNotification');
 const { logger } = require('../../../utils/logger');
 const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
@@ -58,6 +59,18 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.QUEUED_TASK_UPDATE,
+			listenerName: 'queueStatusUpdate',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				model,
+				corId,
+				status,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -80,6 +93,19 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => 
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.QUEUED_TASK_COMPLETED,
+			listenerName: 'queueTasksCompleted',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				model,
+				value,
+				corId,
+				user,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -91,11 +117,26 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1, statusCode: 1, revCode: 1 });
 
 		if (modelTypes.DRAWING === modelType) {
-			await createDrawingThumbnail(teamspace, project, model, revId).catch((err) => {
+			try {
+				await createDrawingThumbnail(teamspace, project, model, revId);
+			} catch (err) {
 				// It is not critical error if we failed to create a thumbnail.
 				// So catch the error and proceed
 				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
-			});
+				await listenerErrorNotification.notifyListenerFailure({
+					eventName: events.MODEL_IMPORT_FINISHED,
+					listenerName: 'revisionAdded.createDrawingThumbnail',
+					component: 'modelEvents',
+					payload: {
+						teamspace,
+						project,
+						model,
+						revId,
+						modelType,
+					},
+					error: err,
+				});
+			}
 		}
 
 		const modelEvents = {
@@ -117,67 +158,118 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 		}), teamspace, UUIDToString(project), model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.MODEL_IMPORT_FINISHED,
+			listenerName: 'revisionAdded',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				revId,
+				modelType,
+				calibration,
+			},
+			error: err,
+		});
 	}
 };
 
 const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
-	const { errorReason, status } = data;
-	const calibration = modelType === modelTypes.DRAWING
-		? await getCalibrationStatus(teamspace, project, model, revId)
-		: undefined;
+	try {
+		const { errorReason, status } = data;
+		const calibration = modelType === modelTypes.DRAWING
+			? await getCalibrationStatus(teamspace, project, model, revId)
+			: undefined;
 
-	if (status === processStatuses.OK) {
-		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
-	} else if (!errorReason.userErr) {
-		try {
-			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+		if (status === processStatuses.OK) {
+			await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
+		} else if (!errorReason.userErr) {
+			try {
+				const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 
-			let fileName = 'N/A';
+				let fileName = 'N/A';
 
-			if (modelType === modelTypes.DRAWING) {
-				const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
-					{ rev_id: revId }, { name: 1 });
-				fileName = name;
-			} else if (modelType === modelTypes.CONTAINER) {
-				fileName = await getContainerFileName(UUIDToString(revId));
-			}
+				if (modelType === modelTypes.DRAWING) {
+					const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+						{ rev_id: revId }, { name: 1 });
+					fileName = name;
+				} else if (modelType === modelTypes.CONTAINER) {
+					fileName = await getContainerFileName(UUIDToString(revId));
+				}
 
-			const { errorCode } = errorReason;
-			const { internalError, message } = getInfoFromCode(errorCode);
+				const { errorCode } = errorReason;
+				const { internalError, message } = getInfoFromCode(errorCode);
 
-			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
-				{
-					errInfo: {
-						code: `${errorCode} ${internalError}`,
-						message,
+				await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+					{
+						errInfo: {
+							code: `${errorCode} ${internalError}`,
+							message,
+						},
+						teamspace,
+						model,
+						user,
+						project: UUIDToString(project),
+						revId: UUIDToString(revId),
+						modelType,
+						fileName,
+						logExcerpt: logPreview,
+
 					},
-					teamspace,
-					model,
-					user,
-					project: UUIDToString(project),
-					revId: UUIDToString(revId),
-					modelType,
-					fileName,
-					logExcerpt: logPreview,
-
-				},
-				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
-			);
-		} catch (err) {
-			logger.logError('Failed to send email for model import failures');
-			if (err.stack) {
-				logger.logError(err.stack);
+					zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
+				);
+			} catch (err) {
+				logger.logError('Failed to send email for model import failures');
+				if (err.stack) {
+					logger.logError(err.stack);
+				}
+				await listenerErrorNotification.notifyListenerFailure({
+					eventName: events.MODEL_IMPORT_FINISHED,
+					listenerName: 'modelProcessingCompleted.importFailureEmail',
+					component: 'modelEvents',
+					payload: {
+						teamspace,
+						project,
+						model,
+						revId,
+						user,
+						modelType,
+						data,
+					},
+					error: err,
+				});
 			}
 		}
-	}
 
-	publish(events.MODEL_SETTINGS_UPDATE, {
-		teamspace,
-		project,
-		model,
-		data,
-		modelType,
-	});
+		publish(events.MODEL_SETTINGS_UPDATE, {
+			teamspace,
+			project,
+			model,
+			data,
+			modelType,
+		});
+	} catch (err) {
+		logger.logError(`Failed to process model import completed event for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.MODEL_IMPORT_FINISHED,
+			listenerName: 'modelProcessingCompleted',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				revId,
+				user,
+				modelType,
+				data,
+			},
+			error: err,
+		});
+	}
 };
 
 const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
@@ -196,6 +288,20 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		}
 	} catch (err) {
 		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.MODEL_SETTINGS_UPDATE,
+			listenerName: 'modelSettingsUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				data,
+				sender,
+				modelType,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -210,6 +316,20 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 			teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.REVISION_UPDATED,
+			listenerName: 'revisionUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				data,
+				sender,
+				modelType,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -224,6 +344,20 @@ const modelAdded = async ({ teamspace, project, model, data, sender, modelType }
 		await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
 	} catch (err) {
 		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.NEW_MODEL,
+			listenerName: 'modelAdded',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				data,
+				sender,
+				modelType,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -238,6 +372,19 @@ const modelDeleted = async ({ teamspace, project, model, sender, modelType }) =>
 		await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.DELETE_MODEL,
+			listenerName: 'modelDeleted',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				sender,
+				modelType,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -247,6 +394,16 @@ const templateUpdated = async ({ teamspace, template: templateId }) => {
 		await onTemplateUpdated(teamspace, template);
 	} catch (err) {
 		logger.logError(`Failed to process template updated event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.TICKET_TEMPLATE_UPDATED,
+			listenerName: 'templateUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				template: templateId,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -265,6 +422,18 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket added event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.NEW_TICKET,
+			listenerName: 'ticketAdded',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				ticket,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -285,6 +454,18 @@ const ticketsImported = async ({ teamspace, project, model, tickets }) => {
 		}));
 	} catch (err) {
 		logger.logError(`Failed to process tickets imported event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.TICKETS_IMPORTED,
+			listenerName: 'ticketsImported',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				tickets,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -323,6 +504,21 @@ const ticketUpdated = async ({ teamspace, project, model, ticket, author, change
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.UPDATE_TICKET,
+			listenerName: 'ticketUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				ticket,
+				author,
+				changes,
+				timestamp,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -338,6 +534,22 @@ const ticketGroupUpdated = async ({ teamspace, project, model, ticket, _id, auth
 		await createModelMessage(event, serialisedMsg, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process group updated event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.UPDATE_TICKET_GROUP,
+			listenerName: 'ticketGroupUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				ticket,
+				_id,
+				author,
+				changes,
+				timestamp,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -349,6 +561,18 @@ const ticketCommentAdded = async ({ teamspace, project, model, data }) => {
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process comment added event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.NEW_COMMENT,
+			listenerName: 'ticketCommentAdded',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				data,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -360,6 +584,18 @@ const ticketCommentUpdated = async ({ teamspace, project, model, data }) => {
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process comment updated event ${err.message}`);
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.UPDATE_COMMENT,
+			listenerName: 'ticketCommentUpdated',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				data,
+			},
+			error: err,
+		});
 	}
 };
 

@@ -16,11 +16,22 @@
  */
 
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { notifyListenerFailure } = require('../listenerErrorNotification');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
 
 const userCreated = async ({ username }) => {
-	await unpackInvitations(username);
+	try {
+		await unpackInvitations(username);
+	} catch (err) {
+		await notifyListenerFailure({
+			eventName: events.USER_CREATED,
+			listenerName: 'userCreated',
+			component: 'userEvents',
+			payload: { username },
+			error: err,
+		});
+	}
 };
 
 const UserEventsListener = {};
