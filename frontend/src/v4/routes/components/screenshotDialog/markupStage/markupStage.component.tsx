@@ -18,6 +18,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { Layer } from 'react-konva';
+import { ceil } from 'lodash';
 
 import { IFontSize, IShapeType, IMode, IStrokeWidth, ICalloutType } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -161,7 +162,7 @@ const BaseMarkupStage = ({
 	const addNewText = useCallback((position, text: string, width?: number, updateState: boolean = true) => {
 		if (!selectedObjectName) {
 			position.y = position.y + 1;
-			const newText = getNewText(color, fontSize, position, text, width);
+			const newText = getNewText(color, fontSize, position, text, ceil(width));
 			addElement(newText);
 
 			if (updateState) {
