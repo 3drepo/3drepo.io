@@ -30,6 +30,7 @@ const {
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
 const GeoMaths = require(`${src}/utils/helper/geoMaths`);
@@ -44,6 +45,9 @@ const MetaModel = require(`${src}/models/metadata`);
 
 jest.mock('../../../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
+
+jest.mock('../../../../../../../../src/v5/models/revisions');
+const RevisionsModel = require(`${src}/models/revisions`);
 
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
@@ -103,6 +107,70 @@ const testGetMeshesWithParentIds = () => {
 
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, `${container}.stash.json_mpc`, `${UUIDToString(revision)}/idToMeshes.json`);
+		});
+	});
+};
+
+const testGetMeshNodeBounds = () => {
+	describe('Get mesh node bounds', () => {
+		test('should calculate the bounds for mesh nodes in world coordinates', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const container = generateUUID();
+			const revision = generateUUID();
+			const meshIds = times(2, generateUUID);
+			const parentIds = times(2, generateUUID);
+			const coordOffset = [1, 2, 3];
+			const meshNodes = [
+				{
+					_id: meshIds[0],
+					parents: [parentIds[0]],
+					bounding_box: [[0, 0, 0], [1, 1, 1]],
+				},
+				{
+					_id: meshIds[1],
+					parents: [parentIds[1]],
+					bounding_box: [[1, 2, 3], [2, 3, 4]],
+				},
+			];
+			const transformationNodes = [
+				{
+					shared_id: parentIds[0],
+					matrix: [
+						[1, 0, 0, 10],
+						[0, 1, 0, 0],
+						[0, 0, 1, 0],
+						[0, 0, 0, 1],
+					],
+				},
+				{
+					shared_id: parentIds[1],
+					matrix: [
+						[1, 0, 0, 0],
+						[0, 1, 0, 20],
+						[0, 0, 1, 0],
+						[0, 0, 0, 1],
+					],
+				},
+			];
+
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshNodes);
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce(transformationNodes);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ coordOffset });
+
+			const res = await Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+
+			expect(res).toEqual({ min: [2, 2, 3], max: [12, 25, 7] });
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
+				_id: { $in: meshIds },
+				type: nodeTypes.MESH,
+			}, { _id: 1, parents: 1, bounding_box: 1 });
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2, teamspace, project, container, {
+				shared_id: { $in: parentIds },
+				type: nodeTypes.TRANSFORMATION,
+			}, { shared_id: 1, parents: 1, matrix: 1 });
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, revision, { coordOffset: 1 });
 		});
 	});
 };
@@ -494,6 +562,7 @@ const testGetSuperMeshesInfo = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
+	testGetMeshNodeBounds();
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();

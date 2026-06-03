@@ -130,6 +130,7 @@ const testCreateRun = () => {
 	const project = generateUUID();
 	const userId = generateRandomString();
 	const runId = generateRandomString();
+	const bboxSignificantFigures = 8;
 	const planData = {
 		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
@@ -142,6 +143,15 @@ const testCreateRun = () => {
 	};
 	const parentWithManyMeshes = generateRandomString();
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
+	const getBoundingBox = (meshIds) => ({
+		min: [meshIds.length + 0.123456789, -0.000123456789, -123456.789123],
+		max: [meshIds.length + 1.987654321, 1.23456789, 987654.321987],
+	});
+	const formatBoundingBox = (bbox) => ({
+		min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+		max: bbox.max.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+	});
+	const appendBoundingBox = (objectId, meshIds) => `${objectId}::${JSON.stringify(formatBoundingBox(getBoundingBox(meshIds)))}`;
 
 	const metadata = times(10, (i) => ({ _id: generateRandomString(),
 		parents: [generateRandomString()],
@@ -165,6 +175,9 @@ const testCreateRun = () => {
 	};
 
 	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].metadata);
+	Scenes.getMeshNodeBounds.mockImplementation((ts, p, container, revision, meshIds) => (
+		Promise.resolve(getBoundingBox(meshIds))
+	));
 
 	const getStreamContent = (stream) => new Promise((resolve, reject) => {
 		const chunks = [];
@@ -232,7 +245,7 @@ const testCreateRun = () => {
 			result[compositePath].push(mesh._id);
 		}
 
-		return Object.entries(result).map(([id, meshIds]) => ({ id, meshIds }));
+		return Object.entries(result).map(([id, meshIds]) => ({ id: appendBoundingBox(id, meshIds), meshIds }));
 	};
 
 	describe('Create Clash Run', () => {
@@ -307,7 +320,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [mesh._id]),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -319,7 +332,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`, [mesh._id]),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -336,11 +349,11 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [namelessMesh._id]),
 						meshIds: [namelessMesh._id],
 					},
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`, [namedMesh._id]),
 						meshIds: [namedMesh._id],
 					},
 				]);
@@ -356,7 +369,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects(meshes);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, meshes.map(({ _id }) => _id)),
 					meshIds: meshes.map(({ _id }) => _id),
 				}]);
 			});
@@ -375,7 +388,7 @@ const testCreateRun = () => {
 					{ rev_id: plan.selectionA.revision, parents: { $in: [parent] } },
 					{ metadata: 1, parents: 1 });
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+					id: appendBoundingBox(`${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`, [mesh._id]),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -387,7 +400,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent)]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [mesh._id]),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -408,11 +421,11 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+						id: appendBoundingBox(`${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`, [meshes[0]._id]),
 						meshIds: [meshes[0]._id],
 					},
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`,
+						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`, [meshes[1]._id]),
 						meshIds: [meshes[1]._id],
 					},
 				]);
@@ -421,16 +434,42 @@ const testCreateRun = () => {
 	});
 };
 
-const formatClash = (clash) => ({
-	...clash,
-	a: { container: clash.a.split('::')[0], idType: clash.a.split('::')[1], id: clash.a.split('::')[2] },
-	b: { container: clash.b.split('::')[0], idType: clash.b.split('::')[1], id: clash.b.split('::')[2] },
-	index: [clash.a, clash.b].sort().join('-'),
+const combineBBoxes = (bboxA, bboxB) => ({
+	min: bboxA.min.map((value, i) => Math.min(value, bboxB.min[i])),
+	max: bboxA.max.map((value, i) => Math.max(value, bboxB.max[i])),
 });
 
+const formatClash = (clash) => {
+	const formatClashObject = (objectId) => {
+		const [container, idType, id, bboxJSON] = objectId.split('::');
+		return {
+			bbox: JSON.parse(bboxJSON),
+			index: [container, idType, id].join('::'),
+			object: { container, idType, id },
+		};
+	};
+	const objectA = formatClashObject(clash.a);
+	const objectB = formatClashObject(clash.b);
+
+	return {
+		...clash,
+		a: objectA.object,
+		b: objectB.object,
+		index: [objectA.index, objectB.index].sort().join('-'),
+		bbox: combineBBoxes(objectA.bbox, objectB.bbox),
+	};
+};
+
+const generateObjectId = () => {
+	const objectId = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
+	const minX = generateRandomNumber();
+	const bbox = { min: [minX, 0, 0], max: [minX + 1, 1, 1] };
+	return `${objectId}::${JSON.stringify(bbox)}`;
+};
+
 const generateClash = () => ({
-	a: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
-	b: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
+	a: generateObjectId(),
+	b: generateObjectId(),
 	...generateRandomObject(),
 });
 
@@ -671,6 +710,56 @@ const testProcessClashResults = () => {
 				{ stats: { new: 5, active: 5, resolved: 5 } });
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+				teamspace,
+				project,
+				runId: corId,
+				plan: currentRun.plan,
+				results: result,
+			});
+		});
+
+		test('should ignore bbox values when generating the clash index', async () => {
+			const objectA = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
+			const objectB = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
+			const previousClash = {
+				...generateRandomObject(),
+				a: `${objectA}::${JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] })}`,
+				b: `${objectB}::${JSON.stringify({ min: [2, 2, 2], max: [3, 3, 3] })}`,
+			};
+			const currentClash = {
+				...generateRandomObject(),
+				a: `${objectA}::${JSON.stringify({ min: [4, 4, 4], max: [5, 5, 5] })}`,
+				b: `${objectB}::${JSON.stringify({ min: [6, 6, 6], max: [7, 7, 7] })}`,
+			};
+			const existingClashes = {
+				new: [formatClash(previousClash)],
+				active: [],
+				resolved: [],
+			};
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+			const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
+
+			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream({ clashes: [currentClash] }));
+			FilesManager.getFileAsStream.mockImplementationOnce(() => {
+				const fakeReadStream = PassThrough();
+				fakeReadStream.write(JSON.stringify(existingClashes));
+				fakeReadStream.end();
+				return Promise.resolve({ readStream: fakeReadStream });
+			});
+
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
+
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
+
+			const result = {
+				new: [],
+				active: [formatClash(currentClash)],
+				resolved: [],
+			};
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
+				Buffer.from(JSON.stringify(result)));
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
 				teamspace,
 				project,

@@ -29,6 +29,7 @@ const { cloneDeep, isEmpty, isEqual } = require('../../../../../utils/helper/obj
 const { convertArrayUnits, units } = require('../../../../../utils/helper/units');
 const { getClosedStatuses, getStatusDefinition } = require('../../../../../schemas/tickets/templates');
 const { importTickets, updateManyTickets } = require('./tickets');
+const { CameraType } = require('../../../../../schemas/tickets/validators');
 const { getFederationById } = require('../../../../../models/modelSettings');
 const { getMeshesWithParentIds } = require('./scenes');
 const { getTicketsByQuery } = require('../../../../../models/tickets');
@@ -56,6 +57,7 @@ const getClashIdToTicket = async (teamspace, project, federation, template, plan
 		[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: UUIDToString(planId),
 	}, {
 		_id: 1,
+		[`properties.${DEFAULT_VIEW}`]: 1,
 		[`properties.${PIN}`]: 1,
 		[`properties.${STATUS}`]: 1,
 		[`modules.${CLOUD_CLASH}`]: 1,
@@ -101,7 +103,28 @@ const updateClashPinAndDistance = (ticket, clashContext, clash, existingTicket) 
 	}
 };
 
-const updateDefaultView = async (teamspace, project, ticket, clashContext, clash) => {
+const createViewpoint = ({ min, max }) => {
+	const fov = 60 * 0.0174533; // deg-2-radians
+	const dim = min.map((value, i) => max[i] - value);
+	const magnitude = Math.sqrt(dim.reduce((sum, value) => sum + value ** 2, 0));
+	const distance = magnitude / Math.tan(fov / 2);
+	const center = min.map((value, i) => (value + max[i]) / 2);
+
+	// These vectors define the camera orientation. In the viewer they are based
+	// on the current camera position, but externally generated views need an
+	// arbitrary orientation.
+	const up = [0.3728146553039551, 0.8944026231765747, -0.2470894455909729];
+	const forward = [0.7455270290374756, -0.4472627639770508, -0.49411076307296753];
+
+	return {
+		position: center.map((value, i) => value - forward[i] * distance),
+		up,
+		forward,
+		type: CameraType.PERSPECTIVE,
+	};
+};
+
+const updateDefaultView = async (teamspace, project, ticket, clashContext, clash, existingTicket) => {
 	if (!clashContext.defaultViewEnabled) return;
 
 	const generateGroupObject = async (name, color, { container, idType, id }, { revision }) => {
@@ -120,16 +143,27 @@ const updateDefaultView = async (teamspace, project, ticket, clashContext, clash
 		};
 	};
 
-	const coloredGroups = await Promise.all([
-		generateGroupObject('Object A', [255, 0, 0], clash.a, clashContext.selectionA),
-		generateGroupObject('Object B', [0, 255, 0], clash.b, clashContext.selectionB),
-	]);
-
 	/* eslint-disable no-param-reassign */
-	ticket.properties = ticket.properties ?? {};
-	ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
-	ticket.properties[DEFAULT_VIEW].state = ticket.properties[DEFAULT_VIEW].state ?? {};
-	ticket.properties[DEFAULT_VIEW].state[viewGroups.COLORED] = coloredGroups;
+	if (!existingTicket) {
+		const coloredGroups = await Promise.all([
+			generateGroupObject('Object A', [255, 0, 0], clash.a, clashContext.selectionA),
+			generateGroupObject('Object B', [0, 255, 0], clash.b, clashContext.selectionB),
+		]);
+
+		ticket.properties = ticket.properties ?? {};
+		ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
+		ticket.properties[DEFAULT_VIEW].state = ticket.properties[DEFAULT_VIEW].state ?? {};
+		ticket.properties[DEFAULT_VIEW].state[viewGroups.COLORED] = coloredGroups;
+	}
+
+	if (clash.bbox) {
+		const camera = createViewpoint(clash.bbox);
+		if (!isEqual(existingTicket?.properties?.[DEFAULT_VIEW]?.camera, camera)) {
+			ticket.properties = ticket.properties ?? {};
+			ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
+			ticket.properties[DEFAULT_VIEW].camera = camera;
+		}
+	}
 	/* eslint-enable no-param-reassign */
 };
 
@@ -203,6 +237,8 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 				? { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onReopened } } : {};
 
 			updateClashPinAndDistance(update, clashContext, clash, existingTicket);
+			// eslint-disable-next-line no-await-in-loop
+			await updateDefaultView(teamspace, project, update, clashContext, clash, existingTicket);
 
 			if (!isEmpty(update)) {
 				ticketsToUpdate.push({

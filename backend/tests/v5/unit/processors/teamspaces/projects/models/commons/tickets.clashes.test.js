@@ -51,6 +51,7 @@ const {
 } = require(`${src}/schemas/tickets/templates.constants`);
 const { CLASH_TYPES, clashObjectIdTypes } = require(`${src}/models/clashes.constants`);
 const { convertArrayUnits, units } = require(`${src}/utils/helper/units`);
+const { CameraType } = require(`${src}/schemas/tickets/validators`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { CLOUD_CLASH } = presetModules;
@@ -66,7 +67,7 @@ const {
 	OBJECT_B_ID,
 	OBJECT_B_ID_TYPE,
 } = modulePropertyLabels[CLOUD_CLASH];
-const { PIN, STATUS } = basePropertyLabels;
+const { DEFAULT_VIEW, PIN, STATUS } = basePropertyLabels;
 
 const getTemplate = (defaultStatus = generateRandomString(), doneStatuses = []) => ({
 	_id: generateUUIDString(),
@@ -145,6 +146,22 @@ const getCloudClashData = (clash, context, distance) => ({
 const getCloudClashUpdateData = (distance) => ({
 	[DISTANCE_M]: distance,
 });
+
+const createViewpoint = ({ min, max }) => {
+	const fov = 60 * 0.0174533;
+	const dim = min.map((value, i) => max[i] - value);
+	const magnitude = Math.sqrt(dim.reduce((sum, value) => sum + value ** 2, 0));
+	const distance = magnitude / Math.tan(fov / 2);
+	const center = min.map((value, i) => (value + max[i]) / 2);
+	const forward = [0.7455270290374756, -0.4472627639770508, -0.49411076307296753];
+
+	return {
+		position: center.map((value, i) => value - forward[i] * distance),
+		up: [0.3728146553039551, 0.8944026231765747, -0.2470894455909729],
+		forward,
+		type: CameraType.PERSPECTIVE,
+	};
+};
 
 describe(determineTestGroup(__filename), () => {
 	const teamspace = generateRandomString();
@@ -228,6 +245,7 @@ describe(determineTestGroup(__filename), () => {
 			[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: context.planId,
 		}, {
 			_id: 1,
+			[`properties.${DEFAULT_VIEW}`]: 1,
 			[`properties.${PIN}`]: 1,
 			[`properties.${STATUS}`]: 1,
 			[`modules.${CLOUD_CLASH}`]: 1,
@@ -372,6 +390,23 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsGroups.commitGroupChanges).toHaveBeenCalledTimes(1);
 		expect(TicketsGroups.commitGroupChanges).toHaveBeenCalledWith(teamspace, project, federation, savedTicketId,
 			expect.objectContaining({ toAdd: expect.any(Array) }));
+	});
+
+	test('Should create a default view camera from the clash bounding box for new tickets if enabled', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const results = { new: [clash], active: [], resolved: [] };
+		template.config.defaultView = true;
+		clash.bbox = { min: [0, 0, 0], max: [10, 10, 10] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const createdTicket = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0];
+		expect(createdTicket.properties[DEFAULT_VIEW].camera).toEqual(createViewpoint(clash.bbox));
 	});
 
 	test('Should create default view groups with revit ids for new clash tickets if enabled', async () => {
@@ -702,6 +737,85 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
 			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should update the default view camera when the clash bounding box changes', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: {
+				[DEFAULT_VIEW]: {
+					camera: createViewpoint({ min: [10, 10, 10], max: [20, 20, 20] }),
+				},
+				[STATUS]: defaultStatus,
+			},
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+					[DISTANCE_M]: 0,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+		template.config.defaultView = true;
+		clash.bbox = { min: [0, 0, 0], max: [10, 10, 10] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		const expectedUpdate = {
+			properties: {
+				[DEFAULT_VIEW]: {
+					camera: createViewpoint(clash.bbox),
+				},
+			},
+		};
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should not update the default view camera when the clash bounding box has not changed', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		clash.bbox = { min: [0, 0, 0], max: [10, 10, 10] };
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: {
+				[DEFAULT_VIEW]: {
+					camera: createViewpoint(clash.bbox),
+				},
+				[STATUS]: defaultStatus,
+			},
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+					[DISTANCE_M]: 0,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+		template.config.defaultView = true;
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 

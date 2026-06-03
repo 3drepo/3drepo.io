@@ -29,7 +29,7 @@ const {
 	updateRunStatus,
 } = require('../../../models/clashes.runs');
 const { createPlan, deletePlan: deleteClashPlan, updatePlan } = require('../../../models/clashes.plans');
-const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
+const { getExternalIdsFromMetadata, getMeshNodeBounds, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { JSONParser } = require('@streamparser/json-node');
@@ -134,7 +134,14 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 			stream.write(',');
 		}
 
-		stream.write(JSON.stringify({ id: compositeId, meshIds }));
+		// eslint-disable-next-line no-await-in-loop
+		const bbox = await getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+		const bboxSignificantFigures = 8;
+		const formattedBbox = bbox && {
+			min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+			max: bbox.max.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+		};
+		stream.write(JSON.stringify({ id: formattedBbox ? `${compositeId}::${JSON.stringify(formattedBbox)}` : compositeId, meshIds }));
 		first = false;
 	}
 
@@ -215,6 +222,42 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 	}
 };
 
+const getClashObjParts = (obj) => {
+	const [container, idType, id, bboxJSON] = obj.split('::');
+	const bbox = bboxJSON ? JSON.parse(bboxJSON) : undefined;
+	return {
+		bbox,
+		index: [container, idType, id].join('::'),
+		object: { container, idType, id },
+	};
+};
+
+const combineBoundingBoxes = (bboxes) => bboxes.filter(Boolean).reduce((res, bbox) => (
+	res ? {
+		min: res.min.map((value, i) => Math.min(value, bbox.min[i])),
+		max: res.max.map((value, i) => Math.max(value, bbox.max[i])),
+	} : bbox
+), undefined);
+
+const formatClashForResults = (clash) => {
+	const objectA = getClashObjParts(clash.a);
+	const objectB = getClashObjParts(clash.b);
+	const index = [objectA.index, objectB.index].sort().join('-');
+	const bbox = combineBoundingBoxes([objectA.bbox, objectB.bbox]);
+	const clashData = deleteIfUndefined({
+		...clash,
+		a: objectA.object,
+		b: objectB.object,
+		index,
+		bbox,
+	});
+
+	return {
+		index,
+		clash: clashData,
+	};
+};
+
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 	const { plan } = await getClashRunByQuery(teamspace, project,
 		{ _id: runId }, { plan: 1, triggeredAt: 1 });
@@ -223,23 +266,6 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 	const errorCounts = {};
 	let hasErrors = false;
-	const formatClashForResults = (clash) => {
-		const index = [clash.a, clash.b].sort().join('-');
-		const getClashObjParts = (obj) => {
-			const [container, idType, id] = obj.split('::');
-			return { container, idType, id };
-		};
-
-		return {
-			index,
-			clash: {
-				...clash,
-				a: getClashObjParts(clash.a),
-				b: getClashObjParts(clash.b),
-				index,
-			},
-		};
-	};
 
 	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
 	const categorizedClashes = { new: [], active: [], resolved: [] };

@@ -19,13 +19,15 @@ const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
-const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getNodeByQuery, getNodesByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
+const { getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { nodeTypes } = require('../../../../../models/scenes.constants');
 const stringToStream = require('string-to-stream');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -76,6 +78,75 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	const meshesArr = Array.from(meshes);
 
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
+};
+
+const expandBounds = (bounds, { min, max }) => {
+	if (!bounds) return { min: [...min], max: [...max] };
+
+	return {
+		min: bounds.min.map((value, i) => Math.min(value, min[i])),
+		max: bounds.max.map((value, i) => Math.max(value, max[i])),
+	};
+};
+
+Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshIds) => {
+	const meshNodes = await getNodesByQuery(teamspace, project, container, {
+		_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
+		type: nodeTypes.MESH,
+	}, { _id: 1, parents: 1, bounding_box: 1 });
+
+	const bounds = {};
+	meshNodes.forEach((node) => {
+		const [min, max] = node.bounding_box;
+		bounds[UUIDToString(node._id)] = {
+			parent: node.parents?.[0] ? UUIDToString(node.parents[0]) : undefined,
+			transform: GeoMaths.matrices.identity(),
+			min,
+			max,
+		};
+	});
+
+	if (!Object.keys(bounds).length) return undefined;
+
+	while (Object.values(bounds).some(({ parent }) => parent)) {
+		const parentIds = Array.from(new Set(Object.values(bounds).flatMap(({ parent }) => parent ?? [])));
+		// eslint-disable-next-line no-await-in-loop
+		const transformationNodes = await getNodesByQuery(teamspace, project, container, {
+			shared_id: { $in: parentIds.map(stringToUUID) },
+			type: nodeTypes.TRANSFORMATION,
+		}, { shared_id: 1, parents: 1, matrix: 1 });
+
+		const transforms = {};
+		transformationNodes.forEach((node) => {
+			transforms[UUIDToString(node.shared_id)] = {
+				parent: node.parents?.[0] ? UUIDToString(node.parents[0]) : undefined,
+				transform: node.matrix ?? GeoMaths.matrices.identity(),
+			};
+		});
+
+		Object.entries(bounds).forEach(([key, bound]) => {
+			if (!bound.parent) return;
+
+			const parent = transforms[bound.parent];
+			bounds[key] = {
+				...bound,
+				parent: parent?.parent,
+				transform: parent ? GeoMaths.matrices.multiply(parent.transform, bound.transform) : bound.transform,
+			};
+		});
+	}
+
+	const { coordOffset = [0, 0, 0] } = await getRevisionByIdOrTag(teamspace, container,
+		modelTypes.CONTAINER, revision, { coordOffset: 1 });
+
+	return Object.values(bounds).reduce((res, bound) => {
+		const min = GeoMaths.vectors.add(GeoMaths.vectors.transform(bound.transform, bound.min), coordOffset);
+		const max = GeoMaths.vectors.add(GeoMaths.vectors.transform(bound.transform, bound.max), coordOffset);
+		return expandBounds(res, {
+			min: min.map((value, i) => Math.min(value, max[i])),
+			max: max.map((value, i) => Math.max(value, min[i])),
+		});
+	}, undefined);
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
