@@ -2316,6 +2316,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use the meshes API when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static enableOnlineSnapping() {
+		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
+	}
+
+	/**
+	 * Use the WebGL buffers when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static disableOnlineSnapping() {
+		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
+	}
+
+	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
