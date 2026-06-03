@@ -295,7 +295,7 @@ const getPropertyDefs = (
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: any, riskCategories: string[]) => {	
+export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: any, riskCategories: string[]) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 	const propertyDefs = getPropertyDefs(templates, ticketFilter.module, ticketFilter.property, ticketFilter.type, jobsAndUsers, riskCategories);
