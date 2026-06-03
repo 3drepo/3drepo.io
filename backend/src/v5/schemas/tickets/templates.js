@@ -83,6 +83,7 @@ const propSchema = Yup.object().shape({
 	required: defaultFalse,
 	immutable: defaultFalse,
 	readOnlyOnUI: defaultFalse,
+	hiddenOnUI: defaultFalse,
 	readOnly: defaultFalse,
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
 		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,

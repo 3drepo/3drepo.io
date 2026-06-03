@@ -25,11 +25,10 @@ const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
-const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
+const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 let server;
@@ -66,6 +65,7 @@ const generateBasicData = () => {
 	const models = times(2, () => ServiceHelper.generateRandomModel());
 	const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 	const template = ServiceHelper.generateTemplate();
+	template.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
 	const plan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 	const project = ServiceHelper.generateRandomProject();
@@ -92,6 +92,7 @@ const testCreatePlan = () => {
 		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
 			status: { values: customStatusValues, default: customStatusValues[0].name },
 		});
+		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 		const users = { ...basicData.users, commenterOnFed, viewerOnFed };
 
 		federation.properties.permissions = [
@@ -186,6 +187,7 @@ const testUpdatePlan = () => {
 		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
 			status: { values: customStatusValues, default: customStatusValues[0].name },
 		});
+		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
 		const clashPlanWithTicketsConfig = {
 			...ServiceHelper.generateClashPlan(
