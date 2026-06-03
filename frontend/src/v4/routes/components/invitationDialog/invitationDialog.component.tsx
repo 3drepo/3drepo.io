@@ -268,7 +268,7 @@ export const InvitationDialog = (props: IProps) => {
 						pending={isSubmitting}
 						disabled={!isEmpty(errors) || !isValid || isValidating || isSubmitting}
 					>
-						Invite!
+						Invite
 					</SubmitButton>
 				</Footer>
 			</Container>
