@@ -28,7 +28,7 @@ import { MenuItem } from '@mui/material';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FlexContainer } from './createContainerForm.styles';
+import { TwoColumnRow } from './createContainerForm.styles';
 
 interface ICreateContainer {
 	open: boolean;
@@ -95,7 +95,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) =>
 				formError={errors.name}
 				required
 			/>
-			<FlexContainer>
+			<TwoColumnRow>
 				<FormSelect
 					required
 					control={control}
@@ -120,7 +120,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) =>
 						</MenuItem>
 					))}
 				</FormSelect>
-			</FlexContainer>
+			</TwoColumnRow>
 			<FormTextField
 				control={control}
 				name="desc"
