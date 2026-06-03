@@ -42,11 +42,13 @@ import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
 import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const BreadcrumbsRouting = () => {
 	const { pathname } = useLocation();
 	const params = useParams<ViewerParams>();
-	const { teamspace = '', revision = '', containerOrFederation: containerOrFederationId = '' } = params;
+	const [drawingId] = useSearchParam('drawingId');
+	const { teamspace = '', revision = '', containerOrFederation: containerOrFederationId = '', drawing } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
@@ -138,7 +140,14 @@ export const BreadcrumbsRouting = () => {
 
 			const revisionOptions = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
-				to: viewerRoute(params.teamspace, params.project, params.containerOrFederation, tag || _id, null, false),
+				to: viewerRoute(
+					params.teamspace,
+					params.project,
+					params.containerOrFederation,
+					tag || _id,
+					{ drawingId }, // keep these search params when switching revisions
+					false, // delete other search params
+				),
 				selected: _id === revision || tag === revision,
 			}));
 
