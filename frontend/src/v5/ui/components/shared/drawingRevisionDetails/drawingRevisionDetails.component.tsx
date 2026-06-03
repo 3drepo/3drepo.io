@@ -76,7 +76,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 		let emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessage', defaultMessage: 'You haven’t added any Files.' }); 
 		
 		if (!canUploadToBackend(status)) {
-			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this container.' }); 
+			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this drawing.' }); 
 		}
 
 		if (!hasPermissionsToUpload) {
