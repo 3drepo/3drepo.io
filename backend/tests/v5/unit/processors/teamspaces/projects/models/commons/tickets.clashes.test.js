@@ -892,6 +892,93 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
+	test('Should update unmatched clash tickets as resolved', async () => {
+		const clash = getClash();
+		const context = getContext();
+		const resolvedStatus = generateRandomString();
+		const template = getTemplate(generateRandomString(), [resolvedStatus]);
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: {},
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: { onResolved: resolvedStatus } }));
+
+		const expectedUpdate = { properties: { [STATUS]: resolvedStatus } };
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should ignore unmatched clash tickets that are already using the resolved status', async () => {
+		const clash = getClash();
+		const context = getContext();
+		const resolvedStatus = generateRandomString();
+		const template = getTemplate();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: resolvedStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [], resolved: [] };
+		template.config.status.values.push({ name: resolvedStatus, type: statusTypes.OPEN });
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: { onResolved: resolvedStatus } }));
+
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test.each([
+		['closed', statusTypes.DONE],
+		['void', statusTypes.VOID],
+	])('Should ignore unmatched clash tickets that are already %s', async (desc, statusType) => {
+		const status = generateRandomString();
+		const template = getTemplate();
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: status },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [], resolved: [] };
+		template.config.status.values.push({ name: status, type: statusType });
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
 	test('Should ignore resolved clashes that are already closed', async () => {
 		const closedStatus = generateRandomString();
 		const template = getTemplate(generateRandomString(), [closedStatus]);

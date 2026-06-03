@@ -225,11 +225,13 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 		[clashObjectIdTypes.IFC]: clashElementTypes.IFC,
 		[clashObjectIdTypes.REVIT]: clashElementTypes.REVIT,
 	};
+	const { clashIdToTicket } = clashContext;
 
 	for (const clash of clashes) {
 		const clashId = clash.index;
-		const existingTicket = clashContext.clashIdToTicket[clashId];
+		const existingTicket = clashIdToTicket[clashId];
 		if (existingTicket) {
+			delete clashIdToTicket[clashId];
 			const ticketStatus = existingTicket?.properties?.[STATUS];
 
 			// update the status of the ticket if it's closed
@@ -272,26 +274,23 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 	return { ticketsToUpdate, ticketsToCreate };
 };
 
-const processResolvedClashes = (clashes, clashContext) => {
-	const ticketsToUpdate = [];
-	clashes.forEach((clash) => {
-		const clashId = clash.index;
-		// if we can't find a ticket for a resolved clash, we ignore.
-		if (clashContext.clashIdToTicket[clashId]) {
-			const ticketStatus = clashContext.clashIdToTicket[clashId]?.properties?.[STATUS];
+const resolveTickets = (tickets, clashContext) => (
+	tickets
+		.flatMap((ticket) => {
+			const ticketStatus = ticket?.properties?.[STATUS];
 
-			if (!clashContext.statusInfo.closedStatuses[ticketStatus]
+			if (ticketStatus !== clashContext.statusInfo.defaultStatuses.onResolved
+				&& !clashContext.statusInfo.closedStatuses[ticketStatus]
 				&& !clashContext.statusInfo.voidStatuses[ticketStatus]) {
-				ticketsToUpdate.push({
-					_id: clashContext.clashIdToTicket[clashId]._id,
+				return [{
+					_id: ticket._id,
 					data: { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onResolved } },
-				});
+				}];
 			}
-		}
-	});
 
-	return ticketsToUpdate;
-};
+			return [];
+		})
+);
 
 const determineStatusInfo = (template, configuredDefaultStatuses) => {
 	const templateStatuses = getStatusDefinition(template);
@@ -370,7 +369,7 @@ TicketsClashes.processClashResults = async (
 	results,
 	{ plan, runId },
 ) => {
-	const { new: newClashes = [], active: activeClashes = [], resolved: resolvedClashes = [] } = results;
+	const { new: newClashes = [], active: activeClashes = [] } = results;
 	const {
 		_id: planId,
 		name: planName,
@@ -408,8 +407,8 @@ TicketsClashes.processClashResults = async (
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
 	const ticketsToProcess = {
 		ticketsToUpdate: [
-			...processResolvedClashes(resolvedClashes, clashContext),
 			...processedClashes.ticketsToUpdate,
+			...resolveTickets(Object.values(clashIdToTicket), clashContext),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};
