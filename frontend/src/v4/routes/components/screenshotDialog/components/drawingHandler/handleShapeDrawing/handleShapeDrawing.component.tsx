@@ -69,10 +69,6 @@ export class HandleShapeDrawing
 	}
 
 	public handleMouseDownShape = () => {
-		if (this.props.selected) {
-			return;
-		}
-
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();
