@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { events } = require('../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { src } = require('../../../helper/path');
 
@@ -94,7 +95,7 @@ const testGetRiskCategories = () => {
 	});
 };
 
-describe('processors/teamspaces/settings', () => {
+describe(determineTestGroup(__filename), () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplateList();

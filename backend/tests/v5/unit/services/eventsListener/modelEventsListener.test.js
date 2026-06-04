@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -77,7 +78,7 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+const ModelEventsListener = require(`${src}/services/eventsListener/components/modelEvents`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
@@ -112,6 +113,7 @@ const testQueueTaskUpdate = () => {
 				model: generateRandomString(),
 				corId: generateRandomString(),
 				status: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -123,13 +125,13 @@ const testQueueTaskUpdate = () => {
 		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				corId: generateUUIDString(),
 				status: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -182,7 +184,6 @@ const testQueueTaskCompleted = () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.CONTAINER);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -198,9 +199,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -212,7 +210,7 @@ const testQueueTaskCompleted = () => {
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -220,6 +218,7 @@ const testQueueTaskCompleted = () => {
 				corId: generateRandomString(),
 				value: 0,
 				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -228,9 +227,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -1629,7 +1625,7 @@ const testTemplateUpdated = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	EventsListener.init();
+	ModelEventsListener.init();
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();

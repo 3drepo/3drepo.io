@@ -123,7 +123,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(1, 'string-test', false);
+        handler.createGetRequest(1, 'string-test', true);
 
         await responsePromise;
 
@@ -149,7 +149,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(2, 'json-test', false);
+        handler.createGetRequest(2, 'json-test', true);
 
         await responsePromise;
 
@@ -174,7 +174,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(3, 'binary-test', false);
+        handler.createGetRequest(3, 'binary-test', true);
 
         await responsePromise;
 
@@ -200,7 +200,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(4, 'large-test', false);
+        handler.createGetRequest(4, 'large-test', true);
 
         await responsePromise;
 
@@ -224,7 +224,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(5, 'stream-test', false);
+        handler.createGetRequest(5, 'stream-test', true);
 
         await responsePromise;
 

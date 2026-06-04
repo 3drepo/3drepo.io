@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

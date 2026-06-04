@@ -15,36 +15,176 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
-const { CLASH_RUN_STATUS, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const ClashRuns = require(`${src}/models/clashes.runs`);
 const db = require(`${src}/handler/db`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
-const createTestRun = () => {
-	describe('Create test run', () => {
-		test('should create a test run', async () => {
+const testCreateClashRun = () => {
+	describe('Create clash run', () => {
+		test('should create a clash run and create an index', async () => {
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const user = generateRandomString();
 			const plan = generateRandomObject();
 			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+			const createIndexFn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 
-			const _id = await ClashRuns.createTestRun(teamspace, plan, user);
+			const _id = await ClashRuns.createClashRun(teamspace, project, plan, user);
 
+			expect(createIndexFn).toHaveBeenCalledTimes(1);
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
+
+			const { triggeredAt, updatedAt } = createFn.mock.calls[0][2];
 			expect(createFn).toHaveBeenCalledTimes(1);
 			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
 				{
 					_id,
+					project,
 					triggeredBy: user,
-					triggeredAt: createFn.mock.calls[0][2].triggeredAt,
-					status: CLASH_RUN_STATUS.PLANNED,
+					triggeredAt,
+					updatedAt,
+					status: clashRunStatus.PLANNED,
+					plan,
+				});
+		});
+
+		test('should create a clash run and handle error if index creation fails', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const user = generateRandomString();
+			const plan = generateRandomObject();
+			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+			const createIndexFn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(new Error());
+
+			const _id = await ClashRuns.createClashRun(teamspace, project, plan, user);
+
+			expect(createIndexFn).toHaveBeenCalledTimes(1);
+
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
+
+			const { triggeredAt, updatedAt } = createFn.mock.calls[0][2];
+			expect(createFn).toHaveBeenCalledTimes(1);
+			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{
+					_id,
+					project,
+					triggeredBy: user,
+					triggeredAt,
+					updatedAt,
+					status: clashRunStatus.PLANNED,
 					plan,
 				});
 		});
 	});
 };
 
+const testUpdateRunStatus = () => {
+	describe('Update run status', () => {
+		test('should update the status of a run', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runId = generateRandomString();
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await ClashRuns.updateRunStatus(teamspace, project, runId, clashRunStatus.QUEUED);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+				{ $set: { status: clashRunStatus.QUEUED, updatedAt } });
+		});
+
+		test('should complete a clash run', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runId = generateRandomString();
+			const stats = generateRandomObject();
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await ClashRuns.updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED, { stats });
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+				{ $set: { status: clashRunStatus.COMPLETED, results: { stats }, updatedAt } });
+		});
+
+		test('should set a clash run to failed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runId = generateRandomString();
+			const error = { code: generateRandomString(), reason: generateRandomString() };
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await ClashRuns.updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED, { error });
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+				{ $set: { status: clashRunStatus.FAILED, results: { error }, updatedAt } });
+		});
+
+		test('should set a clash run to failed without results', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runId = generateRandomString();
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await ClashRuns.updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+				{ $set: { status: clashRunStatus.FAILED, updatedAt } });
+		});
+	});
+};
+
+const testGetClashRunByQuery = () => {
+	describe('Get clash run by query', () => {
+		test('should get a clash run by query', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+			const sort = generateRandomObject();
+			const result = generateRandomObject();
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(result);
+
+			const run = await ClashRuns.getClashRunByQuery(teamspace, project, query, projection, sort);
+			expect(run).toEqual(result);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { ...query, project }, projection, sort);
+		});
+
+		test('should return error if run is not found', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+			const sort = generateRandomObject();
+
+			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.getClashRunByQuery(teamspace, project, query, projection, sort))
+				.rejects.toEqual(templates.clashRunNotFound);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { ...query, project }, projection, sort);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
-	createTestRun();
+	testCreateClashRun();
+	testUpdateRunStatus();
+	testGetClashRunByQuery();
 });
