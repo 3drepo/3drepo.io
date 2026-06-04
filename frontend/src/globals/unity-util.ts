@@ -55,6 +55,11 @@ export class UnityUtil {
 	 * **viewer.pickPointEvent(**_object_**)**: Notify the user what position within the 3D world was
 	 * clicked after a mouse event.
 	 *
+	 * **viewer.onAutorecovery(canvas)**: Called when an autorecovery has been
+	 * performed, with the new canvas. This will occur in response to a WebGL
+	 * Context Loss event. Any handlers or members that are not preserved by
+	 * the clone method must be re-created on the new canvas.
+	 *
 	 * @example UnityUtil.viewer = {
 	 *  numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
 	 */
@@ -356,6 +361,8 @@ export class UnityUtil {
 		}).then((unityInstance) => {
 			UnityUtil.unityInstance = unityInstance;
 		}).catch(UnityUtil.onUnityError);
+
+		canvas.addEventListener('webglcontextlost', UnityUtil.doAutorecovery);
 
 		return UnityUtil.onReady();
 	}
@@ -2933,9 +2940,18 @@ export class UnityUtil {
 			UnityUtil.toUnity('CaptureAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
 		});
 
-		(UnityUtil as any).arc = new TextDecoder().decode(state);
-
 		await UnityUtil.unityInstance.Quit();
+
+		// The Quit method doesn't quite clean up the canvas, so it is
+		// best to re-create it. Event handlers specified by attributes
+		// are cloned, but others are not, so the frontend must be
+		// robust to this.
+
+		const oldCanvas = UnityUtil.unityInstance.Module.canvas;
+		const newCanvas = oldCanvas.cloneNode(false);
+		oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+
+		UnityUtil.unityInstance = null;
 
 		// This 'resets' the promise by forcing it to be re-created by onReady()
 		UnityUtil.readyPromise = undefined;
@@ -2948,12 +2964,16 @@ export class UnityUtil {
 		UnityUtil.hideProgressBar();
 
 		// Tear down and rebuild the viewer.
-		await UnityUtil._loadUnity(UnityUtil.unityInstance.Module.canvas, undefined);
+		await UnityUtil._loadUnity(newCanvas, undefined);
 
 		UnityUtil.getAutorecoveryCapture = () => {
 			return state;
 		};
 		UnityUtil.toUnity('RestoreAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+
+		if (UnityUtil.viewer && UnityUtil.viewer.onAutorecovery) {
+			UnityUtil.viewer.onAutorecovery(newCanvas);
+		}
 	}
 	
 	/** 
