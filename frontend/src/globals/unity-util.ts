@@ -362,6 +362,11 @@ export class UnityUtil {
 			UnityUtil.unityInstance = unityInstance;
 		}).catch(UnityUtil.onUnityError);
 
+		// Note we do not call preventDefault because we handle this case by
+		// reloading the viewer, which will explicitly re-create a new
+		// context.
+
+		canvas.removeEventListener('webglcontextlost', UnityUtil.doAutorecovery);
 		canvas.addEventListener('webglcontextlost', UnityUtil.doAutorecovery);
 
 		return UnityUtil.onReady();
