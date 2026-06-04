@@ -49,7 +49,7 @@ export const TicketFiltersSetter = () => {
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [cardFilters]);
+	}, [JSON.stringify(cardFilters)]);
 
 	useEffect(() => 
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
@@ -118,7 +118,7 @@ export const TicketFiltersSetter = () => {
 		}
 
 		setTicketSearchParam();
-	}, [templates.length, jobsAndUsers, riskCategories]); 
+	}, [JSON.stringify({ templatesLength: templates.length, jobsAndUsers, riskCategories })]); 
 
 	return <></>;
 };

@@ -114,8 +114,7 @@ export class Tree extends PureComponent<IProps, IState> {
 
 	public renderNodesList = renderWhenTrue(() => {
 		const { nodesList } = this.props;
-		return (
-		<VirtualList
+		return (<VirtualList
 			items={nodesList}
 			itemHeight={TREE_ITEM_SIZE}
 			ItemComponent={(node, index) => this.renderTreeNode(node, index)}
