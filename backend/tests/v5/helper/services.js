@@ -976,7 +976,13 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 };
 
 ServiceHelper.generateClashes = (plan, number = 20) => {
-	const objectId = (container) => `${container}::${clashObjectIdTypes.INTERNAL}::${ServiceHelper.generateRandomString()}`;
+	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+	const objectId = (container) => [
+		container,
+		clashObjectIdTypes.INTERNAL,
+		ServiceHelper.generateRandomString(),
+		bbox,
+	].join('::');
 
 	return times(number, () => ({
 		a: objectId(plan.selectionA.container),
