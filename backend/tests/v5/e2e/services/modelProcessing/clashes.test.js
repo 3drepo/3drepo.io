@@ -225,6 +225,5 @@ describe(determineTestGroup(__filename), () => {
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));
-
 	testParseClashResults();
 });

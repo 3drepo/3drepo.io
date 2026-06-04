@@ -80,16 +80,24 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 
-const expandBounds = (bounds, { min, max }) => {
-	if (!bounds) return { min: [...min], max: [...max] };
-
-	return {
-		min: bounds.min.map((value, i) => Math.min(value, min[i])),
-		max: bounds.max.map((value, i) => Math.max(value, max[i])),
-	};
-};
-
 Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshIds) => {
+	const expandBounds = (bounds, { min, max }) => {
+		if (!bounds) return { min: [...min], max: [...max] };
+
+		return {
+			min: bounds.min.map((value, i) => Math.min(value, min[i])),
+			max: bounds.max.map((value, i) => Math.max(value, max[i])),
+		};
+	};
+
+	const getMeshParent = (node, meshId = node._id) => {
+		if (!node.parents?.[0]) {
+			throw new Error(`Invalid scene data: mesh ${UUIDToString(meshId)} is missing a parent`);
+		}
+
+		return node.parents[0];
+	};
+
 	const meshNodes = await getNodesByQuery(teamspace, project, container, {
 		_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
 		type: nodeTypes.MESH,
@@ -99,7 +107,7 @@ Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshId
 	meshNodes.forEach((node) => {
 		const [min, max] = node.bounding_box;
 		bounds[UUIDToString(node._id)] = {
-			parent: node.parents?.[0] ? UUIDToString(node.parents[0]) : undefined,
+			parent: UUIDToString(getMeshParent(node)),
 			transform: GeoMaths.matrices.identity(),
 			min,
 			max,
@@ -128,10 +136,14 @@ Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshId
 			if (!bound.parent) return;
 
 			const parent = transforms[bound.parent];
+			if (!parent) {
+				throw new Error(`Invalid scene data: transformation ${bound.parent} is missing`);
+			}
+
 			bounds[key] = {
 				...bound,
-				parent: parent?.parent,
-				transform: parent ? GeoMaths.matrices.multiply(parent.transform, bound.transform) : bound.transform,
+				parent: parent.parent,
+				transform: GeoMaths.matrices.multiply(parent.transform, bound.transform),
 			};
 		});
 	}
@@ -203,12 +215,16 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) =>
 const calculateNodeMatrix = async (teamspace, project, container, sharedId) => {
 	const transNode = await getNodeByQuery(teamspace, project, container,
 		{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, { parents: 1, matrix: 1 });
-	if ((transNode.parents || []).length > 0) {
-		const parentMatrix = await calculateNodeMatrix(teamspace, project, container, transNode.parents[0]);
-		return transNode.matrix ? GeoMaths.matrices.multiply(parentMatrix, transNode.matrix) : parentMatrix;
+	if (!transNode) {
+		throw new Error(`Invalid scene data: transformation ${UUIDToString(sharedId)} is missing`);
 	}
 
-	return transNode.matrix || GeoMaths.matrices.identity();
+	if ((transNode.parents || []).length > 0) {
+		const parentMatrix = await calculateNodeMatrix(teamspace, project, container, transNode.parents[0]);
+		return GeoMaths.matrices.multiply(parentMatrix, transNode.matrix ?? GeoMaths.matrices.identity());
+	}
+
+	return transNode.matrix ?? GeoMaths.matrices.identity();
 };
 
 const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
@@ -273,7 +289,7 @@ Scene.getMeshData = async (teamspace, project, container, meshId) => {
 		throw templates.meshNotFound;
 	}
 
-	const matrix = await calculateNodeMatrix(teamspace, project, container, meshNode.parents[0]);
+	const matrix = await calculateNodeMatrix(teamspace, project, container, getMeshParent(meshNode, meshId));
 	const mesh = meshNode;
 
 	// eslint-disable-next-line no-underscore-dangle
