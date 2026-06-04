@@ -80,6 +80,14 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 
+const getMeshParent = (node, meshId = node._id) => {
+	if (!node.parents?.[0]) {
+		throw new Error(`Invalid scene data: mesh ${UUIDToString(meshId)} is missing a parent`);
+	}
+
+	return node.parents[0];
+};
+
 Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshIds) => {
 	const expandBounds = (bounds, { min, max }) => {
 		if (!bounds) return { min: [...min], max: [...max] };
@@ -88,14 +96,6 @@ Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshId
 			min: bounds.min.map((value, i) => Math.min(value, min[i])),
 			max: bounds.max.map((value, i) => Math.max(value, max[i])),
 		};
-	};
-
-	const getMeshParent = (node, meshId = node._id) => {
-		if (!node.parents?.[0]) {
-			throw new Error(`Invalid scene data: mesh ${UUIDToString(meshId)} is missing a parent`);
-		}
-
-		return node.parents[0];
 	};
 
 	const meshNodes = await getNodesByQuery(teamspace, project, container, {
