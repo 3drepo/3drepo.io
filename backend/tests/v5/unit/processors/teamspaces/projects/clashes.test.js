@@ -130,7 +130,6 @@ const testCreateRun = () => {
 	const project = generateUUID();
 	const userId = generateRandomString();
 	const runId = generateRandomString();
-	const bboxSignificantFigures = 8;
 	const planData = {
 		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
@@ -143,15 +142,9 @@ const testCreateRun = () => {
 	};
 	const parentWithManyMeshes = generateRandomString();
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
-	const getBoundingBox = (meshIds) => ({
-		min: [meshIds.length + 0.123456789, -0.000123456789, -123456.789123],
-		max: [meshIds.length + 1.987654321, 1.23456789, 987654.321987],
-	});
-	const formatBoundingBox = (bbox) => ({
-		min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
-		max: bbox.max.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
-	});
-	const appendBoundingBox = (objectId, meshIds) => `${objectId}::${JSON.stringify(formatBoundingBox(getBoundingBox(meshIds)))}`;
+	const mockBoundingBox = { min: [1, 2, 3], max: [4, 5, 6] };
+	const mockBoundingBoxStr = JSON.stringify(mockBoundingBox);
+	const generateIndex = (container, idType, id, bbox) => [container, idType, id, bbox].join('::');
 
 	const metadata = times(10, (i) => ({ _id: generateRandomString(),
 		parents: [generateRandomString()],
@@ -175,9 +168,7 @@ const testCreateRun = () => {
 	};
 
 	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].metadata);
-	Scenes.getMeshNodeBounds.mockImplementation((ts, p, container, revision, meshIds) => (
-		Promise.resolve(getBoundingBox(meshIds))
-	));
+	Scenes.getMeshNodeBounds.mockResolvedValue(mockBoundingBox);
 
 	const getStreamContent = (stream) => new Promise((resolve, reject) => {
 		const chunks = [];
@@ -237,7 +228,8 @@ const testCreateRun = () => {
 		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
 			const parentId = mesh.name ? mesh.shared_id : UUIDToString(mesh.parents[0]);
 			const idType = mesh.externalId?.key ?? clashObjectIdTypes.INTERNAL;
-			const compositePath = `${container}::${idType}::${mesh.externalId?.values[0] ?? parentId}`;
+			const compositePath = generateIndex(container, idType, mesh.externalId?.values[0] ?? parentId,
+				mockBoundingBoxStr);
 
 			if (!result[compositePath]) {
 				result[compositePath] = [];
@@ -245,7 +237,10 @@ const testCreateRun = () => {
 			result[compositePath].push(mesh._id);
 		}
 
-		return Object.entries(result).map(([id, meshIds]) => ({ id: appendBoundingBox(id, meshIds), meshIds }));
+		return Object.entries(result).map(([id, meshIds]) => ({
+			id,
+			meshIds,
+		}));
 	};
 
 	describe('Create Clash Run', () => {
@@ -320,7 +315,8 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [mesh._id]),
+					id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, parent,
+						mockBoundingBoxStr),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -332,7 +328,8 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`, [mesh._id]),
+					id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, sharedId,
+						mockBoundingBoxStr),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -349,11 +346,13 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [namelessMesh._id]),
+						id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, parent,
+							mockBoundingBoxStr),
 						meshIds: [namelessMesh._id],
 					},
 					{
-						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`, [namedMesh._id]),
+						id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, sharedId,
+							mockBoundingBoxStr),
 						meshIds: [namedMesh._id],
 					},
 				]);
@@ -369,7 +368,8 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects(meshes);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, meshes.map(({ _id }) => _id)),
+					id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, parent,
+						mockBoundingBoxStr),
 					meshIds: meshes.map(({ _id }) => _id),
 				}]);
 			});
@@ -388,7 +388,8 @@ const testCreateRun = () => {
 					{ rev_id: plan.selectionA.revision, parents: { $in: [parent] } },
 					{ metadata: 1, parents: 1 });
 				expect(content.setA[0].objects).toEqual([{
-					id: appendBoundingBox(`${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`, [mesh._id]),
+					id: generateIndex(plan.selectionA.container, externalId.key, externalId.values[0],
+						mockBoundingBoxStr),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -400,7 +401,8 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent)]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`, [mesh._id]),
+					id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL, parent,
+						mockBoundingBoxStr),
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -421,11 +423,13 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: appendBoundingBox(`${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`, [meshes[0]._id]),
+						id: generateIndex(plan.selectionA.container, externalId.key, externalId.values[0],
+							mockBoundingBoxStr),
 						meshIds: [meshes[0]._id],
 					},
 					{
-						id: appendBoundingBox(`${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`, [meshes[1]._id]),
+						id: generateIndex(plan.selectionA.container, clashObjectIdTypes.INTERNAL,
+							parentWithoutExternalId, mockBoundingBoxStr),
 						meshIds: [meshes[1]._id],
 					},
 				]);
@@ -462,8 +466,7 @@ const formatClash = (clash) => {
 
 const generateObjectId = () => {
 	const objectId = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
-	const minX = generateRandomNumber();
-	const bbox = { min: [minX, 0, 0], max: [minX + 1, 1, 1] };
+	const bbox = { min: [0, 0, 0], max: [1, 1, 1] };
 	return `${objectId}::${JSON.stringify(bbox)}`;
 };
 
@@ -495,277 +498,237 @@ const testProcessClashResults = () => {
 		const corId = generateRandomString();
 		const resPath = generateRandomString();
 
-		test('should process clash results when there are no previous runs', async () => {
-			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
+		describe('General', () => {
+			test('should process clash results when there are no previous runs', async () => {
+				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
 
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
-			await Clashes.processClashResults(teamspace, project, corId, resPath);
+				await Clashes.processClashResults(teamspace, project, corId, resPath);
 
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { plan: 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
-				{ _id: 1 }, { updatedAt: -1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+					{ _id: 1 }, { updatedAt: -1 });
 
-			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
-			expect(fs.createReadStream).toHaveBeenCalledTimes(1);
+				expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+				expect(fs.createReadStream).toHaveBeenCalledTimes(1);
 
-			const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
-				Buffer.from(JSON.stringify(result)));
+				const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
+				expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
+					Buffer.from(JSON.stringify(result)));
 
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.COMPLETED,
-				{ stats: { new: 10, active: 0, resolved: 0 } });
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.COMPLETED,
+					{ stats: { new: 10, active: 0, resolved: 0 } });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
-				teamspace,
-				project,
-				runId: corId,
-				plan: currentRun.plan,
-				results: result,
-			});
-		});
-
-		test('should mark run as failed if the results file contains errors', async () => {
-			const fileContentWithErrors = {
-				clashes: times(3, () => generateClash()),
-				errors: [
-					{ type: 'MeshBoundsException' },
-					{ type: 'TransformBoundsException' },
-					{ type: 'TransformBoundsException' },
-				],
-			};
-			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
-
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
-
-			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.resolves.toBeUndefined();
-
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED,
-				{ error: { reason: 'The following errors were found: 1 MeshBoundsException, 2 TransformBoundsException' } });
-		});
-
-		test('should ignore clashes after an error is found in the results file', async () => {
-			const fileContentWithErrors = {
-				errors: [{ type: 'MeshBoundsException' }],
-				clashes: times(3, () => generateClash()),
-			};
-			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
-
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
-
-			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.resolves.toBeUndefined();
-
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED,
-				{ error: { reason: 'The following errors were found: 1 MeshBoundsException' } });
-		});
-
-		test('should mark run as failed if the results file cannot be read', async () => {
-			const readError = new Error(generateRandomString());
-			fs.createReadStream.mockImplementationOnce(() => {
-				const fakeReadStream = PassThrough();
-				setImmediate(() => fakeReadStream.emit('error', readError));
-				return fakeReadStream;
-			});
-
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
-
-			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.rejects.toEqual(readError);
-
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
-		});
-
-		test('should mark run as failed if the results file cannot be parsed', async () => {
-			fs.createReadStream.mockImplementationOnce(() => createRawResultsReadStream('{'));
-
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
-
-			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.rejects.toThrow();
-
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED,
-				{ error: { reason: expect.stringContaining('Could not read results file:') } });
-		});
-
-		test('should mark run as failed and send an email if it fails to fetch last results', async () => {
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.unknown);
-
-			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.rejects.toEqual(templates.unknown);
-
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { plan: 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
-				{ _id: 1 }, { updatedAt: -1 });
-
-			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
-			expect(fs.createReadStream).not.toHaveBeenCalled();
-
-			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-			const errorMessage = `Error retrieving clashes from last run: ${templates.unknown.message}`;
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED, { error: { reason: errorMessage } });
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(MailerConstants.templates.CLASH_ERROR.name,
-				{
-					errorMessage: templates.unknown.message,
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
 					teamspace,
-					project: UUIDToString(project),
-					planId: currentRun.plan._id,
+					project,
 					runId: corId,
+					plan: currentRun.plan,
+					results: result,
 				});
+			});
+
+			test('should categorize clashes and process clash results when there are previous runs', async () => {
+				const [clashWithNewBbox, ...otherClashes] = fileContent.clashes;
+				const clashWithOldBbox = {
+					...clashWithNewBbox,
+					a: clashWithNewBbox.a.replace(/\{.*\}$/, JSON.stringify({ min: [4, 4, 4], max: [5, 5, 5] })),
+					b: clashWithNewBbox.b.replace(/\{.*\}$/, JSON.stringify({ min: [6, 6, 6], max: [7, 7, 7] })),
+				};
+				const existingClashes = {
+					new: times(5, () => generateClash()).map(formatClash),
+					active: [formatClash(clashWithOldBbox), ...otherClashes.slice(0, 4).map(formatClash)],
+					resolved: times(2, () => generateClash()).map(formatClash),
+				};
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
+
+				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
+
+				FilesManager.getFileAsStream.mockImplementationOnce(() => {
+					const fakeReadStream = PassThrough();
+					fakeReadStream.write(JSON.stringify(existingClashes));
+					fakeReadStream.end();
+					return Promise.resolve({ readStream: fakeReadStream });
+				});
+
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
+
+				await Clashes.processClashResults(teamspace, project, corId, resPath);
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+					{ _id: 1 }, { updatedAt: -1 });
+
+				expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+				expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun._id);
+				expect(fs.createReadStream).toHaveBeenCalledTimes(1);
+
+				const result = {
+					new: fileContent.clashes.slice(5, 10).map(formatClash),
+					active: fileContent.clashes.slice(0, 5).map(formatClash),
+					resolved: existingClashes.new,
+				};
+
+				expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
+					Buffer.from(JSON.stringify(result)));
+
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.COMPLETED,
+					{ stats: { new: 5, active: 5, resolved: 5 } });
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+					teamspace,
+					project,
+					runId: corId,
+					plan: currentRun.plan,
+					results: result,
+				});
+			});
 		});
 
-		test('should categorize clashes and process clash results when there are previous runs', async () => {
-			const existingClashes = {
-				new: times(5, () => generateClash()).map(formatClash),
-				active: fileContent.clashes.slice(0, 5).map(formatClash),
-				resolved: times(2, () => generateClash()).map(formatClash),
-			};
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
+		describe('Error handling', () => {
+			test('should mark run as failed if the results file contains errors', async () => {
+				const fileContentWithErrors = {
+					clashes: times(3, () => generateClash()),
+					errors: [
+						{ type: 'MeshBoundsException' },
+						{ type: 'TransformBoundsException' },
+						{ type: 'TransformBoundsException' },
+					],
+				};
+				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
 
-			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
-			FilesManager.getFileAsStream.mockImplementationOnce(() => {
-				const fakeReadStream = PassThrough();
-				fakeReadStream.write(JSON.stringify(existingClashes));
-				fakeReadStream.end();
-				return Promise.resolve({ readStream: fakeReadStream });
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.resolves.toBeUndefined();
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.FAILED,
+					{ error: { reason: 'The following errors were found: 1 MeshBoundsException, 2 TransformBoundsException' } });
 			});
 
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
+			test('should ignore clashes after an error is found in the results file', async () => {
+				const fileContentWithErrors = {
+					errors: [{ type: 'MeshBoundsException' }],
+					clashes: times(3, () => generateClash()),
+				};
+				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
 
-			await Clashes.processClashResults(teamspace, project, corId, resPath);
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ _id: corId }, { plan: 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
-				{ _id: 1 }, { updatedAt: -1 });
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.resolves.toBeUndefined();
 
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun._id);
-			expect(fs.createReadStream).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
-			const result = {
-				new: fileContent.clashes.slice(5, 10).map(formatClash),
-				active: existingClashes.active,
-				resolved: existingClashes.new,
-			};
-
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
-				Buffer.from(JSON.stringify(result)));
-
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.COMPLETED,
-				{ stats: { new: 5, active: 5, resolved: 5 } });
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
-				teamspace,
-				project,
-				runId: corId,
-				plan: currentRun.plan,
-				results: result,
-			});
-		});
-
-		test('should ignore bbox values when generating the clash index', async () => {
-			const objectA = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
-			const objectB = `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`;
-			const previousClash = {
-				...generateRandomObject(),
-				a: `${objectA}::${JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] })}`,
-				b: `${objectB}::${JSON.stringify({ min: [2, 2, 2], max: [3, 3, 3] })}`,
-			};
-			const currentClash = {
-				...generateRandomObject(),
-				a: `${objectA}::${JSON.stringify({ min: [4, 4, 4], max: [5, 5, 5] })}`,
-				b: `${objectB}::${JSON.stringify({ min: [6, 6, 6], max: [7, 7, 7] })}`,
-			};
-			const existingClashes = {
-				new: [formatClash(previousClash)],
-				active: [],
-				resolved: [],
-			};
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
-
-			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream({ clashes: [currentClash] }));
-			FilesManager.getFileAsStream.mockImplementationOnce(() => {
-				const fakeReadStream = PassThrough();
-				fakeReadStream.write(JSON.stringify(existingClashes));
-				fakeReadStream.end();
-				return Promise.resolve({ readStream: fakeReadStream });
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.FAILED,
+					{ error: { reason: 'The following errors were found: 1 MeshBoundsException' } });
 			});
 
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
+			test('should mark run as failed if the results file cannot be read', async () => {
+				const readError = new Error(generateRandomString());
+				fs.createReadStream.mockImplementationOnce(() => {
+					const fakeReadStream = PassThrough();
+					setImmediate(() => fakeReadStream.emit('error', readError));
+					return fakeReadStream;
+				});
 
-			await Clashes.processClashResults(teamspace, project, corId, resPath);
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
-			const result = {
-				new: [],
-				active: [formatClash(currentClash)],
-				resolved: [],
-			};
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
-				Buffer.from(JSON.stringify(result)));
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
-				teamspace,
-				project,
-				runId: corId,
-				plan: currentRun.plan,
-				results: result,
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.rejects.toEqual(readError);
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
+			});
+
+			test('should mark run as failed if the results file cannot be parsed', async () => {
+				fs.createReadStream.mockImplementationOnce(() => createRawResultsReadStream('{'));
+
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.rejects.toThrow();
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.FAILED,
+					{ error: { reason: expect.stringContaining('Could not read results file:') } });
+			});
+
+			test('should mark run as failed and send an email if it fails to fetch last results', async () => {
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.unknown);
+
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.rejects.toEqual(templates.unknown);
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+					{ _id: 1 }, { updatedAt: -1 });
+
+				expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+				expect(fs.createReadStream).not.toHaveBeenCalled();
+
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				const errorMessage = `Error retrieving clashes from last run: ${templates.unknown.message}`;
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.FAILED, { error: { reason: errorMessage } });
+				expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+				expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(MailerConstants.templates.CLASH_ERROR.name,
+					{
+						errorMessage: templates.unknown.message,
+						teamspace,
+						project: UUIDToString(project),
+						planId: currentRun.plan._id,
+						runId: corId,
+					});
 			});
 		});
 	});

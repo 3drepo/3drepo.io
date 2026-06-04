@@ -267,8 +267,7 @@ const testProcessClashResults = () => {
 		});
 
 		describe('New tickets', () => {
-			/* eslint-disable max-len */
-			const testCases = [
+			test.each([
 				['Should create tickets for new clashes', baseContext, baseTemplate, {}, { new: [clash], active: [], resolved: [] }],
 				['Should create tickets for new clashes with custom statuses', baseContext, getTemplate(true, customDefaultStatus), {}, { new: [clash], active: [], resolved: [] }, { properties: { [STATUS]: customDefaultStatus } }],
 				['Should create tickets for active clashes without matching tickets', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }],
@@ -280,16 +279,9 @@ const testProcessClashResults = () => {
 				['Should create tickets with default values and configured new clash status', baseContext, baseTemplate, { valuesAtCreation, defaultStatuses }, { new: [clash], active: [], resolved: [] }, combinedExpectedRes],
 				['Should calculate the distance for new clearance clash tickets', { ...baseContext, clashType: CLASH_TYPES.CLEARANCE }, baseTemplate, {}, { new: [clash], active: [], resolved: [] }, { modules: { [CLOUD_CLASH]: { [DISTANCE_M]: 0.005 } } }],
 				['Should create tickets with default view and pin if configured', baseContext, defaultViewAndPinTemplate, {}, { new: [clashWithBbox], active: [], resolved: [] }, defaultViewAndPinExpectedRes],
-			];
-			/* eslint-enable max-len */
-
-			const formulateTestCase = ([desc, context, template, clashPlanExtras, clashResults, expectedRes = {}]) => {
-				const [expectedClash] = [...(clashResults.new ?? []), ...(clashResults.active ?? [])];
-				return { desc, context, template, clashPlanExtras, clashResults, expectedRes, expectedClash };
-			};
-
-			test.each(testCases.map(formulateTestCase))(
-				'$desc', async ({ context, template, clashPlanExtras, clashResults, expectedRes, expectedClash }) => {
+			])(
+				'%s', async (desc, context, template, clashPlanExtras, clashResults, expectedRes = {}) => {
+					const [expectedClash] = [...(clashResults.new ?? []), ...(clashResults.active ?? [])];
 					const clashPlan = generateClashPlan(context, clashPlanExtras);
 					if (expectedRes.federationUnit) {
 						ModelSettingsModel.getFederationById.mockResolvedValueOnce({
@@ -395,8 +387,7 @@ const testProcessClashResults = () => {
 				type: CameraType.PERSPECTIVE,
 			};
 			const voidTicket = generateExistingTicket(baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 });
-			/* eslint-disable max-len */
-			const testCases = [
+			test.each([
 				['Should update tickets for active clashes', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, existingTicket, expectedUpdate],
 				['Should reopen resolved tickets using the template default status', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, resolvedTicket, { properties: { [STATUS]: statuses.OPEN } }],
 				['Should reopen resolved tickets using the configured reopened status', baseContext, baseTemplate, { defaultStatuses: configuredReopenedDefaultStatuses }, { new: [], active: [clash], resolved: [] }, configuredReopenedTicket, { properties: { [STATUS]: statuses.FOR_APPROVAL } }],
@@ -410,23 +401,8 @@ const testProcessClashResults = () => {
 				['Should not update unmatched tickets if they are already resolved', baseContext, baseTemplate, {}, { new: [], active: [], resolved: [] }, resolvedTicket, null],
 				['Should not update void tickets', baseContext, baseTemplate, {}, { new: [], active: [], resolved: [] }, voidTicket, null],
 				['Should update matching tickets for new clashes', baseContext, baseTemplate, {}, { new: [clash], active: [], resolved: [] }, existingTicket, expectedUpdate],
-			];
-			/* eslint-enable max-len */
-
-			const formulateTestCase = ([
-				desc, context, template, clashPlanExtras, clashResults, existingData, expectedRes,
-			]) => ({
-				desc,
-				context,
-				template,
-				clashPlanExtras,
-				clashResults,
-				existingData,
-				expectedRes,
-			});
-
-			test.each(testCases.map(formulateTestCase))(
-				'$desc', async ({ context, template, clashPlanExtras, clashResults, existingData, expectedRes }) => {
+			])(
+				'%s', async (desc, context, template, clashPlanExtras, clashResults, existingData, expectedRes) => {
 					TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingData]);
 					if (expectedRes) {
 						TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingData]);
