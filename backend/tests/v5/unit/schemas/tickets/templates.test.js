@@ -546,6 +546,16 @@ const testValidate = () => {
 			}],
 
 		}, true],
+		['property is hiddenOnUI', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
+			}],
+
+		}, true],
 		['property is immutable', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -1294,6 +1304,27 @@ const testValidate = () => {
 		const output = TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
+	});
+
+	test('hiddenOnUI should be preserved when true and stripped when false', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
+			}, {
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: false,
+			}],
+		};
+
+		const output = TemplateSchema.validate(data);
+
+		expect(output.properties[0].hiddenOnUI).toEqual(true);
+		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 };
 

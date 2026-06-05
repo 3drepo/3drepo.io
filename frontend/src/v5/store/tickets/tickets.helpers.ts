@@ -322,11 +322,11 @@ export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => d
 	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 	.map((definition) => definition.name);
 
-export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
-	if (!template.properties) return [];
+export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {
+	if (!template) return [];
 	return [
-		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+		...(template.properties || []).map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...(template.modules || []).flatMap((module) => (module.properties || []).map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
 
@@ -334,18 +334,18 @@ export const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[]
 	propOrModule?.find((p) => p.name === name);
 
 export const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
-	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype);
+	(templateModules || []).find((t) => t.name === nameOrtype || t.type === nameOrtype);
 
 export const findPropertyDefinition = (template:ITemplate,  property:string) => {
 	const propertyChunks = property.split('.');
 
 	if (propertyChunks[0] === 'modules') {
-		const module = findModuleByNameOrType(template.modules, propertyChunks[1]);
-		return findByName(module?.properties, propertyChunks[2]) as PropertyDefinition;
+		const module = findModuleByNameOrType(template.modules || [], propertyChunks[1]);
+		return findByName(module?.properties || [], propertyChunks[2]) as PropertyDefinition;
 	}
 
 	if (propertyChunks[0] === 'properties') {
-		return findByName(template?.properties, propertyChunks[1]) as PropertyDefinition;
+		return findByName(template?.properties || [], propertyChunks[1]) as PropertyDefinition;
 	}
 };
 

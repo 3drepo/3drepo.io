@@ -49,13 +49,13 @@ ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 	const toSet = { updatedAt: new Date(), updatedBy: user };
 	const toUnset = {};
 	const collectUpdates = (searchObj, prefix = '') => {
-		Object.keys(searchObj).forEach((key) => {
-			if (isObject(searchObj[key]) && !isUUID(searchObj[key])) {
-				collectUpdates(searchObj[key], `${prefix}${key}.`);
-			} else if (searchObj[key] === null) {
+		Object.entries(searchObj).forEach(([key, value]) => {
+			if (isObject(value) && !isUUID(value)) {
+				collectUpdates(value, `${prefix}${key}.`);
+			} else if (value === null) {
 				toUnset[`${prefix}${key}`] = 1;
 			} else {
-				toSet[`${prefix}${key}`] = searchObj[key];
+				toSet[`${prefix}${key}`] = value;
 			}
 		});
 	};

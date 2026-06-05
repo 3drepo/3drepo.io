@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
-const { UUIDToString, generateUUIDString, stringToUUID } = require('../../../utils/helper/uuids');
-const { completeTestRun, createTestRun, getRunsByPlanId, getTestRunByQuery, setTestRunToFailed } = require('../../../models/clashes.runs');
+const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS, clashObjectIdTypes, clashRunStatus } = require('../../../models/clashes.constants');
+const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
+const { createClashRun, getClashRunByQuery, getRunsByPlanId, updateRunStatus } = require('../../../models/clashes.runs');
 const {
 	createPlan,
 	deletePlan,
@@ -31,9 +31,10 @@ const { getFileAsStream, storeFile } = require('../../../services/filesManager')
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
-const { createConstantsObject } = require('../../../utils/helper/objects');
 const { createReadStream } = require('fs');
+const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
+const { getArrayDifference } = require('../../../utils/helper/arrays');
 const { getNodesByQuery } = require('../../../models/scenes');
 const { queueClashRun } = require('../../../services/modelProcessing');
 const { sendSystemEmail } = require('../../../services/mailer');
@@ -51,82 +52,84 @@ Clashes.getAllPlans = getAllPlans;
 
 Clashes.getPlanById = getPlanById;
 
-const constructCompositeObject = async (teamspace, container, wantedMeshes, unwantedMeshIds) => {
+const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};
-	const parentIdsToMeshes = {};
-	const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
 
-	for (const mesh of wantedMeshes) {
-		const idStr = UUIDToString(mesh._id);
+	const metadata = await getMetadataByQuery(teamspace, container,
+		{ rev_id: revision, parents: { $in: Object.keys(internalCompIdsToMeshes).map(stringToUUID) } },
+		{ metadata: 1, parents: 1 });
 
-		if (!unwantedIdsObj[idStr]) {
-			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
-			if (parentIdsToMeshes[parentId]) {
-				parentIdsToMeshes[parentId].push(idStr);
-			} else {
-				parentIdsToMeshes[parentId] = [idStr];
-			}
+	const sharedIdToExternalIdMap = {};
+	for (const metaNode of metadata) {
+		const { parents } = metaNode;
+		const externalIds = getExternalIdsFromMetadata([metaNode]);
+		if (externalIds) {
+			const idType = externalIds.key;
+			parents.forEach((parent) => {
+				const parentIdStr = UUIDToString(parent);
+				sharedIdToExternalIdMap[parentIdStr] = `${container}::${idType}::${externalIds.values[0]}`;
+			});
 		}
 	}
 
-	const metadata = await getMetadataByQuery(teamspace, container,
-		{ parents: { $in: Object.keys(parentIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
-
-	const metadataMapping = {};
-	for (const { parents, metadata: meta } of metadata) {
-		const parentIdStr = UUIDToString(parents[0]);
-		metadataMapping[parentIdStr] = meta;
-	}
-
-	for (const [compId, meshes] of Object.entries(parentIdsToMeshes)) {
-		const meshMeta = metadataMapping[compId];
-		const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
-		const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? compId}`;
+	for (const [compId, meshes] of Object.entries(internalCompIdsToMeshes)) {
+		const compositePath = sharedIdToExternalIdMap[compId] ?? `${container}::${clashObjectIdTypes.INTERNAL}::${compId}`;
 		compositesToMeshes[compositePath] = meshes;
 	}
 
 	return compositesToMeshes;
 };
 
-const getMeshData = async (teamspace, project, container, revision, rules) => {
-	let meshes = [];
-	let unwantedMeshIds = [];
+const determineCompositeObjects = async (teamspace, project, container, revision, rules) => {
+	const compIdToMeshes = {};
 
-	if (!rules.length) {
-		meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
-	} else {
+	let meshIDQuery;
+
+	if (rules.length) {
 		const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 			revision, rules, { parents: 1 });
 
-		meshes = matched.length
-			? await getMeshesWithParentIds(teamspace, project, container, revision,
-				matched.flatMap(({ parents }) => parents), true, true)
-			: [];
+		const [wantedMeshesStrIds, unwantedMeshIdsStrIds] = await Promise.all(
+			[matched, unwanted].map((arr) => (arr.length
+				? getMeshesWithParentIds(teamspace, project, container, revision,
+					arr.flatMap(({ parents }) => parents), true)
+				: [])));
 
-		unwantedMeshIds = unwanted.length
-			? await getMeshesWithParentIds(teamspace, project, container, revision,
-				unwanted.flatMap(({ parents }) => parents), true)
-			: [];
+		meshIDQuery = {
+			$in: getArrayDifference(unwantedMeshIdsStrIds, wantedMeshesStrIds).map(stringToUUID),
+		};
 	}
 
-	return { meshes, unwantedMeshIds };
+	const meshes = await getNodesByQuery(teamspace, project, container,
+		deleteIfUndefined({ type: 'mesh', rev_id: revision, _id: meshIDQuery }),
+		{ _id: 1, parents: 1, name: 1, shared_id: 1 });
+
+	for (const mesh of meshes) {
+		const compositeId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
+
+		if (!compIdToMeshes[compositeId]) {
+			compIdToMeshes[compositeId] = [];
+		}
+
+		compIdToMeshes[compositeId].push(UUIDToString(mesh._id));
+	}
+
+	return applyExternalIds(teamspace, container, revision, compIdToMeshes);
 };
 
 const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
 	const { container, revision, rules = [] } = selection;
 
-	const { meshes, unwantedMeshIds } = await getMeshData(teamspace, project, container, revision, rules);
-	const compositesToMeshes = await constructCompositeObject(teamspace, container, meshes, unwantedMeshIds);
-
+	const compToMeshes = await determineCompositeObjects(teamspace, project, container, revision, rules);
 	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 	let first = true;
-	for (const [parentIdStr, meshIds] of Object.entries(compositesToMeshes)) {
+	for (const [compositeId, meshIds] of Object.entries(compToMeshes)) {
 		if (!first) {
 			stream.write(',');
 		}
 
-		stream.write(JSON.stringify({ id: parentIdStr, meshIds }));
+		stream.write(JSON.stringify({ id: compositeId, meshIds }));
 		first = false;
 	}
 
@@ -135,10 +138,8 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
 	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
-	const { _id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
-	const runId = await createTestRun(teamspace, {
-		_id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB,
-	}, user);
+	const { type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
+	const runId = await createClashRun(teamspace, project, plan, user);
 
 	const configStream = new PassThrough();
 	configStream.write('{');
@@ -155,102 +156,140 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	return runId;
 };
 
-const getClashesFromStream = async (stream, isPastRun) => {
-	const arrNames = isPastRun ? ['new', 'active', 'resolved'] : ['clashes'];
-	const clashes = [];
-
+const readArraysFromJSONStream = async (stream, arrayNames, onData) => {
 	const parser = new JSONParser({
-		paths: arrNames.map((name) => `$.${name}.*`),
+		paths: arrayNames.map((name) => `$.${name}.*`),
 	});
 
-	parser.on('data', ({ value }) => {
-		clashes.push(isPastRun ? value.index : value);
-	});
+	parser.on('data', (data) => onData({
+		...data,
+		arrayName: data.stack?.[data.stack.length - 1]?.key,
+	}));
 
 	await new Promise((resolve, reject) => {
+		stream.on('error', (err) => parser.destroy(err));
 		stream
 			.pipe(parser)
 			.on('end', resolve)
 			.on('error', reject);
 	});
-
-	return clashes;
 };
 
-const compareRunResults = (lastRunIndexObj, newRunClashes) => {
-	const newMap = new Set();
-
-	const result = { new: [], active: [], resolved: [] };
-
-	const getClashObjParts = (obj) => {
-		const [container, idType, id] = obj.split('::');
-		return { container, idType, id };
-	};
-
-	for (const newClash of newRunClashes) {
-		const key = [newClash.a, newClash.b].sort().join('-');
-		const clashToAdd = {
-			...newClash,
-			a: getClashObjParts(newClash.a),
-			b: getClashObjParts(newClash.b),
-			index: key,
-		};
-
-		if (lastRunIndexObj[key]) {
-			result.active.push(clashToAdd);
-
-			// eslint-disable-next-line no-param-reassign
-			delete lastRunIndexObj[key];
-		} else {
-			result.new.push(clashToAdd);
-		}
-
-		newMap.add(key);
-	}
-
-	result.resolved = Object.keys(lastRunIndexObj);
-
-	return result;
-};
-
-const getLastRunClashes = async (teamspace, planId) => {
+const getLastRunClashes = async (teamspace, project, planId, runId) => {
+	const clashMap = new Map();
 	try {
-		const lastCompletedRun = await getTestRunByQuery(teamspace,
-			{ 'plan._id': planId, completedAt: { $exists: true } },
-			{ result: 1 }, { completedAt: -1 },
+		const lastCompletedRun = await getClashRunByQuery(teamspace, project,
+			{ 'plan._id': planId, status: clashRunStatus.COMPLETED },
+			{ _id: 1 }, { updatedAt: -1 },
 		);
 
-		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.result);
-		return getClashesFromStream(readStream, true);
+		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun._id);
+		await readArraysFromJSONStream(readStream, ['new', 'active'], ({ value }) => {
+			clashMap.set(value.index, value);
+		});
+
+		return clashMap;
 	} catch (err) {
 		if (err.code === templates.clashRunNotFound.code) {
-			return [];
+			return new Map();
 		}
 
-		return null;
+		await Promise.all([
+			sendSystemEmail(emailTemplates.CLASH_ERROR.name,
+				{
+					errorMessage: err.message,
+					teamspace,
+					project: UUIDToString(project),
+					planId: UUIDToString(planId),
+					runId: UUIDToString(runId),
+				}),
+			updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
+				{ error: { reason: `Error retrieving clashes from last run: ${err.message}` } }),
+		]);
+
+		throw err;
 	}
 };
 
-Clashes.processClashResults = async (teamspace, runId, resPath) => {
-	const { plan: { _id: planId } } = await getTestRunByQuery(teamspace, { _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
-	const lastRunClashes = await getLastRunClashes(teamspace, planId);
+Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
+	const { plan: { _id: planId } } = await getClashRunByQuery(teamspace, project,
+		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
 
-	if (!lastRunClashes) {
-		const errorMessage = 'Error retrieving clashes from last run';
-		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, planId, runId });
-		await setTestRunToFailed(teamspace, runId, errorMessage);
-		return;
+	const errorCounts = {};
+	const currentClashes = new Map();
+	let hasErrors = false;
+	const formatClashForResults = (clash) => {
+		const index = [clash.a, clash.b].sort().join('-');
+		const getClashObjParts = (obj) => {
+			const [container, idType, id] = obj.split('::');
+			return { container, idType, id };
+		};
+
+		return {
+			index,
+			clash: {
+				...clash,
+				a: getClashObjParts(clash.a),
+				b: getClashObjParts(clash.b),
+				index,
+			},
+		};
+	};
+
+	try {
+		const resStream = createReadStream(resPath, { encoding: 'utf8' });
+
+		await readArraysFromJSONStream(resStream, ['errors', 'clashes'], ({ arrayName, value }) => {
+			if (arrayName === 'errors') {
+				hasErrors = true;
+				currentClashes.clear();
+				errorCounts[value.type] = (errorCounts[value.type] ?? 0) + 1;
+				return;
+			}
+
+			if (!hasErrors) {
+				const { index, clash } = formatClashForResults(value);
+				currentClashes.set(index, clash);
+			}
+		});
+
+		if (hasErrors) {
+			const errMessage = `The following errors were found: ${Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
+			}`;
+			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
+				{ error: { reason: errMessage } });
+			return;
+		}
+	} catch (err) {
+		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
+			{ error: { reason: `Could not read results file: ${err.message}` } });
+		throw err;
 	}
 
-	const resStream = createReadStream(resPath, { encoding: 'utf8' });
-	const newRunClashes = await getClashesFromStream(resStream);
-	const lastRunIndexObj = createConstantsObject(lastRunClashes);
+	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
 
-	const categorizedClashes = compareRunResults(lastRunIndexObj, newRunClashes);
-	const resultId = generateUUIDString();
+	const categorizedClashes = { new: [], active: [], resolved: [] };
+	for (const [index, clash] of currentClashes) {
+		if (knownClashes.has(index)) {
+			categorizedClashes.active.push(clash);
 
-	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
-	await completeTestRun(teamspace, runId, resultId);
+			knownClashes.delete(index);
+		} else {
+			categorizedClashes.new.push(clash);
+		}
+	}
+
+	categorizedClashes.resolved = Array.from(knownClashes.values());
+
+	await storeFile(teamspace, RUN_HISTORY_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
+	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,
+		{
+			stats: {
+				new: categorizedClashes.new.length,
+				active: categorizedClashes.active.length,
+				resolved: categorizedClashes.resolved.length,
+			},
+		});
 };
 
 Clashes.getRunsByPlanId = getRunsByPlanId;
