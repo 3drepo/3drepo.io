@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateRandomString, generateUUID, generateRandomDate } = require('../../../../../../helper/services');
+const { generateRandomNumber, generateRandomString, generateUUID, generateRandomDate } = require('../../../../../../helper/services');
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -33,17 +33,18 @@ const testSerialiseClashPlans = () => {
 			const createdAt = generateRandomDate();
 			const updatedAt = generateRandomDate();
 			const req = {
-				outputData: {
-					plans: [
+				outputData:
+					[
 						{
 							_id: generateUUID(),
 							name: generateRandomString(),
 							createdAt,
 							updatedAt,
-							nested: { modelId: generateUUID() },
+							selectionA: { container: generateUUID() },
+							selectionB: { container: generateUUID() },
 						},
 					],
-				},
+
 			};
 
 			ClashOutputMiddleware.serialiseClashPlans(req, {});
@@ -52,11 +53,12 @@ const testSerialiseClashPlans = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
 				plans: [
 					{
-						...req.outputData.plans[0],
-						_id: UUIDToString(req.outputData.plans[0]._id),
+						...req.outputData[0],
+						_id: UUIDToString(req.outputData[0]._id),
 						createdAt: createdAt.getTime(),
 						updatedAt: updatedAt.getTime(),
-						nested: { modelId: UUIDToString(req.outputData.plans[0].nested.modelId) },
+						selectionA: { container: UUIDToString(req.outputData[0].selectionA.container) },
+						selectionB: { container: UUIDToString(req.outputData[0].selectionB.container) },
 					},
 				],
 			});
@@ -81,7 +83,9 @@ const testSerialiseClashPlan = () => {
 					},
 					selectionA: {
 						container: generateUUID(),
-						rules: [{ values: [generateUUID()] }],
+					},
+					selectionB: {
+						container: generateUUID(),
 					},
 				},
 			};
@@ -100,7 +104,9 @@ const testSerialiseClashPlan = () => {
 				},
 				selectionA: {
 					container: UUIDToString(req.outputData.selectionA.container),
-					rules: [{ values: [UUIDToString(req.outputData.selectionA.rules[0].values[0])] }],
+				},
+				selectionB: {
+					container: UUIDToString(req.outputData.selectionB.container),
 				},
 			});
 		});
@@ -117,7 +123,11 @@ const testSerialiseClashRuns = () => {
 				triggeredBy: generateRandomString(),
 				completedAt: generateRandomDate(),
 				result: {
-					stats: { ...generateRandomObject(), modelId: generateUUID(), finishedAt: generateRandomDate() },
+					stats: {
+						new: generateRandomNumber(),
+						current: generateRandomNumber(),
+						resolved: generateRandomNumber(),
+					},
 				},
 			};
 			const failedRun = {
@@ -138,7 +148,7 @@ const testSerialiseClashRuns = () => {
 				errorCode: generateRandomString(),
 				message: generateRandomString(),
 			};
-			const req = { outputData: { runs: [completedRun, failedRun, plannedRun] } };
+			const req = { outputData: [completedRun, failedRun, plannedRun] };
 
 			ClashOutputMiddleware.serialiseClashRuns(req, {});
 
@@ -154,8 +164,6 @@ const testSerialiseClashRuns = () => {
 						result: {
 							stats: {
 								...completedRun.result.stats,
-								modelId: UUIDToString(completedRun.result.stats.modelId),
-								finishedAt: completedRun.result.stats.finishedAt.getTime(),
 							},
 						},
 					},

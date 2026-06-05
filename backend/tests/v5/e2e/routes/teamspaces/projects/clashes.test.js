@@ -120,7 +120,7 @@ const testGetPlans = () => {
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -128,28 +128,18 @@ const testGetPlans = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					expect(res.body.plans).toEqual(expect.arrayContaining([
-						expect.objectContaining({
+					ServiceHelper.outOfOrderArrayEqual(res.body.plans, [
+						{
 							_id: plan._id,
 							name: plan.name,
 							type: plan.type,
-						}),
-						expect.objectContaining({
+						},
+						{
 							_id: anotherPlan._id,
 							name: anotherPlan.name,
 							type: anotherPlan.type,
-						}),
-					]));
-
-					res.body.plans.forEach((returnedPlan) => {
-						expect(returnedPlan).not.toHaveProperty('selectionA');
-						expect(returnedPlan).not.toHaveProperty('selectionB');
-						expect(returnedPlan).not.toHaveProperty('tolerance');
-						expect(returnedPlan).not.toHaveProperty('selfIntersectionsCheck');
-						expect(returnedPlan).not.toHaveProperty('trigger');
-						expect(returnedPlan).not.toHaveProperty('tickets');
-						expect(returnedPlan).not.toHaveProperty('project');
-					});
+						},
+					]);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -323,7 +313,7 @@ const testGetRuns = () => {
 			['the user is not a project admin', { key: nonAdminUser.apiKey }, false, templates.notAuthorized],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
-			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, planId = existingPlan._id, key = users.tsAdmin.apiKey }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -544,8 +534,10 @@ const testUpdatePlan = () => {
 							expectedPlan.tickets = deleteIfUndefined(
 								{ ...orgPlanData.tickets, ...expectedRes.tickets }, true);
 						} else if (planData.tickets) {
-							expectedPlan.tickets = deleteIfUndefined({ ...expectedPlan.tickets,
-								...planData.tickets }, true);
+							expectedPlan.tickets = deleteIfUndefined({
+								...expectedPlan.tickets,
+								...planData.tickets,
+							}, true);
 						} else {
 							delete expectedPlan.tickets;
 						}

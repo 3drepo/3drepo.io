@@ -268,21 +268,19 @@ const testGetAllPlans = () => {
 	describe('Get all plans', () => {
 		const teamspace = generateRandomString();
 		const project = generateUUID();
+		const projection = {
+			createdAt: 1,
+			createdBy: 1,
+			name: 1,
+			type: 1,
+		};
 
 		test('should call find with project filter and summary projection, and return plans', async () => {
 			const plans = [
 				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
 				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
 			];
-			const projection = {
-				selectionA: 0,
-				selectionB: 0,
-				tolerance: 0,
-				selfIntersectionsCheck: 0,
-				trigger: 0,
-				tickets: 0,
-				project: 0,
-			};
+
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(plans);
 
 			await expect(ClashPlans.getAllPlans(teamspace, project)).resolves.toEqual(plans);
@@ -293,15 +291,6 @@ const testGetAllPlans = () => {
 
 		test('should reject when find fails', async () => {
 			const error = new Error(generateRandomString());
-			const projection = {
-				selectionA: 0,
-				selectionB: 0,
-				tolerance: 0,
-				selfIntersectionsCheck: 0,
-				trigger: 0,
-				tickets: 0,
-				project: 0,
-			};
 			const fn = jest.spyOn(db, 'find').mockRejectedValueOnce(error);
 
 			await expect(ClashPlans.getAllPlans(teamspace, project)).rejects.toEqual(error);

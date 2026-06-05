@@ -47,12 +47,9 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-Clashes.getAllPlans = async (teamspace, project) => {
-	const plans = await getAllPlans(teamspace, project);
-	return { plans };
-};
+Clashes.getAllPlans = getAllPlans;
 
-Clashes.getPlanById = (teamspace, project, planId) => getPlanById(teamspace, project, planId);
+Clashes.getPlanById = getPlanById;
 
 const constructCompositeObject = async (teamspace, container, wantedMeshes, unwantedMeshIds) => {
 	const compositesToMeshes = {};
@@ -256,9 +253,6 @@ Clashes.processClashResults = async (teamspace, runId, resPath) => {
 	await completeTestRun(teamspace, runId, resultId);
 };
 
-Clashes.getRunsByPlanId = async (teamspace, planId) => {
-	const runs = await getRunsByPlanId(teamspace, planId);
-	return { runs };
-};
+Clashes.getRunsByPlanId = getRunsByPlanId;
 
 module.exports = Clashes;

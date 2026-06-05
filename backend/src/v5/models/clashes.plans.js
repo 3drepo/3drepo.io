@@ -74,17 +74,9 @@ ClashPlans.deletePlan = async (teamspace, project, planId) => {
 	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId, project });
 };
 
-const PLAN_SUMMARY_PROJECTION = {
-	selectionA: 0,
-	selectionB: 0,
-	tolerance: 0,
-	selfIntersectionsCheck: 0,
-	trigger: 0,
-	tickets: 0,
-	project: 0,
-};
-
 ClashPlans.getAllPlans = (teamspace, project) => db.find(
-	teamspace, CLASH_PLANS_COL, { project }, PLAN_SUMMARY_PROJECTION);
+	teamspace, CLASH_PLANS_COL, { project }, {
+		type: 1, name: 1, createdAt: 1, createdBy: 1,
+	});
 
 module.exports = ClashPlans;

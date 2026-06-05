@@ -126,7 +126,7 @@ const testGetAllPlans = () => {
 			}));
 			ClashPlansModel.getAllPlans.mockResolvedValueOnce(plans);
 
-			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual({ plans });
+			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual(plans);
 
 			expect(ClashPlansModel.getAllPlans).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getAllPlans).toHaveBeenCalledWith(teamspace, project);
@@ -137,7 +137,7 @@ const testGetAllPlans = () => {
 			const project = generateUUID();
 			ClashPlansModel.getAllPlans.mockResolvedValueOnce([]);
 
-			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual({ plans: [] });
+			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual([]);
 
 			expect(ClashPlansModel.getAllPlans).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getAllPlans).toHaveBeenCalledWith(teamspace, project);
