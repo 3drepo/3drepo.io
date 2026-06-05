@@ -9083,11 +9083,6 @@ react-use-intercom@1.1.5:
   resolved "https://registry.yarnpkg.com/react-use-intercom/-/react-use-intercom-1.1.5.tgz#48200eb58e096eb7d7ffa500d1ffb1de249622ae"
   integrity sha512-TI6ssbCBkL29gM67ta+wVPoFGRIoaRHaBtPfGV1nMK7o4ia7+yMPc3YqGO4NKBj3q5+pRJE6LQ317QBh+bxBLw==
 
-react-virtualized-auto-sizer@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/react-virtualized-auto-sizer/-/react-virtualized-auto-sizer-2.0.3.tgz#28b30f5dacc807ee6edc9116564cc3f815e88e97"
-  integrity sha512-nonmCSUIh5HtbzazGcQ1NhnMFps/ZBu/UKJyhCt0Fhi7ondLAUZNETtRCWM8RWYZDzVlMYOQGgBmIxUutIhqgw==
-
 react-virtuoso@4.12.3:
   version "4.12.3"
   resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-4.12.3.tgz#beecf0582b31058c5a6ed3ec58fc43fd780e5844"
