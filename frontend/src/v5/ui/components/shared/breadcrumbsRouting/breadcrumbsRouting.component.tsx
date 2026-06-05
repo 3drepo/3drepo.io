@@ -48,7 +48,7 @@ export const BreadcrumbsRouting = () => {
 	const { pathname } = useLocation();
 	const params = useParams<ViewerParams>();
 	const [drawingId] = useSearchParam('drawingId');
-	const { teamspace = '', revision = '', containerOrFederation: containerOrFederationId = '', drawing } = params;
+	const { teamspace = '', revision = '', containerOrFederation: containerOrFederationId = '' } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();

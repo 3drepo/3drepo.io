@@ -54,9 +54,9 @@ export const FilterFormOperators = ({ type, operator, onOperatorChange }: Filter
 			onChange={(event) => onOperatorChange(event.target.value as TicketFilterOperator)}
 			renderValue={renderValue}
 		>
-			{operators.map((operator) => (
-				<MenuItem value={operator} key={operator}>
-					<MenuItemContent operator={operator} type={type} />
+			{operators.map((op) => (
+				<MenuItem value={op} key={op}>
+					<MenuItemContent operator={op} type={type} />
 				</MenuItem>
 			))}
 		</Select>
