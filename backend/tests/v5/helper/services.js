@@ -45,7 +45,7 @@ const {
 	CLASH_RUNS_COL,
 	RUN_HISTORY_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
-	TRIGGER_OPTIONS,
+	triggerOptions,
 	clashObjectIdTypes,
 	clashRunStatus,
 } = require(`${src}/models/clashes.constants`);
@@ -960,7 +960,7 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 		type: CLASH_PLAN_TYPES[0],
 		tolerance: 0.01,
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [TRIGGER_OPTIONS[0]],
+		trigger: [triggerOptions.MANUAL],
 		selectionA: {
 			container: model1,
 		},

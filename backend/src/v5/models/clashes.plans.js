@@ -33,6 +33,9 @@ const getPlanByQuery = async (teamspace, project, query, projection) => {
 	return res;
 };
 
+ClashPlans.getPlansByQuery = (teamspace, project, query, projection) => db.find(teamspace, CLASH_PLANS_COL,
+	{ ...query, project }, projection);
+
 ClashPlans.getPlanById = (teamspace, project, id, projection = { project: 0 }) => getPlanByQuery(
 	teamspace, project, { _id: id }, projection);
 

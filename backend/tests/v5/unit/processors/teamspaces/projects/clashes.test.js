@@ -28,16 +28,24 @@ const { PassThrough } = require('stream');
 
 const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
+
+jest.mock('../../../../../../src/v5/models/revisions');
+const RevisionsModel = require(`${src}/models/revisions`);
 
 jest.mock('../../../../../../src/v5/models/clashes.runs');
 const ClashRunsModel = require(`${src}/models/clashes.runs`);
 
 jest.mock('../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
+
+jest.mock('../../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
 
 jest.mock('../../../../../../src/v5/services/modelProcessing');
 const ModelProcessing = require(`${src}/services/modelProcessing`);
@@ -653,10 +661,91 @@ const testProcessClashResults = () => {
 	});
 };
 
+const testSetSelectionLastRevisions = () => {
+	describe('Set Selection Last Revisions', () => {
+		test('should set the last revisions for the selection', async () => {
+			const teamspace = generateRandomString();
+			const selectionA = { container: generateRandomString() };
+			const selectionB = { container: generateRandomString() };
+			const lastRevisionA = generateRandomString();
+			const lastRevisionB = generateRandomString();
+
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionA });
+			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
+
+			await Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB);
+
+			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, selectionA.container, modelTypes.CONTAINER, { _id: 1 });
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+
+			expect(selectionA.revision).toEqual(lastRevisionA);
+			expect(selectionB.revision).toEqual(lastRevisionB);
+		});
+
+		test('should throw error if one container doesnt exist', async () => {
+			const teamspace = generateRandomString();
+			const selectionA = { container: generateRandomString() };
+			const selectionB = { container: generateRandomString() };
+
+			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
+
+			await expect(Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB))
+				.rejects.toEqual(templates.containerNotFound);
+
+			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+		});
+
+		test('should throw error if one container doesnt have a revision', async () => {
+			const teamspace = generateRandomString();
+			const selectionA = { container: generateRandomString() };
+			const selectionB = { container: generateRandomString() };
+
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
+
+			await expect(Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB))
+				.rejects.toEqual(templates.revisionNotFound);
+
+			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+			expect(ModelSettingsModel.getContainerById)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, selectionA.container, modelTypes.CONTAINER, { _id: 1 });
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
 	testCreateRun();
 	testProcessClashResults();
+	testSetSelectionLastRevisions();
 });

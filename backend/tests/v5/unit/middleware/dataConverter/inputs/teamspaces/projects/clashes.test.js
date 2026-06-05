@@ -45,6 +45,9 @@ const TicketTemplateModel = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/clashes');
+const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -59,7 +62,7 @@ const { createResponseCode } = require('../../../../../../../../src/v5/utils/res
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
+const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require(`${src}/models/clashes.constants`);
 const { presetModules, statuses: templateDefaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 // Mock respond function to just return the resCode
@@ -93,7 +96,7 @@ const testValidateNewPlanData = () => {
 		type: CLASH_PLAN_TYPES[0],
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [TRIGGER_OPTIONS[0]],
+		trigger: [triggerOptions.MANUAL],
 		selectionA: { container: recognisedContainer[0], rules: [standardRule] },
 		selectionB: { container: recognisedContainer[1], rules: [standardRule] },
 	};
@@ -147,9 +150,9 @@ const testValidateNewPlanData = () => {
 		['with selfIntersectionsCheck set to false', true, { ...planData, selfIntersectionsCheck: false }],
 		['with invalid trigger', false, { ...planData, trigger: generateRandomString() }],
 		['with undefined trigger', false, { ...planData, trigger: undefined }],
-		['with duplicate trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[0]] }, { ...planData, trigger: [TRIGGER_OPTIONS[0]] }],
+		['with duplicate trigger', true, { ...planData, trigger: [triggerOptions.MANUAL, triggerOptions.MANUAL] }, { ...planData, trigger: [triggerOptions.MANUAL] }],
 		['with empty trigger', false, { ...planData, trigger: [] }],
-		['with valid trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
+		['with valid trigger', true, { ...planData, trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION] }],
 		['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
 		['with selections with null container', false, { ...planData, selectionA: { container: null }, selectionB: { container: null } }],
 		['with selections with container that does not exist', false, { ...planData, selectionA: { container: generateRandomString() } }],
@@ -300,7 +303,7 @@ const testValidateUpdatePlanData = () => {
 		type: CLASH_PLAN_TYPES[0],
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [TRIGGER_OPTIONS[0]],
+		trigger: [triggerOptions.MANUAL],
 		selectionA: { container: recognisedContainer[0], rules: [standardRule] },
 		selectionB: { container: recognisedContainer[1], rules: [standardRule] },
 		tickets: ticketData,
@@ -311,7 +314,7 @@ const testValidateUpdatePlanData = () => {
 	};
 	const oldPlanDataWithAllTriggers = {
 		...oldPlanData,
-		trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]],
+		trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION],
 	};
 
 	const expectedValueAtCreationUpdate = [
@@ -381,13 +384,13 @@ const testValidateUpdatePlanData = () => {
 		['with invalid trigger', false, { trigger: generateRandomString() }],
 		['with undefined trigger', false, { trigger: undefined }],
 		['with same trigger', false, { trigger: oldPlanData.trigger }],
-		['with same trigger in a different order', false, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
-		['with an added trigger', true, { trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
-		['with a removed trigger', true, { trigger: [TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
+		['with same trigger in a different order', false, { trigger: [triggerOptions.NEW_REVISION, triggerOptions.MANUAL] }, undefined, planWithAllTriggersId],
+		['with an added trigger', true, { trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION] }],
+		['with a removed trigger', true, { trigger: [triggerOptions.MANUAL] }, undefined, planWithAllTriggersId],
 		['with empty trigger', false, { trigger: [] }],
 		['with null trigger', false, { trigger: null }],
-		['with duplicate trigger', true, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[1]] }, { trigger: [TRIGGER_OPTIONS[1]] }],
-		['with duplicate old trigger', false, { trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[0]] }],
+		['with duplicate trigger', true, { trigger: [triggerOptions.NEW_REVISION, triggerOptions.NEW_REVISION] }, { trigger: [triggerOptions.NEW_REVISION] }],
+		['with duplicate old trigger', false, { trigger: [triggerOptions.MANUAL, triggerOptions.MANUAL] }],
 		['with selections without container', false, { selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
 		['with selections with null container', false, { selectionA: { container: null }, selectionB: { container: null } }],
 		['with selections with container that does not exist', false, { selectionA: { container: generateRandomString() } }],
@@ -577,12 +580,10 @@ const testPlanExists = () => {
 const testPlanContainersHaveRevs = () => {
 	describe('planContainersHaveRevs', () => {
 		test('should assign latest revisions to selectionA and selectionB and call next()', async () => {
-			const mockCB = jest.fn(() => {});
 			const teamspace = generateRandomString();
 			const containerA = generateRandomString();
 			const containerB = generateRandomString();
-			const revA = generateRandomString();
-			const revB = generateRandomString();
+			const mockCB = jest.fn(() => {});
 			const req = {
 				params: { teamspace },
 				planData: {
@@ -590,49 +591,15 @@ const testPlanContainersHaveRevs = () => {
 					selectionB: { container: containerB },
 				},
 			};
-			RevisionsModel.getLatestRevision
-				.mockResolvedValueOnce({ _id: revA })
-				.mockResolvedValueOnce({ _id: revB });
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
-			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
-			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, containerB, modelTypes.CONTAINER, { _id: 1 });
-			expect(req.planData.selectionA.revision).toEqual(revA);
-			expect(req.planData.selectionB.revision).toEqual(revB);
+			expect(ClashesProcessor.setSelectionLastRevisions).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setSelectionLastRevisions)
+				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
 
 			expect(mockCB).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-
-		test('should respond with error if a revisionNotFound error is thrown', async () => {
-			const mockCB = jest.fn(() => {});
-			const teamspace = generateRandomString();
-			const containerA = generateRandomString();
-			const containerB = generateRandomString();
-			const req = {
-				params: { teamspace },
-				planData: {
-					selectionA: { container: containerA },
-					selectionB: { container: containerB },
-				},
-			};
-			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
-
-			await Clashes.planContainersHaveRevs(req, {}, mockCB);
-
-			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			const { message, ...invalidArgRes } = templates.invalidArguments;
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expect.objectContaining(invalidArgRes));
-
-			expect(mockCB).not.toHaveBeenCalled();
 		});
 
 		test('should respond with error if another error is thrown', async () => {
@@ -649,15 +616,13 @@ const testPlanContainersHaveRevs = () => {
 			};
 
 			const error = new Error(generateRandomString());
-			RevisionsModel.getLatestRevision.mockRejectedValueOnce(error);
+			ClashesProcessor.setSelectionLastRevisions.mockRejectedValueOnce(error);
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
-			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
-			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, containerB, modelTypes.CONTAINER, { _id: 1 });
+			expect(ClashesProcessor.setSelectionLastRevisions).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setSelectionLastRevisions)
+				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
