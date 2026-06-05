@@ -397,6 +397,45 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
+		['status with no open type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => type !== statusTypes.OPEN),
+					default: statusValues.find(({ type }) => type !== statusTypes.OPEN).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with no done type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => type !== statusTypes.DONE),
+					default: statusValues.find(({ type }) => type !== statusTypes.DONE).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with only open and void', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => [statusTypes.OPEN, statusTypes.VOID].includes(type)),
+					default: statusValues.find(({ type }) => type === statusTypes.OPEN).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['status that is valid', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -404,6 +443,21 @@ const testValidate = () => {
 				status: {
 					values: statusValues,
 					default: statusValues[0].name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['status with open and done types is valid', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(
+						({ type }) => [statusTypes.OPEN, statusTypes.DONE, statusTypes.VOID].includes(type),
+					),
+					default: statusValues.find(({ type }) => type === statusTypes.OPEN).name,
 				},
 
 			},
@@ -457,12 +511,63 @@ const testValidate = () => {
 			}],
 
 		}, true],
+		['number property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.NUMBER,
+				unique: true,
+			}],
+
+		}, true],
+		['date property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.DATE,
+				unique: true,
+			}],
+
+		}, true],
+		['pastDate property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.PAST_DATE,
+				unique: true,
+			}],
+
+		}, true],
+		['oneOf property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString()],
+				unique: true,
+			}],
+
+		}, true],
 		['property is unique for unsupported type', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
+				unique: true,
+
+			}] }, false],
+		['property is unique for manyOf type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.MANY_OF,
+				values: [generateRandomString(), generateRandomString()],
 				unique: true,
 
 			}] }, false],
