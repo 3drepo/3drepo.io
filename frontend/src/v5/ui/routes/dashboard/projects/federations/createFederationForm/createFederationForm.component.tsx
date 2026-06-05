@@ -24,7 +24,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { GroupedContainer, NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EditFederation } from '../editFederationModal/editFederation/editFederation.component';
@@ -57,19 +57,19 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 	const {
 		handleSubmit,
 		getValues,
-		trigger,
 		formState: { isValid },
 	} = methods;
 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
+	useExistingValuesTrigger('name', alreadyExistingNames, methods);
+
 	const onSubmitError = (err) => {
 		setIsSubmitting(false);
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			setIsSettingsPhase(true);
-			trigger('name');
 		}
 	};
 

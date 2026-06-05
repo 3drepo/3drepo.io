@@ -72,6 +72,11 @@ export const uploadFile = Yup.mixed().nullable().test(
 
 export const alphaNumericHyphens = /^[\w-]*$/;
 
+export const NAME_ALREADY_EXISTS_MESSAGE = formatMessage({
+	id: 'validation.model.name.alreadyExisting',
+	defaultMessage: 'This name is already used within this project',
+});
+
 export const name = trimmedString
 	.max(120,
 		formatMessage({
@@ -86,13 +91,11 @@ export const name = trimmedString
 	)
 	.test(
 		'alreadyExistingNames',
-		formatMessage({
-			id: 'validation.model.name.alreadyExisting',
-			defaultMessage: 'This name is already used within this project',
-		}),
+		NAME_ALREADY_EXISTS_MESSAGE,
 		(nameValue, testContext) => {
 			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingNames?.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+			const result = !testContext.options.context.alreadyExistingNames?.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+			return result;
 		},
 	);
 

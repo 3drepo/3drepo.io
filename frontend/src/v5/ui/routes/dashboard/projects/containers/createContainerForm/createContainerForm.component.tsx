@@ -25,7 +25,7 @@ import { MODEL_UNITS } from '../../models.helpers';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
-import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TwoColumnRow } from './createContainerForm.styles';
@@ -45,14 +45,7 @@ interface IFormInput {
 
 export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
-	const {
-		handleSubmit,
-		getValues,
-		trigger,
-		control,
-		formState,
-		formState: { errors },
-	} = useForm<IFormInput>({
+	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
 		context: { alreadyExistingNames },
@@ -64,16 +57,26 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) =>
 			code: '',
 		},
 	});
+
+	const {
+		handleSubmit,
+		getValues,
+		control,
+		formState,
+		formState: { errors },
+	} = formData;
+
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
-			trigger('name');
 		}
 	};
-
+	
+	useExistingValuesTrigger('name', alreadyExistingNames, formData);
+	
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body, onClickClose, onSubmitError);
 	};
@@ -137,3 +140,4 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) =>
 		</FormModal>
 	);
 };
+
