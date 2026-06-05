@@ -2316,6 +2316,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use the meshes API when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static enableOnlineSnapping() {
+		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
+	}
+
+	/**
+	 * Use the WebGL buffers when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static disableOnlineSnapping() {
+		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
+	}
+
+	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
@@ -2831,5 +2849,56 @@ export class UnityUtil {
 		if (UnityUtil.externalWebRequestHandler) {
 			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
 		}
+	}
+
+	/**
+	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
+	 * with additional options for clipping and gizmo display. rect should be the 
+	 * size and location of the image, given as the location of three corners 
+	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project 
+	 * coordinates. If image is null, the location of the existing image is updated. 
+	 * If no image has ever been loaded, a white rectangle is shown in its place. 
+	 * The clip and gizmo parameters control whether the drawing plane is clipped and 
+	 * whether the gizmo is shown, respectively.
+	 * @param image - DrawingImageSource for the drawing plane
+	 * @param rect - number[] specifying the world rectangle
+	 * @param clip - boolean to enable or disable clipping
+	 * @param gizmo - boolean to show or hide the gizmo
+	 */
+	public static enableDrawingPlane(image: DrawingImageSource, rect: number[], clip: boolean = true, gizmo: boolean = true) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image;
+			dimensions = [image.width, image.height];
+		}
+
+		const parms = {
+			worldRect: rect,
+			domId: index,
+			dimensions,
+			clip,
+			gizmo,
+		};
+
+		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/** 
+	 * Disable the drawing plane
+	 */
+	public static disableDrawingPlane() {
+		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Increases or decreases the size of measurement tool labels. This takes
+	 * effect immediately and applies to existing and new labels.
+	 * @param scale Scale factor, where 1 is the default scale.
+	 */
+	public static setLabelScale(scale: number) {
+		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
 	}
 }
