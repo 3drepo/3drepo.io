@@ -25,10 +25,16 @@ const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const {
 	createClashRun,
 	deleteRunsByPlan,
+	deleteRunsByProject,
 	getClashRunByQuery,
 	updateRunStatus,
 } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan: deleteClashPlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createPlan,
+	deletePlan: deleteClashPlan,
+	deletePlansByProject,
+	updatePlan,
+} = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshNodeBounds, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
@@ -54,6 +60,12 @@ Clashes.updatePlan = updatePlan;
 Clashes.deletePlan = async (teamspace, project, planId) => {
 	await deleteClashPlan(teamspace, project, planId);
 	const runIds = await deleteRunsByPlan(teamspace, project, planId);
+	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+};
+
+Clashes.deleteClashDataInProject = async (teamspace, project) => {
+	await deletePlansByProject(teamspace, project);
+	const runIds = await deleteRunsByProject(teamspace, project);
 	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
 };
 

@@ -224,9 +224,34 @@ const testDeleteRunsByPlan = () => {
 	});
 };
 
+const testDeleteRunsByProject = () => {
+	describe('Delete runs by project', () => {
+		test('should delete the runs associated with a project and return the ids removed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runs = [
+				{ _id: generateRandomString() },
+				{ _id: generateRandomString() },
+			];
+			const runIds = runs.map(({ _id }) => _id);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByProject(teamspace, project)).resolves.toEqual(runIds);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project }, { _id: 1 });
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, _id: { $in: runIds } });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreateClashRun();
 	testUpdateRunStatus();
 	testGetClashRunByQuery();
 	testDeleteRunsByPlan();
+	testDeleteRunsByProject();
 });

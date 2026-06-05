@@ -264,10 +264,26 @@ const testDeletePlan = () => {
 	});
 };
 
+const testDeletePlansByProject = () => {
+	describe('Delete plans by project', () => {
+		test('should delete all plans associated with a project', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await ClashPlans.deletePlansByProject(teamspace, project);
+
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetPlanById();
 	testGetPlanByName();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testDeletePlansByProject();
 });

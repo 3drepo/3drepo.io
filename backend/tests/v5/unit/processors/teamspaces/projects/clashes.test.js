@@ -125,6 +125,26 @@ const testDeletePlan = () => {
 	});
 };
 
+const testDeleteClashDataInProject = () => {
+	describe('Delete clash data in project', () => {
+		test('should delete the plans and associated run data', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const runIds = times(3, () => generateUUID());
+			ClashRunsModel.deleteRunsByProject.mockResolvedValueOnce(runIds);
+
+			await Clashes.deleteClashDataInProject(teamspace, project);
+
+			expect(ClashRunsModel.deleteRunsByProject).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.deleteRunsByProject).toHaveBeenCalledWith(teamspace, project);
+			expect(ClashPlansModel.deletePlansByProject).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.deletePlansByProject).toHaveBeenCalledWith(teamspace, project);
+			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, runIds);
+		});
+	});
+};
+
 const testCreateRun = () => {
 	const teamspace = generateRandomString();
 	const project = generateUUID();
@@ -738,6 +758,7 @@ describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testDeleteClashDataInProject();
 	testCreateRun();
 	testProcessClashResults();
 });
