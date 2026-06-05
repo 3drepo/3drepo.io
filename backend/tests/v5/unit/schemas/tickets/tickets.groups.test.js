@@ -43,6 +43,12 @@ const testDeserialiseGroup = () => {
 
 			expect(GroupsSchema.deserialiseGroup(obj)).toEqual(expectedData);
 		});
+
+		test('Should preserve excludeDefinedObjects', () => {
+			const obj = { ...generateRandomObject(), excludeDefinedObjects: true };
+
+			expect(GroupsSchema.deserialiseGroup(obj)).toEqual(obj);
+		});
 	});
 };
 
@@ -62,10 +68,32 @@ const testSerialiseGroup = () => {
 
 			expect(GroupsSchema.serialiseGroup(obj)).toEqual(expectedData);
 		});
+
+		test('Should preserve excludeDefinedObjects', () => {
+			const obj = { ...generateRandomObject(), excludeDefinedObjects: true };
+
+			expect(GroupsSchema.serialiseGroup(obj)).toEqual(obj);
+		});
 	});
 };
 
 const testSchema = () => {
+	const generateObjectGroup = (overrides = {}) => ({
+		name: generateRandomString(),
+		objects: [{ _ids: [generateUUIDString()], container: generateUUIDString() }],
+		...overrides,
+	});
+
+	const generateDuplicateContainerObjectGroup = () => {
+		const container = generateUUIDString();
+		return generateObjectGroup({
+			objects: [
+				{ _ids: [generateUUIDString()], container },
+				{ [idTypes.IFC]: [generateRandomString(22)], container },
+			],
+		});
+	};
+
 	describe.each([
 		['data is a UUID and allowIds is set to true', true, false, generateUUID(), true],
 		['data is a UUID and allowIds is set to false', false, false, generateUUID(), false],
@@ -107,6 +135,12 @@ const testSchema = () => {
 			name: generateRandomString(),
 			objects: [{ container: generateUUIDString() }],
 		}, false],
+		['data has duplicate containers', false, false, generateDuplicateContainerObjectGroup(), false],
+		['data has excludeDefinedObjects set to true', false, false, generateObjectGroup({ excludeDefinedObjects: true }), true],
+		['data has excludeDefinedObjects set to false', false, false, generateObjectGroup({ excludeDefinedObjects: false }), true],
+		['data has excludeDefinedObjects set to null', false, true, { excludeDefinedObjects: null }, true],
+		['data has excludeDefinedObjects set to undefined', false, true, { excludeDefinedObjects: undefined }, true],
+		['data has excludeDefinedObjects with an invalid type', false, false, generateObjectGroup({ excludeDefinedObjects: generateRandomString() }), false],
 	])('Schema validation', (desc, allowIds, fieldsOptional, data, shouldPass) => {
 		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
 			const schemaToTest = GroupsSchema.schema(allowIds, fieldsOptional);
