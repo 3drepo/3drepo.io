@@ -296,7 +296,7 @@ export const selectGetMeshesByIds = (nodeIds = []) => createSelector(
 	}
 );
 
-export const selectGetMeshesButMeshIds = (meshIds = []) => createSelector(
+export const selectGetAllMeshes = createSelector(
 	selectTreeNodesList,
 	selectNodesIndexesMap,
 	selectSubModelsRootNodes,
@@ -306,19 +306,17 @@ export const selectGetMeshesButMeshIds = (meshIds = []) => createSelector(
 			return [];
 		}
 
-		const excludedMeshes = new Set(meshIds);
 		const [root] = treeNodesList;
 		const containerRootIds = isEmpty(subModelsRootNodes) ? [root._id] : root.subTreeRoots;
 
 		return containerRootIds.flatMap((nodeId) => {
 			const node: any = treeNodesList[nodesIndexesMap[nodeId]];
 			const meshes = meshesByNodeId[node?.namespacedId]?.[node?._id] || [];
-			const filteredMeshes = meshes.filter((mesh) => !excludedMeshes.has(mesh));
 
-			return filteredMeshes.length ? [{
+			return meshes.length ? [{
 				model: node.model,
 				teamspace: node.teamspace,
-				meshes: filteredMeshes,
+				meshes,
 			}] : [];
 		});
 	}

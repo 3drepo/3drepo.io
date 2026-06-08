@@ -26,7 +26,7 @@ import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroups
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
-import { selectGetMeshesButMeshIds, selectIsTreeProcessed } from '@/v4/modules/tree';
+import { selectGetAllMeshes, selectIsTreeProcessed } from '@/v4/modules/tree';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -35,12 +35,25 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 
 export const convertToV4GroupNodes = (group?: Group) => {
 	if (group?.excludeDefinedObjects) {
-		const meshesNotInGroup = selectGetMeshesButMeshIds(group.objects?.flatMap(({ _ids }) => _ids) || [])(getState());
-		return meshesNotInGroup.map(({ teamspace: account, model, meshes }) => ({
-			account,
-			model,
-			shared_ids: toSharedIds(meshes),
-		}));
+		const excludedMeshesByContainer = new Map<string, Set<string>>();
+		(group.objects || []).forEach(({ container, _ids }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(container) || new Set<string>();
+			_ids.forEach((id) => excludedMeshes.add(id));
+			excludedMeshesByContainer.set(container, excludedMeshes);
+		});
+
+		const allMeshes = selectGetAllMeshes(getState());
+		return allMeshes.flatMap(({ teamspace: account, model, meshes }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(model) || new Set();
+			const filteredMeshes = excludedMeshes.size ? meshes.filter((mesh) => !excludedMeshes.has(mesh)) : meshes;
+			if (!filteredMeshes.length) return [];
+
+			return [{
+				account,
+				model,
+				shared_ids: toSharedIds(filteredMeshes),
+			}];
+		});
 	}
 
 	return (group?.objects || []).map(({ container: model, _ids }) => ({

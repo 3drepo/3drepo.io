@@ -18,7 +18,7 @@
 import TreeProcessing from '@/v4/modules/tree/treeProcessing/treeProcessing';
 import { NODE_TYPES } from '@/v4/constants/tree';
 import { setStore } from '@/v5/helpers/redux.helpers';
-import { toGroupPropertiesDicts, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, toGroupPropertiesDicts, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 
 describe('viewpoint helpers', () => {
 	const teamspace = 'teamspace';
@@ -112,6 +112,18 @@ describe('viewpoint helpers', () => {
 				[meshC.shared_id]: 0.02,
 			},
 		});
+	});
+
+	it('only excludes meshes from the container they are listed against', () => {
+		const result = convertToV4GroupNodes({
+			...inverseGroup,
+			objects: [{ container: modelA, _ids: [meshC._id] }],
+		});
+
+		expect(result).toEqual([
+			{ account: teamspace, model: modelA, shared_ids: [meshA.shared_id, meshB.shared_id] },
+			{ account: teamspace, model: modelB, shared_ids: [meshC.shared_id] },
+		]);
 	});
 
 	it('keeps ordinary include groups unchanged', () => {
