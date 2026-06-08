@@ -38,6 +38,11 @@ export const BoardScroller = styled(Box)`
 	align-items: stretch;
 	min-height: 0;
 	height: 100%;
+	
+	&:hover {
+		background-color: transparent;
+	}
+
 	padding-bottom: ${({ theme }) => (theme as any).spacing(1)};
 `;
 
