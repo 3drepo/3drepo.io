@@ -270,12 +270,13 @@ const getNormalTicketGroupById = () => {
 	test('should convert all external id types to mesh ids without dropping existing mesh ids', async () => {
 		const revision = generateRandomString();
 		const existingMeshIds = times(2, generateUUIDString);
+		const duplicateMeshId = existingMeshIds[1];
 		const ifcIds = times(2, generateRandomString);
 		const revitIds = times(2, generateRandomString);
 		const ifcMeta = [{ parents: times(2, generateRandomString) }];
 		const revitMeta = [{ parents: times(2, generateRandomString) }];
-		const ifcMeshIds = times(2, generateUUIDString);
-		const revitMeshIds = times(2, generateUUIDString);
+		const ifcMeshIds = [duplicateMeshId, generateUUIDString()];
+		const revitMeshIds = [ifcMeshIds[1], generateUUIDString()];
 		const mixedGroup = {
 			objects: [{
 				container,
@@ -298,7 +299,7 @@ const getNormalTicketGroupById = () => {
 		expect(results).toEqual({
 			objects: [{
 				container,
-				_ids: [...existingMeshIds, ...ifcMeshIds, ...revitMeshIds],
+				_ids: [...existingMeshIds, ifcMeshIds[1], revitMeshIds[1]],
 			}],
 		});
 
