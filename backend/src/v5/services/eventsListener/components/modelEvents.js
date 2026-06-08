@@ -20,9 +20,9 @@ const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../m
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getContainerFileName, getLogArchive } = require('../../modelProcessing');
-const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
+const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
@@ -43,10 +43,9 @@ const { serialiseComment } = require('../../../schemas/tickets/tickets.comments'
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
 
-const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
+const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		const modelType = await getModelType(teamspace, model);
 		const revId = stringToUUID(corId);
 		if (modelType === modelTypes.DRAWING) {
 			// status are stored in individual revisions on drawings. Eventually this will be the same for others.
@@ -74,10 +73,9 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	}
 };
 
-const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => {
+const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, user }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		const modelType = await getModelType(teamspace, model);
 		const errorInfo = getInfoFromCode(value);
 		errorInfo.retVal = value;
 		const revId = stringToUUID(corId);
@@ -604,7 +602,6 @@ const ModelEventsListener = {};
 ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
-
 	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
