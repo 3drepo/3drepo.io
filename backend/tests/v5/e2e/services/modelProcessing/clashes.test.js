@@ -28,6 +28,7 @@ const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
+const { processStatuses } = require('../../../../../src/v5/models/modelSettings.constants');
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -303,7 +304,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.CONTAINER,
-				data: { status: 'ok' } };
+				data: { status: processStatuses.OK } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
@@ -323,6 +324,54 @@ const testStartClashRunsAfterNewRev = () => {
 			expect(modelWithNoRevsRuns.length).toEqual(0);
 		});
 
+		test('Should not start clash run if the revision has failed', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelA._id,
+				user: user.user,
+				modelType: modelTypes.CONTAINER,
+				data: { errorReason: ServiceHelper.generateRandomObject() } };
+
+			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			expect(newRunsA.length).toEqual(existingRunsA.length);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length);
+		});
+
+		test('Should not start clash run if the revision is not for a container', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelA._id,
+				user: user.user,
+				modelType: modelTypes.DRAWING,
+				data: { errorReason: ServiceHelper.generateRandomObject() } };
+
+			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			expect(newRunsA.length).toEqual(existingRunsA.length);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length);
+		});
+
 		test('Should not start clash run for a plan where one container is deleted', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = { teamspace,
@@ -330,7 +379,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelB._id,
 				user: user.user,
 				modelType: modelTypes.CONTAINER,
-				data: { status: 'ok' } };
+				data: { status: processStatuses.OK } };
 
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
 

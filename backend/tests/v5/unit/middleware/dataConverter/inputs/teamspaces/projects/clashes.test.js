@@ -19,16 +19,11 @@ const { times, isEqual } = require('lodash');
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
 jest.mock('../../../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
-
-jest.mock('../../../../../../../../src/v5/models/revisions');
-const RevisionsModel = require(`${src}/models/revisions`);
 
 jest.mock('../../../../../../../../src/v5/models/modelSettings');
 const ModelSettingsModel = require(`${src}/models/modelSettings`);
