@@ -58,7 +58,6 @@ const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
 const {
 	CLASH_PLAN_TYPES,
-	CLASH_RUN_STATUS,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
@@ -219,7 +218,7 @@ const testGetRunsByPlanId = () => {
 		test('should call getRunsByPlanId and return runs unchanged', async () => {
 			const completedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.COMPLETED,
+				status: clashRunStatus.COMPLETED,
 				triggeredAt: new Date(),
 				triggeredBy: generateRandomString(),
 				completedAt: new Date(),
@@ -227,7 +226,7 @@ const testGetRunsByPlanId = () => {
 			};
 			const failedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.FAILED,
+				status: clashRunStatus.FAILED,
 				triggeredAt: new Date(),
 				triggeredBy: generateRandomString(),
 				errorCode: generateRandomString(),
@@ -236,7 +235,7 @@ const testGetRunsByPlanId = () => {
 			};
 			const queuedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.QUEUED,
+				status: clashRunStatus.QUEUED,
 				triggeredAt: new Date(),
 				triggeredBy: generateRandomString(),
 				completedAt: new Date(),
@@ -247,7 +246,7 @@ const testGetRunsByPlanId = () => {
 			const runs = [completedRun, failedRun, queuedRun];
 			ClashRunsModel.getRunsByPlanId.mockResolvedValueOnce(runs);
 
-			await expect(Clashes.getRunsByPlanId(teamspace, planId)).resolves.toEqual({ runs });
+			await expect(Clashes.getRunsByPlanId(teamspace, planId)).resolves.toEqual(runs);
 
 			expect(ClashRunsModel.getRunsByPlanId).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.getRunsByPlanId).toHaveBeenCalledWith(teamspace, planId);
@@ -256,7 +255,7 @@ const testGetRunsByPlanId = () => {
 		test('should return an empty runs array when no runs are found', async () => {
 			ClashRunsModel.getRunsByPlanId.mockResolvedValueOnce([]);
 
-			await expect(Clashes.getRunsByPlanId(teamspace, planId)).resolves.toEqual({ runs: [] });
+			await expect(Clashes.getRunsByPlanId(teamspace, planId)).resolves.toEqual([]);
 
 			expect(ClashRunsModel.getRunsByPlanId).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.getRunsByPlanId).toHaveBeenCalledWith(teamspace, planId);

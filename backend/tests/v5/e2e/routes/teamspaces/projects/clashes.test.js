@@ -28,7 +28,7 @@ const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
-const { CLASH_RUN_STATUS } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
@@ -206,64 +206,48 @@ const testGetRuns = () => {
 
 		const plannedRun = {
 			...ServiceHelper.generateClashRun(existingPlan),
-			status: CLASH_RUN_STATUS.PLANNED,
+			status: clashRunStatus.PLANNED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
 		};
 		const failedRun = {
 			...ServiceHelper.generateClashRun(existingPlan),
-			status: CLASH_RUN_STATUS.FAILED,
+			status: clashRunStatus.FAILED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
 			errorCode: ServiceHelper.generateRandomString(),
 			message: ServiceHelper.generateRandomString(),
 		};
 		const completedRun = {
 			...ServiceHelper.generateClashRun(existingPlan),
-			status: CLASH_RUN_STATUS.COMPLETED,
+			status: clashRunStatus.COMPLETED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
 			completedAt: ServiceHelper.generateRandomDate(),
-			result: { stats: { total: 5 } },
+			result: {
+				stats: {
+					new: ServiceHelper.generateRandomNumber(),
+					active: ServiceHelper.generateRandomNumber(),
+					resolved: ServiceHelper.generateRandomNumber(),
+				},
+			},
 		};
 
-		const buildRunExpectation = (run) => {
-			const absentProps = ['plan'];
+		const formatRun = (run) => {
 			let result;
-
-			if (run.status === CLASH_RUN_STATUS.FAILED) {
+			if (run.status === clashRunStatus.FAILED) {
 				result = { error: { code: run.errorCode, reason: run.message } };
-			} else if (run.status === CLASH_RUN_STATUS.COMPLETED) {
+			} else if (run.status === clashRunStatus.COMPLETED) {
 				result = { stats: run.result.stats };
 			}
 
-			const expected = {
+			return deleteIfUndefined({
 				_id: run._id,
 				status: run.status,
 				triggeredBy: run.triggeredBy,
 				triggeredAt: run.triggeredAt.getTime(),
-				completedAt: run.status === CLASH_RUN_STATUS.COMPLETED
+				completedAt: run.status === clashRunStatus.COMPLETED
 					? run.completedAt.getTime()
 					: undefined,
 				result,
-			};
-
-			if (run.status === CLASH_RUN_STATUS.PLANNED) {
-				absentProps.push('result');
-			}
-
-			return {
-				expected: deleteIfUndefined(expected, false),
-				absentProps,
-			};
-		};
-
-		const createExpectedRunsById = () => new Map([
-			[plannedRun._id, buildRunExpectation(plannedRun)],
-			[failedRun._id, buildRunExpectation(failedRun)],
-			[completedRun._id, buildRunExpectation(completedRun)],
-		]);
-
-		const assertRunMatchesExpectation = (actualRun, expectation) => {
-			expect(actualRun).toEqual(expect.objectContaining(expectation.expected));
-			expectation.absentProps.forEach((prop) => expect(actualRun).not.toHaveProperty(prop));
+			});
 		};
 
 		beforeAll(async () => {
@@ -273,21 +257,16 @@ const testGetRuns = () => {
 				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
 					models.map(({ _id }) => _id)),
 				ServiceHelper.db.createClashPlan(teamspace, projectWithOwnPlan.id, planInAnotherProject),
-				DB.insertOne(teamspace, CLASH_RUNS_COL, {
-					...plannedRun,
-					_id: stringToUUID(plannedRun._id),
-					plan: { ...plannedRun.plan, _id: stringToUUID(plannedRun.plan._id) },
-				}),
-				DB.insertOne(teamspace, CLASH_RUNS_COL, {
-					...failedRun,
-					_id: stringToUUID(failedRun._id),
-					plan: { ...failedRun.plan, _id: stringToUUID(failedRun.plan._id) },
-				}),
-				DB.insertOne(teamspace, CLASH_RUNS_COL, {
-					...completedRun,
-					_id: stringToUUID(completedRun._id),
-					plan: { ...completedRun.plan, _id: stringToUUID(completedRun.plan._id) },
-				}),
+				ServiceHelper.db.createClashRun(teamspace, project.id, plannedRun),
+				ServiceHelper.db.createClashRun(teamspace, project.id, failedRun),
+				ServiceHelper.db.createClashRun(
+					teamspace, project.id, completedRun,
+					{
+						new: ServiceHelper.generateRandomNumber(),
+						active: ServiceHelper.generateRandomNumber(),
+						resolved: ServiceHelper.generateRandomNumber(),
+					},
+				),
 			]);
 		});
 
@@ -307,27 +286,9 @@ const testGetRuns = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
+					const expectedRuns = [plannedRun, failedRun, completedRun].map(formatRun);
 					expect(res.body.runs).toHaveLength(3);
-
-					const expectedRunsById = createExpectedRunsById();
-					const seenIds = new Set();
-
-					ServiceHelper.outOfOrderArrayEqual(
-						res.body.runs.map(({ _id }) => _id),
-						[...expectedRunsById.keys()],
-					);
-
-					res.body.runs.forEach((run) => {
-						const expectation = expectedRunsById.get(run._id);
-
-						expect(expectation).toBeDefined();
-						expect(seenIds.has(run._id)).toBe(false);
-
-						seenIds.add(run._id);
-						assertRunMatchesExpectation(run, expectation);
-					});
-
-					expect(seenIds.size).toBe(expectedRunsById.size);
+					ServiceHelper.outOfOrderArrayEqual(res.body.runs, expectedRuns);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}

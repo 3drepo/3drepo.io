@@ -21,7 +21,7 @@ const { generateRandomNumber, generateRandomString, generateUUID, generateRandom
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-const { CLASH_RUN_STATUS } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -118,7 +118,7 @@ const testSerialiseClashRuns = () => {
 		test('should serialise completed, failed and default statuses into expected output shape', () => {
 			const completedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.COMPLETED,
+				status: clashRunStatus.COMPLETED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
 				completedAt: generateRandomDate(),
@@ -132,7 +132,7 @@ const testSerialiseClashRuns = () => {
 			};
 			const failedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.FAILED,
+				status: clashRunStatus.FAILED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
 				errorCode: generateRandomString(),
@@ -140,7 +140,7 @@ const testSerialiseClashRuns = () => {
 			};
 			const plannedRun = {
 				_id: generateUUID(),
-				status: CLASH_RUN_STATUS.PLANNED,
+				status: clashRunStatus.PLANNED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
 				completedAt: generateRandomDate(),

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isArray, isDate, isObject, isUUID } = require('../../../../../utils/helper/typeCheck');
-const { CLASH_RUN_STATUS } = require('../../../../../models/clashes.constants');
+const { clashRunStatus } = require('../../../../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -50,11 +49,11 @@ const runSchema = yup.object({
 const formatRun = ({ _id, status, triggeredAt, triggeredBy, completedAt, result, errorCode, message }) => {
 	const base = { _id, status, triggeredAt, triggeredBy };
 
-	if (status === CLASH_RUN_STATUS.COMPLETED) {
-		return runSchema.cast({ ...base, completedAt, result: { stats: result?.stats } });
+	if (status === clashRunStatus.COMPLETED) {
+		return runSchema.cast({ ...base, completedAt, result });
 	}
 
-	if (status === CLASH_RUN_STATUS.FAILED) {
+	if (status === clashRunStatus.FAILED) {
 		return runSchema.cast({ ...base, result: { error: { code: errorCode, reason: message } } });
 	}
 
