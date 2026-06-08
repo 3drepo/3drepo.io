@@ -51,6 +51,7 @@ import {
 	ToggleWrapper,
 	Toggle,
 	FormRow,
+	ExcludeObjectsToggleWrapper,
 	Rules,
 	AddFilterTitle,
 	TriggerButton,
@@ -133,7 +134,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		formState: { errors, isValid, isDirty },
 		setValue,
 		getValues,
+		watch,
 	} = formData;
+	const excludeDefinedObjects = watch('group.excludeDefinedObjects');
 
 	const getFormIsValid = () => {
 		if (!isValid) return false;
@@ -193,6 +196,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			append(data);
 		}
 		resetFilterMenu();
+	};
+
+	const toggleExcludeDefinedObjects = () => {
+		if (!isAdmin) return;
+		setValue('group.excludeDefinedObjects', !getValues('group.excludeDefinedObjects'), {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
 	};
 
 	useEffect(() => {
@@ -335,9 +346,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				</Subheading>
 				<FormBox>
 					<ToggleWrapper>
-						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
-							<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
-						</ToggleLabel>
 						<Toggle
 							value={isSmart}
 							onClick={() => setIsSmart((prev) => !prev)}
@@ -363,6 +371,19 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							/>
 						</Instruction>
 					)}
+					<ExcludeObjectsToggleWrapper>
+						<Toggle
+							value={excludeDefinedObjects}
+							onClick={toggleExcludeDefinedObjects}
+							disabled={!isAdmin}
+						/>
+						<ToggleLabel disabled={!isAdmin} onClick={toggleExcludeDefinedObjects}>
+							<FormattedMessage
+								id="ticketsGroupSettings.form.excludeDefinedObjects"
+								defaultMessage="Exclude specified objects"
+							/>
+						</ToggleLabel>
+					</ExcludeObjectsToggleWrapper>
 				</FormBox>
 				{!isSmart && (
 					<Subheading>
