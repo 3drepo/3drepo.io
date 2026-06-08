@@ -212,8 +212,8 @@ const configSchema = Yup.object().shape({
 	status: Yup.object({
 		values: Yup.array().of(customStatus).min(1).required()
 			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length)
-			.test('Open status', `values must contain at least one "${statusTypes.OPEN}" status`, (vals = []) => vals.some(({ type }) => type === statusTypes.OPEN))
-			.test('Done status', `values must contain at least one "${statusTypes.DONE}" status`, (vals = []) => vals.some(({ type }) => type === statusTypes.DONE)),
+			.test('Open status', `values must contain at least one "${statusTypes.OPEN}" status`, (vals) => vals.some(({ type }) => type === statusTypes.OPEN))
+			.test('Done status', `values must contain at least one "${statusTypes.DONE}" status`, (vals) => vals.some(({ type }) => type === statusTypes.DONE)),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
 	}).default(undefined),
 	tabular: Yup.object({
