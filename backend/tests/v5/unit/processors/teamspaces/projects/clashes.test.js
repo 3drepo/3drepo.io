@@ -661,7 +661,7 @@ const testProcessClashResults = () => {
 	});
 };
 
-const testSetSelectionLastRevisions = () => {
+const testSetLastRevForSelections = () => {
 	describe('Set Selection Last Revisions', () => {
 		test('should set the last revisions for the selection', async () => {
 			const teamspace = generateRandomString();
@@ -675,7 +675,7 @@ const testSetSelectionLastRevisions = () => {
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionA });
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
-			await Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB);
+			await Clashes.setLastRevForSelections(teamspace, selectionA, selectionB);
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
 			expect(ModelSettingsModel.getContainerById)
@@ -700,7 +700,7 @@ const testSetSelectionLastRevisions = () => {
 
 			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
 
-			await expect(Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB))
+			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
 				.rejects.toEqual(templates.containerNotFound);
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
@@ -723,7 +723,7 @@ const testSetSelectionLastRevisions = () => {
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
 
-			await expect(Clashes.setSelectionLastRevisions(teamspace, selectionA, selectionB))
+			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
 				.rejects.toEqual(templates.revisionNotFound);
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
@@ -747,5 +747,5 @@ describe(determineTestGroup(__filename), () => {
 	testDeletePlan();
 	testCreateRun();
 	testProcessClashResults();
-	testSetSelectionLastRevisions();
+	testSetLastRevForSelections();
 });

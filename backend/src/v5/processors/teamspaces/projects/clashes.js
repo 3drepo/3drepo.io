@@ -288,7 +288,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		} });
 };
 
-Clashes.setSelectionLastRevisions = async (teamspace, selectionA, selectionB) => {
+Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 	await Promise.all([selectionA, selectionB].map(async (selectionObj) => {
 		// ensure container exists
 		await getContainerById(teamspace, selectionObj.container, { _id: 1 });

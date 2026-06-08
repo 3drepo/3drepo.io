@@ -18,7 +18,6 @@
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
-const { createRun, setSelectionLastRevisions } = require('../../../processors/teamspaces/projects/clashes');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getContainerFileName, getLogArchive } = require('../../modelProcessing');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
@@ -35,7 +34,6 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
-const { getPlansByQuery } = require('../../../models/clashes.plans');
 const { getRefEntryByQuery } = require('../../../models/fileRefs');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
@@ -43,7 +41,6 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { triggerOptions } = require('../../../models/clashes.constants');
 
 const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
 	try {
@@ -121,27 +118,6 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 	}
 };
 
-const startClashRunsForContainer = async (teamspace, project, container, user) => {
-	const relatedPlans = await getPlansByQuery(teamspace, project, {
-		trigger: triggerOptions.NEW_REVISION,
-		$or: [
-			{ 'selectionA.container': container },
-			{ 'selectionB.container': container },
-		],
-	}, { project: 0 });
-
-	await Promise.all(
-		relatedPlans.map(async (plan) => {
-			try {
-				await setSelectionLastRevisions(teamspace, plan.selectionA, plan.selectionB);
-				await createRun(teamspace, project, plan, user);
-			} catch (err) {
-				logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${err?.message}`);
-			}
-		}),
-	);
-};
-
 const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
 	const { errorReason, status } = data;
 
@@ -151,10 +127,6 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 			: undefined;
 
 		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
-
-		if (modelType === modelTypes.CONTAINER) {
-			await startClashRunsForContainer(teamspace, project, model, user);
-		}
 	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};

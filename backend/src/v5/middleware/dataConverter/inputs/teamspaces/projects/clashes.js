@@ -31,7 +31,7 @@ const { modelsExistInProject } = require('../../../../../models/projectSettings'
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../utils/responder');
 const { schema: rulesSchema } = require('../../../../../schemas/rules');
-const { setSelectionLastRevisions } = require('../../../../../processors/teamspaces/projects/clashes');
+const { setLastRevForSelections } = require('../../../../../processors/teamspaces/projects/clashes');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../common');
 const { validateTicket } = require('../../../../../schemas/tickets');
@@ -258,7 +258,7 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
 
-		await setSelectionLastRevisions(teamspace, req.planData.selectionA, req.planData.selectionB);
+		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
 		await next();
 	} catch (err) {
 		if (err === templates.revisionNotFound) {

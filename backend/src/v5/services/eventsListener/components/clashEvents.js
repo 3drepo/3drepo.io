@@ -15,14 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createRun, setLastRevForSelections } = require('../../../processors/teamspaces/projects/clashes');
+const { getInfoFromCode, modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { clashRunStatus } = require('../../../models/clashes.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { getInfoFromCode } = require('../../../models/modelSettings.constants');
+const { getPlansByQuery } = require('../../../models/clashes.plans');
 const { logger } = require('../../../utils/logger');
 const { processClashResults } = require('../../../processors/teamspaces/projects/clashes');
 const { subscribe } = require('../../eventsManager/eventsManager');
+const { triggerOptions } = require('../../../models/clashes.constants');
 const { updateRunStatus } = require('../../../models/clashes.runs');
+
+const startClashRunsAfterNewRev = async ({ teamspace, project, model, user, modelType, data }) => {
+	try {
+		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
+			const relatedPlans = await getPlansByQuery(teamspace, project, {
+				trigger: triggerOptions.NEW_REVISION,
+				$or: [
+					{ 'selectionA.container': model },
+					{ 'selectionB.container': model },
+				],
+			}, { project: 0 });
+
+			await Promise.all(
+				relatedPlans.map(async (plan) => {
+					try {
+						await setLastRevForSelections(teamspace, plan.selectionA, plan.selectionB);
+						await createRun(teamspace, project, plan, user);
+					} catch (err) {
+						logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${err?.message}`);
+					}
+				}),
+			);
+		}
+	} catch (err) {
+		logger.logError(`Failed to start clash runs after new revision for container ${UUIDToString(model)}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
+	}
+};
 
 const clashRunStatusUpdate = async ({ teamspace, project, runId, status }) => {
 	try {
@@ -61,6 +94,7 @@ const ClashEventsListener = {};
 ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
+	subscribe(events.MODEL_IMPORT_FINISHED, startClashRunsAfterNewRev);
 };
 
 module.exports = ClashEventsListener;

@@ -649,7 +649,7 @@ const testNewRevision = () => {
 		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
 
 		for (let i = 0; i < plans.length; i++) {
-			ClashesProcessor.setSelectionLastRevisions.mockResolvedValueOnce();
+			ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
 			ClashesProcessor.createRun.mockResolvedValueOnce();
 		}
 
@@ -658,7 +658,7 @@ const testNewRevision = () => {
 		await waitOnEvent;
 
 		for (let i = 0; i < plans.length; i++) {
-			expect(ClashesProcessor.setSelectionLastRevisions)
+			expect(ClashesProcessor.setLastRevForSelections)
 				.toHaveBeenCalledWith(data.teamspace, plans[i].selectionA, plans[i].selectionB);
 			expect(ClashesProcessor.createRun)
 				.toHaveBeenCalledWith(data.teamspace, data.project, plans[i], data.user);

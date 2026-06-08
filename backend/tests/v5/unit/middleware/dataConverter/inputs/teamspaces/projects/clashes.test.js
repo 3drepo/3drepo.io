@@ -594,8 +594,8 @@ const testPlanContainersHaveRevs = () => {
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
-			expect(ClashesProcessor.setSelectionLastRevisions).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.setSelectionLastRevisions)
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections)
 				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
 
 			expect(mockCB).toHaveBeenCalled();
@@ -616,12 +616,12 @@ const testPlanContainersHaveRevs = () => {
 			};
 
 			const error = new Error(generateRandomString());
-			ClashesProcessor.setSelectionLastRevisions.mockRejectedValueOnce(error);
+			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
-			expect(ClashesProcessor.setSelectionLastRevisions).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.setSelectionLastRevisions)
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections)
 				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
