@@ -632,38 +632,6 @@ const testNewRevision = () => {
 			undefined);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
-
-	test('Should create clash runs for related plans found after new container revision', async () => {
-		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
-		const data = {
-			teamspace: generateRandomString(),
-			model: generateRandomString(),
-			project: generateUUID(),
-			revId: generateUUID(),
-			user: generateRandomString(),
-			modelType: modelTypes.CONTAINER,
-			data: generateImportResult(true),
-		};
-
-		const plans = times(5, () => generateClashPlan(data.model, generateRandomString()));
-		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
-
-		for (let i = 0; i < plans.length; i++) {
-			ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
-			ClashesProcessor.createRun.mockResolvedValueOnce();
-		}
-
-		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-		await waitOnEvent;
-
-		for (let i = 0; i < plans.length; i++) {
-			expect(ClashesProcessor.setLastRevForSelections)
-				.toHaveBeenCalledWith(data.teamspace, plans[i].selectionA, plans[i].selectionB);
-			expect(ClashesProcessor.createRun)
-				.toHaveBeenCalledWith(data.teamspace, data.project, plans[i], data.user);
-		}
-	});
 };
 
 const testModelProcessingCompleted = () => {
@@ -694,10 +662,6 @@ const testModelProcessingCompleted = () => {
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
 				const fileName = generateRandomString();
-
-				if (success) {
-					ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
-				}
 
 				if (sendMail) {
 					if (modelType === modelTypes.CONTAINER) {

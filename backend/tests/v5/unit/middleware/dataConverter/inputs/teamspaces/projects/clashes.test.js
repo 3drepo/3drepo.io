@@ -597,6 +597,34 @@ const testPlanContainersHaveRevs = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
+		test('should respond with error if revisionNotFound error is thrown', async () => {
+			const mockCB = jest.fn(() => {});
+			const teamspace = generateRandomString();
+			const containerA = generateRandomString();
+			const containerB = generateRandomString();
+			const req = {
+				params: { teamspace },
+				planData: {
+					selectionA: { container: containerA },
+					selectionB: { container: containerB },
+				},
+			};
+
+			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
+
+			await Clashes.planContainersHaveRevs(req, {}, mockCB);
+
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections)
+				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			const { message, ...invalidArgRes } = templates.invalidArguments;
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expect.objectContaining(invalidArgRes));
+
+			expect(mockCB).not.toHaveBeenCalled();
+		});
+
 		test('should respond with error if another error is thrown', async () => {
 			const mockCB = jest.fn(() => {});
 			const teamspace = generateRandomString();

@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createRun, setLastRevForSelections } = require('../../../processors/teamspaces/projects/clashes');
+const { clashRunStatus, triggerOptions } = require('../../../models/clashes.constants');
+const { createRun, processClashResults, setLastRevForSelections } = require('../../../processors/teamspaces/projects/clashes');
 const { getInfoFromCode, modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { UUIDToString } = require('../../../utils/helper/uuids');
-const { clashRunStatus } = require('../../../models/clashes.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { getPlansByQuery } = require('../../../models/clashes.plans');
 const { logger } = require('../../../utils/logger');
-const { processClashResults } = require('../../../processors/teamspaces/projects/clashes');
 const { subscribe } = require('../../eventsManager/eventsManager');
-const { triggerOptions } = require('../../../models/clashes.constants');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
 const startClashRunsAfterNewRev = async ({ teamspace, project, model, user, modelType, data }) => {
