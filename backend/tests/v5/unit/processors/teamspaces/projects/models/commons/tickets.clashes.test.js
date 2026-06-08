@@ -123,14 +123,49 @@ const testProcessClashResults = () => {
 
 	const clash = {
 		index: generateRandomString(),
-		a: { container: generateUUIDString(), idType: clashObjectIdTypes.INTERNAL, id: generateUUIDString() },
-		b: { container: generateUUIDString(), idType: clashObjectIdTypes.IFC, id: generateRandomString() },
+		a: {
+			container: baseContext.selectionA.container,
+			idType: clashObjectIdTypes.INTERNAL,
+			id: generateUUIDString(),
+		},
+		b: {
+			container: baseContext.selectionB.container,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
+		},
 		positions: [
 			[1, 2, 3],
 			[4, 6, 3],
 		],
 	};
 	const clashWithBbox = { ...clash, bbox: { min: [0, 0, 0], max: [10, 10, 10] } };
+	const swappedSelectionClash = {
+		...clash,
+		a: {
+			container: baseContext.selectionB.container,
+			idType: clashObjectIdTypes.INTERNAL,
+			id: generateUUIDString(),
+		},
+		b: {
+			container: baseContext.selectionA.container,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
+		},
+	};
+	const sameContainerClashContainer = generateUUIDString();
+	const sameContainerClash = {
+		...clash,
+		a: {
+			container: sameContainerClashContainer,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
+		},
+		b: {
+			container: sameContainerClashContainer,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
+		},
+	};
 	const generateExistingTicket = (
 		template = baseTemplate,
 		properties = { [STATUS]: statuses.OPEN },
@@ -187,8 +222,130 @@ const testProcessClashResults = () => {
 		properties: { ...defaultValueExpectedRes.properties, ...onNewExpectedRes.properties },
 		modules: defaultValueExpectedRes.modules,
 	};
+	const defaultViewOnlyTemplate = { ...baseTemplate, config: { defaultView: true } };
+	const sameContainerObjectAGroup = {
+		group: {
+			name: 'Object A',
+			objects: [{
+				container: sameContainerClashContainer,
+				[clashObjectIdTypes.IFC]: [sameContainerClash.a.id],
+			}],
+		},
+		color: [255, 0, 0],
+	};
+	const sameContainerObjectBGroup = {
+		group: {
+			name: 'Object B',
+			objects: [{
+				container: sameContainerClashContainer,
+				[clashObjectIdTypes.IFC]: [sameContainerClash.b.id],
+			}],
+		},
+		color: [0, 255, 0],
+	};
+	const sameContainerDefaultViewExpectedRes = {
+		properties: {
+			[DEFAULT_VIEW]: {
+				state: {
+					[viewGroups.COLORED]: [
+						sameContainerObjectAGroup,
+						sameContainerObjectBGroup,
+						{
+							group: {
+								name: 'Other Objects',
+								excludeDefinedObjects: true,
+								objects: [{
+									container: sameContainerClashContainer,
+									[clashObjectIdTypes.IFC]: [sameContainerClash.a.id, sameContainerClash.b.id],
+								}],
+							},
+							color: [182, 188, 193],
+							opacity: 0.02,
+						},
+					],
+				},
+			},
+		},
+		modules: { [CLOUD_CLASH]: { [OBJECT_A_ID_TYPE]: idTypeLabels.IFC } },
+	};
+	const swappedSelectionObjectAGroup = {
+		group: {
+			name: 'Object A',
+			objects: [{
+				container: swappedSelectionClash.a.container,
+				[clashObjectIdTypes.INTERNAL]: [stringToUUID(swappedSelectionClash.a.id)],
+			}],
+		},
+		color: [255, 0, 0],
+	};
+	const swappedSelectionObjectBGroup = {
+		group: {
+			name: 'Object B',
+			objects: [{
+				container: swappedSelectionClash.b.container,
+				[clashObjectIdTypes.IFC]: [swappedSelectionClash.b.id],
+			}],
+		},
+		color: [0, 255, 0],
+	};
+	const swappedSelectionDefaultViewExpectedRes = {
+		properties: {
+			[DEFAULT_VIEW]: {
+				state: {
+					[viewGroups.COLORED]: [
+						swappedSelectionObjectAGroup,
+						swappedSelectionObjectBGroup,
+						{
+							group: {
+								name: 'Other Objects',
+								excludeDefinedObjects: true,
+								objects: [
+									swappedSelectionObjectAGroup.group.objects[0],
+									swappedSelectionObjectBGroup.group.objects[0],
+								],
+							},
+							color: [182, 188, 193],
+							opacity: 0.02,
+						},
+					],
+				},
+			},
+		},
+		meshLookup: {
+			container: swappedSelectionClash.a.container,
+			revision: baseContext.selectionB.revision,
+			id: swappedSelectionClash.a.id,
+		},
+	};
 	const defaultViewAndPinTemplate = { ...baseTemplate, config: { defaultView: true, pin: true } };
 	const defaultViewAndPinUnit = units.M;
+	const objectAGroup = {
+		group: {
+			name: 'Object A',
+			objects: [{
+				container: clash.a.container,
+				[clashObjectIdTypes.INTERNAL]: [stringToUUID(clash.a.id)],
+			}],
+		},
+		color: [255, 0, 0],
+	};
+	const objectBGroup = {
+		group: {
+			name: 'Object B',
+			objects: [{ container: clash.b.container, [clashObjectIdTypes.IFC]: [clash.b.id] }],
+		},
+		color: [0, 255, 0],
+	};
+	const contextGroup = {
+		group: {
+			name: 'Other Objects',
+			excludeDefinedObjects: true,
+			objects: [
+				objectAGroup.group.objects[0],
+				objectBGroup.group.objects[0],
+			],
+		},
+	};
 	const defaultViewAndPinExpectedRes = {
 		federationUnit: defaultViewAndPinUnit,
 		properties: {
@@ -202,24 +359,27 @@ const testProcessClashResults = () => {
 				},
 				state: {
 					[viewGroups.COLORED]: [
+						objectAGroup,
+						objectBGroup,
 						{
-							group: {
-								name: 'Object A',
-								objects: [{
-									container: clash.a.container,
-									[clashObjectIdTypes.INTERNAL]: [stringToUUID(clash.a.id)],
-								}],
-							},
-							color: [255, 0, 0],
-						},
-						{
-							group: {
-								name: 'Object B',
-								objects: [{ container: clash.b.container, [clashObjectIdTypes.IFC]: [clash.b.id] }],
-							},
-							color: [0, 255, 0],
+							...contextGroup,
+							color: [182, 188, 193],
+							opacity: 0.02,
 						},
 					],
+				},
+			},
+		},
+	};
+	const hideOtherObjectsExpectedRes = {
+		...defaultViewAndPinExpectedRes,
+		properties: {
+			...defaultViewAndPinExpectedRes.properties,
+			[DEFAULT_VIEW]: {
+				...defaultViewAndPinExpectedRes.properties[DEFAULT_VIEW],
+				state: {
+					[viewGroups.COLORED]: [objectAGroup, objectBGroup],
+					[viewGroups.HIDDEN]: [contextGroup],
 				},
 			},
 		},
@@ -278,7 +438,10 @@ const testProcessClashResults = () => {
 				['Should create tickets using the configured new clash status', baseContext, baseTemplate, { defaultStatuses }, { new: [clash], active: [], resolved: [] }, onNewExpectedRes],
 				['Should create tickets with default values and configured new clash status', baseContext, baseTemplate, { valuesAtCreation, defaultStatuses }, { new: [clash], active: [], resolved: [] }, combinedExpectedRes],
 				['Should calculate the distance for new clearance clash tickets', { ...baseContext, clashType: CLASH_TYPES.CLEARANCE }, baseTemplate, {}, { new: [clash], active: [], resolved: [] }, { modules: { [CLOUD_CLASH]: { [DISTANCE_M]: 0.005 } } }],
+				['Should merge same-container clash objects in the default view context group', baseContext, defaultViewOnlyTemplate, {}, { new: [sameContainerClash], active: [], resolved: [] }, sameContainerDefaultViewExpectedRes],
+				['Should resolve default view object revisions by container', baseContext, defaultViewOnlyTemplate, {}, { new: [swappedSelectionClash], active: [], resolved: [] }, swappedSelectionDefaultViewExpectedRes],
 				['Should create tickets with default view and pin if configured', baseContext, defaultViewAndPinTemplate, {}, { new: [clashWithBbox], active: [], resolved: [] }, defaultViewAndPinExpectedRes],
+				['Should hide other objects in generated default views if configured', baseContext, defaultViewAndPinTemplate, { hideOtherObjects: true }, { new: [clashWithBbox], active: [], resolved: [] }, hideOtherObjectsExpectedRes],
 			])(
 				'%s', async (desc, context, template, clashPlanExtras, clashResults, expectedRes = {}) => {
 					const [expectedClash] = [...(clashResults.new ?? []), ...(clashResults.active ?? [])];
@@ -349,6 +512,16 @@ const testProcessClashResults = () => {
 					expect(TicketSchema.validateTickets).toHaveBeenLastCalledWith(
 						teamspace, project, federation, template, [expectedTicket], { author: context.creator },
 					);
+					if (expectedRes.meshLookup) {
+						expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledWith(
+							teamspace,
+							project,
+							expectedRes.meshLookup.container,
+							expectedRes.meshLookup.revision,
+							[stringToUUID(expectedRes.meshLookup.id)],
+							true,
+						);
+					}
 					expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
 					expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
 						federation, template._id, [{ ...expectedTicket, type: template._id }]);

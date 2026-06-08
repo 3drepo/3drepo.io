@@ -370,7 +370,7 @@ const testUpdateGroup = () => {
 					{ container: con._id,
 						[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()],
 						[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
-				] }, false, templates.invalidArguments],
+				] }, true],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
 					operator: valueOperators.IS.name,

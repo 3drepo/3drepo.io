@@ -214,7 +214,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
-		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
+		setInputObjects(convertToV4GroupNodes({ objects: value?.group?.objects } as Group));
 		setIsPastingRules(false);
 		setNewPrefix([]);
 	}, [value, isColored]);

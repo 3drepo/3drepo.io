@@ -109,7 +109,7 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			convertedObject[res.key] = res.values;
+			convertedObject[res.key] = [...(convertedObject[res.key] ?? []), ...res.values];
 		}
 		return convertedObject;
 	}));
@@ -118,8 +118,9 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 };
 
 const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
-	// eslint-disable-next-line no-underscore-dangle
-	if (containerEntry._ids) {
+	const idTypesToConvert = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys));
+
+	if (!idTypesToConvert.length) {
 		return containerEntry;
 	}
 
@@ -139,14 +140,16 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	}
 	const formattedEntry = { ...containerEntry };
 
-	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
-	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
-		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
-	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
-		metadata.flatMap(({ parents }) => parents), true);
+	const meshIds = (await Promise.all(idTypesToConvert.map(async (idType) => {
+		const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
+			idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
+		delete formattedEntry[idType];
+		return getMeshesWithParentIds(teamspace, project, container, revision,
+			metadata.flatMap(({ parents }) => parents), true);
+	}))).flat();
 
-	delete formattedEntry[idType];
-	return { ...formattedEntry, _ids: meshIds };
+	// eslint-disable-next-line no-underscore-dangle
+	return { ...formattedEntry, _ids: [...(formattedEntry._ids ?? []), ...meshIds] };
 };
 
 TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {

@@ -124,13 +124,26 @@ const testSchema = () => {
 			name: generateRandomString(),
 			objects: [{
 				[idTypes.IFC]: [generateRandomString(22)],
-				[idTypes.REVIT]: [],
+				[idTypes.REVIT]: [generateRandomNumber()],
 				container: generateUUIDString() }],
-		}, false],
+		}, true],
 		[`data has objects with both _ids and ${[idTypes.REVIT]}`, false, false, {
 			name: generateRandomString(),
-			objects: [{ _ids: [generateUUID()], [idTypes.REVIT]: [], container: generateUUIDString() }],
-		}, false],
+			objects: [{
+				_ids: [generateUUID()],
+				[idTypes.REVIT]: [generateRandomNumber()],
+				container: generateUUIDString(),
+			}],
+		}, true],
+		['data has objects with all id types', false, false, {
+			name: generateRandomString(),
+			objects: [{
+				_ids: [generateUUID()],
+				[idTypes.IFC]: [generateRandomString(22)],
+				[idTypes.REVIT]: [generateRandomNumber()],
+				container: generateUUIDString(),
+			}],
+		}, true],
 		['data has objects with only container and no ids', false, false, {
 			name: generateRandomString(),
 			objects: [{ container: generateUUIDString() }],

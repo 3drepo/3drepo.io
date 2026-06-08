@@ -33,11 +33,9 @@ const objectEntryValidator = Yup.object().shape({
 	[idTypes.REVIT]: Yup.array().of(Yup.number()).min(1),
 }).test(
 	'Object item check',
-	`Can only contain either _ids or ${[idTypes.IFC]} or ${[idTypes.REVIT]}`,
+	`Must contain at least one of _ids, ${[idTypes.IFC]} or ${[idTypes.REVIT]}`,
 	/* eslint-disable no-underscore-dangle */
-	(value) => (value._ids && !(value[idTypes.IFC] || value[idTypes.REVIT]))
-	|| (value[idTypes.IFC] && !(value._ids || value[idTypes.REVIT]))
-	|| (value[idTypes.REVIT] && !(value._ids || value[idTypes.IFC])));
+	(value) => !!(value._ids || value[idTypes.IFC] || value[idTypes.REVIT]));
 	/* eslint-enable no-underscore-dangle */
 
 Groups.schema = (allowIds, isUpdate) => {

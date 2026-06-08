@@ -30,7 +30,6 @@ import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { TreeActions, selectNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
-import { toSharedIds } from '@/v4/helpers/viewpoints';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Buttons,
@@ -63,7 +62,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const isHidden = groupType === 'hidden';
 	const isHighlighted = highlightedIndex === index;
 
-	const sharedIds = toSharedIds(((group as Group).objects || []).flatMap(({ _ids }) => _ids));
+	const sharedIds = convertToV4GroupNodes(group as Group).flatMap(({ shared_ids }) => shared_ids);
 	const objectsCount = useSelector((state) => selectNumNodesByMeshSharedIdsArray(state, sharedIds));
 
 	const preventPropagation = (e) => {
@@ -91,7 +90,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const isolateGroup = (e) => {
 		preventPropagation(e);
-		const objects = convertToV4GroupNodes((group as Group).objects);
+		const objects = convertToV4GroupNodes(group as Group);
 		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 
@@ -109,7 +108,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const alphaHexColor = rgbToHex(alphaColor);
 
 	const highlightGroupObjects = () => {
-		const objects = convertToV4GroupNodes((group as Group).objects);
+		const objects = convertToV4GroupNodes(group as Group);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		const selectionColor = isHidden ? [255, 255, 255] : color;
@@ -118,7 +117,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	useEffect(() => {
 		if (!isHighlighted && isHidden && checked) {
-			const objects = convertToV4GroupNodes((group as Group).objects);
+			const objects = convertToV4GroupNodes(group as Group);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		}
 
