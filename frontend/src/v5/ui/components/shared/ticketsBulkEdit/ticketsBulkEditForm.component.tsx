@@ -22,7 +22,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { getFilterFormTitle, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
-import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaderFilter.component';
+import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';

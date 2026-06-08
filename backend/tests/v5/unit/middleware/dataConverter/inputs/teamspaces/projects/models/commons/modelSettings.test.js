@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 const _ = require('lodash');
 
@@ -424,7 +425,7 @@ const testValidateAddModelData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateUpdateSettingsData();
 	testValidateAddModelData();
 });

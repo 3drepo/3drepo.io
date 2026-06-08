@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -26,10 +29,13 @@ const ClashPlansModel = require(`${src}/models/clashes.plans`);
 jest.mock('../../../../../../../../src/v5/schemas/projects/clashes');
 const ClashesSchema = require(`${src}/schemas/projects/clashes`);
 
+jest.mock('../../../../../../../../src/v5/models/revisions');
+const RevisionsModel = require(`${src}/models/revisions`);
+
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomObject, generateClashPlan } = require('../../../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -83,7 +89,7 @@ const testValidateUpdatePlanData = () => {
 					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
-				body: generateRandomObject(),
+				body: generateClashPlan(),
 			};
 			ClashPlansModel.getPlanById.mockRejectedValueOnce(templates.clashPlanNotFound);
 
@@ -92,8 +98,113 @@ const testValidateUpdatePlanData = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
 			expect(ClashesSchema.validatePlan).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashPlanNotFound);
+		});
+
+		test('next() should be called if the plan exists', async () => {
+			const mockCB = jest.fn(() => {});
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					planId: generateRandomString(),
+				},
+				body: { ...plan, name: generateRandomString() },
+			};
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
+			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
+
+			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalled();
+			expect(req.planData).toEqual({ ...plan, ...extraProps });
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('should respond with error if validation fails', async () => {
+			const mockCB = jest.fn(() => {});
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					planId: generateRandomString(),
+				},
+				body: { ...plan, name: generateRandomString() },
+			};
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
+			ClashesSchema.validatePlan.mockRejectedValueOnce(templates.invalidArguments);
+
+			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.invalidArguments);
+		});
+
+		test('should respond with error if there are no changes', async () => {
+			const mockCB = jest.fn(() => {});
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					planId: generateRandomString(),
+				},
+				body: plan,
+			};
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
+			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
+
+			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.invalidArguments, message: 'No valid properties to update' });
+		});
+	});
+};
+
+const testPlanExists = () => {
+	describe('Check if plan exists', () => {
+		test('should respond with error if plan does not exist', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					planId: generateRandomString(),
+				},
+			};
+			ClashPlansModel.getPlanById.mockRejectedValueOnce(templates.clashPlanNotFound);
+
+			await Clashes.planExists(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashPlanNotFound);
 		});
@@ -104,76 +215,112 @@ const testValidateUpdatePlanData = () => {
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
-					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
-				body: generateRandomObject(),
 			};
 			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
-			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
-			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+			await Clashes.planExists(req, {}, mockCB);
 
 			expect(mockCB).toHaveBeenCalled();
 			expect(req.planData).toEqual(plan);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testPlanContainersHaveRevs = () => {
+	describe('planContainersHaveRevs', () => {
+		test('should assign latest revisions to selectionA and selectionB and call next()', async () => {
+			const mockCB = jest.fn(() => {});
+			const teamspace = generateRandomString();
+			const containerA = generateRandomString();
+			const containerB = generateRandomString();
+			const revA = generateRandomString();
+			const revB = generateRandomString();
+			const req = {
+				params: { teamspace },
+				planData: {
+					selectionA: { container: containerA },
+					selectionB: { container: containerB },
+				},
+			};
+			RevisionsModel.getLatestRevision
+				.mockResolvedValueOnce({ _id: revA })
+				.mockResolvedValueOnce({ _id: revB });
+
+			await Clashes.planContainersHaveRevs(req, {}, mockCB);
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, containerB, modelTypes.CONTAINER, { _id: 1 });
+			expect(req.planData.selectionA.revision).toEqual(revA);
+			expect(req.planData.selectionB.revision).toEqual(revB);
+
+			expect(mockCB).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test('should respond with error if validation fails', async () => {
+		test('should respond with error if a revisionNotFound error is thrown', async () => {
 			const mockCB = jest.fn(() => {});
-			const plan = generateRandomObject();
+			const teamspace = generateRandomString();
+			const containerA = generateRandomString();
+			const containerB = generateRandomString();
 			const req = {
-				params: {
-					teamspace: generateRandomString(),
-					project: generateRandomString(),
-					planId: generateRandomString(),
+				params: { teamspace },
+				planData: {
+					selectionA: { container: containerA },
+					selectionB: { container: containerB },
 				},
-				body: generateRandomObject(),
 			};
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
-			ClashesSchema.validatePlan.mockRejectedValueOnce(templates.invalidArguments);
+			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
 
-			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+			await Clashes.planContainersHaveRevs(req, {}, mockCB);
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			const { message, ...invalidArgRes } = templates.invalidArguments;
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expect.objectContaining(invalidArgRes));
 
 			expect(mockCB).not.toHaveBeenCalled();
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.invalidArguments);
 		});
 
-		test('should respond with error if there are no changes', async () => {
+		test('should respond with error if another error is thrown', async () => {
 			const mockCB = jest.fn(() => {});
-			const plan = generateRandomObject();
+			const teamspace = generateRandomString();
+			const containerA = generateRandomString();
+			const containerB = generateRandomString();
 			const req = {
-				params: {
-					teamspace: generateRandomString(),
-					project: generateRandomString(),
-					planId: generateRandomString(),
+				params: { teamspace },
+				planData: {
+					selectionA: { container: containerA },
+					selectionB: { container: containerB },
 				},
-				body: plan,
 			};
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
-			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
-			await Clashes.validateUpdatePlanData(req, {}, mockCB);
+			const error = new Error(generateRandomString());
+			RevisionsModel.getLatestRevision.mockRejectedValueOnce(error);
+
+			await Clashes.planContainersHaveRevs(req, {}, mockCB);
+
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
+			expect(RevisionsModel.getLatestRevision)
+				.toHaveBeenCalledWith(teamspace, containerB, modelTypes.CONTAINER, { _id: 1 });
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
 
 			expect(mockCB).not.toHaveBeenCalled();
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.invalidArguments, message: 'No valid properties to update' });
 		});
 	});
 };
@@ -181,4 +328,6 @@ const testValidateUpdatePlanData = () => {
 describe(determineTestGroup(__filename), () => {
 	testValidateNewPlanData();
 	testValidateUpdatePlanData();
+	testPlanExists();
+	testPlanContainersHaveRevs();
 });

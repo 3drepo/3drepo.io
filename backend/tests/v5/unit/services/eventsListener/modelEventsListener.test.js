@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -31,6 +32,9 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 
 jest.mock('../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('../../../../../src/v5/models/fileRefs');
+const FileRefs = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../../src/v5/models/tickets.logs');
 const TicketLogs = require(`${src}/models/tickets.logs`);
@@ -74,7 +78,7 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+const ModelEventsListener = require(`${src}/services/eventsListener/components/modelEvents`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
@@ -109,6 +113,7 @@ const testQueueTaskUpdate = () => {
 				model: generateRandomString(),
 				corId: generateRandomString(),
 				status: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -120,13 +125,13 @@ const testQueueTaskUpdate = () => {
 		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				corId: generateUUIDString(),
 				status: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -179,7 +184,6 @@ const testQueueTaskCompleted = () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.CONTAINER);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -195,9 +199,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -209,7 +210,7 @@ const testQueueTaskCompleted = () => {
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -217,6 +218,7 @@ const testQueueTaskCompleted = () => {
 				corId: generateRandomString(),
 				value: 0,
 				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -225,9 +227,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -629,12 +628,16 @@ const testNewRevision = () => {
 const testModelProcessingCompleted = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		describe.each([
-			[true, false, false],
-			[true, false, false, true],
+			[false, true, false],
+			[true, false, false, modelTypes.DRAWING],
+			[true, false, false, modelTypes.FEDERATION],
+			[true, false, false, modelTypes.CONTAINER, true],
 			[false, false, true],
 			[true, false, false],
-		])('', (sendMail, success, userErr, noLogArchive) => {
-			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+			[true, false, false],
+		])('', (sendMail, success, userErr, modelType = modelTypes.CONTAINER, noLogArchive = false) => {
+			test(`Should ${sendMail ? '' : 'not '}send an email if ${modelType} import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+				const errorCode = success ? undefined : generateRandomNumber(2, 40);
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
 					teamspace: generateRandomString(),
@@ -643,13 +646,23 @@ const testModelProcessingCompleted = () => {
 					success,
 					revId: generateUUID(),
 					user: generateRandomString(),
-					modelType: modelTypes.FEDERATION,
-					data: generateImportResult(success, generateRandomString(), userErr),
+					modelType,
+					data: generateImportResult(success, generateRandomString(), userErr, errorCode),
 				};
 
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
+				const fileName = generateRandomString();
+
 				if (sendMail) {
+					if (modelType === modelTypes.CONTAINER) {
+						ModPro.getContainerFileName.mockResolvedValueOnce(fileName);
+					}
+
+					if (modelType === modelTypes.DRAWING) {
+						FileRefs.getRefEntryByQuery.mockResolvedValueOnce({ name: fileName });
+					}
+
 					ModPro.getLogArchive.mockResolvedValueOnce(noLogArchive ? undefined : { zipPath, logPreview });
 				}
 
@@ -660,24 +673,28 @@ const testModelProcessingCompleted = () => {
 				if (sendMail) {
 					expect(ModPro.getLogArchive).toHaveBeenCalledTimes(1);
 					expect(ModPro.getLogArchive).toHaveBeenCalledWith(UUIDToString(data.revId));
-
+					const errorInfo = getInfoFromCode(data.data.errorReason.errorCode);
 					const mailerData = {
 						errInfo: {
-							code: data.data.errorReason.errorCode,
-							message: data.data.errorReason.message,
+							code: `${data.data.errorReason.errorCode} ${errorInfo.internalError}`,
+							message: errorInfo.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
 						user: data.user,
 						project: UUIDToString(data.project),
 						revId: UUIDToString(data.revId),
-						modelType: data.modelType,
+						modelType,
 						logExcerpt: noLogArchive ? undefined : logPreview,
-
+						fileName: modelType === modelTypes.FEDERATION ? 'N/A' : fileName,
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }]);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+						mailTemplates.MODEL_IMPORT_ERROR.name,
+						mailerData,
+						noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }],
+					);
 				} else {
 					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
 					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
@@ -685,7 +702,7 @@ const testModelProcessingCompleted = () => {
 			});
 		});
 
-		test('Should fail gracefully if an error was thrown', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -704,7 +721,7 @@ const testModelProcessingCompleted = () => {
 			await waitOnEvent;
 		});
 
-		test('Should fail gracefully if an error was thrown (error object)', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive (error object)', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1608,7 +1625,7 @@ const testTemplateUpdated = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	EventsListener.init();
+	ModelEventsListener.init();
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();

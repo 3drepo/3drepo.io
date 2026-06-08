@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const {
-	determineTestGroup,
 	db: { reset: resetDB, createModel, createRevision },
 	generateRandomString,
 	generateRandomModel,

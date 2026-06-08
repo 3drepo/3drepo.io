@@ -39,7 +39,16 @@ const { PassThrough } = require('stream');
 const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_PLAN_TYPES,
+	CLASH_PLANS_COL,
+	CLASH_RUNS_COL,
+	RUN_HISTORY_COL,
+	SELF_INTERSECTIONS_CHECK_OPTIONS,
+	TRIGGER_OPTIONS,
+	clashObjectIdTypes,
+	clashRunStatus,
+} = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -71,7 +80,7 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	const { host, model_queue, callback_queue } = config.cn_queue;
+	const { host, model_queue, clash_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
 
 	const purgeQueue = async (queueName) => {
@@ -89,6 +98,7 @@ queue.purgeQueues = async () => {
 
 	await Promise.all([
 		purgeQueue(model_queue),
+		purgeQueue(clash_queue),
 		purgeQueue(callback_queue),
 	]);
 
@@ -182,15 +192,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 		historyCol, id, buffer);
 
 	if (revision.rFile) {
-		writeReferencedData(revision.rFile[0], revision.refData);
+		await writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
 	if (revision.image) {
-		writeReferencedData(revision.image, revision.imageData);
+		await writeReferencedData(revision.image, revision.imageData);
 	}
 
 	if (revision.thumbnail) {
-		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+		await writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
 	const formattedRevision = {
 		...revision,
@@ -336,9 +346,36 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
-db.createClashPlan = (teamspace, plan) => {
+db.createClashPlan = async (teamspace, plan) => {
 	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
-	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+	await DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+};
+
+db.createClashRun = async (teamspace, projectId, run, clashes) => {
+	const formattedRun = {
+		...run,
+		_id: stringToUUID(run._id),
+		project: stringToUUID(projectId),
+		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+		plan: { ...run.plan, _id: stringToUUID(run.plan._id) },
+	};
+
+	if (clashes) {
+		formattedRun.results = {
+			stats: {
+				new: clashes.new.length,
+				active: clashes.active.length,
+				resolved: clashes.resolved.length,
+			},
+		};
+		formattedRun.status = clashRunStatus.COMPLETED;
+		formattedRun.updatedAt = new Date();
+
+		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun._id,
+			Buffer.from(JSON.stringify(clashes)));
+	}
+
+	await DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
 };
 
 db.addLoginRecords = async (records) => {
@@ -517,14 +554,6 @@ ServiceHelper.generateUserCredentials = () => ({
 		},
 	},
 });
-
-ServiceHelper.determineTestGroup = (filePath) => {
-	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
-	if (match?.length === 3) {
-		return `${match[1].toUpperCase()} ${match[2]}`;
-	}
-	return filePath;
-};
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),
@@ -927,6 +956,26 @@ ServiceHelper.generateClashPlan = (model1, model2) => ({
 	selectionB: {
 		container: model2,
 	},
+});
+
+ServiceHelper.generateClashes = (plan, number = 20) => {
+	const objectId = (container) => `${container}::${clashObjectIdTypes.INTERNAL}::${ServiceHelper.generateRandomString()}`;
+
+	return times(number, () => ({
+		a: objectId(plan.selectionA.container),
+		b: objectId(plan.selectionB.container),
+		positions: [
+			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		],
+		fingerprint: ServiceHelper.generateRandomNumber() }));
+};
+
+ServiceHelper.generateClashRun = (plan) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	triggeredBy: ServiceHelper.generateRandomString(),
+	triggeredAt: ServiceHelper.generateRandomDate(),
+	status: clashRunStatus.PLANNED,
+	plan,
 });
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
