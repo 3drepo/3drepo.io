@@ -20,7 +20,7 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber, generateClashPlan } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -62,9 +62,6 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
-
-jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
-const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
 
 jest.mock('../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);

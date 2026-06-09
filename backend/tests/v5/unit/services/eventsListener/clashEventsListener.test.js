@@ -16,19 +16,24 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateRandomString, generateUUID } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateUUIDString } = require('../../../helper/services');
 const { src } = require('../../../helper/path');
+const { times } = require('lodash');
+
+const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const { clashRunStatus } = require(`${src}/models/clashes.constants`);
-const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
+const { clashRunStatus, triggerOptions } = require(`${src}/models/clashes.constants`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
 const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
 
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
+
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashesPlans = require(`${src}/models/clashes.plans`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -183,9 +188,136 @@ const testClashRunCompleted = () => {
 	});
 };
 
+const testStartClashRunsAfterNewRev = () => {
+	describe(events.MODEL_IMPORT_FINISHED, () => {
+		test(`Should fetch related plans and start runs if there is a ${events.MODEL_IMPORT_FINISHED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				model: generateUUIDString(),
+				user: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.OK },
+			};
+
+			const plans = times(5, () => ({
+				_id: generateUUID(),
+				selectionA: generateRandomString(),
+				selectionB: generateRandomString(),
+			}));
+
+			ClashesPlans.getPlansByQuery.mockResolvedValueOnce(plans);
+			// make one run to fail to ensure all the rest will run successfully
+			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesPlans.getPlansByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashesPlans.getPlansByQuery).toHaveBeenCalledWith(data.teamspace, data.project, {
+				trigger: triggerOptions.NEW_REVISION,
+				$or: [
+					{ 'selectionA.container': data.model },
+					{ 'selectionB.container': data.model },
+				],
+			}, { project: 0 });
+
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(5);
+			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(4);
+		});
+
+		test(`Should not start a run if there is a ${events.MODEL_IMPORT_FINISHED} but the model is not container`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				model: generateUUIDString(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: { status: processStatuses.OK },
+			};
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesPlans.getPlansByQuery).not.toHaveBeenCalled();
+			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
+			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
+		});
+
+		test(`Should not start a run if there is a ${events.MODEL_IMPORT_FINISHED} but the status is not OK`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				model: generateUUIDString(),
+				user: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.FAILED },
+			};
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesPlans.getPlansByQuery).not.toHaveBeenCalled();
+			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
+			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				model: generateUUIDString(),
+				user: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.OK },
+			};
+
+			ClashesPlans.getPlansByQuery.mockRejectedValueOnce(templates.clashPlanNotFound);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesPlans.getPlansByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
+			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
+		});
+
+		test(`Should handle rejected error objects for ${events.MODEL_IMPORT_FINISHED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				model: generateUUIDString(),
+				user: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.OK },
+			};
+
+			ClashesPlans.getPlansByQuery.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesPlans.getPlansByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
+			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
 
 	testClashRunUpdate();
 	testClashRunCompleted();
+	testStartClashRunsAfterNewRev();
 });
