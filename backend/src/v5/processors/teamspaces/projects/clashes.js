@@ -100,7 +100,7 @@ const applyExternalIds = async (teamspace, container, revision, internalCompIdsT
 	return compositesToMeshes;
 };
 
-const determineCompositeObjects = async (teamspace, project, container, revision, rules, compIdToMeshes = {}) => {
+const determineCompositeObjects = async (teamspace, project, container, revision, rules, compIdToMeshes) => {
 	let meshIDQuery;
 
 	if (rules.length) {
