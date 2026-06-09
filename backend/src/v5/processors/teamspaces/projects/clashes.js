@@ -22,21 +22,34 @@ const {
 	clashRunStatus,
 } = require('../../../models/clashes.constants');
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
-const { createClashRun, getClashRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createClashRun,
+	deleteRunsByPlan,
+	deleteRunsByProject,
+	getClashRunByQuery,
+	updateRunStatus,
+} = require('../../../models/clashes.runs');
+const {
+	createPlan,
+	deletePlan: deleteClashPlan,
+	deletePlansByProject,
+	updatePlan,
+} = require('../../../models/clashes.plans');
 const { getArrayDifference, uniqueElements } = require('../../../utils/helper/arrays');
-const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
-const { getFileAsStream, storeFile } = require('../../../services/filesManager');
+const { getExternalIdsFromMetadata, getMeshNodeBounds, getMeshesWithParentIds } = require('./models/commons/scenes');
+const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
 const { createReadStream } = require('fs');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
+const { events } = require('../../../services/eventsManager/eventsManager.constants');
 const { getContainerById } = require('../../../models/modelSettings');
 const { getLatestRevision } = require('../../../models/revisions');
 const { getNodesByQuery } = require('../../../models/scenes');
 const { modelTypes } = require('../../../models/modelSettings.constants');
+const { publish } = require('../../../services/eventsManager/eventsManager');
 const { queueClashRun } = require('../../../services/modelProcessing');
 const { sendSystemEmail } = require('../../../services/mailer');
 const { templates } = require('../../../utils/responseCodes');
@@ -47,7 +60,17 @@ Clashes.createPlan = createPlan;
 
 Clashes.updatePlan = updatePlan;
 
-Clashes.deletePlan = deletePlan;
+Clashes.deletePlan = async (teamspace, project, planId) => {
+	await deleteClashPlan(teamspace, project, planId);
+	const runIds = await deleteRunsByPlan(teamspace, project, planId);
+	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+};
+
+Clashes.deleteClashDataInProject = async (teamspace, project) => {
+	await deletePlansByProject(teamspace, project);
+	const runIds = await deleteRunsByProject(teamspace, project);
+	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+};
 
 const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};
@@ -142,12 +165,21 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(revision)},"objects":[`);
 
 		let firstObject = true;
-		for (const [compositeId, meshIds] of Object.entries(objects)) {
+		for (const [compositeId, meshIdsWithDuplicates] of Object.entries(objects)) {
 			if (!firstObject) {
 				stream.write(',');
 			}
 
-			stream.write(JSON.stringify({ id: compositeId, meshIds: uniqueElements(meshIds) }));
+			const meshIds = uniqueElements(meshIdsWithDuplicates);
+			// eslint-disable-next-line no-await-in-loop
+			const bbox = await getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const bboxSignificantFigures = 8;
+			const formattedBbox = {
+				min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+				max: bbox.max.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
+			};
+
+			stream.write(JSON.stringify({ id: `${compositeId}::${JSON.stringify(formattedBbox)}`, meshIds }));
 			firstObject = false;
 		}
 
@@ -160,7 +192,6 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
 	const { type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
 	const runId = await createClashRun(teamspace, project, plan, user);
-
 	const configStream = new PassThrough();
 	configStream.write('{');
 	configStream.write(`"type":${JSON.stringify(type)},`);
@@ -231,30 +262,49 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 	}
 };
 
-Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan: { _id: planId } } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
-
-	const errorCounts = {};
-	const currentClashes = new Map();
-	let hasErrors = false;
-	const formatClashForResults = (clash) => {
-		const index = [clash.a, clash.b].sort().join('-');
-		const getClashObjParts = (obj) => {
-			const [container, idType, id] = obj.split('::');
-			return { container, idType, id };
-		};
-
+const formatClashForResults = (clash) => {
+	const getClashObjParts = (obj) => {
+		const [container, idType, id, bboxJSON] = obj.split('::');
 		return {
-			index,
-			clash: {
-				...clash,
-				a: getClashObjParts(clash.a),
-				b: getClashObjParts(clash.b),
-				index,
-			},
+			bbox: JSON.parse(bboxJSON),
+			index: [container, idType, id].join('::'),
+			object: { container, idType, id },
 		};
 	};
+	const objectA = getClashObjParts(clash.a);
+	const objectB = getClashObjParts(clash.b);
+	const index = [objectA.index, objectB.index].sort().join('-');
+
+	const bbox = {
+		min: objectA.bbox.min.map((value, i) => Math.min(value, objectB.bbox.min[i])),
+		max: objectA.bbox.max.map((value, i) => Math.max(value, objectB.bbox.max[i])),
+	};
+
+	const clashData = {
+		...clash,
+		a: objectA.object,
+		b: objectB.object,
+		index,
+		bbox,
+	};
+
+	return {
+		index,
+		clash: clashData,
+	};
+};
+
+Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
+	const { plan } = await getClashRunByQuery(teamspace, project,
+		{ _id: runId }, { plan: 1, triggeredAt: 1 });
+
+	const planId = plan._id;
+
+	const errorCounts = {};
+	let hasErrors = false;
+
+	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
+	const categorizedClashes = { new: [], active: [], resolved: [] };
 
 	try {
 		const resStream = createReadStream(resPath, { encoding: 'utf8' });
@@ -262,14 +312,21 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		await readArraysFromJSONStream(resStream, ['errors', 'clashes'], ({ arrayName, value }) => {
 			if (arrayName === 'errors') {
 				hasErrors = true;
-				currentClashes.clear();
+				categorizedClashes.new = [];
+				categorizedClashes.active = [];
+				knownClashes.clear();
 				errorCounts[value.type] = (errorCounts[value.type] ?? 0) + 1;
 				return;
 			}
 
 			if (!hasErrors) {
 				const { index, clash } = formatClashForResults(value);
-				currentClashes.set(index, clash);
+				if (knownClashes.has(index)) {
+					categorizedClashes.active.push(clash);
+					knownClashes.delete(index);
+				} else {
+					categorizedClashes.new.push(clash);
+				}
 			}
 		});
 
@@ -287,19 +344,6 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		throw err;
 	}
 
-	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
-
-	const categorizedClashes = { new: [], active: [], resolved: [] };
-	for (const [index, clash] of currentClashes) {
-		if (knownClashes.has(index)) {
-			categorizedClashes.active.push(clash);
-
-			knownClashes.delete(index);
-		} else {
-			categorizedClashes.new.push(clash);
-		}
-	}
-
 	categorizedClashes.resolved = Array.from(knownClashes.values());
 
 	await storeFile(teamspace, RUN_HISTORY_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
@@ -309,6 +353,13 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 			active: categorizedClashes.active.length,
 			resolved: categorizedClashes.resolved.length,
 		} });
+	publish(events.CLASH_RUN_PROCESSED, {
+		teamspace,
+		project,
+		runId,
+		plan,
+		results: categorizedClashes,
+	});
 };
 
 Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {

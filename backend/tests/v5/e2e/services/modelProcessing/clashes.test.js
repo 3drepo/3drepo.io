@@ -19,24 +19,25 @@ const { determineTestGroup } = require('../../../helper/utils');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
+const DBHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { queueMessage } = require(`${src}/handler/queue`);
-const { RUN_HISTORY_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_RUNS_COL,
+	RUN_HISTORY_COL,
+	clashRunStatus,
+	triggerOptions,
+} = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
+const { deleteModel } = require(`${src}/models/modelSettings`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { getClashRunByQuery } = require(`${src}/models/clashes.runs`);
 const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
-const { processStatuses } = require('../../../../../src/v5/models/modelSettings.constants');
-
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const { triggerOptions, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
-const DBHandler = require(`${src}/handler/db`);
-const { deleteModel } = require(`${src}/models/modelSettings`);
-
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 
@@ -44,12 +45,29 @@ const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
 let server;
 
-const formatClash = (clash) => ({
-	...clash,
-	a: { container: clash.a.split('::')[0], idType: clash.a.split('::')[1], id: clash.a.split('::')[2] },
-	b: { container: clash.b.split('::')[0], idType: clash.b.split('::')[1], id: clash.b.split('::')[2] },
-	index: [clash.a, clash.b].sort().join('-'),
-});
+const formatClash = (clash) => {
+	const formatClashObject = (objectId) => {
+		const [container, idType, id, bboxJSON] = objectId.split('::');
+		return {
+			bbox: JSON.parse(bboxJSON),
+			index: [container, idType, id].join('::'),
+			object: { container, idType, id },
+		};
+	};
+	const objectA = formatClashObject(clash.a);
+	const objectB = formatClashObject(clash.b);
+
+	return {
+		...clash,
+		a: objectA.object,
+		b: objectB.object,
+		index: [objectA.index, objectB.index].sort().join('-'),
+		bbox: {
+			min: objectA.bbox.min.map((value, i) => Math.min(value, objectB.bbox.min[i])),
+			max: objectA.bbox.max.map((value, i) => Math.max(value, objectB.bbox.max[i])),
+		},
+	};
+};
 
 const generateBasicData = () => {
 	const user = ServiceHelper.generateUserCredentials();
@@ -133,9 +151,7 @@ const setupBasicData = async ({
 			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
 		ServiceHelper.db.createRevision(teamspace, project.id, modelB._id,
 			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planA),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planB),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planWithNoRevs),
+		ServiceHelper.db.createClashPlans(teamspace, project.id, [planA, planB, planWithNoRevs]),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, project.id, completedClashRun, categorizedClashes),
@@ -400,8 +416,10 @@ describe(determineTestGroup(__filename), () => {
 		server = await ServiceHelper.app();
 	});
 
-	afterAll(() => ServiceHelper.closeApp(server));
-
+	afterAll(async () => {
+		await ServiceHelper.queue.purgeQueues();
+		await ServiceHelper.closeApp(server);
+	});
 	testParseClashResults();
 	testStartClashRunsAfterNewRev();
 });

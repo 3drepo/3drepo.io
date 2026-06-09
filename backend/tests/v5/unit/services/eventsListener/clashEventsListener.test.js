@@ -16,7 +16,12 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateClashPlan, generateRandomString, generateUUID } = require('../../../helper/services');
+const {
+	generateClashPlan,
+	generateRandomObject,
+	generateRandomString,
+	generateUUID,
+} = require('../../../helper/services');
 const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 
@@ -24,15 +29,25 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const { clashRunStatus, triggerOptions } = require(`${src}/models/clashes.constants`);
 const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
+
+jest.mock('../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const TicketTemplatesModel = require(`${src}/models/tickets.templates`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
 const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.clashes');
+const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/commons/tickets.clashes`);
+
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
-
-jest.mock('../../../../../src/v5/models/clashes.plans');
-const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
 jest.mock('../../../../../src/v5/utils/logger', () => {
 	const logError = jest.fn();
@@ -52,58 +67,31 @@ const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
 
+const publishAndWaitForEvent = async (event, data) => {
+	const waitOnEvent = eventTriggeredPromise(event);
+	EventsManager.publish(event, data);
+	await waitOnEvent;
+};
+
 const testClashRunUpdate = () => {
 	describe(events.CLASH_RUN_UPDATE, () => {
-		test(`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				status: generateRandomString(),
-			};
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			runId: generateUUID(),
+			status: generateRandomString(),
+		};
 
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
+		test.each([
+			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound],
+			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString())],
+		])('%s', async (desc, rejectUpdateRunStatus) => {
+			if (rejectUpdateRunStatus) {
+				ClashesModel.updateRunStatus.mockRejectedValueOnce(rejectUpdateRunStatus);
+			}
 
-			await waitOnEvent;
-
-			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, data.status);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
-			ClashesModel.updateRunStatus.mockRejectedValueOnce(templates.clashRunNotFound);
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				status: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
-
-			await waitOnEvent;
-
-			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, data.status);
-		});
-
-		test(`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, async () => {
-			ClashesModel.updateRunStatus.mockRejectedValueOnce(new Error(generateRandomString()));
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				status: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.CLASH_RUN_UPDATE, data);
 
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
@@ -114,85 +102,151 @@ const testClashRunUpdate = () => {
 
 const testClashRunCompleted = () => {
 	describe(events.CLASH_RUN_COMPLETED, () => {
-		test(`Should process clash results if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				results: generateRandomString(),
-				value: 0,
-			};
+		const data = {
+			teamspace: generateRandomString(),
+			project: generateUUID(),
+			runId: generateUUID(),
+			results: generateRandomString(),
+			value: 0,
+		};
+		const bouncerErrorData = { ...data, value: 28 };
 
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+		test.each([
+			[`Should process clash results if there is a ${events.CLASH_RUN_COMPLETED}`, false, undefined],
+			[`Should set the clash run to failed on bouncer error for ${events.CLASH_RUN_COMPLETED}`, true, undefined],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, false, templates.clashRunNotFound],
+			[`Should handle rejected error objects for ${events.CLASH_RUN_COMPLETED}`, false, new Error(generateRandomString())],
+		])('%s', async (desc, bouncerErrored, processClashResultsError) => {
+			if (processClashResultsError) {
+				ClashesProcessor.processClashResults.mockRejectedValueOnce(processClashResultsError);
+			}
 
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.CLASH_RUN_COMPLETED, bouncerErrored ? bouncerErrorData : data);
 
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, data.results);
-		});
+			if (!bouncerErrored) {
+				expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
+				expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
+					data.runId, data.results);
+				return;
+			}
 
-		test(`Should set the clash run to failed on bouncer error for ${events.CLASH_RUN_COMPLETED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				results: generateRandomString(),
-				value: 28,
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-
-			const resInfo = getInfoFromCode(data.value);
-			resInfo.retVal = data.value;
+			const resInfo = getInfoFromCode(bouncerErrorData.value);
+			resInfo.retVal = bouncerErrorData.value;
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, clashRunStatus.FAILED,
+			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(bouncerErrorData.teamspace,
+				bouncerErrorData.project, bouncerErrorData.runId, clashRunStatus.FAILED,
 				{ error: { code: resInfo.retVal, reason: resInfo.message } });
 		});
+	});
+};
 
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.processClashResults.mockRejectedValueOnce(templates.clashRunNotFound);
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				results: generateRandomString(),
-				value: 0,
-			};
+const generateProcessedEventData = () => ({
+	teamspace: generateRandomString(),
+	project: generateUUID(),
+	runId: generateUUID(),
+	plan: {
+		_id: generateUUID(),
+		name: generateRandomString(),
+		type: generateRandomString(),
+		selectionA: [generateRandomObject()],
+		selectionB: [generateRandomObject()],
+		tickets: generateRandomObject(),
+	},
+	results: generateRandomObject(),
+});
 
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+const testClashRunProcessed = () => {
+	describe(events.CLASH_RUN_PROCESSED, () => {
+		const eventData = generateProcessedEventData();
+		const basePlan = {
+			_id: eventData.plan._id,
+			tickets: {
+				federation: generateRandomString(),
+				template: generateRandomString(),
+			},
+		};
+		const planWithTicketConfiguration = {
+			...basePlan,
+			tickets: {
+				...basePlan.tickets,
+				creator: generateRandomString(),
+				valuesAtCreation: generateRandomObject(),
+				defaultStatuses: generateRandomObject(),
+			},
+		};
+		const planWithoutTicketConfiguration = { ...basePlan, tickets: undefined };
+		const fed = { _id: generateRandomString() };
+		const template = generateRandomObject();
 
-			await waitOnEvent;
+		test.each([
+			[`Should process clash tickets if there is a ${events.CLASH_RUN_PROCESSED}`, planWithTicketConfiguration, undefined, undefined, undefined, undefined],
+			['Should not process clash tickets if the plan cannot be found', undefined, new Error(), undefined, undefined, undefined],
+			['Should not process clash tickets if the plan has no ticket configuration', planWithoutTicketConfiguration, undefined, undefined, undefined, undefined],
+			['Should not process clash tickets if the federation cannot be found', basePlan, undefined, new Error(), undefined, undefined],
+			['Should not process clash tickets if the template cannot be found', basePlan, undefined, undefined, new Error(), undefined],
+			['Should log an error if processing clash tickets fails', basePlan, undefined, undefined, undefined, new Error(generateRandomString())],
+		])('%s', async (desc, plan, getPlanError, getFederationError, getTemplateError, processClashResultsError) => {
+			if (getPlanError) {
+				ClashPlansModel.getPlanById.mockRejectedValueOnce(getPlanError);
+			} else {
+				ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			}
+			if (getFederationError) {
+				ModelSettingsModel.getFederationById.mockRejectedValueOnce(getFederationError);
+			} else if (plan?.tickets?.federation) {
+				ModelSettingsModel.getFederationById.mockResolvedValueOnce(fed);
+			}
+			if (getTemplateError) {
+				TicketTemplatesModel.getTemplateById.mockRejectedValueOnce(getTemplateError);
+			} else if (plan?.tickets?.federation && !getFederationError) {
+				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
+			}
+			if (processClashResultsError) {
+				jest.spyOn(logger, 'logError').mockImplementationOnce(() => {});
+				TicketsClashes.processClashResults.mockRejectedValueOnce(processClashResultsError);
+			}
 
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, data.results);
-		});
+			await publishAndWaitForEvent(events.CLASH_RUN_PROCESSED, eventData);
 
-		test(`Should handle rejected error objects for ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.processClashResults.mockRejectedValueOnce(new Error(generateRandomString()));
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateUUID(),
-				runId: generateUUID(),
-				results: generateRandomString(),
-				value: 0,
-			};
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.plan._id, { tickets: 1 });
+			if (getPlanError || !plan?.tickets?.federation) {
+				expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
+				expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
+				expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+				return;
+			}
 
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.federation, { _id: 1 });
+			if (getFederationError) {
+				expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
+				expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+				return;
+			}
 
-			await waitOnEvent;
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.template);
+			if (getTemplateError) {
+				expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+				return;
+			}
 
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
-				data.runId, data.results);
+			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
+			expect(TicketsClashes.processClashResults).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, fed._id, template, eventData.results,
+				{ plan: { ...eventData.plan, tickets: plan.tickets }, runId: eventData.runId });
+			if (processClashResultsError) {
+				expect(logger.logError).toHaveBeenCalledTimes(1);
+				expect(logger.logError).toHaveBeenCalledWith(
+					`Error processing clash run ${UUIDToString(eventData.runId)} `
+					+ `for project ${UUIDToString(eventData.project)} `
+					+ `in teamspace ${eventData.teamspace}: ${processClashResultsError.message}`,
+				);
+			}
 		});
 	});
 };
@@ -200,7 +254,6 @@ const testClashRunCompleted = () => {
 const testModelImportFinished = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		test('Should create clash runs for related plans found after new container revision', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -221,9 +274,7 @@ const testModelImportFinished = () => {
 				ClashesProcessor.createRun.mockResolvedValueOnce();
 			}
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledWith(data.teamspace, data.project, {
@@ -243,7 +294,6 @@ const testModelImportFinished = () => {
 		});
 
 		test('Should continue if a related clash plan fails to start after new container revision', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -261,9 +311,7 @@ const testModelImportFinished = () => {
 			ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
 			ClashesProcessor.createRun.mockResolvedValueOnce();
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(2);
 			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(1);
@@ -274,7 +322,6 @@ const testModelImportFinished = () => {
 		});
 
 		test('Should fail gracefully if related clash plans cannot be found after new container revision', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -287,9 +334,7 @@ const testModelImportFinished = () => {
 			const error = new Error(generateRandomString());
 			ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(error);
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
 			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
@@ -299,7 +344,6 @@ const testModelImportFinished = () => {
 		});
 
 		test('Should not start clash runs if the new revision is not for a container', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -310,9 +354,7 @@ const testModelImportFinished = () => {
 				data: { status: processStatuses.OK },
 			};
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(ClashPlansModel.getPlansByQuery).not.toHaveBeenCalled();
 			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
@@ -320,7 +362,6 @@ const testModelImportFinished = () => {
 		});
 
 		test('Should not start clash runs if the new container revision has failed', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -331,9 +372,7 @@ const testModelImportFinished = () => {
 				data: { status: processStatuses.FAILED },
 			};
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(ClashPlansModel.getPlansByQuery).not.toHaveBeenCalled();
 			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
@@ -341,7 +380,6 @@ const testModelImportFinished = () => {
 		});
 
 		test('Should fail gracefully without stack logging if related clash plan lookup rejects without a stack', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
@@ -354,9 +392,7 @@ const testModelImportFinished = () => {
 			const error = { message: generateRandomString() };
 			ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(error);
 
-			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-			await waitOnEvent;
+			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
 
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 			expect(logger.logError).toHaveBeenCalledWith(
@@ -368,7 +404,12 @@ const testModelImportFinished = () => {
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
 
+	afterAll(() => {
+		EventsManager.reset();
+	});
+
 	testClashRunUpdate();
 	testClashRunCompleted();
 	testModelImportFinished();
+	testClashRunProcessed();
 });

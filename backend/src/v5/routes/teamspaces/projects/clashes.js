@@ -121,10 +121,11 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
 	 *                 type: array
 	 *                 description: The selections for set A of the plan
@@ -284,10 +285,11 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
 	 *                 type: array
 	 *                 description: The selections for set A of the plan

@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createRun, setLastRevForSelections } = require('../../../processors/teamspaces/projects/clashes');
+const { clashRunStatus, triggerOptions } = require('../../../models/clashes.constants');
+const {
+	createRun,
+	processClashResults: processClashRunResults,
+	setLastRevForSelections,
+} = require('../../../processors/teamspaces/projects/clashes');
 const { getInfoFromCode, modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
+const { getPlanById, getPlansByQuery } = require('../../../models/clashes.plans');
 const { UUIDToString } = require('../../../utils/helper/uuids');
-const { clashRunStatus } = require('../../../models/clashes.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { getPlansByQuery } = require('../../../models/clashes.plans');
+const { getFederationById } = require('../../../models/modelSettings');
+const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
-const { processClashResults } = require('../../../processors/teamspaces/projects/clashes');
+const {
+	processClashResults: processTicketClashResults,
+} = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');
 const { subscribe } = require('../../eventsManager/eventsManager');
-const { triggerOptions } = require('../../../models/clashes.constants');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
 const startClashRunsAfterNewRev = async ({ teamspace, project, model, user, modelType, data }) => {
@@ -75,7 +82,7 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 		resInfo.retVal = value;
 
 		if (resInfo.success) {
-			await processClashResults(teamspace, project, runId, results);
+			await processClashRunResults(teamspace, project, runId, results);
 		} else {
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { code: resInfo.retVal, reason: resInfo.message } });
@@ -89,12 +96,36 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 	}
 };
 
+const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun, results }) => {
+	try {
+		const { tickets } = await getPlanById(teamspace, project, planFromRun._id, { tickets: 1 }).catch(() => ({}));
+		if (!tickets?.federation) return;
+
+		const fed = await getFederationById(teamspace,
+			tickets.federation, { _id: 1 }).catch(() => undefined);
+		if (!fed) return;
+
+		const template = await getTemplateById(teamspace, tickets.template).catch(() => undefined);
+		if (!template) return;
+
+		// Use the run's plan details, but keep current ticket settings from the latest plan data.
+		const plan = { ...planFromRun, tickets };
+
+		await processTicketClashResults(teamspace, project, fed._id, template, results,
+			{ plan, runId });
+	} catch (error) {
+		logger.logError(`Error processing clash run ${UUIDToString(runId)} `
+			+ `for project ${UUIDToString(project)} in teamspace ${teamspace}: ${error.message}`);
+	}
+};
+
 const ClashEventsListener = {};
 
 ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
 	subscribe(events.MODEL_IMPORT_FINISHED, startClashRunsAfterNewRev);
+	subscribe(events.CLASH_RUN_PROCESSED, clashRunProcessed);
 };
 
 module.exports = ClashEventsListener;
