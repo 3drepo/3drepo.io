@@ -25,7 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Tooltip } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
@@ -151,9 +151,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 					<TicketButton variant="primary" onClick={isolateGroup}>
 						<ShowIcon />
 					</TicketButton>
-					<TicketButton variant="primary" onClick={onEditGroup}>
-						<EditIcon />
-					</TicketButton>
+					<Tooltip title={formatMessage({ id: 'ticketCard.groups.editGroupTooltip', defaultMessage: 'Edit Group not available for exclude specified objects' })}
+						open={group.excludeDefinedObjects ? undefined : false}>
+						<TicketButton variant="primary" onClick={onEditGroup} disabled={group.excludeDefinedObjects}>
+							<EditIcon />
+						</TicketButton>
+					</Tooltip>
 				</Buttons>
 			</Headline>
 			<GroupToggle
