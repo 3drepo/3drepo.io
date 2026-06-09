@@ -195,8 +195,8 @@ const testCreateRun = () => {
 		ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
 		ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshes);
 		ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
-		MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadataNodes);
-		MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+		MetadataModel.getMetadataByQuery.mockImplementation((ts, container) => Promise.resolve(
+			container === plan.selectionA[0].container ? metadataNodes : []));
 
 		await Clashes.createRun(teamspace, project, plan, userId);
 
@@ -322,9 +322,7 @@ const testCreateRun = () => {
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce([meshA]);
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce([duplicateMeshA, meshB, meshC]);
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
-				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
-				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
-				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValue([]);
 
 				await Clashes.createRun(teamspace, project, plan, userId);
 
@@ -347,6 +345,7 @@ const testCreateRun = () => {
 					],
 				}]);
 				expect(content.setB).toHaveLength(1);
+				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(2);
 			});
 
 			test('should create separate config entries for selections from different containers', async () => {

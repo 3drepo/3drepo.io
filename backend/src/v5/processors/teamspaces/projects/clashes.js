@@ -77,9 +77,7 @@ const applyExternalIds = async (teamspace, container, revision, internalCompIdsT
 	return compositesToMeshes;
 };
 
-const determineCompositeObjects = async (teamspace, project, container, revision, rules) => {
-	const compIdToMeshes = {};
-
+const determineCompositeObjects = async (teamspace, project, container, revision, rules, compIdToMeshes = {}) => {
 	let meshIDQuery;
 
 	if (rules.length) {
@@ -105,13 +103,12 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 		const compositeId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
 
 		if (!compIdToMeshes[compositeId]) {
+			// eslint-disable-next-line no-param-reassign
 			compIdToMeshes[compositeId] = [];
 		}
 
 		compIdToMeshes[compositeId].push(UUIDToString(mesh._id));
 	}
-
-	return applyExternalIds(teamspace, container, revision, compIdToMeshes);
 };
 
 const writeConfigSetEntry = async (teamspace, project, selections, stream, setName) => {
@@ -123,18 +120,20 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 			mergedSelections[container] = { container, revision: revisionStr, objects: {} };
 		}
 
-		const compToMeshes = await determineCompositeObjects(teamspace, project, container, revision, rules);
-		for (const [compositeId, meshIds] of Object.entries(compToMeshes)) {
-			mergedSelections[container].objects[compositeId] = [
-				...(mergedSelections[container].objects[compositeId] ?? []),
-				...meshIds,
-			];
-		}
+		await determineCompositeObjects(teamspace, project, container, revision, rules,
+			mergedSelections[container].objects);
 	}));
+
+	const selectionEntries = await Promise.all(Object.values(mergedSelections)
+		.map(async ({ container, revision, objects }) => ({
+			container,
+			revision,
+			objects: await applyExternalIds(teamspace, container, revision, objects),
+		})));
 
 	stream.write(`"${setName}":[`);
 	let firstSelection = true;
-	for (const { container, revision, objects } of Object.values(mergedSelections)) {
+	for (const { container, revision, objects } of selectionEntries) {
 		if (!firstSelection) {
 			stream.write(',');
 		}
