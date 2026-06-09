@@ -59,10 +59,11 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		return required ? schema.required() : schema;
 	};
 
-	const selectionSchema = Yup.object().shape({
+	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
 		rules: rulesSchema,
 	});
+	const selectionSchema = Yup.array().of(selectionEntrySchema.required()).min(1);
 
 	const defaultStatusesObject = {};
 	statusEvents.forEach((event) => {
@@ -222,9 +223,7 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					const normaliseArray = (array) => [...new Set(array)].sort();
-					if (isArray(req.planData[key])
-						&& isEqual(normaliseArray(req.planData[key]), normaliseArray(bodyVal))) {
+					if (isEqual(bodyVal, req.planData[key])) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {
@@ -261,11 +260,6 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
 		await next();
 	} catch (err) {
-		if (err === templates.revisionNotFound) {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
-			return;
-		}
-
 		respond(req, res, err);
 	}
 };

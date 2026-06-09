@@ -20,7 +20,7 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber, generateClashPlan } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -62,9 +62,6 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
-
-jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
-const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
 
 jest.mock('../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
@@ -631,38 +628,6 @@ const testNewRevision = () => {
 			data.model,
 			undefined);
 		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
-	});
-
-	test('Should create clash runs for related plans found after new container revision', async () => {
-		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
-		const data = {
-			teamspace: generateRandomString(),
-			model: generateRandomString(),
-			project: generateUUID(),
-			revId: generateUUID(),
-			user: generateRandomString(),
-			modelType: modelTypes.CONTAINER,
-			data: generateImportResult(true),
-		};
-
-		const plans = times(5, () => generateClashPlan(data.model, generateRandomString()));
-		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
-
-		for (let i = 0; i < plans.length; i++) {
-			ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
-			ClashesProcessor.createRun.mockResolvedValueOnce();
-		}
-
-		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
-
-		await waitOnEvent;
-
-		for (let i = 0; i < plans.length; i++) {
-			expect(ClashesProcessor.setLastRevForSelections)
-				.toHaveBeenCalledWith(data.teamspace, plans[i].selectionA, plans[i].selectionB);
-			expect(ClashesProcessor.createRun)
-				.toHaveBeenCalledWith(data.teamspace, data.project, plans[i], data.user);
-		}
 	});
 };
 

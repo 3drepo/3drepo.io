@@ -134,11 +134,11 @@ const testCreateRun = () => {
 		type: CLASH_PLAN_TYPES[0],
 		tolerance: generateRandomNumber(),
 		selfIntersectionsCheck: false,
-		selectionA: { container: generateRandomString(), revision: generateRandomString() },
-		selectionB: { container: generateRandomString(),
+		selectionA: [{ container: generateRandomString(), revision: generateRandomString() }],
+		selectionB: [{ container: generateRandomString(),
 			revision: generateRandomString(),
 			rules: [generateRandomObject()],
-		},
+		}],
 	};
 	const parentWithManyMeshes = generateRandomString();
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
@@ -188,8 +188,8 @@ const testCreateRun = () => {
 	const createClashRunWithObjects = async (meshes, metadataNodes = []) => {
 		const plan = {
 			...planData,
-			selectionA: { container: generateRandomString(), revision: generateRandomString() },
-			selectionB: { container: generateRandomString(), revision: generateRandomString() },
+			selectionA: [{ container: generateRandomString(), revision: generateRandomString() }],
+			selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
 		};
 
 		ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
@@ -269,8 +269,8 @@ const testCreateRun = () => {
 				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(
-					teamspace, project, plan.selectionB.container,
-					plan.selectionB.revision, plan.selectionB.rules, { parents: 1 },
+					teamspace, project, plan.selectionB[0].container,
+					plan.selectionB[0].revision, plan.selectionB[0].rules, { parents: 1 },
 				);
 
 				const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
@@ -286,18 +286,120 @@ const testCreateRun = () => {
 						|| plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1],
 					setA: [{
 						teamspace,
-						container: plan.selectionA.container,
-						revision: UUIDToString(plan.selectionA.revision),
-						objects: generateGroupedMeshes(planData.selectionA.container, meshData.nonBimMeshes),
+						container: plan.selectionA[0].container,
+						revision: UUIDToString(plan.selectionA[0].revision),
+						objects: generateGroupedMeshes(plan.selectionA[0].container, meshData.nonBimMeshes),
 					}],
 					setB: [{
 						teamspace,
-						container: plan.selectionB.container,
-						revision: UUIDToString(plan.selectionB.revision),
-						objects: generateGroupedMeshes(planData.selectionB.container, meshData.meshes,
+						container: plan.selectionB[0].container,
+						revision: UUIDToString(plan.selectionB[0].revision),
+						objects: generateGroupedMeshes(plan.selectionB[0].container, meshData.meshes,
 							meshData.unwantedMeshes),
 					}],
 				}));
+			});
+
+			test('should merge multiple selections for the same container into one config entry', async () => {
+				const container = generateRandomString();
+				const revision = generateRandomString();
+				const sharedParent = generateRandomString();
+				const otherParent = generateRandomString();
+				const meshA = makeMesh({ _id: generateRandomString(), parent: sharedParent });
+				const duplicateMeshA = makeMesh({ _id: meshA._id, parent: sharedParent });
+				const meshB = makeMesh({ _id: generateRandomString(), parent: sharedParent });
+				const meshC = makeMesh({ _id: generateRandomString(), parent: otherParent });
+				const plan = {
+					...planData,
+					selectionA: [
+						{ container, revision },
+						{ container, revision },
+					],
+					selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
+				};
+
+				ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([meshA]);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([duplicateMeshA, meshB, meshC]);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+
+				await Clashes.createRun(teamspace, project, plan, userId);
+
+				const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+				const content = JSON.parse(await getStreamContent(stream));
+
+				expect(content.setA).toEqual([{
+					teamspace,
+					container,
+					revision: UUIDToString(revision),
+					objects: [
+						{
+							id: `${container}::${clashObjectIdTypes.INTERNAL}::${sharedParent}`,
+							meshIds: [meshA._id, meshB._id],
+						},
+						{
+							id: `${container}::${clashObjectIdTypes.INTERNAL}::${otherParent}`,
+							meshIds: [meshC._id],
+						},
+					],
+				}]);
+				expect(content.setB).toHaveLength(1);
+			});
+
+			test('should create separate config entries for selections from different containers', async () => {
+				const containerA = generateRandomString();
+				const containerB = generateRandomString();
+				const revisionA = generateRandomString();
+				const revisionB = generateRandomString();
+				const parentA = generateRandomString();
+				const parentB = generateRandomString();
+				const meshA = makeMesh({ _id: generateRandomString(), parent: parentA });
+				const meshB = makeMesh({ _id: generateRandomString(), parent: parentB });
+				const plan = {
+					...planData,
+					selectionA: [
+						{ container: containerA, revision: revisionA },
+						{ container: containerB, revision: revisionB },
+					],
+					selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
+				};
+
+				ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([meshA]);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([meshB]);
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+
+				await Clashes.createRun(teamspace, project, plan, userId);
+
+				const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+				const content = JSON.parse(await getStreamContent(stream));
+
+				expect(content.setA).toEqual([
+					{
+						teamspace,
+						container: containerA,
+						revision: UUIDToString(revisionA),
+						objects: [{
+							id: `${containerA}::${clashObjectIdTypes.INTERNAL}::${parentA}`,
+							meshIds: [meshA._id],
+						}],
+					},
+					{
+						teamspace,
+						container: containerB,
+						revision: UUIDToString(revisionB),
+						objects: [{
+							id: `${containerB}::${clashObjectIdTypes.INTERNAL}::${parentB}`,
+							meshIds: [meshB._id],
+						}],
+					},
+				]);
 			});
 
 			test('should use parent IDs as internal composite IDs for nameless meshes', async () => {
@@ -307,7 +409,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -319,7 +421,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+					id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -336,11 +438,11 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+						id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
 						meshIds: [namelessMesh._id],
 					},
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+						id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
 						meshIds: [namedMesh._id],
 					},
 				]);
@@ -356,7 +458,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects(meshes);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
 					meshIds: meshes.map(({ _id }) => _id),
 				}]);
 			});
@@ -371,11 +473,11 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent, externalId)]);
 
 				expect(MetadataModel.getMetadataByQuery).toHaveBeenNthCalledWith(1,
-					teamspace, plan.selectionA.container,
-					{ rev_id: plan.selectionA.revision, parents: { $in: [parent] } },
+					teamspace, plan.selectionA[0].container,
+					{ rev_id: plan.selectionA[0].revision, parents: { $in: [parent] } },
 					{ metadata: 1, parents: 1 });
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+					id: `${plan.selectionA[0].container}::${externalId.key}::${externalId.values[0]}`,
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -387,7 +489,7 @@ const testCreateRun = () => {
 				const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent)]);
 
 				expect(content.setA[0].objects).toEqual([{
-					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
 					meshIds: [mesh._id],
 				}]);
 			});
@@ -408,11 +510,11 @@ const testCreateRun = () => {
 
 				expect(content.setA[0].objects).toEqual([
 					{
-						id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+						id: `${plan.selectionA[0].container}::${externalId.key}::${externalId.values[0]}`,
 						meshIds: [meshes[0]._id],
 					},
 					{
-						id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`,
+						id: `${plan.selectionA[0].container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`,
 						meshIds: [meshes[1]._id],
 					},
 				]);
@@ -665,8 +767,8 @@ const testSetLastRevForSelections = () => {
 	describe('Set Selection Last Revisions', () => {
 		test('should set the last revisions for the selection', async () => {
 			const teamspace = generateRandomString();
-			const selectionA = { container: generateRandomString() };
-			const selectionB = { container: generateRandomString() };
+			const selectionA = [{ container: generateRandomString() }];
+			const selectionB = [{ container: generateRandomString() }];
 			const lastRevisionA = generateRandomString();
 			const lastRevisionB = generateRandomString();
 
@@ -679,24 +781,48 @@ const testSetLastRevForSelections = () => {
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionA[0].container, { _id: 1 });
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, { _id: 1 });
 
 			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
 			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, selectionA.container, modelTypes.CONTAINER, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionA[0].container, modelTypes.CONTAINER, { _id: 1 });
 			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, modelTypes.CONTAINER, { _id: 1 });
 
-			expect(selectionA.revision).toEqual(lastRevisionA);
-			expect(selectionB.revision).toEqual(lastRevisionB);
+			expect(selectionA[0].revision).toEqual(lastRevisionA);
+			expect(selectionB[0].revision).toEqual(lastRevisionB);
+		});
+
+		test('should set the last revisions for all selections in both sets', async () => {
+			const teamspace = generateRandomString();
+			const selectionA = [{ container: generateRandomString() }, { container: generateRandomString() }];
+			const selectionB = [{ container: generateRandomString() }];
+			const revisions = times(3, () => generateRandomString());
+
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			revisions.forEach((revision) => RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision }));
+
+			await Clashes.setLastRevForSelections(teamspace, selectionA, selectionB);
+
+			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(3);
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(3);
+			[...selectionA, ...selectionB].forEach((selection, index) => {
+				expect(ModelSettingsModel.getContainerById)
+					.toHaveBeenCalledWith(teamspace, selection.container, { _id: 1 });
+				expect(RevisionsModel.getLatestRevision)
+					.toHaveBeenCalledWith(teamspace, selection.container, modelTypes.CONTAINER, { _id: 1 });
+				expect(selection.revision).toEqual(revisions[index]);
+			});
 		});
 
 		test('should throw error if one container doesnt exist', async () => {
 			const teamspace = generateRandomString();
-			const selectionA = { container: generateRandomString() };
-			const selectionB = { container: generateRandomString() };
+			const selectionA = [{ container: generateRandomString() }];
+			const selectionB = [{ container: generateRandomString() }];
 
 			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
 
@@ -705,19 +831,19 @@ const testSetLastRevForSelections = () => {
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionA[0].container, { _id: 1 });
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, { _id: 1 });
 
 			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, modelTypes.CONTAINER, { _id: 1 });
 		});
 
 		test('should throw error if one container doesnt have a revision', async () => {
 			const teamspace = generateRandomString();
-			const selectionA = { container: generateRandomString() };
-			const selectionB = { container: generateRandomString() };
+			const selectionA = [{ container: generateRandomString() }];
+			const selectionB = [{ container: generateRandomString() }];
 
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
@@ -728,15 +854,15 @@ const testSetLastRevForSelections = () => {
 
 			expect(ModelSettingsModel.getContainerById).toHaveBeenCalledTimes(2);
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionA.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionA[0].container, { _id: 1 });
 			expect(ModelSettingsModel.getContainerById)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, { _id: 1 });
 
 			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
 			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, selectionA.container, modelTypes.CONTAINER, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionA[0].container, modelTypes.CONTAINER, { _id: 1 });
 			expect(RevisionsModel.getLatestRevision)
-				.toHaveBeenCalledWith(teamspace, selectionB.container, modelTypes.CONTAINER, { _id: 1 });
+				.toHaveBeenCalledWith(teamspace, selectionB[0].container, modelTypes.CONTAINER, { _id: 1 });
 		});
 	});
 };

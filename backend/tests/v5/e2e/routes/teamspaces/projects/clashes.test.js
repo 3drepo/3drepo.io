@@ -372,8 +372,8 @@ const testCreateRun = () => {
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
-			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.invalidArguments],
-			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.invalidArguments],
+			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.revisionNotFound],
+			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.revisionNotFound],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planId = existingPlan._id }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {

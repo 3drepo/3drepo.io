@@ -24,6 +24,7 @@ const {
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { createClashRun, getClashRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
 const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const { getArrayDifference, uniqueElements } = require('../../../utils/helper/arrays');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
@@ -32,7 +33,6 @@ const { PassThrough } = require('stream');
 const { createReadStream } = require('fs');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
-const { getArrayDifference } = require('../../../utils/helper/arrays');
 const { getContainerById } = require('../../../models/modelSettings');
 const { getLatestRevision } = require('../../../models/revisions');
 const { getNodesByQuery } = require('../../../models/scenes');
@@ -114,23 +114,47 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 	return applyExternalIds(teamspace, container, revision, compIdToMeshes);
 };
 
-const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
-	const { container, revision, rules = [] } = selection;
+const writeConfigSetEntry = async (teamspace, project, selections, stream, setName) => {
+	const mergedSelections = {};
 
-	const compToMeshes = await determineCompositeObjects(teamspace, project, container, revision, rules);
-	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
-
-	let first = true;
-	for (const [compositeId, meshIds] of Object.entries(compToMeshes)) {
-		if (!first) {
-			stream.write(',');
+	await Promise.all(selections.map(async ({ container, revision, rules = [] }) => {
+		const revisionStr = UUIDToString(revision);
+		if (!mergedSelections[container]) {
+			mergedSelections[container] = { container, revision: revisionStr, objects: {} };
 		}
 
-		stream.write(JSON.stringify({ id: compositeId, meshIds }));
-		first = false;
-	}
+		const compToMeshes = await determineCompositeObjects(teamspace, project, container, revision, rules);
+		for (const [compositeId, meshIds] of Object.entries(compToMeshes)) {
+			mergedSelections[container].objects[compositeId] = [
+				...(mergedSelections[container].objects[compositeId] ?? []),
+				...meshIds,
+			];
+		}
+	}));
 
-	stream.write(']}]');
+	stream.write(`"${setName}":[`);
+	let firstSelection = true;
+	for (const { container, revision, objects } of Object.values(mergedSelections)) {
+		if (!firstSelection) {
+			stream.write(',');
+		}
+		firstSelection = false;
+
+		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(revision)},"objects":[`);
+
+		let firstObject = true;
+		for (const [compositeId, meshIds] of Object.entries(objects)) {
+			if (!firstObject) {
+				stream.write(',');
+			}
+
+			stream.write(JSON.stringify({ id: compositeId, meshIds: uniqueElements(meshIds) }));
+			firstObject = false;
+		}
+
+		stream.write(']}');
+	}
+	stream.write(']');
 };
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
@@ -289,7 +313,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 };
 
 Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
-	await Promise.all([selectionA, selectionB].map(async (selectionObj) => {
+	await Promise.all([...selectionA, ...selectionB].map(async (selectionObj) => {
 		// ensure container exists
 		await getContainerById(teamspace, selectionObj.container, { _id: 1 });
 

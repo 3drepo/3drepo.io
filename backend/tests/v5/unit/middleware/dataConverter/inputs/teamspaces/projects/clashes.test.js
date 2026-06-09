@@ -92,8 +92,8 @@ const testValidateNewPlanData = () => {
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 		trigger: [triggerOptions.MANUAL],
-		selectionA: { container: recognisedContainer[0], rules: [standardRule] },
-		selectionB: { container: recognisedContainer[1], rules: [standardRule] },
+		selectionA: [{ container: recognisedContainer[0], rules: [standardRule] }],
+		selectionB: [{ container: recognisedContainer[1], rules: [standardRule] }],
 	};
 
 	const ticketData = {
@@ -148,10 +148,13 @@ const testValidateNewPlanData = () => {
 		['with duplicate trigger', true, { ...planData, trigger: [triggerOptions.MANUAL, triggerOptions.MANUAL] }, { ...planData, trigger: [triggerOptions.MANUAL] }],
 		['with empty trigger', false, { ...planData, trigger: [] }],
 		['with valid trigger', true, { ...planData, trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION] }],
-		['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
-		['with selections with null container', false, { ...planData, selectionA: { container: null }, selectionB: { container: null } }],
-		['with selections with container that does not exist', false, { ...planData, selectionA: { container: generateRandomString() } }],
-		['with selections with container not in project', false, { ...planData, selectionA: { container: containerNotInProject } }],
+		['with selection that is not an array', false, { ...planData, selectionA: { container: recognisedContainer[0], rules: [standardRule] } }],
+		['with empty selection arrays', false, { ...planData, selectionA: [], selectionB: [] }],
+		['with null selection entries', false, { ...planData, selectionA: [null], selectionB: [null] }],
+		['with selections without container', false, { ...planData, selectionA: [{ rules: [standardRule] }], selectionB: [{ rules: [standardRule] }] }],
+		['with selections with null container', false, { ...planData, selectionA: [{ container: null }], selectionB: [{ container: null }] }],
+		['with selections with container that does not exist', false, { ...planData, selectionA: [{ container: generateRandomString() }] }],
+		['with selections with container not in project', false, { ...planData, selectionA: [{ container: containerNotInProject }] }],
 		['with valid data (with ticket config)', true, { ...planData, tickets: ticketData }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
 		['with valid data (with ticket config and built in default statuses)', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }],
 		['with valid data (with ticket config and custom default statuses)', true, { ...planData, tickets: { ...ticketData, template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
@@ -299,8 +302,8 @@ const testValidateUpdatePlanData = () => {
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 		trigger: [triggerOptions.MANUAL],
-		selectionA: { container: recognisedContainer[0], rules: [standardRule] },
-		selectionB: { container: recognisedContainer[1], rules: [standardRule] },
+		selectionA: [{ container: recognisedContainer[0], rules: [standardRule] }],
+		selectionB: [{ container: recognisedContainer[1], rules: [standardRule] }],
 		tickets: ticketData,
 	};
 	const oldPlanDataWithoutDefaultStatuses = {
@@ -379,17 +382,20 @@ const testValidateUpdatePlanData = () => {
 		['with invalid trigger', false, { trigger: generateRandomString() }],
 		['with undefined trigger', false, { trigger: undefined }],
 		['with same trigger', false, { trigger: oldPlanData.trigger }],
-		['with same trigger in a different order', false, { trigger: [triggerOptions.NEW_REVISION, triggerOptions.MANUAL] }, undefined, planWithAllTriggersId],
+		['with same trigger in a different order', true, { trigger: [triggerOptions.NEW_REVISION, triggerOptions.MANUAL] }, undefined, planWithAllTriggersId],
 		['with an added trigger', true, { trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION] }],
 		['with a removed trigger', true, { trigger: [triggerOptions.MANUAL] }, undefined, planWithAllTriggersId],
 		['with empty trigger', false, { trigger: [] }],
 		['with null trigger', false, { trigger: null }],
 		['with duplicate trigger', true, { trigger: [triggerOptions.NEW_REVISION, triggerOptions.NEW_REVISION] }, { trigger: [triggerOptions.NEW_REVISION] }],
 		['with duplicate old trigger', false, { trigger: [triggerOptions.MANUAL, triggerOptions.MANUAL] }],
-		['with selections without container', false, { selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
-		['with selections with null container', false, { selectionA: { container: null }, selectionB: { container: null } }],
-		['with selections with container that does not exist', false, { selectionA: { container: generateRandomString() } }],
-		['with selections with container not in project', false, { selectionA: { container: containerNotInProject } }],
+		['with selection that is not an array', false, { selectionA: { container: recognisedContainer[0], rules: [standardRule] } }],
+		['with empty selection arrays', false, { selectionA: [], selectionB: [] }],
+		['with null selection entries', false, { selectionA: [null], selectionB: [null] }],
+		['with selections without container', false, { selectionA: [{ rules: [standardRule] }], selectionB: [{ rules: [standardRule] }] }],
+		['with selections with null container', false, { selectionA: [{ container: null }], selectionB: [{ container: null }] }],
+		['with selections with container that does not exist', false, { selectionA: [{ container: generateRandomString() }] }],
+		['with selections with container not in project', false, { selectionA: [{ container: containerNotInProject }] }],
 		['with null selections', false, { selectionA: null }],
 		['with same selections', false, { selectionA: oldPlanData.selectionA, selectionB: oldPlanData.selectionB }],
 		['with one set of same selection', true, { selectionA: oldPlanData.selectionA, selectionB: oldPlanData.selectionA }, { selectionB: oldPlanData.selectionA }],
@@ -582,8 +588,8 @@ const testPlanContainersHaveRevs = () => {
 			const req = {
 				params: { teamspace },
 				planData: {
-					selectionA: { container: containerA },
-					selectionB: { container: containerB },
+					selectionA: [{ container: containerA }],
+					selectionB: [{ container: containerB }],
 				},
 			};
 
@@ -605,8 +611,8 @@ const testPlanContainersHaveRevs = () => {
 			const req = {
 				params: { teamspace },
 				planData: {
-					selectionA: { container: containerA },
-					selectionB: { container: containerB },
+					selectionA: [{ container: containerA }],
+					selectionB: [{ container: containerB }],
 				},
 			};
 
@@ -622,6 +628,29 @@ const testPlanContainersHaveRevs = () => {
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
 
+			expect(mockCB).not.toHaveBeenCalled();
+		});
+
+		test('should respond with revision not found if a plan container has no revision', async () => {
+			const mockCB = jest.fn(() => {});
+			const teamspace = generateRandomString();
+			const req = {
+				params: { teamspace },
+				planData: {
+					selectionA: [{ container: generateRandomString() }],
+					selectionB: [{ container: generateRandomString() }],
+				},
+			};
+
+			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
+
+			await Clashes.planContainersHaveRevs(req, {}, mockCB);
+
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.setLastRevForSelections)
+				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.revisionNotFound);
 			expect(mockCB).not.toHaveBeenCalled();
 		});
 	});

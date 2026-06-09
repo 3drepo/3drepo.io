@@ -961,12 +961,12 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 		tolerance: 0.01,
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 		trigger: [triggerOptions.MANUAL],
-		selectionA: {
+		selectionA: [{
 			container: model1,
-		},
-		selectionB: {
+		}],
+		selectionB: [{
 			container: model2,
-		},
+		}],
 		tickets,
 	});
 };
@@ -975,8 +975,8 @@ ServiceHelper.generateClashes = (plan, number = 20) => {
 	const objectId = (container) => `${container}::${clashObjectIdTypes.INTERNAL}::${ServiceHelper.generateRandomString()}`;
 
 	return times(number, () => ({
-		a: objectId(plan.selectionA.container),
-		b: objectId(plan.selectionB.container),
+		a: objectId(plan.selectionA[0].container),
+		b: objectId(plan.selectionB[0].container),
 		positions: [
 			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
 		],
