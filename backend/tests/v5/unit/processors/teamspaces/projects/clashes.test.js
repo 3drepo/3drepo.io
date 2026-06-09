@@ -162,9 +162,9 @@ const testCreateRun = () => {
 		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
 		selfIntersectionsCheck: false,
-		selectionA: [{ container: generateRandomString(), revision: generateRandomString() }],
+		selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
 		selectionB: [{ container: generateRandomString(),
-			revision: generateRandomString(),
+			revision: generateUUID(),
 			rules: [generateRandomObject()],
 		}],
 	};
@@ -220,8 +220,8 @@ const testCreateRun = () => {
 	const createClashRunWithObjects = async (meshes, metadataNodes = []) => {
 		const plan = {
 			...planData,
-			selectionA: [{ container: generateRandomString(), revision: generateRandomString() }],
-			selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
+			selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
+			selectionB: [{ container: generateRandomString(), revision: generateUUID() }],
 		};
 
 		ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
@@ -338,7 +338,7 @@ const testCreateRun = () => {
 
 			test('should merge multiple selections for the same container into one config entry', async () => {
 				const container = generateRandomString();
-				const revision = generateRandomString();
+				const revision = generateUUID();
 				const sharedParent = generateRandomString();
 				const otherParent = generateRandomString();
 				const meshA = makeMesh({ _id: generateRandomString(), parent: sharedParent });
@@ -351,7 +351,7 @@ const testCreateRun = () => {
 						{ container, revision },
 						{ container, revision },
 					],
-					selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
+					selectionB: [{ container: generateRandomString(), revision: generateUUID() }],
 				};
 
 				ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
@@ -389,8 +389,8 @@ const testCreateRun = () => {
 			test('should create separate config entries for selections from different containers', async () => {
 				const containerA = generateRandomString();
 				const containerB = generateRandomString();
-				const revisionA = generateRandomString();
-				const revisionB = generateRandomString();
+				const revisionA = generateUUID();
+				const revisionB = generateUUID();
 				const parentA = generateRandomString();
 				const parentB = generateRandomString();
 				const meshA = makeMesh({ _id: generateRandomString(), parent: parentA });
@@ -401,7 +401,7 @@ const testCreateRun = () => {
 						{ container: containerA, revision: revisionA },
 						{ container: containerB, revision: revisionB },
 					],
-					selectionB: [{ container: generateRandomString(), revision: generateRandomString() }],
+					selectionB: [{ container: generateRandomString(), revision: generateUUID() }],
 				};
 
 				ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
@@ -873,8 +873,8 @@ const testSetLastRevForSelections = () => {
 			const teamspace = generateRandomString();
 			const selectionA = [{ container: generateRandomString() }];
 			const selectionB = [{ container: generateRandomString() }];
-			const lastRevisionA = generateRandomString();
-			const lastRevisionB = generateRandomString();
+			const lastRevisionA = generateUUID();
+			const lastRevisionB = generateUUID();
 
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
@@ -903,7 +903,7 @@ const testSetLastRevForSelections = () => {
 			const teamspace = generateRandomString();
 			const selectionA = [{ container: generateRandomString() }, { container: generateRandomString() }];
 			const selectionB = [{ container: generateRandomString() }];
-			const revisions = times(3, () => generateRandomString());
+			const revisions = times(3, () => generateUUID());
 
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });

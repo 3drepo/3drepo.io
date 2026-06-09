@@ -138,9 +138,8 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 	const mergedSelections = {};
 
 	await Promise.all(selections.map(async ({ container, revision, rules = [] }) => {
-		const revisionStr = UUIDToString(revision);
 		if (!mergedSelections[container]) {
-			mergedSelections[container] = { container, revision: revisionStr, objects: {} };
+			mergedSelections[container] = { container, revision, objects: {} };
 		}
 
 		await determineCompositeObjects(teamspace, project, container, revision, rules,
@@ -162,7 +161,7 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 		}
 		firstSelection = false;
 
-		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(revision)},"objects":[`);
+		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 		let firstObject = true;
 		for (const [compositeId, meshIdsWithDuplicates] of Object.entries(objects)) {

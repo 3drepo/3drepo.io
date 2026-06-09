@@ -127,10 +127,14 @@ const createViewpoint = ({ min, max }) => {
 const updateDefaultView = async (teamspace, project, ticket, clashContext, clash, existingTicket) => {
 	if (!clashContext.defaultViewEnabled) return;
 
-	const generateGroupObject = async (name, color, { container, idType, id }, selections) => {
-		const { revision } = selections.find((selection) => selection.container === container);
+	const generateGroupObject = async (name, color, { container, idType, id }) => {
 		let ids = [id];
 		if (idType === clashObjectIdTypes.INTERNAL) {
+			const revision = clashContext.containerToRevision[UUIDToString(container)];
+			if (!revision) {
+				throw new Error(`Could not find clash selection for container ${UUIDToString(container)}`);
+			}
+
 			// Return strings because validateTickets deserialises view group _ids before committing groups.
 			ids = await getMeshesWithParentIds(teamspace, project, container, revision, [stringToUUID(id)], true);
 		}
@@ -147,8 +151,8 @@ const updateDefaultView = async (teamspace, project, ticket, clashContext, clash
 	/* eslint-disable no-param-reassign */
 	if (!existingTicket) {
 		const coloredGroups = await Promise.all([
-			generateGroupObject('Object A', [255, 0, 0], clash.a, clashContext.selectionA),
-			generateGroupObject('Object B', [0, 255, 0], clash.b, clashContext.selectionB),
+			generateGroupObject('Object A', [255, 0, 0], clash.a),
+			generateGroupObject('Object B', [0, 255, 0], clash.b),
 		]);
 
 		ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
@@ -254,8 +258,8 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			const objectBIdType = clashIdTypeToTicketType[clash.b?.idType] ?? defaultClashIdType;
 			newTicket.title = `[${clashContext.planName}] Clash`;
 			newTicket.modules[CLOUD_CLASH] = newTicket.modules[CLOUD_CLASH] ?? {};
-			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = clashContext.planId;
-			newTicket.modules[CLOUD_CLASH][CLASH_RUN_ID] = clashContext.runId;
+			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = UUIDToString(clashContext.planId);
+			newTicket.modules[CLOUD_CLASH][CLASH_RUN_ID] = UUIDToString(clashContext.runId);
 			newTicket.modules[CLOUD_CLASH][CLASH_TYPE] = clashContext.clashType;
 			newTicket.modules[CLOUD_CLASH][CLASH_ID] = clashId;
 			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_NAME] = clashContext.planName;
@@ -374,8 +378,8 @@ TicketsClashes.processClashResults = async (
 		_id: planId,
 		name: planName,
 		type: clashType,
-		selectionA,
-		selectionB,
+		selectionA = [],
+		selectionB = [],
 		tickets: {
 			valuesAtCreation,
 			defaultStatuses: configuredDefaultStatuses,
@@ -388,11 +392,15 @@ TicketsClashes.processClashResults = async (
 		teamspace, federation, { 'properties.unit': 1 });
 
 	const statusInfo = determineStatusInfo(template, configuredDefaultStatuses);
+	const containerToRevision = {};
+	[...selectionA, ...selectionB].forEach(({ container, revision }) => {
+		containerToRevision[UUIDToString(container)] = revision;
+	});
 
 	const clashContext = {
-		planId: UUIDToString(planId),
+		planId,
 		planName,
-		runId: UUIDToString(runId),
+		runId,
 		clashType,
 		statusInfo,
 		clashIdToTicket,
@@ -400,8 +408,7 @@ TicketsClashes.processClashResults = async (
 		federationUnits,
 		pinEnabled: template.config?.pin,
 		defaultViewEnabled: template.config?.defaultView,
-		selectionA,
-		selectionB,
+		containerToRevision,
 	};
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
