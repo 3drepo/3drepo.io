@@ -28,7 +28,8 @@ const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
-const { processStatuses } = require('../../../../../src/v5/models/modelSettings.constants');
+
+const { processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
