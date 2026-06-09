@@ -45,12 +45,29 @@ const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
 let server;
 
-const formatClash = (clash) => ({
-	...clash,
-	a: { container: clash.a.split('::')[0], idType: clash.a.split('::')[1], id: clash.a.split('::')[2] },
-	b: { container: clash.b.split('::')[0], idType: clash.b.split('::')[1], id: clash.b.split('::')[2] },
-	index: [clash.a, clash.b].sort().join('-'),
-});
+const formatClash = (clash) => {
+	const formatClashObject = (objectId) => {
+		const [container, idType, id, bboxJSON] = objectId.split('::');
+		return {
+			bbox: JSON.parse(bboxJSON),
+			index: [container, idType, id].join('::'),
+			object: { container, idType, id },
+		};
+	};
+	const objectA = formatClashObject(clash.a);
+	const objectB = formatClashObject(clash.b);
+
+	return {
+		...clash,
+		a: objectA.object,
+		b: objectB.object,
+		index: [objectA.index, objectB.index].sort().join('-'),
+		bbox: {
+			min: objectA.bbox.min.map((value, i) => Math.min(value, objectB.bbox.min[i])),
+			max: objectA.bbox.max.map((value, i) => Math.max(value, objectB.bbox.max[i])),
+		},
+	};
+};
 
 const generateBasicData = () => {
 	const user = ServiceHelper.generateUserCredentials();
@@ -402,7 +419,6 @@ describe(determineTestGroup(__filename), () => {
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));
-
 	testParseClashResults();
 	testStartClashRunsAfterNewRev();
 });

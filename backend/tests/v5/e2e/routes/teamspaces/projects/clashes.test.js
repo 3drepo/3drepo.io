@@ -22,8 +22,9 @@ const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
+const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -53,7 +54,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, p
 			model.name,
 			model.properties,
 		)),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, plan),
+		ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 };
@@ -215,12 +216,14 @@ const testUpdatePlan = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 			await Promise.all([
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithDefaultStatuses),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithoutDefaultStatuses),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForDefaultStatusUpdate),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForInvalidDefaultStatus),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForTemplateUpdate),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [
+					clashPlanWithTicketsConfig,
+					clashPlanWithDefaultStatuses,
+					clashPlanWithoutDefaultStatuses,
+					clashPlanForDefaultStatusUpdate,
+					clashPlanForInvalidDefaultStatus,
+					clashPlanForTemplateUpdate,
+				]),
 				ServiceHelper.db.createTemplates(teamspace, [templateWithCustomStatuses]),
 			]);
 		});
@@ -287,10 +290,20 @@ const testDeletePlan = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const { users, teamspace, project, plan: existingPlan } = basicData;
+		const { users, teamspace, project, models, plan: existingPlan } = basicData;
+		const planToKeep = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
+		const runsToDelete = times(2, () => ServiceHelper.generateClashRun(existingPlan));
+		const runToKeep = ServiceHelper.generateClashRun(planToKeep);
+		const clashResults = { new: [], active: [], resolved: [] };
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await Promise.all([
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [planToKeep]),
+				...runsToDelete.map((run) => ServiceHelper.db.createClashRun(
+					teamspace, project.id, run, clashResults)),
+				ServiceHelper.db.createClashRun(teamspace, project.id, runToKeep, clashResults),
+			]);
 		});
 
 		describe.each([
@@ -309,6 +322,20 @@ const testDeletePlan = () => {
 					const planExists = await getPlanById(ts, stringToUUID(proj),
 						stringToUUID(planId)).catch(() => false);
 					expect(planExists).toBe(false);
+
+					await Promise.all(runsToDelete.map(async (run) => {
+						const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
+							{ _id: stringToUUID(run._id) });
+						expect(clashRun).toBe(null);
+						await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(run._id)))
+							.rejects.toEqual(templates.fileNotFound);
+					}));
+
+					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
+						{ _id: stringToUUID(runToKeep._id) });
+					expect(clashRun).toBeDefined();
+					await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(runToKeep._id)))
+						.resolves.toBeDefined();
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -328,8 +355,10 @@ const testCreateRun = () => {
 		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
 		const projectWithOwnPlanModels = times(2, () => ServiceHelper.generateRandomModel());
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
-		const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithNoRev._id);
-		const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithVoidRev._id);
+		const [
+			planWithMissingContainer, planWithNoRev, planWithVoidRev,
+		] = [ServiceHelper.generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
+			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
 		const planInAnotherProject = ServiceHelper.generateClashPlan(
 			projectWithOwnPlanModels[0]._id, projectWithOwnPlanModels[1]._id);
 
@@ -348,8 +377,11 @@ const testCreateRun = () => {
 					project.id, model._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER)),
 				ServiceHelper.db.createRevision(teamspace,
 					project.id, modelWithVoidRev._id, ServiceHelper.generateRevisionEntry(true), modelTypes.CONTAINER),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithNoRev),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithVoidRev),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [
+					planWithMissingContainer,
+					planWithNoRev,
+					planWithVoidRev,
+				]),
 				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
 					projectWithOwnPlanModels.map(({ _id }) => _id)),
 				...projectWithOwnPlanModels.map((model) => ServiceHelper.db.createModel(
@@ -360,7 +392,7 @@ const testCreateRun = () => {
 				)),
 				...projectWithOwnPlanModels.map((model) => ServiceHelper.db.createRevision(teamspace,
 					projectWithOwnPlan.id, model._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER)),
-				ServiceHelper.db.createClashPlan(teamspace, projectWithOwnPlan.id, planInAnotherProject),
+				ServiceHelper.db.createClashPlans(teamspace, projectWithOwnPlan.id, [planInAnotherProject]),
 			]);
 		});
 
@@ -372,6 +404,7 @@ const testCreateRun = () => {
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
+			['the plan has a container that does not exist', { planId: planWithMissingContainer._id }, false, templates.invalidArguments],
 			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.invalidArguments],
 			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.invalidArguments],
 			['user is teamspace admin', {}, true],

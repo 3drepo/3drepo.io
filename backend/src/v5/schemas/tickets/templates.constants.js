@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_PLAN_TYPES } = require('../../models/clashes.constants');
+const { CLASH_TYPES } = require('../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getArrayDifference } = require('../../utils/helper/arrays');
 const { toConstantCase } = require('../../utils/helper/strings');
@@ -111,7 +111,7 @@ TemplateConstants.statusTypes = createConstantMapping(['open', 'active', 'review
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
 const riskLevelConfig = { [propOptions.VALUES]: riskLevelsArr, [propOptions.DEFAULT]: riskLevels.VERY_LOW };
-const clashElementTypes = ['Revit', 'IFC', 'DWG', 'DGN', '3D Repo ID', 'Unknown'];
+const idTypeLabels = ['Revit', 'IFC', 'DWG', 'DGN', '3D Repo ID', 'Unknown'];
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
@@ -148,9 +148,9 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Clash View', propTypes.VIEW, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Item 1 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Item 1 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Item 1 ID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Item 2 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Item 2 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Item 2 ID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Status', propTypes.ONE_OF, { [propOptions.VALUES]: ['Active', 'Reviewed', 'Approved', 'Resolved'], default: 'Active', [propOptions.REQUIRED]: true }),
 		createPropertyEntry('Assigned to', propTypes.TEXT),
@@ -160,14 +160,13 @@ TemplateConstants.presetModulesProperties = {
 	[presetModules.CLOUD_CLASH]: [
 		createPropertyEntry('Clash Plan ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Run ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
-		createPropertyEntry('Clash ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
+		createPropertyEntry('Clash ID', propTypes.LONG_TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: CLASH_PLAN_TYPES, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: Object.values(CLASH_TYPES), [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Object B ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object B ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object B ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 	],
 
@@ -245,5 +244,7 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 	'template_code',
 	'ticket_number',
 ]);
+
+TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
 module.exports = TemplateConstants;

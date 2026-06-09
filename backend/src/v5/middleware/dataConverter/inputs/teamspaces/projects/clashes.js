@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
@@ -34,7 +34,7 @@ const { schema: rulesSchema } = require('../../../../../schemas/rules');
 const { setLastRevForSelections } = require('../../../../../processors/teamspaces/projects/clashes');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../common');
-const { validateTicket } = require('../../../../../schemas/tickets');
+const { validateTickets } = require('../../../../../schemas/tickets');
 
 const Clashes = {};
 
@@ -83,7 +83,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 
 	return Yup.object().shape({
 		name: imposeCondition(types.strings.title, true, false),
-		type: imposeCondition(Yup.string().oneOf(CLASH_PLAN_TYPES), true, false),
+		type: imposeCondition(Yup.string().oneOf(Object.values(CLASH_TYPES)), true, false),
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
 			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
@@ -95,7 +95,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 	}).noUnknown(true).required();
 };
 
-const validateTicketData = async (teamspace, project, newTicketData, oldTicketData = {}) => {
+const validateTicketConfiguration = async (teamspace, project, newTicketData, oldTicketData = {}) => {
 	const updateData = cloneDeep(newTicketData);
 	const ticketData = cloneDeep({ ...oldTicketData, ...updateData });
 	const hasDefaultStatusesUpdate = Object.hasOwn(updateData, 'defaultStatuses');
@@ -182,8 +182,8 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTicket(teamspace, project, ticketData.federation,
-			template, propertiesToUpdate, { });
+		await validateTickets(teamspace, project, ticketData.federation,
+			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -209,7 +209,7 @@ const validatePlanData = async (req, res, next) => {
 			getUserFromSession(req.session), !!req.planData);
 		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
-			req.body.tickets = await validateTicketData(
+			req.body.tickets = await validateTicketConfiguration(
 				teamspace, project, req.body.tickets, req.planData?.tickets);
 		}
 
