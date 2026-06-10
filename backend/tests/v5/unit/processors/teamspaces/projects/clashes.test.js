@@ -67,8 +67,8 @@ const Mailer = require(`${src}/services/mailer`);
 const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
 const {
+	CLASH_RUNS_COL,
 	CLASH_TYPES,
-	RUN_HISTORY_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
@@ -128,7 +128,7 @@ const testDeletePlan = () => {
 			expect(ClashRunsModel.deleteRunsByPlan).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.deleteRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId);
 			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, runIds);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, runIds);
 		});
 	});
 };
@@ -148,7 +148,7 @@ const testDeleteClashDataInProject = () => {
 			expect(ClashPlansModel.deletePlansByProject).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.deletePlansByProject).toHaveBeenCalledWith(teamspace, project);
 			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, runIds);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, runIds);
 		});
 	});
 };
@@ -653,7 +653,7 @@ const testProcessClashResults = () => {
 
 				const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
 				expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
+				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, corId,
 					Buffer.from(JSON.stringify(result)));
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
@@ -708,7 +708,7 @@ const testProcessClashResults = () => {
 					{ _id: 1 }, { updatedAt: -1 });
 
 				expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-				expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun._id);
+				expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, lastRun._id);
 				expect(fs.createReadStream).toHaveBeenCalledTimes(1);
 
 				const result = {
@@ -718,7 +718,7 @@ const testProcessClashResults = () => {
 				};
 
 				expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, corId,
+				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, corId,
 					Buffer.from(JSON.stringify(result)));
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);

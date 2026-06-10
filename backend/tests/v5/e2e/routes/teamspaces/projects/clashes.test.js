@@ -24,7 +24,7 @@ const { readFile } = require('fs/promises');
 const Path = require('path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
@@ -331,14 +331,14 @@ const testDeletePlan = () => {
 						const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
 							{ _id: stringToUUID(run._id) });
 						expect(clashRun).toBe(null);
-						await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(run._id)))
+						await expect(getFileAsStream(ts, CLASH_RUNS_COL, stringToUUID(run._id)))
 							.rejects.toEqual(templates.fileNotFound);
 					}));
 
 					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
 						{ _id: stringToUUID(runToKeep._id) });
 					expect(clashRun).toBeDefined();
-					await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(runToKeep._id)))
+					await expect(getFileAsStream(ts, CLASH_RUNS_COL, stringToUUID(runToKeep._id)))
 						.resolves.toBeDefined();
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);

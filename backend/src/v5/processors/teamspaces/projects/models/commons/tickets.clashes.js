@@ -365,21 +365,13 @@ const processTicketUpdates = async (teamspace, project, federation, template, ti
 	}
 };
 
-TicketsClashes.processClashResults = async (
-	teamspace,
-	project,
-	federation,
-	template,
-	results,
-	{ plan, runId },
-) => {
-	const { new: newClashes = [], active: activeClashes = [] } = results;
+const generateClashContext = async (teamspace, project, federation, template, { plan, runId }) => {
 	const {
 		_id: planId,
 		name: planName,
 		type: clashType,
-		selectionA = [],
-		selectionB = [],
+		selectionA,
+		selectionB,
 		tickets: {
 			valuesAtCreation,
 			defaultStatuses: configuredDefaultStatuses,
@@ -397,7 +389,7 @@ TicketsClashes.processClashResults = async (
 		containerToRevision[UUIDToString(container)] = revision;
 	});
 
-	const clashContext = {
+	return {
 		planId,
 		planName,
 		runId,
@@ -409,20 +401,35 @@ TicketsClashes.processClashResults = async (
 		pinEnabled: template.config?.pin,
 		defaultViewEnabled: template.config?.defaultView,
 		containerToRevision,
+		creator,
 	};
+};
+
+TicketsClashes.processClashResults = async (
+	teamspace,
+	project,
+	federation,
+	template,
+	results,
+	{ plan, runId },
+) => {
+	const { new: newClashes = [], active: activeClashes = [] } = results;
+	const clashContext = await generateClashContext(teamspace, project, federation, template, { plan, runId });
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
 	const ticketsToProcess = {
 		ticketsToUpdate: [
 			...processedClashes.ticketsToUpdate,
-			...resolveTickets(Object.values(clashIdToTicket), clashContext),
+			...resolveTickets(Object.values(clashContext.clashIdToTicket), clashContext),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};
 
 	await Promise.all([
-		processNewClashTickets(teamspace, project, federation, template, ticketsToProcess.ticketsToCreate, creator),
-		processTicketUpdates(teamspace, project, federation, template, ticketsToProcess.ticketsToUpdate, creator),
+		processNewClashTickets(teamspace, project, federation, template,
+			ticketsToProcess.ticketsToCreate, clashContext.creator),
+		processTicketUpdates(teamspace, project, federation, template,
+			ticketsToProcess.ticketsToUpdate, clashContext.creator),
 
 	]);
 };

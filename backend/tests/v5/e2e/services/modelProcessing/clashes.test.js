@@ -24,7 +24,6 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const {
 	CLASH_RUNS_COL,
-	RUN_HISTORY_COL,
 	clashRunStatus,
 	triggerOptions,
 } = require(`${src}/models/clashes.constants`);
@@ -77,18 +76,9 @@ const generateBasicData = () => {
 	const modelB = ServiceHelper.generateRandomModel();
 	const modelWithNoRevs = ServiceHelper.generateRandomModel();
 
-	const planA = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelA._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
-	const planB = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelB._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
-	const planWithNoRevs = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelWithNoRevs._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
+	const [planA, planB, planWithNoRevs] = [modelA, modelB, modelWithNoRevs].map((model) => (
+		ServiceHelper.generateClashPlan(modelA._id, model._id)
+	));
 
 	return ({
 		user,
@@ -176,7 +166,7 @@ const setupRunDataWithUnreadablePreviousResults = async (teamspace, project, { r
 	await Promise.all([
 		ServiceHelper.db.createClashRun(teamspace, project.id, run),
 		ServiceHelper.db.createClashRun(teamspace, project.id, previousRun),
-		storeFile(teamspace, RUN_HISTORY_COL, stringToUUID(previousRun._id), Buffer.from('{')),
+		storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(previousRun._id), Buffer.from('{')),
 	]);
 };
 
@@ -196,7 +186,7 @@ const removeResultsFiles = (runs) => {
 };
 
 const getFileContents = async (teamspace, fileId) => {
-	const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, fileId);
+	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_COL, fileId);
 
 	return new Promise((resolve, reject) => {
 		const chunks = [];

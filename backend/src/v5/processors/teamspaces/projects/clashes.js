@@ -16,7 +16,7 @@
  */
 
 const {
-	RUN_HISTORY_COL,
+	CLASH_RUNS_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
@@ -63,13 +63,13 @@ Clashes.updatePlan = updatePlan;
 Clashes.deletePlan = async (teamspace, project, planId) => {
 	await deleteClashPlan(teamspace, project, planId);
 	const runIds = await deleteRunsByPlan(teamspace, project, planId);
-	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+	await removeFiles(teamspace, CLASH_RUNS_COL, runIds);
 };
 
 Clashes.deleteClashDataInProject = async (teamspace, project) => {
 	await deletePlansByProject(teamspace, project);
 	const runIds = await deleteRunsByProject(teamspace, project);
-	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+	await removeFiles(teamspace, CLASH_RUNS_COL, runIds);
 };
 
 const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
@@ -233,7 +233,7 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 			{ _id: 1 }, { updatedAt: -1 },
 		);
 
-		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun._id);
+		const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_COL, lastCompletedRun._id);
 		await readArraysFromJSONStream(readStream, ['new', 'active'], ({ value }) => {
 			clashMap.set(value.index, value);
 		});
@@ -345,7 +345,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 	categorizedClashes.resolved = Array.from(knownClashes.values());
 
-	await storeFile(teamspace, RUN_HISTORY_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
+	await storeFile(teamspace, CLASH_RUNS_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
 	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,
 		{ stats: {
 			new: categorizedClashes.new.length,

@@ -503,17 +503,19 @@ const testProcessClashResults = () => {
 
 			test('Should handle missing ticket options', async () => {
 				TicketsModel.getTicketsByQuery.mockResolvedValueOnce([{ modules: { [CLOUD_CLASH]: {} } }]);
+				const clashRun = {
+					runId: baseContext.runId,
+					plan: {
+						_id: baseContext.planId,
+						name: baseContext.planName,
+						type: baseContext.clashType,
+						selectionA: baseContext.selectionA,
+						selectionB: baseContext.selectionB,
+					},
+				};
 
 				await TicketsClashes.processClashResults(teamspace, project, federation, baseTemplate,
-					{ new: [], active: [], resolved: [] },
-					{
-						runId: baseContext.runId,
-						plan: {
-							_id: baseContext.planId,
-							name: baseContext.planName,
-							type: baseContext.clashType,
-						},
-					});
+					{ new: [], active: [], resolved: [] }, clashRun);
 
 				expect(TicketSchema.validateTickets).not.toHaveBeenCalled();
 				expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();

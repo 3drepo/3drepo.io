@@ -30,7 +30,7 @@ const { fileMimeFromBuffer } = require(`${src}/utils/helper/typeCheck`);
 const Responder = require(`${src}/utils/responder`);
 
 const DB = require(`${src}/handler/db`);
-const { CLASH_PLANS_COL, CLASH_RUNS_COL, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
+const { CLASH_PLANS_COL, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -329,7 +329,7 @@ const testDeleteProject = () => {
 			const projectId = stringToUUID(res.body._id);
 			expect(await DB.find(teamspace, CLASH_PLANS_COL, { project: projectId })).toEqual([]);
 			expect(await DB.find(teamspace, CLASH_RUNS_COL, { project: projectId })).toEqual([]);
-			await expect(getFileAsStream(teamspace, RUN_HISTORY_COL, stringToUUID(run._id)))
+			await expect(getFileAsStream(teamspace, CLASH_RUNS_COL, stringToUUID(run._id)))
 				.rejects.toEqual(templates.fileNotFound);
 
 			const projectsRes = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
