@@ -637,13 +637,17 @@ const testProcessClashResults = () => {
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+					{ _id: corId }, { plan: 1 });
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
+					currentRun.plan._id, { _id: 1 });
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 					{ _id: 1 }, { updatedAt: -1 });
@@ -696,13 +700,17 @@ const testProcessClashResults = () => {
 				});
 
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
 
 				await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+					{ _id: corId }, { plan: 1 });
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
+					currentRun.plan._id, { _id: 1 });
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 					{ _id: 1 }, { updatedAt: -1 });
@@ -735,6 +743,31 @@ const testProcessClashResults = () => {
 					results: result,
 				});
 			});
+
+			test('should abort superseded clash results before processing the results file', async () => {
+				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: generateRandomString() });
+
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.resolves.toBeUndefined();
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ _id: corId }, { plan: 1 });
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
+					currentRun.plan._id, { _id: 1 });
+
+				expect(fs.createReadStream).not.toHaveBeenCalled();
+				expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				expect(EventsManager.publish).not.toHaveBeenCalled();
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+					clashRunStatus.ABORTED,
+					{ reason: 'Superceded' });
+			});
 		});
 
 		describe('Error handling', () => {
@@ -751,6 +784,7 @@ const testProcessClashResults = () => {
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
@@ -774,6 +808,7 @@ const testProcessClashResults = () => {
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
@@ -798,6 +833,7 @@ const testProcessClashResults = () => {
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
@@ -816,6 +852,7 @@ const testProcessClashResults = () => {
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
@@ -833,6 +870,7 @@ const testProcessClashResults = () => {
 			test('should mark run as failed and send an email if it fails to fetch last results', async () => {
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.unknown);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
@@ -840,7 +878,10 @@ const testProcessClashResults = () => {
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, triggeredAt: 1 });
+					{ _id: corId }, { plan: 1 });
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
+					currentRun.plan._id, { _id: 1 });
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
 					{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
 					{ _id: 1 }, { updatedAt: -1 });

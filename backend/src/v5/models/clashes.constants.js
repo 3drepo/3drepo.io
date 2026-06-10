@@ -48,6 +48,7 @@ ClashesConstants.clashRunStatus = {
 	QUEUED: 'queued',
 	FAILED: 'failed',
 	COMPLETED: 'completed',
+	ABORTED: 'aborted',
 };
 
 module.exports = ClashesConstants;
