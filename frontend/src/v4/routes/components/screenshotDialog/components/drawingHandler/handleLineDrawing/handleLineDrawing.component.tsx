@@ -39,8 +39,8 @@ export class HandleLineDrawing
 		this.props.stage.off('mousedown touchstart', this.handleMouseDownLine);
 	}
 
-	public handleMouseDownLine = () => {
-		this.setState({ isCurrentlyDrawn: true });
+	public handleMouseDownLine = (args) => {
+		this.setState({ isCurrentlyDrawn: !!args?.target?.attrs?.image });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();
 

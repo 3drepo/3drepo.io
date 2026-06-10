@@ -247,10 +247,9 @@ const BaseMarkupStage = ({
 
 	useEffect(() => {
 		const imageObj = new Image();
-		let isMounted = true;
 
 		imageObj.onload = () => {
-			if (!isMounted || !imageLayerRef.current) {
+			if (!imageLayerRef.current) {
 				return;
 			}
 
@@ -273,12 +272,7 @@ const BaseMarkupStage = ({
 		};
 
 		loadImage();
-
-		return () => {
-			isMounted = false;
-			imageObj.onload = null;
-		};
-	}, [clearCanvas, getScreenshot, markupRef, scaleStage, sourceImage]);
+	}, [markupRef,  sourceImage]);
 
 	useEffect(() => {
 		document.addEventListener('keydown', handleKeyDown);
