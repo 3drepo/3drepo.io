@@ -259,8 +259,9 @@ const testOnNewContainerRevision = () => {
 			[`not start a run if there is a ${events.MODEL_IMPORT_FINISHED} but the status is not OK`, { data: { status: processStatuses.FAILED } }, false],
 			[`fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED}`, { getPlansError: templates.clashPlanNotFound }, false],
 			[`handle rejected error objects for ${events.MODEL_IMPORT_FINISHED}`, { getPlansError: new Error(generateRandomString()) }, false],
-			[`not start a run if a related container has no revision for ${events.MODEL_IMPORT_FINISHED}`, undefined, false, true],
-		])('Should %s', async (desc, overrides = {}, shouldStartRuns, revisionNotFound) => {
+			[`not start a run if a related container has no revision for ${events.MODEL_IMPORT_FINISHED}`, undefined, false, templates.revisionNotFound],
+			[`not start a run if a related container has been deleted for ${events.MODEL_IMPORT_FINISHED}`, undefined, false, templates.containerNotFound],
+		])('Should %s', async (desc, overrides = {}, shouldStartRuns, setLastRevError) => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const { data: dataOverrides = {}, getPlansError, ...eventOverrides } = overrides;
 			const data = {
@@ -274,7 +275,7 @@ const testOnNewContainerRevision = () => {
 			};
 			const shouldQueryPlans = data.modelType === modelTypes.CONTAINER
 				&& data.data.status === processStatuses.OK;
-			const plans = times(revisionNotFound ? 1 : 5, () => ({
+			const plans = times(setLastRevError ? 1 : 5, () => ({
 				_id: generateUUID(),
 				selectionA: generateRandomString(),
 				selectionB: generateRandomString(),
@@ -287,9 +288,9 @@ const testOnNewContainerRevision = () => {
 			} else if (shouldQueryPlans) {
 				ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
 			}
-			if (revisionNotFound) {
+			if (setLastRevError) {
 				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
-				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
+				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(setLastRevError);
 			}
 
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
@@ -311,7 +312,18 @@ const testOnNewContainerRevision = () => {
 
 			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(shouldSetLastRev ? plans.length : 0);
 			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(shouldStartRuns ? plans.length : 0);
-			if (revisionNotFound) {
+			if (shouldStartRuns) {
+				plans.forEach((plan, index) => {
+					expect(ClashesProcessor.createRun).toHaveBeenNthCalledWith(
+						index + 1,
+						data.teamspace,
+						data.project,
+						plan,
+						`auto:${triggerOptions.NEW_REVISION}::${UUIDToString(data.model)}`,
+					);
+				});
+			}
+			if (setLastRevError) {
 				expect(loggerSpy).not.toHaveBeenCalled();
 			}
 			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();

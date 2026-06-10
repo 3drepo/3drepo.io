@@ -37,7 +37,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
-const onNewContainerRevision = async ({ teamspace, project, model, user, modelType, data }) => {
+const onNewContainerRevision = async ({ teamspace, project, model, modelType, data }) => {
 	try {
 		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
 			const relatedPlans = await getPlansByQuery(teamspace, project, {
@@ -55,14 +55,16 @@ const onNewContainerRevision = async ({ teamspace, project, model, user, modelTy
 							teamspace, plan.selectionA, plan.selectionB)
 							.then(() => true)
 							.catch((err) => {
-								// we don't want to throw an error if revisions are not found, as it just means
-								// we can't start a run, there's no error.
-								if (err?.code === responseCodes.revisionNotFound.code) return false;
+								// If a container is deleted or has no revisions, we just skip this run.
+								if ([
+									responseCodes.containerNotFound.code,
+									responseCodes.revisionNotFound.code,
+								].includes(err?.code)) return false;
 								throw err;
 							});
 
 						if (selectionsHaveRevisions) {
-							await createRun(teamspace, project, plan, user);
+							await createRun(teamspace, project, plan, `auto:${triggerOptions.NEW_REVISION}::${UUIDToString(model)}`);
 						}
 					} catch (err) {
 						const errorMessage = err.message;

@@ -151,9 +151,7 @@ const setupBasicData = async ({
 			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
 		ServiceHelper.db.createRevision(teamspace, project.id, modelB._id,
 			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planA),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planB),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, planWithNoRevs),
+		ServiceHelper.db.createClashPlans(teamspace, project.id, [planA, planB, planWithNoRevs]),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, project.id, completedClashRun, categorizedClashes),
@@ -349,7 +347,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.CONTAINER,
-				data: { errorReason: ServiceHelper.generateRandomObject() } };
+				data: { status: processStatuses.FAILED, errorReason: ServiceHelper.generateRandomObject() } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
@@ -373,7 +371,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.DRAWING,
-				data: { errorReason: ServiceHelper.generateRandomObject() } };
+				data: { status: processStatuses.OK } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);

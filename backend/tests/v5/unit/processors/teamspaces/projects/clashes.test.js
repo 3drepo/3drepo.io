@@ -798,8 +798,11 @@ const testSetLastRevForSelections = () => {
 			const teamspace = generateRandomString();
 			const selectionA = { container: generateRandomString() };
 			const selectionB = { container: generateRandomString() };
+			const lastRevisionB = generateRandomString();
 
 			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
 			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
 				.rejects.toEqual(templates.containerNotFound);
@@ -819,10 +822,12 @@ const testSetLastRevForSelections = () => {
 			const teamspace = generateRandomString();
 			const selectionA = { container: generateRandomString() };
 			const selectionB = { container: generateRandomString() };
+			const lastRevisionB = generateRandomString();
 
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
 			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
+			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
 			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
 				.rejects.toEqual(templates.revisionNotFound);
