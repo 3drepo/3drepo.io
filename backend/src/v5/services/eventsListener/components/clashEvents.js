@@ -24,6 +24,7 @@ const {
 const { getInfoFromCode, modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { getPlanById, getPlansByQuery } = require('../../../models/clashes.plans');
 const { UUIDToString } = require('../../../utils/helper/uuids');
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { getFederationById } = require('../../../models/modelSettings');
 const { getTemplateById } = require('../../../models/tickets.templates');
@@ -31,10 +32,12 @@ const { logger } = require('../../../utils/logger');
 const {
 	processClashResults: processTicketClashResults,
 } = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');
+const { templates: responseCodes } = require('../../../utils/responseCodes');
+const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
-const startClashRunsAfterNewRev = async ({ teamspace, project, model, user, modelType, data }) => {
+const onNewContainerRevision = async ({ teamspace, project, model, modelType, data }) => {
 	try {
 		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
 			const relatedPlans = await getPlansByQuery(teamspace, project, {
@@ -48,16 +51,40 @@ const startClashRunsAfterNewRev = async ({ teamspace, project, model, user, mode
 			await Promise.all(
 				relatedPlans.map(async (plan) => {
 					try {
-						await setLastRevForSelections(teamspace, plan.selectionA, plan.selectionB);
-						await createRun(teamspace, project, plan, user);
+						const selectionsHaveRevisions = await setLastRevForSelections(
+							teamspace, plan.selectionA, plan.selectionB)
+							.then(() => true)
+							.catch((err) => {
+								// If a container is deleted or has no revisions, we just skip this run.
+								if ([
+									responseCodes.containerNotFound.code,
+									responseCodes.revisionNotFound.code,
+								].includes(err?.code)) return false;
+								throw err;
+							});
+
+						if (selectionsHaveRevisions) {
+							await createRun(teamspace, project, plan, `auto:${triggerOptions.NEW_REVISION}::${UUIDToString(model)}`);
+						}
 					} catch (err) {
-						logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${err?.message}`);
+						const errorMessage = err.message;
+						logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${errorMessage}`);
+						await sendSystemEmail(emailTemplates.CLASH_ERROR.name, {
+							errorMessage,
+							teamspace,
+							project: UUIDToString(project),
+							planId: UUIDToString(plan._id),
+							runId: 'N/A',
+						}).catch(() => {
+							// suppress errors here - we already log it on sendSystemEmail, nothing to do.
+						});
 					}
 				}),
 			);
 		}
 	} catch (err) {
-		logger.logError(`Failed to start clash runs after new revision for container ${UUIDToString(model)}: ${err.message}`);
+		const errorMessage = err.message;
+		logger.logError(`Failed to start clash runs after new revision for container ${UUIDToString(model)}: ${errorMessage}`);
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
@@ -124,7 +151,7 @@ const ClashEventsListener = {};
 ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
-	subscribe(events.MODEL_IMPORT_FINISHED, startClashRunsAfterNewRev);
+	subscribe(events.MODEL_IMPORT_FINISHED, onNewContainerRevision);
 	subscribe(events.CLASH_RUN_PROCESSED, clashRunProcessed);
 };
 

@@ -60,7 +60,7 @@ const testGetPlanById = () => {
 const testGetPlansByQuery = () => {
 	describe('Get plans by query', () => {
 		test('should return the list of plans found', async () => {
-			const expectedData = times(5, () => { generateRandomObject(); });
+			const expectedData = times(5, () => generateRandomObject());
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			const teamspace = generateRandomString();
 			const project = generateUUID();

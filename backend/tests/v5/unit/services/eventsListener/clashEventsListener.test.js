@@ -17,18 +17,19 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const {
-	generateClashPlan,
 	generateRandomObject,
 	generateRandomString,
 	generateUUID,
+	generateUUIDString,
 } = require('../../../helper/services');
-const { times } = require('lodash');
 const { src } = require('../../../helper/path');
+const { times } = require('lodash');
+
+const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const { clashRunStatus, triggerOptions } = require(`${src}/models/clashes.constants`);
-const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../src/v5/models/clashes.plans');
@@ -49,19 +50,14 @@ const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/com
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
 
-jest.mock('../../../../../src/v5/utils/logger', () => {
-	const logError = jest.fn();
-	return {
-		labels: { event: 'EVENT' },
-		logger: { logError },
-		logWithLabel: () => ({ logDebug: jest.fn(), logError }),
-	};
-});
-const { logger } = require(`${src}/utils/logger`);
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const ClashEventsListener = require(`${src}/services/eventsListener/components/clashEvents`);
+const { logger } = require(`${src}/utils/logger`);
 
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
@@ -251,152 +247,136 @@ const testClashRunProcessed = () => {
 	});
 };
 
-const testModelImportFinished = () => {
+const testOnNewContainerRevision = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
-		test('Should create clash runs for related plans found after new container revision', async () => {
+		beforeEach(() => {
+			ClashesProcessor.setLastRevForSelections.mockResolvedValue();
+		});
+
+		test.each([
+			[`fetch related plans and start runs if there is a ${events.MODEL_IMPORT_FINISHED}`, undefined, true],
+			[`not start a run if there is a ${events.MODEL_IMPORT_FINISHED} but the model is not container`, { modelType: modelTypes.DRAWING }, false],
+			[`not start a run if there is a ${events.MODEL_IMPORT_FINISHED} but the status is not OK`, { data: { status: processStatuses.FAILED } }, false],
+			[`fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED}`, { getPlansError: templates.clashPlanNotFound }, false],
+			[`handle rejected error objects for ${events.MODEL_IMPORT_FINISHED}`, { getPlansError: new Error(generateRandomString()) }, false],
+			[`not start a run if a related container has no revision for ${events.MODEL_IMPORT_FINISHED}`, undefined, false, templates.revisionNotFound],
+			[`not start a run if a related container has been deleted for ${events.MODEL_IMPORT_FINISHED}`, undefined, false, templates.containerNotFound],
+		])('Should %s', async (desc, overrides = {}, shouldStartRuns, setLastRevError) => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const { data: dataOverrides = {}, getPlansError, ...eventOverrides } = overrides;
 			const data = {
 				teamspace: generateRandomString(),
-				model: generateRandomString(),
 				project: generateUUID(),
-				revId: generateUUID(),
+				model: generateUUIDString(),
 				user: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
-				data: { status: processStatuses.OK },
+				data: { status: processStatuses.OK, ...dataOverrides },
+				...eventOverrides,
 			};
+			const shouldQueryPlans = data.modelType === modelTypes.CONTAINER
+				&& data.data.status === processStatuses.OK;
+			const plans = times(setLastRevError ? 1 : 5, () => ({
+				_id: generateUUID(),
+				selectionA: [{ container: generateRandomString() }],
+				selectionB: [{ container: generateRandomString() }],
+			}));
+			const shouldSetLastRev = shouldQueryPlans && !getPlansError;
+			let loggerSpy;
 
-			const plans = times(5, () => generateClashPlan(data.model, generateRandomString()));
-			plans[0].selectionA = [{ container: generateRandomString() }, { container: data.model }];
-			plans[1].selectionB = [{ container: generateRandomString() }, { container: data.model }];
-			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
-
-			for (let i = 0; i < plans.length; i++) {
-				ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
-				ClashesProcessor.createRun.mockResolvedValueOnce();
+			if (getPlansError) {
+				ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(getPlansError);
+			} else if (shouldQueryPlans) {
+				ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
+			}
+			if (setLastRevError) {
+				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(setLastRevError);
 			}
 
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
-			expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledWith(data.teamspace, data.project, {
-				trigger: triggerOptions.NEW_REVISION,
-				$or: [
-					{ 'selectionA.container': data.model },
-					{ 'selectionB.container': data.model },
-				],
-			}, { project: 0 });
+			await waitOnEvent;
 
-			for (let i = 0; i < plans.length; i++) {
-				expect(ClashesProcessor.setLastRevForSelections)
-					.toHaveBeenCalledWith(data.teamspace, plans[i].selectionA, plans[i].selectionB);
-				expect(ClashesProcessor.createRun)
-					.toHaveBeenCalledWith(data.teamspace, data.project, plans[i], data.user);
+			if (shouldQueryPlans) {
+				expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledTimes(1);
+				expect(ClashPlansModel.getPlansByQuery).toHaveBeenCalledWith(data.teamspace, data.project, {
+					trigger: triggerOptions.NEW_REVISION,
+					$or: [
+						{ 'selectionA.container': data.model },
+						{ 'selectionB.container': data.model },
+					],
+				}, { project: 0 });
+			} else {
+				expect(ClashPlansModel.getPlansByQuery).not.toHaveBeenCalled();
+			}
+
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(shouldSetLastRev ? plans.length : 0);
+			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(shouldStartRuns ? plans.length : 0);
+			if (shouldStartRuns) {
+				plans.forEach((plan, index) => {
+					expect(ClashesProcessor.createRun).toHaveBeenNthCalledWith(
+						index + 1,
+						data.teamspace,
+						data.project,
+						plan,
+						`auto:${triggerOptions.NEW_REVISION}::${UUIDToString(data.model)}`,
+					);
+				});
+			}
+			if (setLastRevError) {
+				expect(loggerSpy).not.toHaveBeenCalled();
+			}
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			if (loggerSpy) {
+				loggerSpy.mockRestore();
 			}
 		});
 
-		test('Should continue if a related clash plan fails to start after new container revision', async () => {
+		test.each([
+			['send a clash error email if a plan cannot be triggered due to an unexpected error', true, undefined],
+			['gracefully handle the error if the clash error email cannot be sent', false, new Error(generateRandomString())],
+		])('Should %s', async (desc, emailSendSucceeds, emailError) => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
-				model: generateRandomString(),
 				project: generateUUID(),
-				revId: generateUUID(),
+				model: generateUUIDString(),
 				user: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
 				data: { status: processStatuses.OK },
 			};
+			const plan = {
+				_id: generateUUID(),
+				selectionA: [{ container: generateRandomString() }],
+				selectionB: [{ container: generateRandomString() }],
+			};
 			const error = new Error(generateRandomString());
-			const plans = times(2, () => generateClashPlan(data.model, generateRandomString()));
+			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
 
-			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
+			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([plan]);
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
-			ClashesProcessor.setLastRevForSelections.mockResolvedValueOnce();
-			ClashesProcessor.createRun.mockResolvedValueOnce();
+			if (!emailSendSucceeds) {
+				Mailer.sendSystemEmail.mockRejectedValueOnce(emailError);
+			}
 
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
-			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(2);
-			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.createRun)
-				.toHaveBeenCalledWith(data.teamspace, data.project, plans[1], data.user);
-			expect(logger.logError).toHaveBeenCalledWith(
-				`Failed to start clash run for plan ${plans[0]._id}: ${error.message}`);
-		});
+			await waitOnEvent;
 
-		test('Should fail gracefully if related clash plans cannot be found after new container revision', async () => {
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateUUID(),
-				revId: generateUUID(),
-				user: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-				data: { status: processStatuses.OK },
-			};
-			const error = new Error(generateRandomString());
-			ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(error);
-
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
-
-			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
+			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
 			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
-			expect(logger.logError).toHaveBeenCalledWith(
-				`Failed to start clash runs after new revision for container ${data.model}: ${error.message}`);
-			expect(logger.logError).toHaveBeenCalledWith(error.stack);
-		});
-
-		test('Should not start clash runs if the new revision is not for a container', async () => {
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateUUID(),
-				revId: generateUUID(),
-				user: generateRandomString(),
-				modelType: modelTypes.DRAWING,
-				data: { status: processStatuses.OK },
-			};
-
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
-
-			expect(ClashPlansModel.getPlansByQuery).not.toHaveBeenCalled();
-			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
-			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
-		});
-
-		test('Should not start clash runs if the new container revision has failed', async () => {
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateUUID(),
-				revId: generateUUID(),
-				user: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-				data: { status: processStatuses.FAILED },
-			};
-
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
-
-			expect(ClashPlansModel.getPlansByQuery).not.toHaveBeenCalled();
-			expect(ClashesProcessor.setLastRevForSelections).not.toHaveBeenCalled();
-			expect(ClashesProcessor.createRun).not.toHaveBeenCalled();
-		});
-
-		test('Should fail gracefully without stack logging if related clash plan lookup rejects without a stack', async () => {
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateUUID(),
-				revId: generateUUID(),
-				user: generateRandomString(),
-				modelType: modelTypes.CONTAINER,
-				data: { status: processStatuses.OK },
-			};
-			const error = { message: generateRandomString() };
-			ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(error);
-
-			await publishAndWaitForEvent(events.MODEL_IMPORT_FINISHED, data);
-
-			expect(logger.logError).toHaveBeenCalledTimes(1);
-			expect(logger.logError).toHaveBeenCalledWith(
-				`Failed to start clash runs after new revision for container ${data.model}: ${error.message}`);
+			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.CLASH_ERROR.name, {
+				errorMessage: error.message,
+				teamspace: data.teamspace,
+				project: UUIDToString(data.project),
+				planId: UUIDToString(plan._id),
+				runId: 'N/A',
+			});
+			expect(loggerSpy).toHaveBeenCalledWith(
+				`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${error.message}`,
+			);
+			loggerSpy.mockRestore();
 		});
 	});
 };
@@ -410,6 +390,6 @@ describe(determineTestGroup(__filename), () => {
 
 	testClashRunUpdate();
 	testClashRunCompleted();
-	testModelImportFinished();
+	testOnNewContainerRevision();
 	testClashRunProcessed();
 });

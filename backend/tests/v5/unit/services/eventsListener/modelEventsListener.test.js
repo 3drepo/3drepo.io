@@ -660,10 +660,6 @@ const testModelProcessingCompleted = () => {
 				const logPreview = generateRandomString();
 				const fileName = generateRandomString();
 
-				if (success) {
-					ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
-				}
-
 				if (sendMail) {
 					if (modelType === modelTypes.CONTAINER) {
 						ModPro.getContainerFileName.mockResolvedValueOnce(fileName);

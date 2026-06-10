@@ -347,7 +347,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.CONTAINER,
-				data: { errorReason: ServiceHelper.generateRandomObject() } };
+				data: { status: processStatuses.FAILED, errorReason: ServiceHelper.generateRandomObject() } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
@@ -371,7 +371,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.DRAWING,
-				data: { errorReason: ServiceHelper.generateRandomObject() } };
+				data: { status: processStatuses.OK } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
