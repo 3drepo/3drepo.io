@@ -280,7 +280,7 @@ const testOnNewContainerRevision = () => {
 				selectionB: generateRandomString(),
 			}));
 			const shouldSetLastRev = shouldQueryPlans && !getPlansError;
-			const loggerSpy = revisionNotFound ? jest.spyOn(logger, 'logError').mockImplementation(() => {}) : undefined;
+			let loggerSpy;
 
 			if (getPlansError) {
 				ClashPlansModel.getPlansByQuery.mockRejectedValueOnce(getPlansError);
@@ -288,6 +288,7 @@ const testOnNewContainerRevision = () => {
 				ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
 			}
 			if (revisionNotFound) {
+				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
 				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
 			}
 
@@ -310,9 +311,13 @@ const testOnNewContainerRevision = () => {
 
 			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(shouldSetLastRev ? plans.length : 0);
 			expect(ClashesProcessor.createRun).toHaveBeenCalledTimes(shouldStartRuns ? plans.length : 0);
-			if (revisionNotFound) expect(loggerSpy).not.toHaveBeenCalled();
+			if (revisionNotFound) {
+				expect(loggerSpy).not.toHaveBeenCalled();
+			}
 			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
-			if (loggerSpy) loggerSpy.mockRestore();
+			if (loggerSpy) {
+				loggerSpy.mockRestore();
+			}
 		});
 
 		test.each([
