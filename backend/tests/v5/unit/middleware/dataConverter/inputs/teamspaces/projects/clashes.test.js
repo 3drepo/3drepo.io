@@ -625,8 +625,7 @@ const testPlanContainersHaveRevs = () => {
 				.toHaveBeenCalledWith(teamspace, req.planData.selectionA, req.planData.selectionB);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			const { message, ...invalidArgRes } = templates.invalidArguments;
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expect.objectContaining(invalidArgRes));
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.revisionNotFound);
 
 			expect(mockCB).not.toHaveBeenCalled();
 		});
