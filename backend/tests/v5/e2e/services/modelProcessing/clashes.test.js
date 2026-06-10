@@ -29,15 +29,13 @@ const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
 
-const { processStatuses } = require(`${src}/models/modelSettings.constants`);
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { triggerOptions, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DBHandler = require(`${src}/handler/db`);
 const { deleteModel } = require(`${src}/models/modelSettings`);
-
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 
