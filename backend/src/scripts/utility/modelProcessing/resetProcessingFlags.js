@@ -16,7 +16,7 @@
  */
 
 /**
- * This script is used manually overwrite the processing state of model(s).
+ * This script is used manually overwrite the processing state of model(s)/drawing(s)/clash run(s).
  * This is typically used if the queue had an unrecoverable failure and queued
  * processes were purged without being processed (i.e. items stuck in processing/queued state
  * when they no longer physically exists).
@@ -34,9 +34,21 @@ const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
 const { updateMany } = require(`${v5Path}/handler/db`);
 const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { CLASH_RUNS_COL, clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
+const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const Path = require('path');
 
-const processTeamspace = async (teamspace, model) => {
+const MANUAL_CANCELLATION_REASON = 'Cancelled manually';
+const RESET_TYPES = {
+	MODELS: 'models',
+	DRAWINGS: 'drawings',
+	CLASHES: 'clashes',
+};
+const RESET_TYPE_OPTIONS = Object.values(RESET_TYPES);
+
+const shouldResetType = (resetType, type) => !type || type === resetType;
+
+const processTeamspace = async (teamspace, id, type) => {
 	const drawingStatusQuery = {
 		status: {
 			$exists: true,
@@ -46,30 +58,60 @@ const processTeamspace = async (teamspace, model) => {
 			],
 		},
 	};
-
-	const modelQuery = deleteIfUndefined({ _id: model });
-	const drawingQuery = deleteIfUndefined({ model, ...drawingStatusQuery });
+	const modelQuery = deleteIfUndefined({ _id: id });
+	const drawingQuery = deleteIfUndefined({ model: id, ...drawingStatusQuery });
+	const clashRunQuery = deleteIfUndefined({
+		_id: stringToUUID(id),
+		status: {
+			$nin: [
+				clashRunStatus.COMPLETED,
+				clashRunStatus.FAILED,
+				clashRunStatus.ABORTED,
+			],
+		},
+	});
 
 	const modelAction = { $unset: { status: 1 } };
 	const drawingAction = { $set: { status: processStatuses.FAILED } };
+	const clashRunAction = {
+		$set: {
+			status: clashRunStatus.ABORTED,
+			results: { error: { reason: MANUAL_CANCELLATION_REASON } },
+			updatedAt: new Date(),
+		},
+	};
 
-	await Promise.all([
-		updateMany(teamspace, SETTINGS_COL, modelQuery, modelAction),
-		updateMany(teamspace, DRAWINGS_HISTORY_COL, drawingQuery, drawingAction),
-	]);
+	const updatePromises = [];
+
+	if (shouldResetType(RESET_TYPES.MODELS, type)) {
+		updatePromises.push(updateMany(teamspace, SETTINGS_COL, modelQuery, modelAction));
+	}
+
+	if (shouldResetType(RESET_TYPES.DRAWINGS, type)) {
+		updatePromises.push(updateMany(teamspace, DRAWINGS_HISTORY_COL, drawingQuery, drawingAction));
+	}
+
+	if (shouldResetType(RESET_TYPES.CLASHES, type)) {
+		updatePromises.push(updateMany(teamspace, CLASH_RUNS_COL, clashRunQuery, clashRunAction));
+	}
+
+	await Promise.all(updatePromises);
 };
 
-const run = async (teamspace, model) => {
-	if (model && !teamspace) {
-		throw new Error('Teamspace must be provided if model is defined');
+const run = async (teamspace, id, type) => {
+	if (id && !teamspace) {
+		throw new Error('Teamspace must be provided if id is defined');
 	}
-	logger.logInfo(`Reset processing flag(s) in ${teamspace ?? 'all teamspaces'}${model ? `.${model}` : ''}`);
+	if (type && !RESET_TYPE_OPTIONS.includes(type)) {
+		throw new Error(`Type must be one of: ${RESET_TYPE_OPTIONS.join(', ')}`);
+	}
+	logger.logInfo(`Reset processing flag(s) in ${teamspace ?? 'all teamspaces'}${id ? `.${id}` : ''}${type ? ` (${type})` : ''}`);
 
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
 	for (const ts of teamspaces) {
 		logger.logInfo(`\t-${ts}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(ts, model);
+		await processTeamspace(ts, id, type);
 	}
 };
 
@@ -78,14 +120,18 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('teamspace', {
 		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targetted)',
 		type: 'string',
-	}).option('model', {
-		describe: 'Target a specific model (if unspecified, all models will ba targetted)',
+	}).option('id', {
+		describe: 'Target a specific item id (if unspecified, all items will be targetted)',
+		type: 'string',
+	}).option('type', {
+		describe: 'Target a specific item type',
+		choices: RESET_TYPE_OPTIONS,
 		type: 'string',
 	});
 	return yargs.command(commandName,
-		'Manually resets the processing state of a model. (Warning: This may introduce non deterministic behaviour to the application!)',
+		'Manually resets processing state. (Warning: This may introduce non deterministic behaviour to the application!)',
 		argsSpec,
-		(argv) => run(argv.teamspace, argv.model));
+		(argv) => run(argv.teamspace, argv.id, argv.type));
 };
 
 module.exports = {

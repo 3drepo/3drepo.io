@@ -295,8 +295,13 @@ const formatClashForResults = (clash) => {
 };
 
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId }, { plan: 1 });
+	const { plan, status } = await getClashRunByQuery(teamspace, project,
+		{ _id: runId }, { plan: 1, status: 1 });
+
+	if (status === clashRunStatus.ABORTED) {
+		// this run was cancelled (likely via the utility script)
+		return;
+	}
 
 	const planId = plan._id;
 	const latestRun = await getLatestRunByPlan(teamspace, project, planId, { _id: 1 });
