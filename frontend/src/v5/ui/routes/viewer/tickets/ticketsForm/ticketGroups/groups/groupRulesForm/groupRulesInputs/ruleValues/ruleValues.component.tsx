@@ -17,7 +17,6 @@
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
-import { useEffect } from 'react';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 import { Gap } from '@controls/gap';
 import { IFormRule } from '../../groupRulesForm.helpers';
@@ -35,12 +34,6 @@ export const RuleValues = ({ disabled }) => {
 	const operator = watch('operator');
 	const operationType = OPERATIONS_TYPES[operator];
 	const error = errors.values || {};
-
-	useEffect(() => {
-		if (!fields.length) {
-			append({ value: '' });
-		}
-	}, [fields]);
 
 	const FormValueField = ['text', 'regex'].includes(operationType) ? FormTextField : FormNumberField;
 

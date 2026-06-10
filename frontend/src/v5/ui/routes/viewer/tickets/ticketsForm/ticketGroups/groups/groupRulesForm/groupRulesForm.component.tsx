@@ -42,7 +42,7 @@ const DEFAULT_RULE: IGroupRule = {
 		values: [],
 	},
 	operator: null,
-	values: [],
+	values: [''],
 };
 
 type IGroupRules = {
