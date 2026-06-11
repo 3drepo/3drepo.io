@@ -21,6 +21,10 @@ const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 
@@ -37,6 +41,16 @@ const ClashEventsListener = require(`${src}/services/eventsListener/components/c
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
+
+const expectErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.ERROR_NOTIFICATION.name,
+		expect.objectContaining({
+			scope: 'eventsListener',
+		}),
+	);
+};
 
 const testClashRunUpdate = () => {
 	describe(events.CLASH_RUN_UPDATE, () => {
@@ -75,6 +89,7 @@ const testClashRunUpdate = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.status);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, async () => {
@@ -94,6 +109,7 @@ const testClashRunUpdate = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.status);
+			expectErrorNotification();
 		});
 	});
 };
@@ -159,6 +175,7 @@ const testClashRunCompleted = () => {
 			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
 			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.results);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should handle rejected error objects for ${events.CLASH_RUN_COMPLETED}`, async () => {
@@ -179,6 +196,7 @@ const testClashRunCompleted = () => {
 			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
 			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.results);
+			expectErrorNotification();
 		});
 	});
 };

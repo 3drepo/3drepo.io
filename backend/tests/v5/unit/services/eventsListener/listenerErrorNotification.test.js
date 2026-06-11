@@ -56,8 +56,10 @@ const SUPPRESSED_CODES = new Set([
 	responseTemplates.revisionNotFound.code,
 	responseTemplates.drawingNotFound.code,
 	responseTemplates.federationNotFound.code,
+	responseTemplates.clashPlanNotFound.code,
+	responseTemplates.clashRunNotFound.code,
 ]);
-const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation)/i;
+const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation|clash)/i;
 const MISSING_PATTERN = /(not found|deleted|does not exist|no longer exists)/i;
 
 const normaliseErrorForExpected = (error) => {
@@ -231,6 +233,13 @@ const testNotifyListenerFailure = () => {
 				[
 					'Should suppress notifications for known not-found response codes',
 					{ payload: {}, error: { code: responseTemplates.modelNotFound.code } },
+					false,
+					false,
+					false,
+				],
+				[
+					'Should suppress notifications for known clash not-found response codes',
+					{ payload: {}, error: { code: responseTemplates.clashRunNotFound.code } },
 					false,
 					false,
 					false,
