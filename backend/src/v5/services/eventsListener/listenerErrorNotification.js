@@ -23,10 +23,6 @@ const { sendSystemEmail } = require('../mailer');
 const MAX_DEPTH = 4;
 const MAX_ARRAY_LENGTH = 20;
 const MAX_OBJECT_KEYS = 40;
-const MAX_PAYLOAD_LENGTH = 4000;
-const MAX_ERR_MSG_LENGTH = 1000;
-const MAX_STACK_LENGTH = 6000;
-
 const REDACTED_KEYS = [
 	'password',
 	'token',
@@ -36,7 +32,6 @@ const REDACTED_KEYS = [
 	'apikey',
 	'secret',
 ];
-
 const SUPPRESSED_CODES = new Set([
 	responseTemplates.modelNotFound.code,
 	responseTemplates.containerNotFound.code,
@@ -45,21 +40,10 @@ const SUPPRESSED_CODES = new Set([
 	responseTemplates.drawingNotFound.code,
 	responseTemplates.federationNotFound.code,
 ]);
-
 const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation)/i;
 const MISSING_PATTERN = /(not found|deleted|does not exist|no longer exists)/i;
 
-const truncate = (value, maxLength) => {
-	if (typeof value !== 'string') {
-		return value;
-	}
-
-	if (value.length <= maxLength) {
-		return value;
-	}
-
-	return `${value.slice(0, maxLength)}...(truncated)`;
-};
+const ListenerNotificationError = {};
 
 const normaliseError = (error) => {
 	if (!error) {
@@ -131,16 +115,6 @@ const sanitise = (value, depth = 0, seen = new WeakSet()) => {
 	return value;
 };
 
-const serialisePayload = (payload) => {
-	try {
-		const sanitised = sanitise(payload);
-		const serialised = JSON.stringify(sanitised);
-		return truncate(serialised, MAX_PAYLOAD_LENGTH);
-	} catch (err) {
-		return `Failed to serialise payload: ${err.message}`;
-	}
-};
-
 const shouldSuppressListenerError = (error) => {
 	const { code, status, message } = normaliseError(error);
 	const safeMessage = `${message ?? ''}`;
@@ -149,7 +123,7 @@ const shouldSuppressListenerError = (error) => {
 	return SUPPRESSED_CODES.has(code) || hasMissingContext || (status === 404 && hasMissingContext);
 };
 
-const notifyListenerFailure = async ({
+ListenerNotificationError.notifyListenerFailure = async ({
 	eventName,
 	listenerName,
 	component,
@@ -162,10 +136,9 @@ const notifyListenerFailure = async ({
 			return;
 		}
 
-		const serialisedPayload = serialisePayload(payload);
+		const sanitisedPayload = sanitise(payload);
+		const serialisedPayload = JSON.stringify(sanitisedPayload);
 		const { message, stack, code, status } = normaliseError(error);
-		const errorReason = truncate(message || 'No error message available', MAX_ERR_MSG_LENGTH);
-		const truncatedStack = truncate(stack, MAX_STACK_LENGTH);
 		const messageDetails = [
 			`Event: ${eventName}`,
 			`Listener: ${component}.${listenerName}`,
@@ -181,8 +154,8 @@ const notifyListenerFailure = async ({
 				scope: 'eventsListener',
 				message: messageDetails,
 				err: {
-					message: errorReason,
-					stack: truncatedStack || 'No stack trace provided',
+					message: message || 'No error message available',
+					stack: stack || 'No stack trace provided',
 				},
 			},
 		);
@@ -194,8 +167,4 @@ const notifyListenerFailure = async ({
 	}
 };
 
-module.exports = {
-	notifyListenerFailure,
-	shouldSuppressListenerError,
-	serialisePayload,
-};
+module.exports = ListenerNotificationError;

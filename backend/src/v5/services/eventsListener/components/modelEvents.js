@@ -118,8 +118,6 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 			try {
 				await createDrawingThumbnail(teamspace, project, model, revId);
 			} catch (err) {
-				// It is not critical error if we failed to create a thumbnail.
-				// So catch the error and proceed
 				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
 				await listenerErrorNotification.notifyListenerFailure({
 					eventName: events.MODEL_IMPORT_FINISHED,

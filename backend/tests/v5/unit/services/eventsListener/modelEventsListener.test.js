@@ -789,6 +789,29 @@ const testModelProcessingCompleted = () => {
 			expectErrorNotification();
 		});
 
+		test('Should not log the stack if it does not exist in the error object', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: generateImportResult(true),
+			};
+
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce({ message: generateRandomString() });
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus)
+				.toHaveBeenCalledWith(data.teamspace, data.project, data.model, data.revId);
+			expectErrorNotification();
+		});
+
 		testNewRevision();
 	});
 };

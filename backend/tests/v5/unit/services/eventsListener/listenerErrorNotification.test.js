@@ -18,283 +18,369 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
-const { templates } = require('../../../../../src/v5/utils/responseCodes');
 
 jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+
 jest.mock('../../../../../src/v5/utils/logger', () => ({
-	labels: {
-		event: 'EVENT',
+	logger: {
+		logError: jest.fn(),
+		logDebug: jest.fn(),
 	},
 	logWithLabel: () => ({
 		logError: jest.fn(),
 		logDebug: jest.fn(),
+		logInfo: jest.fn(),
+		logTrace: jest.fn(),
+		logWarning: jest.fn(),
+		logFatal: jest.fn(),
 	}),
-	logger: {
-		logDebug: jest.fn(),
-		logError: jest.fn(),
+	labels: {
+		event: 'EVENT',
 	},
 }));
-
-const Mailer = require(`${src}/services/mailer`);
 const { logger } = require(`${src}/utils/logger`);
-const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
-const {
-	notifyListenerFailure,
-	shouldSuppressListenerError,
-	serialisePayload,
-} = require(`${src}/services/eventsListener/components/listenerErrorNotification`);
+const { templates: responseTemplates } = require(`${src}/utils/responseCodes`);
+const ListenerErrorNotification = require(`${src}/services/eventsListener/listenerErrorNotification`);
+
+const MAX_DEPTH = 4;
+const MAX_ARRAY_LENGTH = 20;
+const MAX_OBJECT_KEYS = 40;
+const REDACTED_KEYS = ['password', 'token', 'authorization', 'cookie', 'session', 'apikey', 'secret'];
+const SUPPRESSED_CODES = new Set([
+	responseTemplates.modelNotFound.code,
+	responseTemplates.containerNotFound.code,
+	responseTemplates.projectNotFound.code,
+	responseTemplates.revisionNotFound.code,
+	responseTemplates.drawingNotFound.code,
+	responseTemplates.federationNotFound.code,
+]);
+const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation)/i;
+const MISSING_PATTERN = /(not found|deleted|does not exist|no longer exists)/i;
+
+const normaliseErrorForExpected = (error) => {
+	if (!error) {
+		return {};
+	}
+
+	if (typeof error === 'string') {
+		return { message: error };
+	}
+
+	return {
+		message: error.message || error.errorReason?.message || error.reason || error.msg,
+		stack: error.stack,
+		code: error.code || error.errorCode || error.errorReason?.errorCode || error.response?.data?.code,
+		status: error.status || error.statusCode || error.response?.status,
+	};
+};
+
+const sanitiseForExpected = (value, depth = 0, seen = new WeakSet()) => {
+	if (value === null || value === undefined) {
+		return value;
+	}
+
+	if (depth >= MAX_DEPTH) {
+		return '[Max depth reached]';
+	}
+
+	if (Array.isArray(value)) {
+		return value.slice(0, MAX_ARRAY_LENGTH).map((entry) => sanitiseForExpected(entry, depth + 1, seen));
+	}
+
+	if (value instanceof Date) {
+		return value.toISOString();
+	}
+
+	if (Buffer.isBuffer(value)) {
+		return `[Buffer length=${value.length}]`;
+	}
+
+	if (typeof value === 'object') {
+		if (seen.has(value)) {
+			return '[Circular]';
+		}
+
+		seen.add(value);
+		const entries = Object.entries(value).slice(0, MAX_OBJECT_KEYS);
+		const output = {};
+		entries.forEach(([key, entry]) => {
+			if (REDACTED_KEYS.some((redactedKey) => key.toLowerCase().includes(redactedKey))) {
+				output[key] = '[REDACTED]';
+			} else {
+				output[key] = sanitiseForExpected(entry, depth + 1, seen);
+			}
+		});
+		seen.delete(value);
+
+		return output;
+	}
+
+	if (typeof value === 'function') {
+		return '[Function]';
+	}
+
+	return value;
+};
+
+const shouldSuppressForExpected = (error) => {
+	const { code, status, message } = normaliseErrorForExpected(error);
+	const safeMessage = `${message ?? ''}`;
+	const hasMissingContext = ENTITY_PATTERN.test(safeMessage) && MISSING_PATTERN.test(safeMessage);
+
+	return SUPPRESSED_CODES.has(code) || hasMissingContext || (status === 404 && hasMissingContext);
+};
+
+const formatter = ({ eventName, listenerName, component, payload, error }) => {
+	const sanitisedPayload = sanitiseForExpected(payload);
+	const serialisedPayload = JSON.stringify(sanitisedPayload);
+	const { message, stack, code, status } = normaliseErrorForExpected(error);
+
+	return {
+		title: `Event listener failure: ${eventName}`,
+		scope: 'eventsListener',
+		message: [
+			`Event: ${eventName}`,
+			`Listener: ${component}.${listenerName}`,
+			`Error code: ${code ?? 'N/A'}`,
+			`Error status: ${status ?? 'N/A'}`,
+			`Payload: ${serialisedPayload}`,
+		].join('\n'),
+		err: {
+			message: message || 'No error message available',
+			stack: stack || 'No stack trace provided',
+		},
+	};
+};
+
+const testNotifyListenerFailure = () => {
+	describe('notifyListenerFailure', () => {
+		const eventName = 'MODEL_IMPORT_FINISHED';
+		const listenerName = 'onModelImportFinished';
+		const component = 'modelEvents';
+
+		const generateTests = () => {
+			const initialError = new Error(generateRandomString());
+			const extractedMessage = generateRandomString();
+			const extractedCode = generateRandomString();
+			const dateValue = new Date('2026-01-01T00:00:00.000Z');
+			const circular = { name: 'root' };
+			circular.self = circular;
+			const manyKeys = {};
+			Array.from({ length: 45 }, (_, i) => i).forEach((idx) => {
+				manyKeys[`key${idx}`] = idx;
+			});
+
+			return [
+				[
+					'Should send an error notification email with event and listener details',
+					{ payload: { key: generateRandomString() }, error: initialError },
+					true,
+					false,
+					false,
+				],
+				[
+					'Should support string errors and default missing stack trace',
+					{ payload: {}, error: generateRandomString() },
+					true,
+					false,
+					false,
+				],
+				[
+					'Should extract code, status and message from nested error structures',
+					{
+						payload: {},
+						error: {
+							errorReason: { message: extractedMessage, errorCode: extractedCode },
+							response: { status: 503, data: { code: 'IGNORED_CODE' } },
+						},
+					},
+					true,
+					false,
+					false,
+				],
+				[
+					'Should default message and stack when missing from error object',
+					{ payload: {}, error: {} },
+					true,
+					false,
+					false,
+				],
+				[
+					'Should default message and stack when error is undefined',
+					{ payload: {}, error: undefined },
+					true,
+					false,
+					false,
+				],
+				[
+					'Should not suppress 404 errors without missing-entity context',
+					{
+						payload: {},
+						error: {
+							status: 404,
+							message: 'Unexpected upstream failure',
+						},
+					},
+					true,
+					false,
+					false,
+				],
+				[
+					'Should suppress notifications for known not-found response codes',
+					{ payload: {}, error: { code: responseTemplates.modelNotFound.code } },
+					false,
+					false,
+					false,
+				],
+				[
+					'Should suppress notifications for missing-entity error messages',
+					{
+						payload: {},
+						error: {
+							message: 'Model does not exist anymore',
+							status: 404,
+						},
+					},
+					false,
+					false,
+					false,
+				],
+				[
+					'Should sanitise payload values and redact sensitive fields',
+					{
+						payload: {
+							password: 'super-secret',
+							apiKey: 'api-key-value',
+							authorizationHeader: 'Bearer token',
+							cookieData: 'cookie-value',
+							sessionId: 'session-value',
+							secretThing: 'secret-value',
+							nested: { token: 'nested-token' },
+							createdAt: dateValue,
+							buffer: Buffer.from('abcd'),
+							fn: () => true,
+							circular,
+						},
+						error: new Error('any error'),
+					},
+					true,
+					false,
+					false,
+				],
+				[
+					'Should enforce payload depth, array and object key limits',
+					{
+						payload: {
+							deepObject: { a: { b: { c: { d: { e: 'too deep' } } } } },
+							longArray: Array.from({ length: 25 }, (_, i) => i),
+							manyKeys,
+						},
+						error: new Error('any error'),
+					},
+					true,
+					false,
+					false,
+				],
+				[
+					'Should handle undefined payload value safely',
+					{ payload: undefined, error: new Error('any error') },
+					true,
+					false,
+					false,
+				],
+				[
+					'Should log notification failure and stack trace if sendSystemEmail throws with stack',
+					{ payload: {}, error: new Error('source failure') },
+					true,
+					true,
+					true,
+				],
+				[
+					'Should log notification failure message only when thrown error has no stack',
+					{ payload: {}, error: new Error('source failure') },
+					true,
+					true,
+					false,
+				],
+			];
+		};
+
+		const runTests = (tests) => {
+			describe.each(tests)('',
+				(description, testInput, succeed, skipNotification, notificationErrorHasStack) => {
+					test(`It should ${succeed ? 'succeed' : 'failed'} if ${description}`, async () => {
+						if (skipNotification && notificationErrorHasStack) {
+							const notificationError = new Error('failed to send');
+							Mailer.sendSystemEmail.mockRejectedValueOnce(notificationError);
+						} else if (skipNotification) {
+							Mailer.sendSystemEmail.mockRejectedValueOnce({ message: 'mailer failed without stack' });
+						}
+
+						await expect(ListenerErrorNotification.notifyListenerFailure({
+							eventName,
+							listenerName,
+							component,
+							payload: testInput.payload,
+							error: testInput.error,
+						})).resolves.toBeUndefined();
+
+						if (succeed && !skipNotification) {
+							const expectedPayload = formatter({
+								eventName,
+								listenerName,
+								component,
+								payload: testInput.payload,
+								error: testInput.error,
+							});
+
+							expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+							expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+								emailTemplates.ERROR_NOTIFICATION.name,
+								expectedPayload,
+							);
+							expect(logger.logDebug).not.toHaveBeenCalled();
+							expect(logger.logError).not.toHaveBeenCalled();
+							return;
+						}
+
+						if (!succeed) {
+							if (shouldSuppressForExpected(testInput.error)) {
+								expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+								expect(logger.logDebug).toHaveBeenCalledTimes(1);
+								expect(logger.logDebug).toHaveBeenCalledWith(
+									`Suppressed listener error notification for ${eventName}.${listenerName}`,
+								);
+								expect(logger.logError).not.toHaveBeenCalled();
+							}
+
+							return;
+						}
+
+						if (skipNotification) {
+							expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+							if (notificationErrorHasStack) {
+								expect(logger.logError).toHaveBeenCalledTimes(2);
+								expect(logger.logError).toHaveBeenNthCalledWith(1,
+									`Failed to notify listener failure for ${eventName}.${listenerName}: failed to send`);
+								expect(logger.logError).toHaveBeenNthCalledWith(2, expect.stringContaining('Error: failed to send'));
+							} else {
+								expect(logger.logError).toHaveBeenCalledTimes(1);
+								expect(logger.logError).toHaveBeenCalledWith(
+									`Failed to notify listener failure for ${eventName}.${listenerName}: mailer failed without stack`,
+								);
+							}
+						}
+					});
+				});
+		};
+
+		runTests(generateTests());
+	});
+};
 
 describe(determineTestGroup(__filename), () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
-	});
-
-	describe('shouldSuppressListenerError', () => {
-		test('Should suppress not-found model race conditions', () => {
-			expect(shouldSuppressListenerError(templates.modelNotFound)).toEqual(true);
-			expect(shouldSuppressListenerError({ message: 'Container deleted while queue was processing' })).toEqual(true);
-		});
-
-		test('Should suppress on 404 model missing context', () => {
-			expect(shouldSuppressListenerError({ status: 404, message: 'Model not found in project' })).toEqual(true);
-		});
-
-		test('Should suppress when code is provided through errorCode', () => {
-			expect(shouldSuppressListenerError({ errorCode: templates.projectNotFound.code })).toEqual(true);
-		});
-
-		test('Should suppress when code comes from errorReason', () => {
-			expect(shouldSuppressListenerError({
-				errorReason: { errorCode: templates.revisionNotFound.code },
-			})).toEqual(true);
-		});
-
-		test('Should not suppress unrelated errors', () => {
-			expect(shouldSuppressListenerError(templates.userNotFound)).toEqual(false);
-			expect(shouldSuppressListenerError(new Error(generateRandomString()))).toEqual(false);
-		});
-
-		test('Should not suppress empty or undefined error', () => {
-			expect(shouldSuppressListenerError()).toEqual(false);
-			expect(shouldSuppressListenerError(null)).toEqual(false);
-		});
-
-		test('Should not suppress unrelated 404 messages', () => {
-			expect(shouldSuppressListenerError({ statusCode: 404, message: 'User not found in teamspace' })).toEqual(false);
-		});
-	});
-
-	describe('serialisePayload', () => {
-		test('Should redact sensitive payload values and truncate oversized output', () => {
-			const payload = {
-				password: generateRandomString(),
-				nested: {
-					token: generateRandomString(),
-					authorization: generateRandomString(),
-					normal: generateRandomString(),
-				},
-				list: new Array(100).fill(generateRandomString()),
-			};
-
-			const serialised = serialisePayload(payload);
-			expect(serialised).toContain('[REDACTED]');
-			expect(serialised).not.toContain(payload.password);
-			expect(serialised).not.toContain(payload.nested.token);
-			expect(serialised.length).toBeLessThanOrEqual(4015);
-		});
-
-		test('Should serialise circular payloads safely', () => {
-			const payload = { a: generateRandomString() };
-			payload.self = payload;
-
-			const serialised = serialisePayload(payload);
-			expect(serialised).toContain('[Circular]');
-		});
-
-		test('Should limit payload depth and support date/function/buffer values', () => {
-			const payload = {
-				date: new Date('2024-01-01T00:00:00.000Z'),
-				fn: () => true,
-				buffer: Buffer.from('abc'),
-				nested: {
-					level2: {
-						level3: {
-							level4: {
-								level5: 'too-deep',
-							},
-						},
-					},
-				},
-			};
-
-			const serialised = serialisePayload(payload);
-			expect(serialised).toContain('[Function]');
-			expect(serialised).toContain('[Buffer length=3]');
-			expect(serialised).toContain('[Max depth reached]');
-			expect(serialised).toContain('2024-01-01T00:00:00.000Z');
-		});
-
-		test('Should return serialisation error when payload contains bigint', () => {
-			const serialised = serialisePayload({ value: BigInt(10) });
-			expect(serialised).toContain('Failed to serialise payload:');
-		});
-	});
-
-	describe('notifyListenerFailure', () => {
-		test('Should send ERROR_NOTIFICATION when error is unexpected', async () => {
-			const err = new Error(generateRandomString());
-			await notifyListenerFailure({
-				eventName: 'NEW_EVENT',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: err,
-			});
-
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					title: 'Event listener failure: NEW_EVENT',
-					scope: 'eventsListener',
-				}),
-			);
-		});
-
-		test('Should include fallback stack text when error has no stack', async () => {
-			await notifyListenerFailure({
-				eventName: 'NO_STACK_EVENT',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: generateRandomString(),
-			});
-
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					err: expect.objectContaining({
-						stack: 'No stack trace provided',
-					}),
-				}),
-			);
-		});
-
-		test('Should normalise code and status from response error shape', async () => {
-			await notifyListenerFailure({
-				eventName: 'RESPONSE_ERROR',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { value: generateRandomString() },
-				error: {
-					response: {
-						status: 503,
-						data: {
-							code: 'UPSTREAM_DOWN',
-						},
-					},
-					reason: 'Temporary outage',
-				},
-			});
-
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					message: expect.stringContaining('Error code: UPSTREAM_DOWN'),
-				}),
-			);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					message: expect.stringContaining('Error status: 503'),
-				}),
-			);
-		});
-
-		test('Should truncate long error messages and stacks', async () => {
-			const longMessage = 'm'.repeat(1200);
-			const longStack = 's'.repeat(7000);
-
-			await notifyListenerFailure({
-				eventName: 'LONG_ERROR',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { value: generateRandomString() },
-				error: { message: longMessage, stack: longStack },
-			});
-
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					err: expect.objectContaining({
-						message: expect.stringContaining('...(truncated)'),
-						stack: expect.stringContaining('...(truncated)'),
-					}),
-				}),
-			);
-		});
-
-		test('Should not send ERROR_NOTIFICATION for suppressed errors', async () => {
-			await notifyListenerFailure({
-				eventName: 'NEW_EVENT',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: templates.projectNotFound,
-			});
-
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
-		});
-
-		test('Should use fallback message when error has no recognisable message fields', async () => {
-			await notifyListenerFailure({
-				eventName: 'UNKNOWN_ERR',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: { foo: 'bar' },
-			});
-
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-				mailTemplates.ERROR_NOTIFICATION.name,
-				expect.objectContaining({
-					err: expect.objectContaining({
-						message: 'No error message available',
-					}),
-				}),
-			);
-		});
-
-		test('Should not throw if sending notification fails', async () => {
-			Mailer.sendSystemEmail.mockRejectedValueOnce(new Error(generateRandomString()));
-			await expect(notifyListenerFailure({
-				eventName: 'NEW_EVENT',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: new Error(generateRandomString()),
-			})).resolves.toBeUndefined();
-		});
-
-		test('Should log notify error stack if provided', async () => {
-			const notifyErr = {
-				message: generateRandomString(),
-				stack: generateRandomString(),
-			};
-
-			Mailer.sendSystemEmail.mockRejectedValueOnce(notifyErr);
-
-			await expect(notifyListenerFailure({
-				eventName: 'NEW_EVENT',
-				listenerName: 'listenerFn',
-				component: 'modelEvents',
-				payload: { message: generateRandomString() },
-				error: new Error(generateRandomString()),
-			})).resolves.toBeUndefined();
-
-			expect(logger.logError).toHaveBeenCalledTimes(2);
-			expect(logger.logError).toHaveBeenNthCalledWith(2, notifyErr.stack);
-		});
-	});
+	testNotifyListenerFailure();
 });
