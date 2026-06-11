@@ -16,10 +16,10 @@
  */
 
 /**
- * This script is used manually overwrite the processing state of model(s)/drawing(s)/clash run(s).
+ * This script is used to manually overwrite the processing state of model(s)/drawing(s)/clash run(s).
  * This is typically used if the queue had an unrecoverable failure and queued
- * processes were purged without being processed (i.e. items stuck in processing/queued state
- * when they no longer physically exists).
+ * processes were purged without being processed (i.e. items stuck in a processing/queued state
+ * when they no longer physically exist).
  *
  * NOTE: Running this script in any other situation may result in non deterministic behaviour.
  * Make sure you know what you're doing!
