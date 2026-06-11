@@ -16,9 +16,8 @@
  */
 
 /**
- * This script is used to check the processing status of models/drawings/clash runs.
- * Processing status should be 'ok' or 'failed'.
- * The utility script `resetProcessingFlag` can be used to reset zombie statuses.
+ * This script checks for models/drawings/clash runs stuck in non-terminal processing states.
+ * The utility script `resetProcessingFlags` can be used to reset zombie statuses.
  */
 
 const { v5Path } = require('../../../interop');
@@ -98,7 +97,7 @@ const run = async (teamspace, limit, notify) => {
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace', {
-		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targetted)',
+		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targeted)',
 		type: 'string',
 	}).option('limit', {
 		describe: 'Time limit (hours, default: 24) where models/drawings/clash runs may still be processing',

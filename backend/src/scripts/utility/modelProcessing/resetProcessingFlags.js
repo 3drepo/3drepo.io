@@ -21,7 +21,7 @@
  * processes were purged without being processed (i.e. items stuck in a processing/queued state
  * when they no longer physically exist).
  *
- * NOTE: Running this script in any other situation may result in non deterministic behaviour.
+ * NOTE: Running this script in any other situation may result in non-deterministic behaviour.
  * Make sure you know what you're doing!
  */
 
@@ -118,10 +118,10 @@ const run = async (teamspace, id, type) => {
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace', {
-		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targetted)',
+		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targeted)',
 		type: 'string',
 	}).option('id', {
-		describe: 'Target a specific item id (if unspecified, all items will be targetted)',
+		describe: 'Target a specific item id (if unspecified, all items will be targeted)',
 		type: 'string',
 	}).option('type', {
 		describe: 'Target a specific item type',
@@ -129,7 +129,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		type: 'string',
 	});
 	return yargs.command(commandName,
-		'Manually resets processing state. (Warning: This may introduce non deterministic behaviour to the application!)',
+		'Manually resets processing state. (Warning: This may introduce non-deterministic behaviour to the application!)',
 		argsSpec,
 		(argv) => run(argv.teamspace, argv.id, argv.type));
 };
