@@ -223,7 +223,8 @@ export class Users extends PureComponent<IProps, IState> {
 					disabled: this.props.usersProvisionedEnabled,
 				},
 				{
-					value: teamspacePermissions.find((perm) => perm.value === user.isAdmin)?.name,
+					value: !!user.isAdmin,
+					renderValue: (value) => teamspacePermissions.find((perm) => perm.value === value)?.name || '',
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
 					readOnly: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled,

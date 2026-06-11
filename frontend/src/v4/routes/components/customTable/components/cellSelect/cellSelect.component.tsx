@@ -23,14 +23,14 @@ interface IProps {
 	name?: string;
 	placeholder?: string;
 	readOnly?: boolean;
-	value?: string;
+	value?: unknown;
 	itemTemplate?: Component;
 	disabled?: boolean;
 	disabledPlaceholder?: boolean;
 	hidden?: boolean;
 	inputId?: string;
 	labelName?: string;
-	onChange: (event, selectedValue: string) => void;
+	onChange: (event, selectedValue: unknown) => void;
 	renderValue?: (value: unknown) => React.ReactNode
 }
 
@@ -102,6 +102,7 @@ export class CellSelect extends PureComponent<IProps> {
 				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={value}
+				renderValue={renderValue}
 				onChange={this.handleChange}
 			>
 				{this.renderOptions(options, itemTemplate)}
