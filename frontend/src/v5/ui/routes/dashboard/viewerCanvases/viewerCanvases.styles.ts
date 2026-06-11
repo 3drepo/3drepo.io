@@ -36,6 +36,10 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 		background-clip: padding-box;
 		z-index: 1;
 
+		${({ $is2DOpen }) => !$is2DOpen && css`
+			display: none;
+		`}
+
 		&:hover {
 			background-color: ${({ theme }) => theme.palette.tertiary.light};
 		}
@@ -61,9 +65,6 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 	}
 
 	${({ $is2DOpen }) => !$is2DOpen && css`
-		.Resizer {
-			display: none;
-		}
 		.Pane1 {
 			max-width: 100%;
 		}
