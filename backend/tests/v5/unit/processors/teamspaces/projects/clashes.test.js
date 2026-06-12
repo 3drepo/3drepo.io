@@ -220,6 +220,7 @@ const testCreateRun = () => {
 	const createClashRunWithObjects = async (meshes, metadataNodes = []) => {
 		const plan = {
 			...planData,
+			selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 			selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
 			selectionB: [{ container: generateRandomString(), revision: generateUUID() }],
 		};
@@ -271,25 +272,42 @@ const testCreateRun = () => {
 		}));
 	};
 
+	const generateConfigSet = (selection, meshes, unwantedMeshes = []) => {
+		const objects = generateGroupedMeshes(selection.container, meshes, unwantedMeshes);
+		return objects.length
+			? [{
+				teamspace,
+				container: selection.container,
+				revision: UUIDToString(selection.revision),
+				objects,
+			}]
+			: [];
+	};
+
 	describe('Create Clash Run', () => {
 		describe('General tests', () => {
 			test.each([
-				['no meshes found in set A', undefined, { ...meshDataObj, nonBimMeshes: [] }],
-				['no meshes found in set B', undefined, { ...meshDataObj, meshes: [], metadata: [] }],
 				['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
 				['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
 				['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
 				['there are unwanted metadata', undefined, { ...meshDataObj, unwantedMetadata: metadata.slice(2), unwantedMeshes: meshDataObj.meshes.slice(2) }],
+				['set B has no meshes but selfIntersectionsCheck is set to selectionA',
+					{ ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] },
+					{ ...meshDataObj, meshes: [], metadata: [] }],
+				['set A has no meshes but selfIntersectionsCheck is set to selectionB',
+					{ ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] },
+					{ ...meshDataObj, nonBimMeshes: [] }],
 			])('should create and queue the run when %s', async (desc, plan = planData, meshData = meshDataObj) => {
 				ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
 
 				// mocks for set A (no rules)
-				MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.nonBimMeshes);
+				if (meshData.nonBimMeshes.length) {
+					MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+				}
 				// mocks for set B (rules)
 				MetadataModel.getMetadataByRules.mockResolvedValueOnce(
 					{ matched: meshData.metadata, unwanted: meshData.unwantedMetadata });
-				MetadataModel.getMetadataByQuery.mockResolvedValueOnce(meshData.metadata);
 				if (meshData.metadata.length) {
 					Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.meshes.map((m) => m._id));
 				}
@@ -297,6 +315,9 @@ const testCreateRun = () => {
 					Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshes.map((m) => m._id));
 				}
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshes);
+				if (meshData.meshes.length) {
+					MetadataModel.getMetadataByQuery.mockResolvedValueOnce(meshData.metadata);
+				}
 
 				await Clashes.createRun(teamspace, project, plan, userId);
 
@@ -320,20 +341,45 @@ const testCreateRun = () => {
 						|| plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 					selfIntersectsB: plan.selfIntersectionsCheck === true
 						|| plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1],
-					setA: [{
-						teamspace,
-						container: plan.selectionA[0].container,
-						revision: UUIDToString(plan.selectionA[0].revision),
-						objects: generateGroupedMeshes(plan.selectionA[0].container, meshData.nonBimMeshes),
-					}],
-					setB: [{
-						teamspace,
-						container: plan.selectionB[0].container,
-						revision: UUIDToString(plan.selectionB[0].revision),
-						objects: generateGroupedMeshes(plan.selectionB[0].container, meshData.meshes,
-							meshData.unwantedMeshes),
-					}],
+					setA: generateConfigSet(plan.selectionA[0], meshData.nonBimMeshes),
+					setB: generateConfigSet(plan.selectionB[0], meshData.meshes, meshData.unwantedMeshes),
 				}));
+			});
+
+			describe('Aborted runs', () => {
+				test('should abort the run without queueing when no clashable objects are found', async () => {
+					ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+					ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+					MetadataModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });
+					ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+
+					await expect(Clashes.createRun(teamspace, project, planData, userId)).resolves.toEqual(runId);
+
+					expect(ClashRunsModel.createClashRun).toHaveBeenCalledTimes(1);
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
+						clashRunStatus.ABORTED,
+						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
+					expect(Scenes.getMeshNodeBounds).not.toHaveBeenCalled();
+				});
+
+				test('should abort the run when one set is empty and no self-intersection check can be run', async () => {
+					ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+					ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshDataObj.nonBimMeshes);
+					MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+					MetadataModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });
+					ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+
+					await expect(Clashes.createRun(teamspace, project, planData, userId)).resolves.toEqual(runId);
+
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
+						clashRunStatus.ABORTED,
+						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
+					expect(Scenes.getMeshNodeBounds).not.toHaveBeenCalled();
+				});
 			});
 
 			test('should merge multiple selections for the same container into one config entry', async () => {
@@ -347,6 +393,7 @@ const testCreateRun = () => {
 				const meshC = makeMesh({ _id: generateRandomString(), parent: otherParent });
 				const plan = {
 					...planData,
+					selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 					selectionA: [
 						{ container, revision },
 						{ container, revision },
@@ -382,8 +429,8 @@ const testCreateRun = () => {
 						},
 					],
 				}]);
-				expect(content.setB).toHaveLength(1);
-				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(2);
+				expect(content.setB).toEqual([]);
+				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			});
 
 			test('should create separate config entries for selections from different containers', async () => {
@@ -397,6 +444,7 @@ const testCreateRun = () => {
 				const meshB = makeMesh({ _id: generateRandomString(), parent: parentB });
 				const plan = {
 					...planData,
+					selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 					selectionA: [
 						{ container: containerA, revision: revisionA },
 						{ container: containerB, revision: revisionB },

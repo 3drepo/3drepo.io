@@ -24,7 +24,7 @@ const { readFile } = require('fs/promises');
 const Path = require('path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
@@ -352,15 +352,19 @@ const testCreateRun = () => {
 		const basicData = generateBasicData();
 		const modelWithNoRev = ServiceHelper.generateRandomModel();
 		const modelWithVoidRev = ServiceHelper.generateRandomModel();
-		const createRunModels = [modelWithNoRev, modelWithVoidRev];
+		const modelsWithoutScene = times(2, () => ServiceHelper.generateRandomModel());
+		const createRunModels = [modelWithNoRev, modelWithVoidRev, ...modelsWithoutScene];
 		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
 		const projectWithOwnPlanModels = times(2, () => ServiceHelper.generateRandomModel());
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
 		const revisions = models.map(() => ServiceHelper.generateRevisionEntry());
+		const revisionsWithoutScene = modelsWithoutScene.map(() => ServiceHelper.generateRevisionEntry());
 		const [
 			planWithMissingContainer, planWithNoRev, planWithVoidRev,
 		] = [ServiceHelper.generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
 			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
+		const planWithoutClashCandidates = ServiceHelper.generateClashPlan(
+			modelsWithoutScene[0]._id, modelsWithoutScene[1]._id);
 		const planInAnotherProject = ServiceHelper.generateClashPlan(
 			projectWithOwnPlanModels[0]._id, projectWithOwnPlanModels[1]._id);
 		const createScene = (model, revision) => {
@@ -385,6 +389,8 @@ const testCreateRun = () => {
 				)),
 				...models.map((model, index) => ServiceHelper.db.createRevision(teamspace,
 					project.id, model._id, revisions[index], modelTypes.CONTAINER)),
+				...modelsWithoutScene.map((model, index) => ServiceHelper.db.createRevision(teamspace,
+					project.id, model._id, revisionsWithoutScene[index], modelTypes.CONTAINER)),
 				...models.map((model, index) => createScene(model, revisions[index])),
 				ServiceHelper.db.createRevision(teamspace,
 					project.id, modelWithVoidRev._id, ServiceHelper.generateRevisionEntry(true), modelTypes.CONTAINER),
@@ -392,6 +398,7 @@ const testCreateRun = () => {
 					planWithMissingContainer,
 					planWithNoRev,
 					planWithVoidRev,
+					planWithoutClashCandidates,
 				]),
 				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
 					projectWithOwnPlanModels.map(({ _id }) => _id)),
@@ -447,6 +454,24 @@ const testCreateRun = () => {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
 			});
+		});
+
+		test('should abort the run without queueing if the selections do not resolve to clash candidates', async () => {
+			const res = await agent.post(route(teamspace, project.id,
+				planWithoutClashCandidates._id, users.tsAdmin.apiKey))
+				.expect(templates.ok.status);
+
+			const id = res.body._id;
+			const clashRun = await DB.findOne(teamspace, CLASH_RUNS_COL, { _id: stringToUUID(id) });
+			expect(clashRun).toEqual(expect.objectContaining({
+				status: clashRunStatus.ABORTED,
+				results: {
+					reason: 'The defined selections do not yield any candidates to execute a clash run.',
+				},
+			}));
+
+			const configPath = Path.join(queueConfig.shared_storage, id, 'clashConfig.json');
+			await expect(readFile(configPath, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
 		});
 	});
 };

@@ -135,7 +135,7 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 	}
 };
 
-const writeConfigSetEntry = async (teamspace, project, selections, stream, setName) => {
+const findObjectsForSelections = async (teamspace, project, selections = []) => {
 	const mergedSelections = {};
 
 	await Promise.all(selections.map(async ({ container, revision, rules = [] }) => {
@@ -147,13 +147,22 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 			mergedSelections[container].objects);
 	}));
 
-	const selectionEntries = await Promise.all(Object.values(mergedSelections)
-		.map(async ({ container, revision, objects }) => ({
-			container,
-			revision,
-			objects: await applyExternalIds(teamspace, container, revision, objects),
-		})));
+	const selectionEntries = [];
+	await Promise.all(Object.values(mergedSelections)
+		.map(async ({ container, revision, objects }) => {
+			if (Object.keys(objects).length) {
+				selectionEntries.push({
+					container,
+					revision,
+					objects: await applyExternalIds(teamspace, container, revision, objects),
+				});
+			}
+		}));
 
+	return selectionEntries;
+};
+
+const writeConfigSetEntry = async (teamspace, project, selectionEntries, stream, setName) => {
 	stream.write(`"${setName}":[`);
 	let firstSelection = true;
 	for (const { container, revision, objects } of selectionEntries) {
@@ -188,22 +197,58 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 	stream.write(']');
 };
 
-Clashes.createRun = async (teamspace, project, plan, user) => {
-	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
-	const { type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
-	const runId = await createClashRun(teamspace, project, plan, user);
+const getClashRunContext = async (teamspace, project, plan) => {
+	const { type, tolerance, selfIntersectionsCheck } = plan;
+
+	return {
+		type,
+		tolerance,
+		selfIntersectsA: selfIntersectionsCheck === true
+			|| selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+		selfIntersectsB: selfIntersectionsCheck === true
+			|| selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1],
+		selectionA: await findObjectsForSelections(teamspace, project, plan.selectionA),
+		selectionB: await findObjectsForSelections(teamspace, project, plan.selectionB),
+	};
+};
+
+const sendClashRunToQueue = async (teamspace, project, runId, context) => {
+	const { type, tolerance, selfIntersectsA, selfIntersectsB, selectionA, selectionB } = context;
 	const configStream = new PassThrough();
 	configStream.write('{');
 	configStream.write(`"type":${JSON.stringify(type)},`);
 	configStream.write(`"tolerance":${JSON.stringify(tolerance)},`);
-	configStream.write(`"selfIntersectsA":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
-	configStream.write(`"selfIntersectsB":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
+	configStream.write(`"selfIntersectsA":${JSON.stringify(selfIntersectsA)},`);
+	configStream.write(`"selfIntersectsB":${JSON.stringify(selfIntersectsB)},`);
 	await writeConfigSetEntry(teamspace, project, selectionA, configStream, 'setA');
 	configStream.write(',');
 	await writeConfigSetEntry(teamspace, project, selectionB, configStream, 'setB');
 	configStream.end('}');
 
 	await queueClashRun(teamspace, project, UUIDToString(runId), configStream);
+};
+
+Clashes.createRun = async (teamspace, project, plan, user) => {
+	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
+	const [runId, context] = await Promise.all([
+		createClashRun(teamspace, project, plan, user),
+		getClashRunContext(teamspace, project, plan),
+	]);
+	const { selectionA, selectionB, selfIntersectsA, selfIntersectsB } = context;
+	const hasCompositeObjects = (selectionEntries) => selectionEntries
+		.some(({ objects }) => Object.keys(objects).length);
+	const hasObjectsInA = hasCompositeObjects(selectionA);
+	const hasObjectsInB = hasCompositeObjects(selectionB);
+
+	if (!(hasObjectsInA && hasObjectsInB)
+		&& !(selfIntersectsA && hasObjectsInA)
+		&& !(selfIntersectsB && hasObjectsInB)) {
+		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
+			{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+	} else {
+		await sendClashRunToQueue(teamspace, project, runId, context);
+	}
+
 	return runId;
 };
 
