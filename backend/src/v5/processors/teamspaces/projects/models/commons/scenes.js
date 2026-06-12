@@ -126,7 +126,7 @@ Scene.getBoundsForGroupsOfMeshNodes = async (teamspace, project, container, revi
 	/* Get all the transforms from all parents and their ancestors (this is effectively a recursion loop) */
 	const transforms = {};
 	const getTransform = (parentId) => transforms[UUIDToString(parentId)];
-	let parentIds = unique(Object.values(meshToBounds).flatMap(({ parent }) => parent ?? []));
+	let parentIds = unique(Object.values(meshToBounds).map(({ parent }) => parent));
 	while (parentIds.length) {
 		const missingParentIds = new Set(parentIds.map(UUIDToString));
 
@@ -160,10 +160,6 @@ Scene.getBoundsForGroupsOfMeshNodes = async (teamspace, project, container, revi
 		const parentIdStr = UUIDToString(parentId);
 		if (!cumulativeTransforms[parentIdStr]) {
 			const parent = transforms[parentIdStr];
-			if (!parent) {
-				throw new Error(`Invalid scene data: transformation ${parentIdStr} is missing`);
-			}
-
 			cumulativeTransforms[parentIdStr] = GeoMaths.matrices.multiply(
 				getCumulativeTransform(parent.parent),
 				parent.transform,

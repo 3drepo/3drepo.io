@@ -260,8 +260,9 @@ const testGetBoundsForGroupsOfMeshNodes = () => {
 
 		test('should calculate bounds for multiple groups using shared node lookups', async () => {
 			const meshIds = times(3, generateUUID);
+			const missingMeshId = generateUUID();
 			const parentId = generateUUID();
-			const meshIdGroups = [[meshIds[0]], [meshIds[1], meshIds[2]]];
+			const meshIdGroups = [[meshIds[0]], [meshIds[1], missingMeshId, meshIds[2]]];
 			const meshNodes = [
 				{ _id: meshIds[0], parents: [parentId], bounding_box: [[0, 0, 0], [1, 1, 1]] },
 				{ _id: meshIds[1], parents: [parentId], bounding_box: [[2, 2, 2], [3, 3, 3]] },
@@ -287,7 +288,7 @@ const testGetBoundsForGroupsOfMeshNodes = () => {
 			]);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
-				_id: { $in: meshIds },
+				_id: { $in: meshIdGroups.flat() },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2, teamspace, project, container, {

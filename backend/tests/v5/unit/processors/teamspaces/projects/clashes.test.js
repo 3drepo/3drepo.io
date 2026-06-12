@@ -348,6 +348,27 @@ const testCreateRun = () => {
 			});
 
 			describe('Aborted runs', () => {
+				test('should abort the run when no selections are defined', async () => {
+					const plan = {
+						type: CLASH_TYPES.HARD,
+						tolerance: generateRandomNumber(),
+						selfIntersectionsCheck: false,
+					};
+
+					ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+
+					await expect(Clashes.createRun(teamspace, project, plan, userId)).resolves.toEqual(runId);
+
+					expect(ClashRunsModel.createClashRun).toHaveBeenCalledTimes(1);
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
+						clashRunStatus.ABORTED,
+						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+					expect(ScenesModel.getNodesByQuery).not.toHaveBeenCalled();
+					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
+					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
+				});
+
 				test('should abort the run without queueing when no clashable objects are found', async () => {
 					ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
 					ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
