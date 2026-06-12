@@ -301,6 +301,19 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 
+export const normalizeTicketAssignees = (ticket: ITicket) => {
+	if (!ticket) return ticket;
+	if (ticket.properties?.[IssueProperties.ASSIGNEES] !== undefined) return ticket;
+
+	return {
+		...ticket,
+		properties: {
+			...(ticket.properties || {}),
+			[IssueProperties.ASSIGNEES]: [],
+		},
+	};
+};
+
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
 
 const fillEmptyOverrides = (values: Partial<ITicket>) => {
