@@ -281,8 +281,8 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			}
 		} else {
 			const newTicket = cloneDeep(baseNewTicket);
-			const objectAIdType = clashIdTypeToTicketType[clash.a?.idType] ?? defaultClashIdType;
-			const objectBIdType = clashIdTypeToTicketType[clash.b?.idType] ?? defaultClashIdType;
+			const objectAIdType = clashIdTypeToTicketType[clash.a.idType] ?? defaultClashIdType;
+			const objectBIdType = clashIdTypeToTicketType[clash.b.idType] ?? defaultClashIdType;
 			newTicket.title = `[${clashContext.planName}] Clash`;
 			newTicket.modules[CLOUD_CLASH] = newTicket.modules[CLOUD_CLASH] ?? {};
 			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = clashContext.planId;
@@ -291,9 +291,9 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			newTicket.modules[CLOUD_CLASH][CLASH_ID] = clashId;
 			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_NAME] = clashContext.planName;
 			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID_TYPE] = objectAIdType;
-			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID] = clash.a?.id;
+			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID] = clash.a.id;
 			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID_TYPE] = objectBIdType;
-			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID] = clash.b?.id;
+			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID] = clash.b.id;
 			updateClashPinAndDistance(newTicket, clashContext, clash);
 			// eslint-disable-next-line no-await-in-loop
 			await updateDefaultView(teamspace, project, newTicket, clashContext, clash);
@@ -305,17 +305,17 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 	return { ticketsToUpdate, ticketsToCreate };
 };
 
-const resolveTickets = (tickets, clashContext) => (
+const resolveTickets = (tickets, statusInfo) => (
 	tickets
 		.flatMap((ticket) => {
 			const ticketStatus = ticket?.properties?.[STATUS];
 
-			if (ticketStatus !== clashContext.statusInfo.defaultStatuses.onResolved
-				&& !clashContext.statusInfo.closedStatuses[ticketStatus]
-				&& !clashContext.statusInfo.voidStatuses[ticketStatus]) {
+			if (ticketStatus !== statusInfo.defaultStatuses.onResolved
+				&& !statusInfo.closedStatuses[ticketStatus]
+				&& !statusInfo.voidStatuses[ticketStatus]) {
 				return [{
 					_id: ticket._id,
-					data: { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onResolved } },
+					data: { properties: { [STATUS]: statusInfo.defaultStatuses.onResolved } },
 				}];
 			}
 
@@ -451,7 +451,7 @@ TicketsClashes.processClashResults = async (
 	const ticketsToProcess = {
 		ticketsToUpdate: [
 			...processedClashes.ticketsToUpdate,
-			...resolveTickets(Object.values(clashIdToTicket), clashContext),
+			...resolveTickets(Object.values(clashIdToTicket), statusInfo),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};
