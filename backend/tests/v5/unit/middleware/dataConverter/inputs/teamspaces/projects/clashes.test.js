@@ -155,6 +155,10 @@ const testValidateNewPlanData = () => {
 		['with valid data (with ticket config)', true, { ...planData, tickets: ticketData }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
 		['with valid data (with ticket config and built in default statuses)', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }],
 		['with valid data (with ticket config and custom default statuses)', true, { ...planData, tickets: { ...ticketData, template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
+		['with hide other objects set to true', true, { ...planData, tickets: { ...ticketData, hideOtherObjects: true } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), hideOtherObjects: true } }],
+		['with hide other objects set to false', true, { ...planData, tickets: { ...ticketData, hideOtherObjects: false } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with hide other objects set to null', false, { ...planData, tickets: { ...ticketData, hideOtherObjects: null } }],
+		['with invalid hide other objects value', false, { ...planData, tickets: { ...ticketData, hideOtherObjects: generateRandomString() } }],
 		['with empty default statuses', true, { ...planData, tickets: { ...ticketData, defaultStatuses: {} } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
 		['with null default statuses', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onResolved: null } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
 		['with invalid default status value', false, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: generateRandomString() } } }],
@@ -270,6 +274,7 @@ const testValidateUpdatePlanData = () => {
 	const planWithTemplateWithoutCloudClash = generateUUID();
 	const planWithoutDefaultStatusesId = generateUUID();
 	const planWithAllTriggersId = generateUUID();
+	const planWithHideOtherObjectsId = generateUUID();
 
 	const ticketData = {
 		federation: recognisedFederations[0],
@@ -310,6 +315,10 @@ const testValidateUpdatePlanData = () => {
 	const oldPlanDataWithAllTriggers = {
 		...oldPlanData,
 		trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION],
+	};
+	const oldPlanDataWithHideOtherObjects = {
+		...oldPlanData,
+		tickets: { ...ticketData, hideOtherObjects: true },
 	};
 
 	const expectedValueAtCreationUpdate = [
@@ -425,6 +434,13 @@ const testValidateUpdatePlanData = () => {
 		['with null default statuses fields resulting in an empty object', true, { tickets: { defaultStatuses: { onNew: null, onResolved: null, onReopened: null } } }, { tickets: { defaultStatuses: null } }],
 		['with custom default statuses', true, { tickets: { template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { tickets: { template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
 		['with new template that invalidates stored default statuses', false, { tickets: { template: templateWithCustomStatuses } }],
+		['with hide other objects set to true', true, { tickets: { hideOtherObjects: true } }],
+		['with same hide other objects value', false, { tickets: { hideOtherObjects: true } }, undefined, planWithHideOtherObjectsId],
+		['with hide other objects set to false without a stored flag', false, { tickets: { hideOtherObjects: false } }],
+		['with hide other objects set to false with a stored flag', false, { tickets: { hideOtherObjects: false } }, undefined, planWithHideOtherObjectsId],
+		['with hide other objects set to null without a stored flag', true, { tickets: { hideOtherObjects: null } }],
+		['with hide other objects set to null with a stored flag', true, { tickets: { hideOtherObjects: null } }, undefined, planWithHideOtherObjectsId],
+		['with invalid hide other objects value', false, { tickets: { hideOtherObjects: generateRandomString() } }],
 		['with null creation values', true, { tickets: { valuesAtCreation: null } }],
 		['with invalid creation values', false, { tickets: { valuesAtCreation: [{ property: generateRandomString(), value: generateRandomString() }] } }],
 		['with same creation values', false, { tickets: { valuesAtCreation: oldPlanData.tickets.valuesAtCreation } }],
@@ -469,6 +485,9 @@ const testValidateUpdatePlanData = () => {
 				}
 				if (UUIDToString(id) === UUIDToString(planWithAllTriggersId)) {
 					return Promise.resolve(oldPlanDataWithAllTriggers);
+				}
+				if (UUIDToString(id) === UUIDToString(planWithHideOtherObjectsId)) {
+					return Promise.resolve(oldPlanDataWithHideOtherObjects);
 				}
 				return Promise.reject(templates.clashPlanNotFound);
 			});

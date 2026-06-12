@@ -857,11 +857,13 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	hasId = true,
 	container = ServiceHelper.generateUUIDString(),
 	nObjects = 3,
+	excludeDefinedObjects,
 } = {}) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = deleteIfUndefined({
 		_id: hasId ? genId() : undefined,
 		name: ServiceHelper.generateRandomString(),
+		excludeDefinedObjects,
 	});
 
 	if (isSmart) {

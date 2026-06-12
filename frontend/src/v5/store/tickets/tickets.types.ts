@@ -169,6 +169,7 @@ export type Group = {
 	description?: string,
 	objects?: { container: string, _ids: string[] }[],
 	rules?: IGroupRule[],
+	excludeDefinedObjects?: boolean,
 };
 
 export type V4GroupObjects = {
