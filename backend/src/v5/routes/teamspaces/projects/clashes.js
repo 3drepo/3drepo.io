@@ -214,6 +214,10 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: Set the ticket status for reopened clash tickets
 	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -381,6 +385,11 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: Default status for reopened clash tickets
 	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     nullable: true
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted, null removes the flag
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

@@ -352,7 +352,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 			active: categorizedClashes.active.length,
 			resolved: categorizedClashes.resolved.length,
 		} });
-	publish(events.CLASH_RUN_PROCESSED, {
+	publish(events.CLASH_RUN_RESULTS_PROCESSED, {
 		teamspace,
 		project,
 		runId,
