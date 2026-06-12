@@ -235,18 +235,16 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 		getClashRunContext(teamspace, project, plan),
 	]);
 	const { selectionA, selectionB, selfIntersectsA, selfIntersectsB } = context;
-	const hasCompositeObjects = (selectionEntries) => selectionEntries
-		.some(({ objects }) => Object.keys(objects).length);
-	const hasObjectsInA = hasCompositeObjects(selectionA);
-	const hasObjectsInB = hasCompositeObjects(selectionB);
+	const hasObjectsInA = !!selectionA.length;
+	const hasObjectsInB = !!selectionB.length;
 
-	if (!(hasObjectsInA && hasObjectsInB)
-		&& !(selfIntersectsA && hasObjectsInA)
-		&& !(selfIntersectsB && hasObjectsInB)) {
+	if ((hasObjectsInA && hasObjectsInB)
+		|| (selfIntersectsA && hasObjectsInA)
+		|| (selfIntersectsB && hasObjectsInB)) {
+		await sendClashRunToQueue(teamspace, project, runId, context);
+	} else {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
 			{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
-	} else {
-		await sendClashRunToQueue(teamspace, project, runId, context);
 	}
 
 	return runId;
