@@ -666,7 +666,7 @@ const testProcessClashResults = () => {
 					{ stats: { new: 10, active: 0, resolved: 0 } });
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_RESULTS_PROCESSED, {
 					teamspace,
 					project,
 					runId: corId,
@@ -735,7 +735,7 @@ const testProcessClashResults = () => {
 					{ stats: { new: 5, active: 5, resolved: 5 } });
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_RESULTS_PROCESSED, {
 					teamspace,
 					project,
 					runId: corId,
