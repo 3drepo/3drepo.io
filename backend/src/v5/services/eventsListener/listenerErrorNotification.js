@@ -17,7 +17,6 @@
 
 const { templates: emailTemplates } = require('../mailer/mailer.constants');
 const { logger } = require('../../utils/logger');
-const { templates: responseTemplates } = require('../../utils/responseCodes');
 const { sendSystemEmail } = require('../mailer');
 
 const MAX_DEPTH = 4;
@@ -32,20 +31,10 @@ const REDACTED_KEYS = [
 	'apikey',
 	'secret',
 ];
-const SUPPRESSED_CODES = new Set([
-	responseTemplates.modelNotFound.code,
-	responseTemplates.containerNotFound.code,
-	responseTemplates.projectNotFound.code,
-	responseTemplates.revisionNotFound.code,
-	responseTemplates.drawingNotFound.code,
-	responseTemplates.federationNotFound.code,
-	responseTemplates.clashPlanNotFound.code,
-	responseTemplates.clashRunNotFound.code,
-]);
 const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation|clash)/i;
 const MISSING_PATTERN = /(not found|deleted|does not exist|no longer exists)/i;
 
-const ListenerNotificationError = {};
+const ListenerFailureNotifier = {};
 
 const normaliseError = (error) => {
 	if (!error) {
@@ -118,14 +107,14 @@ const sanitise = (value, depth = 0, seen = new WeakSet()) => {
 };
 
 const shouldSuppressListenerError = (error) => {
-	const { code, status, message } = normaliseError(error);
+	const { status, message } = normaliseError(error);
 	const safeMessage = `${message ?? ''}`;
 	const hasMissingContext = ENTITY_PATTERN.test(safeMessage) && MISSING_PATTERN.test(safeMessage);
 
-	return SUPPRESSED_CODES.has(code) || hasMissingContext || (status === 404 && hasMissingContext);
+	return status === 404 || hasMissingContext;
 };
 
-ListenerNotificationError.notifyListenerFailure = async ({
+ListenerFailureNotifier.notifyListenerFailure = async ({
 	eventName,
 	listenerName,
 	component,
@@ -161,12 +150,12 @@ ListenerNotificationError.notifyListenerFailure = async ({
 				},
 			},
 		);
-	} catch (notifyErr) {
-		logger.logError(`Failed to notify listener failure for ${eventName}.${listenerName}: ${notifyErr.message}`);
-		if (notifyErr.stack) {
-			logger.logError(notifyErr.stack);
+	} catch (err) {
+		logger.logError(`Failed to notify listener failure for ${eventName}.${listenerName}: ${err?.message}`);
+		if (err?.stack) {
+			logger.logError(err?.stack);
 		}
 	}
 };
 
-module.exports = ListenerNotificationError;
+module.exports = ListenerFailureNotifier;

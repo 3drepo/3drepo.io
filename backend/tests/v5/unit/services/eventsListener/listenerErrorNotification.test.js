@@ -49,16 +49,6 @@ const MAX_DEPTH = 4;
 const MAX_ARRAY_LENGTH = 20;
 const MAX_OBJECT_KEYS = 40;
 const REDACTED_KEYS = ['password', 'token', 'authorization', 'cookie', 'session', 'apikey', 'secret'];
-const SUPPRESSED_CODES = new Set([
-	responseTemplates.modelNotFound.code,
-	responseTemplates.containerNotFound.code,
-	responseTemplates.projectNotFound.code,
-	responseTemplates.revisionNotFound.code,
-	responseTemplates.drawingNotFound.code,
-	responseTemplates.federationNotFound.code,
-	responseTemplates.clashPlanNotFound.code,
-	responseTemplates.clashRunNotFound.code,
-]);
 const ENTITY_PATTERN = /(model|container|project|revision|drawing|federation|clash)/i;
 const MISSING_PATTERN = /(not found|deleted|does not exist|no longer exists)/i;
 
@@ -128,11 +118,11 @@ const sanitiseForExpected = (value, depth = 0, seen = new WeakSet()) => {
 };
 
 const shouldSuppressForExpected = (error) => {
-	const { code, status, message } = normaliseErrorForExpected(error);
+	const { status, message } = normaliseErrorForExpected(error);
 	const safeMessage = `${message ?? ''}`;
 	const hasMissingContext = ENTITY_PATTERN.test(safeMessage) && MISSING_PATTERN.test(safeMessage);
 
-	return SUPPRESSED_CODES.has(code) || hasMissingContext || (status === 404 && hasMissingContext);
+	return status === 404 || hasMissingContext;
 };
 
 const formatter = ({ eventName, listenerName, component, payload, error }) => {
