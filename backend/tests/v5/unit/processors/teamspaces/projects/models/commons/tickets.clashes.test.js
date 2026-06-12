@@ -131,7 +131,7 @@ const testProcessClashResults = () => {
 		b: {
 			container: baseContext.selectionB[0].container,
 			idType: clashObjectIdTypes.IFC,
-			id: generateRandomString(),
+			id: generateRandomString(22),
 		},
 		positions: [
 			[1, 2, 3],
@@ -139,8 +139,8 @@ const testProcessClashResults = () => {
 		],
 	};
 	const clashWithBbox = { ...clash, bbox: { min: [0, 0, 0], max: [10, 10, 10] } };
-	const swappedClashWithBbox = {
-		...clashWithBbox,
+	const swappedSelectionClash = {
+		...clash,
 		index: generateRandomString(),
 		a: {
 			container: baseContext.selectionB[0].container,
@@ -150,7 +150,26 @@ const testProcessClashResults = () => {
 		b: {
 			container: baseContext.selectionA[0].container,
 			idType: clashObjectIdTypes.IFC,
-			id: generateRandomString(),
+			id: generateRandomString(22),
+		},
+	};
+	const swappedClashWithBbox = {
+		...swappedSelectionClash,
+		index: generateRandomString(),
+		bbox: clashWithBbox.bbox,
+	};
+	const sameContainerClashContainer = generateUUIDString();
+	const sameContainerClash = {
+		...clash,
+		a: {
+			container: sameContainerClashContainer,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
+		},
+		b: {
+			container: sameContainerClashContainer,
+			idType: clashObjectIdTypes.IFC,
+			id: generateRandomString(22),
 		},
 	};
 	const generateExistingTicket = (
@@ -209,44 +228,83 @@ const testProcessClashResults = () => {
 		properties: { ...defaultValueExpectedRes.properties, ...onNewExpectedRes.properties },
 		modules: defaultValueExpectedRes.modules,
 	};
+	const defaultViewOnlyTemplate = { ...baseTemplate, config: { defaultView: true } };
 	const defaultViewAndPinTemplate = { ...baseTemplate, config: { defaultView: true, pin: true } };
 	const defaultViewAndPinUnit = units.M;
-	const expectedViewObject = ({ container, idType, id }) => ({
-		container,
-		[idType]: [idType === clashObjectIdTypes.INTERNAL ? stringToUUID(id) : id],
+	const defaultViewCamera = {
+		position: [-17.365799280415647, 18.417875965717393, 19.823315210249056],
+		up: [0.3728146553039551, 0.8944026231765747, -0.2470894455909729],
+		forward: [0.7455270290374756, -0.4472627639770508, -0.49411076307296753],
+		type: CameraType.PERSPECTIVE,
+	};
+	const getExpectedViewObjects = (clashObjects) => {
+		const containerEntries = {};
+		clashObjects.forEach(({ container, idType, id }) => {
+			const containerKey = UUIDToString(container);
+			containerEntries[containerKey] = containerEntries[containerKey] ?? { container };
+			containerEntries[containerKey][idType] = containerEntries[containerKey][idType] ?? [];
+			containerEntries[containerKey][idType].push(
+				idType === clashObjectIdTypes.INTERNAL ? stringToUUID(id) : id,
+			);
+		});
+
+		return Object.values(containerEntries);
+	};
+	const getObjectGroup = (name, color, clashObject) => ({
+		group: {
+			name,
+			objects: getExpectedViewObjects([clashObject]),
+		},
+		color,
 	});
-	const getDefaultViewAndPinExpectedRes = (clashData) => ({
-		federationUnit: defaultViewAndPinUnit,
-		properties: {
-			[PIN]: convertArrayUnits(clashData.positions[0], units.MM, defaultViewAndPinUnit),
-			[DEFAULT_VIEW]: {
-				camera: {
-					position: [-17.365799280415647, 18.417875965717393, 19.823315210249056],
-					up: [0.3728146553039551, 0.8944026231765747, -0.2470894455909729],
-					forward: [0.7455270290374756, -0.4472627639770508, -0.49411076307296753],
-					type: CameraType.PERSPECTIVE,
-				},
-				state: {
-					[viewGroups.COLORED]: [
-						{
-							group: {
-								name: 'Object A',
-								objects: [expectedViewObject(clashData.a)],
-							},
-							color: [255, 0, 0],
-						},
-						{
-							group: {
-								name: 'Object B',
-								objects: [expectedViewObject(clashData.b)],
-							},
-							color: [0, 255, 0],
-						},
-					],
-				},
-			},
+	const getContextGroup = (clashData) => ({
+		group: {
+			name: 'Other Objects',
+			excludeDefinedObjects: true,
+			objects: getExpectedViewObjects([clashData.a, clashData.b]),
 		},
 	});
+	const getDefaultViewExpectedRes = (clashData, { federationUnit, hideOtherObjects } = {}) => {
+		const objectAGroup = getObjectGroup('Object A', [255, 0, 0], clashData.a);
+		const objectBGroup = getObjectGroup('Object B', [0, 255, 0], clashData.b);
+		const contextGroup = getContextGroup(clashData);
+		const state = hideOtherObjects
+			? { [viewGroups.COLORED]: [objectAGroup, objectBGroup], [viewGroups.HIDDEN]: [contextGroup] }
+			: {
+				[viewGroups.COLORED]: [
+					objectAGroup,
+					objectBGroup,
+					{ ...contextGroup, color: [182, 188, 193], opacity: 0.02 },
+				],
+			};
+
+		return {
+			...(federationUnit ? { federationUnit } : {}),
+			properties: {
+				...(federationUnit ? { [PIN]: convertArrayUnits(clashData.positions[0], units.MM, federationUnit) } : {}),
+				[DEFAULT_VIEW]: {
+					...(clashData.bbox ? { camera: defaultViewCamera } : {}),
+					state,
+				},
+			},
+		};
+	};
+	const sameContainerDefaultViewExpectedRes = {
+		...getDefaultViewExpectedRes(sameContainerClash),
+		modules: { [CLOUD_CLASH]: { [OBJECT_A_ID_TYPE]: idTypeLabels.IFC } },
+	};
+	const swappedSelectionDefaultViewExpectedRes = {
+		...getDefaultViewExpectedRes(swappedSelectionClash),
+		meshLookup: {
+			container: swappedSelectionClash.a.container,
+			revision: baseContext.selectionB[0].revision,
+			id: swappedSelectionClash.a.id,
+		},
+	};
+	const defaultViewAndPinExpectedRes = getDefaultViewExpectedRes(
+		clashWithBbox, { federationUnit: defaultViewAndPinUnit });
+	const hideOtherObjectsExpectedRes = getDefaultViewExpectedRes(
+		clashWithBbox, { federationUnit: defaultViewAndPinUnit, hideOtherObjects: true });
 	const revitIdExpectedRes = {
 		modules: { [CLOUD_CLASH]: { [OBJECT_A_ID_TYPE]: idTypeLabels.REVIT, [OBJECT_B_ID_TYPE]: idTypeLabels.REVIT } },
 	};
@@ -301,15 +359,18 @@ const testProcessClashResults = () => {
 				['Should create tickets using the configured new clash status', baseContext, baseTemplate, { defaultStatuses }, { new: [clash], active: [], resolved: [] }, onNewExpectedRes],
 				['Should create tickets with default values and configured new clash status', baseContext, baseTemplate, { valuesAtCreation, defaultStatuses }, { new: [clash], active: [], resolved: [] }, combinedExpectedRes],
 				['Should calculate the distance for new clearance clash tickets', { ...baseContext, clashType: CLASH_TYPES.CLEARANCE }, baseTemplate, {}, { new: [clash], active: [], resolved: [] }, { modules: { [CLOUD_CLASH]: { [DISTANCE_M]: 0.005 } } }],
-				['Should create tickets with default view and pin if configured', baseContext, defaultViewAndPinTemplate, {}, { new: [clashWithBbox], active: [], resolved: [] }, getDefaultViewAndPinExpectedRes(clashWithBbox)],
+				['Should merge same-container clash objects in the default view context group', baseContext, defaultViewOnlyTemplate, {}, { new: [sameContainerClash], active: [], resolved: [] }, sameContainerDefaultViewExpectedRes],
+				['Should resolve default view object revisions by container', baseContext, defaultViewOnlyTemplate, {}, { new: [swappedSelectionClash], active: [], resolved: [] }, swappedSelectionDefaultViewExpectedRes],
+				['Should create tickets with default view and pin if configured', baseContext, defaultViewAndPinTemplate, {}, { new: [clashWithBbox], active: [], resolved: [] }, defaultViewAndPinExpectedRes],
 				['Should find default view object revisions by container across both selections', baseContext, defaultViewAndPinTemplate, {}, { new: [swappedClashWithBbox], active: [], resolved: [] }, {
-					...getDefaultViewAndPinExpectedRes(swappedClashWithBbox),
+					...getDefaultViewExpectedRes(swappedClashWithBbox, { federationUnit: defaultViewAndPinUnit }),
 					meshLookup: {
 						container: swappedClashWithBbox.a.container,
 						revision: baseContext.selectionB[0].revision,
 						id: swappedClashWithBbox.a.id,
 					},
 				}],
+				['Should hide other objects in generated default views if configured', baseContext, defaultViewAndPinTemplate, { hideOtherObjects: true }, { new: [clashWithBbox], active: [], resolved: [] }, hideOtherObjectsExpectedRes],
 			])(
 				'%s', async (desc, context, template, clashPlanExtras, clashResults, expectedRes = {}) => {
 					const { meshLookup, ...expectedTicketData } = expectedRes;
@@ -395,7 +456,7 @@ const testProcessClashResults = () => {
 						});
 					expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 					if (meshLookup) {
-						expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(1);
+						expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(2);
 						expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledWith(
 							teamspace,
 							project,
