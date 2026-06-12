@@ -141,7 +141,7 @@ const generateProcessedEventData = () => ({
 });
 
 const testClashRunProcessed = () => {
-	describe(events.CLASH_RUN_PROCESSED, () => {
+	describe(events.CLASH_RUN_RESULTS_PROCESSED, () => {
 		const eventData = generateProcessedEventData();
 		const basePlan = {
 			_id: eventData.plan._id,
@@ -164,7 +164,7 @@ const testClashRunProcessed = () => {
 		const template = generateRandomObject();
 
 		test.each([
-			[`Should process clash tickets if there is a ${events.CLASH_RUN_PROCESSED}`, planWithTicketConfiguration, undefined, undefined, undefined, undefined],
+			[`Should process clash tickets if there is a ${events.CLASH_RUN_RESULTS_PROCESSED}`, planWithTicketConfiguration, undefined, undefined, undefined, undefined],
 			['Should not process clash tickets if the plan cannot be found', undefined, new Error(), undefined, undefined, undefined],
 			['Should not process clash tickets if the plan has no ticket configuration', planWithoutTicketConfiguration, undefined, undefined, undefined, undefined],
 			['Should not process clash tickets if the federation cannot be found', basePlan, undefined, new Error(), undefined, undefined],
@@ -191,7 +191,7 @@ const testClashRunProcessed = () => {
 				TicketsClashes.processClashResults.mockRejectedValueOnce(processClashResultsError);
 			}
 
-			await publishAndWaitForEvent(events.CLASH_RUN_PROCESSED, eventData);
+			await publishAndWaitForEvent(events.CLASH_RUN_RESULTS_PROCESSED, eventData);
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,

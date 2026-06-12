@@ -90,7 +90,7 @@ const ClashEventsListener = {};
 ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
-	subscribe(events.CLASH_RUN_PROCESSED, clashRunProcessed);
+	subscribe(events.CLASH_RUN_RESULTS_PROCESSED, clashRunProcessed);
 };
 
 module.exports = ClashEventsListener;
