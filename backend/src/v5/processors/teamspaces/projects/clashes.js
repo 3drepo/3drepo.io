@@ -36,8 +36,7 @@ const {
 	deletePlansByProject,
 	updatePlan,
 } = require('../../../models/clashes.plans');
-const { getArrayDifference, uniqueElements } = require('../../../utils/helper/arrays');
-const { getExternalIdsFromMetadata, getMeshNodeBounds, getMeshesWithParentIds } = require('./models/commons/scenes');
+const { getBoundsForGroupsOfMeshNodes, getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { JSONParser } = require('@streamparser/json-node');
@@ -46,6 +45,7 @@ const { createReadStream } = require('fs');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
 const { events } = require('../../../services/eventsManager/eventsManager.constants');
+const { getArrayDifference } = require('../../../utils/helper/arrays');
 const { getContainerById } = require('../../../models/modelSettings');
 const { getLatestRevision } = require('../../../models/revisions');
 const { getNodesByQuery } = require('../../../models/scenes');
@@ -128,10 +128,10 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 
 		if (!compIdToMeshes[compositeId]) {
 			// eslint-disable-next-line no-param-reassign
-			compIdToMeshes[compositeId] = [];
+			compIdToMeshes[compositeId] = new Set();
 		}
 
-		compIdToMeshes[compositeId].push(UUIDToString(mesh._id));
+		compIdToMeshes[compositeId].add(UUIDToString(mesh._id));
 	}
 };
 
@@ -174,14 +174,26 @@ const writeConfigSetEntry = async (teamspace, project, selectionEntries, stream,
 		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 		let firstObject = true;
-		for (const [compositeId, meshIdsWithDuplicates] of Object.entries(objects)) {
+		const compositeIds = Object.keys(objects);
+		const meshIdGroupsStr = [];
+		const meshIdGroupsUUID = [];
+		compositeIds.forEach((compositeId) => {
+			const meshIds = Array.from(objects[compositeId]);
+			meshIdGroupsStr.push(meshIds);
+			meshIdGroupsUUID.push(meshIds.map(stringToUUID));
+		});
+		// eslint-disable-next-line no-await-in-loop
+		const bboxes = await getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+			meshIdGroupsUUID);
+
+		for (let index = 0; index < compositeIds.length; index++) {
+			const compositeId = compositeIds[index];
 			if (!firstObject) {
 				stream.write(',');
 			}
 
-			const meshIds = uniqueElements(meshIdsWithDuplicates);
-			// eslint-disable-next-line no-await-in-loop
-			const bbox = await getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const meshIds = meshIdGroupsStr[index];
+			const bbox = bboxes[index];
 			const bboxSignificantFigures = 8;
 			const formattedBbox = {
 				min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),

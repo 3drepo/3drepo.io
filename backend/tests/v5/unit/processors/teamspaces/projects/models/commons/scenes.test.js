@@ -111,32 +111,36 @@ const testGetMeshesWithParentIds = () => {
 	});
 };
 
-const testGetMeshNodeBounds = () => {
+const testGetBoundsForGroupsOfMeshNodes = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateUUID();
 	const revision = generateUUID();
 
-	describe('Get mesh node bounds', () => {
+	describe('Get bounds for groups of mesh nodes', () => {
 		test('should return undefined if no mesh nodes are found', async () => {
-			const meshIds = times(2, generateUUIDString);
+			const meshIdGroups = [times(2, generateUUID), times(2, generateUUID)];
+			const meshIds = meshIdGroups.flat();
 
 			ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
 
-			const res = await Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				meshIdGroups);
 
-			expect(res).toBeUndefined();
+			expect(res).toEqual([undefined, undefined]);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledWith(teamspace, project, container, {
-				_id: { $in: meshIds.map(stringToUUID) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
-			expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, revision, { coordOffset: 1 });
 		});
 
 		const [meshId1, meshId2] = times(2, generateUUID);
 		const [parentId1, parentId2, parentId3] = times(3, generateUUID);
-		const stringMeshId = generateUUIDString();
+		const uuidMeshId = generateUUID();
 		const worldCoordOffset = [1, 2, 3];
 		const worldBoundsCase = {
 			meshIds: [meshId1, meshId2],
@@ -169,9 +173,9 @@ const testGetMeshNodeBounds = () => {
 			transformQueries: [[parentId1, parentId2]],
 		};
 		const defaultOffsetBoundsCase = {
-			meshIds: [stringMeshId],
+			meshIds: [uuidMeshId],
 			meshNodes: [{
-				_id: stringToUUID(stringMeshId),
+				_id: uuidMeshId,
 				parents: [parentId1],
 				bounding_box: [[0, 0, 0], [1, 2, 3]],
 			}],
@@ -234,12 +238,13 @@ const testGetMeshNodeBounds = () => {
 			});
 			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revisionData);
 
-			const res = await Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				[meshIds]);
 
-			expect(res).toEqual(expectedRes);
+			expect(res).toEqual([expectedRes]);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1 + transformResponses.length);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
-				_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
 			transformQueries.forEach((parentIds, index) => {
@@ -251,6 +256,45 @@ const testGetMeshNodeBounds = () => {
 			});
 			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
 				modelTypes.CONTAINER, revision, { coordOffset: 1 });
+		});
+
+		test('should calculate bounds for multiple groups using shared node lookups', async () => {
+			const meshIds = times(3, generateUUID);
+			const parentId = generateUUID();
+			const meshIdGroups = [[meshIds[0]], [meshIds[1], meshIds[2]]];
+			const meshNodes = [
+				{ _id: meshIds[0], parents: [parentId], bounding_box: [[0, 0, 0], [1, 1, 1]] },
+				{ _id: meshIds[1], parents: [parentId], bounding_box: [[2, 2, 2], [3, 3, 3]] },
+				{ _id: meshIds[2], parents: [parentId], bounding_box: [[4, 4, 4], [5, 5, 5]] },
+			];
+			const transform = [
+				[1, 0, 0, 10],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1],
+			];
+
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshNodes);
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce([{ shared_id: parentId, matrix: transform }]);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ coordOffset: [1, 0, 0] });
+
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				meshIdGroups);
+
+			expect(res).toEqual([
+				{ min: [11, 0, 0], max: [12, 1, 1] },
+				{ min: [13, 2, 2], max: [16, 5, 5] },
+			]);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
+				_id: { $in: meshIds },
+				type: nodeTypes.MESH,
+			}, { _id: 1, parents: 1, bounding_box: 1 });
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2, teamspace, project, container, {
+				shared_id: { $in: [parentId] },
+				type: nodeTypes.TRANSFORMATION,
+			}, { shared_id: 1, parents: 1, matrix: 1 });
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		});
 
 		const meshWithoutParentCase = {
@@ -280,16 +324,19 @@ const testGetMeshNodeBounds = () => {
 			transformResponses.forEach((response) => {
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce(response);
 			});
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
 
-			await expect(Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds))
+			await expect(Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				[meshIds]))
 				.rejects.toThrow(expectedError);
 
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1 + transformResponses.length);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
-				_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
-			expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, revision, { coordOffset: 1 });
 		});
 	});
 };
@@ -716,7 +763,7 @@ const testGetSuperMeshesInfo = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
-	testGetMeshNodeBounds();
+	testGetBoundsForGroupsOfMeshNodes();
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();

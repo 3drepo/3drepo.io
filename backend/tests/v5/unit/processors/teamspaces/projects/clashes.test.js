@@ -73,7 +73,7 @@ const {
 	clashObjectIdTypes,
 	clashRunStatus,
 } = require(`${src}/models/clashes.constants`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const Clashes = require(`${src}/processors/teamspaces/projects/clashes`);
@@ -196,7 +196,8 @@ const testCreateRun = () => {
 	};
 
 	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].metadata);
-	Scenes.getMeshNodeBounds.mockResolvedValue(mockBoundingBox);
+	Scenes.getBoundsForGroupsOfMeshNodes.mockImplementation((...args) => (
+		Promise.resolve(args[4].map(() => mockBoundingBox))));
 
 	const getStreamContent = (stream) => new Promise((resolve, reject) => {
 		const chunks = [];
@@ -361,7 +362,7 @@ const testCreateRun = () => {
 						clashRunStatus.ABORTED,
 						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
-					expect(Scenes.getMeshNodeBounds).not.toHaveBeenCalled();
+					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
 
 				test('should abort the run when one set is empty and no self-intersection check can be run', async () => {
@@ -378,7 +379,7 @@ const testCreateRun = () => {
 						clashRunStatus.ABORTED,
 						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
-					expect(Scenes.getMeshNodeBounds).not.toHaveBeenCalled();
+					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
 			});
 
@@ -431,6 +432,9 @@ const testCreateRun = () => {
 				}]);
 				expect(content.setB).toEqual([]);
 				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+				expect(Scenes.getBoundsForGroupsOfMeshNodes).toHaveBeenCalledTimes(1);
+				expect(Scenes.getBoundsForGroupsOfMeshNodes).toHaveBeenCalledWith(teamspace, project, container,
+					revision, [[stringToUUID(meshA._id), stringToUUID(meshB._id)], [stringToUUID(meshC._id)]]);
 			});
 
 			test('should create separate config entries for selections from different containers', async () => {
