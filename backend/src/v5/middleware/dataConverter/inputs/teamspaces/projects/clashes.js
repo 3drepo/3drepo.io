@@ -20,7 +20,7 @@ const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
 const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
-const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
+const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
 const { getPlanById } = require('../../../../../models/clashes.plans');
@@ -80,6 +80,10 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 			value: Yup.mixed().required(),
 		}).noUnknown(true)).min(1).default(undefined), false, true),
 		defaultStatuses: imposeCondition(Yup.object().shape(defaultStatusesObject).default(undefined), false, true),
+		hideOtherObjects: stripWhen(
+			imposeCondition(Yup.boolean().strict().default(undefined), false, true),
+			(value) => value === false,
+		),
 	}).noUnknown(true);
 
 	return Yup.object().shape({
