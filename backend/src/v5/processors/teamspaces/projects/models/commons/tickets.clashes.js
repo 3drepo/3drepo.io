@@ -451,7 +451,7 @@ TicketsClashes.processClashResults = async (
 	const ticketsToProcess = {
 		ticketsToUpdate: [
 			...processedClashes.ticketsToUpdate,
-			...resolveTickets(Object.values(clashIdToTicket), statusInfo),
+			...resolveTickets(Object.values(clashIdToTicket), clashContext.statusInfo),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};
