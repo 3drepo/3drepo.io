@@ -284,39 +284,59 @@ const testDeletePlan = () => {
 	});
 };
 
-const testGetAllPlans = () => {
-	describe('Get all plans', () => {
+const testGetAllPlansByProject = () => {
+	describe('Get all plans by project', () => {
 		const teamspace = generateRandomString();
 		const project = generateUUID();
-		const projection = {
-			createdAt: 1,
-			createdBy: 1,
-			name: 1,
-			type: 1,
-		};
 
-		test('should call find with project filter and summary projection, and return plans', async () => {
+		test('should call getPlansByQuery with a project scoped query and return plans', async () => {
 			const plans = [
 				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
 				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
 			];
 
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(plans);
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
 
-			await expect(ClashPlans.getAllPlans(teamspace, project)).resolves.toEqual(plans);
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).resolves.toEqual(plans);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
 		});
 
-		test('should reject when find fails', async () => {
-			const error = new Error(generateRandomString());
-			const fn = jest.spyOn(db, 'find').mockRejectedValueOnce(error);
+		test('should pass the projection to getPlansByQuery when provided', async () => {
+			const projection = {
+				createdAt: 1,
+				createdBy: 1,
+				name: 1,
+				type: 1,
+			};
+			const plans = [
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+			];
 
-			await expect(ClashPlans.getAllPlans(teamspace, project)).rejects.toEqual(error);
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project, projection)).resolves.toEqual(plans);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, projection);
+
+			fn.mockRestore();
+		});
+
+		test('should reject when getPlansByQuery fails', async () => {
+			const error = new Error(generateRandomString());
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockRejectedValueOnce(error);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).rejects.toEqual(error);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
 		});
 	});
 };
@@ -343,6 +363,6 @@ describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
-	testGetAllPlans();
+	testGetAllPlansByProject();
 	testDeletePlansByProject();
 });

@@ -26,16 +26,17 @@ const {
 	createClashRun,
 	deleteRunsByPlan,
 	deleteRunsByProject,
+	getClashRunById,
 	getClashRunByQuery,
+	getClashRunsByPlan,
 	getLatestRunByPlan,
-	getRunsByPlanId,
 	updateRunStatus,
 } = require('../../../models/clashes.runs');
 const {
 	createPlan,
 	deletePlan: deleteClashPlan,
 	deletePlansByProject,
-	getAllPlans,
+	getAllPlansByProject,
 	getPlanById,
 	updatePlan,
 } = require('../../../models/clashes.plans');
@@ -76,9 +77,11 @@ Clashes.deleteClashDataInProject = async (teamspace, project) => {
 	await removeFiles(teamspace, CLASH_RUNS_COL, runIds);
 };
 
-Clashes.getAllPlans = getAllPlans;
+Clashes.getAllPlans = getAllPlansByProject;
 
 Clashes.getPlanById = getPlanById;
+
+Clashes.getClashRunsByPlan = getClashRunsByPlan;
 
 const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};
@@ -357,8 +360,7 @@ const formatClashForResults = (clash) => {
 };
 
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan, status } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId }, { plan: 1, status: 1 });
+	const { plan, status } = await getClashRunById(teamspace, project, runId, { plan: 1, status: 1 });
 
 	if (status === clashRunStatus.ABORTED) {
 		// this run was cancelled (likely via the utility script)
@@ -446,7 +448,5 @@ Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 		selectionObj.revision = rev;
 	}));
 };
-
-Clashes.getRunsByPlanId = getRunsByPlanId;
 
 module.exports = Clashes;

@@ -23,6 +23,7 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
+const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -259,6 +260,18 @@ Clashes.planExists = async (req, res, next) => {
 
 	try {
 		req.planData = await getPlanById(teamspace, project, planId);
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Clashes.clashRunInPlan = async (req, res, next) => {
+	const { teamspace, project, planId, runId } = req.params;
+
+	try {
+		req.outputData = await getClashRunByQuery(
+			teamspace, project, { _id: runId, 'plan._id': planId }, { project: 0 });
 		await next();
 	} catch (err) {
 		respond(req, res, err);

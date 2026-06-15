@@ -15,8 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { planContainersHaveRevs, planExists, validateNewPlanData, validateUpdatePlanData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
-const { serialiseClashPlan, serialiseClashPlans, serialiseClashRuns } = require('../../../middleware/dataConverter/outputs/teamspaces/projects/clashes');
+const {
+	clashRunInPlan,
+	planContainersHaveRevs,
+	planExists,
+	validateNewPlanData,
+	validateUpdatePlanData,
+} = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
+const {
+	serialiseClashPlan,
+	serialiseClashPlans,
+	serialiseClashRun,
+	serialiseClashRuns,
+} = require('../../../middleware/dataConverter/outputs/teamspaces/projects/clashes');
 const Clashes = require('../../../processors/teamspaces/projects/clashes');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
@@ -75,7 +86,12 @@ const createRun = async (req, res) => {
 const getAllPlans = async (req, res, next) => {
 	const { teamspace, project } = req.params;
 	try {
-		req.outputData = await Clashes.getAllPlans(teamspace, project);
+		req.outputData = await Clashes.getAllPlans(teamspace, project, {
+			type: 1,
+			name: 1,
+			createdAt: 1,
+			createdBy: 1,
+		});
 		next();
 	} catch (err) {
 		// istanbul ignore next
@@ -97,7 +113,10 @@ const getPlan = async (req, res, next) => {
 const getRuns = async (req, res, next) => {
 	const { teamspace, project, planId } = req.params;
 	try {
-		req.outputData = await Clashes.getRunsByPlanId(teamspace, project, planId);
+		req.outputData = await Clashes.getClashRunsByPlan(teamspace, project, planId, {
+			project: 0,
+			plan: 0,
+		});
 		next();
 	} catch (err) {
 		// istanbul ignore next
@@ -769,26 +788,6 @@ const establishRoutes = () => {
 	 *                       updatedAt:
 	 *                         type: integer
 	 *                         description: Epoch timestamp in milliseconds when the run was last updated
-	 *                       plan:
-	 *                         type: object
-	 *                         description: Snapshot of the clash test plan used for this run, including the exact revisions selected
-	 *                         properties:
-	 *                           selectionA:
-	 *                             type: array
-	 *                             items:
-	 *                               type: object
-	 *                               properties:
-	 *                                 revision:
-	 *                                   type: string
-	 *                                   format: uuid
-	 *                           selectionB:
-	 *                             type: array
-	 *                             items:
-	 *                               type: object
-	 *                               properties:
-	 *                                 revision:
-	 *                                   type: string
-	 *                                   format: uuid
 	 *                       results:
 	 *                         type: object
 	 *                         description: >
@@ -810,6 +809,50 @@ const establishRoutes = () => {
 	 *                                 description: A human-readable description of the failure
 	 */
 	router.get('/:planId/runs', isAdminToProject, planExists, getRuns, serialiseClashRuns);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs/{runId}:
+	 *   get:
+	 *     description: Returns the full details of a single clash test run by ID
+	 *     tags: [v:external, Clashes]
+	 *     operationId: getClashTestRun
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: planId
+	 *         description: ID of plan
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: runId
+	 *         description: ID of run
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/clashRunNotFound"
+	 *       200:
+	 *         description: Returns the clash test run, including the copied plan snapshot used for the run
+	 */
+	router.get('/:planId/runs/:runId', isAdminToProject, planExists, clashRunInPlan, serialiseClashRun);
 
 	/**
 	 * @openapi

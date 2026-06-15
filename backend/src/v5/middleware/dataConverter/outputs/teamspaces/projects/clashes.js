@@ -49,7 +49,7 @@ const planSchema = yup.object({
 
 const runSchema = yup.object({
 	_id: types.id,
-	plan: planSchema,
+	plan: planSchema.default(undefined),
 	triggeredAt: types.timestamp,
 	updatedAt: types.timestamp,
 });
@@ -67,6 +67,10 @@ Clashes.serialiseClashPlan = (req, res) => {
 
 Clashes.serialiseClashRuns = (req, res) => {
 	respond(req, res, templates.ok, { runs: req.outputData.map(serialiseRun) });
+};
+
+Clashes.serialiseClashRun = (req, res) => {
+	respond(req, res, templates.ok, serialiseRun(req.outputData));
 };
 
 module.exports = Clashes;

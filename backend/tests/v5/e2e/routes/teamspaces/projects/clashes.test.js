@@ -223,6 +223,15 @@ const testGetPlan = () => {
 	});
 };
 
+const formatRun = (run) => deleteIfUndefined({
+	_id: run._id,
+	status: run.status,
+	triggeredBy: run.triggeredBy,
+	triggeredAt: run.triggeredAt.getTime(),
+	updatedAt: (run.updatedAt ?? run.triggeredAt).getTime(),
+	results: run.results,
+});
+
 const testGetRuns = () => {
 	describe('Get clash test runs', () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs${key ? `?key=${key}` : ''}`;
@@ -242,7 +251,10 @@ const testGetRuns = () => {
 				revision: ServiceHelper.generateUUIDString(),
 			})),
 		};
-
+		const planForAnotherRun = {
+			...planForRuns,
+			_id: ServiceHelper.generateUUIDString(),
+		};
 		const plannedRun = {
 			...ServiceHelper.generateClashRun(planForRuns),
 			status: clashRunStatus.PLANNED,
@@ -269,16 +281,12 @@ const testGetRuns = () => {
 				},
 			},
 		};
-
-		const formatRun = (run) => deleteIfUndefined({
-			_id: run._id,
-			plan: planForRuns,
-			status: run.status,
-			triggeredBy: run.triggeredBy,
-			triggeredAt: run.triggeredAt.getTime(),
-			updatedAt: (run.updatedAt ?? run.triggeredAt).getTime(),
-			results: run.results,
-		});
+		const runInAnotherPlan = {
+			...ServiceHelper.generateClashRun(planForAnotherRun),
+			status: clashRunStatus.COMPLETED,
+			triggeredAt: ServiceHelper.generateRandomDate(),
+			updatedAt: ServiceHelper.generateRandomDate(),
+		};
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
@@ -289,6 +297,7 @@ const testGetRuns = () => {
 				ServiceHelper.db.createClashPlans(teamspace, projectWithOwnPlan.id, [planInAnotherProject]),
 				ServiceHelper.db.createClashRuns(teamspace, project.id, planForRuns,
 					[plannedRun, failedRun, completedRun]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, planForAnotherRun, [runInAnotherPlan]),
 			]);
 		});
 
@@ -311,6 +320,98 @@ const testGetRuns = () => {
 					const expectedRuns = [plannedRun, failedRun, completedRun].map(formatRun);
 					expect(res.body.runs).toHaveLength(3);
 					ServiceHelper.outOfOrderArrayEqual(res.body.runs, expectedRuns);
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
+const testGetRun = () => {
+	describe('Get clash test run', () => {
+		const route = (ts, project, planId, runId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs/${runId}${key ? `?key=${key}` : ''}`;
+		const basicData = generateBasicData();
+		const nonAdminUser = ServiceHelper.generateUserCredentials();
+		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
+		const { users, teamspace, project, models, plan: existingPlan } = basicData;
+		const planInAnotherProject = ServiceHelper.generateClashPlan(models[1]._id, models[0]._id);
+		const planForRuns = {
+			...existingPlan,
+			selectionA: existingPlan.selectionA.map((selection) => ({
+				...selection,
+				revision: ServiceHelper.generateUUIDString(),
+			})),
+			selectionB: existingPlan.selectionB.map((selection) => ({
+				...selection,
+				revision: ServiceHelper.generateUUIDString(),
+			})),
+		};
+		const planForAnotherRun = {
+			...planForRuns,
+			_id: ServiceHelper.generateUUIDString(),
+		};
+		const completedRun = {
+			...ServiceHelper.generateClashRun(planForRuns),
+			status: clashRunStatus.COMPLETED,
+			triggeredAt: ServiceHelper.generateRandomDate(),
+			updatedAt: ServiceHelper.generateRandomDate(),
+			results: {
+				stats: {
+					new: ServiceHelper.generateRandomNumber(),
+					active: ServiceHelper.generateRandomNumber(),
+					resolved: ServiceHelper.generateRandomNumber(),
+				},
+			},
+		};
+		const runInAnotherPlan = {
+			...ServiceHelper.generateClashRun(planForAnotherRun),
+			status: clashRunStatus.COMPLETED,
+			triggeredAt: ServiceHelper.generateRandomDate(),
+			updatedAt: ServiceHelper.generateRandomDate(),
+		};
+		const formatRunDetail = (run) => ({
+			...formatRun(run),
+			plan: planForRuns,
+		});
+
+		beforeAll(async () => {
+			await setupBasicData(basicData);
+			await Promise.all([
+				ServiceHelper.db.createUser(nonAdminUser, [teamspace]),
+				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
+					models.map(({ _id }) => _id)),
+				ServiceHelper.db.createClashPlans(teamspace, projectWithOwnPlan.id, [planInAnotherProject]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, planForRuns, [completedRun]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, planForAnotherRun, [runInAnotherPlan]),
+			]);
+		});
+
+		describe.each([
+			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the user is not a project admin', { key: nonAdminUser.apiKey }, false, templates.notAuthorized],
+			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
+			['the run does not exist', { runId: ServiceHelper.generateRandomString() }, false, templates.clashRunNotFound],
+			['the run belongs to a different plan', { runId: runInAnotherPlan._id }, false, templates.clashRunNotFound],
+			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user is teamspace admin', {}, true],
+		])('', (desc, {
+			ts = teamspace,
+			proj = project.id,
+			planId = existingPlan._id,
+			runId = completedRun._id,
+			key = users.tsAdmin.apiKey,
+		}, success, expectedRes) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const res = await agent.get(route(ts, proj, planId, runId, key))
+					.expect(expectedRes?.status || templates.ok.status);
+
+				if (success) {
+					expect(res.body).toEqual(formatRunDetail(completedRun));
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -729,6 +830,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetPlans();
 	testGetPlan();
 	testGetRuns();
+	testGetRun();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();

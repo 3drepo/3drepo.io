@@ -117,6 +117,82 @@ const testSerialiseClashPlan = () => {
 
 const testSerialiseClashRuns = () => {
 	describe('Serialise clash runs', () => {
+		test('should serialise projected run UUID/date fields without reshaping run data', () => {
+			const completedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.COMPLETED,
+				triggeredAt: generateRandomDate(),
+				triggeredBy: generateRandomString(),
+				updatedAt: generateRandomDate(),
+				results: {
+					stats: {
+						new: generateRandomNumber(),
+						current: generateRandomNumber(),
+						resolved: generateRandomNumber(),
+					},
+				},
+			};
+			const failedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.FAILED,
+				triggeredAt: generateRandomDate(),
+				triggeredBy: generateRandomString(),
+				updatedAt: generateRandomDate(),
+				results: {
+					error: { reason: generateRandomString() },
+				},
+			};
+			const plannedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.PLANNED,
+				triggeredAt: generateRandomDate(),
+				triggeredBy: generateRandomString(),
+				updatedAt: generateRandomDate(),
+				queueId: generateRandomString(),
+			};
+			const req = { outputData: [completedRun, failedRun, plannedRun] };
+
+			ClashOutputMiddleware.serialiseClashRuns(req, {});
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
+				runs: [
+					{
+						_id: UUIDToString(completedRun._id),
+						status: completedRun.status,
+						triggeredAt: completedRun.triggeredAt.getTime(),
+						triggeredBy: completedRun.triggeredBy,
+						updatedAt: completedRun.updatedAt.getTime(),
+						results: {
+							stats: {
+								...completedRun.results.stats,
+							},
+						},
+					},
+					{
+						_id: UUIDToString(failedRun._id),
+						status: failedRun.status,
+						triggeredAt: failedRun.triggeredAt.getTime(),
+						triggeredBy: failedRun.triggeredBy,
+						updatedAt: failedRun.updatedAt.getTime(),
+						results: failedRun.results,
+					},
+					{
+						_id: UUIDToString(plannedRun._id),
+						status: plannedRun.status,
+						triggeredAt: plannedRun.triggeredAt.getTime(),
+						triggeredBy: plannedRun.triggeredBy,
+						updatedAt: plannedRun.updatedAt.getTime(),
+						queueId: plannedRun.queueId,
+					},
+				],
+			});
+		});
+	});
+};
+
+const testSerialiseClashRun = () => {
+	describe('Serialise clash run', () => {
 		test('should serialise run and nested plan UUID/date fields without reshaping run data', () => {
 			const planCreatedAt = generateRandomDate();
 			const planUpdatedAt = generateRandomDate();
@@ -140,7 +216,7 @@ const testSerialiseClashRuns = () => {
 					],
 				},
 			};
-			const completedRun = {
+			const run = {
 				_id: generateUUID(),
 				plan,
 				status: clashRunStatus.COMPLETED,
@@ -155,88 +231,39 @@ const testSerialiseClashRuns = () => {
 					},
 				},
 			};
-			const failedRun = {
-				_id: generateUUID(),
-				plan,
-				status: clashRunStatus.FAILED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				results: {
-					error: { reason: generateRandomString() },
-				},
-			};
-			const plannedRun = {
-				_id: generateUUID(),
-				plan,
-				status: clashRunStatus.PLANNED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				queueId: generateRandomString(),
-			};
-			const req = { outputData: [completedRun, failedRun, plannedRun] };
-			const expectedPlan = {
-				...plan,
-				_id: UUIDToString(plan._id),
-				createdAt: planCreatedAt.getTime(),
-				updatedAt: planUpdatedAt.getTime(),
-				selectionA: [{
-					container: UUIDToString(plan.selectionA[0].container),
-					revision: UUIDToString(plan.selectionA[0].revision),
-				}],
-				selectionB: [{
-					container: UUIDToString(plan.selectionB[0].container),
-					revision: UUIDToString(plan.selectionB[0].revision),
-				}],
-				tickets: {
-					...plan.tickets,
-					federation: UUIDToString(plan.tickets.federation),
-					template: UUIDToString(plan.tickets.template),
-					valuesAtCreation: [
-						{ ...plan.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
-						plan.tickets.valuesAtCreation[1],
-					],
-				},
-			};
+			const req = { outputData: run };
 
-			ClashOutputMiddleware.serialiseClashRuns(req, {});
+			ClashOutputMiddleware.serialiseClashRun(req, {});
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
-				runs: [
-					{
-						_id: UUIDToString(completedRun._id),
-						plan: expectedPlan,
-						status: completedRun.status,
-						triggeredAt: completedRun.triggeredAt.getTime(),
-						triggeredBy: completedRun.triggeredBy,
-						updatedAt: completedRun.updatedAt.getTime(),
-						results: {
-							stats: {
-								...completedRun.results.stats,
-							},
-						},
+				...run,
+				_id: UUIDToString(run._id),
+				triggeredAt: run.triggeredAt.getTime(),
+				updatedAt: run.updatedAt.getTime(),
+				plan: {
+					...plan,
+					_id: UUIDToString(plan._id),
+					createdAt: planCreatedAt.getTime(),
+					updatedAt: planUpdatedAt.getTime(),
+					selectionA: [{
+						container: UUIDToString(plan.selectionA[0].container),
+						revision: UUIDToString(plan.selectionA[0].revision),
+					}],
+					selectionB: [{
+						container: UUIDToString(plan.selectionB[0].container),
+						revision: UUIDToString(plan.selectionB[0].revision),
+					}],
+					tickets: {
+						...plan.tickets,
+						federation: UUIDToString(plan.tickets.federation),
+						template: UUIDToString(plan.tickets.template),
+						valuesAtCreation: [
+							{ ...plan.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
+							plan.tickets.valuesAtCreation[1],
+						],
 					},
-					{
-						_id: UUIDToString(failedRun._id),
-						plan: expectedPlan,
-						status: failedRun.status,
-						triggeredAt: failedRun.triggeredAt.getTime(),
-						triggeredBy: failedRun.triggeredBy,
-						updatedAt: failedRun.updatedAt.getTime(),
-						results: failedRun.results,
-					},
-					{
-						_id: UUIDToString(plannedRun._id),
-						plan: expectedPlan,
-						status: plannedRun.status,
-						triggeredAt: plannedRun.triggeredAt.getTime(),
-						triggeredBy: plannedRun.triggeredBy,
-						updatedAt: plannedRun.updatedAt.getTime(),
-						queueId: plannedRun.queueId,
-					},
-				],
+				},
 			});
 		});
 	});
@@ -246,4 +273,5 @@ describe('middleware/dataConverter/outputs/teamspaces/projects/clashes', () => {
 	testSerialiseClashPlans();
 	testSerialiseClashPlan();
 	testSerialiseClashRuns();
+	testSerialiseClashRun();
 });

@@ -25,6 +25,9 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
+jest.mock('../../../../../../../../src/v5/models/clashes.runs');
+const ClashRunsModel = require(`${src}/models/clashes.runs`);
+
 jest.mock('../../../../../../../../src/v5/models/modelSettings');
 const ModelSettingsModel = require(`${src}/models/modelSettings`);
 
@@ -644,6 +647,63 @@ const testPlanExists = () => {
 	});
 };
 
+const testClashRunInPlan = () => {
+	describe('Check if clash run is in plan', () => {
+		test('should respond with error if the run is not in the plan', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateUUID(),
+					planId: generateUUID(),
+					runId: generateUUID(),
+				},
+			};
+			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+
+			await Clashes.clashRunInPlan(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(
+				req.params.teamspace,
+				req.params.project,
+				{ _id: req.params.runId, 'plan._id': req.params.planId },
+				{ project: 0 },
+			);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashRunNotFound);
+		});
+
+		test('next() should be called if the run is in the plan', async () => {
+			const mockCB = jest.fn(() => {});
+			const run = generateRandomObject();
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateUUID(),
+					planId: generateUUID(),
+					runId: generateUUID(),
+				},
+			};
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(run);
+
+			await Clashes.clashRunInPlan(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalled();
+			expect(req.outputData).toEqual(run);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(
+				req.params.teamspace,
+				req.params.project,
+				{ _id: req.params.runId, 'plan._id': req.params.planId },
+				{ project: 0 },
+			);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 const testPlanContainersHaveRevs = () => {
 	describe('planContainersHaveRevs', () => {
 		test('should assign latest revisions to selectionA and selectionB and call next()', async () => {
@@ -753,5 +813,6 @@ describe(determineTestGroup(__filename), () => {
 	testValidateNewPlanData();
 	testValidateUpdatePlanData();
 	testPlanExists();
+	testClashRunInPlan();
 	testPlanContainersHaveRevs();
 });
