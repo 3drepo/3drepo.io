@@ -73,4 +73,20 @@ ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sor
 	return run;
 };
 
+const deleteRunsByQuery = async (teamspace, project, query = {}) => {
+	const runs = await db.find(teamspace, CLASH_RUNS_COL, { project, ...query }, { _id: 1 });
+	const runIds = runs.map(({ _id }) => _id);
+
+	if (runIds.length) {
+		await db.deleteMany(teamspace, CLASH_RUNS_COL, { project, _id: { $in: runIds } });
+	}
+
+	return runIds;
+};
+
+ClashRuns.deleteRunsByPlan = (teamspace, project, planId) => deleteRunsByQuery(
+	teamspace, project, { 'plan._id': planId });
+
+ClashRuns.deleteRunsByProject = (teamspace, project) => deleteRunsByQuery(teamspace, project);
+
 module.exports = ClashRuns;
