@@ -51,6 +51,7 @@ import {
 	ToggleWrapper,
 	Toggle,
 	FormRow,
+	ExcludeObjectsToggleWrapper,
 	Rules,
 	AddFilterTitle,
 	TriggerButton,
@@ -133,7 +134,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		formState: { errors, isValid, isDirty },
 		setValue,
 		getValues,
+		watch,
 	} = formData;
+	const excludeDefinedObjects = watch('group.excludeDefinedObjects');
 
 	const getFormIsValid = () => {
 		if (!isValid) return false;
@@ -186,6 +189,23 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setFilterMenuOpen(true);
 	};
 
+	const handleGroupRulesFormSubmit = (data) => {
+		if (selectedRule) {
+			update(selectedRule.index, data);
+		} else {
+			append(data);
+		}
+		resetFilterMenu();
+	};
+
+	const toggleExcludeDefinedObjects = () => {
+		if (!isAdmin) return;
+		setValue('group.excludeDefinedObjects', !getValues('group.excludeDefinedObjects'), {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
@@ -205,7 +225,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
-		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
+		setInputObjects(convertToV4GroupNodes({ objects: value?.group?.objects } as Group));
 		setIsPastingRules(false);
 		setNewPrefix([]);
 	}, [value, isColored]);
@@ -326,9 +346,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				</Subheading>
 				<FormBox>
 					<ToggleWrapper>
-						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
-							<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
-						</ToggleLabel>
 						<Toggle
 							value={isSmart}
 							onClick={() => setIsSmart((prev) => !prev)}
@@ -354,6 +371,19 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							/>
 						</Instruction>
 					)}
+					<ExcludeObjectsToggleWrapper>
+						<Toggle
+							value={excludeDefinedObjects}
+							onClick={toggleExcludeDefinedObjects}
+							disabled={!isAdmin}
+						/>
+						<ToggleLabel disabled={!isAdmin} onClick={toggleExcludeDefinedObjects}>
+							<FormattedMessage
+								id="ticketsGroupSettings.form.excludeDefinedObjects"
+								defaultMessage="Exclude specified objects"
+							/>
+						</ToggleLabel>
+					</ExcludeObjectsToggleWrapper>
 				</FormBox>
 				{!isSmart && (
 					<Subheading>
@@ -381,7 +411,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								<GroupRulesForm
 									containerOrFederation={containerOrFederation}
 									rule={selectedRule?.value}
-									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
+									onSubmit={handleGroupRulesFormSubmit}
 									onClose={resetFilterMenu}
 									existingRules={rules}
 								/>

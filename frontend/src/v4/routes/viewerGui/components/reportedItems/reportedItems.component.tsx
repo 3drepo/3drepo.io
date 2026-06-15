@@ -38,6 +38,7 @@ import { ListContainer, Summary } from './reportedItems.styles';
 interface IProps {
 	className?: string;
 	type: string;
+	isEmpty: boolean;
 	items: any[];
 	searchEnabled: boolean;
 	selectedFilters: any[];
@@ -139,8 +140,8 @@ export class ReportedItems extends PureComponent<IProps> {
 		<>
 			<ViewerPanelContent onClick={this.handleClickOutside}>
 				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
-					{this.renderEmptyState((!this.props.searchEnabled && !this.props.items.length || (this.props.searchEnabled && !this.props.items.length && !this.props.selectedFilters.length)))}
-					{this.renderNotFound(this.props.searchEnabled && !this.props.items.length && !!this.props.selectedFilters.length)}
+					{this.renderEmptyState(this.props.isEmpty)}
+					{this.renderNotFound(!this.props.isEmpty && !this.props.items.length && !!this.props.selectedFilters.length)}
 					{this.renderItemsList(this.props.items)}
 				</div>
 			</ViewerPanelContent>

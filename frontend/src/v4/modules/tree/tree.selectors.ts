@@ -227,10 +227,10 @@ export const selectVisibleTreeNodesList = createSelector(
 	}
 );
 
-export const selectGetNodesByIds = (nodesIds) => createSelector(
+export const selectGetNodesByIds = (nodeIds) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
-		return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
+		return nodeIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
 	}
 );
 
@@ -243,17 +243,17 @@ export const selectGetDeepChildren = (nodeId) => createSelector(
 	}
 );
 
-export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
+export const selectGetMeshesByIds = (nodeIds = []) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByNodeId,
 	(treeNodesList, nodesIndexesMap, idToMeshes) => {
-		if (!nodesIds.length) {
+		if (!nodeIds.length) {
 			return [];
 		}
 
 		const childrenMap = {};
 		const meshesByNodes = {};
 
-		let stack = [...nodesIds];
+		let stack = [...nodeIds];
 		while (stack.length > 0) {
 			const nodeId = stack.pop();
 			const nodeIndex = nodesIndexesMap[nodeId];
@@ -293,6 +293,32 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 		}
 
 		return values(meshesByNodes);
+	}
+);
+
+export const selectGetAllMeshes = createSelector(
+	selectTreeNodesList,
+	selectNodesIndexesMap,
+	selectSubModelsRootNodes,
+	selectMeshesByNodeId,
+	(treeNodesList, nodesIndexesMap, subModelsRootNodes, meshesByNodeId) => {
+		if (!treeNodesList.length || isEmpty(meshesByNodeId)) {
+			return [];
+		}
+
+		const [root] = treeNodesList;
+		const containerRootIds = isEmpty(subModelsRootNodes) ? [root._id] : root.subTreeRoots;
+
+		return containerRootIds.flatMap((nodeId) => {
+			const node: any = treeNodesList[nodesIndexesMap[nodeId]];
+			const meshes = meshesByNodeId[node?.namespacedId]?.[node?._id] || [];
+
+			return meshes.length ? [{
+				model: node.model,
+				teamspace: node.teamspace,
+				meshes,
+			}] : [];
+		});
 	}
 );
 

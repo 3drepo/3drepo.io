@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup, generateRandomNumber, generateUUID, generateRandomString } = require('../../../../../../../../helper/services');
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
+const { generateRandomNumber, generateUUID, generateRandomString } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');
 const { times } = require('lodash');
 
