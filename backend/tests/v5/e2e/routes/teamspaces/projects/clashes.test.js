@@ -30,7 +30,7 @@ const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
+const { presetModules, propTypes, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
 
@@ -38,6 +38,30 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 let server;
 let agent;
+
+const datePropertyTypes = [propTypes.DATE, propTypes.PAST_DATE];
+
+const getPropertyType = (template, { property, module }) => {
+	const properties = module
+		? template.modules?.find(({ name, type }) => [name, type].includes(module))?.properties
+		: template.properties;
+	return properties?.find(({ name }) => name === property)?.type;
+};
+
+const getExpectedTicketsObject = (ticketObject, template) => {
+	if (!ticketObject?.valuesAtCreation) {
+		return ticketObject;
+	}
+
+	return {
+		...ticketObject,
+		valuesAtCreation: ticketObject.valuesAtCreation.map((entry) => (
+			datePropertyTypes.includes(getPropertyType(template, entry))
+				? { ...entry, value: new Date(entry.value) }
+				: entry
+		)),
+	};
+};
 
 const setupBasicData = async ({ users, teamspace, project, models, federation, plan, template }) => {
 	await ServiceHelper.db.createUser(users.tsAdmin);
@@ -207,25 +231,37 @@ const testGetRuns = () => {
 		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
 		const planInAnotherProject = ServiceHelper.generateClashPlan(models[1]._id, models[0]._id);
+		const planForRuns = {
+			...existingPlan,
+			selectionA: existingPlan.selectionA.map((selection) => ({
+				...selection,
+				revision: ServiceHelper.generateUUIDString(),
+			})),
+			selectionB: existingPlan.selectionB.map((selection) => ({
+				...selection,
+				revision: ServiceHelper.generateUUIDString(),
+			})),
+		};
 
 		const plannedRun = {
-			...ServiceHelper.generateClashRun(existingPlan),
+			...ServiceHelper.generateClashRun(planForRuns),
 			status: clashRunStatus.PLANNED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
 		};
 		const failedRun = {
-			...ServiceHelper.generateClashRun(existingPlan),
+			...ServiceHelper.generateClashRun(planForRuns),
 			status: clashRunStatus.FAILED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
-			errorCode: ServiceHelper.generateRandomString(),
-			message: ServiceHelper.generateRandomString(),
+			results: {
+				error: { reason: ServiceHelper.generateRandomString() },
+			},
 		};
 		const completedRun = {
-			...ServiceHelper.generateClashRun(existingPlan),
+			...ServiceHelper.generateClashRun(planForRuns),
 			status: clashRunStatus.COMPLETED,
 			triggeredAt: ServiceHelper.generateRandomDate(),
-			completedAt: ServiceHelper.generateRandomDate(),
-			result: {
+			updatedAt: ServiceHelper.generateRandomDate(),
+			results: {
 				stats: {
 					new: ServiceHelper.generateRandomNumber(),
 					active: ServiceHelper.generateRandomNumber(),
@@ -234,25 +270,15 @@ const testGetRuns = () => {
 			},
 		};
 
-		const formatRun = (run) => {
-			let result;
-			if (run.status === clashRunStatus.FAILED) {
-				result = { error: { code: run.errorCode, reason: run.message } };
-			} else if (run.status === clashRunStatus.COMPLETED) {
-				result = { stats: run.result.stats };
-			}
-
-			return deleteIfUndefined({
-				_id: run._id,
-				status: run.status,
-				triggeredBy: run.triggeredBy,
-				triggeredAt: run.triggeredAt.getTime(),
-				completedAt: run.status === clashRunStatus.COMPLETED
-					? run.completedAt.getTime()
-					: undefined,
-				result,
-			});
-		};
+		const formatRun = (run) => deleteIfUndefined({
+			_id: run._id,
+			plan: planForRuns,
+			status: run.status,
+			triggeredBy: run.triggeredBy,
+			triggeredAt: run.triggeredAt.getTime(),
+			updatedAt: (run.updatedAt ?? run.triggeredAt).getTime(),
+			results: run.results,
+		});
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
@@ -261,7 +287,7 @@ const testGetRuns = () => {
 				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
 					models.map(({ _id }) => _id)),
 				ServiceHelper.db.createClashPlans(teamspace, projectWithOwnPlan.id, [planInAnotherProject]),
-				ServiceHelper.db.createClashRuns(teamspace, project.id, existingPlan,
+				ServiceHelper.db.createClashRuns(teamspace, project.id, planForRuns,
 					[plannedRun, failedRun, completedRun]),
 			]);
 		});
@@ -357,7 +383,7 @@ const testCreatePlan = () => {
 				if (success) {
 					const { tickets, ...plan } = await getPlanById(ts,
 						stringToUUID(proj), stringToUUID(res.body._id));
-					const { tickets: expectedTicketsObject, ...expectedPlanData } = planData;
+					const { tickets: expectedTickets, ...expectedPlanData } = planData;
 					expect(plan).toEqual({
 						...expectedPlanData,
 						_id: plan._id,
@@ -367,6 +393,10 @@ const testCreatePlan = () => {
 
 					if (tickets) {
 						tickets.template = UUIDToString(tickets.template);
+						const templateForExpectedTickets = [template, templateWithCustomStatuses].find(
+							({ _id }) => _id === expectedTickets.template);
+						const expectedTicketsObject = getExpectedTicketsObject(
+							expectedTickets, templateForExpectedTickets);
 						const ticketDefaultStatuses = deleteIfUndefined(
 							expectedTicketsObject.defaultStatuses ?? {}, true);
 						if (expectedTicketsObject.defaultStatuses && isEmpty(ticketDefaultStatuses)) {

@@ -213,7 +213,7 @@ const testGetRunsByPlanId = () => {
 		const project = generateRandomString();
 		const planId = generateRandomString();
 
-		test('should get runs by plan ID sorted by triggeredAt descending and without plan field', async () => {
+		test('should get runs by plan ID sorted by triggeredAt descending and without project field', async () => {
 			const runs = [generateRandomObject(), generateRandomObject()];
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
 
@@ -224,7 +224,7 @@ const testGetRunsByPlanId = () => {
 				teamspace,
 				CLASH_RUNS_COL,
 				{ project, 'plan._id': planId },
-				{ plan: 0 },
+				{ project: 0 },
 				{ triggeredAt: -1 },
 			);
 		});
@@ -240,7 +240,7 @@ const testGetRunsByPlanId = () => {
 				teamspace,
 				CLASH_RUNS_COL,
 				{ project, 'plan._id': planId },
-				{ plan: 0 },
+				{ project: 0 },
 				{ triggeredAt: -1 },
 			);
 		});

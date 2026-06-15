@@ -766,10 +766,30 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: The username of the user who triggered the run
 	 *                         example: username1
-	 *                       completedAt:
+	 *                       updatedAt:
 	 *                         type: integer
-	 *                         description: Epoch timestamp in milliseconds when the run completed (only present when status is completed)
-	 *                       result:
+	 *                         description: Epoch timestamp in milliseconds when the run was last updated
+	 *                       plan:
+	 *                         type: object
+	 *                         description: Snapshot of the clash test plan used for this run, including the exact revisions selected
+	 *                         properties:
+	 *                           selectionA:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 revision:
+	 *                                   type: string
+	 *                                   format: uuid
+	 *                           selectionB:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 revision:
+	 *                                   type: string
+	 *                                   format: uuid
+	 *                       results:
 	 *                         type: object
 	 *                         description: >
 	 *                           Present when status is completed or failed.

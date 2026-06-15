@@ -187,8 +187,16 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTickets(teamspace, project, ticketData.federation,
+		const [{ newTicket: validatedTicket }] = await validateTickets(teamspace, project, ticketData.federation,
 			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
+
+		if (updateData.valuesAtCreation?.length) {
+			// Ticket validation may deserialise values, e.g. date fields, so keep the validated values.
+			updateData.valuesAtCreation = updateData.valuesAtCreation.map((entry) => {
+				const target = entry.module ? validatedTicket.modules[entry.module] : validatedTicket.properties;
+				return { ...entry, value: target[entry.property] };
+			});
+		}
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {

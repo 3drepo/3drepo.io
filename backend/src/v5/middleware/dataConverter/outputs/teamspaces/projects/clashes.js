@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { clashRunStatus } = require('../../../../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -26,7 +25,12 @@ const Clashes = {};
 
 const selectionSchema = yup.array().of(yup.object({
 	container: types.id,
+	revision: types.id,
 })).default(undefined);
+
+const serialisableValueSchema = yup.mixed().transform((value, originalValue) => (
+	originalValue instanceof Date ? originalValue.getTime() : value
+));
 
 const planSchema = yup.object({
 	_id: types.id,
@@ -35,6 +39,9 @@ const planSchema = yup.object({
 	tickets: yup.object({
 		federation: types.id,
 		template: types.id,
+		valuesAtCreation: yup.array().of(yup.object({
+			value: serialisableValueSchema,
+		})).default(undefined),
 	}).default(undefined),
 	createdAt: types.timestamp,
 	updatedAt: types.timestamp,
@@ -42,25 +49,13 @@ const planSchema = yup.object({
 
 const runSchema = yup.object({
 	_id: types.id,
+	plan: planSchema,
 	triggeredAt: types.timestamp,
-	completedAt: types.timestamp,
+	updatedAt: types.timestamp,
 });
 
-const formatRun = ({ _id, status, triggeredAt, triggeredBy, completedAt, result, errorCode, message }) => {
-	const base = { _id, status, triggeredAt, triggeredBy };
-
-	if (status === clashRunStatus.COMPLETED) {
-		return runSchema.cast({ ...base, completedAt, result });
-	}
-
-	if (status === clashRunStatus.FAILED) {
-		return runSchema.cast({ ...base, result: { error: { code: errorCode, reason: message } } });
-	}
-
-	return runSchema.cast(base);
-};
-
 const serialisePlan = (plan) => deleteIfUndefined(planSchema.cast(plan));
+const serialiseRun = (run) => deleteIfUndefined(runSchema.cast(run));
 
 Clashes.serialiseClashPlans = (req, res) => {
 	respond(req, res, templates.ok, { plans: req.outputData.map(serialisePlan) });
@@ -71,7 +66,7 @@ Clashes.serialiseClashPlan = (req, res) => {
 };
 
 Clashes.serialiseClashRuns = (req, res) => {
-	respond(req, res, templates.ok, { runs: req.outputData.map(formatRun) });
+	respond(req, res, templates.ok, { runs: req.outputData.map(serialiseRun) });
 };
 
 module.exports = Clashes;

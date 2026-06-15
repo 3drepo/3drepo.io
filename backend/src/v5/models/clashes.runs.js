@@ -82,7 +82,7 @@ ClashRuns.getRunsByPlanId = (teamspace, project, planId) => db.find(
 	teamspace,
 	CLASH_RUNS_COL,
 	{ project, 'plan._id': planId },
-	{ plan: 0 },
+	{ project: 0 },
 	{ triggeredAt: -1 },
 );
 

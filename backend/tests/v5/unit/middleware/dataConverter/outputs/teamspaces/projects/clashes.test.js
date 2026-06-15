@@ -71,6 +71,8 @@ const testSerialiseClashPlan = () => {
 		test('should convert nested UUID fields and createdAt/updatedAt dates', () => {
 			const createdAt = generateRandomDate();
 			const updatedAt = generateRandomDate();
+			const valueAtCreationDate = generateRandomDate();
+			const valueAtCreationString = generateRandomString();
 			const req = {
 				outputData: {
 					_id: generateUUID(),
@@ -80,6 +82,10 @@ const testSerialiseClashPlan = () => {
 					tickets: {
 						template: generateUUID(),
 						federation: generateUUID(),
+						valuesAtCreation: [
+							{ property: generateRandomString(), value: valueAtCreationDate },
+							{ property: generateRandomString(), value: valueAtCreationString },
+						],
 					},
 					selectionA: [{ container: generateUUID() }],
 					selectionB: [{ container: generateUUID() }],
@@ -97,6 +103,10 @@ const testSerialiseClashPlan = () => {
 				tickets: {
 					template: UUIDToString(req.outputData.tickets.template),
 					federation: UUIDToString(req.outputData.tickets.federation),
+					valuesAtCreation: [
+						{ ...req.outputData.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
+						req.outputData.tickets.valuesAtCreation[1],
+					],
 				},
 				selectionA: [{ container: UUIDToString(req.outputData.selectionA[0].container) }],
 				selectionB: [{ container: UUIDToString(req.outputData.selectionB[0].container) }],
@@ -107,14 +117,37 @@ const testSerialiseClashPlan = () => {
 
 const testSerialiseClashRuns = () => {
 	describe('Serialise clash runs', () => {
-		test('should serialise completed, failed and default statuses into expected output shape', () => {
+		test('should serialise run and nested plan UUID/date fields without reshaping run data', () => {
+			const planCreatedAt = generateRandomDate();
+			const planUpdatedAt = generateRandomDate();
+			const valueAtCreationDate = generateRandomDate();
+			const valueAtCreationNumber = generateRandomNumber();
+			const plan = {
+				_id: generateUUID(),
+				name: generateRandomString(),
+				type: generateRandomString(),
+				createdAt: planCreatedAt,
+				updatedAt: planUpdatedAt,
+				selectionA: [{ container: generateUUID(), revision: generateUUID() }],
+				selectionB: [{ container: generateUUID(), revision: generateUUID() }],
+				tickets: {
+					federation: generateUUID(),
+					template: generateUUID(),
+					creator: generateRandomString(),
+					valuesAtCreation: [
+						{ property: generateRandomString(), value: valueAtCreationDate },
+						{ property: generateRandomString(), value: valueAtCreationNumber },
+					],
+				},
+			};
 			const completedRun = {
 				_id: generateUUID(),
+				plan,
 				status: clashRunStatus.COMPLETED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
-				completedAt: generateRandomDate(),
-				result: {
+				updatedAt: generateRandomDate(),
+				results: {
 					stats: {
 						new: generateRandomNumber(),
 						current: generateRandomNumber(),
@@ -124,23 +157,48 @@ const testSerialiseClashRuns = () => {
 			};
 			const failedRun = {
 				_id: generateUUID(),
+				plan,
 				status: clashRunStatus.FAILED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
-				errorCode: generateRandomString(),
-				message: generateRandomString(),
+				updatedAt: generateRandomDate(),
+				results: {
+					error: { reason: generateRandomString() },
+				},
 			};
 			const plannedRun = {
 				_id: generateUUID(),
+				plan,
 				status: clashRunStatus.PLANNED,
 				triggeredAt: generateRandomDate(),
 				triggeredBy: generateRandomString(),
-				completedAt: generateRandomDate(),
-				result: { ignored: true },
-				errorCode: generateRandomString(),
-				message: generateRandomString(),
+				updatedAt: generateRandomDate(),
+				queueId: generateRandomString(),
 			};
 			const req = { outputData: [completedRun, failedRun, plannedRun] };
+			const expectedPlan = {
+				...plan,
+				_id: UUIDToString(plan._id),
+				createdAt: planCreatedAt.getTime(),
+				updatedAt: planUpdatedAt.getTime(),
+				selectionA: [{
+					container: UUIDToString(plan.selectionA[0].container),
+					revision: UUIDToString(plan.selectionA[0].revision),
+				}],
+				selectionB: [{
+					container: UUIDToString(plan.selectionB[0].container),
+					revision: UUIDToString(plan.selectionB[0].revision),
+				}],
+				tickets: {
+					...plan.tickets,
+					federation: UUIDToString(plan.tickets.federation),
+					template: UUIDToString(plan.tickets.template),
+					valuesAtCreation: [
+						{ ...plan.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
+						plan.tickets.valuesAtCreation[1],
+					],
+				},
+			};
 
 			ClashOutputMiddleware.serialiseClashRuns(req, {});
 
@@ -149,28 +207,34 @@ const testSerialiseClashRuns = () => {
 				runs: [
 					{
 						_id: UUIDToString(completedRun._id),
+						plan: expectedPlan,
 						status: completedRun.status,
 						triggeredAt: completedRun.triggeredAt.getTime(),
 						triggeredBy: completedRun.triggeredBy,
-						completedAt: completedRun.completedAt.getTime(),
-						result: {
+						updatedAt: completedRun.updatedAt.getTime(),
+						results: {
 							stats: {
-								...completedRun.result.stats,
+								...completedRun.results.stats,
 							},
 						},
 					},
 					{
 						_id: UUIDToString(failedRun._id),
+						plan: expectedPlan,
 						status: failedRun.status,
 						triggeredAt: failedRun.triggeredAt.getTime(),
 						triggeredBy: failedRun.triggeredBy,
-						result: { error: { code: failedRun.errorCode, reason: failedRun.message } },
+						updatedAt: failedRun.updatedAt.getTime(),
+						results: failedRun.results,
 					},
 					{
 						_id: UUIDToString(plannedRun._id),
+						plan: expectedPlan,
 						status: plannedRun.status,
 						triggeredAt: plannedRun.triggeredAt.getTime(),
 						triggeredBy: plannedRun.triggeredBy,
+						updatedAt: plannedRun.updatedAt.getTime(),
+						queueId: plannedRun.queueId,
 					},
 				],
 			});
