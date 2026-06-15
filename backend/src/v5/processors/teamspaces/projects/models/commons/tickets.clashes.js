@@ -349,7 +349,7 @@ const determineStatusInfo = (template, configuredDefaultStatuses) => {
 	return res;
 };
 
-const prepareContext = (plan, runId, template, clashIdToTicket, federationUnits) => {
+const prepareContext = async (teamspace, project, federation, plan, runId, template, federationUnits) => {
 	const {
 		_id: planId,
 		name: planName,
@@ -367,6 +367,8 @@ const prepareContext = (plan, runId, template, clashIdToTicket, federationUnits)
 	[...selectionA, ...selectionB].forEach(({ container, revision }) => {
 		containerRevisions[container] = revision;
 	});
+
+	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
 
 	return {
 		planId: UUIDToString(planId),
@@ -441,13 +443,11 @@ TicketsClashes.processClashResults = async (
 	{ plan, runId },
 ) => {
 	const { new: newClashes = [], active: activeClashes = [] } = results;
-	const { _id: planId } = plan;
 
-	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
 	const { properties: { unit: federationUnits } } = await getFederationById(
 		teamspace, federation, { 'properties.unit': 1 });
 
-	const clashContext = prepareContext(plan, runId, template, clashIdToTicket, federationUnits);
+	const clashContext = await prepareContext(teamspace, project, federation, plan, runId, template, federationUnits);
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
 	const ticketsToProcess = {
