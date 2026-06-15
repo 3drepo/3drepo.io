@@ -45,7 +45,10 @@ const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
 const { events } = require('../../../services/eventsManager/eventsManager.constants');
 const { getArrayDifference } = require('../../../utils/helper/arrays');
+const { getContainerById } = require('../../../models/modelSettings');
+const { getLatestRevision } = require('../../../models/revisions');
 const { getNodesByQuery } = require('../../../models/scenes');
+const { modelTypes } = require('../../../models/modelSettings.constants');
 const { publish } = require('../../../services/eventsManager/eventsManager');
 const { queueClashRun } = require('../../../services/modelProcessing');
 const { sendSystemEmail } = require('../../../services/mailer');
@@ -332,6 +335,19 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		plan,
 		results: categorizedClashes,
 	});
+};
+
+Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
+	await Promise.all([selectionA, selectionB].map(async (selectionObj) => {
+		// ensure container exists
+		await getContainerById(teamspace, selectionObj.container, { _id: 1 });
+
+		const { _id: rev } = await getLatestRevision(teamspace, selectionObj.container,
+			modelTypes.CONTAINER, { _id: 1 });
+
+		// eslint-disable-next-line no-param-reassign
+		selectionObj.revision = rev;
+	}));
 };
 
 module.exports = Clashes;

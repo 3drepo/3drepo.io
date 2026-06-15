@@ -29,6 +29,14 @@ const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
 
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { triggerOptions, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const DBHandler = require(`${src}/handler/db`);
+const { deleteModel } = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../src/v5/services/mailer');
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
@@ -60,52 +68,97 @@ const formatClash = (clash) => {
 };
 
 const generateBasicData = () => {
+	const user = ServiceHelper.generateUserCredentials();
 	const project = ServiceHelper.generateRandomProject();
+
 	const modelA = ServiceHelper.generateRandomModel();
 	const modelB = ServiceHelper.generateRandomModel();
-	const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
-	const planWithNoRun = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
+	const modelWithNoRevs = ServiceHelper.generateRandomModel();
+
+	const planA = {
+		...ServiceHelper.generateClashPlan(modelA._id, modelA._id),
+		trigger: [triggerOptions.NEW_REVISION],
+	};
+	const planB = {
+		...ServiceHelper.generateClashPlan(modelA._id, modelB._id),
+		trigger: [triggerOptions.NEW_REVISION],
+	};
+	const planWithNoRevs = {
+		...ServiceHelper.generateClashPlan(modelA._id, modelWithNoRevs._id),
+		trigger: [triggerOptions.NEW_REVISION],
+	};
 
 	return ({
+		user,
 		teamspace: ServiceHelper.generateRandomString(),
 		project,
-		plannedClashRun1: ServiceHelper.generateClashRun(plan),
-		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
-		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: clashRunStatus.COMPLETED },
-		clashes: ServiceHelper.generateClashes(plan),
+		plannedClashRun1: ServiceHelper.generateClashRun(planA),
+		plannedClashRun2: ServiceHelper.generateClashRun(planB),
+		completedClashRun: { ...ServiceHelper.generateClashRun(planA), status: clashRunStatus.COMPLETED },
+		clashes: ServiceHelper.generateClashes(planA),
+		modelA,
+		modelB,
+		modelWithNoRevs,
+		planA,
+		planB,
+		planWithNoRevs,
 	});
 };
 
 const generateRunData = (hasPreviousRun) => {
 	const modelA = ServiceHelper.generateRandomModel();
 	const modelB = ServiceHelper.generateRandomModel();
-	const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
-	const previousClashes = hasPreviousRun ? ServiceHelper.generateClashes(plan) : [];
+	const planA = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
+	const previousClashes = hasPreviousRun ? ServiceHelper.generateClashes(planA) : [];
 
 	return ({
-		run: ServiceHelper.generateClashRun(plan),
+		run: ServiceHelper.generateClashRun(planA),
 		previousRun: hasPreviousRun
-			? { ...ServiceHelper.generateClashRun(plan), status: clashRunStatus.COMPLETED }
+			? { ...ServiceHelper.generateClashRun(planA), status: clashRunStatus.COMPLETED }
 			: undefined,
 		previousClashes,
 	});
 };
 
 const setupBasicData = async ({
+	user,
 	teamspace,
 	project,
 	plannedClashRun1,
 	plannedClashRun2,
 	clashes,
 	completedClashRun,
+	modelA,
+	modelB,
+	modelWithNoRevs,
+	planA,
+	planB,
+	planWithNoRevs,
 }) => {
+	await ServiceHelper.db.createUser(user);
+	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
+
 	const categorizedClashes = { new: clashes.map(formatClash), active: [], resolved: [] };
 	await Promise.all([
+		ServiceHelper.db.createProject(teamspace, project.id, project.name,
+			[modelA._id, modelB._id, modelWithNoRevs._id]),
+		ServiceHelper.db.createModel(teamspace, modelA._id, modelA.name, modelA.properties),
+		ServiceHelper.db.createModel(teamspace, modelB._id, modelB.name, modelB.properties),
+		ServiceHelper.db.createModel(teamspace, modelWithNoRevs._id, modelWithNoRevs.name, modelWithNoRevs.properties),
+		ServiceHelper.db.createRevision(teamspace, project.id, modelA._id,
+			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
+		ServiceHelper.db.createRevision(teamspace, project.id, modelB._id,
+			ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
+		ServiceHelper.db.createClashPlans(teamspace, project.id, [planA, planB, planWithNoRevs]),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, project.id, completedClashRun, categorizedClashes),
 	]);
 };
+
+const eventTriggeredPromise = (event) => new Promise(
+	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
+);
 
 const setupRunData = async (teamspace, project, { run, previousRun, previousClashes }) => {
 	await Promise.all([
@@ -236,6 +289,126 @@ const testParseClashResults = () => {
 	});
 };
 
+const getRunsByModel = (teamspace, projectId, modelId) => {
+	const query = {
+		project: stringToUUID(projectId),
+		$or: [
+			{ 'plan.selectionA.container': modelId },
+			{ 'plan.selectionB.container': modelId },
+		],
+		'plan.trigger': triggerOptions.NEW_REVISION,
+	};
+
+	return DBHandler.find(teamspace, CLASH_RUNS_COL, query);
+};
+
+const testStartClashRunsAfterNewRev = () => {
+	describe('Start clash runs after new revision', () => {
+		const basicData = generateBasicData();
+		const { user, teamspace, project, modelA, modelB } = basicData;
+
+		beforeAll(async () => {
+			await setupBasicData(basicData);
+		});
+
+		test('Should start clash runs if there are plans related to the model and there are revisions', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelA._id,
+				user: user.user,
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.OK } };
+
+			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			expect(newRunsA.length).toEqual(existingRunsA.length + 2);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length + 1);
+
+			const modelWithNoRevsRuns = await getRunsByModel(teamspace, project.id, basicData.modelWithNoRevs._id);
+			expect(modelWithNoRevsRuns.length).toEqual(0);
+		});
+
+		test('Should not start clash run if the revision has failed', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelA._id,
+				user: user.user,
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.FAILED, errorReason: ServiceHelper.generateRandomObject() } };
+
+			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			expect(newRunsA.length).toEqual(existingRunsA.length);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length);
+		});
+
+		test('Should not start clash run if the revision is not for a container', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelA._id,
+				user: user.user,
+				modelType: modelTypes.DRAWING,
+				data: { status: processStatuses.OK } };
+
+			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
+			expect(newRunsA.length).toEqual(existingRunsA.length);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length);
+		});
+
+		test('Should not start clash run for a plan where one container is deleted', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = { teamspace,
+				project: stringToUUID(project.id),
+				model: modelB._id,
+				user: user.user,
+				modelType: modelTypes.CONTAINER,
+				data: { status: processStatuses.OK } };
+
+			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+
+			await deleteModel(teamspace, project.id, modelA._id);
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+			await waitOnEvent;
+
+			await ServiceHelper.sleepMS(1000);
+
+			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
+			expect(newRunsB.length).toEqual(existingRunsB.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -243,4 +416,5 @@ describe(determineTestGroup(__filename), () => {
 
 	afterAll(() => ServiceHelper.closeApp(server));
 	testParseClashResults();
+	testStartClashRunsAfterNewRev();
 });

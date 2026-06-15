@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
@@ -23,16 +23,15 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
-const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../utils/responder');
 const { schema: rulesSchema } = require('../../../../../schemas/rules');
+const { setLastRevForSelections } = require('../../../../../processors/teamspaces/projects/clashes');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../common');
 const { validateTickets } = require('../../../../../schemas/tickets');
@@ -92,7 +91,8 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
 			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
-		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1)), true, false),
+		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string()
+			.oneOf(Object.values(triggerOptions))).min(1)), true, false),
 		selectionA: imposeCondition(selectionSchema, true, false),
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
@@ -262,14 +262,7 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
 
-		await Promise.all([req.planData.selectionA, req.planData.selectionB].map(async (selectionObj) => {
-			const { _id: rev } = await getLatestRevision(teamspace, selectionObj.container,
-				modelTypes.CONTAINER, { _id: 1 });
-
-			// eslint-disable-next-line no-param-reassign
-			selectionObj.revision = rev;
-		}));
-
+		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
 		await next();
 	} catch (err) {
 		if (err === templates.revisionNotFound) {

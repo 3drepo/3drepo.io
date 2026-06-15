@@ -39,10 +39,10 @@ ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
 	false,
 ];
 
-ClashesConstants.TRIGGER_OPTIONS = [
-	'manual',
-	'new revision',
-];
+ClashesConstants.triggerOptions = {
+	MANUAL: 'manual',
+	NEW_REVISION: 'new revision',
+};
 
 ClashesConstants.clashRunStatus = {
 	PLANNED: 'planned',
