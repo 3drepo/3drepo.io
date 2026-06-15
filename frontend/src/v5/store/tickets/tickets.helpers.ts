@@ -137,6 +137,7 @@ export const filterEmptyTicketValues = (ticket) => {
 
 const moduleTypeProperties = {
 	clash: { title: formatMessage({ id: 'customTicket.panel.clash', defaultMessage: 'Clash' }), Icon: ClashIcon },
+	cloudClash: { title: formatMessage({ id: 'customTicket.panel.cloudClash', defaultMessage: 'Cloud Clash' }), Icon: ClashIcon },
 	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: SafetibaseIcon },
 	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }), Icon: SequencingIcon },
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
@@ -145,7 +146,7 @@ const moduleTypeProperties = {
 export const getModulePanelProps = (module) => {
 	const CustomModuleIcon = module.color ? FilledCircleIcon : OutlinedCircleIcon;
 	if (module.name) return { title: module.name, Icon: CustomModuleIcon, color: module.color };
-	return moduleTypeProperties[module.type];
+	return moduleTypeProperties[module.type] || { title: module.type, Icon: CustomModuleIcon };
 };
 
 export const getTicketResourceUrl = (
