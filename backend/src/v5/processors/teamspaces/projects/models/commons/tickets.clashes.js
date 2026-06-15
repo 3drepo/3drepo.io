@@ -25,7 +25,7 @@ const {
 	statusTypes,
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
-const { cloneDeep, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
+const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { convertArrayUnits, units } = require('../../../../../utils/helper/units');
 const { getClosedStatuses, getStatusDefinition } = require('../../../../../schemas/tickets/templates');
 const { importTickets, updateManyTickets } = require('./tickets');
@@ -50,6 +50,8 @@ const {
 	OBJECT_B_ID_TYPE,
 } = modulePropertyLabels[CLOUD_CLASH];
 const { DEFAULT_VIEW, PIN, STATUS } = basePropertyLabels;
+
+const CONTEXT_GROUP_CONFIGURATION = { color: [182, 188, 193], opacity: 0.02 };
 
 const getClashIdToTicket = async (teamspace, project, federation, template, planId) => {
 	const tickets = await getTicketsByQuery(teamspace, project, federation, {
@@ -127,32 +129,62 @@ const createViewpoint = ({ min, max }) => {
 const updateDefaultView = async (teamspace, project, ticket, clashContext, clash, existingTicket) => {
 	if (!clashContext.defaultViewEnabled) return;
 
-	const generateGroupObject = async (name, color, { container, idType, id }, { revision }) => {
-		let ids = [id];
-		if (idType === clashObjectIdTypes.INTERNAL) {
-			// Return strings because validateTickets deserialises view group _ids before committing groups.
-			ids = await getMeshesWithParentIds(teamspace, project, container, revision, [stringToUUID(id)], true);
-		}
+	const generateGroup = async (name, groupProperties, clashObjects, excludeDefined) => {
+		const containerToObjectIds = {};
+		clashObjects.forEach(({ container, idType, id }) => {
+			containerToObjectIds[container] = containerToObjectIds[container] ?? {};
+			containerToObjectIds[container][idType] = containerToObjectIds[container][idType] ?? [];
+			containerToObjectIds[container][idType].push(id);
+		});
+
+		const containerEntries = await Promise.all(
+			Object.entries(containerToObjectIds).map(async ([container, objectIds]) => {
+				const containerEntry = { container };
+				await Promise.all(Object.entries(objectIds).map(async ([idType, ids]) => {
+					if (idType === clashObjectIdTypes.INTERNAL) {
+						const revision = clashContext.containerRevisions[UUIDToString(container)];
+						// Return strings because validateTickets deserialises view group _ids before committing groups.
+						containerEntry[idType] = await getMeshesWithParentIds(
+							teamspace, project, container, revision, ids.map(stringToUUID), true);
+					} else {
+						containerEntry[idType] = ids;
+					}
+				}));
+
+				return containerEntry;
+			}),
+		);
 
 		return {
-			group: {
+			group: deleteIfUndefined({
 				name,
-				objects: [{ container, [idType]: ids }],
-			},
-			color,
+				objects: containerEntries,
+				excludeDefinedObjects: excludeDefined,
+			}),
+			...groupProperties,
 		};
 	};
 
 	/* eslint-disable no-param-reassign */
 	if (!existingTicket) {
 		const coloredGroups = await Promise.all([
-			generateGroupObject('Object A', [255, 0, 0], clash.a, clashContext.selectionA),
-			generateGroupObject('Object B', [0, 255, 0], clash.b, clashContext.selectionB),
+			generateGroup('Object A', { color: [255, 0, 0] }, [clash.a]),
+			generateGroup('Object B', { color: [0, 255, 0] }, [clash.b]),
 		]);
+
+		const contextGroup = await generateGroup('Other Objects', {}, [clash.a, clash.b], true);
 
 		ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
 		ticket.properties[DEFAULT_VIEW].state = ticket.properties[DEFAULT_VIEW].state ?? {};
 		ticket.properties[DEFAULT_VIEW].state[viewGroups.COLORED] = coloredGroups;
+		if (clashContext.hideOtherObjects) {
+			ticket.properties[DEFAULT_VIEW].state[viewGroups.HIDDEN] = [contextGroup];
+		} else {
+			ticket.properties[DEFAULT_VIEW].state[viewGroups.COLORED].push({
+				...contextGroup,
+				...CONTEXT_GROUP_CONFIGURATION,
+			});
+		}
 	}
 
 	if (clash.bbox) {
@@ -313,6 +345,44 @@ const determineStatusInfo = (template, configuredDefaultStatuses) => {
 	return res;
 };
 
+const prepareContext = (plan, runId, template, clashIdToTicket, federationUnits) => {
+	const {
+		_id: planId,
+		name: planName,
+		type: clashType,
+		selectionA,
+		selectionB,
+		tickets: {
+			valuesAtCreation,
+			defaultStatuses: configuredDefaultStatuses,
+			hideOtherObjects,
+			creator,
+		} = {},
+	} = plan;
+	const containerRevisions = {};
+	[selectionA, selectionB].forEach(({ container, revision } = {}) => {
+		if (container && revision) {
+			containerRevisions[UUIDToString(container)] = revision;
+		}
+	});
+
+	return {
+		planId: UUIDToString(planId),
+		planName,
+		runId: UUIDToString(runId),
+		clashType,
+		statusInfo: determineStatusInfo(template, configuredDefaultStatuses),
+		clashIdToTicket,
+		valuesAtCreation,
+		federationUnits,
+		containerRevisions,
+		pinEnabled: template.config?.pin,
+		defaultViewEnabled: template.config?.defaultView,
+		hideOtherObjects,
+		creator,
+	};
+};
+
 const processNewClashTickets = async (teamspace, project, federation, template, ticketsToCreate, creator) => {
 	if (ticketsToCreate.length === 0) return;
 
@@ -369,52 +439,28 @@ TicketsClashes.processClashResults = async (
 	{ plan, runId },
 ) => {
 	const { new: newClashes = [], active: activeClashes = [] } = results;
-	const {
-		_id: planId,
-		name: planName,
-		type: clashType,
-		selectionA,
-		selectionB,
-		tickets: {
-			valuesAtCreation,
-			defaultStatuses: configuredDefaultStatuses,
-			creator,
-		} = {},
-	} = plan;
+	const { _id: planId } = plan;
 
 	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
 	const { properties: { unit: federationUnits } } = await getFederationById(
 		teamspace, federation, { 'properties.unit': 1 });
 
-	const statusInfo = determineStatusInfo(template, configuredDefaultStatuses);
-
-	const clashContext = {
-		planId: UUIDToString(planId),
-		planName,
-		runId: UUIDToString(runId),
-		clashType,
-		statusInfo,
-		clashIdToTicket,
-		valuesAtCreation,
-		federationUnits,
-		pinEnabled: template.config?.pin,
-		defaultViewEnabled: template.config?.defaultView,
-		selectionA,
-		selectionB,
-	};
+	const clashContext = prepareContext(plan, runId, template, clashIdToTicket, federationUnits);
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
 	const ticketsToProcess = {
 		ticketsToUpdate: [
 			...processedClashes.ticketsToUpdate,
-			...resolveTickets(Object.values(clashIdToTicket), statusInfo),
+			...resolveTickets(Object.values(clashIdToTicket), clashContext.statusInfo),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};
 
 	await Promise.all([
-		processNewClashTickets(teamspace, project, federation, template, ticketsToProcess.ticketsToCreate, creator),
-		processTicketUpdates(teamspace, project, federation, template, ticketsToProcess.ticketsToUpdate, creator),
+		processNewClashTickets(
+			teamspace, project, federation, template, ticketsToProcess.ticketsToCreate, clashContext.creator),
+		processTicketUpdates(
+			teamspace, project, federation, template, ticketsToProcess.ticketsToUpdate, clashContext.creator),
 
 	]);
 };

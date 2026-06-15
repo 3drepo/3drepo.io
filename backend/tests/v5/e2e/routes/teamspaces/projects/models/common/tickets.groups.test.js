@@ -356,6 +356,7 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
+				['the payload has excludeDefinedObjects', { ...baseRouteParams, checkOutput: false }, { excludeDefinedObjects: true }, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id, [idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
 				] }, true],
@@ -369,7 +370,7 @@ const testUpdateGroup = () => {
 					{ container: con._id,
 						[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()],
 						[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
-				] }, false, templates.invalidArguments],
+				] }, true],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
 					operator: valueOperators.IS.name,

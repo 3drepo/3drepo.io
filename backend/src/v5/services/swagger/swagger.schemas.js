@@ -302,6 +302,11 @@ Schemas.schemas.ticketGroup = {
 			description: 'Description of the group',
 			example: 'All facades on level 1',
 		},
+		excludeDefinedObjects: {
+			type: 'boolean',
+			description: 'Whether this group represents all objects except the defined objects',
+			example: true,
+		},
 		rules: Schemas.schemas.ticketGroupRules,
 		objects: {
 			type: 'array',
