@@ -281,7 +281,9 @@ const testProcessClashResults = () => {
 		return {
 			...(federationUnit ? { federationUnit } : {}),
 			properties: {
-				...(federationUnit ? { [PIN]: convertArrayUnits(clashData.positions[0], units.MM, federationUnit) } : {}),
+				...(federationUnit ? {
+					[PIN]: convertArrayUnits(clashData.positions[0], units.MM, federationUnit),
+				} : {}),
 				[DEFAULT_VIEW]: {
 					...(clashData.bbox ? { camera: defaultViewCamera } : {}),
 					state,
@@ -484,13 +486,9 @@ const testProcessClashResults = () => {
 				baseTemplate, { [STATUS]: statuses.OPEN, [PIN]: [10, 20, 30] }, { [DISTANCE_M]: 1 },
 			);
 			const defaultViewTemplate = { ...baseTemplate, config: { defaultView: true } };
-			const defaultViewCamera = {
-				position: [-17.365799280415647, 18.417875965717393, 19.823315210249056],
-				up: [0.3728146553039551, 0.8944026231765747, -0.2470894455909729],
-				forward: [0.7455270290374756, -0.4472627639770508, -0.49411076307296753],
-				type: CameraType.PERSPECTIVE,
-			};
-			const voidTicket = generateExistingTicket(baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 });
+			const voidTicket = generateExistingTicket(
+				baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 },
+			);
 			test.each([
 				['Should update tickets for active clashes', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, existingTicket, expectedUpdate],
 				['Should reopen resolved tickets using the template default status', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, resolvedTicket, { properties: { [STATUS]: statuses.OPEN } }],
