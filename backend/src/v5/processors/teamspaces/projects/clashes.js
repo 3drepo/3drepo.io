@@ -369,7 +369,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 	const latestRun = await getLatestRunByPlan(teamspace, project, planId, { _id: 1 });
 	if (UUIDToString(latestRun._id) !== UUIDToString(runId)) {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
-			{ reason: 'Superceded' });
+			{ reason: 'Clash run aborted because it has been superseded by a newer run.' });
 		return;
 	}
 
@@ -425,7 +425,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 			active: categorizedClashes.active.length,
 			resolved: categorizedClashes.resolved.length,
 		} });
-	publish(events.CLASH_RUN_PROCESSED, {
+	publish(events.CLASH_RUN_RESULTS_PROCESSED, {
 		teamspace,
 		project,
 		runId,
