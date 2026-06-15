@@ -185,12 +185,7 @@ const BaseMarkupStage = ({
 					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
 
 			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {
-				const { scaleX, scaleY, ...attributes } = attrs;
-				const newShape = getNewShape(figure, color, {
-					...attributes,
-					initScaleX: scaleX,
-					initScaleY: scaleY,
-				});
+				const newShape = getNewShape(figure, color, attrs);
 				const selectedName = newShape.name;
 				addElement(newShape);
 				if (updateState) {
