@@ -37,15 +37,11 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 			transformer.current.nodes([group.current]);
 			transformer.current.getLayer().batchDraw();
 		}
-	}, [transformer.current, isSelected]);
+	}, [transformer.current, group.current, isSelected]);
 
 	const handleTransformEnd = ({ currentTarget }) => {
 		const { attrs } = currentTarget;
-
-		handleChange({
-			...element,
-			group: pick(attrs, ['x', 'y', 'scaleX', 'scaleY', 'rotation']),
-		});
+		handleChange({ ...element, group: pick(attrs, ['x', 'y', 'scaleX', 'scaleY', 'rotation'])});
 	};
 
 	const additionalGroupProps = groupProps || {x: 0, y: 0};

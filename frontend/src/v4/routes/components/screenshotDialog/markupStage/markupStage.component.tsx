@@ -77,7 +77,7 @@ const BaseMarkupStage = ({
 	strokeWidth,
 	mode,
 	fontSize,
-	onSelectedObjectNameChange,
+	onSelectedObjectNameChange: onSelectedObjectNameChange2,
 	onModeChange,
 	onCursorChange,
 	viewer,
@@ -95,6 +95,10 @@ const BaseMarkupStage = ({
 
 	const isErasing = mode === MODES.ERASER;
 	const isDrawingMode = mode === MODES.BRUSH || isErasing;
+
+	const onSelectedObjectNameChange = useCallback((name: string) => {
+		onSelectedObjectNameChange2(name);
+	}, [onSelectedObjectNameChange2]);
 
 	const addElement = useCallback((element) => dispatch(CanvasHistoryActions.add(element)), [dispatch]);
 	const updateElement = useCallback((elementName, property) => {
@@ -149,13 +153,8 @@ const BaseMarkupStage = ({
 	}, [onSelectedObjectNameChange, removeElement, selectedObjectName]);
 
 	const handleStageMouseDown = useCallback(({ target }) => {
-		const isAnchor = target && target.attrs.name && target.attrs.name.includes('anchor');
-		const isSelectedObject = target.parent && (target.parent.attrs.name !== selectedObjectName);
-		const isDrawnLine = target.attrs.type !== 'drawing' && target.attrs.name !== selectedObjectName;
-
-		if (!target.parent || (isSelectedObject && isDrawnLine && !isAnchor)) {
+		if (target.attrs.name === 'backgroundImage' && Boolean(selectedObjectName)) {
 			onSelectedObjectNameChange('');
-			return;
 		}
 	}, [onSelectedObjectNameChange, selectedObjectName]);
 
@@ -253,7 +252,7 @@ const BaseMarkupStage = ({
 				return;
 			}
 
-			const image = new Konva.Image({ image: imageObj });
+			const image = new Konva.Image({ image: imageObj, name: 'backgroundImage' });
 			scaleStage(image);
 
 			imageLayerRef.current.destroyChildren();
