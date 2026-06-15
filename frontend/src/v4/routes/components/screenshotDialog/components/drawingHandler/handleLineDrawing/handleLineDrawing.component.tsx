@@ -40,6 +40,7 @@ export class HandleLineDrawing
 	}
 
 	public handleMouseDownLine = (args) => {
+		// it only starts drawing when the user clicks on the image of the stage
 		this.setState({ isCurrentlyDrawn: !!args?.target?.attrs?.image });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();
