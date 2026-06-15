@@ -63,6 +63,7 @@ const GroupSchema = Yup.object().shape({
 		id: 'validation.group.description.error.max',
 		defaultMessage: 'Description is limited to 1200 characters',
 	})),
+	excludeDefinedObjects: Yup.boolean(),
 	rules: Yup.array().when(
 		'$isSmart',
 		([isSmart], schema) => (isSmart ? schema.required().min(1) : schema),

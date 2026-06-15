@@ -18,11 +18,12 @@
 import { ITemplate } from "@/v5/store/tickets/tickets.types";
 import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
-import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyError, serializeFilter, splitByNonEscaped, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
+import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyError, serializeFilter, splitByNonEscaped, templatesToFilters, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { mockRiskCategories, templateMockFactory } from "./tickets.fixture";
 import { initializeIntl } from "@/v5/services/intl";
 import { TicketsSortingPropertyDictionary } from "@/v5/store/tickets/card/ticketsCard.types";
 import { deserializeSorting, serializeSorting } from "@/v5/helpers/ticketsSorting.helpers";
+import { removeHiddenPropertiesFromTemplates } from "@/v5/store/tickets/ticketsTemplates.helpers";
 
 describe('Tickets: filters', () => {
 	const template: ITemplate = {
@@ -230,6 +231,35 @@ describe('Tickets: filters', () => {
 			arr = splitByNonEscaped(str, ',');
 			expect(arr).toEqual([str]);
 
+		});
+
+		it('should not include hidden properties in available filters for sanitized templates', () => {
+			const templateWithHiddenProperties = templateMockFactory({
+				properties: [
+					{ name: 'Visible property', type: 'text' },
+					{ name: 'Hidden property', type: 'text', hiddenOnUI: true },
+				],
+				modules: [
+					{
+						name: 'Module',
+						properties: [
+							{ name: 'Visible module property', type: 'number' },
+							{ name: 'Hidden module property', type: 'number', hiddenOnUI: true },
+						],
+					},
+				],
+			});
+
+			const filters = templatesToFilters(removeHiddenPropertiesFromTemplates([templateWithHiddenProperties]));
+
+			expect(filters).toEqual(expect.arrayContaining([
+				expect.objectContaining({ property: 'Visible property' }),
+				expect.objectContaining({ module: 'Module', property: 'Visible module property' }),
+			]));
+			expect(filters).not.toEqual(expect.arrayContaining([
+				expect.objectContaining({ property: 'Hidden property' }),
+				expect.objectContaining({ module: 'Module', property: 'Hidden module property' }),
+			]));
 		});
 	});
 
