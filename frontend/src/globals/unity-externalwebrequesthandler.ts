@@ -46,6 +46,8 @@ export class ExternalWebRequestHandler {
 
 	apiHost: string;
 
+	apiKey: string;
+
 	/** An object providing an API to offline store */
 	offlineFetchInterceptor?: (url: string, options?: RequestInit) => Promise<Response>;
 	
@@ -66,6 +68,13 @@ export class ExternalWebRequestHandler {
 
 	setAPIHost(hostNames: [string]) { // An array for backwards compatability reasons
 		[this.apiHost] = hostNames;
+		if (this.apiHost?.endsWith('/')) {
+			this.apiHost = this.apiHost.slice(0, -1);
+		}
+	}
+
+	setAPIKey(apiKey: string) {
+		this.apiKey = apiKey;
 	}
 
 	/** Should direct to the cache object's read function. If the cache is
@@ -115,18 +124,29 @@ export class ExternalWebRequestHandler {
 				return Promise.resolve();
 			}
 
+			let fetchUrl = undefined;
+
 			const cookies = document?.cookie;
 			const headers = {};
 			if (cookies) {
 				const tokenMatch = cookies.match(/(^| )csrf_token=([^;]+)/);
 				if (tokenMatch) {
 					headers['X-CSRF-TOKEN'] = tokenMatch[2];
+					fetchUrl = `${this.apiHost}${url.startsWith('/') ? '' : '/'}${url}`;
 				}
+			}
+
+			if (!fetchUrl && this.apiKey) {
+				fetchUrl = `${this.apiHost}${url.startsWith('/') ? '' : '/'}${url}${url.includes('?') ? '&' : '?'}key=${this.apiKey}`;
+			}
+
+			if (!fetchUrl) {
+				throw new Error('ExternalWebRequestHandler has no cookie or API key and so this request cannot be authenticated.');
 			}
 
 			// If offline interceptor is set (e.g., by Flutter), use it to fetch the resource, otherwise use the default fetch implementation
 			const response = this.offlineFetchInterceptor ? await this.offlineFetchInterceptor(url, { headers }) 
-				: await fetch(this.getUrl(url), { headers });
+				: await fetch(fetchUrl, { headers });
 
 			// Where the request gets a response outside the OK range, fetch will
 			// not raise an error, but will print to the console. In this case we
@@ -151,14 +171,6 @@ export class ExternalWebRequestHandler {
 				size: -1, // This signals that the request ended early. The reason should be printed in the Js log so there is no need to send it to Unity.
 			});
 		});
-	}
-
-	/** Given a local URI that can also act as a cache key, return a fully
-	 * qualified URI that will return the resource from .io */
-	// eslint-disable-next-line class-methods-use-this
-	getUrl(url) {
-		// In the frontend, we rely on the XHR system to already be set up
-		return `${this.apiHost}/${url}`;
 	}
 
 	/**

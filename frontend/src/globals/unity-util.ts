@@ -2149,9 +2149,9 @@ export class UnityUtil {
 	 */
 	public static setAPIHost(hostNames: { hostNames: string[] }) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
-		if (UnityUtil.externalWebRequestHandler !== undefined) {
-			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
-		}
+		UnityUtil.onReady().then(() => { // Make sure not to check externalWebRequestHandler until after we know whether it will be initialised or not
+			UnityUtil.externalWebRequestHandler?.setAPIHost(hostNames.hostNames);
+		});
 	}
 
 	/**
@@ -2161,6 +2161,9 @@ export class UnityUtil {
 	 */
 	public static setAPIKey(apiKey: string) {
 		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+		UnityUtil.onReady().then(() => {
+			UnityUtil.externalWebRequestHandler?.setAPIKey(apiKey);
+		});
 	}
 
 	/**
