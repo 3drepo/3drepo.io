@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
@@ -23,19 +23,18 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
-const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../utils/responder');
 const { schema: rulesSchema } = require('../../../../../schemas/rules');
+const { setLastRevForSelections } = require('../../../../../processors/teamspaces/projects/clashes');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../common');
-const { validateTicket } = require('../../../../../schemas/tickets');
+const { validateTickets } = require('../../../../../schemas/tickets');
 
 const Clashes = {};
 
@@ -60,10 +59,11 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		return required ? schema.required() : schema;
 	};
 
-	const selectionSchema = Yup.object().shape({
+	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
 		rules: rulesSchema,
 	});
+	const selectionSchema = Yup.array().of(selectionEntrySchema.required()).min(1);
 
 	const defaultStatusesObject = {};
 	statusEvents.forEach((event) => {
@@ -84,18 +84,19 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 
 	return Yup.object().shape({
 		name: imposeCondition(types.strings.title, true, false),
-		type: imposeCondition(Yup.string().oneOf(CLASH_PLAN_TYPES), true, false),
+		type: imposeCondition(Yup.string().oneOf(Object.values(CLASH_TYPES)), true, false),
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
 			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
-		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1)), true, false),
+		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string()
+			.oneOf(Object.values(triggerOptions))).min(1)), true, false),
 		selectionA: imposeCondition(selectionSchema, true, false),
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
 	}).noUnknown(true).required();
 };
 
-const validateTicketData = async (teamspace, project, newTicketData, oldTicketData = {}) => {
+const validateTicketConfiguration = async (teamspace, project, newTicketData, oldTicketData = {}) => {
 	const updateData = cloneDeep(newTicketData);
 	const ticketData = cloneDeep({ ...oldTicketData, ...updateData });
 	const hasDefaultStatusesUpdate = Object.hasOwn(updateData, 'defaultStatuses');
@@ -182,8 +183,8 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTicket(teamspace, project, ticketData.federation,
-			template, propertiesToUpdate, { });
+		await validateTickets(teamspace, project, ticketData.federation,
+			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -209,7 +210,7 @@ const validatePlanData = async (req, res, next) => {
 			getUserFromSession(req.session), !!req.planData);
 		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
-			req.body.tickets = await validateTicketData(
+			req.body.tickets = await validateTicketConfiguration(
 				teamspace, project, req.body.tickets, req.planData?.tickets);
 		}
 
@@ -222,9 +223,7 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					const normaliseArray = (array) => [...new Set(array)].sort();
-					if (isArray(req.planData[key])
-						&& isEqual(normaliseArray(req.planData[key]), normaliseArray(bodyVal))) {
+					if (isEqual(bodyVal, req.planData[key])) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {
@@ -258,21 +257,9 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
 
-		await Promise.all([req.planData.selectionA, req.planData.selectionB].map(async (selectionObj) => {
-			const { _id: rev } = await getLatestRevision(teamspace, selectionObj.container,
-				modelTypes.CONTAINER, { _id: 1 });
-
-			// eslint-disable-next-line no-param-reassign
-			selectionObj.revision = rev;
-		}));
-
+		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
 		await next();
 	} catch (err) {
-		if (err === templates.revisionNotFound) {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
-			return;
-		}
-
 		respond(req, res, err);
 	}
 };

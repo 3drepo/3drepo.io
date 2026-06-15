@@ -120,11 +120,12 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 
 const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
 	const { errorReason, status } = data;
-	const calibration = modelType === modelTypes.DRAWING
-		? await getCalibrationStatus(teamspace, project, model, revId)
-		: undefined;
 
 	if (status === processStatuses.OK) {
+		const calibration = modelType === modelTypes.DRAWING
+			? await getCalibrationStatus(teamspace, project, model, revId)
+			: undefined;
+
 		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!errorReason.userErr) {
 		try {

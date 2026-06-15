@@ -2892,4 +2892,13 @@ export class UnityUtil {
 	public static disableDrawingPlane() {
 		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
+
+	/**
+	 * Increases or decreases the size of measurement tool labels. This takes
+	 * effect immediately and applies to existing and new labels.
+	 * @param scale Scale factor, where 1 is the default scale.
+	 */
+	public static setLabelScale(scale: number) {
+		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
 }

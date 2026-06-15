@@ -63,6 +63,9 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
+
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -286,6 +289,7 @@ const testNewRevision = () => {
 
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
 		Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
@@ -555,6 +559,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -596,6 +601,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 

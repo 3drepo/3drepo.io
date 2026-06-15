@@ -40,12 +40,11 @@ const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 const {
-	CLASH_PLAN_TYPES,
+	CLASH_TYPES,
 	CLASH_PLANS_COL,
 	CLASH_RUNS_COL,
-	RUN_HISTORY_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
-	TRIGGER_OPTIONS,
+	triggerOptions,
 	clashObjectIdTypes,
 	clashRunStatus,
 } = require(`${src}/models/clashes.constants`);
@@ -346,36 +345,47 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
-db.createClashPlan = async (teamspace, project, plan) => {
-	const formattedPlan = { ...plan, _id: stringToUUID(plan._id), project: stringToUUID(project) };
-	await DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+db.createClashPlans = async (teamspace, project, plans) => {
+	const formattedPlans = plans.map((plan) => ({
+		...plan,
+		_id: stringToUUID(plan._id),
+		project: stringToUUID(project),
+	}));
+	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
-db.createClashRun = async (teamspace, projectId, run, clashes) => {
-	const formattedRun = {
-		...run,
-		_id: stringToUUID(run._id),
-		project: stringToUUID(projectId),
-		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
-		plan: { ...run.plan, _id: stringToUUID(run.plan._id) },
-	};
-
-	if (clashes) {
-		formattedRun.results = {
-			stats: {
-				new: clashes.new.length,
-				active: clashes.active.length,
-				resolved: clashes.resolved.length,
-			},
+db.createClashRuns = async (teamspace, project, plan, runs) => {
+	const formattedProject = isString(project) ? stringToUUID(project) : project;
+	const formattedRuns = runs.map(({ clashResults, ...run }) => {
+		const formattedRun = {
+			...run,
+			_id: stringToUUID(run._id),
+			project: formattedProject,
+			updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+			plan: { ...plan, _id: stringToUUID(plan._id) },
 		};
-		formattedRun.status = clashRunStatus.COMPLETED;
-		formattedRun.updatedAt = new Date();
 
-		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun._id,
-			Buffer.from(JSON.stringify(clashes)));
-	}
+		if (clashResults) {
+			formattedRun.results = {
+				stats: {
+					new: clashResults.new.length,
+					active: clashResults.active.length,
+					resolved: clashResults.resolved.length,
+				},
+			};
+			formattedRun.status = clashRunStatus.COMPLETED;
+			formattedRun.updatedAt = run.updatedAt ?? new Date();
+		}
 
-	await DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
+		return formattedRun;
+	});
+
+	await Promise.all(runs.map(({ _id, clashResults }) => (clashResults
+		? FilesManager.storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(_id),
+			Buffer.from(JSON.stringify(clashResults)))
+		: Promise.resolve())));
+
+	await DbHandler.insertMany(teamspace, CLASH_RUNS_COL, formattedRuns);
 };
 
 db.addLoginRecords = async (records) => {
@@ -957,38 +967,47 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	return deleteIfUndefined({
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		type: CLASH_PLAN_TYPES[0],
+		type: CLASH_TYPES.HARD,
 		tolerance: 0.01,
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [TRIGGER_OPTIONS[0]],
-		selectionA: {
+		trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION],
+		selectionA: [{
 			container: model1,
-		},
-		selectionB: {
+		}],
+		selectionB: [{
 			container: model2,
-		},
+		}],
 		tickets,
 	});
 };
 
 ServiceHelper.generateClashes = (plan, number = 20) => {
-	const objectId = (container) => `${container}::${clashObjectIdTypes.INTERNAL}::${ServiceHelper.generateRandomString()}`;
+	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+	const objectId = (container) => [
+		container,
+		clashObjectIdTypes.INTERNAL,
+		ServiceHelper.generateRandomString(),
+		bbox,
+	].join('::');
 
 	return times(number, () => ({
-		a: objectId(plan.selectionA.container),
-		b: objectId(plan.selectionB.container),
+		a: objectId(plan.selectionA[0].container),
+		b: objectId(plan.selectionB[0].container),
 		positions: [
 			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
 		],
 		fingerprint: ServiceHelper.generateRandomNumber() }));
 };
 
-ServiceHelper.generateClashRun = (plan) => ({
+ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteIfUndefined({
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
-	triggeredAt: ServiceHelper.generateRandomDate(),
-	status: clashRunStatus.PLANNED,
+	triggeredAt: new Date(),
+	updatedAt: clashResults ? new Date() : undefined,
+	status: clashResults ? clashRunStatus.COMPLETED : clashRunStatus.PLANNED,
 	plan,
+	clashResults,
+	...overrides,
 });
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);

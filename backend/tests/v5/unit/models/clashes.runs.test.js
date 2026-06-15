@@ -32,13 +32,15 @@ const testCreateClashRun = () => {
 			const user = generateRandomString();
 			const plan = generateRandomObject();
 			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
-			const createIndexFn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			const createIndexFn = jest.spyOn(db, 'createIndices').mockResolvedValue(undefined);
 
 			const _id = await ClashRuns.createClashRun(teamspace, project, plan, user);
 
 			expect(createIndexFn).toHaveBeenCalledTimes(1);
-			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
-				{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, [
+				{ key: { project: 1, 'plan._id': 1, updatedAt: -1 }, background: true },
+				{ key: { project: 1, 'plan._id': 1, triggeredAt: -1 }, background: true },
+			]);
 
 			const { triggeredAt, updatedAt } = createFn.mock.calls[0][2];
 			expect(createFn).toHaveBeenCalledTimes(1);
@@ -60,14 +62,16 @@ const testCreateClashRun = () => {
 			const user = generateRandomString();
 			const plan = generateRandomObject();
 			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
-			const createIndexFn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(new Error());
+			const createIndexFn = jest.spyOn(db, 'createIndices').mockRejectedValueOnce(new Error());
 
 			const _id = await ClashRuns.createClashRun(teamspace, project, plan, user);
 
 			expect(createIndexFn).toHaveBeenCalledTimes(1);
 
-			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
-				{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, [
+				{ key: { project: 1, 'plan._id': 1, updatedAt: -1 }, background: true },
+				{ key: { project: 1, 'plan._id': 1, triggeredAt: -1 }, background: true },
+			]);
 
 			const { triggeredAt, updatedAt } = createFn.mock.calls[0][2];
 			expect(createFn).toHaveBeenCalledTimes(1);
@@ -183,19 +187,22 @@ const testGetClashRunByQuery = () => {
 	});
 };
 
-const testGetLastRunFromPlan = () => {
-	describe('Get last run from plan', () => {
-		test('should get the last run from a plan', async () => {
+const testGetLatestRunByPlan = () => {
+	describe('Get latest run by plan', () => {
+		test('should get the latest clash run for the plan', async () => {
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
 			const planId = generateRandomString();
+			const projection = generateRandomObject();
 			const result = generateRandomObject();
 			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(result);
 
-			const run = await ClashRuns.getLastRunFromPlan(teamspace, planId);
+			const run = await ClashRuns.getLatestRunByPlan(teamspace, project, planId, projection);
 			expect(run).toEqual(result);
 
 			expect(findFn).toHaveBeenCalledTimes(1);
-			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': planId }, { sort: { createdAt: -1 } });
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ 'plan._id': planId, project }, projection, { triggeredAt: -1 });
 		});
 	});
 };
@@ -203,19 +210,20 @@ const testGetLastRunFromPlan = () => {
 const testGetRunsByPlanId = () => {
 	describe('Get runs by plan ID', () => {
 		const teamspace = generateRandomString();
+		const project = generateRandomString();
 		const planId = generateRandomString();
 
 		test('should get runs by plan ID sorted by triggeredAt descending and without plan field', async () => {
 			const runs = [generateRandomObject(), generateRandomObject()];
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
 
-			await expect(ClashRuns.getRunsByPlanId(teamspace, planId)).resolves.toEqual(runs);
+			await expect(ClashRuns.getRunsByPlanId(teamspace, project, planId)).resolves.toEqual(runs);
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 			expect(findFn).toHaveBeenCalledWith(
 				teamspace,
 				CLASH_RUNS_COL,
-				{ 'plan._id': planId },
+				{ project, 'plan._id': planId },
 				{ plan: 0 },
 				{ triggeredAt: -1 },
 			);
@@ -225,13 +233,13 @@ const testGetRunsByPlanId = () => {
 			const error = new Error(generateRandomString());
 			const findFn = jest.spyOn(db, 'find').mockRejectedValueOnce(error);
 
-			await expect(ClashRuns.getRunsByPlanId(teamspace, planId)).rejects.toEqual(error);
+			await expect(ClashRuns.getRunsByPlanId(teamspace, project, planId)).rejects.toEqual(error);
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 			expect(findFn).toHaveBeenCalledWith(
 				teamspace,
 				CLASH_RUNS_COL,
-				{ 'plan._id': planId },
+				{ project, 'plan._id': planId },
 				{ plan: 0 },
 				{ triggeredAt: -1 },
 			);
@@ -239,10 +247,77 @@ const testGetRunsByPlanId = () => {
 	});
 };
 
+const testDeleteRunsByPlan = () => {
+	describe('Delete runs by plan', () => {
+		test('should delete the runs associated with a plan and return the ids removed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const planId = generateRandomString();
+			const runs = [
+				{ _id: generateRandomString() },
+				{ _id: generateRandomString() },
+			];
+			const runIds = runs.map(({ _id }) => _id);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByPlan(teamspace, project, planId)).resolves.toEqual(runIds);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, 'plan._id': planId }, { _id: 1 });
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, _id: { $in: runIds } });
+		});
+
+		test('should not try to delete anything if there are no runs associated with a plan', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const planId = generateRandomString();
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByPlan(teamspace, project, planId)).resolves.toEqual([]);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, 'plan._id': planId }, { _id: 1 });
+			expect(deleteFn).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testDeleteRunsByProject = () => {
+	describe('Delete runs by project', () => {
+		test('should delete the runs associated with a project and return the ids removed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const runs = [
+				{ _id: generateRandomString() },
+				{ _id: generateRandomString() },
+			];
+			const runIds = runs.map(({ _id }) => _id);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByProject(teamspace, project)).resolves.toEqual(runIds);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project }, { _id: 1 });
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, _id: { $in: runIds } });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
-	testGetLastRunFromPlan();
 	testGetRunsByPlanId();
 	testCreateClashRun();
 	testUpdateRunStatus();
 	testGetClashRunByQuery();
+	testGetLatestRunByPlan();
+	testDeleteRunsByPlan();
+	testDeleteRunsByProject();
 });

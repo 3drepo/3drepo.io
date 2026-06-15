@@ -33,6 +33,9 @@ const getPlanByQuery = async (teamspace, project, query, projection) => {
 	return res;
 };
 
+ClashPlans.getPlansByQuery = (teamspace, project, query, projection) => db.find(teamspace, CLASH_PLANS_COL,
+	{ ...query, project }, projection);
+
 ClashPlans.getPlanById = (teamspace, project, id, projection = { project: 0 }) => getPlanByQuery(
 	teamspace, project, { _id: id }, projection);
 
@@ -78,5 +81,9 @@ ClashPlans.getAllPlans = (teamspace, project) => db.find(
 	teamspace, CLASH_PLANS_COL, { project }, {
 		type: 1, name: 1, createdAt: 1, createdBy: 1,
 	});
+
+ClashPlans.deletePlansByProject = async (teamspace, project) => {
+	await db.deleteMany(teamspace, CLASH_PLANS_COL, { project });
+};
 
 module.exports = ClashPlans;

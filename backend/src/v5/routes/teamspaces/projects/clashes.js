@@ -95,9 +95,9 @@ const getPlan = async (req, res, next) => {
 };
 
 const getRuns = async (req, res, next) => {
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		req.outputData = await Clashes.getRunsByPlanId(teamspace, planId);
+		req.outputData = await Clashes.getRunsByPlanId(teamspace, project, planId);
 		next();
 	} catch (err) {
 		// istanbul ignore next
@@ -221,38 +221,45 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
-	 *                 type: object
-	 *                 description: The selection A of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection A
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection A
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set A of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection A entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection A entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               selectionB:
-	 *                 type: object
-	 *                 description: The selection B of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection B
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection B
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set B of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection B entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection B entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               tickets:
 	 *                 type: object
 	 *                 description: Ticket creation settings for clashes
@@ -550,38 +557,45 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
-	 *                 type: object
-	 *                 description: The selection A of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection A
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection A
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set A of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection A entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection A entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               selectionB:
-	 *                 type: object
-	 *                 description: The selection B of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection B
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection B
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set B of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection B entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection B entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               tickets:
 	 *                 type: object
 	 *                 description: Ticket creation settings for clashes

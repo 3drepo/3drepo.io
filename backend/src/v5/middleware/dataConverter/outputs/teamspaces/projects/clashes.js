@@ -24,14 +24,14 @@ const yup = require('yup');
 
 const Clashes = {};
 
+const selectionSchema = yup.array().of(yup.object({
+	container: types.id,
+})).default(undefined);
+
 const planSchema = yup.object({
 	_id: types.id,
-	selectionA: yup.object({
-		container: types.id,
-	}).default(undefined),
-	selectionB: yup.object({
-		container: types.id,
-	}).default(undefined),
+	selectionA: selectionSchema,
+	selectionB: selectionSchema,
 	tickets: yup.object({
 		federation: types.id,
 		template: types.id,

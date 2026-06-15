@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
@@ -52,6 +53,25 @@ const testGetPlanById = () => {
 				.rejects.toEqual(templates.clashPlanNotFound);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, projection);
+		});
+	});
+};
+
+const testGetPlansByQuery = () => {
+	describe('Get plans by query', () => {
+		test('should return the list of plans found', async () => {
+			const expectedData = times(5, () => generateRandomObject());
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const query = generateRandomObject();
+			const projection = { _id: 1 };
+
+			await expect(ClashPlans.getPlansByQuery(teamspace, project, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { ...query, project }, projection);
 		});
 	});
 };
@@ -301,11 +321,28 @@ const testGetAllPlans = () => {
 	});
 };
 
+const testDeletePlansByProject = () => {
+	describe('Delete plans by project', () => {
+		test('should delete all plans associated with a project', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await ClashPlans.deletePlansByProject(teamspace, project);
+
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetPlanById();
+	testGetPlansByQuery();
 	testGetPlanByName();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
 	testGetAllPlans();
+	testDeletePlansByProject();
 });

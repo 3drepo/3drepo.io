@@ -40,8 +40,8 @@ const testSerialiseClashPlans = () => {
 							name: generateRandomString(),
 							createdAt,
 							updatedAt,
-							selectionA: { container: generateUUID() },
-							selectionB: { container: generateUUID() },
+							selectionA: [{ container: generateUUID() }],
+							selectionB: [{ container: generateUUID() }],
 						},
 					],
 
@@ -57,8 +57,8 @@ const testSerialiseClashPlans = () => {
 						_id: UUIDToString(req.outputData[0]._id),
 						createdAt: createdAt.getTime(),
 						updatedAt: updatedAt.getTime(),
-						selectionA: { container: UUIDToString(req.outputData[0].selectionA.container) },
-						selectionB: { container: UUIDToString(req.outputData[0].selectionB.container) },
+						selectionA: [{ container: UUIDToString(req.outputData[0].selectionA[0].container) }],
+						selectionB: [{ container: UUIDToString(req.outputData[0].selectionB[0].container) }],
 					},
 				],
 			});
@@ -81,12 +81,8 @@ const testSerialiseClashPlan = () => {
 						template: generateUUID(),
 						federation: generateUUID(),
 					},
-					selectionA: {
-						container: generateUUID(),
-					},
-					selectionB: {
-						container: generateUUID(),
-					},
+					selectionA: [{ container: generateUUID() }],
+					selectionB: [{ container: generateUUID() }],
 				},
 			};
 
@@ -102,12 +98,8 @@ const testSerialiseClashPlan = () => {
 					template: UUIDToString(req.outputData.tickets.template),
 					federation: UUIDToString(req.outputData.tickets.federation),
 				},
-				selectionA: {
-					container: UUIDToString(req.outputData.selectionA.container),
-				},
-				selectionB: {
-					container: UUIDToString(req.outputData.selectionB.container),
-				},
+				selectionA: [{ container: UUIDToString(req.outputData.selectionA[0].container) }],
+				selectionB: [{ container: UUIDToString(req.outputData.selectionB[0].container) }],
 			});
 		});
 	});
