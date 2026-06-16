@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { COLOR } from '@/v4/styles/colors';
 import styled, { css } from 'styled-components';
-import { COLOR } from '../../../../../styles';
+
 
 export const StyledIndicator = styled.div<{ isEraser }>`
 	border-radius: 100%;

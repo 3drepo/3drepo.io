@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useRef, Fragment } from 'react';
-import { Group, Rect, Transformer } from 'react-konva';
+import { Group, Transformer } from 'react-konva';
 import { pick } from 'lodash';
+import { useHandleBubbling } from '../drawnObjects.hooks';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
@@ -79,6 +80,8 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const Component = SHAPE_COMPONENTS[figure];
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
+	const handleBubbling = useHandleBubbling(isSelected);
+
 	return (
 		<Fragment>
 			<Group
@@ -92,6 +95,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 					onMouseOver={handleMouseOver}
 					onMouseOut={handleMouseOut}
 					draggable={draggable && isSelected}
+					{...handleBubbling}
 			>
 				<Component
 						ref={shape}
@@ -105,6 +109,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 				ref={transformer}
 				{...transformerProps}
 				keepRatio
+				{...handleBubbling}
 			/>
 			}
 		</Fragment>

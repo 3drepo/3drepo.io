@@ -16,7 +16,8 @@
  */
 import { pick } from 'lodash';
 import { useEffect, useRef } from 'react';
-import { Group, Line, Rect, Transformer } from 'react-konva';
+import { Group, Line, Transformer } from 'react-konva';
+import { useHandleBubbling } from '../drawnObjects.hooks';
 
 interface IProps {
 	element: any;
@@ -31,6 +32,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	const line = useRef<any>(null);
 	const transformer = useRef<any>(null);
 	const group = useRef<any>(null);
+	const handleBubbling = useHandleBubbling(isSelected);
 
 	useEffect(() => {
 		if (isSelected && transformer.current) {
@@ -45,7 +47,6 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	};
 
 	const additionalGroupProps = groupProps || {x: 0, y: 0};
-
 	return (
 		<>
 			<Group
@@ -56,6 +57,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
 					draggable={isSelected}
+					{...handleBubbling}
 			>
 				<Line
 					ref={line}
@@ -63,7 +65,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 					{...elementProps}
 				/>
 			</Group>
-			{(isSelected && !isEraser) && <Transformer ref={transformer} />}
+			{(isSelected && !isEraser) && <Transformer ref={transformer} {...handleBubbling} />}
 		</>
 	);
 };

@@ -17,7 +17,7 @@
 import { useState, useEffect, CSSProperties, useRef } from 'react';
 import Konva from 'konva';
 import { isEmpty, isEqual } from 'lodash';
-import { EditableText, TextBoxRef, TextBoxSizes } from '../editableText/editableText.component';
+import { EditableText, TextBoxRef, TextBoxSizes } from '../../editableText/editableText.component';
 
 interface IProps {
 	stage: Konva.Stage;

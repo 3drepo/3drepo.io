@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 import { COLOR } from '@/v4/styles';
-import { MODE_OPERATION } from '../../screenshotDialog.helpers';
+import { MODE_OPERATION } from '../../../screenshotDialog.helpers';
 
 declare const Konva;
 

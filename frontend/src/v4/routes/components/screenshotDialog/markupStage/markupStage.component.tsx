@@ -31,12 +31,12 @@ import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DrawingAction } from '../components/drawingAction/drawingAction.component';
 import { DrawnLine } from '../components/drawnLine/drawnLine.component';
-import { Erasing } from '../components/erasing/erasing.component';
-import { Indicator } from '../components/indicator/indicator.component';
+import { Erasing } from '../components/drawingAction/erasingAction/erasingAction.component';
 import { Shape } from '../components/shape/shape.component';
 import { SHAPE_TYPES } from '../components/shape/shape.constants';
 import { TextNode } from '../components/textNode/textNode.component';
-import { TypingHandler } from '../components/typingHandler/typingHandler.component';
+import { TypingHandler } from '../components/drawingAction/typingAction/typingHandler.component';
+import { Indicator } from '../components/drawingAction/indicator/indicator.component';
 import { getNewDrawnLine, getNewShape, getNewText, ELEMENT_TYPES, MODES } from './markupStage.helpers';
 import { Stage, StageContainer } from './markupStage.styles';
 
@@ -153,7 +153,7 @@ const BaseMarkupStage = ({
 	}, [onSelectedObjectNameChange, removeElement, selectedObjectName]);
 
 	const handleStageMouseDown = useCallback(({ target }) => {
-		if (target.attrs.name === 'backgroundImage' && Boolean(selectedObjectName)) {
+		if (Boolean(selectedObjectName)) {
 			onSelectedObjectNameChange('');
 		}
 	}, [onSelectedObjectNameChange, selectedObjectName]);

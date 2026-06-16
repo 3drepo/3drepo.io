@@ -21,7 +21,7 @@ import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHist
 import { COLOR } from '../../../../../../styles';
 
 import { SHAPE_TYPES } from '../../shape/shape.constants';
-import { TypingCalloutHandler } from '../../typingHandler/typingCalloutHandler.component';
+import { TypingCalloutHandler } from '../typingAction/typingCalloutHandler.component';
 import { createDrawnLine, createShape, getDrawFunction } from '../drawingAction.helpers';
 import {
 	BaseDrawingAction, BaseDrawingActionProps, BaseDrawingActionStates,
