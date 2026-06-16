@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import {getDrawFunction} from '../drawingHandler.helpers';
+import {getDrawFunction} from '../drawingAction.helpers';
 
-export interface IHandleBaseDrawingProps {
+export interface BaseDrawingActionProps {
 	color: string;
 	size: number;
 	mode: string;
@@ -29,11 +29,11 @@ export interface IHandleBaseDrawingProps {
 	disabled: boolean;
 }
 
-export interface IHandleBaseDrawingStates {
+export interface BaseDrawingActionStates {
 	isCurrentlyDrawn: boolean;
 }
 
-export class HandleBaseDrawing<P, S> extends PureComponent<IHandleBaseDrawingProps & P> {
+export class BaseDrawingAction<P, S> extends PureComponent<BaseDrawingActionProps & P> {
 
 	public state = {
 		isCurrentlyDrawn: false,

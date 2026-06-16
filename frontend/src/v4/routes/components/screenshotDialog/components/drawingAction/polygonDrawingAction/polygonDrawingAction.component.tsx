@@ -17,18 +17,18 @@
 
 import { between } from '../../../../../../helpers/between';
 import { ELEMENT_TYPES } from '../../../markupStage/markupStage.helpers';
-import { createDrawnLine } from '../handleBaseDrawing/handleBaseDrawing.helpers';
+import { createDrawnLine } from '../baseDrawingAction/baseDrawingAction.helpers';
 
 import {
-	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
-} from '../handleBaseDrawing/handleBaseDrawing.component';
+	BaseDrawingAction, BaseDrawingActionProps, BaseDrawingActionStates,
+} from '../baseDrawingAction/baseDrawingAction.component';
 
-interface IHandlePolygonDrawingProps extends IHandleBaseDrawingProps {
+interface PolygonDrawingActionProps extends BaseDrawingActionProps {
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
 }
 
-export class HandlePolygonDrawing
-		extends HandleBaseDrawing<IHandlePolygonDrawingProps, IHandleBaseDrawingStates> {
+export class PolygonDrawingAction
+		extends BaseDrawingAction<PolygonDrawingActionProps, BaseDrawingActionStates> {
 
 	public isAfterPolygonCreated: boolean = false;
 

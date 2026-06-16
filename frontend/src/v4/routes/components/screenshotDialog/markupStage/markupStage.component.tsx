@@ -29,7 +29,7 @@ import { COLOR } from '@/v4/styles';
 import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { DrawingHandler } from '../components/drawingHandler/drawingHandler.component';
+import { DrawingAction } from '../components/drawingAction/drawingAction.component';
 import { DrawnLine } from '../components/drawnLine/drawnLine.component';
 import { Erasing } from '../components/erasing/erasing.component';
 import { Indicator } from '../components/indicator/indicator.component';
@@ -322,7 +322,7 @@ const BaseMarkupStage = ({
 	));
 
 	const renderDrawingHandler = renderWhenTrue(() => (
-		<DrawingHandler
+		<DrawingAction
 			height={sizes.height}
 			width={sizes.width}
 			size={strokeWidth}
