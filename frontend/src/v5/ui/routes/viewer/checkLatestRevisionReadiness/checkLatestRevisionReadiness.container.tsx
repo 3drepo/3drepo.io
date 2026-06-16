@@ -23,7 +23,7 @@ import { useEffect } from 'react';
 import { useNavigate, generatePath, useParams } from 'react-router-dom';
 import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 
-export const CheckLatestRevisionReadiness = (): JSX.Element => {
+export const CheckLatestRevisionReadiness = () => {
 	const navigate = useNavigate();
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);

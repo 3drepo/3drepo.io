@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
@@ -28,6 +29,9 @@ const { MODEL_CATEGORIES, statusCodes } = require(`${src}/models/modelSettings.c
 const { fileMimeFromBuffer } = require(`${src}/utils/helper/typeCheck`);
 const Responder = require(`${src}/utils/responder`);
 
+const DB = require(`${src}/handler/db`);
+const { CLASH_PLANS_COL, CLASH_RUNS_COL, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
+const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -277,7 +281,7 @@ const testUpdateProject = () => {
 const testDeleteProject = () => {
 	describe('Delete project', () => {
 		const basicData = generateBasicData();
-		const { users, teamspace, projects } = basicData;
+		const { users, teamspace, projects, model } = basicData;
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
@@ -313,8 +317,20 @@ const testDeleteProject = () => {
 			// create test project
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${users.tsAdmin.apiKey}`)
 				.send({ name: 'New Project' }).expect(templates.ok.status);
+			const plan = ServiceHelper.generateClashPlan(model._id, model._id);
+			const run = ServiceHelper.generateClashRun(plan);
+			const clashResults = { new: [], active: [], resolved: [] };
+
+			await ServiceHelper.db.createClashPlans(teamspace, res.body._id, [plan]);
+			await ServiceHelper.db.createClashRun(teamspace, res.body._id, run, clashResults);
 
 			await agent.delete(route(teamspace, res.body._id)).expect(templates.ok.status);
+
+			const projectId = stringToUUID(res.body._id);
+			expect(await DB.find(teamspace, CLASH_PLANS_COL, { project: projectId })).toEqual([]);
+			expect(await DB.find(teamspace, CLASH_RUNS_COL, { project: projectId })).toEqual([]);
+			await expect(getFileAsStream(teamspace, RUN_HISTORY_COL, stringToUUID(run._id)))
+				.rejects.toEqual(templates.fileNotFound);
 
 			const projectsRes = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(projectsRes.body.projects.find((p) => p.name === 'New Project')).toBe(undefined);
@@ -598,7 +614,7 @@ const testGetStatusCodes = () => {
 	describe.each(testCases)('Get Status Codes', runTest);
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 	describe('External Service', () => {

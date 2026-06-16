@@ -39,7 +39,16 @@ const { PassThrough } = require('stream');
 const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_TYPES,
+	CLASH_PLANS_COL,
+	CLASH_RUNS_COL,
+	RUN_HISTORY_COL,
+	SELF_INTERSECTIONS_CHECK_OPTIONS,
+	triggerOptions,
+	clashObjectIdTypes,
+	clashRunStatus,
+} = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -71,7 +80,7 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	const { host, model_queue, callback_queue } = config.cn_queue;
+	const { host, model_queue, clash_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
 
 	const purgeQueue = async (queueName) => {
@@ -89,6 +98,7 @@ queue.purgeQueues = async () => {
 
 	await Promise.all([
 		purgeQueue(model_queue),
+		purgeQueue(clash_queue),
 		purgeQueue(callback_queue),
 	]);
 
@@ -336,9 +346,40 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
-db.createClashPlan = (teamspace, plan) => {
-	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
-	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+db.createClashPlans = async (teamspace, project, plans) => {
+	const formattedPlans = plans.map((plan) => ({
+		...plan,
+		_id: stringToUUID(plan._id),
+		project: stringToUUID(project),
+	}));
+	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
+};
+
+db.createClashRun = async (teamspace, projectId, run, clashes) => {
+	const formattedRun = {
+		...run,
+		_id: stringToUUID(run._id),
+		project: stringToUUID(projectId),
+		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+		plan: { ...run.plan, _id: stringToUUID(run.plan._id) },
+	};
+
+	if (clashes) {
+		formattedRun.results = {
+			stats: {
+				new: clashes.new.length,
+				active: clashes.active.length,
+				resolved: clashes.resolved.length,
+			},
+		};
+		formattedRun.status = clashRunStatus.COMPLETED;
+		formattedRun.updatedAt = new Date();
+
+		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun._id,
+			Buffer.from(JSON.stringify(clashes)));
+	}
+
+	await DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
 };
 
 db.addLoginRecords = async (records) => {
@@ -517,14 +558,6 @@ ServiceHelper.generateUserCredentials = () => ({
 		},
 	},
 });
-
-ServiceHelper.determineTestGroup = (filePath) => {
-	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
-	if (match?.length === 3) {
-		return `${match[1].toUpperCase()} ${match[2]}`;
-	}
-	return filePath;
-};
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),
@@ -824,11 +857,13 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	hasId = true,
 	container = ServiceHelper.generateUUIDString(),
 	nObjects = 3,
+	excludeDefinedObjects,
 } = {}) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = deleteIfUndefined({
 		_id: hasId ? genId() : undefined,
 		name: ServiceHelper.generateRandomString(),
+		excludeDefinedObjects,
 	});
 
 	if (isSmart) {
@@ -914,19 +949,58 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.generateClashPlan = (model1, model2) => ({
+ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
+	let tickets;
+	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
+		const { federation, template, creator } = ticketInfo;
+		const ticket = ServiceHelper.generateTicket(template, false, federation);
+		const valuesAtCreation = Object.keys(ticket.properties).map(
+			(key) => ({ property: key, value: ticket.properties[key] }));
+		tickets = {
+			federation: federation._id, template: template._id, valuesAtCreation, creator,
+		};
+	}
+	return deleteIfUndefined({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		type: CLASH_TYPES.HARD,
+		tolerance: 0.01,
+		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+		trigger: [triggerOptions.MANUAL],
+		selectionA: {
+			container: model1,
+		},
+		selectionB: {
+			container: model2,
+		},
+		tickets,
+	});
+};
+
+ServiceHelper.generateClashes = (plan, number = 20) => {
+	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+	const objectId = (container) => [
+		container,
+		clashObjectIdTypes.INTERNAL,
+		ServiceHelper.generateRandomString(),
+		bbox,
+	].join('::');
+
+	return times(number, () => ({
+		a: objectId(plan.selectionA.container),
+		b: objectId(plan.selectionB.container),
+		positions: [
+			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		],
+		fingerprint: ServiceHelper.generateRandomNumber() }));
+};
+
+ServiceHelper.generateClashRun = (plan) => ({
 	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	type: CLASH_PLAN_TYPES[0],
-	tolerance: 0.01,
-	selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-	trigger: [TRIGGER_OPTIONS[0]],
-	selectionA: {
-		container: model1,
-	},
-	selectionB: {
-		container: model2,
-	},
+	triggeredBy: ServiceHelper.generateRandomString(),
+	triggeredAt: ServiceHelper.generateRandomDate(),
+	status: clashRunStatus.PLANNED,
+	plan,
 });
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);

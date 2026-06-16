@@ -18,7 +18,7 @@
 import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
@@ -27,14 +27,16 @@ import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { isEmpty, isEqual } from 'lodash';
+import { deserializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
 	const [groupByParam] = useSearchParam('groupBy');
+	const [sorting] = useSearchParam('sorting');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams() as ViewerParams;
 	const isFed = modelIsFederation(containerOrFederation);
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
@@ -42,16 +44,25 @@ export const TicketFiltersSetter = () => {
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const filtersFromState = TicketsCardHooksSelectors.selectCardFilters();
+	const [initialized, setInitialized] = useState(false);
 
 	const defaultFiltersForTemplate = getNonCompletedTicketFilters(templates, containerOrFederation);
 
 	useEffect(() => {
+		if (isEmpty(jobsAndUsers) || isEmpty(riskCategories)) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [cardFilters]);
+	}, [JSON.stringify(cardFilters), JSON.stringify(jobsAndUsers), JSON.stringify(riskCategories)]);
 
 	useEffect(() => 
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
 	, [containerOrFederation, revision, isFed]);
+
+	useEffect(() => {
+		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		JobsActionsDispatchers.fetchJobs(teamspace);
+		UsersActionsDispatchers.fetchUsers(teamspace);
+		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+	}, [teamspace]);
 
 	useEffect(() => {
 		if (isFetching) return;
@@ -61,7 +72,18 @@ export const TicketFiltersSetter = () => {
 		if (urlFiltersRaw.length) {
 			UsersActionsDispatchers.fetchUsers(teamspace);
 			JobsActionsDispatchers.fetchJobs(teamspace);
-			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		}
+
+		if (sorting) {
+			try {
+				const  [property, order] = deserializeSorting(sorting);
+
+				if (property && order) {
+					TicketsActionsDispatchers.setSorting(property, order);
+				}
+			} catch (e) {
+				// do nothing if the param is wrong
+			}
 		}
 	}, [isFetching]);
 	
@@ -70,7 +92,7 @@ export const TicketFiltersSetter = () => {
 	 * the url search param.
 	*/
 	useEffect(() => {
-		if (!filtersFromState || !templates.length) return;
+		if (!initialized) return;
 
 		let param = JSON.stringify(filtersFromState.map((f) => 
 			serializeFilter(templates, f, jobsAndUsers, riskCategories),
@@ -82,12 +104,11 @@ export const TicketFiltersSetter = () => {
 			|| (urlFiltersRaw === param) || (!urlFiltersRaw.length && !filtersFromState.length) // if filters from URL and state are the same do nothing
 		) return;
 		setUrlFilters(param);
-	}, [JSON.stringify(filtersFromState), templates.length]);
+	}, [JSON.stringify(filtersFromState), templates.length, initialized]);
 
 	useEffect(() => {
 		if (isEmpty(jobsAndUsers) || isEmpty(riskCategories) || isEmpty(templates)) return;
 		let filtersToSet: TicketFilter[] = [];
-		TicketsCardActionsDispatchers.resetFilters();
 		const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 		if (ticketCodes.length) {
 			filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
@@ -98,13 +119,14 @@ export const TicketFiltersSetter = () => {
 		}
 		
 		TicketsCardActionsDispatchers.setFilters(filtersToSet);
+		setInitialized(true);
 
 		if (ticketCodes.length || urlFiltersRaw?.length) {
 			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 		}
 
 		setTicketSearchParam();
-	}, [templates.length, jobsAndUsers, riskCategories]); 
+	}, [JSON.stringify({ templatesLength: templates.length, jobsAndUsers, riskCategories })]); 
 
 	return <></>;
 };

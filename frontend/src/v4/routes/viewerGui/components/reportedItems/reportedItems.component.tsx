@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, ReactChildren, useEffect, useRef } from 'react';
+import { PureComponent, ReactNode, useEffect, useRef } from 'react';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -64,13 +64,13 @@ interface IProps {
 	onToggleFilters: (isActive) => void;
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean) => void;
-	renderDetailsView: (statement) => ReactChildren[];
+	renderDetailsView: (statement) => ReactNode[];
 	sortByField?: string;
 	id?: string;
 }
 
 const PreviewListSingleItem = ({ active, index, ...props }) => {
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(undefined);
 
 	useEffect(() => {
 		if (active && ref.current) {

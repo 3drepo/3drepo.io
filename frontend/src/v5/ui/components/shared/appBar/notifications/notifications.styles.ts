@@ -21,6 +21,7 @@ import { Item, ItemSecondaryAction } from '@/v4/routes/components/notifications/
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { GRADIENT } from '@/v5/ui/themes/theme';
+import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
 const navbarButtonStyles = css`
 	& > button {
@@ -137,7 +138,7 @@ const itemsStyles = css`
 			background-color: transparent;
 		}
 		
-		${ItemSecondaryAction} span {
+		${ItemSecondaryAction} ${SmallIconButtonStyled} {
 			margin: 0;
 			padding: 13px;
 			display: flex;

@@ -98,7 +98,6 @@ function* fetchData({ teamspace, model }) {
 		const revision = yield select(selectCurrentRevisionId);
 		yield all([
 			put(ViewerGuiActions.loadModel()),
-			put(TicketsActions.resetSorting()),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
@@ -115,6 +114,7 @@ function* fetchData({ teamspace, model }) {
 function* resetPanelsStates() {
 	try {
 		yield all([
+			put(ViewerGuiActions.setCoordView(false)),
 			put(IssuesActions.reset()),
 			put(RisksActions.reset()),
 			put(GroupsActions.resetComponentState()),
@@ -125,6 +125,8 @@ function* resetPanelsStates() {
 			put(GisActions.resetLayers()),
 			put(MeasurementsActions.resetMeasurementTool()),
 			put(TicketsCardActions.resetState()),
+			put(TicketsActions.resetSorting()),
+
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
