@@ -51,7 +51,7 @@ import {
 	ShowViewpointAction,
 	SubscribeOnViewpointChangesAction,
 	UnsubscribeOnViewpointChangesAction,
-	UpdateViewpointAction,
+	UpdateViewpointNameAction,
 } from './viewpoints.redux';
 import { selectSelectedViewpoint } from './viewpoints.selectors';
 import { formatMessage } from '@/v5/services/intl';
@@ -101,7 +101,7 @@ export function* createViewpoint({ teamspace, modelId, viewpoint }: CreateViewpo
 	}
 }
 
-export function* updateViewpoint({ teamspace, modelId, viewpointId, newName }: UpdateViewpointAction) {
+export function* updateViewpointName({ teamspace, modelId, viewpointId, newName }: UpdateViewpointNameAction) {
 	try {
 		yield API.updateModelViewpoint(teamspace, modelId, viewpointId, newName);
 		yield put(ViewpointsActions.updateViewpointSuccess({ _id: viewpointId, name: newName }));
@@ -292,7 +292,7 @@ export function* clearDefaultViewpoint({ teamspace, modelId }: ClearDefaultViewp
 export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeEvery(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
-	yield takeEvery(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
+	yield takeEvery(ViewpointsTypes.UPDATE_VIEWPOINT_NAME, updateViewpointName);
 	yield takeEvery(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
 	yield takeEvery(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeEvery(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);

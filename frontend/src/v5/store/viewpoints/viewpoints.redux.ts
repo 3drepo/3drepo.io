@@ -30,7 +30,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	fetchViewpointsSuccess: ['viewpoints'],
 	createViewpoint: ['teamspace', 'modelId', 'viewpoint'],
 	createViewpointSuccess: ['viewpoint'],
-	updateViewpoint: ['teamspace', 'modelId', 'viewpointId', 'newName'],
+	updateViewpointName: ['teamspace', 'modelId', 'viewpointId', 'newName'],
 	updateViewpointSuccess: ['viewpoint'],
 	deleteViewpoint: ['teamspace', 'modelId', 'viewpointId'],
 	deleteViewpointSuccess: ['viewpointId'],
@@ -105,7 +105,7 @@ const createViewpointSuccess = (state: IViewpointsState, { viewpoint }: CreateVi
 };
 
 const updateViewpointSuccess = (state: IViewpointsState, { viewpoint }: UpdateViewpointSuccessAction) => {
-	state.viewpointsMap[viewpoint._id].name = viewpoint.name;
+	state.viewpointsMap[viewpoint._id] = { ...state.viewpointsMap[viewpoint._id], ...viewpoint };
 };
 
 const deleteViewpointSuccess = (state: IViewpointsState, { viewpointId }: DeleteViewpointSuccessAction) => {
@@ -153,7 +153,7 @@ export type FetchViewpointsAction = Action<'FETCH_VIEWPOINTS'> & { teamspace: st
 export type FetchViewpointsSuccessAction = Action<'FETCH_VIEWPOINTS_SUCCESS'> & { viewpoints: IViewpoint[] };
 export type CreateViewpointAction = Action<'CREATE_VIEWPOINT'> & { teamspace: string; modelId: string; viewpoint: any };
 export type CreateViewpointSuccessAction = Action<'CREATE_VIEWPOINT_SUCCESS'> & { viewpoint: IViewpoint };
-export type UpdateViewpointAction = Action<'UPDATE_VIEWPOINT'> & { teamspace: string; modelId: string; viewpointId: string; newName: string };
+export type UpdateViewpointNameAction = Action<'UPDATE_VIEWPOINT'> & { teamspace: string; modelId: string; viewpointId: string; newName: string };
 export type UpdateViewpointSuccessAction = Action<'UPDATE_VIEWPOINT_SUCCESS'> & { viewpoint: Partial<IViewpoint> };
 export type DeleteViewpointAction = Action<'DELETE_VIEWPOINT'> & { teamspace: string; modelId: string; viewpointId: string };
 export type DeleteViewpointSuccessAction = Action<'DELETE_VIEWPOINT_SUCCESS'> & { viewpointId: string };
@@ -181,7 +181,7 @@ export interface IViewpointsActionCreators {
 	fetchViewpointsSuccess: (viewpoints: IViewpoint[]) => FetchViewpointsSuccessAction;
 	createViewpoint: (teamspace: string, modelId: string, viewpoint: any) => CreateViewpointAction;
 	createViewpointSuccess: (viewpoint: IViewpoint) => CreateViewpointSuccessAction;
-	updateViewpoint: (teamspace: string, modelId: string, viewpointId: string, newName: string) => UpdateViewpointAction;
+	updateViewpointName: (teamspace: string, modelId: string, viewpointId: string, newName: string) => UpdateViewpointNameAction;
 	updateViewpointSuccess: (viewpoint: Partial<IViewpoint>) => UpdateViewpointSuccessAction;
 	deleteViewpoint: (teamspace: string, modelId: string, viewpointId: string) => DeleteViewpointAction;
 	deleteViewpointSuccess: (viewpointId: string) => DeleteViewpointSuccessAction;

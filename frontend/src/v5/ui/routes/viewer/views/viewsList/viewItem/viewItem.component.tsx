@@ -179,7 +179,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 			ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
 			setCreateMode(false);
 		} else {
-			ViewpointsActionsDispatchers.updateViewpoint(teamspace, containerOrFederation, viewpoint._id, newName);
+			ViewpointsActionsDispatchers.updateViewpointName(teamspace, containerOrFederation, viewpoint._id, newName);
 			setEditMode(false);
 		}
 	};
