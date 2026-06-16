@@ -356,11 +356,12 @@ db.createClashPlans = async (teamspace, project, plans) => {
 
 db.createClashRuns = async (teamspace, project, plan, runs) => {
 	const formattedProject = isString(project) ? stringToUUID(project) : project;
-	const formattedRuns = runs.map(({ clashResults, ...run }) => ({
+	const formattedRuns = runs.map(({ clashResults, triggeredAt, updatedAt, ...run }) => deleteIfUndefined({
 		...run,
 		_id: stringToUUID(run._id),
 		project: formattedProject,
-		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+		triggeredAt: new Date(triggeredAt),
+		updatedAt: new Date(updatedAt ?? triggeredAt),
 		plan: { ...plan, _id: stringToUUID(plan._id) },
 	}));
 
@@ -468,7 +469,8 @@ ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
 
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
-ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
+// the last character is always 'a' to avoid generating a string that is compatible with Number() which gives unexpected results in some tests.
+ServiceHelper.generateRandomString = (l = 20) => (l ? `${Crypto.randomBytes(Math.ceil(l / 2)).toString('hex').slice(0, l - 1)}a` : '');
 ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
@@ -988,10 +990,10 @@ ServiceHelper.generateClashes = (plan, number = 20) => {
 ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteIfUndefined({
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
-	triggeredAt: new Date(),
+	triggeredAt: Date.now(),
 	plan,
 	...(clashResults ? {
-		updatedAt: new Date(),
+		updatedAt: Date.now(),
 		status: clashRunStatus.COMPLETED,
 		results: {
 			stats: {

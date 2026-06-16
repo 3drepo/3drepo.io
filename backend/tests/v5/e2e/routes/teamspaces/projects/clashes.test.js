@@ -39,30 +39,6 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 let server;
 let agent;
 
-const datePropertyTypes = [propTypes.DATE, propTypes.PAST_DATE];
-
-const getPropertyType = (template, { property, module }) => {
-	const properties = module
-		? template.modules?.find(({ name, type }) => [name, type].includes(module))?.properties
-		: template.properties;
-	return properties?.find(({ name }) => name === property)?.type;
-};
-
-const getExpectedTicketsObject = (ticketObject, template) => {
-	if (!ticketObject?.valuesAtCreation) {
-		return ticketObject;
-	}
-
-	return {
-		...ticketObject,
-		valuesAtCreation: ticketObject.valuesAtCreation.map((entry) => (
-			datePropertyTypes.includes(getPropertyType(template, entry))
-				? { ...entry, value: new Date(entry.value) }
-				: entry
-		)),
-	};
-};
-
 const setupBasicData = async ({
 	users,
 	teamspace,
@@ -224,8 +200,8 @@ const formatRun = (run) => deleteIfUndefined({
 	_id: run._id,
 	status: run.status,
 	triggeredBy: run.triggeredBy,
-	triggeredAt: run.triggeredAt.getTime(),
-	updatedAt: (run.updatedAt ?? run.triggeredAt).getTime(),
+	triggeredAt: run.triggeredAt,
+	updatedAt: run.updatedAt ?? run.triggeredAt,
 	results: run.results,
 });
 
@@ -259,18 +235,18 @@ const testGetRuns = () => {
 		const completedRunResults = generateRunResults();
 		const plannedRun = ServiceHelper.generateClashRun(runPlan, undefined, {
 			status: clashRunStatus.PLANNED,
-			triggeredAt: ServiceHelper.generateRandomDate(),
+			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
 		});
 		const failedRun = ServiceHelper.generateClashRun(runPlan, undefined, {
 			status: clashRunStatus.FAILED,
-			triggeredAt: ServiceHelper.generateRandomDate(),
+			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
 			results: {
 				error: { reason: ServiceHelper.generateRandomString() },
 			},
 		});
 		const completedRun = ServiceHelper.generateClashRun(runPlan, completedRunResults, {
-			triggeredAt: ServiceHelper.generateRandomDate(),
-			updatedAt: ServiceHelper.generateRandomDate(),
+			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
+			updatedAt: ServiceHelper.generateRandomDate().getTime(),
 		});
 		const plan2Run = ServiceHelper.generateClashRun(plan2RunPlan);
 
@@ -320,8 +296,8 @@ const testGetRun = () => {
 		const plan2RunPlan = injectRevisionIntoPlan(plan2);
 		const completedRunResults = generateRunResults();
 		const completedRun = ServiceHelper.generateClashRun(runPlan, completedRunResults, {
-			triggeredAt: ServiceHelper.generateRandomDate(),
-			updatedAt: ServiceHelper.generateRandomDate(),
+			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
+			updatedAt: ServiceHelper.generateRandomDate().getTime(),
 		});
 		const plan2Run = ServiceHelper.generateClashRun(plan2RunPlan);
 		const formatRunDetail = (run) => ({
@@ -384,6 +360,7 @@ const testCreatePlan = () => {
 		});
 		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 		const users = { ...basicData.users, commenterOnFed, viewerOnFed };
+		const datePropertyTypes = [propTypes.DATE, propTypes.PAST_DATE];
 
 		federation.properties.permissions = [
 			{ user: commenterOnFed.user, permission: 'commenter' },
@@ -403,6 +380,28 @@ const testCreatePlan = () => {
 				planData.tickets = { ...planData.tickets, ...ticketOverrides };
 			}
 			return planData;
+		};
+
+		const getExpectedTicketsObject = (ticketObject, templateToUse) => {
+			const getPropertyType = ({ property, module }) => {
+				const properties = module
+					? templateToUse.modules?.find(({ name, type }) => [name, type].includes(module))?.properties
+					: templateToUse.properties;
+				return properties?.find(({ name }) => name === property)?.type;
+			};
+
+			if (!ticketObject?.valuesAtCreation) {
+				return ticketObject;
+			}
+
+			return {
+				...ticketObject,
+				valuesAtCreation: ticketObject.valuesAtCreation.map((entry) => (
+					datePropertyTypes.includes(getPropertyType(entry))
+						? { ...entry, value: new Date(entry.value) }
+						: entry
+				)),
+			};
 		};
 
 		beforeAll(async () => {

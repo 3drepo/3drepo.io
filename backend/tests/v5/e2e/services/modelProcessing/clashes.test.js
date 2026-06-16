@@ -96,7 +96,7 @@ const generateRunData = (hasPreviousRun) => {
 		previousRun: hasPreviousRun
 			? ServiceHelper.generateClashRun(plan,
 				{ new: previousClashes.map(formatClash), active: [], resolved: [] },
-				{ triggeredAt: previousRunDate })
+				{ triggeredAt: previousRunDate.getTime() })
 			: undefined,
 		previousClashes,
 	});
@@ -172,7 +172,7 @@ const testParseClashResults = () => {
 	const clashes = ServiceHelper.generateClashes(planWithPreviousRun);
 	const previousCompletedRun = ServiceHelper.generateClashRun(planWithPreviousRun,
 		{ new: clashes.map(formatClash), active: [], resolved: [] },
-		{ triggeredAt: previousRunDate });
+		{ triggeredAt: previousRunDate.getTime() });
 	const resultsWithPreviousRun = getResultsPath(runWithPreviousRun);
 	const resultsForBouncerError = getResultsPath(bouncerErrorRun);
 	const resultsWithoutPreviousRun = getResultsPath(runWithoutPreviousRun);
@@ -265,7 +265,7 @@ const testParseClashResults = () => {
 
 		test('Should abort an older completed run and still process the latest run', async () => {
 			const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
-			const oldRun = ServiceHelper.generateClashRun(plan, undefined, { triggeredAt: previousRunDate });
+			const oldRun = ServiceHelper.generateClashRun(plan, undefined, { triggeredAt: previousRunDate.getTime() });
 			const newRun = ServiceHelper.generateClashRun(plan);
 			const oldClashes = ServiceHelper.generateClashes(plan);
 			const latestRunClashes = ServiceHelper.generateClashes(plan);

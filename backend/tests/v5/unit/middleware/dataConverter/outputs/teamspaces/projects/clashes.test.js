@@ -16,51 +16,74 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomNumber, generateRandomString, generateUUID, generateRandomDate } = require('../../../../../../helper/services');
+const ServiceHelper = require('../../../../../../helper/services');
+const { determineTestGroup } = require('../../../../../../helper/utils');
+const { omit, times } = require('lodash');
+
+const { generateRandomString, generateUUIDString } = ServiceHelper;
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const ClashOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/clashes`);
 
+const deserialisePlan = ({ _id, selectionA, selectionB, tickets, ...plan }, template) => {
+	const dateProperties = new Set((template?.properties || [])
+		.filter(({ type }) => [propTypes.DATE, propTypes.PAST_DATE].includes(type))
+		.map(({ name }) => name));
+
+	return {
+		...plan,
+		_id: stringToUUID(_id),
+		selectionA: selectionA.map(({ container, revision, ...selection }) => ({
+			...selection,
+			container: stringToUUID(container),
+			...(revision ? { revision: stringToUUID(revision) } : {}),
+		})),
+		selectionB: selectionB.map(({ container, revision, ...selection }) => ({
+			...selection,
+			container: stringToUUID(container),
+			...(revision ? { revision: stringToUUID(revision) } : {}),
+		})),
+		...(tickets ? {
+			tickets: {
+				...tickets,
+				federation: stringToUUID(tickets.federation),
+				template: stringToUUID(tickets.template),
+				valuesAtCreation: tickets.valuesAtCreation?.map((entry) => ({
+					...entry,
+					value: dateProperties.has(entry.property) ? new Date(entry.value) : entry.value,
+				})),
+			},
+		} : {}),
+	};
+};
+
+const deserialiseRun = ({ _id, clashResults, plan, triggeredAt, updatedAt, ...run }, template) => ({
+	...run,
+	_id: stringToUUID(_id),
+	triggeredAt: new Date(triggeredAt),
+	...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
+	...(plan ? { plan: deserialisePlan(plan, template) } : {}),
+});
+
 const testSerialiseClashPlans = () => {
 	describe('Serialise clash plans', () => {
-		test('should convert UUID and date fields in plans list output', () => {
-			const createdAt = generateRandomDate();
-			const updatedAt = generateRandomDate();
-			const req = {
-				outputData:
-					[
-						{
-							_id: generateUUID(),
-							name: generateRandomString(),
-							createdAt,
-							updatedAt,
-							selectionA: [{ container: generateUUID() }],
-							selectionB: [{ container: generateUUID() }],
-						},
-					],
-
-			};
+		test('should convert UUID fields in plans list output', () => {
+			const plans = times(3,
+				() => ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString()));
+			const req = { outputData: plans.map(deserialisePlan) };
 
 			ClashOutputMiddleware.serialiseClashPlans(req, {});
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
-				plans: [
-					{
-						...req.outputData[0],
-						_id: UUIDToString(req.outputData[0]._id),
-						createdAt: createdAt.getTime(),
-						updatedAt: updatedAt.getTime(),
-						selectionA: [{ container: UUIDToString(req.outputData[0].selectionA[0].container) }],
-						selectionB: [{ container: UUIDToString(req.outputData[0].selectionB[0].container) }],
-					},
-				],
+				plans,
 			});
 		});
 	});
@@ -68,49 +91,19 @@ const testSerialiseClashPlans = () => {
 
 const testSerialiseClashPlan = () => {
 	describe('Serialise clash plan', () => {
-		test('should convert nested UUID fields and createdAt/updatedAt dates', () => {
-			const createdAt = generateRandomDate();
-			const updatedAt = generateRandomDate();
-			const valueAtCreationDate = generateRandomDate();
-			const valueAtCreationString = generateRandomString();
-			const req = {
-				outputData: {
-					_id: generateUUID(),
-					name: generateRandomString(),
-					createdAt,
-					updatedAt,
-					tickets: {
-						template: generateUUID(),
-						federation: generateUUID(),
-						valuesAtCreation: [
-							{ property: generateRandomString(), value: valueAtCreationDate },
-							{ property: generateRandomString(), value: valueAtCreationString },
-						],
-					},
-					selectionA: [{ container: generateUUID() }],
-					selectionB: [{ container: generateUUID() }],
-				},
-			};
+		test('should convert nested UUID fields and ticket dates', () => {
+			const template = ServiceHelper.generateTemplate();
+			const plan = ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString(), {
+				federation: { _id: generateUUIDString() },
+				template,
+				creator: generateRandomString(),
+			});
+			const req = { outputData: deserialisePlan(plan, template) };
 
 			ClashOutputMiddleware.serialiseClashPlan(req, {});
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
-				...req.outputData,
-				_id: UUIDToString(req.outputData._id),
-				createdAt: createdAt.getTime(),
-				updatedAt: updatedAt.getTime(),
-				tickets: {
-					template: UUIDToString(req.outputData.tickets.template),
-					federation: UUIDToString(req.outputData.tickets.federation),
-					valuesAtCreation: [
-						{ ...req.outputData.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
-						req.outputData.tickets.valuesAtCreation[1],
-					],
-				},
-				selectionA: [{ container: UUIDToString(req.outputData.selectionA[0].container) }],
-				selectionB: [{ container: UUIDToString(req.outputData.selectionB[0].container) }],
-			});
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, plan);
 		});
 	});
 };
@@ -118,74 +111,28 @@ const testSerialiseClashPlan = () => {
 const testSerialiseClashRuns = () => {
 	describe('Serialise clash runs', () => {
 		test('should serialise projected run UUID/date fields without reshaping run data', () => {
-			const completedRun = {
-				_id: generateUUID(),
-				status: clashRunStatus.COMPLETED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				results: {
-					stats: {
-						new: generateRandomNumber(),
-						current: generateRandomNumber(),
-						resolved: generateRandomNumber(),
-					},
-				},
+			const clashResults = {
+				new: [generateRandomString()],
+				active: [generateRandomString()],
+				resolved: [generateRandomString()],
 			};
-			const failedRun = {
-				_id: generateUUID(),
-				status: clashRunStatus.FAILED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				results: {
-					error: { reason: generateRandomString() },
-				},
-			};
-			const plannedRun = {
-				_id: generateUUID(),
-				status: clashRunStatus.PLANNED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				queueId: generateRandomString(),
-			};
-			const req = { outputData: [completedRun, failedRun, plannedRun] };
+			const runs = [
+				ServiceHelper.generateClashRun(undefined, clashResults),
+				ServiceHelper.generateClashRun(undefined, undefined, {
+					status: clashRunStatus.FAILED,
+					results: { error: { reason: generateRandomString() } },
+				}),
+				ServiceHelper.generateClashRun(undefined, undefined, {
+					queueId: generateRandomString(),
+				}),
+			].map((run) => omit(run, 'clashResults'));
+			const req = { outputData: runs.map(deserialiseRun) };
 
 			ClashOutputMiddleware.serialiseClashRuns(req, {});
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
-				runs: [
-					{
-						_id: UUIDToString(completedRun._id),
-						status: completedRun.status,
-						triggeredAt: completedRun.triggeredAt.getTime(),
-						triggeredBy: completedRun.triggeredBy,
-						updatedAt: completedRun.updatedAt.getTime(),
-						results: {
-							stats: {
-								...completedRun.results.stats,
-							},
-						},
-					},
-					{
-						_id: UUIDToString(failedRun._id),
-						status: failedRun.status,
-						triggeredAt: failedRun.triggeredAt.getTime(),
-						triggeredBy: failedRun.triggeredBy,
-						updatedAt: failedRun.updatedAt.getTime(),
-						results: failedRun.results,
-					},
-					{
-						_id: UUIDToString(plannedRun._id),
-						status: plannedRun.status,
-						triggeredAt: plannedRun.triggeredAt.getTime(),
-						triggeredBy: plannedRun.triggeredBy,
-						updatedAt: plannedRun.updatedAt.getTime(),
-						queueId: plannedRun.queueId,
-					},
-				],
+				runs,
 			});
 		});
 	});
@@ -194,82 +141,34 @@ const testSerialiseClashRuns = () => {
 const testSerialiseClashRun = () => {
 	describe('Serialise clash run', () => {
 		test('should serialise run and nested plan UUID/date fields without reshaping run data', () => {
-			const planCreatedAt = generateRandomDate();
-			const planUpdatedAt = generateRandomDate();
-			const valueAtCreationDate = generateRandomDate();
-			const valueAtCreationNumber = generateRandomNumber();
-			const plan = {
-				_id: generateUUID(),
-				name: generateRandomString(),
-				type: generateRandomString(),
-				createdAt: planCreatedAt,
-				updatedAt: planUpdatedAt,
-				selectionA: [{ container: generateUUID(), revision: generateUUID() }],
-				selectionB: [{ container: generateUUID(), revision: generateUUID() }],
-				tickets: {
-					federation: generateUUID(),
-					template: generateUUID(),
-					creator: generateRandomString(),
-					valuesAtCreation: [
-						{ property: generateRandomString(), value: valueAtCreationDate },
-						{ property: generateRandomString(), value: valueAtCreationNumber },
-					],
-				},
+			const template = ServiceHelper.generateTemplate();
+			const plan = ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString(), {
+				federation: { _id: generateUUIDString() },
+				template,
+				creator: generateRandomString(),
+			});
+			const planSnapshot = {
+				...plan,
+				selectionA: plan.selectionA.map((selection) => ({ ...selection, revision: generateUUIDString() })),
+				selectionB: plan.selectionB.map((selection) => ({ ...selection, revision: generateUUIDString() })),
 			};
-			const run = {
-				_id: generateUUID(),
-				plan,
-				status: clashRunStatus.COMPLETED,
-				triggeredAt: generateRandomDate(),
-				triggeredBy: generateRandomString(),
-				updatedAt: generateRandomDate(),
-				results: {
-					stats: {
-						new: generateRandomNumber(),
-						current: generateRandomNumber(),
-						resolved: generateRandomNumber(),
-					},
-				},
+			const clashResults = {
+				new: [generateRandomString()],
+				active: [generateRandomString()],
+				resolved: [generateRandomString()],
 			};
-			const req = { outputData: run };
+			const run = omit(ServiceHelper.generateClashRun(planSnapshot, clashResults), 'clashResults');
+			const req = { outputData: deserialiseRun(run, template) };
 
 			ClashOutputMiddleware.serialiseClashRun(req, {});
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {
-				...run,
-				_id: UUIDToString(run._id),
-				triggeredAt: run.triggeredAt.getTime(),
-				updatedAt: run.updatedAt.getTime(),
-				plan: {
-					...plan,
-					_id: UUIDToString(plan._id),
-					createdAt: planCreatedAt.getTime(),
-					updatedAt: planUpdatedAt.getTime(),
-					selectionA: [{
-						container: UUIDToString(plan.selectionA[0].container),
-						revision: UUIDToString(plan.selectionA[0].revision),
-					}],
-					selectionB: [{
-						container: UUIDToString(plan.selectionB[0].container),
-						revision: UUIDToString(plan.selectionB[0].revision),
-					}],
-					tickets: {
-						...plan.tickets,
-						federation: UUIDToString(plan.tickets.federation),
-						template: UUIDToString(plan.tickets.template),
-						valuesAtCreation: [
-							{ ...plan.tickets.valuesAtCreation[0], value: valueAtCreationDate.getTime() },
-							plan.tickets.valuesAtCreation[1],
-						],
-					},
-				},
-			});
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, run);
 		});
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/clashes', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseClashPlans();
 	testSerialiseClashPlan();
 	testSerialiseClashRuns();

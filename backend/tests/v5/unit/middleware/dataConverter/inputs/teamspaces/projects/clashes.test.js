@@ -139,8 +139,6 @@ const testValidateNewPlanData = () => {
 		],
 	};
 
-	const expectedTicketFormat = valuesAtCreationToTicketFormat(ticketData.valuesAtCreation);
-
 	const dateProperty = generateRandomString();
 	const moduleName = generateRandomString();
 	const moduleDateProperty = generateRandomString();
@@ -244,7 +242,7 @@ const testValidateNewPlanData = () => {
 				const expectedValidatedTicketFormat = valuesAtCreationToTicketFormat(
 					expectedData?.tickets?.valuesAtCreation ?? inputValuesAtCreation);
 
-				if (isEqual(updateData[0], expectedTicketFormat)
+				if (isEqual(updateData[0], valuesAtCreationToTicketFormat(ticketData.valuesAtCreation))
 					|| (success && isEqual(updateData[0], expectedInputTicketFormat))) {
 					return Promise.resolve([{ newTicket: expectedValidatedTicketFormat }]);
 				}
