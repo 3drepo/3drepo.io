@@ -21,7 +21,7 @@ type IUploadListItemFileIcon = {
 	extension?: string;
 };
 
-export const UploadListItemFileIcon = ({ extension }: IUploadListItemFileIcon): JSX.Element => (
+export const UploadListItemFileIcon = ({ extension }: IUploadListItemFileIcon) => (
 	<StyledIconButton extension={extension}>
 		{extension[0] || '?'}
 	</StyledIconButton>

@@ -17,10 +17,10 @@
 import { useMemo } from 'react';
 import Konva from 'konva';
 import { MODES } from '../../markupStage/markupStage.helpers';
-import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
-import { HandleLineDrawing } from './handleLineDrawing/handleLineDrawing.component';
-import { HandlePolygonDrawing } from './handlePolygonDrawing/handlePolygonDrawing.component';
-import { HandleShapeDrawing } from './handleShapeDrawing/handleShapeDrawing.component';
+import { LineDrawingAction } from './lineDrawingAction/lineDrawingAction.component';
+import { ShapeDrawingAction } from './shapeDrawingAction/shapeDrawingAction.component';
+import { CalloutDrawingAction } from './calloutDrawingAction/calloutDrawingAction.component';
+import { PolygonDrawingAction } from './polygonDrawingAction/polygonDrawingAction.component';
 
 interface IProps {
 	color: string;
@@ -40,14 +40,14 @@ interface IProps {
 }
 
 const COMPONENTS_MAP = {
-	[MODES.CALLOUT]: HandleCalloutDrawing,
-	[MODES.POLYGON]: HandlePolygonDrawing,
-	[MODES.SHAPE]: HandleShapeDrawing,
-	[MODES.BRUSH]: HandleLineDrawing,
-	[MODES.ERASER]: HandleLineDrawing,
+	[MODES.CALLOUT]: CalloutDrawingAction,
+	[MODES.POLYGON]: PolygonDrawingAction,
+	[MODES.SHAPE]: ShapeDrawingAction,
+	[MODES.BRUSH]: LineDrawingAction,
+	[MODES.ERASER]: LineDrawingAction,
 };
 
-export const DrawingHandler = (props: IProps) => {
+export const DrawingAction = (props: IProps) => {
 	const { mode } = props;
 
 	const Component = useMemo(() => {

@@ -39,7 +39,7 @@ import { Container, Tabs, ViewerPanel } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/';
 
 interface IProps {
-	className: string;
+	className?: string;
 	teamspace: string;
 	model: string;
 	activeMeta: string;

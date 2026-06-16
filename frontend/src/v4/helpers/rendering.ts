@@ -16,6 +16,7 @@
  */
 
 import { result } from 'lodash';
+import { JSX } from 'react';
 
 export const getWindowWidth = () =>
 	window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -24,15 +25,15 @@ export const getWindowHeight = () =>
 	window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 export const renderWhenTrue = (
-	Component: JSX.Element | JSX.Element[] | (() => JSX.Element | JSX.Element[])
+	Component
 ) => (trueStatement): JSX.Element => {
 	return (trueStatement ? result({ Component }, 'Component') : null);
 };
 
 export const renderWhenTrueOtherwise =
 	(
-		ComponentTrue: JSX.Element | (() => JSX.Element),
-		ComponentFalse: JSX.Element | (() => JSX.Element)
+		ComponentTrue,
+		ComponentFalse
 	) => (trueStatement): JSX.Element => {
 		return (
 			trueStatement ?
