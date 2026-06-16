@@ -356,29 +356,13 @@ db.createClashPlans = async (teamspace, project, plans) => {
 
 db.createClashRuns = async (teamspace, project, plan, runs) => {
 	const formattedProject = isString(project) ? stringToUUID(project) : project;
-	const formattedRuns = runs.map(({ clashResults, ...run }) => {
-		const formattedRun = {
-			...run,
-			_id: stringToUUID(run._id),
-			project: formattedProject,
-			updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
-			plan: { ...plan, _id: stringToUUID(plan._id) },
-		};
-
-		if (clashResults) {
-			formattedRun.results = {
-				stats: {
-					new: clashResults.new.length,
-					active: clashResults.active.length,
-					resolved: clashResults.resolved.length,
-				},
-			};
-			formattedRun.status = clashRunStatus.COMPLETED;
-			formattedRun.updatedAt = run.updatedAt ?? new Date();
-		}
-
-		return formattedRun;
-	});
+	const formattedRuns = runs.map(({ clashResults, ...run }) => ({
+		...run,
+		_id: stringToUUID(run._id),
+		project: formattedProject,
+		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+		plan: { ...plan, _id: stringToUUID(plan._id) },
+	}));
 
 	await Promise.all(runs.map(({ _id, clashResults }) => (clashResults
 		? FilesManager.storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(_id),
@@ -1005,10 +989,19 @@ ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteI
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
 	triggeredAt: new Date(),
-	updatedAt: clashResults ? new Date() : undefined,
-	status: clashResults ? clashRunStatus.COMPLETED : clashRunStatus.PLANNED,
 	plan,
-	clashResults,
+	...(clashResults ? {
+		updatedAt: new Date(),
+		status: clashRunStatus.COMPLETED,
+		results: {
+			stats: {
+				new: clashResults.new.length,
+				active: clashResults.active.length,
+				resolved: clashResults.resolved.length,
+			},
+		},
+		clashResults,
+	} : { status: clashRunStatus.PLANNED }),
 	...overrides,
 });
 
