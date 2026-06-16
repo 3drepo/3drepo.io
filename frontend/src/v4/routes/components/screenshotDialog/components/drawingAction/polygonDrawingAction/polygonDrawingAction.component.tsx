@@ -30,11 +30,10 @@ interface PolygonDrawingActionProps extends BaseDrawingActionProps {
 export class PolygonDrawingAction
 		extends BaseDrawingAction<PolygonDrawingActionProps, BaseDrawingActionStates> {
 
-	public isAfterPolygonCreated: boolean = false;
-
 	public subscribeDrawingEvents = () => {
 		this.props.stage.on('mousemove touchmove', this.handleMouseMovePolygon);
 		this.props.stage.on('mousedown touchstart', this.handleMouseDownPolygon);
+		document.addEventListener('keyup', this.handleKeyDownPolygon);
 		document.addEventListener('touchend', this.handleClickCheck);
 		document.addEventListener('mouseup', this.handleClickCheck);
 	}
@@ -42,9 +41,15 @@ export class PolygonDrawingAction
 	public unsubscribeDrawingEvents = () => {
 		this.props.stage.off('mousemove touchmove', this.handleMouseMovePolygon);
 		this.props.stage.off('mousedown touchstart', this.handleMouseDownPolygon);
+		document.removeEventListener('keyup', this.handleKeyDownPolygon);
 		document.removeEventListener('touchend', this.handleClickCheck);
 		document.removeEventListener('mouseup', this.handleClickCheck);
-		this.isAfterPolygonCreated = false;
+	}
+
+	public handleKeyDownPolygon = (e) => {
+		if (e.key === 'Escape' && this.state.isCurrentlyDrawn) {
+			this.clearDrawing();
+		}
 	}
 
 	public handleClickCheck = (e) => {
@@ -65,11 +70,6 @@ export class PolygonDrawingAction
 
 	public handleMouseDownPolygon = () => {
 		if (this.props.selected) {
-			return;
-		}
-
-		if (this.isAfterPolygonCreated) {
-			this.isAfterPolygonCreated = false;
 			return;
 		}
 
@@ -123,18 +123,21 @@ export class PolygonDrawingAction
 		}
 	}
 
-	public handlePolygonCreationEnd = () => {
+	public clearDrawing = () => {
 		this.layer.clear();
 		this.layer.clearCache();
 		this.layer.destroyChildren();
 		this.layer.batchDraw();
 
+		this.lastLine = {};
+		this.setState({ isCurrentlyDrawn: false });
+	}
+
+	public handlePolygonCreationEnd = () => {
 		if (this.lastLine.attrs.points.length > 6) {
 			this.props.handleNewDrawnLine(this.lastLine, ELEMENT_TYPES.POLYGON);
 		}
-		this.lastLine = {};
 
-		this.isAfterPolygonCreated = true;
-		this.setState({ isCurrentlyDrawn: false });
+		this.clearDrawing();
 	}
 }

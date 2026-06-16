@@ -145,14 +145,7 @@ const BaseMarkupStage = ({
 		}
 	}, [onScaleStage]);
 
-	const handleKeyDown = useCallback((e) => {
-		if (selectedObjectName && e.keyCode === 8) {
-			removeElement(selectedObjectName);
-			onSelectedObjectNameChange('');
-		}
-	}, [onSelectedObjectNameChange, removeElement, selectedObjectName]);
-
-	const handleStageMouseDown = useCallback(({ target }) => {
+	const handleStageMouseDown = useCallback(() => {
 		if (Boolean(selectedObjectName)) {
 			onSelectedObjectNameChange('');
 		}
@@ -269,9 +262,20 @@ const BaseMarkupStage = ({
 	}, [markupRef,  sourceImage]);
 
 	useEffect(() => {
-		document.addEventListener('keydown', handleKeyDown);
-		return () => document.removeEventListener('keydown', handleKeyDown);
-	}, [handleKeyDown]);
+		const  onKeyUp = (e) => {
+			if (selectedObjectName && (e.key === 'Backspace' || e.key === 'Delete')) {
+				removeElement(selectedObjectName);
+				onSelectedObjectNameChange('');
+			}
+
+			if (e.key === 'Escape' && selectedObjectName) {
+				onSelectedObjectNameChange('');
+			}
+		};
+
+		document.addEventListener('keyup', onKeyUp);
+		return () => document.removeEventListener('keyup', onKeyUp);
+	}, [selectedObjectName]);
 
 	useEffect(() => {
 		if (pathname.includes(ROUTES.VIEWER)) {
