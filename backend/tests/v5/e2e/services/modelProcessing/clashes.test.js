@@ -25,7 +25,6 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const {
 	CLASH_RUNS_COL,
 	clashRunStatus,
-	triggerOptions,
 } = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
@@ -326,7 +325,6 @@ const getRunsByModel = (teamspace, projectId, modelId) => {
 			{ 'plan.selectionA.container': modelId },
 			{ 'plan.selectionB.container': modelId },
 		],
-		'plan.trigger': triggerOptions.NEW_REVISION,
 	};
 
 	return DBHandler.find(teamspace, CLASH_RUNS_COL, query);

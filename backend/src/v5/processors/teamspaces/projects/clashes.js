@@ -252,8 +252,16 @@ const sendClashRunToQueue = async (teamspace, project, runId, context) => {
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
 	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
+	const clashConfig = deleteIfUndefined({
+		_id: plan._id,
+		type: plan.type,
+		tolerance: plan.tolerance,
+		selfIntersectionsCheck: plan.selfIntersectionsCheck,
+		selectionA: plan.selectionA,
+		selectionB: plan.selectionB,
+	});
 	const [runId, context] = await Promise.all([
-		createClashRun(teamspace, project, plan, user),
+		createClashRun(teamspace, project, clashConfig, user),
 		getClashRunContext(teamspace, project, plan),
 	]);
 	const { selectionA, selectionB, selfIntersectsA, selfIntersectsB } = context;

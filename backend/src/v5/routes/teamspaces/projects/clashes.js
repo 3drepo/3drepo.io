@@ -850,7 +850,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/clashRunNotFound"
 	 *       200:
-	 *         description: Returns the clash test run, including the copied plan snapshot used for the run
+	 *         description: Returns the clash test run, including the copied clash config snapshot used for the run
 	 */
 	router.get('/:planId/runs/:runId', isAdminToProject, planExists, clashRunInPlan, serialiseClashRun);
 

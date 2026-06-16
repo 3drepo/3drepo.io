@@ -350,14 +350,18 @@ const testCreateRun = () => {
 	const userId = generateRandomString();
 	const runId = generateRandomString();
 	const planData = {
+		_id: generateUUID(),
+		name: generateRandomString(),
 		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
 		selfIntersectionsCheck: false,
+		trigger: [generateRandomString()],
 		selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
 		selectionB: [{ container: generateRandomString(),
 			revision: generateUUID(),
 			rules: [generateRandomObject()],
 		}],
+		tickets: generateRandomObject(),
 	};
 	const parentWithManyMeshes = generateRandomString();
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
@@ -516,7 +520,18 @@ const testCreateRun = () => {
 				await Clashes.createRun(teamspace, project, plan, userId);
 
 				expect(ClashRunsModel.createClashRun).toHaveBeenCalledTimes(1);
-				expect(ClashRunsModel.createClashRun).toHaveBeenCalledWith(teamspace, project, plan, userId);
+				expect(ClashRunsModel.createClashRun).toHaveBeenCalledWith(teamspace, project, {
+					_id: plan._id,
+					type: plan.type,
+					tolerance: plan.tolerance,
+					selfIntersectionsCheck: plan.selfIntersectionsCheck,
+					selectionA: plan.selectionA,
+					selectionB: plan.selectionB,
+				}, userId);
+				const storedPlan = ClashRunsModel.createClashRun.mock.calls[0][2];
+				expect(storedPlan).not.toHaveProperty('name');
+				expect(storedPlan).not.toHaveProperty('trigger');
+				expect(storedPlan).not.toHaveProperty('tickets');
 				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(

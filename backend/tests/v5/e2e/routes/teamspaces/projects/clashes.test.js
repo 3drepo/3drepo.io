@@ -205,14 +205,17 @@ const formatRun = (run) => deleteIfUndefined({
 	results: run.results,
 });
 
-// Runs keep the triggered plan snapshot, including the exact container revisions used.
-const injectRevisionIntoPlan = (plan) => ({
-	...plan,
-	selectionA: plan.selectionA.map((selection) => ({
+// Runs store only the clash execution config, including the exact container revisions used.
+const injectRevisionIntoPlan = ({ _id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB }) => ({
+	_id,
+	type,
+	tolerance,
+	selfIntersectionsCheck,
+	selectionA: selectionA.map((selection) => ({
 		...selection,
 		revision: ServiceHelper.generateUUIDString(),
 	})),
-	selectionB: plan.selectionB.map((selection) => ({
+	selectionB: selectionB.map((selection) => ({
 		...selection,
 		revision: ServiceHelper.generateUUIDString(),
 	})),
@@ -710,6 +713,9 @@ const testCreateRun = () => {
 					const id = res.body._id;
 					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
 					expect(clashRun).toBeDefined();
+					expect(clashRun.plan).not.toHaveProperty('name');
+					expect(clashRun.plan).not.toHaveProperty('trigger');
+					expect(clashRun.plan).not.toHaveProperty('tickets');
 
 					const configPath = Path.join(queueConfig.shared_storage, id, 'clashConfig.json');
 					const config = JSON.parse(await readFile(configPath, 'utf8'));

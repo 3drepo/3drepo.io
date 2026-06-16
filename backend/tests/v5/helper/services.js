@@ -356,14 +356,17 @@ db.createClashPlans = async (teamspace, project, plans) => {
 
 db.createClashRuns = async (teamspace, project, plan, runs) => {
 	const formattedProject = isString(project) ? stringToUUID(project) : project;
-	const formattedRuns = runs.map(({ clashResults, triggeredAt, updatedAt, ...run }) => deleteIfUndefined({
-		...run,
-		_id: stringToUUID(run._id),
-		project: formattedProject,
-		triggeredAt: new Date(triggeredAt),
-		updatedAt: new Date(updatedAt ?? triggeredAt),
-		plan: { ...plan, _id: stringToUUID(plan._id) },
-	}));
+	const formattedRuns = runs.map(({ clashResults, triggeredAt, updatedAt, plan: runPlan, ...run }) => {
+		const planToStore = runPlan ?? plan;
+		return deleteIfUndefined({
+			...run,
+			_id: stringToUUID(run._id),
+			project: formattedProject,
+			triggeredAt: new Date(triggeredAt),
+			updatedAt: new Date(updatedAt ?? triggeredAt),
+			plan: planToStore ? { ...planToStore, _id: stringToUUID(planToStore._id) } : undefined,
+		});
+	});
 
 	await Promise.all(runs.map(({ _id, clashResults }) => (clashResults
 		? FilesManager.storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(_id),
@@ -969,6 +972,15 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	});
 };
 
+const generateClashRunPlan = (plan) => plan && deleteIfUndefined({
+	_id: plan._id,
+	type: plan.type,
+	tolerance: plan.tolerance,
+	selfIntersectionsCheck: plan.selfIntersectionsCheck,
+	selectionA: plan.selectionA,
+	selectionB: plan.selectionB,
+});
+
 ServiceHelper.generateClashes = (plan, number = 20) => {
 	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
 	const objectId = (container) => [
@@ -991,7 +1003,7 @@ ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteI
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
 	triggeredAt: Date.now(),
-	plan,
+	plan: generateClashRunPlan(plan),
 	...(clashResults ? {
 		updatedAt: Date.now(),
 		status: clashRunStatus.COMPLETED,
