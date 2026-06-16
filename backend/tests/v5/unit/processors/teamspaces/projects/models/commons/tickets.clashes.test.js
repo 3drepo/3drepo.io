@@ -281,9 +281,9 @@ const testProcessClashResults = () => {
 		return {
 			...(federationUnit ? { federationUnit } : {}),
 			properties: {
-				...(federationUnit
-					? { [PIN]: convertArrayUnits(clashData.positions[0], units.MM, federationUnit) }
-					: {}),
+				...(federationUnit ? {
+					[PIN]: convertArrayUnits(clashData.positions[0], units.MM, federationUnit),
+				} : {}),
 				[DEFAULT_VIEW]: {
 					...(clashData.bbox ? { camera: defaultViewCamera } : {}),
 					state,
@@ -486,12 +486,7 @@ const testProcessClashResults = () => {
 				baseTemplate, { [STATUS]: statuses.OPEN, [PIN]: [10, 20, 30] }, { [DISTANCE_M]: 1 },
 			);
 			const defaultViewTemplate = { ...baseTemplate, config: { defaultView: true } };
-			const updatedDefaultViewCamera = {
-				position: [-17.365799280415647, 18.417875965717393, 19.823315210249056],
-				up: [0.3728146553039551, 0.8944026231765747, -0.2470894455909729],
-				forward: [0.7455270290374756, -0.4472627639770508, -0.49411076307296753],
-				type: CameraType.PERSPECTIVE,
-			};
+
 			const voidTicket = generateExistingTicket(baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 });
 			test.each([
 				['Should update tickets for active clashes', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, existingTicket, expectedUpdate],
@@ -499,8 +494,8 @@ const testProcessClashResults = () => {
 				['Should reopen resolved tickets using the configured reopened status', baseContext, baseTemplate, { defaultStatuses: configuredReopenedDefaultStatuses }, { new: [], active: [clash], resolved: [] }, configuredReopenedTicket, { properties: { [STATUS]: statuses.FOR_APPROVAL } }],
 				['Should update changed clash distance and pin', baseContext, { ...baseTemplate, config: { pin: true } }, {}, { new: [], active: [clash], resolved: [] }, changedPinTicket, { properties: { [PIN]: clash.positions[0] }, modules: { [CLOUD_CLASH]: { [DISTANCE_M]: 0 } } }],
 				['Should not update tickets when status, distance and pin are unchanged', baseContext, { ...baseTemplate, config: { pin: true } }, {}, { new: [], active: [clash], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN, [PIN]: clash.positions[0] }, { [DISTANCE_M]: 0 }), null],
-				['Should update the default view camera when clash bounds change', baseContext, defaultViewTemplate, {}, { new: [], active: [clashWithBbox], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN }, { [DISTANCE_M]: 0 }), { properties: { [DEFAULT_VIEW]: { camera: updatedDefaultViewCamera } } }],
-				['Should not update the default view camera when it has not changed', baseContext, defaultViewTemplate, {}, { new: [], active: [clashWithBbox], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN, [DEFAULT_VIEW]: { camera: updatedDefaultViewCamera } }, { [DISTANCE_M]: 0 }), null],
+				['Should update the default view camera when clash bounds change', baseContext, defaultViewTemplate, {}, { new: [], active: [clashWithBbox], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN }, { [DISTANCE_M]: 0 }), { properties: { [DEFAULT_VIEW]: { camera: defaultViewCamera } } }],
+				['Should not update the default view camera when it has not changed', baseContext, defaultViewTemplate, {}, { new: [], active: [clashWithBbox], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN, [DEFAULT_VIEW]: { camera: defaultViewCamera } }, { [DISTANCE_M]: 0 }), null],
 				['Should not update the default view when clash bounds are missing', baseContext, defaultViewTemplate, {}, { new: [], active: [clash], resolved: [] }, generateExistingTicket(baseTemplate, { [STATUS]: statuses.OPEN }, { [DISTANCE_M]: 0 }), null],
 				['Should resolve tickets that are in the resolved column', baseContext, baseTemplate, {}, { new: [], active: [], resolved: [clash] }, generateExistingTicket(), resolveExpectedUpdate],
 				['Should resolve tickets found in the system but not mentioned in the results', baseContext, baseTemplate, {}, { new: [], active: [], resolved: [] }, generateExistingTicket(), resolveExpectedUpdate],
