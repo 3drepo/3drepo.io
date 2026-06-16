@@ -48,6 +48,12 @@ export class Erasing extends PureComponent<IProps, any> {
 		this.props.stage.on('mousedown touchstart', this.handleMouseDown);
 	}
 
+	public componentWillUnmount() {
+		this.props.stage.off('mousemove touchmove', this.handleMouseMove);
+		this.props.stage.off('mouseup touchend', this.handleMouseUp);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDown);
+	}
+
 	public handleMouseDown = () => {
 		this.setState({ isCurrentlyDrawn: true });
 
