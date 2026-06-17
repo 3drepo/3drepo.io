@@ -1,0 +1,276 @@
+name: Build and Deploy 3drepo.io
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+  pull_request:
+    branches:
+      - master
+      - staging
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy after building. Only master and staging refs are allowed.
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-deploy-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/staging' }}
+
+env:
+  DOCKER_BUILDKIT: 1
+  IMAGE_REPOSITORY: 3drepo.io
+  DOCKERFILE_PATH: .azure/Docker/Dockerfile
+  HELM_CHART_VERSION: '5.23.0'
+  CUSTOM_HELM_OVERRIDE: config.ADDITIONAL_CONFIG=hello
+
+jobs:
+  prepare:
+    name: Prepare build metadata
+    runs-on: ubuntu-24.04
+    outputs:
+      branch_name: ${{ steps.metadata.outputs.branch_name }}
+      checkout_ref: ${{ steps.metadata.outputs.checkout_ref }}
+      commit_sha: ${{ steps.metadata.outputs.commit_sha }}
+      branch_tag: ${{ steps.metadata.outputs.branch_tag }}
+      should_push: ${{ steps.metadata.outputs.should_push }}
+      should_deploy: ${{ steps.metadata.outputs.should_deploy }}
+      should_validate_deploy: ${{ steps.metadata.outputs.should_validate_deploy }}
+    steps:
+      - name: Set build metadata
+        id: metadata
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          GIT_SHA: ${{ github.sha }}
+          GIT_REF: ${{ github.ref }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+          DISPATCH_DEPLOY: ${{ inputs.deploy }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            source_branch="$PR_HEAD_REF"
+            checkout_ref="$GIT_REF"
+            commit_sha="$GIT_SHA"
+            branch_tag="$PR_HEAD_REF"
+          else
+            source_branch="$REF_NAME"
+            checkout_ref="$GIT_SHA"
+            commit_sha="$GIT_SHA"
+            branch_tag="$REF_NAME"
+          fi
+
+          branch_name="$(
+            printf '%s' "$source_branch" |
+            tr '[:upper:]' '[:lower:]' |
+            sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g' |
+            cut -c1-53 |
+            sed -E 's/-+$//'
+          )"
+          if [[ -z "$branch_name" ]]; then
+            branch_name="branch"
+          fi
+
+          should_push=false
+          should_deploy=false
+          should_validate_deploy=false
+
+          if [[ "$EVENT_NAME" == "push" && ( "$REF_NAME" == "master" || "$REF_NAME" == "staging" ) ]]; then
+            should_push=true
+            should_deploy=true
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" && "$DISPATCH_DEPLOY" == "true" && ( "$REF_NAME" == "master" || "$REF_NAME" == "staging" ) ]]; then
+            should_push=true
+            should_deploy=true
+          elif [[ "$EVENT_NAME" == "pull_request" && "$PR_HEAD_REPO" == "$REPOSITORY" ]]; then
+            should_validate_deploy=true
+          fi
+
+          {
+            echo "branch_name=$branch_name"
+            echo "checkout_ref=$checkout_ref"
+            echo "commit_sha=$commit_sha"
+            echo "branch_tag=$branch_tag"
+            echo "should_push=$should_push"
+            echo "should_deploy=$should_deploy"
+            echo "should_validate_deploy=$should_validate_deploy"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Branch name: $branch_name"
+          echo "Checkout ref: $checkout_ref"
+          echo "Commit SHA: $commit_sha"
+          echo "Image branch tag: $branch_tag"
+          echo "Push image: $should_push"
+          echo "Deploy chart: $should_deploy"
+          echo "Validate deploy: $should_validate_deploy"
+
+  build:
+    name: Build container
+    runs-on: ubuntu-24.04
+    needs: prepare
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
+
+      - name: Log in to Azure Container Registry
+        if: needs.prepare.outputs.should_push == 'true'
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        env:
+          REGISTRY: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          SHOULD_PUSH: ${{ needs.prepare.outputs.should_push }}
+          BRANCH_TAG: ${{ needs.prepare.outputs.branch_tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$SHOULD_PUSH" == "true" ]]; then
+            docker build \
+              -t "$REGISTRY/${IMAGE_REPOSITORY}:$BRANCH_TAG" \
+              -t "$REGISTRY/${IMAGE_REPOSITORY}:$COMMIT_SHA" \
+              -f "$DOCKERFILE_PATH" \
+              .
+          else
+            docker build \
+              -t "${IMAGE_REPOSITORY}:$COMMIT_SHA" \
+              -f "$DOCKERFILE_PATH" \
+              .
+          fi
+
+      - name: Push Docker image
+        if: needs.prepare.outputs.should_push == 'true'
+        env:
+          REGISTRY: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          BRANCH_TAG: ${{ needs.prepare.outputs.branch_tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          docker push "$REGISTRY/${IMAGE_REPOSITORY}:$BRANCH_TAG"
+          docker push "$REGISTRY/${IMAGE_REPOSITORY}:$COMMIT_SHA"
+
+      - name: Log out from Azure Container Registry
+        if: always() && needs.prepare.outputs.should_push == 'true'
+        run: docker logout "${{ secrets.REGISTRY_LOGIN_SERVER }}"
+
+  validate-helm:
+    name: Validate Helm deployment
+    runs-on: ubuntu-24.04
+    needs:
+      - prepare
+      - build
+    if: needs.prepare.outputs.should_validate_deploy == 'true'
+    steps:
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '4.0.1'
+
+      - name: Login to ACR for Helm
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Get default Helm values file
+        env:
+          TESTS_USER: ${{ secrets.TESTS_USER }}
+          TESTS_PASSWORD: ${{ secrets.TESTS_PASSWORD }}
+          HELM_DEFAULTS_URL: ${{ secrets.HELM_DEFAULTS_URL }}
+        run: |
+          set -euo pipefail
+          curl -fsS -u "${TESTS_USER}:${TESTS_PASSWORD}" "$HELM_DEFAULTS_URL" \
+            --output "$RUNNER_TEMP/values.yaml"
+
+      - name: Render Helm chart
+        env:
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          helm template \
+            "$BRANCH_NAME" \
+            oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
+            --version "$HELM_CHART_VERSION" \
+            --namespace default \
+            -f "$RUNNER_TEMP/values.yaml" \
+            --set "image.tag=$COMMIT_SHA,branchName=$BRANCH_NAME,$CUSTOM_HELM_OVERRIDE" \
+            >/dev/null
+
+      - name: Logout from ACR for Helm
+        if: always()
+        run: helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}"
+
+  deploy:
+    name: Deploy Helm chart
+    runs-on: ubuntu-24.04
+    needs:
+      - prepare
+      - build
+    if: needs.prepare.outputs.should_deploy == 'true'
+    steps:
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '4.0.1'
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.26.3'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: Add Helm repository
+        run: |
+          helm repo add 3drepo https://3drepo.github.io/DevOps/
+          helm repo update
+
+      - name: Get default Helm values file
+        env:
+          TESTS_USER: ${{ secrets.TESTS_USER }}
+          TESTS_PASSWORD: ${{ secrets.TESTS_PASSWORD }}
+          HELM_DEFAULTS_URL: ${{ secrets.HELM_DEFAULTS_URL }}
+        run: |
+          set -euo pipefail
+          curl -fsS -u "${TESTS_USER}:${TESTS_PASSWORD}" "$HELM_DEFAULTS_URL" \
+            --output "$RUNNER_TEMP/values.yaml"
+
+      - name: Login to ACR for Helm
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Deploy Helm chart
+        env:
+          BRANCH_NAME: ${{ needs.prepare.outputs.branch_name }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          helm upgrade --install \
+            "$BRANCH_NAME" \
+            oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
+            --version "$HELM_CHART_VERSION" \
+            --namespace default \
+            -f "$RUNNER_TEMP/values.yaml" \
+            --set "image.tag=$COMMIT_SHA,branchName=$BRANCH_NAME,$CUSTOM_HELM_OVERRIDE"
+
+      - name: Logout from ACR for Helm
+        if: always()
+        run: helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}"
