@@ -91,6 +91,8 @@ const getAllPlans = async (req, res, next) => {
 			name: 1,
 			createdAt: 1,
 			createdBy: 1,
+			updatedAt: 1,
+			updatedBy: 1,
 		});
 		next();
 	} catch (err) {
@@ -426,33 +428,37 @@ const establishRoutes = () => {
 	 *                     type: string
 	 *                     enum: [manual, new revision]
 	 *                 selectionA:
-	 *                   type: object
-	 *                   description: The selection A of the plan
-	 *                   properties:
-	 *                     container:
-	 *                       type: string
-	 *                       format: uuid
-	 *                       description: The container of selection A
-	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                     rules:
-	 *                       type: array
-	 *                       description: The rules applied to selection A
-	 *                       items:
-	 *                         $ref: '#/components/schemas/ticketGroupRules'
+	 *                   type: array
+	 *                   description: The selections for set A of the plan
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       container:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: The container of a selection A entry
+	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       rules:
+	 *                         type: array
+	 *                         description: The rules applied to the selection A entry
+	 *                         items:
+	 *                           $ref: '#/components/schemas/ticketGroupRules'
 	 *                 selectionB:
-	 *                   type: object
-	 *                   description: The selection B of the plan
-	 *                   properties:
-	 *                     container:
-	 *                       type: string
-	 *                       format: uuid
-	 *                       description: The container of selection B
-	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                     rules:
-	 *                       type: array
-	 *                       description: The rules applied to selection B
-	 *                       items:
-	 *                         $ref: '#/components/schemas/ticketGroupRules'
+	 *                   type: array
+	 *                   description: The selections for set B of the plan
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       container:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         description: The container of a selection B entry
+	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       rules:
+	 *                         type: array
+	 *                         description: The rules applied to the selection B entry
+	 *                         items:
+	 *                           $ref: '#/components/schemas/ticketGroupRules'
 	 *                 tickets:
 	 *                   type: object
 	 *                   description: Ticket creation settings for clashes
@@ -776,7 +782,7 @@ const establishRoutes = () => {
 	 *                       status:
 	 *                         type: string
 	 *                         description: The current status of the run
-	 *                         enum: [planned, queued, failed, completed]
+	 *                         enum: [planned, queued, failed, completed, aborted]
 	 *                         example: completed
 	 *                       triggeredAt:
 	 *                         type: integer

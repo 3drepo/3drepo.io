@@ -279,8 +279,10 @@ const testGetRuns = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const expectedRuns = [plannedRun, failedRun, completedRun].map(formatRun);
-					ServiceHelper.outOfOrderArrayEqual(res.body.runs, expectedRuns);
+					const expectedRuns = [plannedRun, failedRun, completedRun]
+						.map(formatRun)
+						.sort((a, b) => b.triggeredAt - a.triggeredAt);
+					expect(res.body.runs).toEqual(expectedRuns);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
