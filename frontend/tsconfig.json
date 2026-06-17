@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-	"isolatedModules": true,
+    "strict": false,
+    "noImplicitAny": false,
+	  "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "module": "commonjs",

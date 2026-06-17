@@ -359,11 +359,27 @@ describe('Tickets: filters', () => {
 			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
 			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
+
 		it('should work with date and exists operator', () => {
 			const filter: TicketFilter = {
 				module: '',
 				property: 'Birthday',
 				type: 'pastDate',
+				filter: {
+					operator: 'ex',
+					values: [],
+				}
+			};
+
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
+
+		it('should work with number and exists operator', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'A number property',
+				type: 'number',
 				filter: {
 					operator: 'ex',
 					values: [],
@@ -637,9 +653,6 @@ describe('Tickets: filters', () => {
 		});
 
 	})
-
-
-
 
 	describe('sorting serialization', () => {
 		it('should work with a TicketsSortingProperty types ascending', () => {

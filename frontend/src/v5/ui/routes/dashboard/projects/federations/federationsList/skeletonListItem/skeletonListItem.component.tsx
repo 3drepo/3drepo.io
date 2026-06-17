@@ -23,7 +23,7 @@ interface ISkeletonListItem {
 	delay?: number;
 }
 
-export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
+export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem) => (
 	<Container>
 		<FixedOrGrowContainer>
 			<SkeletonBlock width="80%" />

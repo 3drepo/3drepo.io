@@ -30,7 +30,6 @@ import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.compo
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import dayjs from 'dayjs';
 import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
@@ -67,8 +66,8 @@ interface IState {
 	riskCategories?: string[];
 	fileName: string;
 	createMitigationSuggestions: boolean;
-	permissionsLogStart: number;
-	permissionsLogEnd: number;
+	permissionsLogStart?: Date;
+	permissionsLogEnd?: Date;
 }
 
 interface IProps {
@@ -86,13 +85,11 @@ interface IProps {
 }
 
 export class TeamspaceSettings extends PureComponent<IProps, IState> {
-	public state = {
+	public state: IState = {
 		topicTypes: [],
 		riskCategories: [],
 		fileName: '',
 		createMitigationSuggestions: false,
-		permissionsLogStart: null,
-		permissionsLogEnd: null,
 	};
 
 	get teamspace() {
@@ -297,16 +294,16 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 						<DateTimePicker
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
-							maxDateTime={dayjs(this.state.permissionsLogEnd)}
+							maxDateTime={this.state.permissionsLogEnd}
 							value={this.state.permissionsLogStart}
-							onChange={(permissionsLogStart) => this.setState({ permissionsLogStart })}
+							onChange={(permissionsLogStart) => this.setState({ permissionsLogStart} as any)}
 						/>
 						<DateTimePicker
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
-							minDateTime={dayjs(this.state.permissionsLogStart)}
+							minDateTime={this.state.permissionsLogStart}
 							value={this.state.permissionsLogEnd}
-							onChange={(permissionsLogEnd) => this.setState({ permissionsLogEnd })}
+							onChange={(permissionsLogEnd) => this.setState({ permissionsLogEnd } as any)}
 						/>
 						<Button
 							disabled={!this.state.permissionsLogStart && !this.state.permissionsLogEnd}
@@ -340,15 +337,15 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public renderForm = () => {
-		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
-
+		const {createMitigationSuggestions, topicTypes, riskCategories  } = this.state;
 		return	(
 			<Container>
 				<Formik
+					key={topicTypes?.toString()}
 					initialValues={{
 						topicTypes,
 						riskCategories,
-						createMitigationSuggestions
+						createMitigationSuggestions,
 					}}
 					onSubmit={this.handleUpdateSettings}
 				>
@@ -365,10 +362,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 						<StyledGrid>
 							<Headline>Issue Types</Headline>
-							<Field
-								name="topicTypes"
-								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new issue type...'} />}
-							/>
+							<Field name="topicTypes">{({ field }) =>
+								(<ChipsInput {...field} placeholder={'Enter new issue type...'} />)
+							}</Field>
 						</StyledGrid>
 
 						<StyledGrid $gridPaddingBottom>
