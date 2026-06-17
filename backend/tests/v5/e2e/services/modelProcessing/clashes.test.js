@@ -19,23 +19,24 @@ const { determineTestGroup } = require('../../../helper/utils');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
+const DBHandler = require(`${src}/handler/db`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { queueMessage } = require(`${src}/handler/queue`);
-const { RUN_HISTORY_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_RUNS_COL,
+	clashRunStatus,
+	triggerOptions,
+} = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
+const { deleteModel } = require(`${src}/models/modelSettings`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { getClashRunByQuery } = require(`${src}/models/clashes.runs`);
 const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
+const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
-
-const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
-
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const { triggerOptions, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
-const DBHandler = require(`${src}/handler/db`);
-const { deleteModel } = require(`${src}/models/modelSettings`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 
@@ -75,18 +76,9 @@ const generateBasicData = () => {
 	const modelB = ServiceHelper.generateRandomModel();
 	const modelWithNoRevs = ServiceHelper.generateRandomModel();
 
-	const planA = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelA._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
-	const planB = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelB._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
-	const planWithNoRevs = {
-		...ServiceHelper.generateClashPlan(modelA._id, modelWithNoRevs._id),
-		trigger: [triggerOptions.NEW_REVISION],
-	};
+	const [planA, planB, planWithNoRevs] = [modelA, modelB, modelWithNoRevs].map((model) => (
+		ServiceHelper.generateClashPlan(modelA._id, model._id)
+	));
 
 	return ({
 		user,
@@ -174,7 +166,7 @@ const setupRunDataWithUnreadablePreviousResults = async (teamspace, project, { r
 	await Promise.all([
 		ServiceHelper.db.createClashRun(teamspace, project.id, run),
 		ServiceHelper.db.createClashRun(teamspace, project.id, previousRun),
-		storeFile(teamspace, RUN_HISTORY_COL, stringToUUID(previousRun._id), Buffer.from('{')),
+		storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(previousRun._id), Buffer.from('{')),
 	]);
 };
 
@@ -194,7 +186,7 @@ const removeResultsFiles = (runs) => {
 };
 
 const getFileContents = async (teamspace, fileId) => {
-	const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, fileId);
+	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_COL, fileId);
 
 	return new Promise((resolve, reject) => {
 		const chunks = [];
@@ -414,7 +406,10 @@ describe(determineTestGroup(__filename), () => {
 		server = await ServiceHelper.app();
 	});
 
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(async () => {
+		await ServiceHelper.queue.purgeQueues();
+		await ServiceHelper.closeApp(server);
+	});
 	testParseClashResults();
 	testStartClashRunsAfterNewRev();
 });

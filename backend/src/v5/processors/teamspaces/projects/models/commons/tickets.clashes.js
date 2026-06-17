@@ -142,7 +142,11 @@ const updateDefaultView = async (teamspace, project, ticket, clashContext, clash
 				const containerEntry = { container };
 				await Promise.all(Object.entries(objectIds).map(async ([idType, ids]) => {
 					if (idType === clashObjectIdTypes.INTERNAL) {
-						const revision = clashContext.containerRevisions[UUIDToString(container)];
+						const revision = clashContext.containerRevisions[container];
+						if (!revision) {
+							throw new Error(`Could not find active revision in clash selection for container ${container}`);
+						}
+
 						// Return strings because validateTickets deserialises view group _ids before committing groups.
 						containerEntry[idType] = await getMeshesWithParentIds(
 							teamspace, project, container, revision, ids.map(stringToUUID), true);
@@ -285,8 +289,8 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			const objectBIdType = clashIdTypeToTicketType[clash.b.idType] ?? defaultClashIdType;
 			newTicket.title = `[${clashContext.planName}] Clash`;
 			newTicket.modules[CLOUD_CLASH] = newTicket.modules[CLOUD_CLASH] ?? {};
-			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = clashContext.planId;
-			newTicket.modules[CLOUD_CLASH][CLASH_RUN_ID] = clashContext.runId;
+			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = UUIDToString(clashContext.planId);
+			newTicket.modules[CLOUD_CLASH][CLASH_RUN_ID] = UUIDToString(clashContext.runId);
 			newTicket.modules[CLOUD_CLASH][CLASH_TYPE] = clashContext.clashType;
 			newTicket.modules[CLOUD_CLASH][CLASH_ID] = clashId;
 			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_NAME] = clashContext.planName;
@@ -345,7 +349,7 @@ const determineStatusInfo = (template, configuredDefaultStatuses) => {
 	return res;
 };
 
-const prepareContext = (plan, runId, template, clashIdToTicket, federationUnits) => {
+const prepareContext = async (teamspace, project, federation, plan, runId, template, federationUnits) => {
 	const {
 		_id: planId,
 		name: planName,
@@ -360,11 +364,11 @@ const prepareContext = (plan, runId, template, clashIdToTicket, federationUnits)
 		} = {},
 	} = plan;
 	const containerRevisions = {};
-	[selectionA, selectionB].forEach(({ container, revision } = {}) => {
-		if (container && revision) {
-			containerRevisions[UUIDToString(container)] = revision;
-		}
+	[...selectionA, ...selectionB].forEach(({ container, revision }) => {
+		containerRevisions[container] = revision;
 	});
+
+	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
 
 	return {
 		planId: UUIDToString(planId),
@@ -439,19 +443,17 @@ TicketsClashes.processClashResults = async (
 	{ plan, runId },
 ) => {
 	const { new: newClashes = [], active: activeClashes = [] } = results;
-	const { _id: planId } = plan;
 
-	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
 	const { properties: { unit: federationUnits } } = await getFederationById(
 		teamspace, federation, { 'properties.unit': 1 });
 
-	const clashContext = prepareContext(plan, runId, template, clashIdToTicket, federationUnits);
+	const clashContext = await prepareContext(teamspace, project, federation, plan, runId, template, federationUnits);
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
 	const ticketsToProcess = {
 		ticketsToUpdate: [
 			...processedClashes.ticketsToUpdate,
-			...resolveTickets(Object.values(clashIdToTicket), clashContext.statusInfo),
+			...resolveTickets(Object.values(clashContext.clashIdToTicket), clashContext.statusInfo),
 		],
 		ticketsToCreate: processedClashes.ticketsToCreate,
 	};

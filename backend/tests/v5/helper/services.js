@@ -43,7 +43,6 @@ const {
 	CLASH_TYPES,
 	CLASH_PLANS_COL,
 	CLASH_RUNS_COL,
-	RUN_HISTORY_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	triggerOptions,
 	clashObjectIdTypes,
@@ -375,7 +374,7 @@ db.createClashRun = async (teamspace, projectId, run, clashes) => {
 		formattedRun.status = clashRunStatus.COMPLETED;
 		formattedRun.updatedAt = new Date();
 
-		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun._id,
+		await FilesManager.storeFile(teamspace, CLASH_RUNS_COL, formattedRun._id,
 			Buffer.from(JSON.stringify(clashes)));
 	}
 
@@ -966,13 +965,13 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 		type: CLASH_TYPES.HARD,
 		tolerance: 0.01,
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [triggerOptions.MANUAL],
-		selectionA: {
+		trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION],
+		selectionA: [{
 			container: model1,
-		},
-		selectionB: {
+		}],
+		selectionB: [{
 			container: model2,
-		},
+		}],
 		tickets,
 	});
 };
@@ -987,8 +986,8 @@ ServiceHelper.generateClashes = (plan, number = 20) => {
 	].join('::');
 
 	return times(number, () => ({
-		a: objectId(plan.selectionA.container),
-		b: objectId(plan.selectionB.container),
+		a: objectId(plan.selectionA[0].container),
+		b: objectId(plan.selectionB[0].container),
 		positions: [
 			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
 		],

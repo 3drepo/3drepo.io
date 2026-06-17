@@ -20,15 +20,19 @@ const { determineTestGroup } = require('../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
+const { readFile } = require('fs/promises');
+const Path = require('path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
+const { cn_queue: queueConfig } = require(`${src}/utils/config`);
+const { nodeTypes } = require(`${src}/models/scenes.constants`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
@@ -327,14 +331,14 @@ const testDeletePlan = () => {
 						const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
 							{ _id: stringToUUID(run._id) });
 						expect(clashRun).toBe(null);
-						await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(run._id)))
+						await expect(getFileAsStream(ts, CLASH_RUNS_COL, stringToUUID(run._id)))
 							.rejects.toEqual(templates.fileNotFound);
 					}));
 
 					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL,
 						{ _id: stringToUUID(runToKeep._id) });
 					expect(clashRun).toBeDefined();
-					await expect(getFileAsStream(ts, RUN_HISTORY_COL, stringToUUID(runToKeep._id)))
+					await expect(getFileAsStream(ts, CLASH_RUNS_COL, stringToUUID(runToKeep._id)))
 						.resolves.toBeDefined();
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
@@ -355,12 +359,21 @@ const testCreateRun = () => {
 		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
 		const projectWithOwnPlanModels = times(2, () => ServiceHelper.generateRandomModel());
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
+		const revisions = models.map(() => ServiceHelper.generateRevisionEntry());
 		const [
 			planWithMissingContainer, planWithNoRev, planWithVoidRev,
 		] = [ServiceHelper.generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
 			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
 		const planInAnotherProject = ServiceHelper.generateClashPlan(
 			projectWithOwnPlanModels[0]._id, projectWithOwnPlanModels[1]._id);
+		const createScene = (model, revision) => {
+			const parent = ServiceHelper.generateUUIDString();
+			const parentNode = ServiceHelper.generateBasicNode(nodeTypes.TRANSFORMATION, revision._id, [],
+				{ shared_id: stringToUUID(parent) });
+			const meshNode = ServiceHelper.generateBasicNode(nodeTypes.MESH, revision._id, [stringToUUID(parent)],
+				{ bounding_box: [[0, 0, 0], [1, 1, 1]] });
+			return ServiceHelper.db.createScene(teamspace, project.id, model._id, revision, [parentNode, meshNode]);
+		};
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
@@ -373,8 +386,9 @@ const testCreateRun = () => {
 					model.name,
 					model.properties,
 				)),
-				...models.map((model) => ServiceHelper.db.createRevision(teamspace,
-					project.id, model._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER)),
+				...models.map((model, index) => ServiceHelper.db.createRevision(teamspace,
+					project.id, model._id, revisions[index], modelTypes.CONTAINER)),
+				...models.map((model, index) => createScene(model, revisions[index])),
 				ServiceHelper.db.createRevision(teamspace,
 					project.id, modelWithVoidRev._id, ServiceHelper.generateRevisionEntry(true), modelTypes.CONTAINER),
 				ServiceHelper.db.createClashPlans(teamspace, project.id, [
@@ -405,8 +419,8 @@ const testCreateRun = () => {
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
 			['the plan has a container that does not exist', { planId: planWithMissingContainer._id }, false, templates.containerNotFound],
-			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.invalidArguments],
-			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.invalidArguments],
+			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.revisionNotFound],
+			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.revisionNotFound],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planId = existingPlan._id }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -417,6 +431,21 @@ const testCreateRun = () => {
 					const id = res.body._id;
 					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
 					expect(clashRun).toBeDefined();
+
+					const configPath = Path.join(queueConfig.shared_storage, id, 'clashConfig.json');
+					const config = JSON.parse(await readFile(configPath, 'utf8'));
+					expect(config.setA).toMatchObject([{
+						teamspace: ts,
+						container: clashRun.plan.selectionA[0].container,
+						revision: UUIDToString(clashRun.plan.selectionA[0].revision),
+					}]);
+					expect(config.setB).toMatchObject([{
+						teamspace: ts,
+						container: clashRun.plan.selectionB[0].container,
+						revision: UUIDToString(clashRun.plan.selectionB[0].revision),
+					}]);
+					expect(config.setA[0].objects).toHaveLength(1);
+					expect(config.setB[0].objects).toHaveLength(1);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
