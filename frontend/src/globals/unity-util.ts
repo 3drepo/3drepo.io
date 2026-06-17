@@ -25,14 +25,36 @@ import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 declare let SendMessage;
 declare let createUnityInstance;
 
-type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+export type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
 // The contents of this type will change in line with the needs of
 // the Test Automation or Profiling Tools.
-type ModelStatistics = {
+export type ModelStatistics = {
 	bundlesLoaded: number,
 	bundleLoadingTasks: number,
 	frameCount: number,
+};
+
+export type Clip = {
+	normal: number[];
+	distance: number;
+	clipDirection: number;
+};
+
+export type Viewpoint = {
+	right: number[];
+	up: number[];
+	view_dir: number[];
+	position: number[];
+	look_at: number[];
+	near: number;
+	far: number;
+	fov: number;
+	aspect_ratio: number;
+	orthographicSize: number;
+	clippingPlanes: Clip[] | null;
+	highlighted_group_id: string | null;
+	type: string;
 };
 
 export class UnityUtil {
@@ -2123,23 +2145,16 @@ export class UnityUtil {
 	/**
 	 * Request the information of the current viewpoint
 	 * @category Model Interactions
-	 * @param account - name of teamspace
-	 * @param model - name of model
 	 * @return returns a promises which will resolve with the viewpoint information
 	 */
-	public static requestViewpoint(account: string, model: string): Promise<any> {
+	public static requestViewpoint(): Promise<Viewpoint> {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});
 
-		const param: any = {};
-		if (account && model) {
-			param.namespace = `${account}.${model}`;
-		}
+		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, '');
 
-		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
-
-		return newViewpointPromise as Promise<object>;
+		return newViewpointPromise as Promise<Viewpoint>;
 	}
 
 	/**
@@ -2271,7 +2286,7 @@ export class UnityUtil {
 		position: number[],
 		up: number[],
 		forward: number[],
-		lookAt: number[],
+		lookAt: number[] | undefined,
 		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
