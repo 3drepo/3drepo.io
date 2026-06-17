@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { theme } from '@/v5/ui/routes/viewer/theme';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardViewerLayout.styles';
 import { ViewerCanvasesContextComponent } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { Outlet } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 
 export const DashboardViewerLayout = () => (
 	<>

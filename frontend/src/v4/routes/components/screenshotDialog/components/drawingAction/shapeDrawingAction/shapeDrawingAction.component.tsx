@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createShape } from '../drawingHandler.helpers';
+import { createShape } from '../drawingAction.helpers';
 import {
-	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
-} from '../handleBaseDrawing/handleBaseDrawing.component';
+	BaseDrawingAction, BaseDrawingActionProps, BaseDrawingActionStates,
+} from '../baseDrawingAction/baseDrawingAction.component';
 
-interface IHandleShapeDrawingProps extends IHandleBaseDrawingProps {
+interface IHandleShapeDrawingProps extends BaseDrawingActionProps {
 	activeShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 }
 
-export class HandleShapeDrawing
-		extends HandleBaseDrawing<IHandleShapeDrawingProps, IHandleBaseDrawingStates> {
+export class ShapeDrawingAction
+		extends BaseDrawingAction<IHandleShapeDrawingProps, BaseDrawingActionStates> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		if (prevProps.activeShape !== this.props.activeShape) {
@@ -69,10 +69,6 @@ export class HandleShapeDrawing
 	}
 
 	public handleMouseDownShape = () => {
-		if (this.props.selected) {
-			return;
-		}
-
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();

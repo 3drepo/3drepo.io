@@ -36,7 +36,7 @@ export const UploadListItemTitle = ({
 	revisionPrefix,
 	isMultiPagePdf = false, 
 	isSelected,
-}: IUploadListItemTitle): JSX.Element => {
+}: IUploadListItemTitle) => {
 	const { formState: { errors } } = useFormContext();
 	const errorMessage = get(errors, `${revisionPrefix}.file`)?.message;
 

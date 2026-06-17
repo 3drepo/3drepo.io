@@ -18,7 +18,6 @@
 import { FilterForm } from '@components/viewer/cards/cardFilters/filterForm/filterForm.component';
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
-import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import SmallFunnel from '@assets/icons/filters/small_funnel.svg';
 import { useState } from 'react';
@@ -70,16 +69,10 @@ export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) 
 			)}
 			PopoverProps={TICKET_HEADER_POPOVER_PROPS}
 		>
-			<ActionMenuContext.Consumer>
-				{({ close }) => (
-					<FilterForm
-						{...filter as any}
-						onCancel={close}
-						onSubmit={setFilter}
-						cancelButton
-					/>
-				)}
-			</ActionMenuContext.Consumer>
+			<FilterForm
+				{...filter as any}
+				onSubmit={setFilter}
+			/>
 		</CardFilterActionMenu>
 	);
 };

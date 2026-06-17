@@ -27,7 +27,6 @@ import { clamp, debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-import dayjs from 'dayjs';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -313,19 +312,19 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 				<SequencePlayerColumn>
 					<SequencePlayerAllInputs>
 						<SequenceRow>
-							<Grid item>
+							<Grid>
 								<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
 									<StepBackIcon fontSize="large" />
 								</IconButton>
 							</Grid>
-							<Grid item>
+							<Grid>
 								<FlexCol>
 									<DatePicker
-										minDateTime={dayjs(min)}
-										maxDateTime={dayjs(max)}
+										minDateTime={min}
+										maxDateTime={max}
 										name="date"
 										value={value}
-										onChange={(e) => this.gotoDate(new Date(e.target.value))}
+										onChange={(val) => this.gotoDate(new Date(val))}
 										placeholder="date"
 									/>
 									<SetToCurrentDateButton onClick={goToToday}>
@@ -333,7 +332,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 									</SetToCurrentDateButton>
 								</FlexCol>
 							</Grid>
-							<Grid item>
+							<Grid>
 								<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
 									<StepForwardIcon fontSize="large" />
 								</IconButton>
@@ -354,10 +353,10 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 						</IntervalRow>
 					</SequencePlayerAllInputs>
 					<SliderRow>
-						<Grid item>
+						<Grid>
 							<IconButton onClick={this.onClickPlayStop} size="large"><this.PlayButtonIcon /></IconButton>
 						</Grid>
-						<Grid item>
+						<Grid>
 							<SequenceSlider
 								max={this.totalTime}
 								step={36000000}
