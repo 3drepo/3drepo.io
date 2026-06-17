@@ -84,6 +84,7 @@ const propSchema = Yup.object().shape({
 	required: defaultFalse,
 	immutable: defaultFalse,
 	readOnlyOnUI: defaultFalse,
+	hiddenOnUI: defaultFalse,
 	readOnly: defaultFalse,
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
 		.when('type', ([typeVal], schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
@@ -314,21 +315,21 @@ const schema = Yup.object().shape({
 	.test(validTabularPropsTest)
 	.noUnknown();
 
-TemplateSchema.getClosedStatuses = (template) => {
+TemplateSchema.getClosedStatuses = (template, includeVoid = true) => {
 	if (template?.config?.status) {
 		return template.config.status.values.flatMap(
-			({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
+			({ type, name }) => (type === statusTypes.DONE || (includeVoid && type === statusTypes.VOID)
 				? name : []));
 	}
 
-	return [statuses.CLOSED, statuses.VOID];
+	return includeVoid ? [statuses.CLOSED, statuses.VOID] : [statuses.CLOSED];
 };
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 
 TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	const result = cloneDeep(template);
-	result.properties = [...getApplicableDefaultProperties(template.config, isImport), ...result.properties];
+	result.properties = [...getApplicableDefaultProperties(template.config ?? {}, isImport), ...result.properties];
 	result.modules.forEach((module) => {
 		if (module.type && presetModulesProperties[module.type]) {
 			// eslint-disable-next-line no-param-reassign
@@ -337,6 +338,17 @@ TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	});
 
 	return result;
+};
+
+TemplateSchema.getStatusDefinition = (template) => template?.config?.status ?? {
+	values: [
+		{ name: statuses.OPEN, type: statusTypes.OPEN },
+		{ name: statuses.IN_PROGRESS, type: statusTypes.ACTIVE },
+		{ name: statuses.FOR_APPROVAL, type: statusTypes.REVIEW },
+		{ name: statuses.CLOSED, type: statusTypes.DONE },
+		{ name: statuses.VOID, type: statusTypes.VOID },
+	],
+	default: statuses.OPEN,
 };
 
 module.exports = TemplateSchema;

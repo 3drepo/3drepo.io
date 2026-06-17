@@ -266,12 +266,60 @@ const getNormalTicketGroupById = () => {
 			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
 		});
 	});
+
+	test('should convert all external id types to mesh ids without dropping existing mesh ids', async () => {
+		const revision = generateRandomString();
+		const existingMeshIds = times(2, generateUUIDString);
+		const duplicateMeshId = existingMeshIds[1];
+		const ifcIds = times(2, generateRandomString);
+		const revitIds = times(2, generateRandomString);
+		const ifcMeta = [{ parents: times(2, generateRandomString) }];
+		const revitMeta = [{ parents: times(2, generateRandomString) }];
+		const ifcMeshIds = [duplicateMeshId, generateUUIDString()];
+		const revitMeshIds = [ifcMeshIds[1], generateUUIDString()];
+		const mixedGroup = {
+			objects: [{
+				container,
+				_ids: existingMeshIds,
+				[idTypes.IFC]: ifcIds,
+				[idTypes.REVIT]: revitIds,
+			}],
+		};
+
+		GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(mixedGroup));
+		RevsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revision });
+		MetaModel.getMetadataWithMatchingData.mockResolvedValueOnce(ifcMeta);
+		MetaModel.getMetadataWithMatchingData.mockResolvedValueOnce(revitMeta);
+		SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ifcMeshIds);
+		SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(revitMeshIds);
+
+		const results = await Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
+			groupId, true);
+
+		expect(results).toEqual({
+			objects: [{
+				container,
+				_ids: [...existingMeshIds, ifcMeshIds[1], revitMeshIds[1]],
+			}],
+		});
+
+		expect(MetaModel.getMetadataWithMatchingData).toHaveBeenNthCalledWith(1, teamspace,
+			container, revision, idTypesToKeys[idTypes.IFC], ifcIds, { parents: 1 });
+		expect(MetaModel.getMetadataWithMatchingData).toHaveBeenNthCalledWith(2, teamspace,
+			container, revision, idTypesToKeys[idTypes.REVIT], revitIds, { parents: 1 });
+		expect(SceneProcessor.getMeshesWithParentIds).toHaveBeenNthCalledWith(1, teamspace, project,
+			container, revision, ifcMeta.flatMap(({ parents }) => parents), true);
+		expect(SceneProcessor.getMeshesWithParentIds).toHaveBeenNthCalledWith(2, teamspace, project,
+			container, revision, revitMeta.flatMap(({ parents }) => parents), true);
+	});
 };
 
 const getCommonTestCases = (isUpdate) => {
 	const nodes = times(10, () => ({ rev_id: generateRandomString(), shared_id: generateRandomString() }));
 	const action = isUpdate ? 'update' : 'add';
 	const metadataValue = generateRandomString();
+	const metadataValue2 = generateRandomString();
+	const existingMetadataValue = generateRandomString();
 	const container = generateRandomString();
 
 	return [
@@ -314,6 +362,26 @@ const getCommonTestCases = (isUpdate) => {
 			nodes,
 			convertedResults: { key: idTypes.REVIT, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.REVIT]: [metadataValue], container }] },
+		},
+		{
+			desc: `should ${action} a group and merge converted group ids into existing ${[idTypes.IFC]}`,
+			container,
+			group: { objects: [{ _ids: [generateRandomString()], [idTypes.IFC]: [existingMetadataValue], container }] },
+			nodes,
+			convertedResults: { key: idTypes.IFC, values: [metadataValue2] },
+			convertedGroup: { objects: [{ [idTypes.IFC]: [existingMetadataValue, metadataValue2], container }] },
+		},
+		{
+			desc: `should ${action} a group and preserve other external id types when converting group ids`,
+			container,
+			group: {
+				objects: [{ _ids: [generateRandomString()], [idTypes.REVIT]: [existingMetadataValue], container }],
+			},
+			nodes,
+			convertedResults: { key: idTypes.IFC, values: [metadataValue] },
+			convertedGroup: {
+				objects: [{ [idTypes.REVIT]: [existingMetadataValue], [idTypes.IFC]: [metadataValue], container }],
+			},
 		},
 	];
 };

@@ -82,7 +82,7 @@ export const DEFAULT_FILTERS: TicketFilter[] = [
 export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) => type === propertyType);
 const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
-const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): TicketFilter[] => properties
+const propertiesToValidFilters = (properties: PropertyDefinition[], module: string = ''): TicketFilter[] => properties
 	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
