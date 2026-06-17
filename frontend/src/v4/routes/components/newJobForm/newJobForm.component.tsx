@@ -83,13 +83,12 @@ export class NewJobForm extends PureComponent<IProps, any> {
 					>
 						<Form>
 						<Grid
-							item
 							container
 							direction="row"
 							spacing={2}
 							wrap="nowrap"
 						>
-							<StyledTextFieldContainer item>
+							<StyledTextFieldContainer>
 								<Field name="name" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
@@ -105,7 +104,7 @@ export class NewJobForm extends PureComponent<IProps, any> {
 									/>
 								)} />
 							</StyledTextFieldContainer>
-							<Grid item>
+							<Grid>
 								<ColorPicker
 									value={color}
 									predefinedColors={colors}

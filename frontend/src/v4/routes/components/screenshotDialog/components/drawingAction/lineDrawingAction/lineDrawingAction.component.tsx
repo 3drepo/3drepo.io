@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createDrawnLine } from '../drawingHandler.helpers';
+import { createDrawnLine } from '../drawingAction.helpers';
 import {
-	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
-} from '../handleBaseDrawing/handleBaseDrawing.component';
+	BaseDrawingAction, BaseDrawingActionProps, BaseDrawingActionStates,
+} from '../baseDrawingAction/baseDrawingAction.component';
 
-interface IHandleLineDrawingProps extends IHandleBaseDrawingProps {
+interface LineDrawingActionProps extends BaseDrawingActionProps {
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
 }
 
-export class HandleLineDrawing
-		extends HandleBaseDrawing<IHandleLineDrawingProps, IHandleBaseDrawingStates> {
+export class LineDrawingAction
+		extends BaseDrawingAction<LineDrawingActionProps, BaseDrawingActionStates> {
 
 	public subscribeDrawingEvents = () => {
 		this.props.stage.on('mousemove touchmove', this.handleMouseMoveLine);
@@ -40,10 +40,6 @@ export class HandleLineDrawing
 	}
 
 	public handleMouseDownLine = () => {
-		if (this.props.selected) {
-			return;
-		}
-
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();

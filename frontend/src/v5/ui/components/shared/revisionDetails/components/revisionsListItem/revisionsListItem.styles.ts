@@ -26,10 +26,11 @@ type IRevisionsListItemContainer = LinkProps & {
 	disabled: boolean;
 };
 
-export const Container = styled(Link).attrs(({ disabled, target, to }: IRevisionsListItemContainer) => ({
+export const Container = styled(Link as React.ForwardRefExoticComponent<IRevisionsListItemContainer>,
+).attrs(({ disabled, target, to }: IRevisionsListItemContainer) => ({
 	to: disabled ? '#' : to,
 	target: disabled ? undefined : target,
-}))<IRevisionsListItemContainer>`
+}))`
 	display: flex;
 	align-items: center;
 	height: 100%;

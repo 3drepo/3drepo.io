@@ -21,19 +21,19 @@ import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHist
 import { COLOR } from '../../../../../../styles';
 
 import { SHAPE_TYPES } from '../../shape/shape.constants';
-import { TypingCalloutHandler } from '../../typingHandler/typingCalloutHandler.component';
-import { createDrawnLine, createShape, getDrawFunction } from '../drawingHandler.helpers';
+import { TypingCalloutHandler } from '../typingAction/typingCalloutHandler.component';
+import { createDrawnLine, createShape, getDrawFunction } from '../drawingAction.helpers';
 import {
-	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
-} from '../handleBaseDrawing/handleBaseDrawing.component';
-import { getLinePoints } from './handleCalloutDrawing.helpers';
+	BaseDrawingAction, BaseDrawingActionProps, BaseDrawingActionStates,
+} from '../baseDrawingAction/baseDrawingAction.component';
+import { getLinePoints } from './calloutDrawingAction.helpers';
 
 enum CalloutState {
 	SETTING_ANCHOR = 'settingAnchor',
 	POSITIONING_TEXT_BOX = 'positioningTextBox',
 };
 
-export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
+export interface CalloutDrawingActionProps extends BaseDrawingActionProps {
 	textSize: number;
 	activeShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
@@ -41,20 +41,20 @@ export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	handleNewText: (position, text?: string, width?: number, updateState?: boolean) => void;
 }
 
-export interface IHandleCalloutDrawingStates extends IHandleBaseDrawingStates {
+export interface CalloutDrawingActionStates extends BaseDrawingActionStates {
 	calloutState: typeof CalloutState;
 	lastShape: any;
 }
 
-export class HandleCalloutDrawing
-		extends HandleBaseDrawing<IHandleCalloutDrawingProps, IHandleCalloutDrawingStates> {
+export class CalloutDrawingAction
+		extends BaseDrawingAction<CalloutDrawingActionProps, CalloutDrawingActionStates> {
 
 	public constructor(props) {
 		super(props);
 	}
 
 	public state = {
-		...super.state,
+		isCurrentlyDrawn: false,
 		calloutState: CalloutState.SETTING_ANCHOR,
 		lastShape: {},
 	};

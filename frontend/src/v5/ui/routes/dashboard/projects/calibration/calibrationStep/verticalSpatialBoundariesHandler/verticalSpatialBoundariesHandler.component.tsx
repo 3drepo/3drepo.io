@@ -27,7 +27,7 @@ import { isNull } from 'lodash';
 import { DrawingViewerService, ImageSrcReference } from '@components/viewer/drawingViewer/drawingViewer.service';
 
 export const VerticalSpatialBoundariesHandler = () => {
-	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
+	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive } = useContext(CalibrationContext);
 	const planesRef = useRef(verticalPlanes); // ref needed to get plane values in useEffect without causing excessive retriggers
 	const planesAreSet = !verticalPlanes.some(isNull);
