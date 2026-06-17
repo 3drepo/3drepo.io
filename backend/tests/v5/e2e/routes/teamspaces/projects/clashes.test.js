@@ -194,10 +194,8 @@ const testUpdatePlan = () => {
 		});
 		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
-		const clashPlanWithTicketsConfig = {
-			...ServiceHelper.generateClashPlan(
-				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user }),
-		};
+		const clashPlanWithTicketsConfig = ServiceHelper.generateClashPlan(
+			models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user });
 		const generatePlanWithTickets = (ticketDefaultStatuses) => {
 			const plan = ServiceHelper.generateClashPlan(
 				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user });
@@ -296,17 +294,16 @@ const testDeletePlan = () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
 		const planToKeep = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
-		const runsToDelete = times(2, () => ServiceHelper.generateClashRun(existingPlan));
-		const runToKeep = ServiceHelper.generateClashRun(planToKeep);
 		const clashResults = { new: [], active: [], resolved: [] };
+		const runsToDelete = times(2, () => ServiceHelper.generateClashRun(existingPlan, clashResults));
+		const runToKeep = ServiceHelper.generateClashRun(planToKeep, clashResults);
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 			await Promise.all([
 				ServiceHelper.db.createClashPlans(teamspace, project.id, [planToKeep]),
-				...runsToDelete.map((run) => ServiceHelper.db.createClashRun(
-					teamspace, project.id, run, clashResults)),
-				ServiceHelper.db.createClashRun(teamspace, project.id, runToKeep, clashResults),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, existingPlan, runsToDelete),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, planToKeep, [runToKeep]),
 			]);
 		});
 

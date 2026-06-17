@@ -354,31 +354,38 @@ db.createClashPlans = async (teamspace, project, plans) => {
 	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
-db.createClashRun = async (teamspace, projectId, run, clashes) => {
-	const formattedRun = {
-		...run,
-		_id: stringToUUID(run._id),
-		project: stringToUUID(projectId),
-		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
-		plan: { ...run.plan, _id: stringToUUID(run.plan._id) },
-	};
-
-	if (clashes) {
-		formattedRun.results = {
-			stats: {
-				new: clashes.new.length,
-				active: clashes.active.length,
-				resolved: clashes.resolved.length,
-			},
+db.createClashRuns = async (teamspace, project, plan, runs) => {
+	const formattedProject = isString(project) ? stringToUUID(project) : project;
+	const formattedRuns = runs.map(({ clashResults, ...run }) => {
+		const formattedRun = {
+			...run,
+			_id: stringToUUID(run._id),
+			project: formattedProject,
+			updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+			plan: { ...plan, _id: stringToUUID(plan._id) },
 		};
-		formattedRun.status = clashRunStatus.COMPLETED;
-		formattedRun.updatedAt = new Date();
 
-		await FilesManager.storeFile(teamspace, CLASH_RUNS_COL, formattedRun._id,
-			Buffer.from(JSON.stringify(clashes)));
-	}
+		if (clashResults) {
+			formattedRun.results = {
+				stats: {
+					new: clashResults.new.length,
+					active: clashResults.active.length,
+					resolved: clashResults.resolved.length,
+				},
+			};
+			formattedRun.status = clashRunStatus.COMPLETED;
+			formattedRun.updatedAt = run.updatedAt ?? new Date();
+		}
 
-	await DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
+		return formattedRun;
+	});
+
+	await Promise.all(runs.map(({ _id, clashResults }) => (clashResults
+		? FilesManager.storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(_id),
+			Buffer.from(JSON.stringify(clashResults)))
+		: Promise.resolve())));
+
+	await DbHandler.insertMany(teamspace, CLASH_RUNS_COL, formattedRuns);
 };
 
 db.addLoginRecords = async (records) => {
@@ -994,12 +1001,15 @@ ServiceHelper.generateClashes = (plan, number = 20) => {
 		fingerprint: ServiceHelper.generateRandomNumber() }));
 };
 
-ServiceHelper.generateClashRun = (plan) => ({
+ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteIfUndefined({
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
-	triggeredAt: ServiceHelper.generateRandomDate(),
-	status: clashRunStatus.PLANNED,
+	triggeredAt: new Date(),
+	updatedAt: clashResults ? new Date() : undefined,
+	status: clashResults ? clashRunStatus.COMPLETED : clashRunStatus.PLANNED,
 	plan,
+	clashResults,
+	...overrides,
 });
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
