@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
@@ -58,7 +59,7 @@ const testRemoveOldSessions = () => {
 	});
 };
 
-describe('services/sessions', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetSessions();
 	testRemoveOldSessions();
 });

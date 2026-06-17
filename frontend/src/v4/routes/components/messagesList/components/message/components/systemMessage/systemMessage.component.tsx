@@ -26,7 +26,7 @@ interface IProps {
 	propertyName: string;
 }
 
-const Comment: FunctionComponent<{ propertyName }> = ({ children, propertyName }) => {
+const Comment = ({ children, propertyName }) => {
 	if (propertyName === 'issue_referenced') {
 		return (<MarkdownComment>{children}</MarkdownComment>);
 	}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { planExists, validateNewPlanData, validateUpdatePlanData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
+const { planContainersHaveRevs, planExists, validateNewPlanData, validateUpdatePlanData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
 const Clashes = require('../../../processors/teamspaces/projects/clashes');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
@@ -26,9 +26,9 @@ const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace } = req.params;
+	const { teamspace, project } = req.params;
 	try {
-		const planId = await Clashes.createPlan(teamspace, req.body, user);
+		const planId = await Clashes.createPlan(teamspace, project, req.body, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(planId) });
 	} catch (err) {
 		// istanbul ignore next
@@ -38,9 +38,9 @@ const createPlan = async (req, res) => {
 
 const updatePlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.updatePlan(teamspace, planId, req.body, user);
+		await Clashes.updatePlan(teamspace, project, planId, req.body, user);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -49,10 +49,22 @@ const updatePlan = async (req, res) => {
 };
 
 const deletePlan = async (req, res) => {
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.deletePlan(teamspace, planId);
+		await Clashes.deletePlan(teamspace, project, planId);
 		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const createRun = async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	try {
+		const _id = await Clashes.createRun(teamspace, project, req.planData, user);
+		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -109,10 +121,11 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
 	 *                 type: object
 	 *                 description: The selection A of the plan
@@ -141,6 +154,64 @@ const establishRoutes = () => {
 	 *                     description: The rules applied to selection B
 	 *                     items:
 	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *               tickets:
+	 *                 type: object
+	 *                 description: Ticket creation settings for clashes
+	 *                 properties:
+	 *                   federation:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The federation where clash tickets will be created
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   template:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ticket template used to create clash tickets
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   creator:
+	 *                     type: string
+	 *                     description: The user ID to create clash tickets as; defaults to the current user
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   valuesAtCreation:
+	 *                     type: array
+	 *                     description: Ticket property values to apply when clash tickets are created
+	 *                     items:
+	 *                       type: object
+	 *                       properties:
+	 *                         property:
+	 *                           type: string
+	 *                           description: The property name
+	 *                           example: Priority
+	 *                         module:
+	 *                           type: string
+	 *                           description: The module name; omitted for top-level ticket properties
+	 *                           example: clash
+	 *                         value:
+	 *                           description: The value to set on the property
+	 *                           nullable: true
+	 *                       required:
+	 *                         - property
+	 *                         - value
+	 *                   defaultStatuses:
+	 *                     type: object
+	 *                     description: Status to set when a certain event happens
+	 *                     properties:
+	 *                       onNew:
+	 *                         type: string
+	 *                         description: Set the ticket status for newly created clash tickets
+	 *                         example: Open
+	 *                       onResolved:
+	 *                         type: string
+	 *                         description: Set the ticket status for resolved clash tickets
+	 *                         example: Closed
+	 *                       onReopened:
+	 *                         type: string
+	 *                         description: Set the ticket status for reopened clash tickets
+	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -212,10 +283,11 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
 	 *                 type: object
 	 *                 description: The selection A of the plan
@@ -244,6 +316,68 @@ const establishRoutes = () => {
 	 *                     description: The rules applied to selection B
 	 *                     items:
 	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *               tickets:
+	 *                 type: object
+	 *                 description: Ticket creation settings for clashes
+	 *                 nullable: true
+	 *                 properties:
+	 *                   federation:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The federation where clash tickets will be created
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   template:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ticket template used to create clash tickets
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   creator:
+	 *                     type: string
+	 *                     description: The user to create clash tickets as
+	 *                     example: user@example.com
+	 *                   valuesAtCreation:
+	 *                     type: array
+	 *                     description: Ticket property values to apply when clash tickets are created
+	 *                     nullable: true
+	 *                     items:
+	 *                       type: object
+	 *                       properties:
+	 *                         property:
+	 *                           type: string
+	 *                           description: The property name
+	 *                           example: Priority
+	 *                         module:
+	 *                           type: string
+	 *                           description: The module name; omitted for top-level ticket properties
+	 *                           example: clash
+	 *                         value:
+	 *                           description: The value to set on the property
+	 *                           nullable: true
+	 *                       required:
+	 *                         - property
+	 *                         - value
+	 *                   defaultStatuses:
+	 *                     type: object
+	 *                     description: Optional default statuses; removed when no fields remain
+	 *                     nullable: true
+	 *                     properties:
+	 *                       onNew:
+	 *                         type: string
+	 *                         description: Default status for newly created clash tickets
+	 *                         example: Open
+	 *                       onResolved:
+	 *                         type: string
+	 *                         description: Default status for resolved clash tickets
+	 *                         example: Closed
+	 *                       onReopened:
+	 *                         type: string
+	 *                         description: Default status for reopened clash tickets
+	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     nullable: true
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted, null removes the flag
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -285,6 +419,50 @@ const establishRoutes = () => {
 	 *         description: Delete a clash test plan
 	 */
 	router.delete('/:planId', isAdminToProject, planExists, deletePlan);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs:
+	 *   post:
+	 *     description: Create a clash run based on the plan
+	 *     tags: [v:external, Clashes]
+	 *     operationId: createClashRun
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: planId
+	 *         description: ID of plan
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Create a clash run based on the plan
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The id of the new clash run
+	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/:planId/runs', isAdminToProject, planExists, planContainersHaveRevs, createRun);
 
 	return router;
 };

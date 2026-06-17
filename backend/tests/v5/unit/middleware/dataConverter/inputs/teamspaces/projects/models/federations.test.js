@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../../helper/path');
-const { generateUUIDString, generateRandomString, determineTestGroup } = require('../../../../../../../helper/services');
+const { generateUUIDString, generateRandomString } = require('../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -194,9 +195,13 @@ const testGetAccessibleContainers = () => {
 			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
 			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			containers.slice(0, 2).forEach((container) => {
-				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
-					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			containers.forEach((container, i) => {
+				expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledWith(
+					teamspace, project, container._id, username);
+				if (i <= 1) {
+					expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+						teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+				}
 			});
 		});
 
@@ -231,9 +236,13 @@ const testGetAccessibleContainers = () => {
 			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
 			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			containers.slice(0, 2).forEach((container) => {
-				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
-					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			containers.forEach((container, i) => {
+				expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledWith(
+					teamspace, project, container._id, username);
+				if (i <= 1) {
+					expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+						teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+				}
 			});
 		});
 
@@ -269,6 +278,8 @@ const testGetAccessibleContainers = () => {
 			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(nSubModels);
 			containers.forEach((container) => {
+				expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledWith(
+					teamspace, project, container._id, username);
 				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
 					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
 			});

@@ -16,6 +16,7 @@
  */
 
 const auditLogPassword = require('./templates/auditLogPassword');
+const clashError = require('./templates/clashError');
 const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
 const modelImportError = require('./templates/modelImportError');
@@ -30,6 +31,7 @@ const templates = {
 	modelImportError,
 	zombieProcessingStatuses,
 	auditLogPassword,
+	clashError,
 };
 
 MailerConstants.templates = {};

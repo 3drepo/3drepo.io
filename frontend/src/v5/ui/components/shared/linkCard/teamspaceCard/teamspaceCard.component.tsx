@@ -27,7 +27,7 @@ interface ITeamspaceCard {
 	className?: string;
 }
 
-export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX.Element => {
+export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard) => {
 	const { username } = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const isPersonalTeamspace = teamspaceName === username;

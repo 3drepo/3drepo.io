@@ -26,7 +26,7 @@ export const SubmitButton = ({
 	disabled,
 	isPending,
 	...props
-}: IButton): JSX.Element => (
+}: IButton) => (
 	<Button
 		type="submit"
 		fullWidth={fullWidth}
