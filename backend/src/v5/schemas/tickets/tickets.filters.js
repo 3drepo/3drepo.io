@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { isBooleanString, isNumberString } = require('../../utils/helper/typeCheck');
+const { isBooleanString, isNumberString, isString } = require('../../utils/helper/typeCheck');
 
 const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
@@ -86,8 +86,12 @@ Filters.queryParamSchema = Yup.object().shape({
 			if (operator === Filters.queryOperators.RANGE || operator === Filters.queryOperators.NOT_IN_RANGE) {
 				return Yup.array().of(types.range).required()
 					.transform((v, value) => {
-						if (typeof value !== 'string') return value;
-						return value.split(/,(?=\[)/).map((range) => JSON.parse(range));
+						if (!isString(value)) return value;
+						try {
+							return value.split(/,(?=\[)/).map((range) => JSON.parse(range));
+						} catch {
+							return value;
+						}
 					});
 			}
 

@@ -21,9 +21,13 @@ const { generateTemplateFn } = require('./common');
 
 const TEMPLATE_PATH = `${__dirname}/html/clashError.html`;
 
-const dataSchema = Yup.object({
+const subjectDef = {
 	title: Yup.string().default('Clash Error'),
 	domain: Yup.string().default(() => config.getBaseURL()),
+};
+
+const dataSchema = Yup.object({
+	...subjectDef,
 	teamspace: Yup.string().required(),
 	project: Yup.string().required(),
 	planId: Yup.string().required(),
@@ -34,7 +38,8 @@ const dataSchema = Yup.object({
 const ClashErrorTemplate = {};
 
 ClashErrorTemplate.subject = (data) => {
-	const { domain, title } = dataSchema.cast(data);
+	const subjectSchema = Yup.object(subjectDef).required(true);
+	const { domain, title } = subjectSchema.cast(data);
 	return `[${domain}] ${title}`;
 };
 
