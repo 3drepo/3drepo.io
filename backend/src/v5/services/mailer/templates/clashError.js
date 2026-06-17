@@ -37,9 +37,9 @@ const dataSchema = Yup.object({
 
 const ClashErrorTemplate = {};
 
-ClashErrorTemplate.subject = (data) => {
-	const subjectSchema = Yup.object(subjectDef).required(true);
-	const { domain, title } = subjectSchema.cast(data);
+ClashErrorTemplate.subject = (data = {}) => {
+	const subjectSchema = Yup.object(subjectDef);
+	const { domain, title } = subjectSchema.cast(data ?? {}, { assert: false });
 	return `[${domain}] ${title}`;
 };
 
