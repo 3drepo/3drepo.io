@@ -788,7 +788,7 @@ const testProcessClashResults = () => {
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
 					clashRunStatus.ABORTED,
-					{ reason: 'Clash run aborted because it has been superseded by a newer run.' });
+					{ error: { reason: 'Clash run aborted because it has been superseded by a newer run.' } });
 			});
 		});
 
