@@ -39,7 +39,6 @@ export const SortLabel = styled(TableSortLabel) `
 		top: 0;
 		transition: 200ms ease-in-out;
 		content: '';
-		background: ${({ active }) => active ? '#15563c' : 'transparent'};
 	}
 
 	svg {

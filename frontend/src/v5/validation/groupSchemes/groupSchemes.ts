@@ -49,7 +49,7 @@ export const GroupRuleSchema = Yup.object().shape({
 	operator: requiredTrimmedString,
 	values: Yup.mixed().when(
 		'operator',
-		(operator, schema) => {
+		([operator], schema) => {
 			if (OPERATIONS_TYPES[operator] === 'field') return schema;
 			if (['number', 'numberComparison', 'numberRange'].includes(OPERATIONS_TYPES[operator])) return Yup.array().of(valueNumberType);
 			return Yup.array().of(valueType).required();
@@ -66,7 +66,7 @@ const GroupSchema = Yup.object().shape({
 	excludeDefinedObjects: Yup.boolean(),
 	rules: Yup.array().when(
 		'$isSmart',
-		(isSmart, schema) => (isSmart ? schema.required().min(1) : schema),
+		([isSmart], schema) => (isSmart ? schema.required().min(1) : schema),
 	),
 });
 
