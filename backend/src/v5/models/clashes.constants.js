@@ -16,14 +16,21 @@
  */
 
 const ClashesConstants = {};
+const { idTypes } = require('./metadata.constants');
+
+ClashesConstants.clashObjectIdTypes = {
+	...idTypes,
+	INTERNAL: '_ids',
+};
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
+ClashesConstants.RUN_HISTORY_COL = 'clashes.runs';
 
-ClashesConstants.CLASH_PLAN_TYPES = [
-	'hard',
-	'clearance',
-];
+ClashesConstants.CLASH_TYPES = {
+	HARD: 'hard',
+	CLEARANCE: 'clearance',
+};
 
 ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
 	'selectionA',
@@ -32,15 +39,16 @@ ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
 	false,
 ];
 
-ClashesConstants.TRIGGER_OPTIONS = [
-	'manual',
-	'new revision',
-];
+ClashesConstants.triggerOptions = {
+	MANUAL: 'manual',
+	NEW_REVISION: 'new revision',
+};
 
-ClashesConstants.CLASH_RUN_STATUS = {
+ClashesConstants.clashRunStatus = {
 	PLANNED: 'planned',
 	QUEUED: 'queued',
 	FAILED: 'failed',
+	COMPLETED: 'completed',
 };
 
 module.exports = ClashesConstants;

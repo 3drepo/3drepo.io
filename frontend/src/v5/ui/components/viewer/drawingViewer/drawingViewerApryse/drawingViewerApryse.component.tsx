@@ -88,8 +88,16 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	const pageSectionReferences = useRef<PageSectionReferences>(new PageSectionReferences());
 	const snapModes = useRef(null);
 	const offset = useRef({ x: 0, y: 0 }); // Stores the offset of the document in the container. The scale should come from the documentviewer.
-	const placeholder = useRef<HTMLElement>();
+	const placeholder = useRef<HTMLElement>(null);
 	const snappingTask = useRef(null);
+
+
+	const getPageSize = () => {
+		return {
+			width: documentViewer.current.getPageWidth(1),
+			height: documentViewer.current.getPageHeight(1),
+		};
+	};
 
 	// Gets the full image as a blob that can be loaded into another image
 	// source, regardless of the current transformation.
@@ -113,13 +121,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		});
 		documentViewer.current.pendingTasks.push(p);
 		return p;
-	};
-
-	const getPageSize = () => {
-		return {
-			width: documentViewer.current.getPageWidth(1),
-			height: documentViewer.current.getPageHeight(1),
-		};
 	};
 
 	// snap is the implementation for ISnapHandler.
