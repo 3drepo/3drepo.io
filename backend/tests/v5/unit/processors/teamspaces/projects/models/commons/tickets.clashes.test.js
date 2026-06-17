@@ -626,7 +626,7 @@ const testProcessClashResults = () => {
 				await expect(TicketsClashes.processClashResults(teamspace, project,
 					federation, defaultViewAndPinTemplate, { new: [missingSelectionClash] },
 					generateClashPlan(baseContext)))
-					.rejects.toThrow(`Could not find clash selection for container ${missingSelectionClash.a.container}`);
+					.rejects.toThrow(`Could not find active revision in clash selection for container ${missingSelectionClash.a.container}`);
 
 				expect(TicketSchema.validateTickets).not.toHaveBeenCalled();
 				expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
