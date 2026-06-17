@@ -25,7 +25,7 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 export const RuleFieldValues = ({ disabled }) => {
 	const name = 'field.values';
 	const [autoFocus, setAutoFocus] = useState(false);
-	const { control, watch, setValue } = useFormContext<IFormRule>();
+	const { control, watch, setValue, trigger } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({ control, name });
 
 	const operator = watch('field.operator');
@@ -65,6 +65,7 @@ export const RuleFieldValues = ({ disabled }) => {
 							name={`field.values.${i}.value`}
 							autoFocus={autoFocus}
 							disabled={disabled}
+							onChange={() => trigger('field.values')}
 						/>
 					</ArrayFieldContainer>
 				))}
@@ -72,5 +73,5 @@ export const RuleFieldValues = ({ disabled }) => {
 		);
 	}
 
-	return (<FieldValueInput name="field.values.0.value" disabled={disabled}/>);
+	return (<FieldValueInput name="field.values.0.value" disabled={disabled} onChange={() => trigger('field.values')} />);
 };

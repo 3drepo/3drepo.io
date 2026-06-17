@@ -80,7 +80,7 @@ const run = async (teamspace, limit, notify) => {
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
 	const results = { models: [], drawings: [], clashRuns: [] };
 	await Promise.all(teamspaces.map((ts) => processTeamspace(ts, results)));
-	const totalResults = Object.values(results).reduce((sum, entries) => sum + entries.length, 0);
+	const totalResults = results.models.length + results.drawings.length + results.clashRuns.length;
 
 	if (notify && totalResults > 0) {
 		logger.logInfo(`Zombie processing statuses found: ${totalResults}`);

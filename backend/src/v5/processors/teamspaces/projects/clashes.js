@@ -362,7 +362,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 	const latestRun = await getLatestRunByPlan(teamspace, project, planId, { _id: 1 });
 	if (UUIDToString(latestRun._id) !== UUIDToString(runId)) {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
-			{ reason: 'Clash run aborted because it has been superseded by a newer run.' });
+			{ error: { reason: 'Clash run aborted because it has been superseded by a newer run.' } });
 		return;
 	}
 

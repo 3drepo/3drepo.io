@@ -373,8 +373,6 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		if (filter.operator === 'rng' || filter.operator === 'nrng') {
 			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
 			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
-		} else if (filter.operator === 'ex' || filter.operator === 'nex') {
-			filter.values = [];
 		} else {
 			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
 		}
@@ -398,6 +396,11 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 	if (isTextType(type)) {
 		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
 		filter.displayValues = arrToDisplayValue(filter.values);
+	}
+
+	if (filter.operator === 'ex' || filter.operator === 'nex') {
+		filter.values = [];
+		delete filter.displayValues;
 	}
 
 	return { module, property, type, filter };
