@@ -8934,10 +8934,10 @@ react-highlight-words@0.21.0:
     highlight-words-core "^1.2.0"
     memoize-one "^4.0.0"
 
-react-hook-form@7.72.1:
-  version "7.72.1"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.72.1.tgz#19a8bbeaf685934f4c9fc422294cc730ade2780e"
-  integrity sha512-RhwBoy2ygeVZje+C+bwJ8g0NjTdBmDlJvAUHTxRjTmSUKPYsKfMphkS2sgEMotsY03bP358yEYlnUeZy//D9Ig==
+react-hook-form@7.74.0:
+  version "7.74.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.74.0.tgz#7c55ac360290e7e7a78cc3169b0f07bce11a36c0"
+  integrity sha512-yR6wHr99p9wFv686jhRWVSFhUvDvNbdUf2dKlbno8/VKOCuoNobDGC6S+M2dua9A9Yo8vpcrp8assIYbsZCQ9g==
 
 react-intl@10.1.0:
   version "10.1.0"
