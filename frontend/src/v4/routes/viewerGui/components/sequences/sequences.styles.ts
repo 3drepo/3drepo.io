@@ -22,6 +22,7 @@ import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 import PlayIcon from '@assets/icons/filled/play-filled.svg';
 
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -29,7 +30,6 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
-import { DateField } from '../../../components/dateField/dateField.component';
 import { Loader } from '../../../components/loader/loader.component';
 import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
@@ -110,7 +110,6 @@ export const TaskButton = styled(IconButton)`
 export const SequencePlayerColumn = styled(Grid).attrs({
 	container: true,
 	direction: 'column',
-	justify: 'flex-start',
 	alignItems: 'center'
 })`
 	&& {
@@ -131,7 +130,7 @@ export const TaskSmallDot = styled(DotIcon)`
 export const Task = styled.div`
 	align-items: flex-start;
 	display: flex;
-` as any;
+`;
 
 export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 	margin-top: 3px;
@@ -147,9 +146,7 @@ export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
-	justify: 'flex-start',
 	alignItems: 'flex-start',
-	item: true
 })`
 	&& {
 		width: auto;
@@ -177,7 +174,7 @@ export const IntervalRow = styled(SequenceRow)`
 	}
 `;
 
-export const DatePicker = styled(DateField)`
+export const DatePicker = styled(DateTimePicker)`
 	&& {
 		width: 160px;
 		margin: 0 9px 12px;
@@ -226,9 +223,7 @@ export const SequenceItemContainer = styled(MenuItemContainer)`
 	}
 `;
 
-export const SequenceName = styled(Grid).attrs({
-	item: true,
-})`
+export const SequenceName = styled(Grid)`
 	&& {
 		font-size: 18px;
 		font-weight: 500;
@@ -240,7 +235,6 @@ export const SequenceName = styled(Grid).attrs({
 `;
 
 export const SequenceDatesContainer = styled(Grid).attrs({
-	item: true,
 	container: true,
 	direction: 'row'
 })`

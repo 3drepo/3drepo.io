@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
@@ -95,7 +96,7 @@ const testGetComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -186,7 +187,7 @@ const testGetCommentsList = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType, orderChecker: orderCheck('createdAt', true) };
 
 			return [
@@ -288,7 +289,7 @@ const testCreateComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = {
 				key: users.tsAdmin.apiKey, projectId: project.id, model, modelType, allowComments: true,
 			};
@@ -366,7 +367,7 @@ const testUpdateComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -459,7 +460,7 @@ const testDeleteComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -519,7 +520,7 @@ const testDeleteComment = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

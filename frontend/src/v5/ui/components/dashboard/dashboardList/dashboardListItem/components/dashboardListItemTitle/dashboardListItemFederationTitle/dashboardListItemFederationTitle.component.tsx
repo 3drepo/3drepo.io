@@ -35,7 +35,7 @@ interface IFederationTitle extends FixedOrGrowContainerProps {
 
 export const DashboardListItemFederationTitle = ({
 	federation,
-}: IFederationTitle): JSX.Element => {
+}: IFederationTitle) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { query } = useContext(SearchContext);
 

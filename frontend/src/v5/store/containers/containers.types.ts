@@ -132,6 +132,7 @@ export type ContainerStats = {
 	status: UploadStatus;
 	unit: string;
 	code: string;
+	modelId: string;
 };
 
 export type ContainerBackendSettings = {
