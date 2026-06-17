@@ -19,8 +19,8 @@ import * as Yup from 'yup';
 import { requiredNumber, numberRange, trimmedString, INVALID_DATE_RANGE_MESSAGE, INVALID_NUMBER_RANGE_MESSAGE, ERROR_REQUIRED_FIELD_MESSAGE } from '../shared/validators';
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
-import { isRangeOperator, isDateType, isTextType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
-import { TicketFilterOperator, TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { isDateType, isTextType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { formatMessage } from '@/v5/services/intl';
 
 const getValueValidator = (type: TicketFilterType) => {
@@ -42,27 +42,41 @@ const getValueValidator = (type: TicketFilterType) => {
 	return trimmedString;
 };
 
-export const FilterSchema = Yup.object().shape({
-	operator: trimmedString,
+export const RangeFilterSchema = Yup.object().shape({
 	values: Yup.array()
 		.when(
-			['operator', '$type'],
+			['$type'],
 			// @ts-ignore
-			(operator: TicketFilterOperator, filterType: TicketFilterType, schema) => {
-				let value;
-				if (isRangeOperator(operator)) {
-					value = numberRange(isDateType(filterType) ? INVALID_DATE_RANGE_MESSAGE : INVALID_NUMBER_RANGE_MESSAGE);
-				} else {
-					value = getValueValidator(filterType);
-				}
+			([filterType]: [TicketFilterType], schema) => {
+				const value = numberRange(isDateType(filterType) ? INVALID_DATE_RANGE_MESSAGE : INVALID_NUMBER_RANGE_MESSAGE);
 				return schema.of(Yup.object({ value }));
 			},
 		)
 		.when(
-			'operator',
-			(operator, schema) => {
+			'$operator',
+			([operator], schema) => {
 				const maxFields = getOperatorMaxFieldsAllowed(operator);
 				return schema.min(Math.min(maxFields, 1));
 			},
 		),
 });
+
+export const NonRangeFilterSchema = Yup.object().shape({
+	values: Yup.array()
+		.when(
+			['$type'],
+			// @ts-ignore
+			([filterType]: [TicketFilterType], schema) => {
+				const value = getValueValidator(filterType);
+				return schema.of(Yup.object({ value }));
+			},
+		)
+		.when(
+			'$operator',
+			([operator], schema) => {
+				const maxFields = getOperatorMaxFieldsAllowed(operator);
+				return schema.min(Math.min(maxFields, 1));
+			},
+		),
+});
+

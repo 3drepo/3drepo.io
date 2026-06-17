@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2025 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Select as SelectBase } from '@controls/inputs/select/select.component';
-import styled from 'styled-components';
+import { COLOR } from '@/v4/styles/colors';
+import styled, { css } from 'styled-components';
 
-export const Select = styled(SelectBase)`
-	margin: 0;
-`;
+
+export const StyledIndicator = styled.div<{ isEraser }>`
+	border-radius: 100%;
+	width: ${(props: any) => props.size}px;
+	min-width: ${(props: any) => props.size}px;
+	height: ${(props: any) => props.size}px;
+	color: ${(props: any) => props.color || COLOR.WHITE};
+	border: 2px solid currentColor;
+	opacity: .8;
+	position: absolute;
+	z-index: 2;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+
+	${({ isEraser }) => isEraser && css`
+		background-color: ${COLOR.WHITE};
+		border-color: ${COLOR.BLACK};
+	`}
+` as any;

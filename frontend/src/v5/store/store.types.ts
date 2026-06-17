@@ -23,8 +23,8 @@ export type ModelId = { modelId: string };
 export type TicketId = { ticketId: string };
 export type DrawingId = { drawingId: string };
 
-
-export type OnSuccess<T=void> = { onSuccess: (T?) => void };
+// eslint-disable-next-line
+export type OnSuccess<T = void> = { onSuccess: (arg?: T) => void };
 export type OnError = { onError: (error) => void };
 
 export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
