@@ -24,9 +24,8 @@ import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
-import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
+import { createGroupsFromViewpoint, generateViewpointV4, getViewpointWithGroups, mergeGroupsDataFromViewpoint } from '@/v5/helpers/viewpoint.helpers';
 import { ROUTES } from '@/v4/constants/routes';
-import { createGroupsFromViewpoint, generateViewpoint, mergeGroupsDataFromViewpoint } from '@/v4/helpers/viewpoints';
 import * as API from '@/v4/services/api';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { ModelActions } from '@/v4/modules/model';
@@ -246,7 +245,7 @@ export function* clearTransformations() {
 
 export function* prepareNewViewpoint({ viewpointName }: PrepareNewViewpointAction) {
 	try {
-		const newViewpoint = yield generateViewpoint(viewpointName, true);
+		const newViewpoint = yield generateViewpointV4(viewpointName, true);
 		yield put(ViewpointsActions.setNewViewpoint(newViewpoint));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

@@ -21,7 +21,7 @@ import * as queryString from 'query-string';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { generatePath } from 'react-router';
-import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { generateViewpointV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
@@ -125,7 +125,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const userJob = yield select(selectMyJob);
 
 		let risk = !ignoreViewer ?
-			yield generateViewpoint(riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
+			yield generateViewpointV4(riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
 		if (riskData.descriptionThumbnail ) {
@@ -212,7 +212,7 @@ function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmit
 	yield put(RisksActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, account, model } = yield select(selectActiveRiskDetails);
-		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint('', false) : {viewpoint: {}};
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpointV4('', false) : {viewpoint: {}};
 
 		riskData.viewpoint = {
 			...viewpoint,
@@ -677,7 +677,7 @@ function* showMitigationSuggestions({conditions, setFieldValue}) {
 }
 
 export function * updateActiveRiskViewpoint({ screenshot }) {
-	const { viewpoint } = yield generateViewpoint('', false);
+	const { viewpoint } = yield generateViewpointV4('', false);
 	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(RisksActions.updateRisk({viewpoint}));
 }

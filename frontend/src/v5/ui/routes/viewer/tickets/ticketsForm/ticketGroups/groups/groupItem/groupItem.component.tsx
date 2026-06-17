@@ -28,9 +28,8 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, toSharedIds } from '@/v5/helpers/viewpoint.helpers';
 import { TreeActions, selectNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
-import { toSharedIds } from '@/v4/helpers/viewpoints';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Buttons,

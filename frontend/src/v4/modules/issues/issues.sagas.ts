@@ -21,7 +21,7 @@ import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { generatePath } from 'react-router-dom';
-import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { generateViewpointV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
@@ -120,7 +120,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		const userJob = yield select(selectMyJob);
 
 		let issue = !ignoreViewer ?
-			yield generateViewpoint(issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
+			yield generateViewpointV4(issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
 		if (issueData.descriptionThumbnail ) {
@@ -215,7 +215,7 @@ function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 	yield put(IssuesActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint('', false) : {viewpoint: {}};
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpointV4('', false) : {viewpoint: {}};
 
 		issueData.viewpoint = {
 			...viewpoint,
@@ -693,7 +693,7 @@ export function* attachLinkResources({ links }) {
 }
 
 export function * updateActiveIssueViewpoint({screenshot}) {
-	const { viewpoint } = yield generateViewpoint( '', false);
+	const { viewpoint } = yield generateViewpointV4( '', false);
 	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }

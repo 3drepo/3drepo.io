@@ -49,6 +49,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { SearchContext } from '@controls/search/searchContext';
 import { ViewItemSchema } from '@/v5/validation/viewpointSchemes/viewpointSchemes';
 import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
+import { getScreenshotFromView } from '@/v5/helpers/viewpoint.helpers';
 
 interface IViewItem {
 	viewpoint: IViewpoint;
@@ -107,16 +108,6 @@ const ViewEllipsisMenu = ({ onSetAsDefault, onDelete, isAdmin, defaultView }) =>
 	</EllipsisMenu>
 );
 
-const getScreenshot = (viewpoint: IViewpoint): string | null => {
-	const screenshot = viewpoint?.screenshot || viewpoint?.viewpoint?.screenshot;
-	if (!screenshot) return null;
-	if (screenshot.thumbnailUrl) return screenshot.thumbnailUrl;
-	if (!screenshot.startsWith('data:image/png;base64,') && !screenshot.startsWith('https://')) {
-		return 'data:image/png;base64,' + screenshot;
-	}
-	return screenshot;
-};
-
 export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setEditMode, createMode, setCreateMode }: IViewItem) => {
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -128,7 +119,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	const defaultView = defaultViewSetting ? viewpoint._id === defaultViewSetting.id : false;
 	const { isCalibrating, step: calibrationStep } = useContext(CalibrationContext);
 
-	const screenshot = getScreenshot(viewpoint);
+	const screenshot = getScreenshotFromView(viewpoint);
 
 	const handleDelete = (e) => {
 		e.persist();
