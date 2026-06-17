@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, CSSProperties } from 'react';
+import { ReactNode, CSSProperties, JSX } from 'react';
 
 import { Container, ContainerProps } from './fixedOrGrowContainer.styles';
 

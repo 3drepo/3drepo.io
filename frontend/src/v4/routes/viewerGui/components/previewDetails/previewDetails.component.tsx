@@ -18,6 +18,7 @@ import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
+import { JSX } from 'react/jsx-runtime';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';

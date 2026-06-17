@@ -37,7 +37,7 @@ export const Comments = styled.div`
 	height: 400px;
 `;
 
-export const VirtualisedList = styled(TableVirtuoso).attrs({
+export const VirtualisedList = styled(TableVirtuoso as any).attrs({
 	style: { overflowY: 'scroll' },
 })`
 	box-sizing: border-box;

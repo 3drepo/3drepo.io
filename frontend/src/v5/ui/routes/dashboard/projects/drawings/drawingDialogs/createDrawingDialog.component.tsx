@@ -49,7 +49,10 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'drawings.creation.ok', defaultMessage: 'Create Drawing' })}
 			maxWidth="sm"
-			{...formState}
+			// converted from enumerable to non-enumerable isValid one of them so {...formstate} will no longer 
+			// pass the correct values.
+			isValid={formState.isValid}
+			isSubmitting={formState.isSubmitting}
 		>
 			<DrawingForm formData={formData} />
 		</FormModal>
