@@ -32,7 +32,7 @@ export const ChevronButton = forwardRef(({
 	isLoading = false,
 	size = 'medium',
 	...props
-}: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
+}: IChevronButton, ref: Ref<HTMLButtonElement>) => (
 	<ChevronStyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref} $size={size}>
 		{isLoading ? (
 			<SpinnerLoader />

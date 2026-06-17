@@ -20,6 +20,7 @@ import FormControlBase from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import styled from 'styled-components';
+import { Typography } from '@controls/typography';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
@@ -30,79 +31,43 @@ export const Container = styled.div`
 	position: relative;
 	display: flex;
 	flex-direction: column;
+
+	& .MuiInputBase-root {
+		width: 100%;
+	}
 `;
 
 export const BoardContainer = styled.div`
 	height: 100%;
 	box-sizing: border-box;
-	border-top: 1px solid ${COLOR.BLACK_6};
 	overflow: hidden;
 
 	> div {
 		height: 100%;
 	}
 
-	.react-trello-board {
-		background-color: initial;
-		height: 100%;
-		padding: 16px 12px;
-		overflow-y: hidden;
-		overflow-x: auto;
-		box-sizing: border-box;
-
-		> div {
-			height: 100%;
-			min-width: 100%;
-		}
-	}
-
-	.smooth-dnd-container {
+	.kanban-board {
 		height: 100%;
 	}
+		
+	.kanban-board .lane-column:first-child {
+		margin-left: 75px;
+	}
 
-	.react-trello-lane {
-		background-color: ${COLOR.BLACK_6};
-		border: 1px solid ${COLOR.BLACK_12};
-		min-height: 100%;
-		max-height: none;
-		height: inherit;
-		margin: 0 5px;
-		min-width: 300px;
-		width: calc((100% / 4) - 2 * 5px);
-		padding: 10px 8px;
-
-		> div {
-			width: 100%;
-		}
-
-		header {
-			color: ${COLOR.BLACK_70};
-			display: flex;
-			align-items: center;
-
-			> span:nth-child(1) {
-				font-size: 14px;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			> span:nth-child(2) {
-				font-size: 12px;
-				line-height: 1;
-			}
-		}
+	.kanban-board .lane-column:last-child {
+		margin-right: 75px;
 	}
 `;
 
 export const Config = styled.div`
-	background-color: ${COLOR.WHITE};
 	flex-basis: 30px;
-	padding: 10px 15px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	position: relative;
 	z-index: 1;
+	background-color: transparent;
+	padding: 10px 75px;
 `;
 
 export const DataConfig = styled.div``;
@@ -114,7 +79,55 @@ export const ViewConfig = styled.div`
 
 export const AddButton = styled(Fab).attrs({
 	size: 'small',
-})``;
+})`
+	background-color: ${({ theme }) => theme.palette.primary.main};
+	text-transform: none;
+	margin-bottom: -28px;
+	margin-left: 0;
+	height: 35px;
+	width: fit-content;
+	border-radius: 8px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 8px 16px;
+	border: none;
+
+	svg {
+		background: currentColor;
+		border-radius: 50%;
+		fill: ${({ theme }) => theme.palette.primary.main};
+		height: 17px;
+		width: 17px;
+		margin-right: 8px;
+		transform: scale(.7);
+	}
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+		
+		svg {
+			fill: ${({ theme }) => theme.palette.primary.dark};
+		}
+	}
+
+	&:active {
+		box-shadow: none;
+		background-color: ${({ theme }) => theme.palette.primary.darkest};
+
+		svg {
+			fill: ${({ theme }) => theme.palette.primary.darkest};
+		}
+	}
+
+	&:disabled {
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		
+		svg {
+			fill: ${({ theme }) => theme.palette.base.lightest};
+		}
+	}
+`;
 
 export const TitleActions = styled.div`
 	display: flex;
@@ -148,6 +161,7 @@ export const TitleContainer = styled.div`
 export const SelectContainer = styled.div`
 	align-items: center;
 	display: flex;
+	width: 140px;
 `;
 
 export const SelectLabel = styled.div`
@@ -161,11 +175,11 @@ export const LoaderContainer = styled.div`
 	display: flex;
 	position: absolute;
 	width: 100%;
-	height: 100%;
 	justify-content: center;
 	overflow: hidden;
-	top: 0;
 	left: 0;
+	top: 110px;
+	height: calc(100% - 120px);
 `;
 
 export const FormWrapper = styled.div<{ size: string }>`
@@ -179,9 +193,11 @@ export const FormWrapper = styled.div<{ size: string }>`
 	}
 `;
 
-export const NoDataMessage = styled.div`
+export const NoDataMessage = styled(Typography).attrs({
+	variant: 'h2',
+	color: 'base',
+})`
 	align-self: center;
-	color: ${COLOR.BLACK_54};
 `;
 
 export const Filters = styled.div`
@@ -217,8 +233,8 @@ export const Title = styled.div``;
 
 export const BoardItem = styled(PreviewListItem)`
 	&& {
-		margin-bottom: 6px;
-		border: 1px solid ${COLOR.BLACK_12};
+		border: 1px solid  ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 8px;
 	}
 `;
 
@@ -227,3 +243,10 @@ export const FormControl = styled(FormControlBase)`
 		margin-right: 15px;
 	}
 `;
+
+export const ModelSelectFormControl = styled(FormControl)`
+	&& {
+		min-width: 373px;
+	}
+`;
+
