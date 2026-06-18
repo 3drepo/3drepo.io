@@ -1965,15 +1965,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
