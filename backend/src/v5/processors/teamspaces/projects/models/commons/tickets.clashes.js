@@ -144,7 +144,7 @@ const updateDefaultView = async (teamspace, project, ticket, clashContext, clash
 					if (idType === clashObjectIdTypes.INTERNAL) {
 						const revision = clashContext.containerRevisions[container];
 						if (!revision) {
-							throw new Error(`Could not find clash selection for container ${container}`);
+							throw new Error(`Could not find active revision in clash selection for container ${container}`);
 						}
 
 						// Return strings because validateTickets deserialises view group _ids before committing groups.

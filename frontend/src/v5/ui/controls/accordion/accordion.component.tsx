@@ -26,7 +26,7 @@ import { IconContainer, TitleContainer } from './accordion.styles';
 
 export type AccordionProps = MuiAccordionProps & {
 	Icon?: any;
-	title: any | JSX.Element;
+	title: any;
 	children: any;
 };
 

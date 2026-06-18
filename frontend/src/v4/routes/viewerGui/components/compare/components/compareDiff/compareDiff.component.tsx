@@ -23,19 +23,19 @@ import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareDiff.styles';
 
 interface IProps {
-	className: string;
-	selectedItemsMap: any[];
-	selectedFilters: any[];
-	compareModels: any[];
-	isAllSelected: boolean;
-	targetModels: any;
-	isCompareProcessed: boolean;
-	renderComparisonLoader: () => void;
-	setTargetModel: (modelId, isTarget) => void;
-	setComponentState: (state) => void;
-	setTargetRevision: (modelId, targetRevision, isDiff) => void;
-	handleAllItemsSelect: () => void;
-	handleItemSelect: (modelProps) => (event, selected) => void;
+	className?: string;
+	selectedItemsMap?: any[];
+	selectedFilters?: any[];
+	compareModels?: any[];
+	isAllSelected?: boolean;
+	targetModels?: any;
+	isCompareProcessed?: boolean;
+	renderComparisonLoader?: () => any;
+	setTargetModel?: (modelId, isTarget) => void;
+	setComponentState?: (state) => void;
+	setTargetRevision?: (modelId, targetRevision, isDiff) => void;
+	handleAllItemsSelect?: (...args) => void;
+	handleItemSelect?: (modelProps) => (event, selected) => void;
 }
 
 export class CompareDiff extends PureComponent<IProps, any> {

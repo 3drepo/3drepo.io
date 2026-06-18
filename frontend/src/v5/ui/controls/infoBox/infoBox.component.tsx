@@ -42,5 +42,5 @@ export const InfoBox = ({ title, description, className }: InfoBoxProps) => {
 				<Description>{description}</Description>
 			</Box>
 		</Container>
-	)
-}
+	);
+};
