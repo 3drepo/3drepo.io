@@ -26,8 +26,10 @@ const ClashRuns = {};
 
 const ensureIndexExists = async (teamspace) => {
 	try {
-		await db.createIndex(teamspace, CLASH_RUNS_COL,
-			{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
+		await db.createIndices(teamspace, CLASH_RUNS_COL, [
+			{ key: { project: 1, 'plan._id': 1, updatedAt: -1 }, background: true },
+			{ key: { project: 1, 'plan._id': 1, triggeredAt: -1 }, background: true },
+		]);
 	} catch (err) {
 		logger.logError(`Failed to create index for clash runs in teamspace ${teamspace}: ${err.message}`);
 	}
@@ -72,6 +74,9 @@ ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sor
 
 	return run;
 };
+
+ClashRuns.getLatestRunByPlan = (teamspace, project, planId, projection) => ClashRuns.getClashRunByQuery(
+	teamspace, project, { 'plan._id': planId }, projection, { triggeredAt: -1 });
 
 const deleteRunsByQuery = async (teamspace, project, query = {}) => {
 	const runs = await db.find(teamspace, CLASH_RUNS_COL, { project, ...query }, { _id: 1 });
