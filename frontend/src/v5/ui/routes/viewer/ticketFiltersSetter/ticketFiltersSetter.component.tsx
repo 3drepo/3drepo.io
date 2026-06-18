@@ -101,7 +101,7 @@ export const TicketFiltersSetter = () => {
 		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
 		if (
 			(isEqual(defaultFiltersForTemplate, filtersFromState) && !urlFiltersRaw.length)
-			|| (urlFiltersRaw === param) || (!urlFiltersRaw.length && !filtersFromState.length) // if filters from URL and state are the same do nothing
+			|| (urlFiltersRaw === param) // if filters from URL and state are the same do nothing
 		) return;
 		setUrlFilters(param);
 	}, [JSON.stringify(filtersFromState), templates.length, initialized]);
