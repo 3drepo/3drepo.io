@@ -291,7 +291,7 @@ const testParseClashResults = () => {
 					{ _id: stringToUUID(oldRun._id) }, { _id: 1, status: 1, results: 1 });
 
 				expect(oldRunInDb.status).toEqual(clashRunStatus.ABORTED);
-				expect(oldRunInDb.results.reason).toEqual(
+				expect(oldRunInDb.results.error.reason).toEqual(
 					'Clash run aborted because it has been superseded by a newer run.');
 				await expect(fileExists(teamspace, CLASH_RUNS_COL, oldRunInDb._id)).resolves.toEqual(false);
 
