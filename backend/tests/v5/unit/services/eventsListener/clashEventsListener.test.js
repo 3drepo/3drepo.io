@@ -156,6 +156,7 @@ const testClashRunProcessed = () => {
 		const eventData = generateProcessedEventData();
 		const basePlan = {
 			_id: eventData.plan._id,
+			name: generateRandomString(),
 			tickets: {
 				federation: generateRandomString(),
 				template: generateRandomString(),
@@ -206,7 +207,7 @@ const testClashRunProcessed = () => {
 
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
-				eventData.project, eventData.plan._id, { tickets: 1 });
+				eventData.project, eventData.plan._id, { tickets: 1, name: 1 });
 			if (getPlanError || !plan?.tickets?.federation) {
 				expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
 				expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
@@ -234,7 +235,7 @@ const testClashRunProcessed = () => {
 			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
 			expect(TicketsClashes.processClashResults).toHaveBeenCalledWith(eventData.teamspace,
 				eventData.project, fed._id, template, eventData.results,
-				{ plan: { ...eventData.plan, tickets: plan.tickets }, runId: eventData.runId });
+				{ plan: { ...eventData.plan, tickets: plan.tickets, name: plan.name }, runId: eventData.runId });
 			if (processClashResultsError) {
 				expect(logger.logError).toHaveBeenCalledTimes(1);
 				expect(logger.logError).toHaveBeenCalledWith(
