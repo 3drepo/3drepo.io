@@ -43,6 +43,7 @@ const {
 const { getBoundsForGroupsOfMeshNodes, getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
+const { meshPrimitiveTypes, nodeTypes } = require('../../../models/scenes.constants');
 const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
 const { createReadStream } = require('fs');
@@ -130,7 +131,15 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 	}
 
 	const meshes = await getNodesByQuery(teamspace, project, container,
-		deleteIfUndefined({ type: 'mesh', rev_id: revision, _id: meshIDQuery }),
+		deleteIfUndefined({
+			type: nodeTypes.MESH,
+			rev_id: revision,
+			_id: meshIDQuery,
+			$or: [
+				{ primitive: meshPrimitiveTypes.POLYGON },
+				{ primitive: { $exists: false } },
+			],
+		}),
 		{ _id: 1, parents: 1, name: 1, shared_id: 1 });
 
 	for (const mesh of meshes) {
