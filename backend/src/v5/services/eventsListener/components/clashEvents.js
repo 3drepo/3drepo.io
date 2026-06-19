@@ -125,7 +125,8 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 
 const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun, results }) => {
 	try {
-		const { tickets } = await getPlanById(teamspace, project, planFromRun._id, { tickets: 1 }).catch(() => ({}));
+		const { tickets, name } = await getPlanById(teamspace, project, planFromRun._id,
+			{ tickets: 1, name: 1 }).catch(() => ({}));
 		if (!tickets?.federation) return;
 
 		const fed = await getFederationById(teamspace,
@@ -136,7 +137,7 @@ const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun,
 		if (!template) return;
 
 		// Use the run's plan details, but keep current ticket settings from the latest plan data.
-		const plan = { ...planFromRun, tickets };
+		const plan = { ...planFromRun, tickets, name };
 
 		await processTicketClashResults(teamspace, project, fed._id, template, results,
 			{ plan, runId });

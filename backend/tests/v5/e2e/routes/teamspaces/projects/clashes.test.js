@@ -32,7 +32,7 @@ const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, propTypes, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
-const { nodeTypes } = require(`${src}/models/scenes.constants`);
+const { meshPrimitiveTypes, nodeTypes } = require(`${src}/models/scenes.constants`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
@@ -658,13 +658,21 @@ const testCreateRun = () => {
 			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
 		const planWithoutClashCandidates = ServiceHelper.generateClashPlan(
 			modelsWithoutScene[0]._id, modelsWithoutScene[1]._id);
+		const allowedMeshesPerScene = 2;
 		const createScene = (model, revision) => {
 			const parent = ServiceHelper.generateUUIDString();
+			const parentIds = [stringToUUID(parent)];
+			const boundingBox = { bounding_box: [[0, 0, 0], [1, 1, 1]] };
 			const parentNode = ServiceHelper.generateBasicNode(nodeTypes.TRANSFORMATION, revision._id, [],
 				{ shared_id: stringToUUID(parent) });
-			const meshNode = ServiceHelper.generateBasicNode(nodeTypes.MESH, revision._id, [stringToUUID(parent)],
-				{ bounding_box: [[0, 0, 0], [1, 1, 1]] });
-			return ServiceHelper.db.createScene(teamspace, project.id, model._id, revision, [parentNode, meshNode]);
+			const meshWithoutPrimitive = ServiceHelper.generateBasicNode(
+				nodeTypes.MESH, revision._id, parentIds, boundingBox);
+			const polygonMesh = ServiceHelper.generateBasicNode(
+				nodeTypes.MESH, revision._id, parentIds, { ...boundingBox, primitive: meshPrimitiveTypes.POLYGON });
+			const lineMesh = ServiceHelper.generateBasicNode(
+				nodeTypes.MESH, revision._id, parentIds, { ...boundingBox, primitive: meshPrimitiveTypes.LINE });
+			return ServiceHelper.db.createScene(teamspace, project.id, model._id, revision,
+				[parentNode, meshWithoutPrimitive, polygonMesh, lineMesh]);
 		};
 
 		beforeAll(async () => {
@@ -733,6 +741,8 @@ const testCreateRun = () => {
 					}]);
 					expect(config.setA[0].objects).toHaveLength(1);
 					expect(config.setB[0].objects).toHaveLength(1);
+					expect(config.setA[0].objects[0].meshIds).toHaveLength(allowedMeshesPerScene);
+					expect(config.setB[0].objects[0].meshIds).toHaveLength(allowedMeshesPerScene);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -749,7 +759,9 @@ const testCreateRun = () => {
 			expect(clashRun).toEqual(expect.objectContaining({
 				status: clashRunStatus.ABORTED,
 				results: {
-					reason: 'The defined selections do not yield any candidates to execute a clash run.',
+					error: {
+						reason: 'The defined selections do not yield any candidates to execute a clash run.',
+					},
 				},
 			}));
 

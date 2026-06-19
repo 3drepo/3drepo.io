@@ -29,6 +29,7 @@ const { PassThrough } = require('stream');
 const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { meshPrimitiveTypes, nodeTypes } = require(`${src}/models/scenes.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -367,7 +368,25 @@ const testCreateRun = () => {
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
 	const mockBoundingBox = { min: [1, 2, 3], max: [4, 5, 6] };
 	const mockBoundingBoxStr = JSON.stringify(mockBoundingBox);
+	const meshQueryProjection = { _id: 1, parents: 1, name: 1, shared_id: 1 };
+	const polygonMeshFilter = {
+		$or: [
+			{ primitive: meshPrimitiveTypes.POLYGON },
+			{ primitive: { $exists: false } },
+		],
+	};
 	const generateIndex = (container, idType, id, bbox) => [container, idType, id, bbox].join('::');
+	const generateMeshQuery = (revision, meshIDQuery) => ({
+		type: nodeTypes.MESH,
+		rev_id: revision,
+		...(meshIDQuery ? { _id: meshIDQuery } : {}),
+		...polygonMeshFilter,
+	});
+	const generateRulesMeshIdQuery = (meshData) => {
+		const wantedMeshIds = meshData.metadata.length ? meshData.meshes.map(({ _id }) => _id) : [];
+		const unwantedMeshIds = meshData.unwantedMeshes.map(({ _id }) => _id);
+		return { $in: wantedMeshIds.filter((meshId) => !unwantedMeshIds.includes(meshId)).map(stringToUUID) };
+	};
 
 	const metadata = times(10, (i) => ({
 		_id: generateRandomString(),
@@ -533,6 +552,14 @@ const testCreateRun = () => {
 				expect(storedPlan).not.toHaveProperty('trigger');
 				expect(storedPlan).not.toHaveProperty('tickets');
 				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
+				expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1,
+					teamspace, project, plan.selectionA[0].container,
+					generateMeshQuery(plan.selectionA[0].revision),
+					meshQueryProjection);
+				expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2,
+					teamspace, project, plan.selectionB[0].container,
+					generateMeshQuery(plan.selectionB[0].revision, generateRulesMeshIdQuery(meshData)),
+					meshQueryProjection);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(
 					teamspace, project, plan.selectionB[0].container,
@@ -571,7 +598,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ScenesModel.getNodesByQuery).not.toHaveBeenCalled();
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
@@ -589,7 +616,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
@@ -606,7 +633,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
