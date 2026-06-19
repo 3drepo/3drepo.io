@@ -283,7 +283,9 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 		await sendClashRunToQueue(teamspace, project, runId, context);
 	} else {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
-			{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+			{ error: {
+				reason: 'The defined selections do not yield any candidates to execute a clash run.' },
+			});
 	}
 
 	return runId;
