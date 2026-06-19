@@ -644,7 +644,7 @@ const testProcessClashResults = () => {
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1 });
+					{ _id: corId }, { plan: 1, status: 1 });
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -707,7 +707,7 @@ const testProcessClashResults = () => {
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1 });
+					{ _id: corId }, { plan: 1, status: 1 });
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -744,6 +744,28 @@ const testProcessClashResults = () => {
 				});
 			});
 
+			test('should ignore aborted clash runs before processing the results file', async () => {
+				const currentRun = {
+					...generateRandomObject(),
+					plan: { _id: generateRandomString() },
+					status: clashRunStatus.ABORTED,
+				};
+				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+
+				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+					.resolves.toBeUndefined();
+
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
+					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getLatestRunByPlan).not.toHaveBeenCalled();
+				expect(fs.createReadStream).not.toHaveBeenCalled();
+				expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+				expect(EventsManager.publish).not.toHaveBeenCalled();
+				expect(ClashRunsModel.updateRunStatus).not.toHaveBeenCalled();
+			});
+
 			test('should abort superseded clash results before processing the results file', async () => {
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
@@ -754,7 +776,7 @@ const testProcessClashResults = () => {
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1 });
+					{ _id: corId }, { plan: 1, status: 1 });
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -766,7 +788,7 @@ const testProcessClashResults = () => {
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
 					clashRunStatus.ABORTED,
-					{ reason: 'Clash run aborted because it has been superseded by a newer run.' });
+					{ error: { reason: 'Clash run aborted because it has been superseded by a newer run.' } });
 			});
 		});
 
@@ -878,7 +900,7 @@ const testProcessClashResults = () => {
 
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1 });
+					{ _id: corId }, { plan: 1, status: 1 });
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
