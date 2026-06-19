@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 import { COLOR } from '@/v4/styles';
-import { MODE_OPERATION } from '../../screenshotDialog.helpers';
+import { MODE_OPERATION } from '../../../screenshotDialog.helpers';
 
 declare const Konva;
 
@@ -46,6 +46,12 @@ export class Erasing extends PureComponent<IProps, any> {
 		this.props.stage.on('mousemove touchmove', this.handleMouseMove);
 		this.props.stage.on('mouseup touchend', this.handleMouseUp);
 		this.props.stage.on('mousedown touchstart', this.handleMouseDown);
+	}
+
+	public componentWillUnmount() {
+		this.props.stage.off('mousemove touchmove', this.handleMouseMove);
+		this.props.stage.off('mouseup touchend', this.handleMouseUp);
+		this.props.stage.off('mousedown touchstart', this.handleMouseDown);
 	}
 
 	public handleMouseDown = () => {

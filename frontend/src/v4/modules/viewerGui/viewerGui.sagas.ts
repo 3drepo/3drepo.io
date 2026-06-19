@@ -114,6 +114,7 @@ function* fetchData({ teamspace, model }) {
 function* resetPanelsStates() {
 	try {
 		yield all([
+			put(ViewerGuiActions.setCoordView(false)),
 			put(IssuesActions.reset()),
 			put(RisksActions.reset()),
 			put(GroupsActions.resetComponentState()),

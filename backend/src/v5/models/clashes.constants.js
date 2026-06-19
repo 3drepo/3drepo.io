@@ -25,7 +25,6 @@ ClashesConstants.clashObjectIdTypes = {
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
-ClashesConstants.RUN_HISTORY_COL = 'clashes.runs';
 
 ClashesConstants.CLASH_TYPES = {
 	HARD: 'hard',
@@ -49,6 +48,7 @@ ClashesConstants.clashRunStatus = {
 	QUEUED: 'queued',
 	FAILED: 'failed',
 	COMPLETED: 'completed',
+	ABORTED: 'aborted',
 };
 
 module.exports = ClashesConstants;

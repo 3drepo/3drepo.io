@@ -144,8 +144,8 @@ const generateProcessedEventData = () => ({
 		_id: generateUUID(),
 		name: generateRandomString(),
 		type: generateRandomString(),
-		selectionA: generateRandomObject(),
-		selectionB: generateRandomObject(),
+		selectionA: [generateRandomObject()],
+		selectionB: [generateRandomObject()],
 		tickets: generateRandomObject(),
 	},
 	results: generateRandomObject(),
@@ -277,8 +277,8 @@ const testOnNewContainerRevision = () => {
 				&& data.data.status === processStatuses.OK;
 			const plans = times(setLastRevError ? 1 : 5, () => ({
 				_id: generateUUID(),
-				selectionA: generateRandomString(),
-				selectionB: generateRandomString(),
+				selectionA: [{ container: generateRandomString() }],
+				selectionB: [{ container: generateRandomString() }],
 			}));
 			const shouldSetLastRev = shouldQueryPlans && !getPlansError;
 			let loggerSpy;
@@ -347,8 +347,8 @@ const testOnNewContainerRevision = () => {
 			};
 			const plan = {
 				_id: generateUUID(),
-				selectionA: generateRandomString(),
-				selectionB: generateRandomString(),
+				selectionA: [{ container: generateRandomString() }],
+				selectionB: [{ container: generateRandomString() }],
 			};
 			const error = new Error(generateRandomString());
 			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});

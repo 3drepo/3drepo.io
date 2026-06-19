@@ -37,7 +37,7 @@ export const EditFederationModal = ({
 	federation,
 	onClickClose,
 	...otherProps
-}: EditFederationModalProps): JSX.Element => {
+}: EditFederationModalProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 

@@ -18,8 +18,8 @@ import { useState, useEffect, useCallback, CSSProperties } from 'react';
 import Konva from 'konva';
 import { isEmpty } from 'lodash';
 
-import { MODES } from '../../markupStage/markupStage.helpers';
-import { EditableText } from '../editableText/editableText.component';
+import { MODES } from '../../../markupStage/markupStage.helpers';
+import { EditableText } from '../../editableText/editableText.component';
 
 interface IProps {
 	selected: string;

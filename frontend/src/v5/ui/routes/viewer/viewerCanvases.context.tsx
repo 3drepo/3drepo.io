@@ -18,11 +18,11 @@ import { createContext, useState } from 'react';
 import { useSearchParam } from '../useSearchParam';
 
 interface ViewerCanvasesContextType {
-	is2DOpen?: boolean;
+	is2DOpen: boolean;
 	close2D: () => void;
-	open2D: (drawingId) => void;
+	open2D: (drawingId: string) => void;
 	leftPanelRatio: number;
-	setLeftPanelRatio: (size) => void;
+	setLeftPanelRatio: (size: number) => void;
 }
 
 const defaultValue: ViewerCanvasesContextType = {
@@ -35,15 +35,20 @@ const defaultValue: ViewerCanvasesContextType = {
 export const ViewerCanvasesContext = createContext(defaultValue);
 ViewerCanvasesContext.displayName = 'ViewerCanvasesContext';
 
-export const ViewerCanvasesContextComponent = ({ children }) => {
+export const ViewerCanvasesContextComponent = ({ children }: { children: React.ReactNode }) => {
 	const [leftPanelRatio, setLeftPanelRatio] = useState(0.5);
 	const [drawingId, setDrawingId] = useSearchParam('drawingId');
+
+	const open2D = (id: string) => {
+		setDrawingId(id);
+		setLeftPanelRatio(0.5); // Reset to default ratio when opening a new drawing
+	};
 
 	return (
 		<ViewerCanvasesContext.Provider value={{
 			is2DOpen: !!drawingId && leftPanelRatio < 1,
 			close2D: () => setDrawingId(''),
-			open2D: setDrawingId,
+			open2D: open2D,
 			leftPanelRatio,
 			setLeftPanelRatio,
 		}}>
