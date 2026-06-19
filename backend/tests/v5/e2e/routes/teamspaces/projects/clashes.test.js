@@ -466,7 +466,9 @@ const testCreateRun = () => {
 			expect(clashRun).toEqual(expect.objectContaining({
 				status: clashRunStatus.ABORTED,
 				results: {
-					reason: 'The defined selections do not yield any candidates to execute a clash run.',
+					error: {
+						reason: 'The defined selections do not yield any candidates to execute a clash run.',
+					},
 				},
 			}));
 

@@ -363,7 +363,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ScenesModel.getNodesByQuery).not.toHaveBeenCalled();
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
@@ -381,7 +381,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
@@ -398,7 +398,7 @@ const testCreateRun = () => {
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 					expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, runId,
 						clashRunStatus.ABORTED,
-						{ reason: 'The defined selections do not yield any candidates to execute a clash run.' });
+						{ error: { reason: 'The defined selections do not yield any candidates to execute a clash run.' } });
 					expect(ModelProcessing.queueClashRun).not.toHaveBeenCalled();
 					expect(Scenes.getBoundsForGroupsOfMeshNodes).not.toHaveBeenCalled();
 				});
