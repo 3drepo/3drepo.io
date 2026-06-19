@@ -29,6 +29,7 @@ const { PassThrough } = require('stream');
 const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { meshPrimitiveTypes, nodeTypes } = require(`${src}/models/scenes.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -153,30 +154,245 @@ const testDeleteClashDataInProject = () => {
 	});
 };
 
+const testGetAllPlans = () => {
+	describe('Get All Plans', () => {
+		test('should call getAllPlansByProject with the teamspace and project provided and return plans unchanged', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const plans = times(3, () => ({
+				_id: generateUUID(),
+				name: generateRandomString(),
+				type: CLASH_TYPES.HARD,
+			}));
+			ClashPlansModel.getAllPlansByProject.mockResolvedValueOnce(plans);
+
+			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual(plans);
+
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledWith(teamspace, project);
+		});
+
+		test('should return an empty plans array when no plans are found', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			ClashPlansModel.getAllPlansByProject.mockResolvedValueOnce([]);
+
+			await expect(Clashes.getAllPlans(teamspace, project)).resolves.toEqual([]);
+
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledWith(teamspace, project);
+		});
+
+		test('should pass the projection to getAllPlansByProject when provided', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const projection = { name: 1, type: 1 };
+			const plans = times(3, () => ({
+				_id: generateUUID(),
+				name: generateRandomString(),
+				type: CLASH_TYPES.HARD,
+			}));
+			ClashPlansModel.getAllPlansByProject.mockResolvedValueOnce(plans);
+
+			await expect(Clashes.getAllPlans(teamspace, project, projection)).resolves.toEqual(plans);
+
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledWith(teamspace, project, projection);
+		});
+
+		test('should reject when getAllPlansByProject fails', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const error = new Error(generateRandomString());
+			ClashPlansModel.getAllPlansByProject.mockRejectedValueOnce(error);
+
+			await expect(Clashes.getAllPlans(teamspace, project)).rejects.toEqual(error);
+
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getAllPlansByProject).toHaveBeenCalledWith(teamspace, project);
+		});
+	});
+};
+
+const testGetPlanById = () => {
+	describe('Get Plan By ID', () => {
+		const teamspace = generateRandomString();
+		const project = generateUUID();
+		const planId = generateUUID();
+
+		test('should call getPlanById with the teamspace, project and plan ID provided and return plan unchanged', async () => {
+			const plan = {
+				_id: generateUUID(),
+				name: generateRandomString(),
+				tickets: {
+					template: generateUUID(),
+					federation: generateUUID(),
+					...generateRandomObject(),
+				},
+				...generateRandomObject(),
+			};
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+
+			await expect(Clashes.getPlanById(teamspace, project, planId)).resolves.toEqual(plan);
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+
+		test('should return plan unchanged when plan has no tickets', async () => {
+			const plan = {
+				_id: generateUUID(),
+				name: generateRandomString(),
+			};
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+
+			await expect(Clashes.getPlanById(teamspace, project, planId)).resolves.toEqual(plan);
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+
+		test('should reject when getPlanById fails', async () => {
+			const error = new Error(generateRandomString());
+			ClashPlansModel.getPlanById.mockRejectedValueOnce(error);
+
+			await expect(Clashes.getPlanById(teamspace, project, planId)).rejects.toEqual(error);
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+	});
+};
+
+const testGetClashRunsByPlan = () => {
+	describe('Get Clash Runs By Plan', () => {
+		const teamspace = generateRandomString();
+		const planId = generateUUID();
+
+		test('should call getClashRunsByPlan and return runs unchanged', async () => {
+			const completedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.COMPLETED,
+				triggeredAt: new Date(),
+				triggeredBy: generateRandomString(),
+				completedAt: new Date(),
+				result: { stats: generateRandomObject(), details: generateRandomObject() },
+			};
+			const failedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.FAILED,
+				triggeredAt: new Date(),
+				triggeredBy: generateRandomString(),
+				errorCode: generateRandomString(),
+				message: generateRandomString(),
+				result: generateRandomObject(),
+			};
+			const queuedRun = {
+				_id: generateUUID(),
+				status: clashRunStatus.QUEUED,
+				triggeredAt: new Date(),
+				triggeredBy: generateRandomString(),
+				completedAt: new Date(),
+				result: generateRandomObject(),
+				errorCode: generateRandomString(),
+				message: generateRandomString(),
+			};
+			const runs = [completedRun, failedRun, queuedRun];
+			ClashRunsModel.getClashRunsByPlan.mockResolvedValueOnce(runs);
+
+			const project = generateUUID();
+			await expect(Clashes.getClashRunsByPlan(teamspace, project, planId)).resolves.toEqual(runs);
+
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+
+		test('should return an empty runs array when no runs are found', async () => {
+			const project = generateUUID();
+			ClashRunsModel.getClashRunsByPlan.mockResolvedValueOnce([]);
+
+			await expect(Clashes.getClashRunsByPlan(teamspace, project, planId)).resolves.toEqual([]);
+
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+
+		test('should pass the projection to getClashRunsByPlan when provided', async () => {
+			const project = generateUUID();
+			const projection = { project: 0, plan: 0 };
+			const runs = times(3, () => ({
+				_id: generateUUID(),
+				status: clashRunStatus.COMPLETED,
+			}));
+			ClashRunsModel.getClashRunsByPlan.mockResolvedValueOnce(runs);
+
+			await expect(Clashes.getClashRunsByPlan(teamspace, project, planId, projection)).resolves.toEqual(runs);
+
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId, projection);
+		});
+
+		test('should reject when getClashRunsByPlan fails', async () => {
+			const project = generateUUID();
+			const error = new Error(generateRandomString());
+			ClashRunsModel.getClashRunsByPlan.mockRejectedValueOnce(error);
+
+			await expect(Clashes.getClashRunsByPlan(teamspace, project, planId)).rejects.toEqual(error);
+
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId);
+		});
+	});
+};
+
 const testCreateRun = () => {
 	const teamspace = generateRandomString();
 	const project = generateUUID();
 	const userId = generateRandomString();
 	const runId = generateRandomString();
 	const planData = {
+		_id: generateUUID(),
+		name: generateRandomString(),
 		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
 		selfIntersectionsCheck: false,
+		trigger: [generateRandomString()],
 		selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
 		selectionB: [{ container: generateRandomString(),
 			revision: generateUUID(),
 			rules: [generateRandomObject()],
 		}],
+		tickets: generateRandomObject(),
 	};
 	const parentWithManyMeshes = generateRandomString();
 	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
 	const mockBoundingBox = { min: [1, 2, 3], max: [4, 5, 6] };
 	const mockBoundingBoxStr = JSON.stringify(mockBoundingBox);
+	const meshQueryProjection = { _id: 1, parents: 1, name: 1, shared_id: 1 };
+	const polygonMeshFilter = {
+		$or: [
+			{ primitive: meshPrimitiveTypes.POLYGON },
+			{ primitive: { $exists: false } },
+		],
+	};
 	const generateIndex = (container, idType, id, bbox) => [container, idType, id, bbox].join('::');
+	const generateMeshQuery = (revision, meshIDQuery) => ({
+		type: nodeTypes.MESH,
+		rev_id: revision,
+		...(meshIDQuery ? { _id: meshIDQuery } : {}),
+		...polygonMeshFilter,
+	});
+	const generateRulesMeshIdQuery = (meshData) => {
+		const wantedMeshIds = meshData.metadata.length ? meshData.meshes.map(({ _id }) => _id) : [];
+		const unwantedMeshIds = meshData.unwantedMeshes.map(({ _id }) => _id);
+		return { $in: wantedMeshIds.filter((meshId) => !unwantedMeshIds.includes(meshId)).map(stringToUUID) };
+	};
 
-	const metadata = times(10, (i) => ({ _id: generateRandomString(),
+	const metadata = times(10, (i) => ({
+		_id: generateRandomString(),
 		parents: [generateRandomString()],
-		metadata: externalIds[i] }));
+		metadata: externalIds[i],
+	}));
 
 	const meshDataObj = {
 		nonBimMeshes: times(10, (i) => ({
@@ -323,8 +539,27 @@ const testCreateRun = () => {
 				await Clashes.createRun(teamspace, project, plan, userId);
 
 				expect(ClashRunsModel.createClashRun).toHaveBeenCalledTimes(1);
-				expect(ClashRunsModel.createClashRun).toHaveBeenCalledWith(teamspace, project, plan, userId);
+				expect(ClashRunsModel.createClashRun).toHaveBeenCalledWith(teamspace, project, {
+					_id: plan._id,
+					type: plan.type,
+					tolerance: plan.tolerance,
+					selfIntersectionsCheck: plan.selfIntersectionsCheck,
+					selectionA: plan.selectionA,
+					selectionB: plan.selectionB,
+				}, userId);
+				const storedPlan = ClashRunsModel.createClashRun.mock.calls[0][2];
+				expect(storedPlan).not.toHaveProperty('name');
+				expect(storedPlan).not.toHaveProperty('trigger');
+				expect(storedPlan).not.toHaveProperty('tickets');
 				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
+				expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1,
+					teamspace, project, plan.selectionA[0].container,
+					generateMeshQuery(plan.selectionA[0].revision),
+					meshQueryProjection);
+				expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2,
+					teamspace, project, plan.selectionB[0].container,
+					generateMeshQuery(plan.selectionB[0].revision, generateRulesMeshIdQuery(meshData)),
+					meshQueryProjection);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(
 					teamspace, project, plan.selectionB[0].container,
@@ -709,15 +944,16 @@ const testProcessClashResults = () => {
 				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await Clashes.processClashResults(teamspace, project, corId, resPath);
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -772,15 +1008,16 @@ const testProcessClashResults = () => {
 					return Promise.resolve({ readStream: fakeReadStream });
 				});
 
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(lastRun);
 
 				await Clashes.processClashResults(teamspace, project, corId, resPath);
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -823,14 +1060,15 @@ const testProcessClashResults = () => {
 					plan: { _id: generateRandomString() },
 					status: clashRunStatus.ABORTED,
 				};
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.resolves.toBeUndefined();
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
 				expect(ClashRunsModel.getLatestRunByPlan).not.toHaveBeenCalled();
 				expect(fs.createReadStream).not.toHaveBeenCalled();
 				expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
@@ -841,15 +1079,16 @@ const testProcessClashResults = () => {
 
 			test('should abort superseded clash results before processing the results file', async () => {
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: generateRandomString() });
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.resolves.toBeUndefined();
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -878,14 +1117,17 @@ const testProcessClashResults = () => {
 				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.resolves.toBeUndefined();
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
@@ -902,14 +1144,17 @@ const testProcessClashResults = () => {
 				fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.resolves.toBeUndefined();
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
@@ -927,14 +1172,17 @@ const testProcessClashResults = () => {
 				});
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.rejects.toEqual(readError);
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
@@ -946,14 +1194,17 @@ const testProcessClashResults = () => {
 				fs.createReadStream.mockImplementationOnce(() => createRawResultsReadStream('{'));
 
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.rejects.toThrow();
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
 				expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
@@ -964,16 +1215,17 @@ const testProcessClashResults = () => {
 
 			test('should mark run as failed and send an email if it fails to fetch last results', async () => {
 				const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-				ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+				ClashRunsModel.getClashRunById.mockResolvedValueOnce(currentRun);
 				ClashRunsModel.getLatestRunByPlan.mockResolvedValueOnce({ _id: corId });
 				ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.unknown);
 
 				await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
 					.rejects.toEqual(templates.unknown);
 
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
-				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
-					{ _id: corId }, { plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+				expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(teamspace, project, corId,
+					{ plan: 1, status: 1 });
+				expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledTimes(1);
 				expect(ClashRunsModel.getLatestRunByPlan).toHaveBeenCalledWith(teamspace, project,
 					currentRun.plan._id, { _id: 1 });
@@ -1116,6 +1368,9 @@ describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testGetAllPlans();
+	testGetPlanById();
+	testGetClashRunsByPlan();
 	testDeleteClashDataInProject();
 	testCreateRun();
 	testProcessClashResults();

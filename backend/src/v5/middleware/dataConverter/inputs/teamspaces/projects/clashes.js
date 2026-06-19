@@ -23,6 +23,7 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
+const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -187,8 +188,16 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTickets(teamspace, project, ticketData.federation,
+		const [{ newTicket: validatedTicket }] = await validateTickets(teamspace, project, ticketData.federation,
 			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
+
+		if (updateData.valuesAtCreation?.length) {
+			// Ticket validation may deserialise values, e.g. date fields, so keep the validated values.
+			updateData.valuesAtCreation = updateData.valuesAtCreation.map((entry) => {
+				const target = entry.module ? validatedTicket.modules[entry.module] : validatedTicket.properties;
+				return { ...entry, value: target[entry.property] };
+			});
+		}
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -251,6 +260,18 @@ Clashes.planExists = async (req, res, next) => {
 
 	try {
 		req.planData = await getPlanById(teamspace, project, planId);
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Clashes.clashRunInPlan = async (req, res, next) => {
+	const { teamspace, project, planId, runId } = req.params;
+
+	try {
+		req.outputData = await getClashRunByQuery(
+			teamspace, project, { _id: runId, 'plan._id': planId }, { project: 0 });
 		await next();
 	} catch (err) {
 		respond(req, res, err);

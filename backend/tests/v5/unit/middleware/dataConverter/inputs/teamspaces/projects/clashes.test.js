@@ -25,6 +25,9 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
+jest.mock('../../../../../../../../src/v5/models/clashes.runs');
+const ClashRunsModel = require(`${src}/models/clashes.runs`);
+
 jest.mock('../../../../../../../../src/v5/models/modelSettings');
 const ModelSettingsModel = require(`${src}/models/modelSettings`);
 
@@ -50,6 +53,7 @@ const {
 	generateRandomString,
 	generateRandomObject,
 	generateRandomNumber,
+	generateRandomDate,
 	generateUUIDString,
 } = require('../../../../../../helper/services');
 const { stringToUUID, UUIDToString, generateUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
@@ -62,6 +66,28 @@ const { presetModules, statuses: templateDefaultStatuses } = require(`${src}/sch
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+
+const valuesAtCreationToTicketFormat = (valuesAtCreation = []) => {
+	const ticketFormat = {};
+	if (!Array.isArray(valuesAtCreation)) {
+		return ticketFormat;
+	}
+
+	valuesAtCreation.forEach(({ property, module, value }) => {
+		const moduleName = module ?? 'properties';
+
+		if (moduleName === 'properties') {
+			ticketFormat.properties = ticketFormat.properties ?? {};
+			ticketFormat.properties[property] = value;
+		} else {
+			ticketFormat.modules = ticketFormat.modules ?? {};
+			ticketFormat.modules[moduleName] = ticketFormat.modules[moduleName] ?? {};
+			ticketFormat.modules[moduleName][property] = value;
+		}
+	});
+
+	return ticketFormat;
+};
 
 const testValidateNewPlanData = () => {
 	const standardRule = {
@@ -113,19 +139,30 @@ const testValidateNewPlanData = () => {
 		],
 	};
 
-	const expectedTicketFormat = {};
-	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
-		const moduleName = module ?? 'properties';
-
-		if (moduleName === 'properties') {
-			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
-			expectedTicketFormat.properties[property] = value;
-		} else {
-			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
-			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
-			expectedTicketFormat.modules[moduleName][property] = value;
-		}
-	});
+	const dateProperty = generateRandomString();
+	const moduleName = generateRandomString();
+	const moduleDateProperty = generateRandomString();
+	const textProperty = generateRandomString();
+	const dateValue = generateRandomDate();
+	const moduleDateValue = generateRandomDate();
+	const textValue = generateRandomString();
+	const ticketDataWithDateValues = {
+		...ticketData,
+		valuesAtCreation: [
+			{ property: dateProperty, value: dateValue.getTime() },
+			{ property: moduleDateProperty, module: moduleName, value: moduleDateValue.getTime() },
+			{ property: textProperty, value: textValue },
+		],
+	};
+	const expectedTicketDataWithDateValues = {
+		...ticketDataWithDateValues,
+		template: stringToUUID(templateInTeamspace),
+		valuesAtCreation: [
+			{ property: dateProperty, value: dateValue },
+			{ property: moduleDateProperty, module: moduleName, value: moduleDateValue },
+			{ property: textProperty, value: textValue },
+		],
+	};
 
 	const testCases = [
 		['with no object (undefined)', false, undefined],
@@ -156,6 +193,7 @@ const testValidateNewPlanData = () => {
 		['with selections with container that does not exist', false, { ...planData, selectionA: [{ container: generateRandomString() }] }],
 		['with selections with container not in project', false, { ...planData, selectionA: [{ container: containerNotInProject }] }],
 		['with valid data (with ticket config)', true, { ...planData, tickets: ticketData }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with valid data (with ticket config and date values at creation)', true, { ...planData, tickets: ticketDataWithDateValues }, { ...planData, tickets: expectedTicketDataWithDateValues }],
 		['with valid data (with ticket config and built in default statuses)', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }],
 		['with valid data (with ticket config and custom default statuses)', true, { ...planData, tickets: { ...ticketData, template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
 		['with hide other objects set to true', true, { ...planData, tickets: { ...ticketData, hideOtherObjects: true } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), hideOtherObjects: true } }],
@@ -197,8 +235,17 @@ const testValidateNewPlanData = () => {
 							&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, p, f, username) => Promise.resolve(username === knownUsername));
-			TicketSchema.validateTickets.mockImplementation((t, p, f, tem, updateData) => {
-				if (isEqual(updateData[0], expectedTicketFormat)) return Promise.resolve();
+			TicketSchema.validateTickets.mockImplementation((t, p, f, tem, updateData, options) => {
+				expect(options).toEqual({ existingData: [{}], processValidatedData: false });
+				const inputValuesAtCreation = data?.tickets?.valuesAtCreation ?? ticketData.valuesAtCreation;
+				const expectedInputTicketFormat = valuesAtCreationToTicketFormat(inputValuesAtCreation);
+				const expectedValidatedTicketFormat = valuesAtCreationToTicketFormat(
+					expectedData?.tickets?.valuesAtCreation ?? inputValuesAtCreation);
+
+				if (isEqual(updateData[0], valuesAtCreationToTicketFormat(ticketData.valuesAtCreation))
+					|| (success && isEqual(updateData[0], expectedInputTicketFormat))) {
+					return Promise.resolve([{ newTicket: expectedValidatedTicketFormat }]);
+				}
 				return Promise.reject(createResponseCode(templates.invalidArguments, 'Ticket values at creation do not match expected format'));
 			});
 
@@ -335,33 +382,23 @@ const testValidateUpdatePlanData = () => {
 			value: generateRandomString(),
 		})),
 	];
-	const expectedTicketFormat = {};
-	expectedValueAtCreationUpdate.forEach(({ property, module, value }) => {
-		const moduleName = module ?? 'properties';
+	const expectedTicketFormat = valuesAtCreationToTicketFormat(expectedValueAtCreationUpdate);
 
-		if (moduleName === 'properties') {
-			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
-			expectedTicketFormat.properties[property] = value;
-		} else {
-			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
-			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
-			expectedTicketFormat.modules[moduleName][property] = value;
-		}
-	});
+	const oldTicketFormat = valuesAtCreationToTicketFormat(ticketData.valuesAtCreation);
 
-	const oldTicketFormat = {};
-	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
-		const moduleName = module ?? 'properties';
-
-		if (moduleName === 'properties') {
-			oldTicketFormat.properties = oldTicketFormat.properties ?? {};
-			oldTicketFormat.properties[property] = value;
-		} else {
-			oldTicketFormat.modules = oldTicketFormat.modules ?? {};
-			oldTicketFormat.modules[moduleName] = oldTicketFormat.modules[moduleName] ?? {};
-			oldTicketFormat.modules[moduleName][property] = value;
-		}
-	});
+	const dateProperty = generateRandomString();
+	const moduleName = generateRandomString();
+	const moduleDateProperty = generateRandomString();
+	const dateValue = generateRandomDate();
+	const moduleDateValue = generateRandomDate();
+	const expectedDateValueAtCreationUpdate = [
+		{ property: dateProperty, value: dateValue.getTime() },
+		{ property: moduleDateProperty, module: moduleName, value: moduleDateValue.getTime() },
+	];
+	const expectedDateValueAtCreationUpdateResult = [
+		{ property: dateProperty, value: dateValue },
+		{ property: moduleDateProperty, module: moduleName, value: moduleDateValue },
+	];
 
 	const updateStr = generateRandomString();
 
@@ -451,6 +488,7 @@ const testValidateUpdatePlanData = () => {
 		['with invalid creation values', false, { tickets: { valuesAtCreation: [{ property: generateRandomString(), value: generateRandomString() }] } }],
 		['with same creation values', false, { tickets: { valuesAtCreation: oldPlanData.tickets.valuesAtCreation } }],
 		['with new creation values', true, { tickets: { valuesAtCreation: expectedValueAtCreationUpdate } }],
+		['with new date creation values', true, { tickets: { valuesAtCreation: expectedDateValueAtCreationUpdate } }, { tickets: { valuesAtCreation: expectedDateValueAtCreationUpdateResult } }],
 	];
 
 	describe.each(testCases)('Validate update plan data', (desc, success, data, expectedData, planId = knownPlanId) => {
@@ -470,9 +508,19 @@ const testValidateUpdatePlanData = () => {
 							&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, pro, f, username) => Promise.resolve(knownUsernames.includes(username)));
-			TicketSchema.validateTickets.mockImplementation((t, pro, f, tem, updateData) => {
+			TicketSchema.validateTickets.mockImplementation((t, pro, f, tem, updateData, options) => {
+				expect(options).toEqual({ existingData: [{}], processValidatedData: false });
+				const inputValuesAtCreation = data?.tickets?.valuesAtCreation
+					?? oldPlanData.tickets.valuesAtCreation;
+				const expectedInputTicketFormat = valuesAtCreationToTicketFormat(inputValuesAtCreation);
+				const expectedValidatedTicketFormat = valuesAtCreationToTicketFormat(
+					expectedData?.tickets?.valuesAtCreation ?? inputValuesAtCreation);
+
 				if (isEqual(updateData[0], expectedTicketFormat)
-					|| isEqual(updateData[0], oldTicketFormat)) return Promise.resolve();
+					|| isEqual(updateData[0], oldTicketFormat)
+					|| (success && isEqual(updateData[0], expectedInputTicketFormat))) {
+					return Promise.resolve([{ newTicket: expectedValidatedTicketFormat }]);
+				}
 				return Promise.reject(createResponseCode(templates.invalidArguments,
 					'Ticket values at creation do not match expected format'));
 			});
@@ -597,6 +645,63 @@ const testPlanExists = () => {
 	});
 };
 
+const testClashRunInPlan = () => {
+	describe('Check if clash run is in plan', () => {
+		test('should respond with error if the run is not in the plan', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateUUID(),
+					planId: generateUUID(),
+					runId: generateUUID(),
+				},
+			};
+			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+
+			await Clashes.clashRunInPlan(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(
+				req.params.teamspace,
+				req.params.project,
+				{ _id: req.params.runId, 'plan._id': req.params.planId },
+				{ project: 0 },
+			);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashRunNotFound);
+		});
+
+		test('next() should be called if the run is in the plan', async () => {
+			const mockCB = jest.fn(() => {});
+			const run = generateRandomObject();
+			const req = {
+				params: {
+					teamspace: generateRandomString(),
+					project: generateUUID(),
+					planId: generateUUID(),
+					runId: generateUUID(),
+				},
+			};
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(run);
+
+			await Clashes.clashRunInPlan(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalled();
+			expect(req.outputData).toEqual(run);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(
+				req.params.teamspace,
+				req.params.project,
+				{ _id: req.params.runId, 'plan._id': req.params.planId },
+				{ project: 0 },
+			);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 const testPlanContainersHaveRevs = () => {
 	describe('planContainersHaveRevs', () => {
 		test('should assign latest revisions to selectionA and selectionB and call next()', async () => {
@@ -706,5 +811,6 @@ describe(determineTestGroup(__filename), () => {
 	testValidateNewPlanData();
 	testValidateUpdatePlanData();
 	testPlanExists();
+	testClashRunInPlan();
 	testPlanContainersHaveRevs();
 });

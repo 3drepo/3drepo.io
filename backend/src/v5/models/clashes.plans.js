@@ -77,6 +77,9 @@ ClashPlans.deletePlan = async (teamspace, project, planId) => {
 	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId, project });
 };
 
+ClashPlans.getAllPlansByProject = (teamspace, project, projection) => ClashPlans.getPlansByQuery(
+	teamspace, project, {}, projection);
+
 ClashPlans.deletePlansByProject = async (teamspace, project) => {
 	await db.deleteMany(teamspace, CLASH_PLANS_COL, { project });
 };
