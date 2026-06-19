@@ -5,6 +5,7 @@ on:
 permissions:
   contents: read
   issues: write
+  pull-requests: read
 jobs:
   get-details:
     name: Get Current Issue Details

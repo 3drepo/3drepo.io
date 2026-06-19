@@ -26,6 +26,7 @@ const CameraType = {
 	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective',
 };
+Validators.CameraType = CameraType;
 
 Validators.generateViewValidator = (isUpdate, required, isComment) => {
 	const imposeNullableRule = (val, optional) => {

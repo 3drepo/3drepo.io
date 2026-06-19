@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 const { generateRevisionEntry } = require('../../../../../../../../helper/services');
 
@@ -90,7 +91,7 @@ const testSerialiseRevision = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseRevisionArray();
 	testSerialiseRevision();
 });

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const config = require(`${src}/utils/config`);
@@ -228,7 +229,7 @@ const testSufficientQuota = () => {
 	});
 };
 
-describe('utils/quota', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();

@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup, fileExists, resetFileshare, db: { reset: resetDB }, generateRandomString } = require('../../helper/services');
+const { determineTestGroup } = require('../../helper/utils');
+const { fileExists, resetFileshare, db: { reset: resetDB }, generateRandomString } = require('../../helper/services');
 const { utilScripts, src } = require('../../helper/path');
 const { times } = require('lodash');
 

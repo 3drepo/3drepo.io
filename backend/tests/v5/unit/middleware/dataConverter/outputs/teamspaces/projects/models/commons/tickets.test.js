@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { cloneDeep, times, uniq } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateTemplate, generateTicket, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
@@ -479,7 +480,7 @@ const testSerialiseTicketHistory = () => {
 	);
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
 	testSerialiseTicketList();

@@ -34,7 +34,7 @@ interface ITeamspaceLayout {
 	className?: string;
 }
 
-export const TeamspaceLayout = ({ className }: ITeamspaceLayout): JSX.Element => {
+export const TeamspaceLayout = ({ className }: ITeamspaceLayout) => {
 	const { teamspace } = useParams<TeamspaceParams>();
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 

@@ -137,7 +137,9 @@ export class ExternalWebRequestHandler {
 			}
 
 			const data = await response.arrayBuffer();
-			this.writeCache(url, data);
+			if (cache) {
+				this.writeCache(url, data);
+			}
 			resolve(data);
 
 		}).catch((err) => {
@@ -218,5 +220,18 @@ export class ExternalWebRequestHandler {
 	 */
 	sendOnWebResponse(parms: any) {
 		this.unityInstance.SendMessage(this.gameObjectName, 'OnWebResponse', JSON.stringify(parms));
+	}
+
+	/**
+	 * Deletes all keys from the cache that contain the specified string. This
+	 * is typically used to delete all the records for a specific container.
+	 * A record will be left in the cache recording the version number this was
+	 * last called with. Only missing or higher versions will take effect.
+	 * @param contains The string to match against cache keys for invalidation.
+	 * @param version The cache version to record; only missing or higher versions take effect.
+	 * @returns A promise that resolves when the matching cache entries have been invalidated.
+	 */
+	invalidateCache(contains: string, version: number): Promise<void> {
+		return this.cache.delete(contains, version);
 	}
 }

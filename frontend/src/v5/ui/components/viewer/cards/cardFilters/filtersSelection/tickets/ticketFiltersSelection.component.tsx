@@ -48,7 +48,6 @@ const FullTriggerButton = ({ disabled }) => (
 	>
 		<FormattedMessage id="filterSelection.AddFilter" defaultMessage="Add filter" />
 	</Button>
-
 );
 
 
@@ -96,7 +95,7 @@ export const FilterSelection = () => {
 						<FilterForm
 							{...(selectedFilter || {} as any)}
 							onSubmit={setFilter}
-							onCancel={clearFilter}
+							onClickBack={clearFilter}
 						/>
 					</TicketsFiltersModalItem>
 				</TicketsFiltersModal>

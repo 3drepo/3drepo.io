@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomDate, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
@@ -172,7 +173,7 @@ const testLogUserUninvited = () => {
 	});
 };
 
-describe('models/teamspaces.audits', () => {
+describe(determineTestGroup(__filename), () => {
 	tesGetActionLog();
 	testLogSeatAllocated();
 	testLogSeatDeallocated();

@@ -68,7 +68,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 
 	const isolateCollection = (e) => {
 		e.stopPropagation();
-		const objects = overrides.flatMap((o) => convertToV4GroupNodes((o.group as Group).objects));
+		const objects = overrides.flatMap((o) => convertToV4GroupNodes(o.group as Group));
 		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 

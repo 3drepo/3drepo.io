@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { src, imagesFolder, modelFolder } = require('../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const { generateRandomString, determineTestGroup, generateRandomEmail } = require('../../../../../../../helper/services');
+const { generateRandomString, generateRandomEmail } = require('../../../../../../../helper/services');
 
 const config = require(`${src}/utils/config`);
 const { FileStorageTypes } = require(`${src}/utils/config.constants`);

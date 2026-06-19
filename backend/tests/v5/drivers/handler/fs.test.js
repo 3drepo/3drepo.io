@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { readFile, writeFile, access, rm, unlink } = require('fs/promises');
 const Path = require('path');
 
-const { determineTestGroup, generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/services');
 const { Readable } = require('stream');
 const { times, cloneDeep } = require('lodash');
 

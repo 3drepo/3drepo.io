@@ -106,6 +106,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
+		viewer.init();
 		MeasurementsActionsDispatchers.setMeasureSlopeUnits('Percentage');
 	}
 

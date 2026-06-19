@@ -25,6 +25,7 @@ import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
 import EventEmitter from 'eventemitter3';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { removeHiddenPropertiesFromTemplates } from './ticketsTemplates.helpers';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
@@ -100,13 +101,14 @@ export const upsertTicketsSuccess = (state: ITicketsState, { modelId, tickets }:
 export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
 	if (!state.templatesByModelId[modelId]) state.templatesByModelId[modelId] = [];
 
+	const [templateWithoutHiddenProperties] = removeHiddenPropertiesFromTemplates([template]);
 	const modelTemplate = state.templatesByModelId[modelId]
-		.find((loadedTemplate) => loadedTemplate._id === template._id);
+		.find((loadedTemplate) => loadedTemplate._id === templateWithoutHiddenProperties._id);
 
 	if (modelTemplate) {
-		mergeWithArray(modelTemplate, template);
+		mergeWithArray(modelTemplate, templateWithoutHiddenProperties);
 	} else {
-		state.templatesByModelId[modelId].push(template);
+		state.templatesByModelId[modelId].push(templateWithoutHiddenProperties);
 	}
 };
 
@@ -121,7 +123,7 @@ export const updateTicketGroupSuccess = (state: ITicketsState, { group }: Update
 };
 
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
-	state.templatesByModelId[modelId] = templates;
+	state.templatesByModelId[modelId] = removeHiddenPropertiesFromTemplates(templates);
 };
 
 export const fetchRiskCategoriesSuccess = (

@@ -7,6 +7,7 @@ on:
     types: [opened]
 permissions:
   issues: write
+  pull-requests: read
 jobs:
   add-to-project:
     name: Add issue/PR to project

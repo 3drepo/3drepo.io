@@ -19,17 +19,27 @@ const { isNumber } = require('./typeCheck');
 
 const UnitsHelper = {};
 
-const UNITS_CONVERSION_FACTORS_TO_METRES = {
-	m: 1,
-	dm: 10,
-	cm: 100,
-	mm: 1000,
-	ft: 3.28084,
+const units = {
+	M: 'm',
+	DM: 'dm',
+	CM: 'cm',
+	MM: 'mm',
+	FT: 'ft',
 };
 
+const unitsConversionFactorsToMetres = {
+	[units.M]: 1,
+	[units.DM]: 10,
+	[units.CM]: 100,
+	[units.MM]: 1000,
+	[units.FT]: 3.28084,
+};
+
+UnitsHelper.units = units;
+
 UnitsHelper.convertArrayUnits = (array, fromUnit, toUnit) => {
-	const fromFactor = UNITS_CONVERSION_FACTORS_TO_METRES[fromUnit];
-	const toFactor = UNITS_CONVERSION_FACTORS_TO_METRES[toUnit];
+	const fromFactor = unitsConversionFactorsToMetres[fromUnit];
+	const toFactor = unitsConversionFactorsToMetres[toUnit];
 	const scale = toFactor / fromFactor;
 
 	if (!array.every(isNumber) || !fromFactor || !toFactor) {

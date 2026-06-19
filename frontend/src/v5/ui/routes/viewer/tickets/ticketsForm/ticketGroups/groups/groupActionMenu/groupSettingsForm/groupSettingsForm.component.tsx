@@ -51,6 +51,7 @@ import {
 	ToggleWrapper,
 	Toggle,
 	FormRow,
+	ExcludeObjectsToggleWrapper,
 	Rules,
 	AddFilterTitle,
 	TriggerButton,
@@ -109,8 +110,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 
-
 	const formRef = useRef(null);
+	const isSmartRef = useRef(isSmart);
 
 	const isNewGroup = !value;
 	const selectedNodes = TreeHooksSelectors.selectSelectedNodes();
@@ -118,8 +119,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
-		resolver: yupResolver(GroupSettingsSchema),
-		context: { isSmart },
+		resolver: (data, _, options) => yupResolver(GroupSettingsSchema)(data, { isSmart: isSmartRef.current }, options),
 	});
 
 	const { fields, append, remove, update } = useFieldArray({
@@ -130,10 +130,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const {
 		handleSubmit,
-		formState: { errors, isValid, isDirty },
+		formState: { errors, isValid, isDirty, touchedFields },
 		setValue,
 		getValues,
+		trigger,
+		watch,
 	} = formData;
+	const excludeDefinedObjects = watch('group.excludeDefinedObjects');
 
 	const getFormIsValid = () => {
 		if (!isValid) return false;
@@ -195,6 +198,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		resetFilterMenu();
 	};
 
+	const toggleExcludeDefinedObjects = () => {
+		if (!isAdmin) return;
+		setValue('group.excludeDefinedObjects', !getValues('group.excludeDefinedObjects'), {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
@@ -214,7 +225,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
-		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
+		setInputObjects(convertToV4GroupNodes({ objects: value?.group?.objects } as Group));
 		setIsPastingRules(false);
 		setNewPrefix([]);
 	}, [value, isColored]);
@@ -230,6 +241,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		});
 	}, []);
 
+	useEffect(() => {
+		// isSmartRef is used to get the current value of isSmart in the
+		// resolver function of useForm, as it doesn't have access to the state value directly
+		isSmartRef.current = isSmart;
+		const touched = Object.keys(touchedFields) as Parameters<typeof trigger>[0];
+		if (touched.length) trigger(touched);
+	}, [isSmart]);
 
 	useEffect(() => {
 		setCurrentPrefixes(mergePrefixes(prefixes, subPrefixes(newPrefix)));
@@ -335,9 +353,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				</Subheading>
 				<FormBox>
 					<ToggleWrapper>
-						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
-							<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
-						</ToggleLabel>
 						<Toggle
 							value={isSmart}
 							onClick={() => setIsSmart((prev) => !prev)}
@@ -363,6 +378,19 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							/>
 						</Instruction>
 					)}
+					<ExcludeObjectsToggleWrapper>
+						<Toggle
+							value={excludeDefinedObjects}
+							onClick={toggleExcludeDefinedObjects}
+							disabled={!isAdmin}
+						/>
+						<ToggleLabel disabled={!isAdmin} onClick={toggleExcludeDefinedObjects}>
+							<FormattedMessage
+								id="ticketsGroupSettings.form.excludeDefinedObjects"
+								defaultMessage="Exclude specified objects"
+							/>
+						</ToggleLabel>
+					</ExcludeObjectsToggleWrapper>
 				</FormBox>
 				{!isSmart && (
 					<Subheading>

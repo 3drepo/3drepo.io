@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/services');
 
 const { session } = require(`${src}/services/sessions`);
 const { disconnect } = require(`${src}/handler/db`);

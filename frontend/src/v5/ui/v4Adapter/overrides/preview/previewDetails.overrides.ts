@@ -20,7 +20,6 @@ import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/compon
 import { Container, Header, TitleNumber, Grid, Details as Accordion, StyledForm } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
 
 export default css`
 	${Accordion} {
@@ -161,9 +160,6 @@ export default css`
 				${Details} {
 					align-items: flex-end;
 					
-					${UserIndicator} {
-						margin-bottom: 4px;
-					}
 				}
 			}
 		}

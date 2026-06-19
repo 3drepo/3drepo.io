@@ -48,7 +48,7 @@ export const SidebarForm = () => {
 	const hasAdministratorErrors =  FieldsForProjectAdministrators.some((field) => has(errors, `${revisionPrefix}.${field}`));
 
 	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
-	const hideBottomExtentError = getError('calibration.verticalRange')?.some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	const hideBottomExtentError = (getError('calibration.verticalRange') as any)?.some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 	watchVerticalRange(formData, revisionPrefix + '.');
 
 	if (!fetched && drawingId) return <Loader />;

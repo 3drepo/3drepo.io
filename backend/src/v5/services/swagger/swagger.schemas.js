@@ -81,6 +81,7 @@ const ticketTemplatePropSchema = {
 			deprecated: helpers.boolDef('Denotes if this prop is no longer in use', false),
 			immutable: helpers.boolDef('Denotes if this prop is immutable', false),
 			readOnlyOnUI: helpers.boolDef('Denotes if this prop can be edited from the UI', false),
+			hiddenOnUI: helpers.boolDef('Denotes if this prop should be hidden from the UI', false),
 			unique: helpers.boolDef('Denotes if the value of this prop should be unique among tickets of the same type in the model', false),
 			required: helpers.boolDef('If this prop is required (default: false)', true),
 			values: helpers.arrayDef(`list of possible values (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
@@ -300,6 +301,11 @@ Schemas.schemas.ticketGroup = {
 			type: 'string',
 			description: 'Description of the group',
 			example: 'All facades on level 1',
+		},
+		excludeDefinedObjects: {
+			type: 'boolean',
+			description: 'Whether this group represents all objects except the defined objects',
+			example: true,
 		},
 		rules: Schemas.schemas.ticketGroupRules,
 		objects: {

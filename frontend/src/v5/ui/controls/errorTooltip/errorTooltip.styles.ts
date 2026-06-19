@@ -22,6 +22,8 @@ export const Container = styled.div`
 	height: 15px;
 `;
 
+// TODO issue 5588 these styles have been broken since the previous updgrade of material ui
+/*
 export const Tooltip = styled(TooltipComponent).attrs(({ theme }: any) => ({
 	popper: {
 		width: 180,
@@ -39,6 +41,8 @@ export const Tooltip = styled(TooltipComponent).attrs(({ theme }: any) => ({
 		margin: '-17px 0px 0 -1px',
 	},
 }))``;
+*/
+export const Tooltip = styled(TooltipComponent)``;
 
 export const IconWrapper = styled.div`
 	height: max-content;

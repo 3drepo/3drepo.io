@@ -42,7 +42,6 @@ export const GroupBySelect = () => {
 			onChange={(e) => setGroupBy(e.target.value)}
 			value={groupBy}
 			label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'Group by:' })}
-			placeholder='none'
 			renderValue={(value: string) => (<b>{value === NONE_OPTION ? NONE_OPTION_MESSAGE : getPropertyLabel(value)}</b>)}
 		>
 			<MenuItem value={NONE_OPTION}>{NONE_OPTION_MESSAGE}</MenuItem>

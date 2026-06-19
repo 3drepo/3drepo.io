@@ -78,6 +78,17 @@ describe('Containers: store', () => {
 			expect(containerFromState.type).toEqual(stats.type);
 		});
 
+		it('should bulk fetch containers\' stats', () => {
+			const mockContainers = times(3, () => containerMockFactory());
+			dispatch(ContainersActions.fetchContainersSuccess(projectId, mockContainers));
+			const stats = times(3, (index) => ({ ...prepareMockStats(), modelId: mockContainers[index]._id }));
+			dispatch(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
+			const containerFromState = selectContainerById(getState(), mockContainers[0]._id);
+			expect(containerFromState.code).toEqual(stats[0].code);
+			expect(containerFromState.status).toEqual(stats[0].status);
+			expect(containerFromState.type).toEqual(stats[0].type);
+		});
+
 		it('should update container status', () => {
 			const newStatus = UploadStatus.OK;
 			const newContainer = createAndAddContainerToStore({ status: UploadStatus.GENERATING_BUNDLES });

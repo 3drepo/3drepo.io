@@ -16,11 +16,11 @@
  */
 
 import { DialogContainer } from '@/v4/routes/components/dialogContainer';
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { V4DialogsOverridesContainer } from './dialogs/v4DialogsOverrides.styles';
 import { V4OverridesContainer } from './v4Overrides.styles';
 import { SnackbarHandler } from '@components/shared/snackbarHandler/snackbarHandler.component';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">

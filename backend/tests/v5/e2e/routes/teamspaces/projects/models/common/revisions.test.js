@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
@@ -192,14 +193,12 @@ const testGetRevisions = (isInternal = false) => {
 
 		const generateTestData = (modelType) => {
 			let model;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
@@ -283,18 +282,16 @@ const testCreateNewRevision = (internal = false) => {
 			let model;
 			let modelWithNoRev;
 			let modelWithNoRev2;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				modelWithNoRev = models.conWithNoRev;
 
 				modelWithNoRev2 = models.conWithNoRev2;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				modelWithNoRev = models.drawWithNoRev;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const generateParams = () => deleteIfUndefined({
@@ -431,18 +428,16 @@ const testUpdateRevisionStatus = () => {
 			let model;
 			let nonVoidrevision;
 			let voidRevision;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				nonVoidrevision = conRevisions.nonVoidRevision;
 				voidRevision = conRevisions.voidRevision;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				nonVoidrevision = drawRevisions.nonVoidRevision;
 				voidRevision = drawRevisions.voidRevision;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
@@ -515,20 +510,18 @@ const testDownloadRevisionFiles = () => {
 			let revision;
 			let noFileRevision;
 			let voidRevision;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				revision = conRevisions.nonVoidRevision;
 				noFileRevision = conRevisions.noFileRevision;
 				voidRevision = conRevisions.voidRevision;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				revision = drawRevisions.nonVoidRevision;
 				noFileRevision = drawRevisions.noFileRevision;
 				voidRevision = drawRevisions.voidRevision;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
@@ -618,8 +611,8 @@ const testGetRevisionMD5Hash = () => {
 				['the user is viewer.', { ...params, key: users.viewer.apiKey }, true],
 				['the user is commenter.', { ...params, key: users.commenter.apiKey }, true],
 				['the project does not exist.', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.containerNotFound],
-				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.containerNotFound],
+				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.modelNotFound],
+				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.modelNotFound],
 				['the revision does not exist.', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
 				['the revision has a file.', params, true],
 				['the revision has a file (void revision).', { ...params, revision: voidRevision }, false, templates.revisionNotFound],
@@ -658,7 +651,7 @@ const testGetImage = () => {
 			const model = models.drawWithRev;
 			const revision = drawRevisions.nonVoidRevision;
 			const { noFileRevision } = drawRevisions;
-			const modelNotFound = templates.drawingNotFound;
+			const { modelNotFound } = templates;
 
 			const params = {
 				key: users.tsAdmin.apiKey,
@@ -704,7 +697,7 @@ const testGetImage = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 

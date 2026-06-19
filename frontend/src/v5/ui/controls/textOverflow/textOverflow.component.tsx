@@ -29,7 +29,7 @@ interface ITextOverflow {
 	className?: string;
 }
 
-export const TextOverflow = ({ children, className, tooltipText, lines }: ITextOverflow): JSX.Element => {
+export const TextOverflow = ({ children, className, tooltipText, lines }: ITextOverflow) => {
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 

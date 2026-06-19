@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const {
-	determineTestGroup,
 	resetFileshare,
 	db: { reset: resetDB, createTeamspace, createUser,
 		createProject, createModel, createTemplates, createTicket },

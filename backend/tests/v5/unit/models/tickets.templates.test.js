@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUID } = require('../../helper/services');
@@ -267,7 +268,7 @@ const testDeprecateTemplate = () => {
 	});
 };
 
-describe('models/tickets.templates', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetTemplateByName();
 	testGetTemplateById();
 	testGetTemplateByCode();

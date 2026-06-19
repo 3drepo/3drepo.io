@@ -18,7 +18,7 @@
 const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getRevisionByIdOrTag, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 
 const BundleAssets = require('./commons/assets/bundles');
 const Comments = require('./commons/tickets.comments');
@@ -54,38 +54,9 @@ Containers.getContainerList = async (teamspace, project, user, bypassPerms) => {
 };
 
 Containers.getContainerStats = async (teamspace, project, container) => {
-	let latestRev = {};
-	const [settings, revCount] = await Promise.all([
-		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1, errorReason: 1 }),
-		getRevisionCount(teamspace, container),
-	]);
+	const stats = await Containers.getMultipleContainersStats(teamspace, project, [container]);
 
-	try {
-		latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { tag: 1, timestamp: 1 });
-	} catch {
-		// do nothing. A container can have 0 revision.
-	}
-
-	const stats = {
-		type: settings.type,
-		code: settings.properties.code,
-		status: settings.status,
-		unit: settings.properties.unit,
-		revisions: {
-			total: revCount,
-			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || timestampToString(latestRev.timestamp?.getTime()),
-		},
-	};
-
-	if (settings.status === 'failed' && settings.errorReason) {
-		stats.errorReason = {
-			message: settings.errorReason.message,
-			timestamp: settings.errorReason.timestamp,
-		};
-	}
-
-	return stats;
+	return stats[container];
 };
 
 Containers.getRevisions = async (teamspace, project, container, showVoid) => {
@@ -146,5 +117,38 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
+
+Containers.getMultipleContainersStats = async (teamspace, project, containers) => {
+	const stats = {};
+
+	const settings = await getContainers(
+		teamspace, containers, { _id: 1, name: 1, type: 1, properties: 1, status: 1, errorReason: 1 });
+
+	await Promise.all(settings.map(async (setting) => {
+		const revs = await getRevisions(teamspace, project, setting._id, modelTypes.CONTAINER, false,
+			{ _id: 1, tag: 1, timestamp: 1 }, { timestamp: -1 });
+
+		stats[setting._id] = {
+			type: setting.type,
+			code: setting.properties.code,
+			status: setting.status,
+			unit: setting.properties.unit,
+			revisions: {
+				total: revs.length,
+				lastUpdated: revs[0]?.timestamp,
+				latestRevision: revs[0]?.tag || timestampToString(revs[0]?.timestamp?.getTime()),
+			},
+		};
+
+		if (setting.status === 'failed' && setting.errorReason) {
+			stats[setting._id].errorReason = {
+				message: setting.errorReason.message,
+				timestamp: setting.errorReason.timestamp,
+			};
+		}
+	}));
+
+	return stats;
+};
 
 module.exports = Containers;

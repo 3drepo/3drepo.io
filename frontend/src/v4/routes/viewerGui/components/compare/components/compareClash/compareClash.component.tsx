@@ -25,18 +25,18 @@ import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareClash.styles';
 
 interface IProps {
-	className: string;
-	selectedItemsMap: any[];
-	selectedFilters: any[];
-	compareModels: any[];
-	isAllSelected: boolean;
-	targetModels: any;
-	renderComparisonLoader: () => void;
-	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
-	setComponentState: (state) => void;
-	setTargetRevision: (modelId, targetRevision, isDiff) => void;
-	handleAllItemsSelect: () => void;
-	handleItemSelect: (modelProps) => (event, selected) => void;
+	className?: string;
+	selectedItemsMap?: any[];
+	selectedFilters?: any[];
+	compareModels?: any[];
+	isAllSelected?: boolean;
+	targetModels?: any;
+	renderComparisonLoader?: () => any;
+	setTargetModel?: (modelId, isTarget, isTypeChange?) => void;
+	setComponentState?: (state) => void;
+	setTargetRevision?: (modelId, targetRevision, isDiff) => void;
+	handleAllItemsSelect?: (...args) => void;
+	handleItemSelect?: (...args) => (event, selected) => void;
 }
 
 export class CompareClash extends PureComponent<IProps, any> {

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
 const { generateRandomString } = require('../../../../../helper/services');
@@ -494,7 +495,7 @@ const testValidateGetAuditLogParams = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateNewTicketSchema();
 	testValidateUpdateTicketSchema();
 	testCheckTicketTemplateExists();

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 
@@ -137,7 +138,7 @@ const testValidateUpdateComment = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.comments', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateNewComment();
 	testValidateUpdateComment();
 });

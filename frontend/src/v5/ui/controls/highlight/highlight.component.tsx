@@ -25,7 +25,7 @@ interface IHighlight {
 
 const HighlightTag = (props) => <Tag {...props} />;
 
-export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
+export const Highlight = ({ search, children = '' }: IHighlight) => (
 	<Highlighter
 		searchWords={isArray(search) ? search.map(trim) : [trim(search)]}
 		autoEscape

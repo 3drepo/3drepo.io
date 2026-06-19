@@ -25,7 +25,7 @@ interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
 }
 
-export const RevisionsListItemAuthor = ({ authorName, ...containerProps }: IRevisionsListItemAuthor): JSX.Element => {
+export const RevisionsListItemAuthor = ({ authorName, ...containerProps }: IRevisionsListItemAuthor) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const author: IUser = UsersHooksSelectors.selectUser(teamspace, authorName);
 	const authorFullName = [author.firstName, author.lastName].join(' ');

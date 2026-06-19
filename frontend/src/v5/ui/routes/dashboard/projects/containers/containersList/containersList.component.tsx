@@ -60,7 +60,7 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-}: IContainersList): JSX.Element => {
+}: IContainersList) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);

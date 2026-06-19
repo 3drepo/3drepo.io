@@ -71,7 +71,7 @@ export const UploadListItemDestination = memo(({
 	name,
 	inputRef,
 	...props
-}: IUploadListItemDestination): JSX.Element => {
+}: IUploadListItemDestination) => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const { getValues, setValue, setError, clearErrors } = useFormContext();
 

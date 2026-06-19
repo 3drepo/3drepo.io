@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { calibrationStatuses } = require('../../../../../../../../../../src/v5/models/calibrations.constants');
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

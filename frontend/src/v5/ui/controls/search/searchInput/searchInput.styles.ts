@@ -51,7 +51,7 @@ export const TextField = styled(BaseTextField)`
 	}
 `;
 
-export const StartAdornment = styled(BaseInputAdornment).attrs({
+export const StartAdornment = styled(BaseInputAdornment as any).attrs({
 	position: 'start',
 })`
 	margin-right: 0;
@@ -60,7 +60,7 @@ export const StartAdornment = styled(BaseInputAdornment).attrs({
 	}
 `;
 
-export const EndAdornment = styled(BaseInputAdornment).attrs({
+export const EndAdornment = styled(BaseInputAdornment as any).attrs({
 	position: 'end',
 })<{ $isVisible?: boolean }>`
 	${({ $isVisible }) => !$isVisible && css`

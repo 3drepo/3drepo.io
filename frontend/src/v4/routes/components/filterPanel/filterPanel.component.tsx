@@ -194,7 +194,17 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			<ButtonContainer>
 				<ButtonMenu
 					renderButton={FilterButton}
-					renderContent={this.renderFiltersMenu}
+					renderContent={() => (
+						<FiltersMenu
+							items={this.props.filters}
+							selectedItems={this.state.selectedFilters}
+							onToggleFilter={this.onToggleFilter}
+							onToggleDataType={this.onToggleDataType}
+							left={this.props.left}
+							dataTypes={this.props.dataTypes}
+							selectedDataTypes={this.state.selectedDataTypes}
+						/>)
+					}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={popoverProps}
 					ButtonProps={{ disabled: false }}
@@ -233,18 +243,6 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			);
 		}
 	}
-
-	public renderFiltersMenu = () => (
-		<FiltersMenu
-			items={this.props.filters}
-			selectedItems={this.state.selectedFilters}
-			onToggleFilter={this.onToggleFilter}
-			onToggleDataType={this.onToggleDataType}
-			left={this.props.left}
-			dataTypes={this.props.dataTypes}
-			selectedDataTypes={this.state.selectedDataTypes}
-		/>
-	)
 
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({

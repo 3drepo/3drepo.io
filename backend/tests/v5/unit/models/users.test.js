@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const { cloneDeep, times } = require('lodash');
@@ -25,7 +26,7 @@ const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';

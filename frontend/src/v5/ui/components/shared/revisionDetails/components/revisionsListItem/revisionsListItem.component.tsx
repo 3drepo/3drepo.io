@@ -39,7 +39,7 @@ export const RevisionsListItem = ({
 	onDownloadRevision,
 	children,
 	target,
-}: IRevisionsListItem): JSX.Element => {
+}: IRevisionsListItem) => {
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
 		e.stopPropagation();

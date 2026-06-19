@@ -124,6 +124,10 @@ export const ToggleWrapper = styled.div`
 	display: flex;
 `;
 
+export const ExcludeObjectsToggleWrapper = styled(ToggleWrapper)`
+	margin-top: 10px;
+`;
+
 export const Rules = styled.div`
 	display: flex;
 	flex-direction: row;

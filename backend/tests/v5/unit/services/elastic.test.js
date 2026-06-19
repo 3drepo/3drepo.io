@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src, srcV4 } = require('../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../helper/services');
 
 jest.mock('../../../../src/v4/handler/elastic');
 const { createElasticRecord } = require(`${srcV4}/handler/elastic`);

@@ -28,7 +28,7 @@ type IUploadProgress = {
 	statusText: string;
 };
 
-export const UploadProgress = ({ errorMessage, progress, uploadCompleted, uploadStatus, statusText }: IUploadProgress): JSX.Element => (
+export const UploadProgress = ({ errorMessage, progress, uploadCompleted, uploadStatus, statusText }: IUploadProgress) => (
 	<Container>
 		<StatusText uploadstatus={uploadStatus}>
 			{statusText}

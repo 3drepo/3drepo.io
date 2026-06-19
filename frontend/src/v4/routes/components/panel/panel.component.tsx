@@ -17,6 +17,7 @@
 
 import { pick } from 'lodash';
 
+import { JSX } from 'react';
 import { Container, Content, ContentWrapper, Title } from './panel.styles';
 
 interface IProps {

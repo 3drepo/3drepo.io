@@ -22,6 +22,18 @@ import { CALIBRATION_SORT_ORDER } from '@/v5/ui/routes/dashboard/projects/calibr
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { get, isArray } from 'lodash';
 
+const sortLoadingItemsToEnd = (sortRest) => (a, b) => {
+	if (a.hasOwnProperty('hasStatsPending') && b.hasOwnProperty('hasStatsPending') && a.hasStatsPending !== b.hasStatsPending) {
+		if (a.hasStatsPending) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
+	return sortRest(a, b);
+};
+
 export const getSortingFunction = <T>(sortConfig) => {
 	const { column, direction } = sortConfig;
 
@@ -35,8 +47,6 @@ export const getSortingFunction = <T>(sortConfig) => {
 			aValue = aValue || now;
 			bValue = bValue || now;
 		}
-
-
 
 		if (!aValue && !bValue) {
 			return 0;
@@ -82,5 +92,7 @@ export const getSortingFunction = <T>(sortConfig) => {
 		return 0;
 	};
 
-	return  direction[0] === SortingDirection.ASCENDING ? sortingFunction : (a: T, b: T) => sortingFunction(b, a);
+	return direction[0] === SortingDirection.ASCENDING ? 
+		sortLoadingItemsToEnd(sortingFunction) :
+		sortLoadingItemsToEnd((a: T, b: T) => sortingFunction(b, a));
 };

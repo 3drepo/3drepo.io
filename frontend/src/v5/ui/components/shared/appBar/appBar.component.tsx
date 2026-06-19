@@ -23,7 +23,7 @@ import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.com
 import { Notifications } from './notifications/notifications.component';
 import { Intercom } from './intercom/intercom.component';
 
-export const AppBar = (): JSX.Element => {
+export const AppBar = () => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 

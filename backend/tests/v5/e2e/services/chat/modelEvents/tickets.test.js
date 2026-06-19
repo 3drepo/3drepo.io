@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
@@ -1062,7 +1063,7 @@ const groupUpdatedTest = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {

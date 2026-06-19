@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
@@ -212,14 +213,14 @@ const testNewRevision = () => {
 
 		test('should fail if the federation does not exist', async () => {
 			const res = await agent.post(`${route(teamspace, project.id, 'sdlfkds')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
+				.expect(templates.modelNotFound.status);
+			expect(res.body.code).toEqual(templates.modelNotFound.code);
 		});
 
 		test('should fail if the federation is actually a container', async () => {
 			const res = await agent.post(`${route(teamspace, project.id, container._id)}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
+				.expect(templates.modelNotFound.status);
+			expect(res.body.code).toEqual(templates.modelNotFound.code);
 		});
 		test('should succeed if correct parameters are sent', async () => {
 			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
@@ -264,7 +265,7 @@ const testNewRevision = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

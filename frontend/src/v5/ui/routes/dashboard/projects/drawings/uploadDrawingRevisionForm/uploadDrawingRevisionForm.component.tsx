@@ -86,7 +86,7 @@ export const UploadDrawingRevisionForm = ({
 	presetFile,
 	open,
 	onClickClose,
-}: IUploadDrawingRevisionForm): JSX.Element => {
+}: IUploadDrawingRevisionForm) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();

@@ -38,6 +38,7 @@ export class IndexedDbCacheWorker {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
 		this.numReadTransactions = 0;
+		this.committing = false;
 		this.createIndexedDbCache();
 
 		// Check at low frequency if there is anything going on, and if not try
@@ -76,47 +77,72 @@ export class IndexedDbCacheWorker {
 	 * avoiding expensive database transactions. */
 	index: any;
 
+	/** A promise holding the state of the database. If a method requires the
+	 * database to be open before proceeding, it can await this promise. */
+	open!: Promise<void>;
+
 	createIndexedDbCache() {
-		const request = indexedDB.open('3DRepoCacheDb', 2);
+		this.open = new Promise<void>((resolve, reject) => {
+			const request = indexedDB.open('3DRepoCacheDb', 2);
 
-		request.onerror = () => {
-			console.error('Unable to open IndexedDb - Model Caching will be Disabled.');
-			this.sendIndexedDbUpdated({
-				state: 'Disabled',
-			});
-		};
-
-		// When onupgradeneeded completes successfully, onsuccess will be called
-		request.onupgradeneeded = (event: any) => {
-			const db = event.target.result;
-			if (event.oldVersion == 1) {
-				db.deleteObjectStore(this.objectStoreName); // Existing keys from version 1 are the wrong types (UInt8Array, whereas we now expect them to be ArrayBuffers)
-			}
-			db.createObjectStore(this.objectStoreName, {}); // The database uses a simple key-pair assocation, where the key is passed explicitly
-		};
-
-		request.onsuccess = (event: any) => {
-			this.db = event.target.result;
-
-			// Populate our index
-			const transaction = this.db.transaction(this.objectStoreName, 'readonly');
-			const objectStore = transaction.objectStore(this.objectStoreName);
-			const req = objectStore.getAllKeys();
-			req.onsuccess = () => {
+			request.onerror = () => {
 				this.index = {};
-				req.result.forEach((x) => { this.index[x] = 1; }); // Give any value here - we will only check the existence of the key (property)
 				this.sendIndexedDbUpdated({
-					state: 'Open',
+					state: 'Disabled',
 				});
+				reject('Unable to open IndexedDb - Model Caching will be Disabled.');
 			};
 
-			this.db.onerror = (error: any) => {
-				console.error(`IndexedDbCache error has bubbled to db. This should not happen as all errors should be handled within request error handlers: ${error}`);
+			// When onupgradeneeded completes successfully, onsuccess will be called
+			request.onupgradeneeded = (event: any) => {
+				const db = event.target.result;
+				if (event.oldVersion == 1) {
+					db.deleteObjectStore(this.objectStoreName); // Existing keys from version 1 are the wrong types (UInt8Array, whereas we now expect them to be ArrayBuffers)
+				}
+				db.createObjectStore(this.objectStoreName, {}); // The database uses a simple key-pair assocation, where the key is passed explicitly
 			};
-			this.db.onversionchange = () => {
-				this.db.close();
+
+			request.onsuccess = (event: any) => {
+				this.db = event.target.result;
+
+				// Populate our index
+				const transaction = this.db.transaction(this.objectStoreName, 'readonly');
+				const objectStore = transaction.objectStore(this.objectStoreName);
+				const req = objectStore.getAllKeys();
+				req.onsuccess = () => {
+					this.index = {};
+					req.result.forEach((x: any) => { this.index[x] = 1; }); // Give any value here - we will only check the existence of the key (property)
+
+					// By convention, if a key is prepended with an underscore,
+					// it indicates that the record should be read into index in
+					// full.
+					for (const key of Object.keys(this.index)) {
+						if (key.startsWith('_')) {
+							const readRequest = objectStore.get(key);
+							readRequest.onsuccess = () => {
+								this.index[key] = readRequest.result;
+							};
+						}
+					}
+				};
+
+				transaction.oncomplete = () => {
+					this.sendIndexedDbUpdated({
+						state: 'Open',
+					});
+					resolve();
+				};
+
+				this.db.onerror = (error: any) => {
+					console.error(`IndexedDbCache error has bubbled to db. This should not happen as all errors should be handled within request error handlers: ${error}`);
+					reject(error);
+				};
+
+				this.db.onversionchange = () => {
+					this.db.close();
+				};
 			};
-		};
+		});
 	}
 
 	recreateIndexedDb() {
@@ -234,6 +260,13 @@ export class IndexedDbCacheWorker {
 		});
 	}
 
+	sendDeleteTransactionComplete(parms: any) {
+		self.postMessage({
+			type: 'OnDeleteTransactionComplete',
+			parms,
+		});
+	}
+
 	// A version of sendGetTransactionComplete that uses the transferable objects
 	// override to transfer the data ArrayBuffer, rather then perform a deep copy.
 	// Only use this when no more references to the ArrayBuffer will exist in the
@@ -292,8 +325,10 @@ export class IndexedDbCacheWorker {
 				const record = this.memoryCache[key];
 				const request = objectStore.put(record, key);
 				request.onsuccess = () => {
-					delete this.memoryCache[key]; // Delete the local copy
-					this.index[key] = 1; // Update the index as we go
+					if (this.memoryCache[key]) { // If the key has been removed since the write began, don't update the index
+						delete this.memoryCache[key]; // Delete the local copy
+						this.index[key] = 1; // Update the index as we go
+					}
 				};
 			}
 
@@ -351,6 +386,91 @@ export class IndexedDbCacheWorker {
 			};
 		}
 	}
+
+	createDeleteTransaction(id: number, contains: string, version: number) {
+		// This function deletes a key from the cache. The key is effectively
+		// deleted immediately as soon as this method returns.
+
+		// First check if we have anything to do - the invalidation should only
+		// take place if have a missing or out of date version of the literal.
+
+		const semaphoreKey = `_${contains}`;
+
+		if (this.index[semaphoreKey] && this.index[semaphoreKey] >= version) {
+			this.sendDeleteTransactionComplete({
+				id,
+			});
+			return;
+		}
+
+		// Remove from memory cache first, so we don't try to commit it later.
+
+		Object.keys(this.memoryCache).forEach((key) => {
+			if (key.includes(contains)) {
+				delete this.memoryCache[key];
+			}
+		});
+
+		// Delete from our local index before creating any transactions.
+		// Indexeddb readwrite transactions complete in the order they are
+		// created (see: https://www.w3.org/TR/IndexedDB/#transaction-construct).
+		// However, our local index is not part of this and may be read during a
+		// transaction.
+		//
+		// Since all reads are first checked against the index, this effectively
+		// deletes the key from the point of view of any external callers, and
+		// means the caller can immediately try to access the cache again without
+		// getting a stale value, even before the promise resolves.
+
+		var keysToDelete: string[] = [];
+
+		Object.keys(this.index).forEach((key) => {
+			if (key.includes(contains)) { // This will also delete existing semaphores, which is intentional
+				delete this.index[key];
+				keysToDelete.push(key);
+			}
+		});
+
+		// If a key is being deleted, it is likely because it contains
+		// conflicting, so we set the durability to strict as we don't want any
+		// risk of it not being fully purged.
+
+		const transaction = this.db.transaction(this.objectStoreName, 'readwrite', {
+			durability: 'strict',
+		});
+
+		const objectStore = transaction.objectStore(this.objectStoreName);
+
+		for (const key of keysToDelete) {
+			objectStore.delete(key);
+		}
+
+		// As the penultimate step, update the index so we don't have to
+		// iterate again (in this session or the future). The semaphore is
+		// a key that holds the version. It is prefixed with an underscore
+		// so that the full value will be loaded into the index on startup,
+		// meaning we can perform the early reject above without accessing
+		// the database.
+
+		this.index[semaphoreKey] = version;
+		objectStore.put(version, semaphoreKey);
+
+		// Finally, wait for the transaction to complete (all the above
+		// requests to succeed) before resolving.
+
+		transaction.oncomplete = () => {
+			this.sendDeleteTransactionComplete({
+				id,
+			});
+		};
+
+		transaction.onabort = (ev) => {
+			this.sendDeleteTransactionComplete({
+				id,
+			});
+			console.error(`Failed to perform cache invalidation transaction: ${ev.currentTarget.error}`);
+		};
+	}
 }
 
 onmessage = (e) => {
@@ -365,6 +485,19 @@ onmessage = (e) => {
 
 	if (e.data.message === 'Get') {
 		const { key, id } = e.data;
-		self.repoCache.createGetTransaction(id, key);
+		self.repoCache.open.then(() => {
+			self.repoCache.createGetTransaction(id, key);
+		}).catch(() => {
+			self.repoCache.sendGetTransactionComplete({ id, data: undefined });
+		});
+	}
+
+	if (e.data.message === 'Delete') {
+		const { contains, version, id } = e.data;
+		self.repoCache.open.then(() => {
+			self.repoCache.createDeleteTransaction(id, contains, version);
+		}).catch(() => {
+			self.repoCache.sendDeleteTransactionComplete({ id });
+		});
 	}
 };

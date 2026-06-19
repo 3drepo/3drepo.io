@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
 const DateHelper = require(`${src}/utils/helper/dates`);
@@ -33,6 +34,6 @@ const testTimestampToString = () => {
 	});
 };
 
-describe('utils/helper/dates', () => {
+describe(determineTestGroup(__filename), () => {
 	testTimestampToString();
 });

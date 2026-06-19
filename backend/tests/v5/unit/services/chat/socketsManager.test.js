@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const _ = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
@@ -480,7 +481,7 @@ const testResetSocketsBySessionIds = () => {
 	});
 };
 
-describe('services/chat/socketsManager', () => {
+describe(determineTestGroup(__filename), () => {
 	testSocketsCollection();
 	testSocketsEvents();
 	testResetSocketsBySessionIds();

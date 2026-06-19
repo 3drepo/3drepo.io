@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/formModal/formModal.component';
@@ -22,7 +22,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { DialogsActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isFileFormatUnsupported, projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported, projectAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { TextField } from '@controls/inputs/textField/textField.component';
@@ -60,7 +60,6 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		formState: { errors, isSubmitting },
 		handleSubmit,
 		getValues,
-		trigger,
 	} = formData;
 
 	const onSubmissionError = ({ error, projectId }) => {
@@ -81,7 +80,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 						with processing the image. To add a different image, please visit {breakLine}
 						the project page and choose a file in a supported format.
 					`,
-				}, { breakLine: <br /> }),
+				}, { breakLine: <br /> }) as React.ReactNode,
 				secondaryButtonLabel: formatMessage({
 					id: 'project.creation.warning.imageNotSaved.openProject',
 					defaultMessage: 'Open Project',
@@ -111,9 +110,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		onClickClose();
 	};
 
-	useEffect(() => {
-		if (existingNames.length) trigger('name');
-	}, [errors, JSON.stringify(existingNames)]);
+	useExistingValuesTrigger('name', existingNames, formData);
 
 	return (
 		<FormProvider {...formData}>

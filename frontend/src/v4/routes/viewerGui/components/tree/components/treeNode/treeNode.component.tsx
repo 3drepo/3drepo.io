@@ -180,12 +180,10 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style, key, active, hasFederationRoot, activeNodeIsVisible } = this.props;
-
+		const { expanded, isSearchResult, key, active, hasFederationRoot, activeNodeIsVisible } = this.props;
 		return (
 			<Tooltip title={this.node.name.trim()} placement="bottom">
 				<Container
-					style={style}
 					key={key}
 					nodeType={this.type}
 					expandable={this.node.expandable && !this.isModelRoot}

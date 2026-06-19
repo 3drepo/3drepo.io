@@ -34,6 +34,7 @@ import { UploadProgress } from '@components/shared/uploadFiles/uploadList/upload
 import { formatMessage } from '@/v5/services/intl';
 import { get } from 'lodash';
 import { uploadFile } from '@/v5/validation/shared/validators';
+import { MinFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -57,11 +58,7 @@ type IUploadListItem = {
 	index: number;
 	isSelected: boolean;
 	isUploading: boolean;
-	fileData: {
-		size: number;
-		name: string;
-		extension: string;
-	}
+	fileData: MinFileData;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 };
@@ -74,7 +71,7 @@ export const UploadListItem = ({
 	isSelected,
 	fileData,
 	isUploading,
-}: IUploadListItem): JSX.Element => {
+}: IUploadListItem) => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue, setError, formState: { errors } } = useFormContext();

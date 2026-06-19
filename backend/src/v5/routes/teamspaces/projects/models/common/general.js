@@ -16,15 +16,18 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
+const { formatModelSettings, formatModelStats, serialiseModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToContainers,
 	hasReadAccessToDrawing,
+	hasReadAccessToDrawings,
 	hasReadAccessToFederation,
+	hasReadAccessToFederations,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
@@ -228,6 +231,24 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
+const getModelStatsInBulk = (modelType) => async (req, res, next) => {
+	const { teamspace, project } = req.params;
+	const fn = {
+		[modelTypes.CONTAINER]: Containers.getMultipleContainersStats,
+		[modelTypes.DRAWING]: Drawings.getMultipleDrawingsStats,
+		[modelTypes.FEDERATION]: Federations.getMultipleFederationsStats,
+	};
+
+	try {
+		const stats = await fn[modelType](teamspace, project, req.models);
+		req.outputData = stats;
+		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -249,7 +270,112 @@ const establishRoutes = (modelType, isInternal) => {
 		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
 	};
 
+	const hasReadAccessToModels = {
+		[modelTypes.CONTAINER]: hasReadAccessToContainers,
+		[modelTypes.FEDERATION]: hasReadAccessToFederations,
+		[modelTypes.DRAWING]: hasReadAccessToDrawings,
+	};
+
 	if (!isInternal) {
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/stats:
+		 *   get:
+		 *     description: Get the statistics and general information about multiple models in bulk
+		 *     tags: [v:external, Models]
+		 *     operationId: getBulkModelStats
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum:
+		 *             - containers
+		 *             - federations
+		 *             - drawings
+		 *       - name: models
+		 *         description: List of model IDs to get stats for (comma separated)
+		 *         in: query
+		 *         schema:
+		 *           type: string
+		 *           example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
+		 *     responses:
+		 *       200:
+		 *         description: Returns the statistics of multiple models
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 stats:
+		 *                   type: array
+		 *                   items:
+		 *                     type: object
+		 *                     properties:
+		 *                       modelId:
+		 *                         type: string
+		 *                         description: Model ID
+		 *                         example: a54e8776-da7c-11ec-9d64-0242ac120002
+		 *                       code:
+		 *                         type: string
+		 *                         description: Model code
+		 *                         example: STR-01
+		 *                       status:
+		 *                         type: string
+		 *                         description: Current status of the model
+		 *                         example: ok
+		 *                       containers:
+		 *                         type: array
+		 *                         description: The IDs of the models the model consists of
+		 *                         items:
+		 *                           type: object
+		 *                           properties:
+		 *                             _id:
+		 *                               description: Container id
+		 *                               type: string
+		 *                               format: uuid
+		 *                             group:
+		 *                               description: Federation group the container is under (optional)
+		 *                               type: string
+		 *                               example: Architectural
+		 *                       tickets:
+		 *                         type: object
+		 *                         properties:
+		 *                           issues:
+		 *                             type: integer
+		 *                             description: The number of non-closed issues of the model
+		 *                           risks:
+		 *                             type: integer
+		 *                             description: The number of unmitigated risks of the model
+		 *                       desc:
+		 *                         type: string
+		 *                         description: Model description
+		 *                         example: Floor 1 MEP with Facade
+		 *                       lastUpdated:
+		 *                         type: integer
+		 *                         description: Timestamp (ms) of when any of the submodels was updated
+		 *                         example: 1630598072000
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 */
+		router.get('/stats', hasReadAccessToModels[modelType], getModelStatsInBulk(modelType), serialiseModelStats);
+
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
@@ -835,7 +961,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 	 *                   calibration: uncalibrated
 	 */
-	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
+	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats);
 
 	/**
 	 * @openapi

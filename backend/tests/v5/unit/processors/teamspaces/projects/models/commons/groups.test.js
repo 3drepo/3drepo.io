@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/groups`);
@@ -78,7 +79,7 @@ const testImportGroups = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/groups', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetGroups();
 	testImportGroups();
 });

@@ -184,7 +184,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 				wrap="nowrap"
 				className={className}
 			>
-				<ModelsContainer item>
+				<ModelsContainer>
 					<CustomTable
 						cells={MODEL_TABLE_CELLS}
 						rows={getModelsTableRows(models, selectedModels)}
@@ -196,7 +196,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 							null
 					}
 				</ModelsContainer>
-				<PermissionsContainer item>
+				<PermissionsContainer>
 					<PermissionsTable
 						key={permissionsRevision}
 						permissions={permissions}

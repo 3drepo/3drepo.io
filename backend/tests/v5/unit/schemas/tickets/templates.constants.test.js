@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../helper/services');
@@ -78,6 +79,6 @@ const testGetApplicableDefaultProperties = () => {
 	});
 };
 
-describe('schema/tickets/templates', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetApplicableDefaultProperties();
 });

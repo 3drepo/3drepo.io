@@ -37,7 +37,7 @@ import { CreateFederationForm } from './createFederationForm';
 import { useFederationsData } from './federations.hooks';
 import { DashboardParams } from '../../../routes.constants';
 
-export const Federations = (): JSX.Element => {
+export const Federations = () => {
 	const {
 		federations,
 		favouriteFederations,

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const Yup = require('yup');
 const { access } = require('fs/promises');
 const { src } = require('../../../../helper/path');
@@ -51,6 +52,6 @@ const testRenderTemplate = () => {
 	});
 };
 
-describe('services/mailer/templates/common', () => {
+describe(determineTestGroup(__filename), () => {
 	testRenderTemplate();
 });

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 const _ = require('lodash');
 
@@ -56,6 +57,6 @@ const testSerialiseViews = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/views', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseViews();
 });

@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+
+const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
+const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const { determineTestGroup } = require('../../helper/utils');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const ClashPlans = require(`${src}/models/clashes.plans`);
@@ -29,25 +33,45 @@ const testGetPlanById = () => {
 			const data = { _id: generateRandomString() };
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(data);
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
-			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanById(teamspace, planId, projection))
+			await expect(ClashPlans.getPlanById(teamspace, project, planId))
 				.resolves.toEqual(data);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, { project: 0 });
 		});
 
 		test('should throw clash plan not found if it is not available', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanById(teamspace, planId, projection))
+			await expect(ClashPlans.getPlanById(teamspace, project, planId, projection))
 				.rejects.toEqual(templates.clashPlanNotFound);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, projection);
+		});
+	});
+};
+
+const testGetPlansByQuery = () => {
+	describe('Get plans by query', () => {
+		test('should return the list of plans found', async () => {
+			const expectedData = times(5, () => generateRandomObject());
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const query = generateRandomObject();
+			const projection = { _id: 1 };
+
+			await expect(ClashPlans.getPlansByQuery(teamspace, project, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { ...query, project }, projection);
 		});
 	});
 };
@@ -58,25 +82,26 @@ const testGetPlanByName = () => {
 			const data = { _id: generateRandomString() };
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(data);
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const name = generateRandomString();
-			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanByName(teamspace, name, projection))
+			await expect(ClashPlans.getPlanByName(teamspace, project, name))
 				.resolves.toEqual(data);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name, project }, { project: 0 });
 		});
 
 		test('should throw clash plan not found if it is not available', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const name = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanByName(teamspace, name, projection))
+			await expect(ClashPlans.getPlanByName(teamspace, project, name, projection))
 				.rejects.toEqual(templates.clashPlanNotFound);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name, project }, projection);
 		});
 	});
 };
@@ -86,15 +111,16 @@ const testCreatePlan = () => {
 		test('should create a plan and return its id', async () => {
 			const insertFn = jest.spyOn(db, 'insertOne').mockResolvedValue();
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const user = generateRandomString();
 			const data = generateRandomObject();
 
-			const res = await ClashPlans.createPlan(teamspace, data, user);
+			const res = await ClashPlans.createPlan(teamspace, project, data, user);
 
 			const { _id, createdAt } = insertFn.mock.calls[0][2];
 			expect(insertFn).toHaveBeenCalledTimes(1);
 			expect(insertFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL,
-				{ ...data, _id, createdAt, createdBy: user });
+				{ ...data, project, _id, createdAt, createdBy: user });
 			expect(res).toEqual(_id);
 		});
 	});
@@ -105,16 +131,139 @@ const testUpdatePlan = () => {
 		test('should update a plan and return its id', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
 			const user = generateRandomString();
 			const data = generateRandomObject();
 
-			await ClashPlans.updatePlan(teamspace, planId, data, user);
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
 
 			const { updatedAt } = updateFn.mock.calls[0][3].$set;
 			expect(updateFn).toHaveBeenCalledTimes(1);
-			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId },
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				{ $set: { ...data, updatedAt, updatedBy: user } });
+		});
+
+		test('Should unset fields with null values', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { [generateRandomString()]: null, [generateRandomString()]: 'value' };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+		test('Should have a combination of $set and $unset if there are both null and non-null fields', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { [generateRandomString()]: null, [generateRandomString()]: null, ...generateRandomObject() };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+
+		test('should work with nested objects and unset nested fields with null values', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = {
+				field1: null,
+				field2: 'value',
+				nested: {
+					nestedField1: null,
+					nestedField2: 'nestedValue',
+				},
+			};
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+					Object.keys(data[key]).forEach((nestedKey) => {
+						if (data[key][nestedKey] === null) {
+							expectedData.$unset[`${key}.${nestedKey}`] = 1;
+						} else {
+							expectedData.$set[`${key}.${nestedKey}`] = data[key][nestedKey];
+						}
+					});
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+
+		test('should not try to recurse on the object if the data is a UUID', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { field1: generateRandomString(), field2: generateUUID(), nested: { field: generateUUID() } };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user } };
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else if (isObject(data[key]) && !isUUID(data[key]) && !Array.isArray(data[key])) {
+					Object.keys(data[key]).forEach((nestedKey) => {
+						if (data[key][nestedKey] === null) {
+							expectedData.$unset[`${key}.${nestedKey}`] = 1;
+						} else {
+							expectedData.$set[`${key}.${nestedKey}`] = data[key][nestedKey];
+						}
+					});
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
 		});
 	});
 };
@@ -123,21 +272,39 @@ const testDeletePlan = () => {
 	describe('Delete plan', () => {
 		test('should delete a plan', async () => {
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
 			const deleteFn = jest.spyOn(db, 'deleteOne').mockResolvedValueOnce(undefined);
 
-			await ClashPlans.deletePlan(teamspace, planId);
+			await ClashPlans.deletePlan(teamspace, project, planId);
 
 			expect(deleteFn).toHaveBeenCalledTimes(1);
-			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId });
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project });
+		});
+	});
+};
+
+const testDeletePlansByProject = () => {
+	describe('Delete plans by project', () => {
+		test('should delete all plans associated with a project', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await ClashPlans.deletePlansByProject(teamspace, project);
+
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project });
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
 	testGetPlanById();
+	testGetPlansByQuery();
 	testGetPlanByName();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testDeletePlansByProject();
 });

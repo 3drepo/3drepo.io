@@ -25,7 +25,7 @@ type ITeamspaceList = {
 	className?: string;
 };
 
-export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
+export const TeamspaceList = ({ className }: ITeamspaceList) => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const teamspacesArePending = TeamspacesHooksSelectors.selectTeamspacesArePending();

@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateRandomObject,
 	generateRandomDate,
-	generateUUID,
-} = require('../../../../../../helper/services');
+	generateUUID } = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -288,6 +287,70 @@ const testGetCalibrationStatusForAllRevs = () => {
 	});
 };
 
+const testGetCalibrationStatusForAllRevsFromMultipleDrawings = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const drawing1 = generateRandomString();
+	const drawing2 = generateRandomString();
+
+	const revs1Calibrations = [];
+	const revs2Calibrations = [];
+
+	const revs1Str = [];
+	const revs2Str = [];
+
+	const revs1 = times(3, () => {
+		const rev = generateUUID();
+		const revStr = UUIDToString(rev);
+		revs1Calibrations.push({ _id: rev, latestCalibration: { units: 'mm', ...generateRandomObject() } });
+		revs1Str.push(revStr);
+		return rev;
+	});
+	const revs2 = times(2, () => {
+		const rev = generateUUID();
+		const revStr = UUIDToString(rev);
+		revs2Calibrations.push({ _id: rev, latestCalibration: { units: 'mm', ...generateRandomObject() } });
+		revs2Str.push(revStr);
+		return rev;
+	});
+
+	describe('Get calibration status for all revs from multiple drawings', () => {
+		test('should return the calibration status for all revisions of multiple drawings', async () => {
+			RevisionsModel.getRevisionsByQuery.mockResolvedValueOnce(
+				[...revs1.map((r) => ({ _id: r, model: drawing1 })),
+					...revs2.map((r) => ({ _id: r, model: drawing2 }))]);
+			ModelSettingsModel.getDrawingById.mockResolvedValue({ calibration: { units: 'm', verticalRange: [0, 10] } });
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce(revs1Calibrations);
+			CalibrationsModel.getCalibrationForMultipleRevisions.mockResolvedValueOnce(revs2Calibrations);
+
+			const res = await Calibrations.getCalibrationStatusForAllRevsFromMultipleDrawings(
+				teamspace, project, [drawing1, drawing2]);
+			expect(res).toEqual({
+				[drawing1]: {
+					[revs1Str[0]]: calibrationStatuses.CALIBRATED,
+					[revs1Str[1]]: calibrationStatuses.CALIBRATED,
+					[revs1Str[2]]: calibrationStatuses.CALIBRATED,
+				},
+				[drawing2]: {
+					[revs2Str[0]]: calibrationStatuses.CALIBRATED,
+					[revs2Str[1]]: calibrationStatuses.CALIBRATED,
+				},
+			});
+
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getRevisionsByQuery).toHaveBeenCalledWith(teamspace, project, undefined,
+				modelTypes.DRAWING, { model: { $in: [drawing1, drawing2] } },
+				{ _id: 1, void: 1 }, {}, { timestamp: 1 });
+
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledTimes(2);
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledWith(teamspace,
+				revs1, { _id: 1 });
+			expect(CalibrationsModel.getCalibrationForMultipleRevisions).toHaveBeenCalledWith(teamspace,
+				revs2, { _id: 1 });
+		});
+	});
+};
+
 const testAddCalibration = () => {
 	describe('Add Calibration', () => {
 		const teamspace = generateRandomString();
@@ -350,5 +413,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetCalibration();
 	testGetCalibrationStatus();
 	testGetCalibrationStatusForAllRevs();
+	testGetCalibrationStatusForAllRevsFromMultipleDrawings();
 	testAddCalibration();
 });

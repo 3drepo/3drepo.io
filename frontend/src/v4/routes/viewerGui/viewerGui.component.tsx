@@ -135,8 +135,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			fetchTeamspaces,
 		} = this.props;
 
-		viewer.init();
-
 		if (issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
@@ -314,7 +312,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private renderRightPanels = (panels) => (
 		<RightPanels>
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
-			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
 		</RightPanels>
 	)
 

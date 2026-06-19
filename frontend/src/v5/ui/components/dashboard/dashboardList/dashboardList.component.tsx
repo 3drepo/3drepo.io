@@ -24,6 +24,6 @@ type IDashboardList = {
 	style?: React.CSSProperties;
 };
 
-export const DashboardList = ({ children, ...props }: IDashboardList): JSX.Element => (
+export const DashboardList = ({ children, ...props }: IDashboardList) => (
 	<ListContainer {...props}>{children}</ListContainer>
 );

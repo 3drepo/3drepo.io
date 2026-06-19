@@ -45,6 +45,7 @@ import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
 import { ToggleAllCheckbox } from './bulkUpdate/toggleAllCheckbox.component';
 import { TextOverflow } from '@controls/textOverflow';
 import { useSearchParam } from '../../../useSearchParam';
+import { isEqual } from 'lodash';
 
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
@@ -101,6 +102,7 @@ export const TicketsListCard = () => {
 	const [fetchingProperties, setFetchingProperties] = useState(false);
 
 	const onFiltersChange = (newfilters) => {
+		if (isEqual(newfilters, filters)) return;
 		TicketsCardActionsDispatchers.setFilters(newfilters);
 	};
 

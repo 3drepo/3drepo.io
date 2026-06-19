@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
@@ -271,7 +272,7 @@ const testGetGroupById = () => {
 	});
 };
 
-describe('models/tickets.groups', () => {
+describe(determineTestGroup(__filename), () => {
 	testAddGroups();
 	testDeleteGroups();
 	testGetGroupsByIds();

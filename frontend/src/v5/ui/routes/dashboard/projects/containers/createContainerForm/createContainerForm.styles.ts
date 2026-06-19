@@ -17,17 +17,8 @@
 
 import styled from 'styled-components';
 
-export const FlexContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: flex-start;
-	width: 100%;
-
-	> div {
-		:first-child {
-			margin-right: 9px;
-		}
-		flex: 1;
-	}
+export const TwoColumnRow = styled.div`
+	display: grid;
+	gap: 9px;
+	grid-template-columns: 50% 50%;
 `;

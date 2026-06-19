@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
@@ -99,6 +100,6 @@ const testSerialiseGroupArray = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseGroupArray();
 });

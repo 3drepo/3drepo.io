@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
@@ -102,6 +103,6 @@ const testIsProjectAdmin = () => {
 	});
 };
 
-describe('middleware/permissions/components/projects', () => {
+describe(determineTestGroup(__filename), () => {
 	testIsProjectAdmin();
 });

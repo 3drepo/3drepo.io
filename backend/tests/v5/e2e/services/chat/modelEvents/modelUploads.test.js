@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const ServiceHelper = require('../../../../helper/services');
 const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
@@ -267,7 +268,7 @@ const queueUpdateTest = () => {
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
-			const content = { status: 'processing', database: teamspace, project: container._id };
+			const content = { status: 'processing', teamspace, container: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
@@ -282,7 +283,8 @@ const queueUpdateTest = () => {
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
 
-			const content = { status: 'processing', database: teamspace, project: drawing._id };
+			const content = { status: 'processing', teamspace, drawing: drawing._id };
+
 			await queueMessage(queueConfig.callback_queue, drawingRevision._id,
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
@@ -302,7 +304,7 @@ const queueFinishedTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
-			const content = { value: 0, database: teamspace, project: container._id };
+			const content = { value: 0, teamspace, container: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
@@ -335,7 +337,7 @@ const queueFinishedTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
 			const newRevisionPromise = waitForEvent(socket, EVENTS.DRAWING_NEW_REVISION);
 
-			const content = { value: 0, database: teamspace, project: drawing._id };
+			const content = { value: 0, teamspace, drawing: drawing._id };
 			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
 
 			const modelUpdateResults = await modelUpdatePromise;
@@ -362,7 +364,7 @@ const queueFinishedTest = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {

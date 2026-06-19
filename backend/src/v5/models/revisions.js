@@ -33,7 +33,10 @@ const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ?
 
 const findRevisionsByQuery = (teamspace, project, model, modelType, query, projection, sort) => db.find(teamspace,
 	collectionName(modelType, model),
-	{ ...query, ...(modelType === modelTypes.DRAWING ? { model, project } : {}) },
+	{
+		...(modelType === modelTypes.DRAWING ? { model, project } : {}),
+		...query,
+	},
 	projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, modelType, query, projection, sort) => {
@@ -81,24 +84,22 @@ Revisions.getRevisions = (teamspace, project, model, modelType, showVoid,
 	const query = {
 		...excludeIncomplete,
 		...excludeFailed,
+		...(showVoid ? {} : excludeVoids),
 	};
-
-	if (!showVoid) {
-		query.void = excludeVoids.void;
-	}
 
 	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, sort);
 };
 
-Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection) => {
+Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection,
+	{ includeVoid, includeFailed, includeIncomplete } = {}, sort = { timestamp: -1 }) => {
 	const formattedQuery = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		...excludeFailed,
+		...(includeVoid ? {} : { ...excludeVoids }),
+		...(includeIncomplete ? {} : { ...excludeIncomplete }),
+		...(includeFailed ? {} : { ...excludeFailed }),
 		...query,
 	});
 
-	return findRevisionsByQuery(teamspace, project, model, modelType, formattedQuery, projection, { timestamp: -1 });
+	return findRevisionsByQuery(teamspace, project, model, modelType, formattedQuery, projection, sort);
 };
 
 Revisions.getRevisionByIdOrTag = (teamspace, model, modelType, revision, projection = {},

@@ -24,8 +24,8 @@ import { Container } from './truncate.styles';
 
 interface IProps {
 	className?: string;
-	children: string | ReactNode;
-	lines: number;
+	children?: any;
+	lines?: number;
 	ellipsis?: string | ReactNode;
 	trimWhitespace?: boolean;
 	width?: number;

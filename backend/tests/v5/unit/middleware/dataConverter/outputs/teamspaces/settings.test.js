@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { generateTemplate } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
@@ -65,6 +66,6 @@ const testCastTicketSchemaOutput = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/settings', () => {
+describe(determineTestGroup(__filename), () => {
 	testCastTicketSchemaOutput();
 });

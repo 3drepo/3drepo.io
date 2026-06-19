@@ -75,7 +75,7 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 	`}
 `;
 
-export const DragAndDrop = styled(DragAndDropBase).attrs({
+export const DragAndDrop = styled(DragAndDropBase as any).attrs({
 	$dashSize: 2,
 })<{ $hidden?: boolean }>`
 	margin: 10px 15px;
@@ -146,12 +146,6 @@ export const ErroredImageMessages = styled.div`
 export const MessageInput = styled(FormTextAreaExpandable)`
 	padding: 8px 15px 0;
 	overflow: hidden;
-
-	:after {
-		content: '';
-		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
-		z-index: 1;
-	}
 
 	.MuiInputBase-multiline {
 		padding: 0;

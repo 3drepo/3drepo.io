@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../utils/responseCodes');
 const { modelTypes } = require('../../models/modelSettings.constants');
+const { respond } = require('../../utils/responder');
 const { stringToUUID } = require('../../utils/helper/uuids');
 
 const PathParams = {};
@@ -34,6 +36,28 @@ PathParams.getModelIdFromParam = (modelType) => async (req, res, next) => {
 	}
 
 	await next();
+};
+
+PathParams.getModelIdsFromQuery = (modelType) => async (req, res, next) => {
+	if (!req.query.models) {
+		const modelParams = {
+			[modelTypes.CONTAINER]: req.query.containers,
+			[modelTypes.FEDERATION]: req.query.federations,
+			[modelTypes.DRAWING]: req.query.drawings,
+		};
+
+		req.query.models = modelParams[modelType];
+	}
+
+	const modelList = req.query?.models?.split(',');
+
+	// ensure models query string exists and is an array string
+	if (modelList?.length > 0) {
+		req.models = modelList;
+		await next();
+	} else {
+		respond(req, res, createResponseCode(templates.invalidArguments, '"models" is missing from query string'));
+	}
 };
 
 PathParams.convertAllUUIDs = async (req, res, next) => {

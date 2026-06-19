@@ -27,7 +27,7 @@ type IProps = IButton & {
 const VOID_STATUS = formatMessage({ id: 'revisionDetails.void', defaultMessage: 'void' });
 const ACTIVE_STATUS = formatMessage({ id: 'revisionDetails.active', defaultMessage: 'active' });
 
-export const RevisionsListItemButton = ({ status: isVoid, disabled, ...props }: IProps): JSX.Element => {
+export const RevisionsListItemButton = ({ status: isVoid, disabled, ...props }: IProps) => {
 	const currentStatus = isVoid ? VOID_STATUS : ACTIVE_STATUS;
 	const oppositeStatus = isVoid ? ACTIVE_STATUS : VOID_STATUS;
 

@@ -26,9 +26,9 @@ const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace } = req.params;
+	const { teamspace, project } = req.params;
 	try {
-		const planId = await Clashes.createPlan(teamspace, req.body, user);
+		const planId = await Clashes.createPlan(teamspace, project, req.body, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(planId) });
 	} catch (err) {
 		// istanbul ignore next
@@ -38,9 +38,9 @@ const createPlan = async (req, res) => {
 
 const updatePlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.updatePlan(teamspace, planId, req.body, user);
+		await Clashes.updatePlan(teamspace, project, planId, req.body, user);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -49,9 +49,9 @@ const updatePlan = async (req, res) => {
 };
 
 const deletePlan = async (req, res) => {
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.deletePlan(teamspace, planId);
+		await Clashes.deletePlan(teamspace, project, planId);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -121,38 +121,103 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
-	 *                 type: object
-	 *                 description: The selection A of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection A
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection A
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set A of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection A entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection A entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               selectionB:
+	 *                 type: array
+	 *                 description: The selections for set B of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection B entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection B entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
+	 *               tickets:
 	 *                 type: object
-	 *                 description: The selection B of the plan
+	 *                 description: Ticket creation settings for clashes
 	 *                 properties:
-	 *                   container:
+	 *                   federation:
 	 *                     type: string
-	 *                     description: The container of selection B
 	 *                     format: uuid
+	 *                     description: The federation where clash tickets will be created
 	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
+	 *                   template:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ticket template used to create clash tickets
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   creator:
+	 *                     type: string
+	 *                     description: The user ID to create clash tickets as; defaults to the current user
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   valuesAtCreation:
 	 *                     type: array
-	 *                     description: The rules applied to selection B
+	 *                     description: Ticket property values to apply when clash tickets are created
 	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                       type: object
+	 *                       properties:
+	 *                         property:
+	 *                           type: string
+	 *                           description: The property name
+	 *                           example: Priority
+	 *                         module:
+	 *                           type: string
+	 *                           description: The module name; omitted for top-level ticket properties
+	 *                           example: clash
+	 *                         value:
+	 *                           description: The value to set on the property
+	 *                           nullable: true
+	 *                       required:
+	 *                         - property
+	 *                         - value
+	 *                   defaultStatuses:
+	 *                     type: object
+	 *                     description: Status to set when a certain event happens
+	 *                     properties:
+	 *                       onNew:
+	 *                         type: string
+	 *                         description: Set the ticket status for newly created clash tickets
+	 *                         example: Open
+	 *                       onResolved:
+	 *                         type: string
+	 *                         description: Set the ticket status for resolved clash tickets
+	 *                         example: Closed
+	 *                       onReopened:
+	 *                         type: string
+	 *                         description: Set the ticket status for reopened clash tickets
+	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -224,38 +289,107 @@ const establishRoutes = () => {
 	 *               trigger:
 	 *                 type: array
 	 *                 description: The trigger options for the plan
+	 *                 example: [manual, new revision]
 	 *                 items:
 	 *                   type: string
 	 *                   enum: [manual, new revision]
-	 *                   example: [manual, new revision]
+	 *                   example: manual
 	 *               selectionA:
-	 *                 type: object
-	 *                 description: The selection A of the plan
-	 *                 properties:
-	 *                   container:
-	 *                     type: string
-	 *                     description: The container of selection A
-	 *                     format: uuid
-	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
-	 *                     type: array
-	 *                     description: The rules applied to selection A
-	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                 type: array
+	 *                 description: The selections for set A of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection A entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection A entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
 	 *               selectionB:
+	 *                 type: array
+	 *                 description: The selections for set B of the plan
+	 *                 minItems: 1
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     container:
+	 *                       type: string
+	 *                       description: The container of a selection B entry
+	 *                       format: uuid
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     rules:
+	 *                       type: array
+	 *                       description: The rules applied to the selection B entry
+	 *                       items:
+	 *                         $ref: '#/components/schemas/ticketGroupRules'
+	 *               tickets:
 	 *                 type: object
-	 *                 description: The selection B of the plan
+	 *                 description: Ticket creation settings for clashes
+	 *                 nullable: true
 	 *                 properties:
-	 *                   container:
+	 *                   federation:
 	 *                     type: string
-	 *                     description: The container of selection B
 	 *                     format: uuid
+	 *                     description: The federation where clash tickets will be created
 	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                   rules:
+	 *                   template:
+	 *                     type: string
+	 *                     format: uuid
+	 *                     description: The ticket template used to create clash tickets
+	 *                     example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   creator:
+	 *                     type: string
+	 *                     description: The user to create clash tickets as
+	 *                     example: user@example.com
+	 *                   valuesAtCreation:
 	 *                     type: array
-	 *                     description: The rules applied to selection B
+	 *                     description: Ticket property values to apply when clash tickets are created
+	 *                     nullable: true
 	 *                     items:
-	 *                       $ref: '#/components/schemas/ticketGroupRules'
+	 *                       type: object
+	 *                       properties:
+	 *                         property:
+	 *                           type: string
+	 *                           description: The property name
+	 *                           example: Priority
+	 *                         module:
+	 *                           type: string
+	 *                           description: The module name; omitted for top-level ticket properties
+	 *                           example: clash
+	 *                         value:
+	 *                           description: The value to set on the property
+	 *                           nullable: true
+	 *                       required:
+	 *                         - property
+	 *                         - value
+	 *                   defaultStatuses:
+	 *                     type: object
+	 *                     description: Optional default statuses; removed when no fields remain
+	 *                     nullable: true
+	 *                     properties:
+	 *                       onNew:
+	 *                         type: string
+	 *                         description: Default status for newly created clash tickets
+	 *                         example: Open
+	 *                       onResolved:
+	 *                         type: string
+	 *                         description: Default status for resolved clash tickets
+	 *                         example: Closed
+	 *                       onReopened:
+	 *                         type: string
+	 *                         description: Default status for reopened clash tickets
+	 *                         example: Open
+	 *                   hideOtherObjects:
+	 *                     type: boolean
+	 *                     nullable: true
+	 *                     description: Hide all objects outside the clash objects in generated ticket views; false is omitted, null removes the flag
+	 *                     example: true
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -302,9 +436,9 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs:
 	 *   post:
-	 *     description: Create a clash test run based on the plan
+	 *     description: Create a clash run based on the plan
 	 *     tags: [v:external, Clashes]
-	 *     operationId: createClashTestRun
+	 *     operationId: createClashRun
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: name of teamspace
@@ -328,7 +462,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Create a clash test run based on the plan
+	 *         description: Create a clash run based on the plan
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -337,7 +471,7 @@ const establishRoutes = () => {
 	 *                 _id:
 	 *                   type: string
 	 *                   format: uuid
-	 *                   description: The id of the new clash test run
+	 *                   description: The id of the new clash run
 	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.post('/:planId/runs', isAdminToProject, planExists, planContainersHaveRevs, createRun);

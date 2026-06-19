@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomString } = require('../../../../../../helper/services');
 
@@ -64,7 +65,7 @@ const testGetThumbnail = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/views', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetViews();
 	testGetThumbnail();
 });

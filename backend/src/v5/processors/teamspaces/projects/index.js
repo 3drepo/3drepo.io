@@ -24,6 +24,7 @@ const {
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions');
 const { COL_NAME } = require('../../../models/projectSettings.constants');
+const { deleteClashDataInProject } = require('./clashes');
 const { deleteDrawing } = require('./models/drawings');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { getModelById } = require('../../../models/modelSettings');
@@ -58,6 +59,7 @@ Projects.deleteProject = async (teamspace, projectId) => {
 		return removeModelData(teamspace, projectId, model);
 	}));
 
+	await deleteClashDataInProject(teamspace, projectId);
 	await deleteProject(teamspace, projectId);
 };
 

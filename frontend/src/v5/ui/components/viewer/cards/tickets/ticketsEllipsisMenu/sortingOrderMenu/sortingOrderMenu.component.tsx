@@ -14,16 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { serializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsSortingOrder } from '@/v5/store/tickets/card/ticketsCard.types';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { ExpandingMenu } from '@controls/ellipsisMenu/expandingMenu/expandingMenu.component';
 import { ExpandingMenuItem } from '@controls/ellipsisMenu/expandingMenu/expandingMenuItem/expandingMenuItem.component';
 
 const Item = ({ order, title }: { order: TicketsSortingOrder, title: string }) => {
 	const sorting = TicketsHooksSelectors.selectSorting();
-	const handleClick = () => TicketsActionsDispatchers.setSorting(sorting.property, order);
+	const [, setSortingParam] = useSearchParam('sorting');
+	const handleClick = () => {
+		TicketsActionsDispatchers.setSorting(sorting.property, order);
+		setSortingParam(serializeSorting(sorting.property, order));
+	};
 
 	return (
 		<ExpandingMenuItem

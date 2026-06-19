@@ -41,7 +41,6 @@ import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
 import gis from './overrides/cards/gis.overrides';
 import compare from './overrides/cards/compare.overrides';
-import board from './overrides/dashboard/board.overrides';
 import sequences from './overrides/cards/sequences.overrides';
 
 export const V4OverridesContainer = styled.div`
@@ -90,6 +89,5 @@ export const V4OverridesContainer = styled.div`
 		display: none;
 	}
 
-	${board}
 	${newJobDialog}
 `;

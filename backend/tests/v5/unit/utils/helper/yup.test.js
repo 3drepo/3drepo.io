@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
+const Yup = require('yup');
 const config = require('../../../../../src/v5/utils/config');
 const fs = require('fs');
 
@@ -185,7 +187,22 @@ const testEmbeddedImageOrRef = () => {
 	});
 };
 
-describe('utils/helper/yup', () => {
+const testTransformUniqueArray = () => {
+	describe.each([
+		['Should remove duplicates from array', [1, 2, 3, 2, 4, 1], [1, 2, 3, 4]],
+		['Should not modify array if there are no duplicates', [1, 2, 3, 4], [1, 2, 3, 4]],
+		['Should return empty array if input is empty', [], []],
+		['Should return original value if undefined', undefined, undefined],
+		['Should return original value if null', null, null],
+	])('Unique array transformer', (desc, input, expected) => {
+		test(desc, () => {
+			const schema = YupHelper.transformer.uniqueArray(Yup.array().of(Yup.number()).nullable());
+			expect(schema.cast(input)).toEqual(expected);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testId();
 	testColorArr();
 	testColorStr();
@@ -197,4 +214,5 @@ describe('utils/helper/yup', () => {
 	testEmbeddedImage();
 	testEmbeddedImageOrRef();
 	testDateInThePast();
+	testTransformUniqueArray();
 });

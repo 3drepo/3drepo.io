@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
+import { createRef, PureComponent, Ref, RefObject } from 'react';
 import ReactDOM from 'react-dom';
 import { formatMessage } from '@/v5/services/intl';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg'
@@ -67,7 +67,6 @@ interface IProps {
 
 interface IState {
 	rows: any[];
-	containerElement: Node;
 	panelKey: number;
 	panelBottomAnchorEl: any;
 }
@@ -79,9 +78,15 @@ export class Jobs extends PureComponent<IProps, IState> {
 		};
 	}
 
+	private containerRef: RefObject<HTMLDivElement>;
+
+	constructor(props) {
+		super(props);
+		this.containerRef = createRef<HTMLDivElement>();
+	}
+
 	public state = {
 		rows: [],
-		containerElement: null,
 		panelKey: Math.random(),
 		panelBottomAnchorEl: null,
 	};
@@ -125,8 +130,6 @@ export class Jobs extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
-		this.setState({ containerElement });
 		this.props.fetchJobsAndColors();
 	}
 
@@ -145,9 +148,8 @@ export class Jobs extends PureComponent<IProps, IState> {
 		return <NewJobForm {...formProps} onCancel={closePanel} />;
 	}
 
-	public renderNewJobForm = (container) => (
+	public renderNewJobForm = () => (
 		<FloatingActionPanel
-			container={container}
 			key={this.state.panelKey}
 			render={this.renderNewJobFormPanel}
 			Icon={() => (
@@ -161,7 +163,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { jobs, colors, isPending, currentTeamspace, usersProvisionedEnabled } =  this.props;
-		const { containerElement, panelBottomAnchorEl } = this.state;
+		const { panelBottomAnchorEl } = this.state;
 
 		const closeNewJobForm = () => {
 			this.setState({
@@ -183,14 +185,14 @@ export class Jobs extends PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Container>
+			<Container ref={this.containerRef}>
 				<UserManagementTab footerLabel="Manage jobs">
 					<CustomTable
 						cells={JOBS_TABLE_CELLS}
 						rows={this.getJobsTableRows(jobs, colors)}
 					/>
 				</UserManagementTab>
-				{containerElement && !usersProvisionedEnabled && this.renderNewJobForm(containerElement)}
+				{!usersProvisionedEnabled && this.renderNewJobForm()}
 				<Panel
 					open={Boolean(panelBottomAnchorEl)}
 					anchorEl={panelBottomAnchorEl}

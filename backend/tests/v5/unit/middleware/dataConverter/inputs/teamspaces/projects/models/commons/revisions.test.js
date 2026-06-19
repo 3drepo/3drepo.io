@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
@@ -26,7 +27,7 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const { generateRandomString, determineTestGroup, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 

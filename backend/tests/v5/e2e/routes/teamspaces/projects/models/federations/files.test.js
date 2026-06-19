@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
@@ -200,7 +201,7 @@ const testGetFederationMD5Hash = () => {
 			['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
 			['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 			['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
-			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.modelNotFound],
 			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
 			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
 			['the admin access it but the federation is empty.', { ...parameters, modelId: models[2]._id }, true],
@@ -227,7 +228,7 @@ const testGetFederationMD5Hash = () => {
 	describe.each(generateTestData())('Get Federation MD5 Files', runTest);
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

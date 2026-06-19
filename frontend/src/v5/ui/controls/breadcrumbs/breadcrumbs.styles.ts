@@ -81,7 +81,7 @@ const BasicBreadcrumb = styled(Button).attrs({
 `;
 
 
-export const Breadcrumb = styled(BasicBreadcrumb).attrs({
+export const Breadcrumb = styled(BasicBreadcrumb as any).attrs({
 	component: Link,
 })<LinkProps>``;
 

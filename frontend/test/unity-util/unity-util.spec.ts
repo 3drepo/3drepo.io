@@ -123,7 +123,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(1, 'string-test', false);
+        handler.createGetRequest(1, 'string-test', true);
 
         await responsePromise;
 
@@ -149,7 +149,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(2, 'json-test', false);
+        handler.createGetRequest(2, 'json-test', true);
 
         await responsePromise;
 
@@ -174,7 +174,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(3, 'binary-test', false);
+        handler.createGetRequest(3, 'binary-test', true);
 
         await responsePromise;
 
@@ -200,7 +200,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(4, 'large-test', false);
+        handler.createGetRequest(4, 'large-test', true);
 
         await responsePromise;
 
@@ -224,7 +224,7 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
         const responsePromise = waitForOnWebResponse();
 
         UnityUtil.setOfflineFetchInterceptor(interceptor);
-        handler.createGetRequest(5, 'stream-test', false);
+        handler.createGetRequest(5, 'stream-test', true);
 
         await responsePromise;
 
@@ -289,5 +289,60 @@ describe('UnityUtil.setOfflineFetchInterceptor', () => {
             }),
         );
         expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+});
+
+describe('UnityUtil.doAutorecovery', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        UnityUtil.viewer = undefined;
+        UnityUtil.unityInstance = undefined;
+        UnityUtil.readyPromise = undefined;
+        UnityUtil.loadingPromise = undefined;
+        UnityUtil.loadingResolve = undefined;
+        UnityUtil.loadedPromise = undefined;
+        UnityUtil.loadedResolve = undefined;
+        UnityUtil.loadedFlag = false;
+    });
+
+    it('should capture state, rebuild canvas, restore state and notify viewer', async () => {
+        const savedState = new ArrayBuffer(16);
+        const wrapper = document.createElement('div');
+        const oldCanvas = document.createElement('canvas');
+        wrapper.appendChild(oldCanvas);
+
+        const quitMock = jest.fn().mockResolvedValue(undefined);
+        const onAutorecoveryMock = jest.fn();
+        const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
+            if (methodName === 'CaptureAutorecoveryState') {
+                UnityUtil.postAutorecoveryCapture(savedState);
+            }
+        });
+        const hideProgressBarSpy = jest.spyOn(UnityUtil, 'hideProgressBar').mockImplementation(() => {});
+        const loadUnitySpy = jest.spyOn(UnityUtil, '_loadUnity').mockImplementation(async () => {});
+
+        UnityUtil.viewer = {
+            onAutorecovery: onAutorecoveryMock,
+        };
+
+        UnityUtil.unityInstance = {
+            Quit: quitMock,
+            Module: {
+                canvas: oldCanvas,
+            },
+        } as any;
+
+        await UnityUtil.doAutorecovery();
+
+        const newCanvas = wrapper.firstChild as HTMLCanvasElement;
+        expect(quitMock).toHaveBeenCalledTimes(1);
+        expect(newCanvas).not.toBe(oldCanvas);
+        expect(newCanvas.tagName).toBe('CANVAS');
+        expect(loadUnitySpy).toHaveBeenCalledWith(newCanvas, undefined);
+        expect(toUnitySpy).toHaveBeenCalledWith('CaptureAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+        expect(toUnitySpy).toHaveBeenCalledWith('RestoreAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+        expect(hideProgressBarSpy).toHaveBeenCalledTimes(1);
+        expect(onAutorecoveryMock).toHaveBeenCalledWith(newCanvas);
+        expect(UnityUtil.getAutorecoveryCapture()).toBe(savedState);
     });
 });

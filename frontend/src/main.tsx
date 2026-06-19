@@ -18,7 +18,7 @@
 import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
@@ -66,7 +66,8 @@ setSocket(getSocket());
 subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocket().id));
 
 const render = () => {
-	ReactDOM.render(
+	const root = createRoot(document.getElementById('app')); // createRoot(container!) if you use TypeScript
+	root.render(
 		<Provider store={store as any}>
 			<BrowserRouter>
 				<IntlProvider {...getIntl()}>
@@ -83,7 +84,6 @@ const render = () => {
 				</IntlProvider>
 			</BrowserRouter>
 		</Provider>,
-		document.getElementById('app'),
 	);
 };
 

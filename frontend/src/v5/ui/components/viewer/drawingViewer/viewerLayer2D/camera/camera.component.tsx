@@ -18,7 +18,7 @@ import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraIcon } from './camera.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -37,12 +37,12 @@ export const Camera = ({ scale, offsetRef }) => {
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
 	const [haloVisibility, setHaloVisibility] = useState(1);
-	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
-	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation) as ((vector: any) => Vector2);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation) as ((vector: any) => Vector2);
 
 	const modelLoading = useModelLoading();
 
-	useEffect(() => scaleRef.current = scale, [scale]);
+	useEffect(() => { scaleRef.current = scale; }, [scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform3DTo2D) return;
@@ -97,11 +97,11 @@ export const Camera = ({ scale, offsetRef }) => {
 		ev.nativeEvent.stopPropagation();
 		ev.nativeEvent.stopImmediatePropagation();
 
-		const container = ev.currentTarget.parentElement.parentElement.parentElement;
+		const container = ev.currentTarget.parentElement?.parentElement?.parentElement;
 
-		container.addEventListener('mousemove', onMouseMove);
-		container.addEventListener('mouseup', onMouseUp);
-		container.addEventListener('mouseleave', onMouseUp);
+		container?.addEventListener('mousemove', onMouseMove);
+		container?.addEventListener('mouseup', onMouseUp);
+		container?.addEventListener('mouseleave', onMouseUp);
 	};
 
 	if (!transform2DTo3D || modelLoading) {

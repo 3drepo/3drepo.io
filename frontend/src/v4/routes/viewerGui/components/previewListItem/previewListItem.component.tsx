@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PureComponent } from 'react';
+import { JSX, PureComponent } from 'react';
 import removeMd from 'remove-markdown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';

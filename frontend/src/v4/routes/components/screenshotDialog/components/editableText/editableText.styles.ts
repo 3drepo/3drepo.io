@@ -21,7 +21,7 @@ export const TextBox = styled.div<{ $placeholder: string; disabled?: boolean }>`
 	font-family: 'Arial', sans-serif;
 	line-height: 1;
 	position: absolute;
-	padding: 0;
+	padding: 0 1px 1px 0;
 	margin: 0;
 	transform-origin: left top;
 	z-index: 3;

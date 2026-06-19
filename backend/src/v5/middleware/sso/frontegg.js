@@ -52,6 +52,7 @@ const checkStateIsValid = async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Response body does not contain code or state');
 		}
 		req.state = { ...JSON.parse(fromBase64(state)), code };
+		req.state.redirectUri = decodeURIComponent(req.state.redirectUri);
 		if (req.session.csrfToken !== req.state.csrfToken) {
 			throw createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again');
 		}

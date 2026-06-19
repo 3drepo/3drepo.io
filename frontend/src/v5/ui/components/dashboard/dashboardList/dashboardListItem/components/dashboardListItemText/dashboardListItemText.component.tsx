@@ -31,7 +31,7 @@ export const DashboardListItemText = ({
 	children,
 	dontHighlight,
 	...containerProps
-}: IDashboardListItemText): JSX.Element => {
+}: IDashboardListItemText) => {
 	const { query } = useContext(SearchContext);
 	const shouldHighlight = isString(children) && !dontHighlight;
 

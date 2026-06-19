@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
@@ -122,8 +123,8 @@ const testGetTree = (internalService) => {
 
 			const internalTests = modelType === modelTypes.CONTAINER ? [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
 				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
 				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
@@ -184,8 +185,7 @@ const testGetModelProperties = (internalService) => {
 			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
 			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
 
-			const modelNotFoundErr = modelType === modelTypes.CONTAINER
-				? templates.containerNotFound : templates.federationNotFound;
+			const modelNotFoundErr = templates.modelNotFound;
 			let rev1FullContent;
 			let rev2FullContent;
 
@@ -295,8 +295,8 @@ const testGetMesh = (isInternal) => {
 
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 				['the mesh does not exist', getRoute({ meshIdParam: ServiceHelper.generateRandomString() }), false, templates.meshNotFound],
 				['the mesh exists', getRoute(), true],
 			];
@@ -378,8 +378,8 @@ const testGetTexture = (isInternal) => {
 
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 				['the texture does not exist', getRoute({ textureIdParam: ServiceHelper.generateRandomString() }), false, templates.textureNotFound],
 				['the texture exists', getRoute(), true],
 			];
@@ -408,7 +408,7 @@ const testGetTexture = (isInternal) => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 	describe('External Service', () => {

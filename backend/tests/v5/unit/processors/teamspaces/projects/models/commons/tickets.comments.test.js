@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const Comments = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 

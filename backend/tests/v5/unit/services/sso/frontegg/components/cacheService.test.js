@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/frontegg.cache');
 const FronteggCache = require(`${src}/models/frontegg.cache`);

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../../../../../../helper/path');
@@ -104,7 +105,7 @@ const testValidateNewTicket = () => {
 			});
 
 			const errMsg = generateRandomString();
-			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
+			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -128,8 +129,7 @@ const testValidateNewTicket = () => {
 			});
 
 			const errMsg = generateRandomString();
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
+			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -152,9 +152,7 @@ const testValidateNewTicket = () => {
 				await next();
 			});
 
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.deserialiseUUIDsInTicket.mockReturnValueOnce(req.body);
-			TicketSchema.processReadOnlyValues.mockReturnValueOnce(req.body);
+			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -212,15 +210,18 @@ const testValidateImportTickets = () => {
 		}
 	};
 
-	const validation = (t, p, m, tem, ticket) => {
-		if (ticket === badTicket) return Promise.reject(templates.invalidArguments);
-		if (ticket === throwTicket) return Promise.reject(new Error('abc'));
-		return Promise.resolve({ ...ticket, type: tem._id });
-	};
-	const processReadOnly = (e, ticket) => {
-		// eslint-disable-next-line no-param-reassign
-		ticket.processed = true;
-		return Promise.resolve();
+	const validation = (t, p, m, tem, tickets) => {
+		if (tickets.includes(badTicket)) return Promise.reject(templates.invalidArguments);
+		if (tickets.includes(throwTicket)) return Promise.reject(new Error('abc'));
+		if (tickets === duplicateUniqueProp) {
+			return Promise.reject(new Error(`The unique property ${uniquePropName} can not have the same value multiple times.`));
+		}
+		if (tickets === duplicateModuleUniqueProp) {
+			return Promise.reject(new Error(`The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`));
+		}
+		return Promise.resolve(tickets.map((ticket) => ({
+			newTicket: { ...ticket, type: tem._id, processed: true },
+		})));
 	};
 
 	describe.each([
@@ -253,9 +254,7 @@ const testValidateImportTickets = () => {
 			const res = {};
 
 			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
-			TicketSchema.validateTicket.mockImplementation(validation);
-			TicketSchema.deserialiseUUIDsInTicket.mockImplementation((t) => t);
-			TicketSchema.processReadOnlyValues.mockImplementation(processReadOnly);
+			TicketSchema.validateTickets.mockImplementation(validation);
 
 			await Tickets.validateImportTickets(req, res, fn);
 
@@ -269,10 +268,7 @@ const testValidateImportTickets = () => {
 
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
-				const nTickets = req.body.tickets.length;
-				expect(TicketSchema.validateTicket).toHaveBeenCalledTimes(nTickets);
-				expect(TicketSchema.deserialiseUUIDsInTicket).toHaveBeenCalledTimes(nTickets);
-				expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.
@@ -310,7 +306,7 @@ const testValidateUpdateTicket = () => {
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			const errMsg = generateRandomString();
-			TicketSchema.validateTicket.mockRejectedValueOnce(new Error(errMsg));
+			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
@@ -329,7 +325,7 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			TicketSchema.validateTicket.mockResolvedValueOnce({ properties: {}, modules: {} });
+			TicketSchema.validateTickets.mockResolvedValueOnce([]);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
@@ -348,8 +344,7 @@ const testValidateUpdateTicket = () => {
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			const errMsg = generateRandomString();
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.processReadOnlyValues.mockImplementationOnce(() => { throw new Error(errMsg); });
+			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
@@ -369,7 +364,7 @@ const testValidateUpdateTicket = () => {
 
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
 
 			await Tickets.validateUpdateTicket(req, res, fn);
 
@@ -391,16 +386,18 @@ const testValidateUpdateTicket = () => {
 				[generateRandomString()]: generateRandomString(),
 			};
 
-			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
 			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			await Tickets.validateUpdateTicket(req, res, fn);
 
 			expect(fn).toHaveBeenCalled();
 			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalled();
-			expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledWith(ticket, req.body,
-				req.session.user.username);
+			expect(TicketSchema.validateTickets).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				req.params.model, template, [req.body], {
+					author: req.session.user.username,
+					existingData: [ticket],
+				});
 		});
 	});
 };
@@ -460,22 +457,26 @@ const testValidateUpdateMultipleTickets = () => {
 		}
 	};
 
-	const validation = (t, p, m, tem, ticket, existingTicket) => {
-		if (ticket._id === badTicket._id) {
+	const validation = (t, p, m, tem, tickets, { existingData } = {}) => {
+		if (tickets.some(({ _id }) => _id === badTicket._id)) {
 			return Promise.reject(templates.invalidArguments);
 		}
 
-		if (isEqual(ticket, { ...existingTicket, _id: UUIDToString(existingTicket._id) })) {
-			return Promise.resolve({ modules: {}, properties: {} });
+		if (tickets === duplicateUniqueProp) {
+			return Promise.reject(new Error(`The unique property ${uniquePropName} can not have the same value multiple times.`));
+		}
+		if (tickets === duplicateModuleUniqueProp) {
+			return Promise.reject(new Error(`The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`));
 		}
 
-		return Promise.resolve(ticket);
-	};
+		return Promise.resolve(tickets.map((ticket, i) => {
+			const oldTicket = existingData?.[i];
+			if (isEqual(ticket, { ...oldTicket, _id: UUIDToString(oldTicket?._id) })) {
+				return undefined;
+			}
 
-	const processReadOnly = (e, ticket) => {
-		// eslint-disable-next-line no-param-reassign
-		ticket.processed = true;
-		return Promise.resolve();
+			return { newTicket: { ...ticket, processed: true }, existingData: oldTicket };
+		}).filter(Boolean));
 	};
 
 	const idNotFound = generateUUIDString();
@@ -512,9 +513,7 @@ const testValidateUpdateMultipleTickets = () => {
 			const res = {};
 
 			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
-			TicketSchema.validateTicket.mockImplementation(validation);
-			TicketSchema.deserialiseUUIDsInTicket.mockImplementation((t) => t);
-			TicketSchema.processReadOnlyValues.mockImplementation(processReadOnly);
+			TicketSchema.validateTickets.mockImplementation(validation);
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
 			TicketModelSchema.getTicketsByQuery.mockResolvedValueOnce(existingTickets);
 
@@ -529,10 +528,7 @@ const testValidateUpdateMultipleTickets = () => {
 
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
-				const nTickets = req.body.tickets.length;
-				expect(TicketSchema.validateTicket).toHaveBeenCalledTimes(nTickets);
-				expect(TicketSchema.deserialiseUUIDsInTicket).toHaveBeenCalledTimes(nTickets);
-				expect(TicketSchema.processReadOnlyValues).toHaveBeenCalledTimes(nTickets);
+				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.
@@ -545,7 +541,7 @@ const testValidateUpdateMultipleTickets = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateNewTicket();
 	testValidateImportTickets();
 	testValidateUpdateTicket();

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateRandomDate, generateUUID, generateRandomString } = require('../../../../../../../../helper/services');
@@ -153,7 +154,7 @@ const testSerialiseCommentList = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.comments', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseComment();
 	testSerialiseCommentList();
 });

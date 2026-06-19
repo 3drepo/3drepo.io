@@ -26,7 +26,7 @@ import Typography from '@mui/material/Typography';
 import { COLOR } from '../../../../../styles';
 
 export const StyledTypography = styled(Typography).attrs({
-	component: 'span'
+	variantMapping: { body1 : 'span'}
 })<{ inline: boolean }>`
 	&& {
 		display: ${({ inline }) => inline ? 'inline' : 'inherit'};

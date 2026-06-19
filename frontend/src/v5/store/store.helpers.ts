@@ -28,6 +28,8 @@ export const EMPTY_VIEW: View = {
 	hasThumbnail: false,
 };
 
+export const DASHBOARD_LIST_CHUNK_SIZE = [5, 5, 10, 10, 30, 50, 100, 250];
+
 export const uniqueIds = <T>(listItems: T[]) =>
 	// eslint-disable-next-line implicit-arrow-linebreak
 	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);

@@ -74,9 +74,6 @@ const LegendDialogStyles = css`
 			}
 
 			& > div:last-of-type {
-				position: relative;
-				left: -35px;
-
 				&:hover span {
 					text-decoration: underline;
 					text-underline-offset: 2px;

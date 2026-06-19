@@ -24,7 +24,7 @@ import { getGroupHexColor, hexToRgb, rgbToHex } from './colors.helper';
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
-import { selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectIsTreeProcessed, selectNodesBySharedIdsMap } from '@/v4/modules/tree';
+import { selectGetAllMeshes, selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectIsTreeProcessed, selectNodesBySharedIdsMap } from '@/v4/modules/tree';
 import { selectTransformations, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '../store/viewpoints/viewpoints.selectors';
 import { ViewpointsActions } from '../store/viewpoints/viewpoints.redux';
 import { IViewpoint } from '../store/viewpoints/viewpoints.types';
@@ -315,11 +315,35 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	_ids: getNodesIdsFromSharedIds([object]),
 }));
 
-export const convertToV4GroupNodes = (objects = []) => objects.map(({ container: model, _ids }) => ({
-	account: selectCurrentTeamspace(getState()),
-	model,
-	shared_ids: toSharedIds(_ids),
-}));
+export const convertToV4GroupNodes = (group?: Group) => {
+	if (group?.excludeDefinedObjects) {
+		const excludedMeshesByContainer = new Map<string, Set<string>>();
+		(group.objects || []).forEach(({ container, _ids }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(container) || new Set<string>();
+			_ids.forEach((id) => excludedMeshes.add(id));
+			excludedMeshesByContainer.set(container, excludedMeshes);
+		});
+
+		const allMeshes = selectGetAllMeshes(getState());
+		return allMeshes.flatMap(({ teamspace: account, model, meshes }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(model) || new Set();
+			const filteredMeshes = excludedMeshes.size ? meshes.filter((mesh) => !excludedMeshes.has(mesh)) : meshes;
+			if (!filteredMeshes.length) return [];
+
+			return [{
+				account,
+				model,
+				shared_ids: toSharedIds(filteredMeshes),
+			}];
+		});
+	}
+
+	return (group?.objects || []).map(({ container: model, _ids }) => ({
+		account: selectCurrentTeamspace(getState()),
+		model,
+		shared_ids: toSharedIds(_ids),
+	}));
+};
 
 const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType): GroupOverride => {
 	let description = '';
@@ -401,7 +425,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	}
 
 	const group:any = {
-		objects: convertToV4GroupNodes(v5Group?.objects || []),
+		objects: convertToV4GroupNodes(v5Group),
 	};
 
 	if (color) {
@@ -476,7 +500,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
-		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
+		const v4Objects = convertToV4GroupNodes(current.group as Group);
 
 		return v4Objects.reduce((dict, objects) => {
 			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1);

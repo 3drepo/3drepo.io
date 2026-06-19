@@ -40,7 +40,7 @@ type EditFederationProps = {
 	federation: IFederation;
 };
 
-export const EditFederation = ({ federation }: EditFederationProps): JSX.Element => {
+export const EditFederation = ({ federation }: EditFederationProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { containers } = useContainersData();

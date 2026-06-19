@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
@@ -128,7 +129,7 @@ const testGetJobs = () => {
 	});
 };
 
-describe('models/jobs', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetJobsToUsers();
 	testAddDefaultJobs();
 	testAssignUserToJob();

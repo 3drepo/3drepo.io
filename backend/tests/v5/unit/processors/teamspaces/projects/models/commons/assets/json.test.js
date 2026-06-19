@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { PassThrough } = require('stream');
 const { src } = require('../../../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateUUID,
-	generateRandomObject,
-} = require('../../../../../../../helper/services');
+	generateRandomObject } = require('../../../../../../../helper/services');
 const { times } = require('lodash');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);

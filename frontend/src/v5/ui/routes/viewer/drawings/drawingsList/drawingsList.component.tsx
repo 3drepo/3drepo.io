@@ -32,7 +32,7 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
 import { useSearchParam } from '../../../useSearchParam';
 
-const Table = forwardRef(({ children, ...props }, ref: any) => {
+const Table = forwardRef(({ children, ...props }: any, ref: any) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
 	return (
 		<div ref={ref} {...props}>
@@ -60,7 +60,7 @@ export const DrawingsList = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
-	const virtuosoRef = useRef<any>();
+	const virtuosoRef = useRef<any>(null);
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const selectedIndex = drawings.findIndex((d) => d._id === selectedDrawingId);
 
@@ -94,7 +94,7 @@ export const DrawingsList = () => {
 				TableRow,
 				FillerRow,
 				EmptyPlaceholder,
-			}}
+			} as any}
 			itemContent={(index, drawing: IDrawing) => (
 				<DrawingItem
 					drawing={drawing}

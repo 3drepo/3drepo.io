@@ -45,7 +45,7 @@ ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 15
 		const pdfJsLib = await loadPdfJsDist();
 		const loadingTask = pdfJsLib.getDocument({
 			data: buffer.buffer,
-			standardFrontDataUrl: `${v5Path}/../../node_modules/pdfjs-dist/standard_fonts`,
+			standardFontDataUrl: `${v5Path}/../../node_modules/pdfjs-dist/standard_fonts/`,
 		});
 		const document = await loadingTask.promise;
 		const page = await document.getPage(1);

@@ -17,13 +17,14 @@
 
 import { FontAwesomeIcon as FontAwesomeIconComponent } from '@fortawesome/react-fontawesome';
 import { IconProps } from '@mui/material/Icon';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 import { IconContainer } from './fontAwesomeIcon.styles';
 
 interface IExtendedIconProps extends IconProps {
 	ref?: any;
 }
 interface IProps {
-	icon: any;
+	icon: IconName;
 	IconProps?: IExtendedIconProps;
 }
 

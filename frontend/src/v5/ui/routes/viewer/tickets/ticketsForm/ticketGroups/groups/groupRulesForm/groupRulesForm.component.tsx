@@ -42,7 +42,7 @@ const DEFAULT_RULE: IGroupRule = {
 		values: [],
 	},
 	operator: null,
-	values: [],
+	values: [''],
 };
 
 type IGroupRules = {
@@ -75,6 +75,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 		formState: { isValid, errors },
 		getValues,
 		reset,
+		trigger,
 	} = formData;
 
 	const getIsDirty = () => {
@@ -85,7 +86,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 				...obj.field,
 				values: obj.field?.values?.map(({ value }) => ({ value })),
 			},
-			values: obj.values.filter(({ value }) => value),
+			values: obj.values?.filter(({ value }) => value),
 		});
 		return !isEqual(cleanValuesForComparison(defaultValues), cleanValuesForComparison(formValues));
 	};
@@ -124,6 +125,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
 						disabled={isReadOnly}
+						onChange={() => trigger('name')}
 					/>
 					<RuleFieldOperator disabled={isReadOnly} />
 					<RuleFieldValues disabled={isReadOnly} />

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 
-const { determineTestGroup, generateRandomObject, generateRandomString } = require('../../../../../../../../helper/services');
+const { generateRandomObject, generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.groups');
 const TicketGroups = require(`${src}/models/tickets.groups`);

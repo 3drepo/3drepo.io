@@ -24,7 +24,7 @@ type IDashboardFooter = {
 	variant?: 'light' | 'dark';
 };
 
-export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.Element => (
+export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter) => (
 	<FooterContainer variant={variant} showLabels>
 		<FooterLogo />
 		<FooterItems>

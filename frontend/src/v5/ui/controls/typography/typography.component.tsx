@@ -20,10 +20,10 @@ import { KickerTypography, KickerTitleTypography, LinkTypography, LabelTypograph
 type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle' | 'link' | 'label';
 
 type ITypography = Omit<TypographyProps, 'variant'> & {
-	variant: ITypographyVariants;
+	variant?: ITypographyVariants;
 };
 
-export const Typography = ({ variant, children, ...props }: ITypography): JSX.Element => {
+export const Typography = ({ variant, children, ...props }: ITypography) => {
 	if (variant === 'kicker') {
 		return <KickerTypography {...props}>{children}</KickerTypography>;
 	}

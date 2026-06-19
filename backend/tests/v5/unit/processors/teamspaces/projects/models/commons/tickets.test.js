@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, generateUUIDString } = require('../../../../../../helper/services');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
-const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { statuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
@@ -1135,78 +1136,31 @@ const testGetTicketList = () => {
 };
 
 const testGetOpenTicketsCount = () => {
-	describe('Get the number of open tickets', () => {
+	describe('Get the number of open tickets for one model', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 
-		test('should return 0 if getAllTickets returns no tickets', async () => {
-			TicketsModel.getAllTickets.mockResolvedValueOnce([]);
-			TemplatesModel.getAllTemplates.mockResolvedValueOnce([]);
+		test('should return 0 if no tickets are open', async () => {
+			const spy = jest.spyOn(Tickets, 'getOpenTicketsCountForMultipleModels').mockResolvedValueOnce({});
 
-			await expect(Tickets.getOpenTicketsCount(teamspace, project, model))
-				.resolves.toEqual(0);
+			expect(await Tickets.getOpenTicketsCount(teamspace, project, model)).toEqual(0);
 
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
-				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(teamspace, project, [model]);
 		});
 
-		test('should return the number of open tickets with no custom status', async () => {
-			const template = generateTemplate();
-			const tickets = Object.values(statuses).map((status) => {
-				const ticket = generateTicket(template);
-				ticket.properties.Status = status;
-				return ticket;
-			});
+		test('should return the number of open tickets for the model', async () => {
+			const expectedCount = generateRandomNumber();
+			const spy = jest.spyOn(Tickets, 'getOpenTicketsCountForMultipleModels').mockResolvedValueOnce({ [model]: expectedCount });
 
-			TicketsModel.getAllTickets.mockResolvedValueOnce(tickets);
-			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
+			expect(await Tickets.getOpenTicketsCount(teamspace, project, model)).toEqual(expectedCount);
 
-			await expect(Tickets.getOpenTicketsCount(teamspace, project, model)).resolves.toEqual(3);
-
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
-				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(teamspace, project, [model]);
 		});
-
-		test('should return the number of open tickets with custom status', async () => {
-			const customStatuses = [
-				{ name: generateRandomString(), type: statusTypes.OPEN },
-				{ name: generateRandomString(), type: statusTypes.ACTIVE },
-				{ name: generateRandomString(), type: statusTypes.VOID },
-				{ name: generateRandomString(), type: statusTypes.DONE },
-			];
-
-			const template = generateTemplate(false, false, {
-				status: {
-					values: customStatuses,
-					default: customStatuses[0].name,
-				},
-			});
-
-			const tickets = customStatuses.map((status) => {
-				const ticket = generateTicket(template);
-				ticket.properties.Status = status.name;
-				return ticket;
-			});
-
-			TicketsModel.getAllTickets.mockResolvedValueOnce(tickets);
-			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
-
-			await expect(Tickets.getOpenTicketsCount(teamspace, project, model)).resolves.toEqual(2);
-
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
-				{ projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 } });
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
-		});
-	});
+	},
+	);
 };
 
 const testRemoveTicketsWithTemplates = () => {
@@ -1523,6 +1477,58 @@ const testOnModelNameUpdated = () => {
 	});
 };
 
+const testGetOpenTicketsCountForMultipleModels = () => {
+	describe('Get the number of open tickets for multiple models', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const models = times(3, () => generateRandomString());
+
+		test('should return 0 if getAllTickets returns no tickets', async () => {
+			TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([]);
+
+			await expect(Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, models))
+				.resolves.toEqual({});
+
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(
+				teamspace,
+				project,
+				null,
+				{ model: { $in: models } },
+				{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+		});
+
+		test('should return the number of open tickets for each model', async () => {
+			const template = generateTemplate();
+			const tickets = models.flatMap((model) => Object.values(statuses).map((status) => {
+				const ticket = generateTicket(template);
+				ticket.model = model;
+				ticket.properties.Status = status;
+				return ticket;
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
+
+			await expect(Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, models))
+				.resolves.toEqual(models.reduce((acc, model) => ({ ...acc, [model]: 3 }), {}));
+
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(
+				teamspace,
+				project,
+				null,
+				{ model: { $in: models } },
+				{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
@@ -1534,6 +1540,7 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateTicket();
 	testUpdateManyTickets();
 	testGetTicketList();
+	testGetOpenTicketsCountForMultipleModels();
 	testGetOpenTicketsCount();
 	testRemoveTicketsWithTemplates();
 	testInitialiseAutomatedProperties();

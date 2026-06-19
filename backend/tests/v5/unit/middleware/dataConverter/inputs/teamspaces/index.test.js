@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../../../../helper/services');
+const { determineTestGroup } = require('../../../../../helper/utils');
+const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/schemas/teamspaces');

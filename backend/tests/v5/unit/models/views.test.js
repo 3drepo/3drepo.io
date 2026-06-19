@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const View = require(`${src}/models/views`);
@@ -55,7 +56,7 @@ const testGetViews = () => {
 	});
 };
 
-describe('models/views', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetViewById();
 	testGetViews();
 });

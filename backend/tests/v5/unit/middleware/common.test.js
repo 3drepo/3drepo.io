@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -92,7 +93,7 @@ const testRouteDecommissioned = () => {
 	});
 };
 
-describe('middleware/common', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateMany();
 	testRouteDecommissioned();
 });

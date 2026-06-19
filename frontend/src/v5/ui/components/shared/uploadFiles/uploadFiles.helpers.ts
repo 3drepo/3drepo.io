@@ -20,6 +20,13 @@ import { createFilterOptions } from '@mui/material';
 import { orderBy } from 'lodash';
 import { PDFDocument } from 'pdf-lib';
 
+export type MinFileData = {
+	size: number;
+	name: string;
+	extension: string;
+};
+
+
 export const reduceFileData = (files) => files.map(({ file: { name, size }, ...rest }) => ({ file: { name, size }, ...rest }));
 
 export const parseFileName = (fileName: string, maxLength: number): string => {
@@ -48,7 +55,7 @@ export const fileToPdf = async (file: File) => {
 };
 
 export const pdfToFile = async (pdf: PDFDocument, fileName) => {
-	const fileAsUintArray = await pdf.save();
+	const fileAsUintArray: any = await pdf.save();
 	return new File([new Blob([fileAsUintArray])], fileName);
 };
 

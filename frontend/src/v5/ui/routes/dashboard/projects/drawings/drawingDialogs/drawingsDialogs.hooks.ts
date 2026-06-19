@@ -19,7 +19,7 @@ import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
-import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, numberAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { get } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -73,19 +73,20 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 		defaultValues,
 	});
 
-	const { getValues, setValue, trigger }  = formData;
+	const { getValues, setValue }  =  formData;
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setExistingNames([getValues('name'), ...existingNames]);
-			trigger('name');
 		}
 
 		if (numberAlreadyExists(err)) {
 			setExistingNumbers(existingNumbers.add(getValues('number')));
-			trigger('number');
 		}
 	};
+
+	useExistingValuesTrigger('name', existingNames, formData);
+	useExistingValuesTrigger('number', Array.from(existingNumbers), formData);
 	
 	watchVerticalRange(formData);
 

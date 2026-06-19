@@ -82,7 +82,7 @@ export const DEFAULT_FILTERS: TicketFilter[] = [
 export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) => type === propertyType);
 const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
-const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): TicketFilter[] => properties
+const propertiesToValidFilters = (properties: PropertyDefinition[], module: string = ''): TicketFilter[] => properties
 	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
@@ -373,8 +373,6 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		if (filter.operator === 'rng' || filter.operator === 'nrng') {
 			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
 			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
-		} else if (filter.operator === 'ex' || filter.operator === 'nex') {
-			filter.values = [];
 		} else {
 			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
 		}
@@ -398,6 +396,11 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 	if (isTextType(type)) {
 		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
 		filter.displayValues = arrToDisplayValue(filter.values);
+	}
+
+	if (filter.operator === 'ex' || filter.operator === 'nex') {
+		filter.values = [];
+		delete filter.displayValues;
 	}
 
 	return { module, property, type, filter };

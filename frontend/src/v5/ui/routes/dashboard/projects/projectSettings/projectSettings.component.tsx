@@ -18,7 +18,7 @@
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isFileFormatUnsupported, isPathNotFound, projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported, isPathNotFound, projectAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
@@ -65,7 +65,6 @@ export const ProjectSettings = () => {
 		setError,
 		getValues,
 		reset,
-		trigger,
 	} = formData;
 
 	const onSubmitError = (error) => {
@@ -119,11 +118,9 @@ export const ProjectSettings = () => {
 			.catch(() => reset({ name, image: isAdmin ? null : DEFAULT_PROJECT_IMAGE }));
 	}, [projectId, isAdmin]);
 
-	useEffect(() => {
-		if (existingNames.length) { 
-			trigger('name');
-		}
-	}, [existingNames]);
+
+	useExistingValuesTrigger('name', existingNames, formData);
+
 
 	if (!projectId) return (<></>);
 

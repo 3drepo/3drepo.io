@@ -30,4 +30,5 @@ export interface InfoModalProps {
 	highlightActionButton?: boolean;
 	disableClose?: boolean;
 	className?: string;
+	onClose?: () => void;
 }

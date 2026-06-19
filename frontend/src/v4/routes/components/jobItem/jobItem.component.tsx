@@ -32,8 +32,8 @@ export const JobItem = (props: IProps) => {
 			justifyContent="flex-start"
 			alignItems="center"
 		>
-			<Color item color={props.color} />
-			<Name item>{props.name}</Name>
+			<Color color={props.color} />
+			<Name>{props.name}</Name>
 		</Grid>
     );
 };

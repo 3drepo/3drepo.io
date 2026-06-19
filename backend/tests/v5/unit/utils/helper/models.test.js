@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
 const { generateRandomString } = require('../../../helper/services');
@@ -127,6 +128,6 @@ const testRemoveModelData = () => {
 	});
 };
 
-describe('utils/helper/models', () => {
+describe(determineTestGroup(__filename), () => {
 	testRemoveModelData();
 });

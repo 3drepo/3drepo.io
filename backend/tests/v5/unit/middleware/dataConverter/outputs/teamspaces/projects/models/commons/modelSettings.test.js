@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
-const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomModelProperties, generateRandomObject, generateUUID } = require('../../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -113,7 +114,7 @@ const testFormatModelStats = () => {
 			async () => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				await ModelSettingsOutputMiddlewares.formatModelStats(modelType)(req, res);
+				await ModelSettingsOutputMiddlewares.formatModelStats(req, res);
 
 				const formattedStats = {
 					...data,
@@ -136,7 +137,54 @@ const testFormatModelStats = () => {
 	});
 };
 
+const testFormatBulkModelStats = () => {
+	describe.each([
+		[modelTypes.FEDERATION, {
+			model1: { ...generateRandomObject(), lastUpdated: new Date() },
+			model2: { ...generateRandomObject() },
+		}, 'lastUpdated field'],
+		[modelTypes.CONTAINER, {
+			model1: { ...generateRandomObject(), revisions: {} },
+			model2: {
+				...generateRandomObject(),
+				revisions: {
+					lastUpdated: new Date(),
+					latestRevision: generateUUID(),
+				},
+				errorReason: { timestamp: new Date() },
+			},
+		}, 'data to convert'],
+	])('Format bulk model stats data', (modelType, data, desc) => {
+		test(`[${modelType ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
+			async () => {
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				await ModelSettingsOutputMiddlewares.serialiseModelStats(req, res);
+
+				const formattedData = { stats: [] };
+				Object.entries(data).forEach(([key, value]) => {
+					const formattedStats = { modelId: key, ...value };
+					if (modelType === modelTypes.FEDERATION) {
+						if (value.lastUpdated) formattedStats.lastUpdated = value.lastUpdated.getTime();
+					} else {
+						formattedStats.revisions.lastUpdated = value.revisions.lastUpdated
+							? value.revisions.lastUpdated.getTime() : undefined;
+						if (value.errorReason?.timestamp) {
+							formattedStats.errorReason.timestamp = value.errorReason.timestamp.getTime();
+						}
+						formattedStats.revisions.latestRevision = UUIDToString(value.revisions.latestRevision);
+					}
+					formattedData.stats.push(formattedStats);
+				});
+
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedData);
+			});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testFormatModelSettings();
 	testFormatModelStats();
+	testFormatBulkModelStats();
 });

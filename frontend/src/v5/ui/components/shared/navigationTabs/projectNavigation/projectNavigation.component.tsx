@@ -19,7 +19,7 @@ import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors
 import { Container, Link } from '../navigationTabs.styles';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
-export const ProjectNavigation = (): JSX.Element => {
+export const ProjectNavigation = () => {
 	const { linkLabel, shouldRenderLink } = useKanbanNavigationData();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();

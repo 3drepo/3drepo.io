@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src, srcV4 } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
@@ -58,6 +59,6 @@ const testUnpack = () => {
 	});
 };
 
-describe('processors/teamspaces/invitations', () => {
+describe(determineTestGroup(__filename), () => {
 	testUnpack();
 });

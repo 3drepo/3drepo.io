@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
@@ -310,7 +311,7 @@ const modelDeletedTest = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {

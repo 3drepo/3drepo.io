@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
@@ -396,6 +397,45 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
+		['status with no open type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => type !== statusTypes.OPEN),
+					default: statusValues.find(({ type }) => type !== statusTypes.OPEN).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with no done type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => type !== statusTypes.DONE),
+					default: statusValues.find(({ type }) => type !== statusTypes.DONE).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with only open and void', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(({ type }) => [statusTypes.OPEN, statusTypes.VOID].includes(type)),
+					default: statusValues.find(({ type }) => type === statusTypes.OPEN).name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['status that is valid', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -403,6 +443,21 @@ const testValidate = () => {
 				status: {
 					values: statusValues,
 					default: statusValues[0].name,
+				},
+
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['status with open and done types is valid', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues.filter(
+						({ type }) => [statusTypes.OPEN, statusTypes.DONE, statusTypes.VOID].includes(type),
+					),
+					default: statusValues.find(({ type }) => type === statusTypes.OPEN).name,
 				},
 
 			},
@@ -456,12 +511,63 @@ const testValidate = () => {
 			}],
 
 		}, true],
+		['number property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.NUMBER,
+				unique: true,
+			}],
+
+		}, true],
+		['date property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.DATE,
+				unique: true,
+			}],
+
+		}, true],
+		['pastDate property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.PAST_DATE,
+				unique: true,
+			}],
+
+		}, true],
+		['oneOf property is unique', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.ONE_OF,
+				values: [generateRandomString(), generateRandomString()],
+				unique: true,
+			}],
+
+		}, true],
 		['property is unique for unsupported type', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
+				unique: true,
+
+			}] }, false],
+		['property is unique for manyOf type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.MANY_OF,
+				values: [generateRandomString(), generateRandomString()],
 				unique: true,
 
 			}] }, false],
@@ -542,6 +648,16 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnlyOnUI: true,
+			}],
+
+		}, true],
+		['property is hiddenOnUI', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
 			}],
 
 		}, true],
@@ -1294,6 +1410,27 @@ const testValidate = () => {
 
 		expect(output).toEqual(expectedData);
 	});
+
+	test('hiddenOnUI should be preserved when true and stripped when false', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
+			}, {
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: false,
+			}],
+		};
+
+		const output = TemplateSchema.validate(data);
+
+		expect(output.properties[0].hiddenOnUI).toEqual(true);
+		expect(output.properties[1].hiddenOnUI).toBeUndefined();
+	});
 };
 
 const testGenerateFullSchema = () => {
@@ -1318,6 +1455,25 @@ const testGenerateFullSchema = () => {
 			const expectedOutput = cloneDeep(template);
 			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
 				...expectedOutput.properties];
+			expect(output).toEqual(expectedOutput);
+		});
+
+		test('should fill default properties when config is not defined', () => {
+			const template = {
+				name: generateRandomString(),
+				properties: [
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...getApplicableDefaultProperties({}), ...expectedOutput.properties];
 			expect(output).toEqual(expectedOutput);
 		});
 
@@ -1412,13 +1568,54 @@ const testGetClosedStatuses = () => {
 	const customClosedStatuses = config.status.values.flatMap(
 		({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
 			? name : []));
+	const customDoneStatuses = config.status.values.flatMap(
+		({ type, name }) => (type === statusTypes.DONE
+			? name : []));
 
 	describe.each([
-		['when custom statuses are configured', { config }, customClosedStatuses],
-		['when custom statuses are not configured', {}, [statuses.CLOSED, statuses.VOID]],
-	])('Get ticket closed statuses', (desc, input, expectedOutput) => {
+		['when custom statuses are configured', { config }, undefined, customClosedStatuses],
+		['when custom statuses are configured and void is excluded', { config }, false, customDoneStatuses],
+		['when custom statuses are not configured', {}, undefined, [statuses.CLOSED, statuses.VOID]],
+		['when custom statuses are not configured and void is excluded', {}, false, [statuses.CLOSED]],
+	])('Get ticket closed statuses', (desc, input, includeVoid, expectedOutput) => {
 		test(desc, () => {
-			expect(TemplateSchema.getClosedStatuses(input)).toEqual(expectedOutput);
+			expect(TemplateSchema.getClosedStatuses(input, includeVoid)).toEqual(expectedOutput);
+		});
+	});
+};
+
+const testGetStatusDefinition = () => {
+	describe('Get ticket status definition', () => {
+		test('should return the default status definition when custom statuses are not configured', () => {
+			const template = { config: {}, properties: [], modules: [] };
+
+			expect(TemplateSchema.getStatusDefinition(template)).toEqual({
+				values: [
+					{ name: statuses.OPEN, type: statusTypes.OPEN },
+					{ name: statuses.IN_PROGRESS, type: statusTypes.ACTIVE },
+					{ name: statuses.FOR_APPROVAL, type: statusTypes.REVIEW },
+					{ name: statuses.CLOSED, type: statusTypes.DONE },
+					{ name: statuses.VOID, type: statusTypes.VOID },
+				],
+				default: statuses.OPEN,
+			});
+		});
+
+		test('should return the custom status definition when custom statuses are configured', () => {
+			const values = generateCustomStatusValues();
+			const defaultStatus = values[0].name;
+			const template = {
+				config: {
+					status: {
+						values,
+						default: defaultStatus,
+					},
+				},
+				properties: [],
+				modules: [],
+			};
+
+			expect(TemplateSchema.getStatusDefinition(template)).toBe(template.config.status);
 		});
 	});
 };
@@ -1427,4 +1624,5 @@ describe(determineTestGroup(__filename), () => {
 	testValidate();
 	testGenerateFullSchema();
 	testGetClosedStatuses();
+	testGetStatusDefinition();
 });
