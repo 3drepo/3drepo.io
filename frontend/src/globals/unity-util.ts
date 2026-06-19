@@ -2385,6 +2385,13 @@ export class UnityUtil {
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
 	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
+		if(arrLength == 0) {
+			//pass the message as is
+			return new Promise((resolve) => {
+			func(0, 0);
+			this.unityOnUpdateActions.push(resolve);
+		});
+		}
 		return new Promise((resolve) => {
 			let index = 0;
 			while (index < arrLength) {
