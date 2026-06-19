@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
@@ -29,11 +32,27 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('fs', () => {
+	const actualFs = jest.requireActual('fs');
+	return { ...actualFs, createWriteStream: jest.fn(actualFs.createWriteStream) };
+});
+const { createWriteStream } = require('fs');
+
+jest.mock('fs/promises', () => {
+	const actualFs = jest.requireActual('fs/promises');
+	return { ...actualFs, stat: jest.fn(actualFs.stat), access: jest.fn(actualFs.access) };
+});
+
+const { access, stat, copyFile, rm, mkdir, writeFile } = require('fs/promises');
+
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { MESSAGE_TYPES } = require(`${src}/services/modelProcessing.constants`);
 const config = require(`${src}/utils/config`);
-const fs = require('fs/promises');
+
+const { PassThrough } = require('stream');
 const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -49,41 +68,42 @@ const publishFn = EventsManager.publish.mockImplementation(() => { });
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
 	describe('queue model upload', () => {
-		const teamspace = 'teamspace';
-		const model = 'modelID';
+		const teamspace = generateRandomString();
+		const container = generateRandomString();
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
 
 		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			await fs.copyFile(objModel, fileCreated);
+			await copyFile(objModel, fileCreated);
 
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
-			await fs.copyFile(objModel, fileCreated);
-			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
+			await copyFile(objModel, fileCreated);
+			await expect(ModelProcessing.queueModelUpload(teamspace, container, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
+				{ teamspace, model: container, modelType: modelTypes.CONTAINER, corId, status: 'queued' });
 		});
 	});
 
-	afterAll(() => fs.rm(fileCreated).catch(() => {}));
+	afterAll(() => rm(fileCreated).catch(() => {}));
 };
 
 const testCallbackQueueConsumer = () => {
@@ -95,11 +115,137 @@ const testCallbackQueueConsumer = () => {
 			return Queue.listenToQueue.mock.calls[0][1];
 		};
 
+		test(`Should trigger ${events.CLASH_RUN_UPDATE} event if there is a clash run update message`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: MESSAGE_TYPES.CLASH,
+				status: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				status: content.status,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
+			const SHARED_SPACE_TAG = '$SHARED_SPACE';
+
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: MESSAGE_TYPES.CLASH,
+				container: generateRandomString(),
+				results: `${SHARED_SPACE_TAG}/${generateRandomString()}/results.json`,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: path.resolve(config.cn_queue.shared_storage,
+					content.results.slice(SHARED_SPACE_TAG.length + 1)),
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['shared space root', '$SHARED_SPACE', path.resolve(config.cn_queue.shared_storage)],
+			['backslash separators', '$SHARED_SPACE\\folder\\results.json',
+				path.resolve(config.cn_queue.shared_storage, 'folder', 'results.json')],
+			['normalised path inside shared storage', '$SHARED_SPACE/folder/../results.json',
+				path.resolve(config.cn_queue.shared_storage, 'results.json')],
+		])('Should trigger %s as a safe clash run results path', async (desc, results, expectedResults) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: MESSAGE_TYPES.CLASH,
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: expectedResults,
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['path traversal', '$SHARED_SPACE/../../etc/passwd'],
+			['parent directory', '$SHARED_SPACE/..'],
+			['absolute path', '/etc/passwd'],
+			['windows absolute path', '$SHARED_SPACE/C:\\Windows\\system.ini'],
+			['missing results', undefined],
+			['missing shared space tag', 'results.json'],
+			['malformed shared space tag', '$SHARED_SPACEevil/results.json'],
+		])('Should not publish a %s from a clash run completed message', async (desc, results) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: MESSAGE_TYPES.CLASH,
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: undefined,
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
 		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
 			const content = {
-				database: generateRandomString(),
+				teamspace: generateRandomString(),
 				status: generateRandomString(),
-				project: generateRandomString(),
+				container: generateRandomString(),
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -109,8 +255,33 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				status: content.status,
+			};
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				drawing: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				status: content.status,
 			};
@@ -120,8 +291,8 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			const content = {
-				database: generateRandomString(),
-				project: generateRandomString(),
+				teamspace: generateRandomString(),
+				container: generateRandomString(),
 				user: generateRandomString(),
 				message: generateRandomString(),
 				value: 1,
@@ -134,8 +305,38 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				drawing: generateRandomString(),
+				user: generateRandomString(),
+				message: generateRandomString(),
+				value: 1,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
@@ -189,7 +390,11 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
-				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
 			});
 		});
 
@@ -221,7 +426,11 @@ const testProcessDrawingUpload = () => {
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 4,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				value: 4,
 			});
 		});
 
@@ -260,8 +469,26 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
+				teamspace, model, modelType: modelTypes.DRAWING, corId: UUIDToString(revId), value: 0, user: owner,
 			});
+		});
+	});
+};
+
+const testContainerGetFileName = () => {
+	describe('Get container file name', () => {
+		test('Should return file name if the file exists', async () => {
+			const corId = generateUUIDString();
+			const fileName = `${generateRandomString()}.obj`;
+			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
+			await writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+
+			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
+		});
+
+		test('Should fail if the file does not exist', async () => {
+			const corId = generateUUIDString();
+			await expect(ModelProcessing.getContainerFileName(corId)).toBeUndefined();
 		});
 	});
 };
@@ -271,10 +498,11 @@ const testGetLogArchive = () => {
 		test('Should return undefined if the path is not found', async () => {
 			await expect(ModelProcessing.getLogArchive(generateUUIDString())).resolves.toBeUndefined();
 		});
+
 		test('Should return with zip file if path is found but no files found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
+			await mkdir(taskPath);
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: undefined,
@@ -285,9 +513,9 @@ const testGetLogArchive = () => {
 			const corId = generateUUIDString();
 			const log = generateRandomString(100);
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/1.log`, log);
-			await fs.writeFile(`${taskPath}/2.log`, generateRandomString());
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/1.log`, log);
+			await writeFile(`${taskPath}/2.log`, generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),
@@ -297,8 +525,8 @@ const testGetLogArchive = () => {
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
 				generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
@@ -307,9 +535,119 @@ const testGetLogArchive = () => {
 		});
 	});
 };
-describe('services/modelProcessing', () => {
+
+const testQueueClashRun = () => {
+	describe('Queue clash run', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const data = generateRandomString();
+
+		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(new Error(generateRandomString()));
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
+
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
+
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if createWriteStream threw the error`, async () => {
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			createWriteStream.mockImplementationOnce(() => {
+				throw new Error(generateRandomString());
+			});
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(templates.queueInsertionFailed);
+
+			expect(Queue.queueMessage).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testInit = () => {
+	describe('Init', () => {
+		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
+		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
+			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
+				const originalValue = config.cn_queue[propName];
+				config.cn_queue[propName] = undefined;
+				await expect(ModelProcessing.init()).rejects.toThrow();
+				config.cn_queue[propName] = originalValue;
+				expect(Queue.listenToQueue).not.toHaveBeenCalled();
+			});
+		});
+
+		test('Should fail if shared_storage path is invalid', async () => {
+			stat.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if shared_storage path is not a directory', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => false,
+			});
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if user has no access to shared_storage', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should succeed if the config is set correctly', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockResolvedValueOnce();
+			await expect(ModelProcessing.init()).resolves.toBeUndefined();
+			expect(Queue.listenToQueue).toHaveBeenCalledTimes(1);
+			expect(Queue.listenToQueue).toHaveBeenCalledWith(config.cn_queue.callback_queue, expect.any(Function));
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testQueueModelUpload();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
+	testContainerGetFileName();
 	testGetLogArchive();
+	testQueueClashRun();
+	testInit();
 });

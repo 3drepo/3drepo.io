@@ -44,7 +44,7 @@ export const ContainerListItem = memo(({
 	isSelected,
 	container,
 	onSelectOrToggleItem,
-}: IContainerListItem): JSX.Element => {
+}: IContainerListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {

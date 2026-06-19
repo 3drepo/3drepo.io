@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Fragment, useMemo, cloneElement } from 'react';
+import { Fragment, useMemo, cloneElement, JSX } from 'react';
 import { DashboardList } from '@components/dashboard/dashboardList';
 
 interface IDashboardSkeletonList {
@@ -23,7 +23,7 @@ interface IDashboardSkeletonList {
 	itemComponent: JSX.Element;
 }
 
-export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDashboardSkeletonList): JSX.Element => {
+export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDashboardSkeletonList) => {
 	const list = useMemo(() => Array(itemsAmount).fill({}), []);
 
 	return (

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
@@ -170,7 +171,7 @@ const testInitialise = () => {
 	});
 };
 
-describe('models/loginRecords', () => {
+describe(determineTestGroup(__filename), () => {
 	testSaveLoginRecord();
 	testRemoveAllUserRecords();
 	testGetLastLoginDate();

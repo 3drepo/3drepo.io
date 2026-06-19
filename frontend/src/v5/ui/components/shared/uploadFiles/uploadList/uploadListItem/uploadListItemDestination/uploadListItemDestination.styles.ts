@@ -51,7 +51,12 @@ export const AutocompleteInput = styled(TextField)`
 
 export type NewOrExisting = '' | 'new' | 'existing';
 export const DestinationInput = styled(AutocompleteInput)<{ neworexisting: NewOrExisting }>`
-	& > .MuiInputBase-root {
+	&.MuiFormControl-root > .MuiInputBase-root.MuiAutocomplete-inputRoot {
+		padding-right: 40px;
+		&:hover, &.Mui-focused {
+			padding-right: 60px;
+		}
+		
 		${({ neworexisting, theme, error }) => neworexisting === 'new' && !error && css`
 			color: ${theme.palette.primary.main};
 			background-color: ${theme.palette.primary.lightest};
