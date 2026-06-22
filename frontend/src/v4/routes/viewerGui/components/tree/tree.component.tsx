@@ -101,7 +101,6 @@ export class Tree extends PureComponent<IProps, IState> {
 	};
 
 	public nodeListRef = createRef() as any;
-	private scrollbarRef = createRef() as any;
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
@@ -115,6 +114,7 @@ export class Tree extends PureComponent<IProps, IState> {
 	public renderNodesList = renderWhenTrue(() => {
 		const { nodesList } = this.props;
 		return (<VirtualList
+			handle={this.nodeListRef}
 			items={nodesList}
 			itemHeight={TREE_ITEM_SIZE}
 			ItemComponent={(node, index) => this.renderTreeNode(node, index)}
@@ -130,7 +130,7 @@ export class Tree extends PureComponent<IProps, IState> {
 		if (prevProps.activeNode !== activeNode && activeNode) {
 			if (this.state.isScrollToActive) {
 				const index = nodesList.findIndex(({ _id }) => _id === activeNode);
-				this.nodeListRef.current.scrollToItem(index, 'start');
+				this.nodeListRef.current.gotoIndex(index);
 			} else {
 				this.setState({ isScrollToActive: true });
 			}
