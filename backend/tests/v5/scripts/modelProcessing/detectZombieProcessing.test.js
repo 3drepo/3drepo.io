@@ -67,8 +67,8 @@ const setupData = () => {
 		const clashRuns = clashRunStates.map((status) => (
 			generateClashRun(plan, undefined, {
 				status,
-				triggeredAt: recentDate,
-				updatedAt: recentDate,
+				triggeredAt: recentDate.getTime(),
+				updatedAt: recentDate.getTime(),
 			})
 		));
 		await createClashRuns(teamspace, project.id, plan, clashRuns);

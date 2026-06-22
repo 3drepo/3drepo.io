@@ -356,28 +356,16 @@ db.createClashPlans = async (teamspace, project, plans) => {
 
 db.createClashRuns = async (teamspace, project, plan, runs) => {
 	const formattedProject = isString(project) ? stringToUUID(project) : project;
-	const formattedRuns = runs.map(({ clashResults, ...run }) => {
-		const formattedRun = {
+	const formattedRuns = runs.map(({ clashResults, triggeredAt, updatedAt, plan: runPlan, ...run }) => {
+		const planToStore = runPlan ?? plan;
+		return deleteIfUndefined({
 			...run,
 			_id: stringToUUID(run._id),
 			project: formattedProject,
-			updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
-			plan: { ...plan, _id: stringToUUID(plan._id) },
-		};
-
-		if (clashResults) {
-			formattedRun.results = {
-				stats: {
-					new: clashResults.new.length,
-					active: clashResults.active.length,
-					resolved: clashResults.resolved.length,
-				},
-			};
-			formattedRun.status = clashRunStatus.COMPLETED;
-			formattedRun.updatedAt = run.updatedAt ?? new Date();
-		}
-
-		return formattedRun;
+			triggeredAt: new Date(triggeredAt),
+			updatedAt: new Date(updatedAt ?? triggeredAt),
+			plan: planToStore ? { ...planToStore, _id: stringToUUID(planToStore._id) } : undefined,
+		});
 	});
 
 	await Promise.all(runs.map(({ _id, clashResults }) => (clashResults
@@ -484,7 +472,8 @@ ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
 
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
-ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
+// the last character is always 'a' to avoid generating a string that is compatible with Number() which gives unexpected results in some tests.
+ServiceHelper.generateRandomString = (l = 20) => (l ? `${Crypto.randomBytes(Math.ceil(l / 2)).toString('hex').slice(0, l - 1)}a` : '');
 ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
@@ -983,6 +972,15 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	});
 };
 
+const generateClashRunPlan = (plan) => plan && deleteIfUndefined({
+	_id: plan._id,
+	type: plan.type,
+	tolerance: plan.tolerance,
+	selfIntersectionsCheck: plan.selfIntersectionsCheck,
+	selectionA: plan.selectionA,
+	selectionB: plan.selectionB,
+});
+
 ServiceHelper.generateClashes = (plan, number = 20) => {
 	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
 	const objectId = (container) => [
@@ -1004,11 +1002,20 @@ ServiceHelper.generateClashes = (plan, number = 20) => {
 ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteIfUndefined({
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
-	triggeredAt: new Date(),
-	updatedAt: clashResults ? new Date() : undefined,
-	status: clashResults ? clashRunStatus.COMPLETED : clashRunStatus.PLANNED,
-	plan,
-	clashResults,
+	triggeredAt: Date.now(),
+	plan: generateClashRunPlan(plan),
+	...(clashResults ? {
+		updatedAt: Date.now(),
+		status: clashRunStatus.COMPLETED,
+		results: {
+			stats: {
+				new: clashResults.new.length,
+				active: clashResults.active.length,
+				resolved: clashResults.resolved.length,
+			},
+		},
+		clashResults,
+	} : { status: clashRunStatus.PLANNED }),
 	...overrides,
 });
 

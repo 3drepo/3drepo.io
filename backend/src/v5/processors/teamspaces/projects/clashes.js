@@ -26,7 +26,9 @@ const {
 	createClashRun,
 	deleteRunsByPlan,
 	deleteRunsByProject,
+	getClashRunById,
 	getClashRunByQuery,
+	getClashRunsByPlan,
 	getLatestRunByPlan,
 	updateRunStatus,
 } = require('../../../models/clashes.runs');
@@ -34,18 +36,21 @@ const {
 	createPlan,
 	deletePlan: deleteClashPlan,
 	deletePlansByProject,
+	getAllPlansByProject,
+	getPlanById,
 	updatePlan,
 } = require('../../../models/clashes.plans');
-const { getArrayDifference, uniqueElements } = require('../../../utils/helper/arrays');
-const { getExternalIdsFromMetadata, getMeshNodeBounds, getMeshesWithParentIds } = require('./models/commons/scenes');
+const { getBoundsForGroupsOfMeshNodes, getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
+const { meshPrimitiveTypes, nodeTypes } = require('../../../models/scenes.constants');
 const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
 const { createReadStream } = require('fs');
 const { deleteIfUndefined } = require('../../../utils/helper/objects');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
 const { events } = require('../../../services/eventsManager/eventsManager.constants');
+const { getArrayDifference } = require('../../../utils/helper/arrays');
 const { getContainerById } = require('../../../models/modelSettings');
 const { getLatestRevision } = require('../../../models/revisions');
 const { getNodesByQuery } = require('../../../models/scenes');
@@ -72,6 +77,12 @@ Clashes.deleteClashDataInProject = async (teamspace, project) => {
 	const runIds = await deleteRunsByProject(teamspace, project);
 	await removeFiles(teamspace, CLASH_RUNS_COL, runIds);
 };
+
+Clashes.getAllPlans = getAllPlansByProject;
+
+Clashes.getPlanById = getPlanById;
+
+Clashes.getClashRunsByPlan = getClashRunsByPlan;
 
 const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};
@@ -120,7 +131,15 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 	}
 
 	const meshes = await getNodesByQuery(teamspace, project, container,
-		deleteIfUndefined({ type: 'mesh', rev_id: revision, _id: meshIDQuery }),
+		deleteIfUndefined({
+			type: nodeTypes.MESH,
+			rev_id: revision,
+			_id: meshIDQuery,
+			$or: [
+				{ primitive: meshPrimitiveTypes.POLYGON },
+				{ primitive: { $exists: false } },
+			],
+		}),
 		{ _id: 1, parents: 1, name: 1, shared_id: 1 });
 
 	for (const mesh of meshes) {
@@ -128,14 +147,14 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 
 		if (!compIdToMeshes[compositeId]) {
 			// eslint-disable-next-line no-param-reassign
-			compIdToMeshes[compositeId] = [];
+			compIdToMeshes[compositeId] = new Set();
 		}
 
-		compIdToMeshes[compositeId].push(UUIDToString(mesh._id));
+		compIdToMeshes[compositeId].add(UUIDToString(mesh._id));
 	}
 };
 
-const writeConfigSetEntry = async (teamspace, project, selections, stream, setName) => {
+const findObjectsForSelections = async (teamspace, project, selections = []) => {
 	const mergedSelections = {};
 
 	await Promise.all(selections.map(async ({ container, revision, rules = [] }) => {
@@ -147,13 +166,22 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 			mergedSelections[container].objects);
 	}));
 
-	const selectionEntries = await Promise.all(Object.values(mergedSelections)
-		.map(async ({ container, revision, objects }) => ({
-			container,
-			revision,
-			objects: await applyExternalIds(teamspace, container, revision, objects),
-		})));
+	const selectionEntries = [];
+	await Promise.all(Object.values(mergedSelections)
+		.map(async ({ container, revision, objects }) => {
+			if (Object.keys(objects).length) {
+				selectionEntries.push({
+					container,
+					revision,
+					objects: await applyExternalIds(teamspace, container, revision, objects),
+				});
+			}
+		}));
 
+	return selectionEntries;
+};
+
+const writeConfigSetEntry = async (teamspace, project, selectionEntries, stream, setName) => {
 	stream.write(`"${setName}":[`);
 	let firstSelection = true;
 	for (const { container, revision, objects } of selectionEntries) {
@@ -165,14 +193,26 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 		stream.write(`{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 		let firstObject = true;
-		for (const [compositeId, meshIdsWithDuplicates] of Object.entries(objects)) {
+		const compositeIds = Object.keys(objects);
+		const meshIdGroupsStr = [];
+		const meshIdGroupsUUID = [];
+		compositeIds.forEach((compositeId) => {
+			const meshIds = Array.from(objects[compositeId]);
+			meshIdGroupsStr.push(meshIds);
+			meshIdGroupsUUID.push(meshIds.map(stringToUUID));
+		});
+		// eslint-disable-next-line no-await-in-loop
+		const bboxes = await getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+			meshIdGroupsUUID);
+
+		for (let index = 0; index < compositeIds.length; index++) {
+			const compositeId = compositeIds[index];
 			if (!firstObject) {
 				stream.write(',');
 			}
 
-			const meshIds = uniqueElements(meshIdsWithDuplicates);
-			// eslint-disable-next-line no-await-in-loop
-			const bbox = await getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const meshIds = meshIdGroupsStr[index];
+			const bbox = bboxes[index];
 			const bboxSignificantFigures = 8;
 			const formattedBbox = {
 				min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
@@ -188,22 +228,66 @@ const writeConfigSetEntry = async (teamspace, project, selections, stream, setNa
 	stream.write(']');
 };
 
-Clashes.createRun = async (teamspace, project, plan, user) => {
-	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
-	const { type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
-	const runId = await createClashRun(teamspace, project, plan, user);
+const getClashRunContext = async (teamspace, project, plan) => {
+	const { type, tolerance, selfIntersectionsCheck } = plan;
+
+	return {
+		type,
+		tolerance,
+		selfIntersectsA: selfIntersectionsCheck === true
+			|| selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+		selfIntersectsB: selfIntersectionsCheck === true
+			|| selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1],
+		selectionA: await findObjectsForSelections(teamspace, project, plan.selectionA),
+		selectionB: await findObjectsForSelections(teamspace, project, plan.selectionB),
+	};
+};
+
+const sendClashRunToQueue = async (teamspace, project, runId, context) => {
+	const { type, tolerance, selfIntersectsA, selfIntersectsB, selectionA, selectionB } = context;
 	const configStream = new PassThrough();
 	configStream.write('{');
 	configStream.write(`"type":${JSON.stringify(type)},`);
 	configStream.write(`"tolerance":${JSON.stringify(tolerance)},`);
-	configStream.write(`"selfIntersectsA":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
-	configStream.write(`"selfIntersectsB":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
+	configStream.write(`"selfIntersectsA":${JSON.stringify(selfIntersectsA)},`);
+	configStream.write(`"selfIntersectsB":${JSON.stringify(selfIntersectsB)},`);
 	await writeConfigSetEntry(teamspace, project, selectionA, configStream, 'setA');
 	configStream.write(',');
 	await writeConfigSetEntry(teamspace, project, selectionB, configStream, 'setB');
 	configStream.end('}');
 
 	await queueClashRun(teamspace, project, UUIDToString(runId), configStream);
+};
+
+Clashes.createRun = async (teamspace, project, plan, user) => {
+	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
+	const clashConfig = deleteIfUndefined({
+		_id: plan._id,
+		type: plan.type,
+		tolerance: plan.tolerance,
+		selfIntersectionsCheck: plan.selfIntersectionsCheck,
+		selectionA: plan.selectionA,
+		selectionB: plan.selectionB,
+	});
+	const [runId, context] = await Promise.all([
+		createClashRun(teamspace, project, clashConfig, user),
+		getClashRunContext(teamspace, project, plan),
+	]);
+	const { selectionA, selectionB, selfIntersectsA, selfIntersectsB } = context;
+	const hasObjectsInA = !!selectionA.length;
+	const hasObjectsInB = !!selectionB.length;
+
+	if ((hasObjectsInA && hasObjectsInB)
+		|| (selfIntersectsA && hasObjectsInA)
+		|| (selfIntersectsB && hasObjectsInB)) {
+		await sendClashRunToQueue(teamspace, project, runId, context);
+	} else {
+		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
+			{ error: {
+				reason: 'The defined selections do not yield any candidates to execute a clash run.' },
+			});
+	}
+
 	return runId;
 };
 
@@ -295,8 +379,7 @@ const formatClashForResults = (clash) => {
 };
 
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan, status } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId }, { plan: 1, status: 1 });
+	const { plan, status } = await getClashRunById(teamspace, project, runId, { plan: 1, status: 1 });
 
 	if (status === clashRunStatus.ABORTED) {
 		// this run was cancelled (likely via the utility script)
@@ -342,8 +425,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		});
 
 		if (hasErrors) {
-			const errMessage = `The following errors were found: ${
-				Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
+			const errMessage = `The following errors were found: ${Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
 			}`;
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { reason: errMessage } });
