@@ -92,7 +92,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		type: imposeCondition(Yup.string().oneOf(Object.values(CLASH_TYPES)), true, false),
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
-			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
+			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, false),
 		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string()
 			.oneOf(Object.values(triggerOptions))).min(1)), true, false),
 		selectionA: imposeCondition(selectionSchema, true, false),
