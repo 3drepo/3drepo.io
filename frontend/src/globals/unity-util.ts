@@ -2384,13 +2384,13 @@ export class UnityUtil {
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
-		if(arrLength == 0) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 5000) {
+		if (arrLength == 0) {
 			//pass the message as is
 			return new Promise((resolve) => {
-			func(0, 0);
-			this.unityOnUpdateActions.push(resolve);
-		});
+				func(0, 0);
+				this.unityOnUpdateActions.push(resolve);
+			});
 		}
 		return new Promise((resolve) => {
 			let index = 0;
@@ -3036,7 +3036,7 @@ export class UnityUtil {
 			UnityUtil.viewer.onAutorecovery(newCanvas);
 		}
 	}
-	
+
 	/** 
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.
