@@ -27,6 +27,14 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+// The contents of this type will change in line with the needs of
+// the Test Automation or Profiling Tools.
+type ModelStatistics = {
+	bundlesLoaded: number,
+	bundleLoadingTasks: number,
+	frameCount: number,
+};
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -77,6 +85,14 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static externalWebRequestHandler;
+
+	/** Stores an offset into the WASM heap were the model statistics counters
+	 * can be found. These are in the same order as the Statistics in the
+	 * viewer's GUI display. This is an internal property and subject to change
+	 * without notice.
+	 *  @hidden
+	*/
+	public static modelStatisticsArrayOffset: number = 0;
 
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
@@ -1923,20 +1939,22 @@ export class UnityUtil {
 	/**
 	 * Override the colour of given object(s)
 	 * @category Object Highlighting
-	 * @param account - teamspace the meshes resides in
-	 * @param model - model ID the meshes resides in
+	 * @param teamspace - teamspace the meshes resides in
+	 * @param container - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
+	 * @param excludeIds - If set to true, the color override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
-	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
+	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
-			if (account && model) {
-				param.nameSpace = `${account}.${model}`;
+			if (teamspace && container) {
+				param.nameSpace = `${teamspace}.${container}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1947,15 +1965,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1968,9 +1988,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param opacity - opacity (>0 - 1) value to override with
+	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -1978,6 +1999,7 @@ export class UnityUtil {
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.opacity = opacity;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1988,15 +2010,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2093,15 +2117,15 @@ export class UnityUtil {
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with an object with a screenshot in base64 format
+	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
 	 */
-	public static requestScreenShot(): Promise<object> {
+	public static requestScreenShot(): Promise<string> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
-		return newScreenshotPromise as Promise<object>;
+		return newScreenshotPromise as Promise<string>;
 	}
 
 	/**
@@ -2133,9 +2157,9 @@ export class UnityUtil {
 	 */
 	public static setAPIHost(hostNames: { hostNames: string[] }) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
-		if (UnityUtil.externalWebRequestHandler !== undefined) {
-			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
-		}
+		UnityUtil.onReady().then(() => { // Make sure not to check externalWebRequestHandler until after we know whether it will be initialised or not
+			UnityUtil.externalWebRequestHandler?.setAPIHost(hostNames.hostNames);
+		});
 	}
 
 	/**
@@ -2145,6 +2169,9 @@ export class UnityUtil {
 	 */
 	public static setAPIKey(apiKey: string) {
 		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+		UnityUtil.onReady().then(() => {
+			UnityUtil.externalWebRequestHandler?.setAPIKey(apiKey);
+		});
 	}
 
 	/**
@@ -2240,7 +2267,7 @@ export class UnityUtil {
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
-	 * @param pos - 3D point in space where the camera should be
+	 * @param position - 3D point in space where the camera should be
 	 * @param up - Up vector
 	 * @param forward - forward vector
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
@@ -2249,11 +2276,11 @@ export class UnityUtil {
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
-		pos: [number],
-		up: [number],
-		forward: [number],
-		lookAt: [number],
-		projectionType?: boolean,
+		position: number[],
+		up: number[],
+		forward: number[],
+		lookAt: number[],
+		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
@@ -2278,7 +2305,7 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
-		param.position = pos;
+		param.position = position;
 		param.up = up;
 		param.forward = forward;
 		param.lookAt = lookAt;
@@ -2357,7 +2384,14 @@ export class UnityUtil {
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 5000) {
+		if (arrLength == 0) {
+			//pass the message as is
+			return new Promise((resolve) => {
+				func(0, 0);
+				this.unityOnUpdateActions.push(resolve);
+			});
+		}
 		return new Promise((resolve) => {
 			let index = 0;
 			while (index < arrLength) {
@@ -2381,7 +2415,7 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
-	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
+	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2390,6 +2424,7 @@ export class UnityUtil {
 
 			param.ids = ids.slice(start, end);
 			param.visible = visibility;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2870,6 +2905,27 @@ export class UnityUtil {
 		}
 	}
 
+	/** Polls the viewer for a number of model statistics. This is an internal
+	 * API for the use of the Automated Tests and is subject to change without
+	 * notice.
+	 * @hidden
+	 */
+	public static getModelStatistics(): ModelStatistics {
+		const statistics: ModelStatistics = {
+			bundlesLoaded: 0,
+			bundleLoadingTasks: 0,
+			frameCount: 0,
+		};
+		if (UnityUtil.modelStatisticsArrayOffset) {
+			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
+			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.bundlesLoaded = heap[ptr64 + 23];
+			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.frameCount = heap[ptr64 + 30];
+		}
+		return statistics;
+	}
+
 	/**
 	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
 	 * with additional options for clipping and gizmo display. rect should be the 
@@ -2980,7 +3036,7 @@ export class UnityUtil {
 			UnityUtil.viewer.onAutorecovery(newCanvas);
 		}
 	}
-	
+
 	/** 
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.

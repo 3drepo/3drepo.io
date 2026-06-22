@@ -17,7 +17,7 @@
 
 const Scene = {};
 
-const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { UUIDToString, stringToUUID, unique } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
 const { getNodeByQuery, getNodesByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
@@ -88,7 +88,7 @@ const getMeshParent = (node, meshId = node._id) => {
 	return node.parents[0];
 };
 
-Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshIds) => {
+Scene.getBoundsForGroupsOfMeshNodes = async (teamspace, project, container, revision, meshIdGroups) => {
 	const expandBounds = (bounds, { min, max }) => {
 		if (!bounds) return { min: [...min], max: [...max] };
 
@@ -98,67 +98,93 @@ Scene.getMeshNodeBounds = async (teamspace, project, container, revision, meshId
 		};
 	};
 
-	const meshNodes = await getNodesByQuery(teamspace, project, container, {
-		_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
-		type: nodeTypes.MESH,
-	}, { _id: 1, parents: 1, bounding_box: 1 });
+	/* Flatten the list of meshIds and get all their parents and bounds info in one go */
+	const meshIdGroupKeys = meshIdGroups.map((group) => group.map(UUIDToString));
+	const meshIds = unique(meshIdGroups.flat());
 
-	const bounds = {};
+	const [meshNodes, { coordOffset = [0, 0, 0] }] = await Promise.all([
+		getNodesByQuery(teamspace, project, container, {
+			_id: { $in: meshIds },
+			type: nodeTypes.MESH,
+		}, { _id: 1, parents: 1, bounding_box: 1 }),
+		getRevisionByIdOrTag(teamspace, container,
+			modelTypes.CONTAINER, revision, { coordOffset: 1 }),
+	]);
+
+	const meshToBounds = {};
 	meshNodes.forEach((node) => {
 		const [min, max] = node.bounding_box;
-		bounds[UUIDToString(node._id)] = {
-			parent: UUIDToString(getMeshParent(node)),
-			transform: GeoMaths.matrices.identity(),
+		meshToBounds[UUIDToString(node._id)] = {
+			parent: getMeshParent(node),
 			min,
 			max,
 		};
 	});
 
-	if (!Object.keys(bounds).length) return undefined;
+	if (!Object.keys(meshToBounds).length) return meshIdGroups.map(() => undefined);
 
-	while (Object.values(bounds).some(({ parent }) => parent)) {
-		const parentIds = Array.from(new Set(Object.values(bounds).flatMap(({ parent }) => parent ?? [])));
+	/* Get all the transforms from all parents and their ancestors (this is effectively a recursion loop) */
+	const transforms = {};
+	const getTransform = (parentId) => transforms[UUIDToString(parentId)];
+	let parentIds = unique(Object.values(meshToBounds).map(({ parent }) => parent));
+	while (parentIds.length) {
+		const missingParentIds = new Set(parentIds.map(UUIDToString));
+
 		// eslint-disable-next-line no-await-in-loop
 		const transformationNodes = await getNodesByQuery(teamspace, project, container, {
-			shared_id: { $in: parentIds.map(stringToUUID) },
+			shared_id: { $in: parentIds },
 			type: nodeTypes.TRANSFORMATION,
 		}, { shared_id: 1, parents: 1, matrix: 1 });
 
-		const transforms = {};
 		transformationNodes.forEach((node) => {
+			missingParentIds.delete(UUIDToString(node.shared_id));
 			transforms[UUIDToString(node.shared_id)] = {
-				parent: node.parents?.[0] ? UUIDToString(node.parents[0]) : undefined,
+				parent: node.parents?.[0],
 				transform: node.matrix ?? GeoMaths.matrices.identity(),
 			};
 		});
 
-		Object.entries(bounds).forEach(([key, bound]) => {
-			if (!bound.parent) return;
+		if (missingParentIds.size) {
+			throw new Error(`Invalid scene data: transformation ${Array.from(missingParentIds).join(', ')} is missing`);
+		}
 
-			const parent = transforms[bound.parent];
-			if (!parent) {
-				throw new Error(`Invalid scene data: transformation ${bound.parent} is missing`);
-			}
-
-			bounds[key] = {
-				...bound,
-				parent: parent.parent,
-				transform: GeoMaths.matrices.multiply(parent.transform, bound.transform),
-			};
-		});
+		parentIds = unique(parentIds.flatMap((parentId) => {
+			const { parent } = getTransform(parentId);
+			return parent && !getTransform(parent) ? [parent] : [];
+		}));
 	}
 
-	const { coordOffset = [0, 0, 0] } = await getRevisionByIdOrTag(teamspace, container,
-		modelTypes.CONTAINER, revision, { coordOffset: 1 });
+	const cumulativeTransforms = {};
+	const getCumulativeTransform = (parentId) => {
+		if (!parentId) return GeoMaths.matrices.identity();
+		const parentIdStr = UUIDToString(parentId);
+		if (!cumulativeTransforms[parentIdStr]) {
+			const parent = transforms[parentIdStr];
+			cumulativeTransforms[parentIdStr] = GeoMaths.matrices.multiply(
+				getCumulativeTransform(parent.parent),
+				parent.transform,
+			);
+		}
 
-	return Object.values(bounds).reduce((res, bound) => {
-		const min = GeoMaths.vectors.add(GeoMaths.vectors.transform(bound.transform, bound.min), coordOffset);
-		const max = GeoMaths.vectors.add(GeoMaths.vectors.transform(bound.transform, bound.max), coordOffset);
-		return expandBounds(res, {
-			min: min.map((value, i) => Math.min(value, max[i])),
-			max: max.map((value, i) => Math.max(value, min[i])),
-		});
-	}, undefined);
+		return cumulativeTransforms[parentIdStr];
+	};
+
+	return meshIdGroupKeys.map((group) => {
+		let bounds;
+		for (const meshIdKey of group) {
+			const bound = meshToBounds[meshIdKey];
+			if (bound) {
+				const transform = getCumulativeTransform(bound.parent);
+				const min = GeoMaths.vectors.add(GeoMaths.vectors.transform(transform, bound.min), coordOffset);
+				const max = GeoMaths.vectors.add(GeoMaths.vectors.transform(transform, bound.max), coordOffset);
+				bounds = expandBounds(bounds, {
+					min: min.map((value, i) => Math.min(value, max[i])),
+					max: max.map((value, i) => Math.max(value, min[i])),
+				});
+			}
+		}
+		return bounds;
+	});
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {

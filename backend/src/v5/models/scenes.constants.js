@@ -23,4 +23,9 @@ SceneConstants.nodeTypes = {
 	TEXTURE: 'texture',
 };
 
+SceneConstants.meshPrimitiveTypes = {
+	LINE: 2,
+	POLYGON: 3,
+};
+
 module.exports = SceneConstants;
