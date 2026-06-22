@@ -188,19 +188,26 @@ jobs:
 
       # release_name is master/staging for push deploys, or the normalised
       # PR branch name for on-demand branch deployments.
-      - name: Deploy Helm chart
-        env:
-          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
-          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
+
+          helm_set_args=(
+            --set "image.tag=$COMMIT_SHA"
+            --set "branchName=$RELEASE_NAME"
+          )
+
+          override="${CUSTOM_HELM_OVERRIDE#,}"
+          if [[ -n "$override" ]]; then
+            helm_set_args+=(--set "$override")
+          fi
+
           helm upgrade --install \
             "$RELEASE_NAME" \
             oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
             --version "$HELM_CHART_VERSION" \
             --namespace default \
             -f "$RUNNER_TEMP/values.yaml" \
-            --set "image.tag=$COMMIT_SHA,branchName=$RELEASE_NAME,$CUSTOM_HELM_OVERRIDE"
+            "${helm_set_args[@]}"
 
       - name: Log out from registries
         if: always()
