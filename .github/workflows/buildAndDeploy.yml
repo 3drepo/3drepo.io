@@ -46,6 +46,8 @@ jobs:
     steps:
       # Push deploys use master/staging from the triggering commit. ChatOps
       # deploys use the PR head commit from the slash-command payload.
+      # Fork PRs are refused because this workflow uses registry and cluster
+      # secrets during Docker build, image push, and Helm deployment.
       # The release name is normalised because Helm release names become
       # Kubernetes resource names.
       - name: Set deployment metadata
@@ -67,6 +69,11 @@ jobs:
             checkout_ref="$PUSH_SHA"
             commit_sha="$PUSH_SHA"
           else
+            if [[ "$PR_HEAD_REPO" != "$REPOSITORY_NAME" ]]; then
+              echo "Refusing to deploy forked PR from '$PR_HEAD_REPO'."
+              exit 1
+            fi
+
             source_branch="$PR_HEAD_REF"
             checkout_repository="$PR_HEAD_REPO"
             checkout_ref="$PR_HEAD_SHA"

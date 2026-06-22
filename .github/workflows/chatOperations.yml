@@ -10,6 +10,9 @@ jobs:
         uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          # Deployment commands use registry and cluster secrets, so only
+          # users with write access or above can dispatch them.
+          permission: write
           commands: |
             deploy
             destroy

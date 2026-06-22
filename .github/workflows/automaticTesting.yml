@@ -217,6 +217,8 @@ jobs:
           branch: ${{ github.head_ref || github.ref_name }}
       - name: Check to see if customHelmOverride has any APP settings
         id: customHelmOverride
-        uses: mikefarah/yq@master
+        # Pin yq instead of using the floating master branch so CI is
+        # reproducible and not affected by upstream branch changes.
+        uses: mikefarah/yq@v4.53.3
         with:
           cmd: if ( $(yq eval '.env.CUSTOM_HELM_OVERRIDE | ( contains("APP_") )' .github/workflows/buildAndDeploy.yml) === "true" ); then echo $(yq eval '.env.CUSTOM_HELM_OVERRIDE' .github/workflows/buildAndDeploy.yml); exit 1;  fi
