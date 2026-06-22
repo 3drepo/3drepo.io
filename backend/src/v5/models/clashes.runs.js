@@ -75,8 +75,19 @@ ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sor
 	return run;
 };
 
+ClashRuns.getClashRunById = (teamspace, project, runId, projection) => ClashRuns.getClashRunByQuery(
+	teamspace, project, { _id: runId }, projection);
+
 ClashRuns.getLatestRunByPlan = (teamspace, project, planId, projection) => ClashRuns.getClashRunByQuery(
 	teamspace, project, { 'plan._id': planId }, projection, { triggeredAt: -1 });
+
+ClashRuns.getClashRunsByPlan = (teamspace, project, planId, projection) => db.find(
+	teamspace,
+	CLASH_RUNS_COL,
+	{ project, 'plan._id': planId },
+	projection,
+	{ triggeredAt: -1 },
+);
 
 const deleteRunsByQuery = async (teamspace, project, query = {}) => {
 	const runs = await db.find(teamspace, CLASH_RUNS_COL, { project, ...query }, { _id: 1 });

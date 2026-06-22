@@ -27,14 +27,6 @@ declare let createUnityInstance;
 
 export type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
-// The contents of this type will change in line with the needs of
-// the Test Automation or Profiling Tools.
-export type ModelStatistics = {
-	bundlesLoaded: number,
-	bundleLoadingTasks: number,
-	frameCount: number,
-};
-
 export type Clip = {
 	normal: number[];
 	distance: number;
@@ -55,6 +47,14 @@ export type Viewpoint = {
 	clippingPlanes: Clip[] | null;
 	highlighted_group_id: string | null;
 	type: string;
+};
+
+// The contents of this type will change in line with the needs of
+// the Test Automation or Profiling Tools.
+type ModelStatistics = {
+	bundlesLoaded: number,
+	bundleLoadingTasks: number,
+	frameCount: number,
 };
 
 export class UnityUtil {
@@ -1965,9 +1965,10 @@ export class UnityUtil {
 	 * @param container - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
+	 * @param excludeIds - If set to true, the color override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
-	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[]) {
+	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (teamspace && container) {
@@ -1975,6 +1976,7 @@ export class UnityUtil {
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1985,15 +1987,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2006,9 +2010,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param opacity - opacity (>0 - 1) value to override with
+	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2016,6 +2021,7 @@ export class UnityUtil {
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.opacity = opacity;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2026,15 +2032,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2391,7 +2399,14 @@ export class UnityUtil {
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 5000) {
+		if (arrLength == 0) {
+			//pass the message as is
+			return new Promise((resolve) => {
+				func(0, 0);
+				this.unityOnUpdateActions.push(resolve);
+			});
+		}
 		return new Promise((resolve) => {
 			let index = 0;
 			while (index < arrLength) {
@@ -2415,7 +2430,7 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
-	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean) {
+	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2424,6 +2439,7 @@ export class UnityUtil {
 
 			param.ids = ids.slice(start, end);
 			param.visible = visibility;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -3035,7 +3051,7 @@ export class UnityUtil {
 			UnityUtil.viewer.onAutorecovery(newCanvas);
 		}
 	}
-	
+
 	/** 
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.

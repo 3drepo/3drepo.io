@@ -486,9 +486,8 @@ const testProcessClashResults = () => {
 				baseTemplate, { [STATUS]: statuses.OPEN, [PIN]: [10, 20, 30] }, { [DISTANCE_M]: 1 },
 			);
 			const defaultViewTemplate = { ...baseTemplate, config: { defaultView: true } };
-			const voidTicket = generateExistingTicket(
-				baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 },
-			);
+
+			const voidTicket = generateExistingTicket(baseTemplate, { [STATUS]: statuses.VOID }, { [DISTANCE_M]: 0 });
 			test.each([
 				['Should update tickets for active clashes', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, existingTicket, expectedUpdate],
 				['Should reopen resolved tickets using the template default status', baseContext, baseTemplate, {}, { new: [], active: [clash], resolved: [] }, resolvedTicket, { properties: { [STATUS]: statuses.OPEN } }],
