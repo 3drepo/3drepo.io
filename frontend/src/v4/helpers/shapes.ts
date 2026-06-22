@@ -33,7 +33,7 @@ export const shouldDisplayShapes = (ticket, sequence?, min?, max?) => {
 
 export const chopShapesUuids = ({shapes, ...ticket}) => {
 	if (shapes) {
-		ticket = { shapes: shapes.map(({uuid, _id, ...rest}) => rest), ...ticket};
+		ticket = { shapes: shapes.map(({uuid, _id, hidelabel, ...rest}) => rest), ...ticket};
 	}
 
 	return ticket;
