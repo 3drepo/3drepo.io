@@ -24,7 +24,7 @@ const { isString } = require(`${v5Path}/utils/helper/typeCheck`);
 const getSchema = (cmdList) => {
 	const taskArrSchema = Yup.array().of(
 		Yup.object({
-			name: Yup.string().oneOf(cmdList),
+			name: Yup.string().oneOf(cmdList).required(),
 			params: Yup.array().of(Yup.mixed().nullable()).default([]),
 		}),
 	).default([]);

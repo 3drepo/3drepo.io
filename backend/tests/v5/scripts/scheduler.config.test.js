@@ -43,6 +43,7 @@ const testValidateConfig = () => {
 			daily: [{ name: 'cleanUpSharedDir', params: [] }],
 		}, false],
 		['config is a JSON string rendered by helm', JSON.stringify(helmStringConfig), helmStringConfig, false],
+		['task name is missing', { daily: [{}] }, undefined, true],
 		['task name is unknown', { daily: [{ name: 'unknownTask' }] }, undefined, true],
 		['task params are not an array', { daily: [{ name: 'cleanUpSharedDir', params: 'invalid' }] }, undefined, true],
 		['config is a malformed JSON string', '{', undefined, true],
