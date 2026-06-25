@@ -118,7 +118,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const objectsCount = TreeHooksSelectors.selectSelectedObjectsCount();
 
 	const formData = useForm<IGroupSettingsForm>({
-		mode: 'onChange',
+		mode: 'all',
 		resolver: (data, _, options) => yupResolver(GroupSettingsSchema)(data, { isSmart: isSmartRef.current }, options),
 	});
 
@@ -132,7 +132,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		handleSubmit,
 		formState: { errors, isValid, isDirty, touchedFields },
 		setValue,
-		getValues,
 		trigger,
 		watch,
 	} = formData;
@@ -200,7 +199,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const toggleExcludeDefinedObjects = () => {
 		if (!isAdmin) return;
-		setValue('group.excludeDefinedObjects', !getValues('group.excludeDefinedObjects'), {
+		setValue('group.excludeDefinedObjects', !watch('group.excludeDefinedObjects'), {
 			shouldDirty: true,
 			shouldValidate: true,
 		});
@@ -290,10 +289,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 						{isColored && (
 							<ColorPicker
 								onChange={({ color, opacity }) => {
-									setValue('color', color, { shouldDirty: true });
-									setValue('opacity', opacity, { shouldDirty: true });
+									setValue('color', color, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
+									setValue('opacity', opacity, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
 								}}
-								value={({ color: getValues('color'), opacity: getValues('opacity') })}
+								value={({ color: watch('color'), opacity: watch('opacity') })}
 								disabled={!isAdmin}
 							/>
 						)}
