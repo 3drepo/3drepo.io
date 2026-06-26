@@ -52,6 +52,8 @@ export type Viewpoint = {
 // The contents of this type will change in line with the needs of
 // the Test Automation or Profiling Tools.
 type ModelStatistics = {
+	numSupermeshes: number,
+	isNavigating: boolean,
 	bundlesLoaded: number,
 	bundleLoadingTasks: number,
 	frameCount: number,
@@ -2927,6 +2929,8 @@ export class UnityUtil {
 	 */
 	public static getModelStatistics(): ModelStatistics {
 		const statistics: ModelStatistics = {
+			numSupermeshes: 0,
+			isNavigating: false,
 			bundlesLoaded: 0,
 			bundleLoadingTasks: 0,
 			frameCount: 0,
@@ -2934,6 +2938,8 @@ export class UnityUtil {
 		if (UnityUtil.modelStatisticsArrayOffset) {
 			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
 			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.numSupermeshes = heap[ptr64 + 2];
+			statistics.isNavigating = heap[ptr64 + 4] !== 0;
 			statistics.bundlesLoaded = heap[ptr64 + 23];
 			statistics.bundleLoadingTasks = heap[ptr64 + 20];
 			statistics.frameCount = heap[ptr64 + 30];
