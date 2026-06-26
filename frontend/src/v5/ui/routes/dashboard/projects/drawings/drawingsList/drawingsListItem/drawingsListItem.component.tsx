@@ -82,7 +82,7 @@ export const DrawingsListItem = memo(({
 				enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
 			);
 		}
-		return null;
+		return;
 	}, [drawingId]);
 
 	return (

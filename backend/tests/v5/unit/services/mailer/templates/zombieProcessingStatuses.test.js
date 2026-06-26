@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
 const ZombieProcessingStatuses = require(`${src}/services/mailer/templates/zombieProcessingStatuses`);
@@ -24,12 +25,33 @@ const ZombieProcessingStatuses = require(`${src}/services/mailer/templates/zombi
 const testHtml = () => {
 	describe('get template html', () => {
 		test('should get zombieProcessingStatuses template html', async () => {
+			const modelId = generateRandomString();
+			const clashRunId = generateRandomString();
 			const res = await ZombieProcessingStatuses.html({
 				message: generateRandomString(),
 				domain: generateRandomString(),
-				logExcerpt: generateRandomString(),
+				zombieEntries: {
+					models: [{
+						teamspace: generateRandomString(),
+						id: modelId,
+						status: generateRandomString(),
+						timestamp: new Date(),
+					}],
+					drawings: [],
+					clashRuns: [{
+						teamspace: generateRandomString(),
+						id: clashRunId,
+						status: generateRandomString(),
+						timestamp: new Date(),
+					}],
+				},
 			});
 			expect(isHtml(res)).toEqual(true);
+			expect(res).toContain('<b>Models</b>');
+			expect(res).toContain(modelId);
+			expect(res).not.toContain('<b>Drawings</b>');
+			expect(res).toContain('<b>Clash runs</b>');
+			expect(res).toContain(clashRunId);
 		});
 	});
 };

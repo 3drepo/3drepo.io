@@ -25,7 +25,7 @@ import { Outlet, useParams } from 'react-router-dom';
 import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { DashboardFooter } from '@components/shared/dashboardFooter/dashboardFooter.component';
 
-export const DashboardProjectLayout = (): JSX.Element => {
+export const DashboardProjectLayout = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	useEffect(() => {

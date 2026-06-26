@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
@@ -78,6 +79,52 @@ const generateBasicData = () => {
 	return data;
 };
 
+const generateMultipleModelsBasicData = () => {
+	const viewer = ServiceHelper.generateUserCredentials();
+	const commenter = ServiceHelper.generateUserCredentials();
+	const collaborator = ServiceHelper.generateUserCredentials();
+	const data = {
+		users: {
+			tsAdmin: ServiceHelper.generateUserCredentials(),
+			noProjectAccess: ServiceHelper.generateUserCredentials(),
+			nobody: ServiceHelper.generateUserCredentials(),
+			projectAdmin: ServiceHelper.generateUserCredentials(),
+			viewer,
+			commenter,
+			collaborator,
+		},
+		teamspace: ServiceHelper.generateRandomString(),
+		project: ServiceHelper.generateRandomProject(),
+		cons: times(3, () => ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user],
+		})),
+		feds: times(3, () => ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user],
+			modelType: modelTypes.FEDERATION,
+		})),
+		draws: times(3, () => ServiceHelper.generateRandomModel({
+			viewers: [viewer.user],
+			commenters: [commenter.user],
+			collaborators: [collaborator.user],
+			modelType: modelTypes.DRAWING,
+		})),
+		calibration: ServiceHelper.generateCalibration(),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
+	};
+
+	data.jobs = [
+		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+	];
+
+	return data;
+};
+
 const setupBasicData = async (users, teamspace, project, models) => {
 	const { tsAdmin, ...otherUsers } = users;
 
@@ -97,6 +144,67 @@ const setupBasicData = async (users, teamspace, project, models) => {
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
 			[users.projectAdmin.user]),
 	]);
+};
+
+const formatToStats = ({ properties, ticketCount = 0, revs = [] }) => {
+	const { subModels, status, desc, number, properties: props, calibrationStatus,
+		federate, errorReason, type } = properties;
+
+	let { modelType } = properties;
+	if (!modelType) {
+		modelType = federate ? modelTypes.FEDERATION : modelTypes.CONTAINER;
+	}
+
+	revs.sort(({ timestamp: t1 }, { timestamp: t2 }) => {
+		if (t1 < t2) return -1;
+		if (t1 > t2) return 1;
+		return 0;
+	});
+
+	const latestRev = revs.length ? revs[revs.length - 1] : undefined;
+	const res = {
+		code: modelType === modelTypes.DRAWING ? undefined : props.code,
+		unit: modelType === modelTypes.DRAWING ? undefined : props.unit,
+		number: modelType === modelTypes.DRAWING ? number : undefined,
+		desc: modelType === modelTypes.CONTAINER ? undefined : desc,
+		lastUpdated: modelType === modelTypes.FEDERATION ? latestRev?.timestamp?.getTime() : undefined,
+		containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
+		status,
+		calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
+		type: modelType === modelTypes.FEDERATION ? undefined : type,
+	};
+
+	if (federate) {
+		if (subModels) {
+			res.containers = subModels;
+		}
+		if (desc) {
+			res.desc = desc;
+		}
+
+		res.tickets = ticketCount;
+
+		if (latestRev) {
+			res.lastUpdated = latestRev.timestamp.getTime();
+		}
+	} else {
+		res.revisions = {
+			total: revs.length,
+			lastUpdated: latestRev?.timestamp ? latestRev.timestamp.getTime() : undefined,
+			latestRevision: modelType === modelTypes.DRAWING && latestRev
+				? `${latestRev.statusCode}-${latestRev.revCode}`
+				: latestRev?.tag || latestRev?._id,
+		};
+	}
+
+	if (status === 'failed') {
+		res.errorReason = {
+			message: errorReason.message,
+			timestamp: errorReason.timestamp ? errorReason.timestamp.getTime() : undefined,
+		};
+	}
+
+	return deleteIfUndefined(res);
 };
 
 const testGetModelList = (isInternal) => {
@@ -304,20 +412,17 @@ const testGetModelStats = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -370,67 +475,6 @@ const testGetModelStats = (isInternal = false) => {
 				...customCases[modelType],
 				...(isInternal ? [] : externalCases),
 			];
-		};
-
-		const formatToStats = ({ properties, ticketCount = 0, revs = [] }) => {
-			const { subModels, status, desc, number, properties: props, calibrationStatus,
-				federate, errorReason, type } = properties;
-
-			let { modelType } = properties;
-			if (!modelType) {
-				modelType = federate ? modelTypes.FEDERATION : modelTypes.CONTAINER;
-			}
-
-			revs.sort(({ timestamp: t1 }, { timestamp: t2 }) => {
-				if (t1 < t2) return -1;
-				if (t1 > t2) return 1;
-				return 0;
-			});
-
-			const latestRev = revs.length ? revs[revs.length - 1] : undefined;
-			const res = {
-				code: modelType === modelTypes.DRAWING ? undefined : props.code,
-				unit: modelType === modelTypes.DRAWING ? undefined : props.unit,
-				number: modelType === modelTypes.DRAWING ? number : undefined,
-				desc: modelType === modelTypes.CONTAINER ? undefined : desc,
-				lastUpdated: modelType === modelTypes.FEDERATION ? latestRev?.timestamp?.getTime() : undefined,
-				containers: modelType === modelTypes.FEDERATION ? subModels : undefined,
-				status,
-				calibration: modelType === modelTypes.DRAWING ? calibrationStatus : undefined,
-				type: modelType === modelTypes.FEDERATION ? undefined : type,
-			};
-
-			if (federate) {
-				if (subModels) {
-					res.containers = subModels;
-				}
-				if (desc) {
-					res.desc = desc;
-				}
-
-				res.tickets = ticketCount;
-
-				if (latestRev) {
-					res.lastUpdated = latestRev.timestamp.getTime();
-				}
-			} else {
-				res.revisions = {
-					total: revs.length,
-					lastUpdated: latestRev?.timestamp ? latestRev.timestamp.getTime() : undefined,
-					latestRevision: modelType === modelTypes.DRAWING && latestRev
-						? `${latestRev.statusCode}-${latestRev.revCode}`
-						: latestRev?.tag || latestRev?._id,
-				};
-			}
-
-			if (status === 'failed') {
-				res.errorReason = {
-					message: errorReason.message,
-					timestamp: errorReason.timestamp ? errorReason.timestamp.getTime() : undefined,
-				};
-			}
-
-			return deleteIfUndefined(res);
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -771,7 +815,7 @@ const testDeleteModel = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 			const getRoute = ({
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
@@ -781,15 +825,12 @@ const testDeleteModel = (isInternal = false) => {
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			if (isInternal && modelType !== modelTypes.CONTAINER) {
@@ -835,9 +876,9 @@ const testDeleteModel = (isInternal = false) => {
 
 					expect(getRes.body[modelType].find(({ _id }) => _id === res.body._id)).toBeUndefined();
 				} else if (success && isInternal) {
-					const getRes = await agent.get(route).expect(templates.containerNotFound.status);
+					const getRes = await agent.get(route).expect(templates.modelNotFound.status);
 
-					expect(getRes.body.code).toEqual(templates.containerNotFound.code);
+					expect(getRes.body.code).toEqual(templates.modelNotFound.code);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -878,20 +919,17 @@ const testUpdateModelSettings = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1002,23 +1040,20 @@ const testGetSettings = (isInternal = false) => {
 			let model;
 			let model2;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				model2 = con2;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				model2 = fed2;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				model2 = draw2;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1113,7 +1148,7 @@ const testGetThumbnail = () => {
 		const generateTestData = () => {
 			const model = draw;
 			const wrongTypeModel = fed;
-			const modelNotFound = templates.drawingNotFound;
+			const { modelNotFound } = templates;
 
 			const getRoute = ({
 				projectId = project.id,
@@ -1161,20 +1196,17 @@ const testGetUsersWithPermissions = () => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1226,20 +1258,17 @@ const testGetJobsWithAccess = () => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1279,7 +1308,96 @@ const testGetJobsWithAccess = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+const testGetModelStatsInBulk = () => {
+	describe('Get Model Stats in Bulk', () => {
+		const { users, teamspace, project, cons, feds, draws, calibration } = generateMultipleModelsBasicData();
+
+		feds.forEach((fed) => {
+			// eslint-disable-next-line no-param-reassign
+			fed.properties.subModels = cons.map(({ _id }) => ({ _id }));
+		});
+
+		const generateRoute = (
+			modelType,
+			models,
+			key,
+			teamspaceId = teamspace,
+			projectId = project.id) => `/v5/teamspaces/${teamspaceId}/projects/${projectId}/${modelType}s/stats?models=${models.join(',')}&key=${key}`;
+
+		beforeAll(async () => {
+			const models = [...cons, ...feds, ...draws];
+			await setupBasicData(users, teamspace, project, models);
+
+			await Promise.all(feds.map((fed) => addTickets(teamspace, project, fed)));
+
+			const drawRev = await addRevision(teamspace, project, draws[0], modelTypes.DRAWING, true);
+			await ServiceHelper.db.createCalibration(teamspace, project.id, draws[0]._id, drawRev._id, calibration);
+			draws[0].properties.calibrationStatus = calibrationStatuses.CALIBRATED;
+
+			const revs = await Promise.all(cons.map((con) => addRevision(teamspace, project, con)));
+
+			await feds.forEach((fed) => {
+				// eslint-disable-next-line no-param-reassign
+				fed.revs = revs;
+			});
+		});
+
+		const generateTestData = (modelType) => {
+			let models = [];
+			switch (modelType) {
+			case modelTypes.CONTAINER:
+				models = cons;
+				break;
+			case modelTypes.FEDERATION:
+				models = feds;
+				break;
+			case modelTypes.DRAWING:
+				models = draws;
+				break;
+			default:
+				break;
+			}
+			const modelIds = models.map(({ _id }) => _id);
+			return [
+				['the user does not have a valid session', generateRoute(modelType, modelIds, null), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', generateRoute(modelType, modelIds, users.nobody.apiKey), false, templates.teamspaceNotFound],
+				['the teamspace does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, ServiceHelper.generateRandomString(), project.id), false, templates.teamspaceNotFound],
+				['the project does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.projectNotFound],
+				['the models exist and the user has access', generateRoute(modelType, modelIds, users.tsAdmin.apiKey), true, models],
+				['some models do not exist', generateRoute(modelType, [...modelIds, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['!modelQuery string is not provided', `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/stats?key=${users.tsAdmin.apiKey}`, false, templates.invalidArguments],
+				['all models do not exist', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models are of wrong type', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models are of wrong type', generateRoute(modelType, [models[0]._id, models[0]._id], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models do not belong to the project', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+			];
+		};
+
+		const runTests = (desc, route, succeed, expectedOutput) => {
+			test(`should ${succeed ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = succeed ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (succeed) {
+					const expectedStats = expectedOutput.map((model) => ({
+						...formatToStats(model),
+						modelId: model._id,
+					}));
+					expect(res.body.stats).toHaveLength(expectedStats.length);
+					ServiceHelper.outOfOrderArrayEqual(res.body.stats, expectedStats);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.FEDERATION))(modelTypes.FEDERATION.toUpperCase(), runTests);
+		describe.each(generateTestData(modelTypes.CONTAINER))(modelTypes.CONTAINER.toUpperCase(), runTests);
+		describe.each(generateTestData(modelTypes.DRAWING))(modelTypes.DRAWING.toUpperCase(), runTests);
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 
@@ -1300,6 +1418,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testGetThumbnail();
 		testGetUsersWithPermissions();
 		testGetJobsWithAccess();
+		testGetModelStatsInBulk();
 	});
 
 	describe('Internal Service', () => {

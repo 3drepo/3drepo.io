@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../../helper/path');
-const { determineTestGroup, generateUUID, generateRandomNumber, generateRandomString } = require('../../../../../../../../../helper/services');
+const { generateUUID, generateRandomNumber, generateRandomString } = require('../../../../../../../../../helper/services');
 const { times } = require('lodash');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
