@@ -28,11 +28,11 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy, uniqBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
 import { getMeshIDsByQuery } from '@/v4/services/api';
@@ -99,19 +99,22 @@ const mergePrefixes = (prefixesA: string[][], prefixesB: string[][]) => {
  
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(true);
+	const [isGroupDefinitionValid, setIsGroupDefinitionValid] = useState(true);
+	const [isGroupDefinitionDirty, setIsGroupDefinitionDirty] = useState(false);
+
 	const [newPrefix, setNewPrefix] = useState([]);
 	const [currentPrefixes, setCurrentPrefixes] = useState([]);
 	const [filterMenuCoords, setFilterMenuCoords] = useState({ left: 0, bottom: 0 });
 	const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-	const [inputObjects, setInputObjects] = useState([]);
 	const [isPastingRules, setIsPastingRules] = useState(false);
+	const [rules, setRules] = useState([]);
+
 	const [selectedRule, setSelectedRule] = useState(null);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 
 	const formRef = useRef(null);
-	const isSmartRef = useRef(isSmart);
 
 	const isNewGroup = !value;
 	const selectedNodes = TreeHooksSelectors.selectSelectedNodes();
@@ -119,42 +122,31 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'all',
-		resolver: (data, _, options) => yupResolver(GroupSettingsSchema)(data, { isSmart: isSmartRef.current }, options),
+		resolver: yupResolver(GroupSettingsSchema),
 	});
 
-	const { fields, append, remove, update } = useFieldArray({
-		control: formData.control,
-		name: 'group.rules',
-	});
-	const rules = fields as Array<IGroupRule & { id: string }>;
 
 	const {
 		handleSubmit,
-		formState: { errors, isValid, isDirty, touchedFields },
+		formState: { errors, isValid, touchedFields },
 		setValue,
-		trigger,
 		watch,
 	} = formData;
 	const excludeDefinedObjects = watch('group.excludeDefinedObjects');
 
 	const getFormIsValid = () => {
-		if (!isValid) return false;
-		if (isSmart) return isDirty;
-		if (!objectsCount) return false;
-		const objectsAreDifferent = !isEqual(
-			sortBy(selectedNodes),
-			inputObjects,
-		);
-		return (isDirty || objectsAreDifferent);
+		// isDirty from react-hook-form is buggy
+		const isDirty = Object.keys(formData.formState.dirtyFields).length > 0;
+		return ((isDirty || isGroupDefinitionDirty) && (isValid && isGroupDefinitionValid));
 	};
 
 	const onClickSubmit = async (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
-			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
-		} else if (!isEqual(newValues.group?.rules, value?.group?.rules)) {
-			const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, newValues.group.rules, revision);
+		} else if (isGroupDefinitionDirty) {
+			const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, rules, revision);
 			newValues.group.objects = meshObjectsToV5GroupNode(data);
+			newValues.group.rules = rules;
 		}
 
 		if (!newValues.color) {
@@ -175,7 +167,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(appendCopySuffixToDuplicateNames(rules, pastedRules));
+		setRules([...rules, ...appendCopySuffixToDuplicateNames(rules, pastedRules)]);
 	};
 
 	const resetFilterMenu = () => {
@@ -190,9 +182,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handleGroupRulesFormSubmit = (data) => {
 		if (selectedRule) {
-			update(selectedRule.index, data);
+			const newRules = [...rules];
+			newRules[selectedRule.index] = data;
+			setRules(newRules);
 		} else {
-			append(data);
+			setRules([...rules, data]);
 		}
 		resetFilterMenu();
 	};
@@ -220,11 +214,19 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			return;
 		}
 
-		const { objects, ...restGroup } = value.group as Group;
-		const newValue = cloneDeep({ ...value, group: restGroup });
+		const newValue = cloneDeep(value);
+		if (newValue.group.rules) {
+			setRules(newValue.group.rules);
+		}
+
+		// objects validation is manage separately, so we remove it from the form data
+		delete newValue.group.objects;
+		delete newValue.group.rules;
+	
+		newValue.opacity = newValue.opacity ?? 1;
+
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
-		setInputObjects(convertToV4GroupNodes({ objects: value?.group?.objects } as Group));
 		setIsPastingRules(false);
 		setNewPrefix([]);
 	}, [value, isColored]);
@@ -241,16 +243,36 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	}, []);
 
 	useEffect(() => {
-		// isSmartRef is used to get the current value of isSmart in the
-		// resolver function of useForm, as it doesn't have access to the state value directly
-		isSmartRef.current = isSmart;
-		const touched = Object.keys(touchedFields) as Parameters<typeof trigger>[0];
-		if (touched.length) trigger(touched);
-	}, [isSmart]);
-
-	useEffect(() => {
 		setCurrentPrefixes(mergePrefixes(prefixes, subPrefixes(newPrefix)));
 	}, [prefixes, newPrefix]);
+
+	useEffect(() => {
+		// Validate smart group
+		if (!isSmart) return;
+
+		const objectsAreDifferent = !isEqual(
+			rules,
+			value?.group?.rules,
+		);
+
+		setIsGroupDefinitionDirty(objectsAreDifferent);
+		setIsGroupDefinitionValid(rules.length > 0);
+	}, [isSmart,  rules]);
+
+
+	useEffect(() => {
+		// Validate manual group
+		if (isSmart)  return;
+	
+		const objectsAreDifferent = !isEqual(
+			convertToV5GroupNodes(sortBy(selectedNodes)),
+			value?.group?.objects,
+		);
+
+		setIsGroupDefinitionDirty(objectsAreDifferent);
+		setIsGroupDefinitionValid(!!selectedNodes.length);
+
+	}, [isSmart, selectedNodes]);
 
 	return (
 		<form ref={formRef}>
@@ -436,7 +458,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								)}
 							</Subheading>
 							<FormRulesBox>
-								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => { remove(); resetFilterMenu(); }} />
+								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => { setRules([]); resetFilterMenu(); }} />
 								{isPastingRules && (<RulesField onSubmit={handlePasteRules} onClose={() => setIsPastingRules(false)} />)}
 								{isPastingRules && rules.length > 0 && (<Gap $height="5px" />)}
 								<Rules>
@@ -446,7 +468,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 											key={id}
 											isSelected={selectedRule === ruleValue}
 											onDelete={() => {
-												remove(i);
+												const newRules = [...rules];
+												newRules.splice(i, 1);
+												setRules(newRules);
 												resetFilterMenu();
 											}}
 											isReadOnly={!isAdmin}
