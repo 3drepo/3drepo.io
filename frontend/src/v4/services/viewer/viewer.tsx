@@ -84,6 +84,8 @@ export class ViewerService {
 	public isSnappingCursorEnabled: boolean;
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
+		this.setInitialisePromise();
+		UnityUtil.viewer = this;
 		this.name = name;
 
 		this.unityLoaderReady = false;
@@ -101,6 +103,7 @@ export class ViewerService {
 	}
 
 	public setupInstance = async (container, onError) => {
+		this.setInitialisePromise();
 		this.element = container;
 
 		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
@@ -129,6 +132,8 @@ export class ViewerService {
 		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
+
+		this.init();
 	}
 
 	/**
@@ -139,6 +144,7 @@ export class ViewerService {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
+
 
 		this.setInitialisePromise();
 		UnityUtil.viewer = this;
@@ -345,6 +351,7 @@ export class ViewerService {
 		this.isInitialised = false;
 		this.removeAllListeners();
 		this.clearMeasureMode();
+		this.initialisedPromise = null;
 	}
 
 	/**
@@ -782,15 +789,13 @@ export class ViewerService {
 	 */
 
 	public setInitialisePromise() {
+		if (this.initialisedPromise) return;
+
 		const initialised = {} as any;
 		initialised.promise = new Promise((resolve, reject) => {
 			initialised.resolve = resolve;
 			initialised.reject = reject;
 		});
-
-		if (this.initialisedPromise) {
-			this.initialisedPromise.reject();
-		}
 
 		this.initialisedPromise = initialised;
 	}
