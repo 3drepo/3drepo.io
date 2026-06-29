@@ -167,21 +167,21 @@ const testNotifyListenerFailure = () => {
 
 			return [
 				[
-					'Should send an error notification email with event and listener details',
+					'receiving an error with event and listener details',
 					{ payload: { key: generateRandomString() }, error: initialError },
 					true,
 					false,
 					false,
 				],
 				[
-					'Should support string errors and default missing stack trace',
+					'the error is a string value',
 					{ payload: {}, error: generateRandomString() },
 					true,
 					false,
 					false,
 				],
 				[
-					'Should extract code, status and message from nested error structures',
+					'the error has nested error structures',
 					{
 						payload: {},
 						error: {
@@ -194,61 +194,22 @@ const testNotifyListenerFailure = () => {
 					false,
 				],
 				[
-					'Should default message and stack when missing from error object',
+					'the error object is missing message and stack',
 					{ payload: {}, error: {} },
 					true,
 					false,
 					false,
 				],
 				[
-					'Should default message and stack when error is undefined',
+					'the error is undefined',
 					{ payload: {}, error: undefined },
 					true,
 					false,
 					false,
 				],
+
 				[
-					'Should not suppress 404 errors without missing-entity context',
-					{
-						payload: {},
-						error: {
-							status: 404,
-							message: 'Unexpected upstream failure',
-						},
-					},
-					true,
-					false,
-					false,
-				],
-				[
-					'Should suppress notifications for known not-found response codes',
-					{ payload: {}, error: { code: responseTemplates.modelNotFound.code } },
-					false,
-					false,
-					false,
-				],
-				[
-					'Should suppress notifications for known clash not-found response codes',
-					{ payload: {}, error: { code: responseTemplates.clashRunNotFound.code } },
-					false,
-					false,
-					false,
-				],
-				[
-					'Should suppress notifications for missing-entity error messages',
-					{
-						payload: {},
-						error: {
-							message: 'Model does not exist anymore',
-							status: 404,
-						},
-					},
-					false,
-					false,
-					false,
-				],
-				[
-					'Should sanitise payload values and redact sensitive fields',
+					'the payload contains sensitive fields',
 					{
 						payload: {
 							password: 'super-secret',
@@ -270,7 +231,7 @@ const testNotifyListenerFailure = () => {
 					false,
 				],
 				[
-					'Should enforce payload depth, array and object key limits',
+					'the payload exceeds structural limits',
 					{
 						payload: {
 							deepObject: { a: { b: { c: { d: { e: 'too deep' } } } } },
@@ -284,24 +245,51 @@ const testNotifyListenerFailure = () => {
 					false,
 				],
 				[
-					'Should handle undefined payload value safely',
+					'the payload is undefined',
 					{ payload: undefined, error: new Error('any error') },
 					true,
 					false,
 					false,
 				],
 				[
-					'Should log notification failure and stack trace if sendSystemEmail throws with stack',
+					'the mailer throws with a stack trace',
 					{ payload: {}, error: new Error('source failure') },
 					true,
 					true,
 					true,
 				],
 				[
-					'Should log notification failure message only when thrown error has no stack',
+					'the mailer throws without a stack trace',
 					{ payload: {}, error: new Error('source failure') },
 					true,
 					true,
+					false,
+				],
+				[
+					'the error is a not-found response code',
+					{ payload: {}, error: { code: responseTemplates.modelNotFound.code } },
+					false,
+					false,
+					false,
+				],
+				[
+					'the error is a clash not-found response code',
+					{ payload: {}, error: { code: responseTemplates.clashRunNotFound.code } },
+					false,
+					false,
+					false,
+				],
+				[
+					'the error indicates a missing entity',
+					{
+						payload: {},
+						error: {
+							message: 'Model does not exist anymore',
+							status: 404,
+						},
+					},
+					false,
+					false,
 					false,
 				],
 			];
@@ -310,7 +298,7 @@ const testNotifyListenerFailure = () => {
 		const runTests = (tests) => {
 			describe.each(tests)('',
 				(description, testInput, succeed, skipNotification, notificationErrorHasStack) => {
-					test(`It should ${succeed ? 'succeed' : 'failed'} if ${description}`, async () => {
+					test(`It should ${succeed ? 'succeed' : 'fail'} if ${description}`, async () => {
 						if (skipNotification && notificationErrorHasStack) {
 							const notificationError = new Error('failed to send');
 							Mailer.sendSystemEmail.mockRejectedValueOnce(notificationError);
