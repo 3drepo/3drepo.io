@@ -210,15 +210,21 @@ jobs:
     name: Ensure that custom settings are not being merged
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout .github/workflows/buildAndDeploy.yml
+      - name: Checkout .github/deploy/overrides.env
         uses: Bhacaz/checkout-files@v2
         with:
-          files: .github/workflows/buildAndDeploy.yml
+          files: .github/deploy/overrides.env
           branch: ${{ github.head_ref || github.ref_name }}
-      - name: Check to see if customHelmOverride has any APP settings
+      - name: Check to see if CUSTOM_HELM_OVERRIDE has any APP settings
         id: customHelmOverride
-        # Pin yq instead of using the floating master branch so CI is
-        # reproducible and not affected by upstream branch changes.
-        uses: mikefarah/yq@v4.53.3
-        with:
-          cmd: if ( $(yq eval '.env.CUSTOM_HELM_OVERRIDE | ( contains("APP_") )' .github/workflows/buildAndDeploy.yml) === "true" ); then echo $(yq eval '.env.CUSTOM_HELM_OVERRIDE' .github/workflows/buildAndDeploy.yml); exit 1;  fi
+        # Per-branch helm overrides now live in .github/deploy/overrides.env
+        # (sourced by buildAndDeploy.yml). Fail the merge if CUSTOM_HELM_OVERRIDE
+        # still carries a branch-specific APP_ setting that shouldn't reach
+        # master/staging.
+        run: |
+          set -euo pipefail
+          override="$(grep -E '^[[:space:]]*CUSTOM_HELM_OVERRIDE=' .github/deploy/overrides.env | tail -n1 | cut -d= -f2-)"
+          if printf '%s' "$override" | grep -q 'APP_'; then
+            echo "CUSTOM_HELM_OVERRIDE must not carry APP_ settings into a merge: $override"
+            exit 1
+          fi

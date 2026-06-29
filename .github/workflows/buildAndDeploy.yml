@@ -8,27 +8,29 @@ on:
       - master
       - staging
   # ChatOps dispatch comes from .github/workflows/chatOperations.yml when
-  # someone comments /deploy or /destroy on a PR.
+  # someone comments /deploy on a PR.
   repository_dispatch:
     types:
       - deploy-command
-      - destroy-command
 
 permissions:
   contents: read
 
 concurrency:
-  # Cancel superseded runs for the same operation/ref so repeated /deploy
-  # comments or quick successive staging pushes do not race each other.
-  group: deploy-${{ github.event_name == 'repository_dispatch' && github.event.action || github.ref }}-${{ github.event.client_payload.pull_request.number || github.event.client_payload.github.payload.issue.number || github.ref_name }}
+  # Cancel superseded runs for the same ref so repeated /deploy comments or
+  # quick successive staging pushes do not race each other.
+  group: deploy-${{ github.event.client_payload.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 env:
   DOCKER_BUILDKIT: 1
   IMAGE_REPOSITORY: 3drepo.io
-  DOCKERFILE_PATH: .azure/Docker/Dockerfile
-  HELM_CHART_VERSION: '5.23.0'
-  CUSTOM_HELM_OVERRIDE: config.ADDITIONAL_CONFIG=hello
+  DOCKERFILE_PATH: docker/3drepo.io/Dockerfile
+  # Per-branch overridable values (chart version, custom Helm overrides) are NOT
+  # set here. They live in .github/deploy/overrides.env and are sourced from the
+  # deployed branch's checkout below, because repository_dispatch always runs
+  # this workflow definition from the default branch.
+  DEPLOY_OVERRIDES_FILE: .github/deploy/overrides.env
 
 jobs:
   metadata:
@@ -48,8 +50,6 @@ jobs:
       # deploys use the PR head commit from the slash-command payload.
       # Fork PRs are refused because this workflow uses registry and cluster
       # secrets during Docker build, image push, and Helm deployment.
-      # The release name is normalised because Helm release names become
-      # Kubernetes resource names.
       - name: Set deployment metadata
         id: metadata
         env:
@@ -80,6 +80,10 @@ jobs:
             commit_sha="$PR_HEAD_SHA"
           fi
 
+          # Derive a Helm release name from the branch. Helm release names become
+          # Kubernetes resource/DNS names, so normalise to a DNS-1035-friendly
+          # string: lowercase, only [a-z0-9-], no leading/trailing or repeated
+          # dashes, and capped at 53 chars (Helm's release-name limit).
           release_name="$(
             printf '%s' "$source_branch" |
             tr '[:upper:]' '[:lower:]' |
@@ -122,6 +126,35 @@ jobs:
           ref: ${{ needs.metadata.outputs.checkout_ref }}
           token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
 
+      # Read per-branch deploy values from the checked-out branch (see
+      # DEPLOY_OVERRIDES_FILE comment above). Defaults are applied first so a
+      # branch without the file, or with only some keys, still deploys.
+      # Sourcing is safe here: forked PRs are refused in metadata and only
+      # write-access users can /deploy, so this only runs trusted branches.
+      - name: Load deploy overrides
+        run: |
+          set -euo pipefail
+
+          HELM_CHART_VERSION=5.23.0
+          CUSTOM_HELM_OVERRIDE=
+
+          if [[ -f "$DEPLOY_OVERRIDES_FILE" ]]; then
+            set -a
+            # shellcheck disable=SC1090
+            source "$DEPLOY_OVERRIDES_FILE"
+            set +a
+          else
+            echo "No $DEPLOY_OVERRIDES_FILE on this branch; using defaults."
+          fi
+
+          {
+            echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+            echo "CUSTOM_HELM_OVERRIDE=$CUSTOM_HELM_OVERRIDE"
+          } >> "$GITHUB_ENV"
+
+          echo "Helm chart version: $HELM_CHART_VERSION"
+          echo "Custom Helm override: ${CUSTOM_HELM_OVERRIDE:-<none>}"
+
       - name: Log in to Azure Container Registry
         run: |
           echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
@@ -160,7 +193,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.26.3'
+          version: 'v1.34.2'
 
       - name: Set Kubernetes context
         uses: azure/k8s-set-context@v4
@@ -187,7 +220,12 @@ jobs:
             -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
       # release_name is master/staging for push deploys, or the normalised
-      # PR branch name for on-demand branch deployments.
+      # PR branch name for on-demand branch deployments. HELM_CHART_VERSION and
+      # CUSTOM_HELM_OVERRIDE come from the overrides file loaded above.
+      - name: Deploy with Helm
+        env:
+          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
 
@@ -214,44 +252,3 @@ jobs:
         run: |
           docker logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
           helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
-
-  destroy:
-    name: Destroy PR instance
-    # Only ChatOps /destroy reaches this job. It removes the same release name
-    # that /deploy would create for the PR branch.
-    if: github.event.action == 'destroy-command'
-    needs: metadata
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: '4.0.1'
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.26.3'
-
-      - name: Set Kubernetes context
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
-
-      # Keep /destroy scoped to ephemeral PR releases. Master/staging are
-      # protected even if someone manages to dispatch those names.
-      - name: Destroy Helm release
-        env:
-          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
-        run: |
-          set -euo pipefail
-
-          if [[ "$RELEASE_NAME" == "master" || "$RELEASE_NAME" == "staging" ]]; then
-            echo "Refusing to destroy protected release '$RELEASE_NAME'."
-            exit 1
-          fi
-
-          helm uninstall "$RELEASE_NAME" \
-            --namespace default \
-            --ignore-not-found

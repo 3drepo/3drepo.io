@@ -5,4 +5,4 @@
 *.tsx text eol=lf
 *.css text eol=lf
 
-.azure/build-and-deploy.yaml merge=ours
+.github/deploy/overrides.env merge=ours

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Slash Command Dispatch
-        uses: peter-evans/slash-command-dispatch@v3
+        uses: peter-evans/slash-command-dispatch@v5
         with:
           token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           # Deployment commands use registry and cluster secrets, so only
@@ -16,4 +16,4 @@ jobs:
           commands: |
             deploy
             destroy
-          issue-type: pull-request  # initially we only require pull request for operations to match /azp run
+          issue-type: pull-request  # deploy/destroy operations only apply to pull requests
