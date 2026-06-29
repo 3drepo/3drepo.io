@@ -210,11 +210,14 @@ jobs:
     name: Ensure that custom settings are not being merged
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout .github/deploy/overrides.env
-        uses: Bhacaz/checkout-files@v2
+      # Plain checkout of the source branch. We deliberately don't use a
+      # fetch-single-file action here: the overrides file is optional, and such
+      # actions hard-fail on a branch that doesn't have it yet (e.g. branches
+      # predating this file), which would break their pushes.
+      - name: Check out source branch
+        uses: actions/checkout@v4
         with:
-          files: .github/deploy/overrides.env
-          branch: ${{ github.head_ref || github.ref_name }}
+          ref: ${{ github.head_ref || github.ref_name }}
       - name: Check to see if CUSTOM_HELM_OVERRIDE has any APP settings
         id: customHelmOverride
         # Per-branch helm overrides now live in .github/deploy/overrides.env
@@ -223,9 +226,10 @@ jobs:
         # master/staging.
         run: |
           set -euo pipefail
-          # Tolerate the key being absent/commented out: grep exits non-zero on
-          # no match, which would otherwise fail the job under pipefail.
-          override="$( { grep -E '^[[:space:]]*CUSTOM_HELM_OVERRIDE=' .github/deploy/overrides.env || true; } | tail -n1 | cut -d= -f2-)"
+          # Treat a missing file or absent/commented key as "no overrides":
+          # grep exits non-zero in those cases, which would otherwise fail the
+          # job under pipefail.
+          override="$( { grep -E '^[[:space:]]*CUSTOM_HELM_OVERRIDE=' .github/deploy/overrides.env 2>/dev/null || true; } | tail -n1 | cut -d= -f2-)"
           if printf '%s' "$override" | grep -q 'APP_'; then
             echo "CUSTOM_HELM_OVERRIDE must not carry APP_ settings into a merge: $override"
             exit 1
