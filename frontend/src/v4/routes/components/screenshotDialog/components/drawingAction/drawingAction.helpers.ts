@@ -28,7 +28,7 @@ const rectangleProps = { height: 1, width: 1 };
 const cloudProps = {
 	data: cloud.path,
 	scaleX: 0,
-	scaleY: 0
+	scaleY: 0,
 };
 
 export const createShape = (shapeType, commonProps, initialPositionProps) => {

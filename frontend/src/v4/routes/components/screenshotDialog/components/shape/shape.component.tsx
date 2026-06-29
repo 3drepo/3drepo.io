@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useRef, Fragment } from 'react';
-import { Group, Transformer } from 'react-konva';
+import { Circle, Group, Transformer } from 'react-konva';
 import { pick } from 'lodash';
 import { useHandleBubbling } from '../drawnObjects.hooks';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
