@@ -223,7 +223,9 @@ jobs:
         # master/staging.
         run: |
           set -euo pipefail
-          override="$(grep -E '^[[:space:]]*CUSTOM_HELM_OVERRIDE=' .github/deploy/overrides.env | tail -n1 | cut -d= -f2-)"
+          # Tolerate the key being absent/commented out: grep exits non-zero on
+          # no match, which would otherwise fail the job under pipefail.
+          override="$( { grep -E '^[[:space:]]*CUSTOM_HELM_OVERRIDE=' .github/deploy/overrides.env || true; } | tail -n1 | cut -d= -f2-)"
           if printf '%s' "$override" | grep -q 'APP_'; then
             echo "CUSTOM_HELM_OVERRIDE must not carry APP_ settings into a merge: $override"
             exit 1
