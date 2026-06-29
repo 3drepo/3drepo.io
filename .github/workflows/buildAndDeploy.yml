@@ -1,0 +1,254 @@
+name: Deploy 3drepo.io
+
+on:
+  # Keep Azure parity: merges to master/staging are pushes and should build
+  # and deploy those long-lived releases automatically.
+  push:
+    branches:
+      - master
+      - staging
+  # ChatOps dispatch comes from .github/workflows/chatOperations.yml when
+  # someone comments /deploy on a PR.
+  repository_dispatch:
+    types:
+      - deploy-command
+
+permissions:
+  contents: read
+
+concurrency:
+  # Cancel superseded runs for the same ref so repeated /deploy comments or
+  # quick successive staging pushes do not race each other.
+  group: deploy-${{ github.event.client_payload.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_BUILDKIT: 1
+  IMAGE_REPOSITORY: 3drepo.io
+  DOCKERFILE_PATH: docker/3drepo.io/Dockerfile
+  # Per-branch overridable values (chart version, custom Helm overrides) are NOT
+  # set here. They live in .github/deploy/overrides.env and are sourced from the
+  # deployed branch's checkout below, because repository_dispatch always runs
+  # this workflow definition from the default branch.
+  DEPLOY_OVERRIDES_FILE: .github/deploy/overrides.env
+
+jobs:
+  metadata:
+    name: Prepare deployment metadata
+    # This job converts either a push event or a PR ChatOps event into the
+    # common values used by build, image tagging, and Helm release naming.
+    if: github.event_name == 'push' || github.event.client_payload.pull_request != null
+    runs-on: ubuntu-24.04
+    outputs:
+      checkout_repository: ${{ steps.metadata.outputs.checkout_repository }}
+      checkout_ref: ${{ steps.metadata.outputs.checkout_ref }}
+      commit_sha: ${{ steps.metadata.outputs.commit_sha }}
+      image_branch_tag: ${{ steps.metadata.outputs.image_branch_tag }}
+      release_name: ${{ steps.metadata.outputs.release_name }}
+    steps:
+      # Push deploys use master/staging from the triggering commit. ChatOps
+      # deploys use the PR head commit from the slash-command payload.
+      # Fork PRs are refused because this workflow uses registry and cluster
+      # secrets during Docker build, image push, and Helm deployment.
+      - name: Set deployment metadata
+        id: metadata
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY_NAME: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          PUSH_SHA: ${{ github.sha }}
+          PR_HEAD_REF: ${{ github.event.client_payload.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.client_payload.pull_request.head.sha }}
+          PR_HEAD_REPO: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            source_branch="$REF_NAME"
+            checkout_repository="$REPOSITORY_NAME"
+            checkout_ref="$PUSH_SHA"
+            commit_sha="$PUSH_SHA"
+          else
+            if [[ "$PR_HEAD_REPO" != "$REPOSITORY_NAME" ]]; then
+              echo "Refusing to deploy forked PR from '$PR_HEAD_REPO'."
+              exit 1
+            fi
+
+            source_branch="$PR_HEAD_REF"
+            checkout_repository="$PR_HEAD_REPO"
+            checkout_ref="$PR_HEAD_SHA"
+            commit_sha="$PR_HEAD_SHA"
+          fi
+
+          # Derive a Helm release name from the branch. Helm release names become
+          # Kubernetes resource/DNS names, so normalise to a DNS-1035-friendly
+          # string: lowercase, only [a-z0-9-], no leading/trailing or repeated
+          # dashes, and capped at 53 chars (Helm's release-name limit).
+          release_name="$(
+            printf '%s' "$source_branch" |
+            tr '[:upper:]' '[:lower:]' |
+            sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g' |
+            cut -c1-53 |
+            sed -E 's/-+$//'
+          )"
+
+          if [[ -z "$release_name" ]]; then
+            echo "Unable to derive a Helm release name from branch '$source_branch'."
+            exit 1
+          fi
+
+          {
+            echo "checkout_repository=$checkout_repository"
+            echo "checkout_ref=$checkout_ref"
+            echo "commit_sha=$commit_sha"
+            echo "image_branch_tag=$release_name"
+            echo "release_name=$release_name"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Checkout repository: $checkout_repository"
+          echo "Checkout ref: $checkout_ref"
+          echo "Image branch tag: $release_name"
+          echo "Helm release: $release_name"
+
+  deploy:
+    name: Build and deploy instance
+    # Runs for automatic master/staging pushes and explicit /deploy comments.
+    if: github.event_name == 'push' || github.event.action == 'deploy-command'
+    needs: metadata
+    runs-on: ubuntu-24.04
+    steps:
+      # Checkout is pinned to the commit chosen in metadata so the Docker
+      # image tag, Helm image.tag override, and deployed source all match.
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.metadata.outputs.checkout_repository }}
+          ref: ${{ needs.metadata.outputs.checkout_ref }}
+          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+
+      # Read per-branch deploy values from the checked-out branch (see
+      # DEPLOY_OVERRIDES_FILE comment above). Defaults are applied first so a
+      # branch without the file, or with only some keys, still deploys.
+      # Sourcing is safe here: forked PRs are refused in metadata and only
+      # write-access users can /deploy, so this only runs trusted branches.
+      - name: Load deploy overrides
+        run: |
+          set -euo pipefail
+
+          HELM_CHART_VERSION=5.23.0
+          CUSTOM_HELM_OVERRIDE=
+
+          if [[ -f "$DEPLOY_OVERRIDES_FILE" ]]; then
+            set -a
+            # shellcheck disable=SC1090
+            source "$DEPLOY_OVERRIDES_FILE"
+            set +a
+          else
+            echo "No $DEPLOY_OVERRIDES_FILE on this branch; using defaults."
+          fi
+
+          {
+            echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+            echo "CUSTOM_HELM_OVERRIDE=$CUSTOM_HELM_OVERRIDE"
+          } >> "$GITHUB_ENV"
+
+          echo "Helm chart version: $HELM_CHART_VERSION"
+          echo "Custom Helm override: ${CUSTOM_HELM_OVERRIDE:-<none>}"
+
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      # Tag by release name for easy branch lookup and by commit SHA for
+      # immutable deploys. Helm uses the commit SHA tag below.
+      - name: Build Docker image
+        env:
+          REGISTRY: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          IMAGE_BRANCH_TAG: ${{ needs.metadata.outputs.image_branch_tag }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            -t "$REGISTRY/${IMAGE_REPOSITORY}:$IMAGE_BRANCH_TAG" \
+            -t "$REGISTRY/${IMAGE_REPOSITORY}:$COMMIT_SHA" \
+            -f "$DOCKERFILE_PATH" \
+            .
+
+      - name: Push Docker image
+        env:
+          REGISTRY: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          IMAGE_BRANCH_TAG: ${{ needs.metadata.outputs.image_branch_tag }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          docker push "$REGISTRY/${IMAGE_REPOSITORY}:$IMAGE_BRANCH_TAG"
+          docker push "$REGISTRY/${IMAGE_REPOSITORY}:$COMMIT_SHA"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '4.0.1'
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.34.2'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      # Reuse the same default values source that the Azure pipeline used,
+      # then override image.tag, branchName, and any temporary custom config.
+      - name: Get default Helm values file
+        env:
+          TESTS_USER: ${{ secrets.TESTS_USER }}
+          TESTS_PASSWORD: ${{ secrets.TESTS_PASSWORD }}
+          HELM_DEFAULTS_URL: ${{ secrets.HELM_DEFAULTS_URL }}
+        run: |
+          set -euo pipefail
+          curl -fsS -u "${TESTS_USER}:${TESTS_PASSWORD}" "$HELM_DEFAULTS_URL" \
+            --output "$RUNNER_TEMP/values.yaml"
+
+      # The IO chart is pulled from ACR as an OCI Helm chart.
+      - name: Login to ACR for Helm
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      # release_name is master/staging for push deploys, or the normalised
+      # PR branch name for on-demand branch deployments. HELM_CHART_VERSION and
+      # CUSTOM_HELM_OVERRIDE come from the overrides file loaded above.
+      - name: Deploy with Helm
+        env:
+          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+
+          helm_set_args=(
+            --set "image.tag=$COMMIT_SHA"
+            --set "branchName=$RELEASE_NAME"
+          )
+
+          override="${CUSTOM_HELM_OVERRIDE#,}"
+          if [[ -n "$override" ]]; then
+            helm_set_args+=(--set "$override")
+          fi
+
+          helm upgrade --install \
+            "$RELEASE_NAME" \
+            oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
+            --version "$HELM_CHART_VERSION" \
+            --namespace default \
+            -f "$RUNNER_TEMP/values.yaml" \
+            "${helm_set_args[@]}"
+
+      - name: Log out from registries
+        if: always()
+        run: |
+          docker logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
+          helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
