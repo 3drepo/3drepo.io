@@ -34,6 +34,7 @@ const testValidateNewTeamspaceSchema = () => {
 		['name includes a full stop', { name: `${generateRandomString()}.${generateRandomString()}` }, false],
 		['name includes special characters', { name: `${generateRandomString()}@${generateRandomString()}#${generateRandomString()}!` }, false],
 		['teamspace name already exists', { name: generateRandomString() }, false, { failTsCheck: true }],
+		['name is empty', { name: '' }, false],
 		['email is valid', { name: generateRandomString(), admin: generateRandomEmail() }, true],
 		['email is invalid', { name: generateRandomString(), admin: generateRandomString() }, false],
 		['account is provided', { name: generateRandomString(), accountId: generateRandomString() }, true, { accountCheckFail: false, getTeamspaceCheckFail: false }],
