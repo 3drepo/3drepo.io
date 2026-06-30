@@ -1776,7 +1776,7 @@ export class UnityUtil {
 		account: string,
 		model: string,
 		idArr: string[],
-		color: [number],
+		color: number[],
 		toggleMode: boolean,
 		forceReHighlight: boolean,
 	) {
@@ -1992,7 +1992,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
+	public static resetMeshColor(account: string, model: string, meshIDs: string[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2015,7 +2015,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: string[], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2037,7 +2037,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: string[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
