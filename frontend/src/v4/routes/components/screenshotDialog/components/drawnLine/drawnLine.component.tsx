@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { pick } from 'lodash';
 import { useEffect, useRef } from 'react';
-import { Group, Line, Rect, Transformer } from 'react-konva';
+import { Group, Line, Transformer } from 'react-konva';
+import { useHandleBubbling } from '../drawnObjects.hooks';
 
 interface IProps {
 	element: any;
@@ -25,70 +27,26 @@ interface IProps {
 
 export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	const {
-		color, isEraser, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
+		color, isEraser, draggable, group: groupProps, ...elementProps
 	} = element;
-	const line = useRef<any>();
-	const transformer = useRef<any>();
-	const rect = useRef<any>(null);
+	const line = useRef<any>(null);
+	const transformer = useRef<any>(null);
 	const group = useRef<any>(null);
+	const handleBubbling = useHandleBubbling(isSelected);
 
 	useEffect(() => {
 		if (isSelected && transformer.current) {
-			transformer.current.setNode(group.current);
+			transformer.current.nodes([group.current]);
 			transformer.current.getLayer().batchDraw();
 		}
-	}, [transformer.current, isSelected]);
-
-	useEffect(() => {
-		if (line.current) {
-			const selfRect = line.current.getSelfRect();
-			const width = line.current.width() || selfRect.width;
-			const height = line.current.height() || selfRect.height;
-			const { x, y } = line.current.getAbsolutePosition();
-
-			rect.current.x(x + selfRect.x);
-			rect.current.y(y + selfRect.y);
-			rect.current.width(width * line.current.scaleX());
-			rect.current.height(height * line.current.scaleY());
-		}
-	}, [line.current]);
-
-	const handleDragEnd = ({ currentTarget }) => {
-		const { x, y } = currentTarget.getAbsolutePosition();
-		handleChange({
-			...element,
-			groupX: x,
-			groupY: y,
-		});
-	};
+	}, [transformer.current, group.current, isSelected]);
 
 	const handleTransformEnd = ({ currentTarget }) => {
-		const { x, y } = currentTarget.getAbsolutePosition();
 		const { attrs } = currentTarget;
-
-		handleChange({
-			...element,
-			groupX: x,
-			groupY: y,
-			rotation: attrs.rotation,
-			scaleX: attrs.scaleX,
-			scaleY: attrs.scaleY,
-		});
+		handleChange({ ...element, group: pick(attrs, ['x', 'y', 'scaleX', 'scaleY', 'rotation'])});
 	};
 
-	const additionalGroupProps = ({
-		x: groupX || 0,
-		y: groupY || 0,
-		rotation,
-		scaleX,
-		scaleY,
-	});
-
-	const additionalComponentProps = ({
-		scaleX: initScaleX,
-		scaleY: initScaleY,
-	});
-
+	const additionalGroupProps = groupProps || {x: 0, y: 0};
 	return (
 		<>
 			<Group
@@ -96,19 +54,18 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 					{...additionalGroupProps}
 					name={elementProps.name}
 					transformer={transformer}
-					onDragEnd={handleDragEnd}
+					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
 					draggable={isSelected}
+					{...handleBubbling}
 			>
-				<Rect ref={rect} />
 				<Line
 					ref={line}
 					stroke={color}
 					{...elementProps}
-					{...additionalComponentProps}
 				/>
 			</Group>
-			{(isSelected && !isEraser) && <Transformer ref={transformer} />}
+			{(isSelected && !isEraser) && <Transformer ref={transformer} {...handleBubbling} />}
 		</>
 	);
 };

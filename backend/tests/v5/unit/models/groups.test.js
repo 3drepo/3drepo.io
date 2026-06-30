@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
@@ -139,7 +140,7 @@ const testAddGroups = () => {
 	});
 };
 
-describe('models/groups', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetGroups();
 	testGetGroupsByIds();
 	testUpdateGroup();

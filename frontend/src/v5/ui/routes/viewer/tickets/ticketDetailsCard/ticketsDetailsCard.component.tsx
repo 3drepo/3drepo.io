@@ -89,7 +89,10 @@ export const TicketDetailsCard = () => {
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		if (!ticketWasRemoved) return;
-		if (initialIndex.current < listLength) {
+		if (
+			initialIndex.current < listLength
+			&& initialIndex.current >= 0 // This is for when a new ticket is filtered out
+		) {
 			cycleToNextTicket();
 		} else {
 			TicketsCardActionsDispatchers.setSelectedTicket(null);

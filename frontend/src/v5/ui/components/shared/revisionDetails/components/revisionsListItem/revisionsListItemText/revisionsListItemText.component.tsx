@@ -21,7 +21,7 @@ import { TextOverflow } from '@controls/textOverflow';
 export const RevisionsListItemText = ({
 	children,
 	...props
-}: FixedOrGrowContainerProps): JSX.Element => (
+}: FixedOrGrowContainerProps) => (
 	<FixedOrGrowContainer {...props}>
 		<TextOverflow>
 			{children}

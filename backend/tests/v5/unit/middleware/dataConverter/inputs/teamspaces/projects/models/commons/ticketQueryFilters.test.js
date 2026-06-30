@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 
-const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
+const { queryOperators, queryParamSchema, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -66,6 +67,7 @@ const testValidateQueryString = () => {
 		.flatMap((operator) => ([
 			[`operator is ${operator} and value is empty`, getQueryProp(propName, operator), false],
 			[`operator is ${operator} and a non range value is provided`, getQueryProp(propName, operator, generateRandomString()), false],
+			[`operator is ${operator} and range value is malformed JSON`, getQueryProp(propName, operator, '[10,5'), false],
 			[`operator is ${operator} and range values are provided`, getQueryProp(propName, operator, `[${rangePropValue1[0]},${rangePropValue1[1]}],[${rangePropValue2[0]},${rangePropValue2[1]}]`), true, [{ operator, propertyName: `properties.${propName}`, value: [rangePropValue1, rangePropValue2] }]],
 			[`operator is ${operator} and an invalid range value is provided`, getQueryProp(propName, operator, '[10,5]'), false],
 			[`operator is ${operator} and a non range value is provided (module prop)`, getQueryProp(`${moduleName}:${propName}`, operator, generateRandomString()), false],
@@ -101,7 +103,7 @@ const testValidateQueryString = () => {
 		['template is queried and operator is valid', getQueryProp(`$${specialQueryFields.TEMPLATE}`, queryOperators.CONTAINS, stringPropValue), true, [{ operator: queryOperators.CONTAINS, propertyName: specialQueryFields.TEMPLATE, value: [stringPropValue] }]],
 		[`operator is ${queryOperators.EXISTS}`, getQueryProp(propName, queryOperators.EXISTS, ''), true, [{ operator: queryOperators.EXISTS, propertyName: `properties.${propName}` }]],
 		[`operator is ${queryOperators.NOT_EXISTS}`, getQueryProp(propName, queryOperators.NOT_EXISTS, ''), true, [{ operator: queryOperators.NOT_EXISTS, propertyName: `properties.${propName}` }]],
-		['multiple properties with different operators are provided', `'${propName}::${queryOperators.IS}::${stringPropValue}&&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }, { operator: queryOperators.IS, propertyName: `properties.${propName}`, value: [stringPropValue] }]],
+		['multiple properties with different operators are provided', `'${propName}::${queryOperators.IS}::${stringPropValue}&&${moduleName}:${propName2}::${queryOperators.GREATER_OR_EQUAL_TO}::${numberPropValue}'`, true, [{ operator: queryOperators.IS, propertyName: `properties.${propName}`, value: [stringPropValue] }, { operator: queryOperators.GREATER_OR_EQUAL_TO, propertyName: `modules.${moduleName}.${propName2}`, value: numberPropValue }]],
 		...stringValueTests,
 		...numberValueTests,
 		...rangeValueTests,
@@ -124,6 +126,20 @@ const testValidateQueryString = () => {
 				const { message, ...invalidArgRes } = templates.invalidArguments;
 				expect(Responder.respond).toHaveBeenCalledWith(req, res, expect.objectContaining(invalidArgRes));
 			}
+		});
+	});
+
+	test('Should support range value that has already been parsed', async () => {
+		const parsedRange = [rangePropValue1, rangePropValue2];
+
+		await expect(queryParamSchema.validate({
+			propertyName: propName,
+			operator: queryOperators.RANGE,
+			value: parsedRange,
+		})).resolves.toEqual({
+			propertyName: `properties.${propName}`,
+			operator: queryOperators.RANGE,
+			value: parsedRange,
 		});
 	});
 };

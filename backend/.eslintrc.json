@@ -1,7 +1,7 @@
 {
 	"extends": [
 		"airbnb-base",
-		"plugin:node/recommended",
+		"plugin:n/recommended",
 		"plugin:security/recommended"
 	],
 	"parserOptions": {
@@ -11,30 +11,53 @@
 		"require-sort"
 	],
 	"env": {
+		"node": true,
+		"es2022": true
 	},
 	"rules": {
-		"arrow-parens": ["error", "always"],
+		"arrow-parens": [
+			"error",
+			"always"
+		],
 		"camelcase": 0,
 		"default-param-last": 0,
 		"function-call-argument-newline": 0,
 		"function-paren-newline": 0,
 		"import/order": 0,
-		"indent": ["error", "tab"],
+		"indent": [
+			"error",
+			"tab"
+		],
 		"license-header": 2,
-		"max-len": ["error", {
-			"code": 120,
-			"ignoreComments": true,
-			"ignoreTemplateLiterals": true,
-			"ignoreStrings":  true
-		}],
+		"max-len": [
+			"error",
+			{
+				"code": 120,
+				"ignoreComments": true,
+				"ignoreTemplateLiterals": true,
+				"ignoreStrings": true
+			}
+		],
 		"no-console": "error",
 		"no-loss-of-precision": 0,
-		"no-plusplus" : 0,
+		"no-plusplus": 0,
 		"no-promise-executor-return": 0,
 		"no-restricted-syntax": 0,
-		"no-tabs": ["error", {"allowIndentationTabs": true}],
+		"no-tabs": [
+			"error",
+			{
+				"allowIndentationTabs": true
+			}
+		],
 		"no-throw-literal": 0,
-		"no-underscore-dangle": ["error", { "allow": ["_id"] }],
+		"no-underscore-dangle": [
+			"error",
+			{
+				"allow": [
+					"_id"
+				]
+			}
+		],
 		"no-unsafe-optional-chaining": 0,
 		"object-curly-newline": 0,
 		"prefer-regex-literals": 0,

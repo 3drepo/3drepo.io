@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
@@ -92,19 +93,26 @@ const testGetTeamspaceListByUser = () => {
 				{ name: generateRandomString(), isAdmin: true },
 				{ name: generateRandomString(), isAdmin: false },
 			];
+			const frontEggData = goldenData
+				.map(({ name }) => ({ name, refId: generateRandomString() }))
+				.concat({ name: generateRandomString(), refId: generateRandomString() });
 			const userId = generateRandomString();
 			const username = generateRandomString();
 
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 
 			FronteggService.getAccountsByUser.mockResolvedValueOnce(
-				times(goldenData.length + 1, () => generateRandomString()));
+				frontEggData.map(({ refId }) => refId));
 
 			goldenData.forEach(({ name }) => {
 				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					frontEggData.find(({ name: n }) => n === name).refId,
+				);
 			});
 
 			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+
 			Permissions.isTeamspaceAdmin.mockImplementation(
 				(ts) => goldenData.find(({ name }) => name === ts).isAdmin);
 
@@ -118,6 +126,43 @@ const testGetTeamspaceListByUser = () => {
 			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
 
 			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length + 1);
+		});
+		test('should return empty array if the refIds do not match', async () => {
+			const goldenData = [
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: false },
+			];
+
+			const frontEggData = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const refIds = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const userId = generateRandomString();
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				frontEggData.map(({ refId }) => refId));
+			goldenData.forEach(({ name }) => {
+				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					refIds.find(({ name: n }) => n === name).refId,
+				);
+				Permissions.isTeamspaceAdmin.mockResolvedValueOnce(
+					goldenData.find(({ name: n }) => n === name).isAdmin);
+			});
+
+			const res = await Teamspaces.getTeamspaceListByUser(username);
+			expect(res).toEqual([]);
+
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length);
 		});
 		test('Should return undefined if unknown error occured', async () => {
 			const userId = generateRandomString();
@@ -922,6 +967,45 @@ const testIsTeamspaceMember = () => {
 					expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledWith(teamspaceRef, userId);
 					expect(FronteggService.getAllUsersInAccount).not.toHaveBeenCalled();
 				}
+			}
+		});
+	});
+
+	describe.each([
+		['membership is active', membershipStatus.ACTIVE, false, true],
+		['membership is pending login', membershipStatus.PENDING_LOGIN, false, true],
+		['membership is pending invite', membershipStatus.PENDING_INVITE, false, false, templates.pendingInviteAcceptance],
+		['membership is inactive', membershipStatus.INACTIVE, false, false, templates.membershipInactive],
+		['membership is not a member', membershipStatus.NOT_MEMBER, false, false, templates.teamspaceNotFound],
+		['an unexpected error occurs', membershipStatus.NOT_MEMBER, false, false, undefined, true],
+		['bypass is set and user is a member', membershipStatus.ACTIVE, true, true],
+		['bypass is set and user is not a member', membershipStatus.NOT_MEMBER, true, false, templates.teamspaceNotFound],
+		['bypass is set and an unexpected error occurs', membershipStatus.NOT_MEMBER, true, false, undefined, true],
+	])('Is teamspace member (throwWithDetails=true)', (desc, memStatus, byPassStatusCheck, succeeds, expectedError, getRefShouldThrow) => {
+		const teamspace = generateRandomString();
+		const user = generateRandomString();
+		test(desc, async () => {
+			const teamspaceRef = generateRandomString();
+			const userId = generateRandomString();
+			const error = new Error('Unexpected error');
+			if (getRefShouldThrow) {
+				TeamspacesModel.getTeamspaceRefId.mockRejectedValueOnce(error);
+			} else {
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceRef);
+				UsersModel.getUserId.mockResolvedValueOnce(userId);
+				if (byPassStatusCheck) {
+					const dataToReturn = memStatus === membershipStatus.NOT_MEMBER ? [] : [{ id: userId }];
+					FronteggService.getAllUsersInAccount.mockResolvedValueOnce(dataToReturn);
+				} else {
+					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
+				}
+			}
+
+			const call = Teamspaces.isTeamspaceMember(teamspace, user, byPassStatusCheck, true);
+			if (succeeds) {
+				await expect(call).resolves.toBe(true);
+			} else {
+				await expect(call).rejects.toEqual(expectedError ?? error);
 			}
 		});
 	});

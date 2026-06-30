@@ -1,6 +1,73 @@
-<p><%= message %> on <%= domain %><p>
-<p><b>Log:</b></p>
-<p>
-	<%-logExcerpt-%>
-</p>
+<p><%= message %> on <%= domain %></p>
 
+<% if (zombieEntries.models.length) { %>
+	<p><b>Models</b></p>
+	<table border="1" cellpadding="6" cellspacing="0">
+		<thead>
+			<tr>
+				<th>Teamspace</th>
+				<th>Model</th>
+				<th>Status</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% for (const entry of zombieEntries.models) { %>
+				<tr>
+					<td><%= entry.teamspace %></td>
+					<td><%= entry.id %></td>
+					<td><%= entry.status %></td>
+					<td><%= entry.timestamp %></td>
+				</tr>
+			<% } %>
+		</tbody>
+	</table>
+<% } %>
+
+<% if (zombieEntries.drawings.length) { %>
+	<p><b>Drawings</b></p>
+	<table border="1" cellpadding="6" cellspacing="0">
+		<thead>
+			<tr>
+				<th>Teamspace</th>
+				<th>Drawing</th>
+				<th>Status</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% for (const entry of zombieEntries.drawings) { %>
+				<tr>
+					<td><%= entry.teamspace %></td>
+					<td><%= entry.id %></td>
+					<td><%= entry.status %></td>
+					<td><%= entry.timestamp %></td>
+				</tr>
+			<% } %>
+		</tbody>
+	</table>
+<% } %>
+
+<% if (zombieEntries.clashRuns.length) { %>
+	<p><b>Clash runs</b></p>
+	<table border="1" cellpadding="6" cellspacing="0">
+		<thead>
+			<tr>
+				<th>Teamspace</th>
+				<th>Clash run</th>
+				<th>Status</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% for (const entry of zombieEntries.clashRuns) { %>
+				<tr>
+					<td><%= entry.teamspace %></td>
+					<td><%= entry.id %></td>
+					<td><%= entry.status %></td>
+					<td><%= entry.timestamp %></td>
+				</tr>
+			<% } %>
+		</tbody>
+	</table>
+<% } %>
