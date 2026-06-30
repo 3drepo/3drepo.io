@@ -393,20 +393,20 @@ const testClashPlanUpdated = () => {
 			planId: generateUUIDString(),
 		};
 
-		const defaultData = { data: { ...generateRandomObject(), name: generateRandomString() } };
+		const defaultData = { ...generateRandomObject(), name: generateRandomString() };
 
 		test.each([
 			[`Should call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} and name is updated`, defaultData],
-			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, { data: generateRandomObject() }],
-			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, { data: undefined }],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, generateRandomObject()],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, undefined],
 			[`Should fail gracefully on error if there is a ${events.CLASH_PLAN_UPDATED}`, defaultData, templates.clashPlanNotFound],
 			[`Should handle rejected error objects for ${events.CLASH_PLAN_UPDATED}`, defaultData, new Error(generateRandomString())],
-		])('%s', async (data, error) => {
+		])('%s', async (desc, data, error) => {
 			if (error) {
 				TicketsProcessor.onClashPlanNameUpdated.mockRejectedValueOnce(error);
 			}
 
-			await publishAndWaitForEvent(events.CLASH_PLAN_UPDATED, { eventData, data });
+			await publishAndWaitForEvent(events.CLASH_PLAN_UPDATED, { ...eventData, data });
 
 			if (data?.name && !error) {
 				expect(ClashesProcessor.onClashPlanNameUpdated).toHaveBeenCalledTimes(1);
