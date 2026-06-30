@@ -97,6 +97,9 @@ export const filterErrors = (
 }, {});
 
 export const removeEmptyObjects = (tree) => {
+	console.log('@@~~ removeEmptyObjects', tree);
+	console.log('@@~~ isBasicValue(tree)', isBasicValue(tree));
+
 	if (isBasicValue(tree)) return tree;
 
 	return Object.keys(tree).reduce((accum, key) => {
@@ -106,7 +109,11 @@ export const removeEmptyObjects = (tree) => {
 			return accum;
 		}
 
-		return ({ ...accum, [key]: removeEmptyObjects(value) });
+		const sanitizedValue = removeEmptyObjects(value);
+		if (_.isEqual(sanitizedValue, {})) {
+			return accum;
+		}
+		return ({ ...accum, [key]: sanitizedValue });
 	}, {});
 };
 
