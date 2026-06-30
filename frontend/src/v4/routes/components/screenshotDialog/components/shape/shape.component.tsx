@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useRef, Fragment } from 'react';
-import { Circle, Group, Transformer } from 'react-konva';
+import { Group, Transformer } from 'react-konva';
 import { pick } from 'lodash';
-import { useHandleBubbling } from '../drawnObjects.hooks';
+import { useHandleBubbling, cursorStylesEvents } from '../drawnObjects.hooks';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
@@ -53,16 +53,6 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 		});
 	};
 
-	const handleMouseOver = () => {
-		if (isSelected) {
-			document.body.style.cursor = 'move';
-		}
-	};
-
-	const handleMouseOut = () => {
-		document.body.style.cursor = 'default';
-	};
-
 	useEffect(() => {
 		if (isSelected && transformer.current) {
 			transformer.current.nodes([group.current]);
@@ -81,7 +71,6 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	const handleBubbling = useHandleBubbling(isSelected);
-
 	return (
 		<Fragment>
 			<Group
@@ -92,14 +81,13 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
 					onDblClick={handleDoubleClick}
-					onMouseOver={handleMouseOver}
-					onMouseOut={handleMouseOut}
 					draggable={draggable && isSelected}
 					{...handleBubbling}
 			>
 				<Component
 						ref={shape}
 						{...elementProps}
+						{...cursorStylesEvents(isSelected)}
 						stroke={color}
 						perfectDrawEnabled={false}
 				/>

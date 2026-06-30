@@ -17,7 +17,7 @@
 import { pick } from 'lodash';
 import { useEffect, useRef } from 'react';
 import { Group, Line, Transformer } from 'react-konva';
-import { useHandleBubbling } from '../drawnObjects.hooks';
+import { cursorStylesEvents, useHandleBubbling } from '../drawnObjects.hooks';
 
 interface IProps {
 	element: any;
@@ -47,6 +47,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	};
 
 	const additionalGroupProps = groupProps || {x: 0, y: 0};
+
 	return (
 		<>
 			<Group
@@ -60,6 +61,7 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 					{...handleBubbling}
 			>
 				<Line
+					{...cursorStylesEvents(isSelected)}
 					ref={line}
 					stroke={color}
 					{...elementProps}
