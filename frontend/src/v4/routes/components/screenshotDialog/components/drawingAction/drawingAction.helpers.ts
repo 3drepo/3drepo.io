@@ -85,8 +85,10 @@ export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 			shape.radius(distance);
 		},
 		[SHAPE_TYPES.RECTANGLE]: () => {
-			shape.height(currentPos.y - initialPos.y);
-			shape.width(currentPos.x - initialPos.x);
+			shape.x(Math.min(initialPos.x, currentPos.x));
+			shape.y(Math.min(initialPos.y, currentPos.y));
+			shape.height(Math.abs(currentPos.y - initialPos.y));
+			shape.width(Math.abs(currentPos.x - initialPos.x));
 		},
 		[SHAPE_TYPES.LINE]: () => {
 			shape.points([initialPos.x, initialPos.y, currentPos.x, currentPos.y]);
