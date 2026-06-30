@@ -33,6 +33,9 @@ const getPlanByQuery = async (teamspace, project, query, projection) => {
 	return res;
 };
 
+ClashPlans.getPlansByQuery = (teamspace, project, query, projection) => db.find(teamspace, CLASH_PLANS_COL,
+	{ ...query, project }, projection);
+
 ClashPlans.getPlanById = (teamspace, project, id, projection = { project: 0 }) => getPlanByQuery(
 	teamspace, project, { _id: id }, projection);
 
@@ -49,13 +52,13 @@ ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 	const toSet = { updatedAt: new Date(), updatedBy: user };
 	const toUnset = {};
 	const collectUpdates = (searchObj, prefix = '') => {
-		Object.keys(searchObj).forEach((key) => {
-			if (isObject(searchObj[key]) && !isUUID(searchObj[key])) {
-				collectUpdates(searchObj[key], `${prefix}${key}.`);
-			} else if (searchObj[key] === null) {
+		Object.entries(searchObj).forEach(([key, value]) => {
+			if (isObject(value) && !isUUID(value)) {
+				collectUpdates(value, `${prefix}${key}.`);
+			} else if (value === null) {
 				toUnset[`${prefix}${key}`] = 1;
 			} else {
-				toSet[`${prefix}${key}`] = searchObj[key];
+				toSet[`${prefix}${key}`] = value;
 			}
 		});
 	};
@@ -72,6 +75,13 @@ ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 
 ClashPlans.deletePlan = async (teamspace, project, planId) => {
 	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId, project });
+};
+
+ClashPlans.getAllPlansByProject = (teamspace, project, projection) => ClashPlans.getPlansByQuery(
+	teamspace, project, {}, projection);
+
+ClashPlans.deletePlansByProject = async (teamspace, project) => {
+	await db.deleteMany(teamspace, CLASH_PLANS_COL, { project });
 };
 
 module.exports = ClashPlans;

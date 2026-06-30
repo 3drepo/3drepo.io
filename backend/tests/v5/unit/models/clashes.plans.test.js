@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isObject, isUUID } = require('../../../../src/v5/utils/helper/typeCheck');
+const { times } = require('lodash');
+const { src } = require('../../helper/path');
+
+const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
+const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const ClashPlans = require(`${src}/models/clashes.plans`);
@@ -51,6 +55,25 @@ const testGetPlanById = () => {
 				.rejects.toEqual(templates.clashPlanNotFound);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, projection);
+		});
+	});
+};
+
+const testGetPlansByQuery = () => {
+	describe('Get plans by query', () => {
+		test('should return the list of plans found', async () => {
+			const expectedData = times(5, () => generateRandomObject());
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const query = generateRandomObject();
+			const projection = { _id: 1 };
+
+			await expect(ClashPlans.getPlansByQuery(teamspace, project, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { ...query, project }, projection);
 		});
 	});
 };
@@ -263,10 +286,85 @@ const testDeletePlan = () => {
 	});
 };
 
+const testGetAllPlansByProject = () => {
+	describe('Get all plans by project', () => {
+		const teamspace = generateRandomString();
+		const project = generateUUID();
+
+		test('should call getPlansByQuery with a project scoped query and return plans', async () => {
+			const plans = [
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).resolves.toEqual(plans);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
+		});
+
+		test('should pass the projection to getPlansByQuery when provided', async () => {
+			const projection = {
+				createdAt: 1,
+				createdBy: 1,
+				name: 1,
+				type: 1,
+			};
+			const plans = [
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project, projection)).resolves.toEqual(plans);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, projection);
+
+			fn.mockRestore();
+		});
+
+		test('should reject when getPlansByQuery fails', async () => {
+			const error = new Error(generateRandomString());
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockRejectedValueOnce(error);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).rejects.toEqual(error);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
+		});
+	});
+};
+
+const testDeletePlansByProject = () => {
+	describe('Delete plans by project', () => {
+		test('should delete all plans associated with a project', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await ClashPlans.deletePlansByProject(teamspace, project);
+
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { project });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetPlanById();
+	testGetPlansByQuery();
 	testGetPlanByName();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testGetAllPlansByProject();
+	testDeletePlansByProject();
 });

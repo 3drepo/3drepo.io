@@ -27,7 +27,6 @@ const { modelTypes, processStatuses } = require('../../../models/modelSettings.c
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
-const { completeRun } = require('../../../processors/teamspaces/projects/clashes');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
@@ -82,17 +81,6 @@ const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, 
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, corId, results }) => {
-	try {
-		await completeRun(teamspace, stringToUUID(project), stringToUUID(corId), results);
-	} catch (err) {
-		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
-		if (err.stack) {
-			logger.logError(err.stack);
-		}
-	}
-};
-
 const revisionAdded = async ({ teamspace, project, model, revId, modelType, calibration }) => {
 	try {
 		const {
@@ -132,11 +120,12 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 
 const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
 	const { errorReason, status } = data;
-	const calibration = modelType === modelTypes.DRAWING
-		? await getCalibrationStatus(teamspace, project, model, revId)
-		: undefined;
 
 	if (status === processStatuses.OK) {
+		const calibration = modelType === modelTypes.DRAWING
+			? await getCalibrationStatus(teamspace, project, model, revId)
+			: undefined;
+
 		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!errorReason.userErr) {
 		try {
@@ -378,7 +367,6 @@ const ModelEventsListener = {};
 ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
-	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
 	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);

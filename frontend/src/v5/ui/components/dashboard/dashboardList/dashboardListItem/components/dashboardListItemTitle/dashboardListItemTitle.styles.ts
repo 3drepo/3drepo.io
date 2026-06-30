@@ -41,7 +41,9 @@ export const Title = styled(Button)<{ selected?: boolean }>`
 
 export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
-	component: 'span',
+	variantMapping: {
+		body2: 'span',
+	},
 })<{ selected?: boolean }>`
 	white-space: nowrap;
 	display: block;

@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { UUIDToString, generateUUID, generateUUIDString, stringToUUID } = require('../utils/helper/uuids');
 const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
+const { MESSAGE_TYPES } = require('./modelProcessing.constants');
 const Path = require('path');
 const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
@@ -46,23 +47,62 @@ const {
 	clash_queue: clashq,
 } = queueConfig;
 
-const MESSAGE_TYPES = {
-	CLASH: 'clash',
-	IMPORT: 'import',
+const resolveSharedPath = (filePath) => {
+	if (typeof filePath !== 'string') return undefined;
+
+	const isTaggedSharedPath = filePath === SHARED_SPACE_TAG
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}/`)
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}\\`);
+	if (!isTaggedSharedPath) return undefined;
+
+	const relativePathFromTag = filePath.slice(SHARED_SPACE_TAG.length).replace(/^[/\\]+/, '');
+	if (Path.isAbsolute(relativePathFromTag) || Path.win32.isAbsolute(relativePathFromTag)) return undefined;
+
+	const relativePath = relativePathFromTag.replace(/\\/g, Path.sep);
+	const resolvedSharedDir = Path.resolve(sharedDir);
+	const resolvedPath = Path.resolve(resolvedSharedDir, relativePath);
+	const relativeToSharedDir = Path.relative(resolvedSharedDir, resolvedPath);
+
+	if (relativeToSharedDir === '..' || relativeToSharedDir.startsWith(`..${Path.sep}`)) return undefined;
+
+	return resolvedPath;
 };
 
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
-		const { status, teamspace, project, container, drawing, type, user, value,
-			message, results } = JSON.parse(content);
-		const modelType = container ? modelTypes.CONTAINER : modelTypes.DRAWING;
+		const { type, status, value, ...msgContent } = JSON.parse(content);
 
 		if (type === MESSAGE_TYPES.CLASH) {
-			const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
-			publish(events.CLASH_RUN_COMPLETED,
-				{ teamspace, project, corId: properties.correlationId, results: resultsDir });
-		} else if (status) {
+			const { teamspace, project, results } = msgContent;
+
+			if (status) {
+				publish(events.CLASH_RUN_UPDATE,
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						status,
+					});
+			} else {
+				const resultsDir = resolveSharedPath(results);
+				publish(events.CLASH_RUN_COMPLETED,
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						results: resultsDir,
+						value,
+					});
+			}
+
+			return;
+		}
+
+		const { teamspace, container, drawing, user, message } = msgContent;
+		const modelType = container ? modelTypes.CONTAINER : modelTypes.DRAWING;
+
+		if (status) {
 			publish(events.QUEUED_TASK_UPDATE, { teamspace,
 				model: container || drawing,
 				modelType,
@@ -294,7 +334,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 			throw err;
 		}
 
-		logger.logError('Failed to queue clash test run', err?.message);
+		logger.logError('Failed to queue clash run', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };

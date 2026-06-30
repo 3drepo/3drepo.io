@@ -63,8 +63,8 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
-jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
-const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
@@ -81,7 +81,7 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+const ModelEventsListener = require(`${src}/services/eventsListener/components/modelEvents`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
@@ -277,63 +277,6 @@ const testQueueTaskCompleted = () => {
 	});
 };
 
-const testClashRunCompleted = () => {
-	describe(events.CLASH_RUN_COMPLETED, () => {
-		test(`Should trigger completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
-				stringToUUID(data.corId), data.results);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.completeRun.mockRejectedValueOnce(templates.testRunNotFound);
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
-				stringToUUID(data.corId), data.results);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}  (Rejected with an error object)`, async () => {
-			ClashesProcessor.completeRun.mockRejectedValueOnce(new Error(generateRandomString()));
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
-				stringToUUID(data.corId), data.results);
-		});
-	});
-};
-
 const testNewRevision = () => {
 	DrawingProcessor.createDrawingThumbnail.mockResolvedValue();
 	test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.MODEL_IMPORT_FINISHED} (container)`, async () => {
@@ -346,6 +289,7 @@ const testNewRevision = () => {
 
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
 		Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
@@ -615,6 +559,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -656,6 +601,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -1685,11 +1631,10 @@ const testTemplateUpdated = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	EventsListener.init();
+	ModelEventsListener.init();
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
-	testClashRunCompleted();
 	testModelSettingsUpdate();
 	testModelProcessingCompleted();
 	testRevisionUpdated();

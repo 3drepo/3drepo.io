@@ -64,7 +64,7 @@ export const UploadListItemDestination = memo(({
 	error,
 	helperText,
 	...props
-}: IUploadListItemDestination): JSX.Element => {
+}: IUploadListItemDestination) => {
 	const { getValues, setValue, setError, clearErrors } = useFormContext<DrawingUploadForm>();
 
 	// The value that is typed in the input of the autocomplete is inconsistent
