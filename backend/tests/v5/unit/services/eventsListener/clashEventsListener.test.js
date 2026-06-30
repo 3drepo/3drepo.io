@@ -47,6 +47,9 @@ const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.clashes');
 const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/commons/tickets.clashes`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets');
+const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
+
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
 
@@ -382,6 +385,38 @@ const testOnNewContainerRevision = () => {
 	});
 };
 
+const testClashPlanUpdated = () => {
+	describe(events.CLASH_PLAN_UPDATED, () => {
+		const eventData = {
+			teamspace: generateRandomString(),
+			project: generateUUIDString(),
+			planId: generateUUIDString(),
+		};
+
+		const defaultData = { data: { ...generateRandomObject(), name: generateRandomString() } };
+
+		test.each([
+			[`Should call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} and name is updated`, defaultData],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, { data: generateRandomObject() }],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, { data: undefined }],
+			[`Should fail gracefully on error if there is a ${events.CLASH_PLAN_UPDATED}`, defaultData, templates.clashPlanNotFound],
+			[`Should handle rejected error objects for ${events.CLASH_PLAN_UPDATED}`, defaultData, new Error(generateRandomString())],
+		])('%s', async (data, error) => {
+			if (error) {
+				TicketsProcessor.onClashPlanNameUpdated.mockRejectedValueOnce(error);
+			}
+
+			await publishAndWaitForEvent(events.CLASH_PLAN_UPDATED, { eventData, data });
+
+			if (data?.name && !error) {
+				expect(ClashesProcessor.onClashPlanNameUpdated).toHaveBeenCalledTimes(1);
+				expect(ClashesProcessor.onClashPlanNameUpdated).toHaveBeenCalledWith(eventData.teamspace,
+					eventData.project, eventData.planId, data.name);
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
 
@@ -393,4 +428,5 @@ describe(determineTestGroup(__filename), () => {
 	testClashRunCompleted();
 	testOnNewContainerRevision();
 	testClashRunProcessed();
+	testClashPlanUpdated();
 });
