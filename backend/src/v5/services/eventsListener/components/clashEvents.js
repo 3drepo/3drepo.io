@@ -29,7 +29,7 @@ const { events } = require('../../eventsManager/eventsManager.constants');
 const { getFederationById } = require('../../../models/modelSettings');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
-const { onClashPlanNameUpdated } = require('../../../processors/teamspaces/projects/models/containers');
+const { onClashPlanNameUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const {
 	processClashResults: processTicketClashResults,
 } = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');

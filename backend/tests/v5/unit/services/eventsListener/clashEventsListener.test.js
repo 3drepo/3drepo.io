@@ -396,21 +396,26 @@ const testClashPlanUpdated = () => {
 		const defaultData = { ...generateRandomObject(), name: generateRandomString() };
 
 		test.each([
-			[`Should call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} and name is updated`, defaultData],
-			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, generateRandomObject()],
-			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, undefined],
+			[`Should call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} and name is updated`, defaultData, undefined],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, generateRandomObject(), undefined],
+			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, undefined, undefined],
 			[`Should fail gracefully on error if there is a ${events.CLASH_PLAN_UPDATED}`, defaultData, templates.clashPlanNotFound],
 			[`Should handle rejected error objects for ${events.CLASH_PLAN_UPDATED}`, defaultData, new Error(generateRandomString())],
 		])('%s', async (desc, data, error) => {
-			if (error) {
-				TicketsProcessor.onClashPlanNameUpdated.mockRejectedValueOnce(error);
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_PLAN_UPDATED);
+
+			if (data?.name) {
+				TicketsProcessor.onClashPlanNameUpdated
+					.mockImplementationOnce(() => (error ? Promise.reject(error) : Promise.resolve()));
 			}
 
-			await publishAndWaitForEvent(events.CLASH_PLAN_UPDATED, { ...eventData, data });
+			EventsManager.publish(events.CLASH_PLAN_UPDATED, { ...eventData, data });
 
-			if (data?.name && !error) {
-				expect(ClashesProcessor.onClashPlanNameUpdated).toHaveBeenCalledTimes(1);
-				expect(ClashesProcessor.onClashPlanNameUpdated).toHaveBeenCalledWith(eventData.teamspace,
+			await waitOnEvent;
+
+			if (data?.name) {
+				expect(TicketsProcessor.onClashPlanNameUpdated).toHaveBeenCalledTimes(1);
+				expect(TicketsProcessor.onClashPlanNameUpdated).toHaveBeenCalledWith(eventData.teamspace,
 					eventData.project, eventData.planId, data.name);
 			}
 		});
