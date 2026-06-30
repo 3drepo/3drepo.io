@@ -22,6 +22,7 @@ const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
 const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 const { determineTestGroup } = require('../../helper/utils');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
