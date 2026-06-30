@@ -21,8 +21,6 @@ const { src } = require('../../helper/path');
 const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
 const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 const { determineTestGroup } = require('../../helper/utils');
-const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const ClashPlans = require(`${src}/models/clashes.plans`);
