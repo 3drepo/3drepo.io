@@ -143,11 +143,15 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const onClickSubmit = async (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
-		} else if (isGroupDefinitionDirty) {
-			const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, rules, revision);
-			newValues.group.objects = meshObjectsToV5GroupNode(data);
-			newValues.group.rules = rules;
-		}
+		} else {
+			if (isGroupDefinitionDirty) {
+				const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, rules, revision);
+				newValues.group.objects = meshObjectsToV5GroupNode(data);
+				newValues.group.rules = rules;
+			} else {
+				newValues.group = value.group;
+			}
+		} 
 
 		if (!newValues.color) {
 			delete newValues.color;
