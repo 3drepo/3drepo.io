@@ -2291,6 +2291,8 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of model
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
+	 * @param near - the near plane of the camera to be set after the animation is complete. This will be immediately overridden if the camera moves again.
+	 * @param far - the far plane of the camera to be set after the animation is complete. This will be immediately overridden if the camera moves again.
 	 */
 	public static setViewpoint(
 		position: number[],
@@ -2302,6 +2304,8 @@ export class UnityUtil {
 		account?: string,
 		model?: string,
 		animationTime?: number,
+		near?: number,
+		far?: number,
 	) {
 		const param: any = {};
 		if (account && model) {
@@ -2322,6 +2326,8 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
+		param.near = near;
+		param.far = far;
 		param.position = position;
 		param.up = up;
 		param.forward = forward;
