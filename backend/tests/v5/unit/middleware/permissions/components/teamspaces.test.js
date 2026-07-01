@@ -61,7 +61,7 @@ const testIsTeamspaceMember = () => {
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledTimes(1);
-			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, username, true);
+			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, username, true, false);
 		});
 
 		test('next() should be called if auth bypassed is enabled', async () => {
@@ -113,19 +113,19 @@ const testIsActiveTeamspaceMember = () => {
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			TeamspacesProcessor.isTeamspaceMember.mockResolvedValueOnce(true);
-			await TSMiddlewares.isTeamspaceMember(
+			await TSMiddlewares.isActiveTeamspaceMember(
 				request,
 				{},
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledTimes(1);
-			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, username, true);
+			expect(TeamspacesProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, username, false, true);
 		});
 
 		test('next() should be called if auth bypassed is enabled', async () => {
 			const mockCB = jest.fn(() => {});
-			await TSMiddlewares.isTeamspaceMember(
+			await TSMiddlewares.isActiveTeamspaceMember(
 				{ ...request, app: { get: () => true } },
 				{},
 				mockCB,
@@ -137,7 +137,7 @@ const testIsActiveTeamspaceMember = () => {
 		test('should respond with teamspace not found if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			TeamspacesProcessor.isTeamspaceMember.mockResolvedValueOnce(false);
-			await TSMiddlewares.isTeamspaceMember(
+			await TSMiddlewares.isActiveTeamspaceMember(
 				request,
 				{},
 				mockCB,
@@ -147,10 +147,23 @@ const testIsActiveTeamspaceMember = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(request, {}, templates.teamspaceNotFound);
 		});
 
+		test('should respond with error if isTeamspaceMember throws a specific membership error', async () => {
+			const mockCB = jest.fn(() => {});
+			TeamspacesProcessor.isTeamspaceMember.mockRejectedValueOnce(templates.pendingInviteAcceptance);
+			await TSMiddlewares.isActiveTeamspaceMember(
+				request,
+				{},
+				mockCB,
+			);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(request, {}, templates.pendingInviteAcceptance);
+		});
+
 		test('should respond with error if isTeamspaceMember did not resolve', async () => {
 			const mockCB = jest.fn(() => {});
 			TeamspacesProcessor.isTeamspaceMember.mockRejectedValueOnce(templates.userNotFound);
-			await TSMiddlewares.isTeamspaceMember(
+			await TSMiddlewares.isActiveTeamspaceMember(
 				request,
 				{},
 				mockCB,

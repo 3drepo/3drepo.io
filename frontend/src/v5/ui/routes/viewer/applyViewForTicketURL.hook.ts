@@ -16,7 +16,7 @@
  */
 
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParam } from '../useSearchParam';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../routes.constants';
@@ -29,13 +29,11 @@ export const useApplyViewForTicketURL = () => {
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const hasTicketData = !isEmpty(tickets) && !isEmpty(templates);
-	const [lastTicketId, setLasticketId] = useState('');
 
 
 	useEffect(() => {
-		if (!ticketId || !hasTicketData || lastTicketId === ticketId) return;
+		if (!ticketId || !hasTicketData) return;
 		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticketId, revision);
-		setLasticketId(ticketId);
-	}, [ticketId, hasTicketData, lastTicketId]);
+	}, [ticketId, hasTicketData]);
 	
 };
