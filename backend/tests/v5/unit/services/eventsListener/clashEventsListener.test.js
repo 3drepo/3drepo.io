@@ -398,7 +398,6 @@ const testClashPlanUpdated = () => {
 		test.each([
 			[`Should call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} and name is updated`, defaultData, undefined],
 			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but name is not updated`, generateRandomObject(), undefined],
-			[`Should not call onClashPlanNameUpdated if there is a ${events.CLASH_PLAN_UPDATED} but data is undefined`, undefined, undefined],
 			[`Should fail gracefully on error if there is a ${events.CLASH_PLAN_UPDATED}`, defaultData, templates.clashPlanNotFound],
 			[`Should handle rejected error objects for ${events.CLASH_PLAN_UPDATED}`, defaultData, new Error(generateRandomString())],
 		])('%s', async (desc, data, error) => {

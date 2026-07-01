@@ -49,6 +49,9 @@ const LogsModel = require(`${src}/models/tickets.logs`);
 jest.mock('../../../../../../../../src/v5/models/tickets.comments');
 const CommentsModel = require(`${src}/models/tickets.comments`);
 
+jest.mock('../../../../../../../../src/v5/models/clashes.plans');
+const ClashPlanModel = require(`${src}/models/clashes.plans`);
+
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -1348,7 +1351,7 @@ const testOnTemplateUpdated = () => {
 			if (fetchedTickets) {
 				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledWith(teamspace,
-					template._id, { number: 1, _id: 1, project: 1, model: 1 });
+					template._id, { number: 1, _id: 1, project: 1, model: 1, modules: 1 });
 			} else {
 				expect(TicketsModel.getTicketsByTemplateId).not.toHaveBeenCalled();
 			}
@@ -1452,7 +1455,7 @@ const testOnModelNameUpdated = () => {
 				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
 				templates.forEach((template) => {
 					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
-						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1 });
+						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1, modules: 1 });
 				});
 			} else {
 				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
@@ -1478,6 +1481,9 @@ const testOnModelNameUpdated = () => {
 };
 
 const testOnClashPlanNameUpdated = () => {
+	const { CLOUD_CLASH } = presetModules;
+	const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
+
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
@@ -1504,8 +1510,12 @@ const testOnClashPlanNameUpdated = () => {
 				modules: [{
 					name: moduleName,
 					properties: [property],
+				}, {
+					type: CLOUD_CLASH,
+					properties: [],
 				}],
 			}));
+			const clashPlanId = generateRandomString();
 			const nTickets = hasTickets ? 5 : 0;
 			const expectedData = [];
 			const tickets = times(nTickets, () => {
@@ -1514,7 +1524,10 @@ const testOnClashPlanNameUpdated = () => {
 					project,
 					model,
 					properties: {},
-					modules: { [moduleName]: {} },
+					modules: {
+						[moduleName]: {},
+						[presetModules.CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_ID]: clashPlanId },
+					},
 				};
 				const resTicket = cloneDeep(ticket);
 
@@ -1536,14 +1549,14 @@ const testOnClashPlanNameUpdated = () => {
 			});
 
 			const fetchedTickets = config.value?.includes(`{${supportedPatterns.CLASH_PLAN_NAME}}`);
-
 			if (fetchedTickets) {
 				templates.forEach(() => {
+					ClashPlanModel.getPlanById.mockResolvedValueOnce({ name: planName });
 					TicketsModel.getTicketsByClashPlanId.mockResolvedValueOnce(tickets);
 				});
 			}
 
-			await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId, planName))
+			await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId))
 				.resolves.toBeUndefined();
 
 			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
