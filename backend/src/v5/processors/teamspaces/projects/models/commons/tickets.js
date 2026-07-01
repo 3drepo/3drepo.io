@@ -461,8 +461,8 @@ const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, 
 				const clashPlan = await getPlanById(teamspace, ticket.project, stringToUUID(clashPlanId), { name: 1 });
 				clashPlanIdToName[clashPlanId] = clashPlan.name;
 			}
-			patternToVal[supportedPatterns.CLASH_PLAN_NAME] = clashPlanIdToName[clashPlanId];
 		}
+		patternToVal[supportedPatterns.CLASH_PLAN_NAME] = clashPlanIdToName[clashPlanId] ?? '';
 
 		if (!modelIdToName[ticket.model]) {
 			// eslint-disable-next-line no-await-in-loop
