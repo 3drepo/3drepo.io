@@ -415,7 +415,7 @@ const testClashPlanUpdated = () => {
 			if (data?.name) {
 				expect(TicketsProcessor.onClashPlanNameUpdated).toHaveBeenCalledTimes(1);
 				expect(TicketsProcessor.onClashPlanNameUpdated).toHaveBeenCalledWith(eventData.teamspace,
-					eventData.project, eventData.planId, data.name);
+					eventData.project, eventData.planId);
 			}
 		});
 	});
