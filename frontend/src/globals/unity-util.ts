@@ -3072,4 +3072,18 @@ export class UnityUtil {
 	public static setLabelScale(scale: number) {
 		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
 	}
+
+	/**
+	 * @hidden
+	 */
+	static randomiseDrawOrder() {
+		UnityUtil.toUnity('RandomiseDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
+	}
+
+	/**
+	 * @hidden
+	 */
+	static resetDrawOrder() {
+		UnityUtil.toUnity('ResetDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
+	}
 }
