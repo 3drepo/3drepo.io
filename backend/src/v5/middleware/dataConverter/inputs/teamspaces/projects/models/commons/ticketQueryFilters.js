@@ -26,13 +26,11 @@ TicketQueryFilters.validateQueryString = async (req, res, next) => {
 		try {
 			const queryString = await querySchema.validate(decodeURIComponent(req.query.query));
 			const queryParams = queryString.slice(1, -1).split('&&');
-			const queryFilters = [];
 
-			await Promise.all(queryParams.map(async (param) => {
+			const queryFilters = await Promise.all(queryParams.map(async (param) => {
 				const [propertyName, operator, value] = param.split('::');
 				try {
-					const validatedQuery = await queryParamSchema.validate({ propertyName, operator, value });
-					queryFilters.push(validatedQuery);
+					return await queryParamSchema.validate({ propertyName, operator, value });
 				} catch (err) {
 					throw createResponseCode(templates.invalidArguments, `Error at '${propertyName}' query filter: ${err.message}`);
 				}

@@ -479,7 +479,7 @@ export class CustomTable extends PureComponent<IProps, IState> {
 									this.renderCheckbox({
 										onChange: this.handleSelectAll,
 										indeterminate: isIndeterminate,
-										checked: selectedAll || isIndeterminate,
+										checked: selectedAll,
 										disabled: checkboxDisabled
 									})
 								}
