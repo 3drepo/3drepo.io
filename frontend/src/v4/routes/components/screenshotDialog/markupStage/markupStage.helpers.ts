@@ -52,6 +52,7 @@ export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) 
 	const name = createUniqueName(type);
 	const newLine = {
 		type: ELEMENT_TYPES.DRAWING,
+		figure: ELEMENT_TYPES.DRAWING,
 		name,
 		color,
 		rotation: 0,

@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useRef, Fragment } from 'react';
-import { Group, Transformer } from 'react-konva';
+import { useEffect, useRef, Fragment, useState } from 'react';
+import { Group, Rect, Transformer } from 'react-konva';
 import { pick } from 'lodash';
 import { useHandleBubbling, cursorStylesEvents } from '../drawnObjects.hooks';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
@@ -34,6 +34,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformer = useRef<any>(null);
 	const group = useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
+	const [rectProps, setRectProps] = useState({ width: 0, height: 0 , x: 0, y: 0});
 
 	useEffect(() => {
 		if (isSelected && transformer.current) {
@@ -71,6 +72,11 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	const handleBubbling = useHandleBubbling(isSelected);
+
+	useEffect(() => {
+		setRectProps(shape.current?.getClientRect() || {});
+	}, [shape.current]);
+
 	return (
 		<Fragment>
 			<Group
@@ -81,16 +87,16 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
 					onDblClick={handleDoubleClick}
-					draggable={draggable && isSelected}
+					draggable={isSelected}
 					{...handleBubbling}
 			>
 				<Component
 						ref={shape}
 						{...elementProps}
-						{...cursorStylesEvents(isSelected)}
 						stroke={color}
 						perfectDrawEnabled={false}
 				/>
+				{ isSelected && <Rect  {...rectProps} fill="transparent" visible={isSelected} 	{...cursorStylesEvents()} />}
 			</Group>
 			{ isSelected &&
 			<Transformer

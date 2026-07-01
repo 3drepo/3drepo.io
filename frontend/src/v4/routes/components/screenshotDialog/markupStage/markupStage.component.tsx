@@ -30,7 +30,6 @@ import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DrawingAction } from '../components/drawingAction/drawingAction.component';
-import { DrawnLine } from '../components/drawnLine/drawnLine.component';
 import { Erasing } from '../components/drawingAction/erasingAction/erasingAction.component';
 import { Shape } from '../components/shape/shape.component';
 import { SHAPE_TYPES } from '../components/shape/shape.constants';
@@ -226,9 +225,8 @@ const BaseMarkupStage = ({
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
 			return (<TextNode key={index} {...commonProps} />);
-		} else if (element.type === ELEMENT_TYPES.DRAWING) {
-			return (<DrawnLine key={index} {...commonProps} />);
 		}
+
 		return (<Shape key={index} {...commonProps} />);
 	}), [canvasElements, selectedObjectName, updateElement]);
 

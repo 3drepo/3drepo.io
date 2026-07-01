@@ -23,7 +23,7 @@ export const useHandleBubbling = (isSelected: boolean) => {
     return { onMouseDown, onTouchStart: onMouseDown };
 }
 
-export const cursorStylesEvents = (isEnabled: boolean) => {
+export const cursorStylesEvents = () => {
     const onMouseEnterDrawing = (e) => {
         e.target.getStage().container().style.cursor = 'move';
     };
@@ -40,10 +40,10 @@ export const cursorStylesEvents = (isEnabled: boolean) => {
         e.target.getStage().container().style.cursor = 'move';
     };
 
-    return isEnabled ? {
+    return {
         onMouseEnter: onMouseEnterDrawing,
         onMouseLeave: onMouseLeaveDrawing,
         onMouseDown: onMouseDownDrawing,
         onMouseUp: onMouseUpDrawing
-    } : {};
+    };
 }
