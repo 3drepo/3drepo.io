@@ -20,6 +20,8 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUID, generateRandomNumber, generateRandomObject } = require('../../helper/services');
 
+const { presetModules, modulePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
+
 const Ticket = require(`${src}/models/tickets`);
 const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -191,7 +193,7 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, 0);
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, undefined, 0);
 		});
 
 		test('Should impose query for updated since a certain date if it is provided', async () => {
@@ -208,7 +210,7 @@ const testGetAllTickets = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
-				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, limit, skip);
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, limit, skip);
 		});
 	});
 };
@@ -805,6 +807,32 @@ const testGetTicketsByTemplate = () => {
 	});
 };
 
+const testGetTicketsByClashPlanId = () => {
+	describe('Get tickets by clash plan id', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const templateId = generateRandomString();
+		const clashPlanId = generateUUID();
+		const projection = generateRandomObject();
+
+		const { CLOUD_CLASH } = presetModules;
+		const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
+
+		test('Should return whatever the query returns', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByClashPlanId(teamspace, project, templateId, clashPlanId, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, type: templateId, [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(clashPlanId) }, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddTicketsWithTemplate();
 	testRemoveAllTickets();
@@ -815,4 +843,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTicketsByFilter();
 	testRemoveAllTicketsWithTemplate();
 	testGetTicketsByTemplate();
+	testGetTicketsByClashPlanId();
 });

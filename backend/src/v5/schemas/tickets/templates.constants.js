@@ -110,6 +110,13 @@ TemplateConstants.statusTypes = createConstantMapping(['open', 'active', 'review
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
+TemplateConstants.supportedPatterns = createConstantMapping([
+	'model_name',
+	'template_code',
+	'ticket_number',
+	'clash_plan_name',
+]);
+
 const riskLevelConfig = { [propOptions.VALUES]: riskLevelsArr, [propOptions.DEFAULT]: riskLevels.VERY_LOW };
 const idTypeLabels = ['Revit', 'IFC', 'DWG', 'DGN', '3D Repo ID', 'Unknown'];
 
@@ -161,7 +168,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash Plan ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Run ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash ID', propTypes.LONG_TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
-		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true, value: `{${TemplateConstants.supportedPatterns.CLASH_PLAN_NAME}}` }),
 		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: Object.values(CLASH_TYPES), [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
@@ -239,11 +246,6 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
-TemplateConstants.supportedPatterns = createConstantMapping([
-	'model_name',
-	'template_code',
-	'ticket_number',
-]);
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
