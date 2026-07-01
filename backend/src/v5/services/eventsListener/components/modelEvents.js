@@ -174,68 +174,90 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
 	const { errorReason, status } = data;
 
-	if (status === processStatuses.OK) {
-		const calibration = modelType === modelTypes.DRAWING
-			? await getCalibrationStatus(teamspace, project, model, revId)
-			: undefined;
+	try {
+		if (status === processStatuses.OK) {
+			const calibration = modelType === modelTypes.DRAWING
+				? await getCalibrationStatus(teamspace, project, model, revId)
+				: undefined;
 
-		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
-	} else if (!errorReason.userErr) {
-		try {
-			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
+		} else if (!errorReason.userErr) {
+			try {
+				const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 
-			let fileName = 'N/A';
+				let fileName = 'N/A';
 
-			if (modelType === modelTypes.DRAWING) {
-				const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
-					{ rev_id: revId }, { name: 1 });
-				fileName = name;
-			} else if (modelType === modelTypes.CONTAINER) {
-				fileName = await getContainerFileName(UUIDToString(revId));
-			}
+				if (modelType === modelTypes.DRAWING) {
+					const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+						{ rev_id: revId }, { name: 1 });
+					fileName = name;
+				} else if (modelType === modelTypes.CONTAINER) {
+					fileName = await getContainerFileName(UUIDToString(revId));
+				}
 
-			const { errorCode } = errorReason;
-			const { internalError, message } = getInfoFromCode(errorCode);
+				const { errorCode } = errorReason;
+				const { internalError, message } = getInfoFromCode(errorCode);
 
-			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
-				{
-					errInfo: {
-						code: `${errorCode} ${internalError}`,
-						message,
+				await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+					{
+						errInfo: {
+							code: `${errorCode} ${internalError}`,
+							message,
+						},
+						teamspace,
+						model,
+						user,
+						project: UUIDToString(project),
+						revId: UUIDToString(revId),
+						modelType,
+						fileName,
+						logExcerpt: logPreview,
+
 					},
-					teamspace,
-					model,
-					user,
-					project: UUIDToString(project),
-					revId: UUIDToString(revId),
-					modelType,
-					fileName,
-					logExcerpt: logPreview,
-
-				},
-				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
-			);
-		} catch (err) {
-			logger.logError('Failed to send email for model import failures');
-			if (err.stack) {
-				logger.logError(err.stack);
+					zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
+				);
+			} catch (err) {
+				logger.logError('Failed to send email for model import failures');
+				if (err.stack) {
+					logger.logError(err.stack);
+				}
+				await listenerErrorNotification.notifyListenerFailure({
+					eventName: events.MODEL_IMPORT_FINISHED,
+					listenerName: 'modelProcessingCompleted.importFailureEmail',
+					component: 'modelEvents',
+					payload: {
+						teamspace,
+						project,
+						model,
+						revId,
+						user,
+						modelType,
+						data,
+					},
+					error: err,
+				});
 			}
-			await listenerErrorNotification.notifyListenerFailure({
-				eventName: events.MODEL_IMPORT_FINISHED,
-				listenerName: 'modelProcessingCompleted.importFailureEmail',
-				component: 'modelEvents',
-				payload: {
-					teamspace,
-					project,
-					model,
-					revId,
-					user,
-					modelType,
-					data,
-				},
-				error: err,
-			});
 		}
+	} catch (err) {
+		logger.logError(`Failed to process model import completion for ${teamspace}.${model}: ${err?.message}`);
+		if (err?.stack) {
+			logger.logError(err.stack);
+		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.MODEL_IMPORT_FINISHED,
+			listenerName: 'modelProcessingCompleted',
+			component: 'modelEvents',
+			payload: {
+				teamspace,
+				project,
+				model,
+				revId,
+				user,
+				modelType,
+				data,
+			},
+			error: err,
+		});
 	}
 
 	publish(events.MODEL_SETTINGS_UPDATE, {

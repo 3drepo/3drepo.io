@@ -784,7 +784,7 @@ const testModelProcessingCompleted = () => {
 				data: generateImportResult(true),
 			};
 
-			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce(new Error(generateRandomString()));
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce(new Error());
 
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -1175,7 +1175,6 @@ const testDeleteModel = () => {
 		});
 	});
 };
-
 const testUpdateTicket = () => {
 	const updateTicketTest = async (isFederation, changes, expectedData) => {
 		const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
@@ -1289,7 +1288,6 @@ const testUpdateTicket = () => {
 		});
 	});
 };
-
 const testNewTicket = () => {
 	describe(events.NEW_TICKET, () => {
 		times(2, (i) => {
@@ -1456,7 +1454,6 @@ const testNewTicket = () => {
 		});
 	});
 };
-
 const testNewComment = () => {
 	const addCommentTest = async (isFederation) => {
 		const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
@@ -1525,7 +1522,6 @@ const testNewComment = () => {
 		});
 	});
 };
-
 const testUpdateComment = () => {
 	describe(events.UPDATE_COMMENT, () => {
 		const updateCommentTest = async (isFederation) => {

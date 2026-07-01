@@ -88,10 +88,10 @@ const testClashRunUpdate = () => {
 		};
 
 		test.each([
-			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined],
-			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound],
-			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString())],
-		])('%s', async (desc, rejectUpdateRunStatus) => {
+			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined, false],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound, false],
+			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString()), true],
+		])('%s', async (desc, rejectUpdateRunStatus, shouldNotifyError) => {
 			if (rejectUpdateRunStatus) {
 				ClashesModel.updateRunStatus.mockRejectedValueOnce(rejectUpdateRunStatus);
 			}
@@ -101,7 +101,11 @@ const testClashRunUpdate = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.status);
-			expectErrorNotification();
+			if (shouldNotifyError) {
+				expectErrorNotification();
+			} else {
+				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			}
 		});
 	});
 };
