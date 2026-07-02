@@ -18,21 +18,51 @@
 const { createDirectMessage, createInternalMessage } = require('../../chat');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { notifyListenerFailure } = require('../listenerErrorNotification');
 const { removeOldSessions } = require('../../sessions');
 const { saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
-	saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
-	removeOldSessions(username, sessionID, referer),
-	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
-]);
+const userLoggedIn = async ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => {
+	try {
+		await Promise.all([
+			saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+			removeOldSessions(username, sessionID, referer),
+			...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
+		]);
+	} catch (err) {
+		await notifyListenerFailure({
+			eventName: events.SESSION_CREATED,
+			listenerName: 'userLoggedIn',
+			component: 'authEvents',
+			payload: {
+				username,
+				sessionID,
+				socketId,
+				ipAddress,
+				userAgent,
+				referer,
+			},
+			error: err,
+		});
+	}
+};
 
 const sessionsRemoved = async ({ ids, elective }) => {
-	if (!elective) {
-		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+	try {
+		if (!elective) {
+			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+		}
+		await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
+	} catch (err) {
+		await notifyListenerFailure({
+			eventName: events.SESSIONS_REMOVED,
+			listenerName: 'sessionsRemoved',
+			component: 'authEvents',
+			payload: { ids, elective },
+			error: err,
+		});
 	}
-	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 };
 
 const AuthEventsListener = {};

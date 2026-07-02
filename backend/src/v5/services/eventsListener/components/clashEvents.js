@@ -28,6 +28,7 @@ const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { getFederationById } = require('../../../models/modelSettings');
 const { getTemplateById } = require('../../../models/tickets.templates');
+const listenerErrorNotification = require('../listenerErrorNotification');
 const { logger } = require('../../../utils/logger');
 const {
 	processClashResults: processTicketClashResults,
@@ -100,6 +101,18 @@ const clashRunStatusUpdate = async ({ teamspace, project, runId, status }) => {
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.CLASH_RUN_UPDATE,
+			listenerName: 'clashRunStatusUpdate',
+			component: 'clashEvents',
+			payload: {
+				teamspace,
+				project,
+				runId,
+				status,
+			},
+			error: err,
+		});
 	}
 };
 
@@ -120,6 +133,19 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		await listenerErrorNotification.notifyListenerFailure({
+			eventName: events.CLASH_RUN_COMPLETED,
+			listenerName: 'clashRunCompleted',
+			component: 'clashEvents',
+			payload: {
+				teamspace,
+				project,
+				runId,
+				results,
+				value,
+			},
+			error: err,
+		});
 	}
 };
 

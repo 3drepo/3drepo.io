@@ -27,6 +27,10 @@ jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
 jest.mock('../../../../../src/v5/handler/db', () => ({
@@ -46,6 +50,16 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
+
+const expectErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.ERROR_NOTIFICATION.name,
+		expect.objectContaining({
+			scope: 'eventsListener',
+		}),
+	);
+};
 
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
@@ -92,6 +106,23 @@ const testAuthEventsListener = () => {
 				expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
 				expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
 			});
+
+			test(`Should send an error notification if ${events.SESSION_CREATED} processing fails`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+				const username = generateRandomString();
+				const sessionID = generateRandomString();
+				const socketId = generateRandomString();
+				const ipAddress = generateRandomString();
+				const userAgent = generateRandomString();
+				const referer = generateRandomString();
+				LoginRecords.saveSuccessfulLoginRecord.mockRejectedValueOnce(new Error(generateRandomString()));
+
+				EventsManager.publish(events.SESSION_CREATED,
+					{ username, sessionID, socketId, ipAddress, userAgent, referer });
+
+				await waitOnEvent;
+				expectErrorNotification();
+			});
 		});
 
 		describe(events.SESSION_REMOVED, () => {
@@ -134,6 +165,19 @@ const testAuthEventsListener = () => {
 					{ sessionIds: data.ids },
 				);
 			});
+
+			test(`Should send an error notification if ${events.SESSIONS_REMOVED} processing fails`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+				const data = {
+					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+				};
+				ChatService.createInternalMessage.mockRejectedValueOnce(new Error(generateRandomString()));
+
+				EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+				await waitOnEvent;
+				expectErrorNotification();
+			});
 		});
 	});
 };
@@ -148,6 +192,17 @@ const testUserEventsListener = () => {
 			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
 			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
 			expect(Invitations.unpack).toHaveBeenCalledWith(username);
+		});
+
+		test(`Should send an error notification if ${events.USER_CREATED} processing fails`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
+			const username = generateRandomString();
+			Invitations.unpack.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			EventsManager.publish(events.USER_CREATED, { username });
+
+			await waitOnEvent;
+			expectErrorNotification();
 		});
 	});
 };

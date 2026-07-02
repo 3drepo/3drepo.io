@@ -105,6 +105,16 @@ const generateImportResult = (success, message = generateRandomString(), userErr
 	};
 };
 
+const expectErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.ERROR_NOTIFICATION.name,
+		expect.objectContaining({
+			scope: 'eventsListener',
+		}),
+	);
+};
+
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
 		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.CONTAINER})`, async () => {
@@ -159,6 +169,7 @@ const testQueueTaskUpdate = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE} (Rejected with an error object)`,
@@ -177,6 +188,7 @@ const testQueueTaskUpdate = () => {
 				expect(ProjectSettings.findProjectByModelId)
 					.toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 				expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+				expectErrorNotification();
 			});
 	});
 };
@@ -254,6 +266,7 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED} (Rejected with an error object)`, async () => {
@@ -273,6 +286,7 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expectErrorNotification();
 		});
 	});
 };
@@ -480,7 +494,7 @@ const testNewRevision = () => {
 				undefined],
 		];
 		expect(ChatService.createModelMessage.mock.calls).toEqual(expect.arrayContaining(expectedCalls));
-		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expectErrorNotification();
 
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledTimes(1);
 		expect(DrawingProcessor.createDrawingThumbnail).toHaveBeenCalledWith(data.teamspace,
@@ -627,7 +641,7 @@ const testNewRevision = () => {
 			UUIDToString(data.project),
 			data.model,
 			undefined);
-		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expectErrorNotification();
 	});
 };
 
@@ -659,6 +673,16 @@ const testModelProcessingCompleted = () => {
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
 				const fileName = generateRandomString();
+
+				if (success) {
+					Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({
+						tag: generateRandomString(),
+						author: generateRandomString(),
+						timestamp: generateRandomDate(),
+						rFile: [generateRandomString()],
+						desc: generateRandomString(),
+					});
+				}
 
 				if (sendMail) {
 					if (modelType === modelTypes.CONTAINER) {
@@ -725,6 +749,7 @@ const testModelProcessingCompleted = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
 			await waitOnEvent;
+			expectErrorNotification();
 		});
 
 		test('Should fail gracefully if an error was thrown in getLogArchive (error object)', async () => {
@@ -744,6 +769,53 @@ const testModelProcessingCompleted = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
 			await waitOnEvent;
+			expectErrorNotification();
+		});
+
+		test('Should notify if modelProcessingCompleted outer catch is triggered', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: generateImportResult(true),
+			};
+
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus)
+				.toHaveBeenCalledWith(data.teamspace, data.project, data.model, data.revId);
+			expectErrorNotification();
+		});
+
+		test('Should not log the stack if it does not exist in the error object', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: generateImportResult(true),
+			};
+
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce({ message: generateRandomString() });
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus)
+				.toHaveBeenCalledWith(data.teamspace, data.project, data.model, data.revId);
+			expectErrorNotification();
 		});
 
 		testNewRevision();
@@ -778,6 +850,7 @@ const testModelSettingsUpdate = () => {
 			);
 
 			expect(TicketsProcessor.onModelNameUpdated).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 		test(`Should create a ${chatEvents.FEDERATION_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
@@ -910,6 +983,7 @@ const testRevisionUpdated = () => {
 			);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should create a ${chatEvents.CONTAINER_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED}`, async () => {
@@ -984,6 +1058,7 @@ const testNewModel = () => {
 				data.project,
 				undefined,
 			);
+			expectErrorNotification();
 		});
 
 		test(`Should create a ${chatEvents.NEW_FEDERATION} chat event if there is a ${events.NEW_MODEL} (federation)`, async () => {
@@ -1053,6 +1128,7 @@ const testDeleteModel = () => {
 				data.model,
 				undefined,
 			);
+			expectErrorNotification();
 		});
 		test(`Should create a ${chatEvents.FEDERATION_REMOVED} chat event if there is a ${events.DELETE_MODEL} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
@@ -1099,7 +1175,6 @@ const testDeleteModel = () => {
 		});
 	});
 };
-
 const testUpdateTicket = () => {
 	const updateTicketTest = async (isFederation, changes, expectedData) => {
 		const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
@@ -1161,6 +1236,7 @@ const testUpdateTicket = () => {
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
@@ -1212,7 +1288,6 @@ const testUpdateTicket = () => {
 		});
 	});
 };
-
 const testNewTicket = () => {
 	describe(events.NEW_TICKET, () => {
 		times(2, (i) => {
@@ -1346,6 +1421,7 @@ const testNewTicket = () => {
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
 				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+				expectErrorNotification();
 			});
 
 			test(`Should fail gracefully on error if there is an ${events.TICKETS_IMPORTED} event (${isFederation ? 'Federation' : 'Container'})`, async () => {
@@ -1373,11 +1449,11 @@ const testNewTicket = () => {
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, template._id);
 				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+				expectErrorNotification();
 			});
 		});
 	});
 };
-
 const testNewComment = () => {
 	const addCommentTest = async (isFederation) => {
 		const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
@@ -1442,10 +1518,10 @@ const testNewComment = () => {
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 	});
 };
-
 const testUpdateComment = () => {
 	describe(events.UPDATE_COMMENT, () => {
 		const updateCommentTest = async (isFederation) => {
@@ -1510,6 +1586,7 @@ const testUpdateComment = () => {
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 	});
 };
@@ -1586,6 +1663,7 @@ const testUpdateTicketGroup = () => {
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, data._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 	});
 };
@@ -1607,6 +1685,7 @@ const testTemplateUpdated = () => {
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
 			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should call onTemplateUpdated if template code is updated', async () => {
