@@ -35,6 +35,25 @@ type ModelStatistics = {
 	frameCount: number,
 };
 
+type Deferred<T> = {
+    resolve: (value: T | PromiseLike<T>) => void;
+    reject: (reason?: unknown) => void;
+};
+
+// Interface representing a position on the canvas, in pixels, with (0,0) being the top bottom corner of the canvas.
+// Used for requestPointInfo.
+export interface CanvasPosition {
+    x: number; 
+    y: number; 
+}
+
+// Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
+// Used for requestPointInfo.
+export interface ClientPosition {
+     clientX: number; 
+     clientY: number;
+}
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -140,6 +159,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectStatusPromises = [];
+
+	//* @hidden */
+	public static pointInfoPromises = new Map<string, Deferred<object>[]>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -686,6 +708,28 @@ export class UnityUtil {
 		}
 
 		UnityUtil.objectStatusPromises = [];
+	}
+
+	/** @hidden */
+	public static respondToPointInfoRequest(pointInfo) {
+
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', JSON.parse(pointInfo));
+		}
+
+		const data = JSON.parse(pointInfo);
+		const key = data.mousePos[0] + ',' + data.mousePos[1];
+
+		// If there are any promises waiting for this point info, resolve them
+		if (this.pointInfoPromises.has(key)) {			
+			this.pointInfoPromises.get(key).forEach((promise) => {
+				promise.resolve(data);
+			});
+			this.pointInfoPromises.delete(key);
+		}
+		else{
+			console.warn('No entries found for point info request');
+		}
 	}
 
 	/** @hidden */
@@ -1700,6 +1744,56 @@ export class UnityUtil {
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
 		return newObjectStatusPromise as Promise<object>;
+	}
+
+	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<object> {
+		
+		let x: number;
+		let y: number;
+
+		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
+		if('clientX' in position && 'clientY' in position) {
+
+			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
+			// bottom left-corner.
+
+			const canvas = this.unityInstance?.Module.canvas;
+			const rect = canvas.getBoundingClientRect();
+
+			x = position.clientX - rect.left;
+			y = rect.height - 1 - (position.clientY - rect.top);
+		}
+		else if('x' in position && 'y' in position) {
+
+			// If it is a CanvasPosition, we can extract the coordinates directly.
+
+			x = position.x;
+			y = position.y;
+		}
+		else {			
+			console.error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.');
+			return;
+		}
+
+		const newPointInfoPromise = new Promise((resolve, reject) => {
+			
+			// Store the promise in a map with the key being the coordinates, so that when Unity responds
+			// with the point info, we can resolve the correct promise.
+			const key = x + ',' + y;
+			if(!this.pointInfoPromises.has(key)) {
+				this.pointInfoPromises.set(key, []);
+			}
+			this.pointInfoPromises.get(key).push({ resolve, reject });
+		});
+
+		const params = {
+			x,
+			y
+		};
+
+		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		return newPointInfoPromise as Promise<object>;
 	}
 
 	/**
