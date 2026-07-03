@@ -1289,6 +1289,15 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like "Off", "Navigation" or "Drawing"
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode) {
+		UnityUtil.toUnity('SetSnapMode', undefined, mode);
+	}
+
 	 /**
 	 * Enable Cursor
 	 * Note: Changing the snap mode can affect the cursor.
