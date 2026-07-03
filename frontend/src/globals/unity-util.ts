@@ -1772,7 +1772,7 @@ export class UnityUtil {
 			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
 			// bottom left-corner.
 
-			const canvas = this.unityInstance?.Module.canvas;
+			const canvas = this.unityInstance.Module.canvas;
 			const rect = canvas.getBoundingClientRect();
 
 			x = position.clientX - rect.left;
