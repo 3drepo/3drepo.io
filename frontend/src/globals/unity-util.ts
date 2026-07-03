@@ -712,18 +712,33 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static respondToPointInfoRequest(pointInfo) {
+		
+		let data;
+		let error = undefined;
 
-		if (UnityUtil.verbose) {
-			console.debug('[FROM UNITY] respondToPointInfoRequest', JSON.parse(pointInfo));
+		// Parse data
+		try {
+			data = JSON.parse(pointInfo);
+		}
+		catch (err) {
+			error = err;
+			console.error('Failed to parse point info', pointInfo);
+			return;
 		}
 
-		const data = JSON.parse(pointInfo);
-		const key = data.mousePos[0] + ',' + data.mousePos[1];
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', data);
+		}
 
-		// If there are any promises waiting for this point info, resolve them
-		if (this.pointInfoPromises.has(key)) {			
+		// If there are any promises waiting for this point info, resolve or reject them
+		const key = data.mousePos[0] + ',' + data.mousePos[1];
+		if (this.pointInfoPromises.has(key)) {
 			this.pointInfoPromises.get(key).forEach((promise) => {
-				promise.resolve(data);
+				if (error) {
+					promise.reject(error);
+				} else {
+					promise.resolve(data);
+				}
 			});
 			this.pointInfoPromises.delete(key);
 		}
