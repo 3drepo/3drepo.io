@@ -160,7 +160,7 @@ export class UnityUtil {
 	/** @hidden */
 	public static objectStatusPromises = [];
 
-	//* @hidden */
+	/** @hidden */
 	public static pointInfoPromises = new Map<string, Deferred<object>[]>();
 
 	/** @hidden */
