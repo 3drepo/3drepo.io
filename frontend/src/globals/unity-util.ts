@@ -712,7 +712,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static respondToPointInfoRequest(pointInfo) {
-		
+
 		let data;
 		let error = undefined;
 
@@ -1785,9 +1785,8 @@ export class UnityUtil {
 			x = position.x;
 			y = position.y;
 		}
-		else {			
-			console.error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.');
-			return;
+		else {
+			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
 		}
 
 		const newPointInfoPromise = new Promise((resolve, reject) => {
