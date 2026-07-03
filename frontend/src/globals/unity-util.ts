@@ -36,23 +36,23 @@ type ModelStatistics = {
 };
 
 type Deferred<T> = {
-    resolve: (value: T | PromiseLike<T>) => void;
-    reject: (reason?: unknown) => void;
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
 };
 
-// Interface representing a position on the canvas, in pixels, with (0,0) being the top bottom corner of the canvas.
+// Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
 // Used for requestPointInfo.
 export interface CanvasPosition {
-    x: number; 
-    y: number; 
-}
+	x: number,
+	y: number,
+};
 
 // Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
 // Used for requestPointInfo.
 export interface ClientPosition {
-     clientX: number; 
-     clientY: number;
-}
+	clientX: number,
+	clientY: number,
+};
 
 export class UnityUtil {
 	/** @hidden */
