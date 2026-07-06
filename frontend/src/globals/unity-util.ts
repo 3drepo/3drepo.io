@@ -1761,6 +1761,16 @@ export class UnityUtil {
 		return newObjectStatusPromise as Promise<object>;
 	}
 
+	/**
+ 	 * Request point information for an arbitrary location on the Unity canvas.
+ 	 *
+ 	 * Accepts either:
+ 	 * - ClientPosition: `clientX`/`clientY` from PointerEvent/MouseEvent/Touch in viewport coordinates
+ 	 * - CanvasPosition: canvas pixel coordinates with (0,0) at the bottom-left corner
+ 	 * @category Model Interactions
+	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
+	 * @returns A promise that resolves with the point information object returned by the viewer.
+ 	 */
 	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<object> {
 		
 		let x: number;
