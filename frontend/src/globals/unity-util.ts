@@ -28,9 +28,9 @@ declare let createUnityInstance;
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
 export enum SnapMode {
-    Off = 'Off',
-    Navigation = 'Navigation',
-    Drawing = 'Drawing',
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
 }
 // The contents of this type will change in line with the needs of
 // the Test Automation or Profiling Tools.
