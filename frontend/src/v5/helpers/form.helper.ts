@@ -97,9 +97,6 @@ export const filterErrors = (
 }, {});
 
 export const removeEmptyObjects = (tree) => {
-	console.log('@@~~ removeEmptyObjects', tree);
-	console.log('@@~~ isBasicValue(tree)', isBasicValue(tree));
-
 	if (isBasicValue(tree)) return tree;
 
 	return Object.keys(tree).reduce((accum, key) => {
