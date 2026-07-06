@@ -16,11 +16,11 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { getPropertyLabel } from '../ticketsTable/ticketsTable.helper';
+import { getPropertyLabel } from '../tabularView/ticketsTable.helper';
 import { MenuItem } from './selectMenus.styles';
 import { Select } from '@controls/inputs/select/select.component';
 import { useContext } from 'react';
-import { TicketsTableContext } from '../ticketsTable/ticketsTableContext/ticketsTableContext';
+import { TabularViewContext } from '../tabularView/tabularViewContext/tabularViewContext';
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
@@ -29,7 +29,7 @@ import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 export const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
 export const GroupBySelect = () => {
-	const { groupByProperties, groupBy, setGroupBy } = useContext(TicketsTableContext);
+	const { groupByProperties, groupBy, setGroupBy } = useContext(TabularViewContext);
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const items = groupByProperties.filter((property) => visibleSortedColumnsNames.includes(property));
 
@@ -42,7 +42,6 @@ export const GroupBySelect = () => {
 			onChange={(e) => setGroupBy(e.target.value)}
 			value={groupBy}
 			label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'Group by:' })}
-			placeholder='none'
 			renderValue={(value: string) => (<b>{value === NONE_OPTION ? NONE_OPTION_MESSAGE : getPropertyLabel(value)}</b>)}
 		>
 			<MenuItem value={NONE_OPTION}>{NONE_OPTION_MESSAGE}</MenuItem>

@@ -67,7 +67,7 @@ Group.validateSchema = (group) => schema(group).validate(group);
 Group.castSchema = (group) => {
 	const groupToCast = { ...group };
 	groupToCast.updatedAt = groupToCast.updatedAt || groupToCast.createdAt;
-	return schema(groupToCast).cast(groupToCast);
+	return schema(groupToCast).cast(groupToCast, { assert: false });
 };
 
 module.exports = Group;

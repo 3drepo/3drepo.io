@@ -106,6 +106,7 @@ module.exports = {
 	cn_queue: {
 		host: 'amqp://localhost:5672',
 		model_queue: 'modelq',
+		clash_queue: 'clashq',
 		callback_queue: 'callbackq',
 		upload_dir: tmpDir,
 		shared_storage: sharedDirPath,

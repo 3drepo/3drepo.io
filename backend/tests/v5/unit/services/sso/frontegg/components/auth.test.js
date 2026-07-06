@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { src } = require('../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/connections');
 const Connections = require(`${src}/services/sso/frontegg/components/connections`);

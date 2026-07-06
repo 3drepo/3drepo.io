@@ -21,7 +21,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
-import { TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
+import { TicketsGroup } from '../../../../components/tickets/ticketsGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
@@ -52,9 +52,9 @@ export const TicketsList = ({ groupBy, loading }: any) => {
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 
-	const tableHandle = useRef<VListHandle>();
-	const subTableHandle = useRef<VListHandle>();
-	const scrollerRef = useRef<Element>();
+	const tableHandle = useRef<VListHandle>(null);
+	const subTableHandle = useRef<VListHandle>(null);
+	const scrollerRef = useRef<Element>(null);
 
 	let selectedIndex = -1;
 	let selectedSubIndex = -1;

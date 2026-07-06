@@ -1,5 +1,5 @@
 ARG REBUILD_DATE=unknown
-FROM node:22 as builder
+FROM node:24 as builder
 # copy resources  to build 
 COPY . /home/node/3drepo.io
 #install dependencies
@@ -10,7 +10,7 @@ RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && 
 RUN mkdir -p /home/node/3drepo.io/config/chart
 
 #deploy
-FROM node:22 as deploy
+FROM node:24 as deploy
 
 # Install minimal packages in one layer
 RUN apt-get update && apt-get install -y gosu less && rm -rf /var/lib/apt/lists/*

@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-	"isolatedModules": true,
+    "strict": false,
+    "noImplicitAny": false,
+	  "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "module": "commonjs",
@@ -23,10 +25,10 @@
       "WebWorker",
       "DOM.Iterable"
     ],
+    "strict": false,
     "jsx": "react-jsx",
     "removeComments": true,
     "sourceMap": true,
-    "baseUrl": "./",
     "paths": {
       "@components/*": ["./src/v5/ui/components/*"],
       "@controls/*": ["./src/v5/ui/controls/*"],

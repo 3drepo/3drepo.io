@@ -23,9 +23,8 @@ const { hideBin } = require('yargs/helpers');
 const { readFile, readdir } = require('fs/promises');
 const Path = require('path');
 
-const Yup = require('yup');
-
 const { handleErrorBeforeExit } = require('../utils');
+const { validateConfig } = require('./scheduler.config');
 
 const { v5Path } = require('../../interop');
 
@@ -96,23 +95,6 @@ const runScripts = async (scripts) => {
 	}
 };
 
-const getSchema = () => {
-	// This needs to be a function as cmdList needs to be initialised
-	const taskArrSchema = Yup.array().of(
-		Yup.object({
-			name: Yup.string().oneOf(cmdList),
-			params: Yup.array().of(Yup.mixed()).default([]),
-		}),
-	).default([]);
-
-	return Yup.object({
-		daily: taskArrSchema,
-		weekly: taskArrSchema,
-		monthly: taskArrSchema,
-		emailOnFailure: Yup.boolean().default(true),
-	});
-};
-
 /* Weekly tasks are executed on sundays */
 const runWeekly = () => new Date().getDay() === 0;
 
@@ -126,7 +108,7 @@ const run = async () => {
 	const { config } = await parser;
 	await findCmds();
 	const conf = JSON.parse(await readFile(config, 'utf8'));
-	const { daily, weekly, monthly, emailOnFailure } = await getSchema().validate(conf);
+	const { daily, weekly, monthly, emailOnFailure } = await validateConfig(conf, cmdList);
 	emailOnError = emailOnFailure;
 	logger.logInfo('======================== Daily tasks ========================');
 	await runScripts(daily);
@@ -142,6 +124,6 @@ const run = async () => {
 };
 
 Promise.resolve(run()).catch(onError).finally(() => {
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit();
 });

@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
 const {
-	determineTestGroup,
-	generateRandomString,
-} = require('../../../../../../helper/services');
+	generateRandomString } = require('../../../../../../helper/services');
 
 const Settings = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
 
