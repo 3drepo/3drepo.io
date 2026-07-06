@@ -1789,6 +1789,11 @@ export class UnityUtil {
 			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
 		}
 
+		// Round down the coordinates to the nearest integer, as Unity expects integer
+		// values for pixel coordinates and will truncate any decimal values.
+		x = Math.floor(x);
+		y = Math.floor(y);
+
 		const newPointInfoPromise = new Promise((resolve, reject) => {
 			
 			// Store the promise in a map with the key being the coordinates, so that when Unity responds
