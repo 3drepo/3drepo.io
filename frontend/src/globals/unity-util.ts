@@ -1784,7 +1784,7 @@ export class UnityUtil {
 
 			x = position.clientX - rect.left;
 			y = rect.height - 1 - (position.clientY - rect.top);
-		} else if('x' in position && 'y' in position) {
+		} else if ('x' in position && 'y' in position) {
 
 			// If it is a CanvasPosition, we can extract the coordinates directly.
 
