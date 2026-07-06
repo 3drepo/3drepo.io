@@ -714,16 +714,19 @@ export class UnityUtil {
 	public static respondToPointInfoRequest(pointInfo) {
 
 		let data;
-		let error = undefined;
-
+		
 		// Parse data
 		try {
 			data = JSON.parse(pointInfo);
 		}
-		catch (err) {
-			error = err;
-			console.error('Failed to parse point info', pointInfo);
-			return;
+		catch (error) {
+			// In the case of malformed data, we can't recover the key and reject all currently open requests.
+			// This is preferrable to leaving them hanging indefinitely.
+			// If the viewer is sending malformed data they are probably all shot anyway.
+			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
+ 			UnityUtil.pointInfoPromises.forEach((promises) => promises.forEach((promise) => promise.reject(error)));
+ 			UnityUtil.pointInfoPromises.clear();
+ 			return;
 		}
 
 		if (UnityUtil.verbose) {
@@ -734,11 +737,7 @@ export class UnityUtil {
 		const key = data.mousePos[0] + ',' + data.mousePos[1];
 		if (this.pointInfoPromises.has(key)) {
 			this.pointInfoPromises.get(key).forEach((promise) => {
-				if (error) {
-					promise.reject(error);
-				} else {
-					promise.resolve(data);
-				}
+				promise.resolve(data);
 			});
 			this.pointInfoPromises.delete(key);
 		}
