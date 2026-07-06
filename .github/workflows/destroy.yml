@@ -1,9 +1,12 @@
 name: Destroy 3drepo.io instance
 
 on:
-  # Dispatched by .github/workflows/chatOperations.yml when someone comments
-  # /destroy on a PR, and by .github/workflows/onPRClose.yml when a PR is
-  # closed so the ephemeral branch deployment is torn down.
+  workflow_call:
+    inputs:
+      branch:
+        description: Branch whose deployment should be destroyed.
+        required: true
+        type: string
   repository_dispatch:
     types:
       - destroy-command
@@ -12,76 +15,42 @@ permissions:
   contents: read
 
 concurrency:
-  group: destroy-${{ github.event.client_payload.pull_request.number || github.event.client_payload.branch }}
+  group: destroy-${{ inputs.branch || github.event.client_payload.pull_request.number || github.event.client_payload.branch }}
   cancel-in-progress: true
 
 jobs:
   destroy:
-    name: Destroy PR instance
-    if: github.event.client_payload.pull_request != null || github.event.client_payload.branch != null
+    name: Destroy instance
+    if: inputs.branch || github.event.client_payload.pull_request != null || github.event.client_payload.branch != null
     runs-on: ubuntu-24.04
     steps:
-      # Derive the release name the same way buildAndDeploy.yml does so /destroy
-      # targets the release that /deploy created. The branch comes from the
-      # ChatOps PR payload, or from the `branch` field sent by onPRClose.yml.
-      - name: Resolve release name
-        id: metadata
-        env:
-          PR_HEAD_REF: ${{ github.event.client_payload.pull_request.head.ref }}
-          CLOSE_BRANCH: ${{ github.event.client_payload.branch }}
-        run: |
-          set -euo pipefail
+      - uses: actions/checkout@v4
 
-          source_branch="${PR_HEAD_REF:-$CLOSE_BRANCH}"
+      - id: release
+        uses: ./.github/actions/derive-release-name
+        with:
+          branch: ${{ inputs.branch || github.event.client_payload.pull_request.head.ref || github.event.client_payload.branch }}
 
-          # Normalise to the same DNS-1035-friendly Helm release name used when
-          # deploying (lowercase, only [a-z0-9-], no leading/trailing/repeated
-          # dashes, capped at Helm's 53-char release-name limit).
-          release_name="$(
-            printf '%s' "$source_branch" |
-            tr '[:upper:]' '[:lower:]' |
-            sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g' |
-            cut -c1-53 |
-            sed -E 's/-+$//'
-          )"
-
-          if [[ -z "$release_name" ]]; then
-            echo "Unable to derive a Helm release name from branch '$source_branch'."
-            exit 1
-          fi
-
-          echo "release_name=$release_name" >> "$GITHUB_OUTPUT"
-          echo "Helm release to destroy: $release_name"
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v4
         with:
           version: '4.0.1'
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v4
         with:
           version: 'v1.34.2'
 
-      - name: Set Kubernetes context
-        uses: azure/k8s-set-context@v4
+      - uses: azure/k8s-set-context@v4
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
 
-      # Keep /destroy scoped to ephemeral PR releases. Master/staging are
-      # protected even if someone manages to dispatch those names.
       - name: Destroy Helm release
         env:
-          RELEASE_NAME: ${{ steps.metadata.outputs.release_name }}
+          RELEASE_NAME: ${{ steps.release.outputs.release_name }}
         run: |
           set -euo pipefail
-
           if [[ "$RELEASE_NAME" == "master" || "$RELEASE_NAME" == "staging" ]]; then
-            echo "Refusing to destroy protected release '$RELEASE_NAME'."
+            echo "Refusing to destroy protected release '$RELEASE_NAME'." >&2
             exit 1
           fi
-
-          helm uninstall "$RELEASE_NAME" \
-            --namespace default \
-            --ignore-not-found
+          helm uninstall "$RELEASE_NAME" --namespace default --ignore-not-found

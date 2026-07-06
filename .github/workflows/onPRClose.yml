@@ -53,15 +53,7 @@ jobs:
 
   destroy-deployed-branch:
     name: Tear down branch deployment
-    runs-on: ubuntu-latest
-    steps:
-      # Hand off to .github/workflows/destroy.yml (same path as a /destroy
-      # comment) by dispatching a destroy-command with the closed PR's branch.
-      # The destroy workflow normalises the branch to the release name and
-      # refuses to remove the protected master/staging releases itself.
-      - name: Dispatch destroy for closed branch
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
-          event-type: destroy-command
-          client-payload: '{"branch": "${{ github.head_ref || github.ref_name }}"}'
+    uses: ./.github/workflows/destroy.yml
+    with:
+      branch: ${{ github.head_ref || github.ref_name }}
+    secrets: inherit

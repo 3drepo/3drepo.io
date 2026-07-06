@@ -27,22 +27,22 @@ Fork PRs are refused, because deploying uses registry and cluster secrets.
 ## How to destroy
 
 - **Automatically** – closing/merging the PR tears its deployment down
-  ([`onPRClose.yml`](./onPRClose.yml) dispatches the destroy workflow).
+  ([`onPRClose.yml`](./onPRClose.yml) calls `destroy.yml` directly).
 - **On demand** – comment **`/destroy`** on the pull request.
 
 `master` and `staging` are protected: the destroy workflow refuses to remove
 those releases even if asked.
 
-## Per-branch deploy overrides
+## Per-branch deploy config
 
 Because deploys are driven by `repository_dispatch`, GitHub always runs the
 **workflow definition from the default branch (`master`)** — so editing
 `buildAndDeploy.yml` on a feature branch has no effect on a `/deploy`.
 
-To still tune a branch's deployment (the equivalent of the old Azure
-`customHelmOverride`), edit [`.github/deploy/overrides.env`](../deploy/overrides.env)
-**on your branch**. The deploy job checks out your branch and reads that file,
-so the values take effect and show up in the PR diff for review. You can set:
+Deployment config therefore lives in [`.github/deploy/config.env`](../deploy/config.env),
+which the deploy job reads from **your branch's** checkout. Edit it on your
+branch to tune that branch's deployment; the values show up in the PR diff for
+review. The file is required — a deploy fails if it's missing. You can set:
 
 - `HELM_CHART_VERSION` – the chart version to deploy.
 - `CUSTOM_HELM_OVERRIDE` – extra comma-delimited `helm --set` overrides, e.g.

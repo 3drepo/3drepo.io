@@ -1,0 +1,34 @@
+name: Derive release name
+description: Normalise a branch name into a Helm release name.
+
+inputs:
+  branch:
+    description: Source branch name.
+    required: true
+
+outputs:
+  release_name:
+    description: Sanitised Helm release name.
+    value: ${{ steps.derive.outputs.release_name }}
+
+runs:
+  using: composite
+  steps:
+    - id: derive
+      shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        set -euo pipefail
+        # DNS-1035: lowercase [a-z0-9-], no leading/trailing/repeated dashes, <=53 chars.
+        release_name="$(
+          printf '%s' "$BRANCH" |
+          tr '[:upper:]' '[:lower:]' |
+          sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g' |
+          cut -c1-53 | sed -E 's/-+$//'
+        )"
+        if [[ -z "$release_name" ]]; then
+          echo "Could not derive a release name from branch '$BRANCH'." >&2
+          exit 1
+        fi
+        echo "release_name=$release_name" >> "$GITHUB_OUTPUT"
