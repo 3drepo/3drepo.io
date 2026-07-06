@@ -45,14 +45,14 @@ type Deferred<T> = {
 export interface CanvasPosition {
 	x: number,
 	y: number,
-};
+}
 
 // Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
 // Used for requestPointInfo.
 export interface ClientPosition {
 	clientX: number,
 	clientY: number,
-};
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -718,8 +718,7 @@ export class UnityUtil {
 		// Parse data
 		try {
 			data = JSON.parse(pointInfo);
-		}
-		catch (error) {
+		} catch (error) {
 			// In the case of malformed data, we can't recover the key and reject all currently open requests.
 			// This is preferrable to leaving them hanging indefinitely.
 			// If the viewer is sending malformed data they are probably all shot anyway.
@@ -740,8 +739,7 @@ export class UnityUtil {
 				promise.resolve(data);
 			});
 			this.pointInfoPromises.delete(key);
-		}
-		else{
+		} else {
 			console.warn('No entries found for point info request');
 		}
 	}
@@ -1776,7 +1774,7 @@ export class UnityUtil {
 		let y: number;
 
 		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
-		if('clientX' in position && 'clientY' in position) {
+		if ('clientX' in position && 'clientY' in position) {
 
 			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
 			// bottom left-corner.
@@ -1786,15 +1784,13 @@ export class UnityUtil {
 
 			x = position.clientX - rect.left;
 			y = rect.height - 1 - (position.clientY - rect.top);
-		}
-		else if('x' in position && 'y' in position) {
+		} else if('x' in position && 'y' in position) {
 
 			// If it is a CanvasPosition, we can extract the coordinates directly.
 
 			x = position.x;
 			y = position.y;
-		}
-		else {
+		} else {
 			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
 		}
 
@@ -1808,7 +1804,7 @@ export class UnityUtil {
 			// Store the promise in a map with the key being the coordinates, so that when Unity responds
 			// with the point info, we can resolve the correct promise.
 			const key = x + ',' + y;
-			if(!this.pointInfoPromises.has(key)) {
+			if (!this.pointInfoPromises.has(key)) {
 				this.pointInfoPromises.set(key, []);
 			}
 			this.pointInfoPromises.get(key).push({ resolve, reject });
@@ -1816,7 +1812,7 @@ export class UnityUtil {
 
 		const params = {
 			x,
-			y
+			y,
 		};
 
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
