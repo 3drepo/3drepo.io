@@ -28,7 +28,7 @@ interface IProps {
 
 export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const {
-		color, figure, draggable, group: groupProps, ...elementProps
+		color, figure, group: groupProps, ...elementProps
 	} = element;
 	const shape = useRef<any>(null);
 	const transformer = useRef<any>(null);
