@@ -75,7 +75,6 @@ export const TextContainer = styled(Grid)`
 export const Container = styled.div`
 	position: relative;
 	width: 600px;
-	min-height: 40vh;
 	overflow: auto;
 `;
 

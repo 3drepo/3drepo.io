@@ -26,7 +26,7 @@ const _ = require("lodash");
 const User = require("./user");
 
 const {v5Path} = require("../../interop");
-const { getTeamspaceSettingsCollection } = require("./teamspaceSetting");
+const {  getTeamspaceSettings } = require("./teamspaceSetting");
 const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
 
 const types = {
@@ -111,7 +111,7 @@ const getModelToProject = async (teamspaces) => {
 	const modelToProject = {};
 	await Promise.all(teamspaces.map(async teamspace => {
 		try {
-			await getTeamspaceSettingsCollection(teamspace);
+			await getTeamspaceSettings(teamspace, {_id: 1});
 			modelToProject[teamspace] = {};
 			const projects = await listProjects(teamspace, {}, {models : 1});
 

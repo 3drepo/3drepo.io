@@ -51,35 +51,6 @@ export type Viewpoint = {
 /**
  * @hidden
  */
-export type ModelSharedIds = {
-	account: string,
-	model: string,
-	shared_ids: string[]
-};
-
-/**
- * @hidden
- */
-export type Group = {
-	_id: string,
-	name: string;
-	objects: ModelSharedIds[],
-
-	// If present, the colour override associated with the group. A tuple
-	// overrides the colour without an alpha override. If a fourth component
-	// is present, the alpha is overridden as well. It is not possible to
-	// override just the alpha via Group response.
-	color?: number[],
-
-	// If present, a transform that should be applied to all meshes in the
-	// Group. The transform should be expressed as a column-major order matrix
-	// in Project Coordinates, with row-major layout.
-	transformation?: number[],
-};
-
-/**
- * @hidden
- */
 export type ViewerInitState = {
 	// Camera properties for the viewpoint. All of these must be set together
 	// for the viewpoint to be updated.
@@ -119,6 +90,12 @@ export type ModelStatistics = {
 	bundleLoadingTasks: number,
 	frameCount: number,
 };
+
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -1371,6 +1348,15 @@ export class UnityUtil {
 	 */
 	public static disableSnapping() {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
+	}
+
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
 	}
 
 	 /**
