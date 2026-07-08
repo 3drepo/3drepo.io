@@ -44,14 +44,75 @@ export type Viewpoint = {
 	fov: number;
 	aspect_ratio: number;
 	orthographicSize: number;
-	clippingPlanes: Clip[] | null;
-	highlighted_group_id: string | null;
+	clippingPlanes?: Clip[];
 	type: string;
 };
 
-// The contents of this type will change in line with the needs of
-// the Test Automation or Profiling Tools.
-type ModelStatistics = {
+/**
+ * @hidden
+ */
+export type ModelSharedIds = {
+	account: string,
+	model: string,
+	shared_ids: string[]
+};
+
+/**
+ * @hidden
+ */
+export type Group = {
+	_id: string,
+	name: string;
+	objects: ModelSharedIds[],
+
+	// If present, the colour override associated with the group. A tuple
+	// overrides the colour without an alpha override. If a fourth component
+	// is present, the alpha is overridden as well. It is not possible to
+	// override just the alpha via Group response.
+	color?: number[],
+
+	// If present, a transform that should be applied to all meshes in the
+	// Group. The transform should be expressed as a column-major order matrix
+	// in Project Coordinates, with row-major layout.
+	transformation?: number[],
+};
+
+/**
+ * @hidden
+ */
+export type ViewerInitState = {
+	// Camera properties for the viewpoint. All of these must be set together
+	// for the viewpoint to be updated.
+	position?: number[];
+	up?: number[];
+	view_dir?: number[];
+	orthographicSize?: number;
+	animationTime?: number;
+	type?: string;
+
+	// Specify group-based overrides to apply on load. These should be Ids of
+	// Groups fetched using the /groups API. The response will contain the
+	// details of the override.
+	highlighted_group_id?: string;
+	hidden_group_id?: string;
+	override_group_ids?: string[];
+	transformation_group_ids?: string[];
+
+	// Clippling planes to apply at loading time.
+	clippingPlanes?: Clip[];
+
+	// When true, the Ids in the hidden group are immediately hidden. Otherwise
+	// hideHiddenByDefaultObjects must be called explicitly to hide them.
+	// Despite the name, this does not only affect IFCs.
+	hideIfc?: boolean;
+};
+ 
+/**
+ * @hidden The contents of this type will change in line with the needs of
+ * the Test Automation or Profiling Tools.
+ */
+export type ModelStatistics = {
+	numContainers: number,
 	numSupermeshes: number,
 	isNavigating: boolean,
 	bundlesLoaded: number,
@@ -938,24 +999,23 @@ export class UnityUtil {
 
 	/**
 	 * Load comparator model for compare tool
-	 * This returns a promise which will be resolved when the comparator model is loaded
+	 * This returns a promise which will be resolved when the comparator model is
+	 * loaded.
 	 * @category Compare Tool
 	 * @param teamspace - teamspace
 	 * @param project - project
 	 * @param container - model ID
-	 * @param revision - Specific revision ID/tag to load
+	 * @param revision - Specific revision ID/tag to load. When loading a
+	 * Comparator a revision must always be provided.
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision = 'head'): Promise<void> {
+	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision: string): Promise<void> {
 		const params: any = {
 			database: teamspace,
 			project,
 			model: container,
+			revID: revision,
 		};
-
-		if (revision !== 'head') {
-			params.revID = revision;
-		}
 
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
@@ -1861,7 +1921,7 @@ export class UnityUtil {
 		model: string,
 		revision = 'head',
 		isFederation: boolean = false,
-		initView = null,
+		initView: ViewerInitState = null,
 		clearCanvas = true,
 		assetGroups?: string[],
 	): Promise<void> {
@@ -2936,6 +2996,7 @@ export class UnityUtil {
 	 */
 	public static getModelStatistics(): ModelStatistics {
 		const statistics: ModelStatistics = {
+			numContainers: 0,
 			numSupermeshes: 0,
 			isNavigating: false,
 			bundlesLoaded: 0,
@@ -2946,6 +3007,7 @@ export class UnityUtil {
 		if (UnityUtil.modelStatisticsArrayOffset) {
 			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
 			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.numContainers = heap[ptr64 + 0];
 			statistics.numSupermeshes = heap[ptr64 + 2];
 			statistics.isNavigating = heap[ptr64 + 4] !== 0;
 			statistics.textureCount = heap[ptr64 + 18];
