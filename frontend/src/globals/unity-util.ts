@@ -57,6 +57,7 @@ type ModelStatistics = {
 	bundlesLoaded: number,
 	bundleLoadingTasks: number,
 	frameCount: number,
+	textureCount: number,
 };
 
 export class UnityUtil {
@@ -2940,12 +2941,14 @@ export class UnityUtil {
 			bundlesLoaded: 0,
 			bundleLoadingTasks: 0,
 			frameCount: 0,
+			textureCount: 0,
 		};
 		if (UnityUtil.modelStatisticsArrayOffset) {
 			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
 			const heap = UnityUtil.unityInstance.Module.HEAPF64;
 			statistics.numSupermeshes = heap[ptr64 + 2];
 			statistics.isNavigating = heap[ptr64 + 4] !== 0;
+			statistics.textureCount = heap[ptr64 + 18];
 			statistics.bundlesLoaded = heap[ptr64 + 23];
 			statistics.bundleLoadingTasks = heap[ptr64 + 20];
 			statistics.frameCount = heap[ptr64 + 30];
