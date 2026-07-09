@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useRef, Fragment } from 'react';
-import { Group, Transformer } from 'react-konva';
+import { useEffect, useRef, Fragment, useState } from 'react';
+import { Group, Rect, Transformer } from 'react-konva';
 import { pick } from 'lodash';
-import { useHandleBubbling } from '../drawnObjects.hooks';
+import { useHandleBubbling, cursorStylesEvents } from '../drawnObjects.hooks';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
@@ -28,12 +28,13 @@ interface IProps {
 
 export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const {
-		color, figure, draggable, group: groupProps, ...elementProps
+		color, figure, group: groupProps, ...elementProps
 	} = element;
 	const shape = useRef<any>(null);
 	const transformer = useRef<any>(null);
 	const group = useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
+	const [rectProps, setRectProps] = useState({ width: 0, height: 0 , x: 0, y: 0});
 
 	useEffect(() => {
 		if (isSelected && transformer.current) {
@@ -51,16 +52,6 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 			...element,
 			fill: fill === 'transparent' ? element.color : 'transparent'
 		});
-	};
-
-	const handleMouseOver = () => {
-		if (isSelected) {
-			document.body.style.cursor = 'move';
-		}
-	};
-
-	const handleMouseOut = () => {
-		document.body.style.cursor = 'default';
 	};
 
 	useEffect(() => {
@@ -82,6 +73,10 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 
 	const handleBubbling = useHandleBubbling(isSelected);
 
+	useEffect(() => {
+		setRectProps(shape.current?.getClientRect() || {});
+	}, [shape.current]);
+
 	return (
 		<Fragment>
 			<Group
@@ -92,9 +87,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
 					onDblClick={handleDoubleClick}
-					onMouseOver={handleMouseOver}
-					onMouseOut={handleMouseOut}
-					draggable={draggable && isSelected}
+					draggable={isSelected}
 					{...handleBubbling}
 			>
 				<Component
@@ -103,6 +96,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 						stroke={color}
 						perfectDrawEnabled={false}
 				/>
+				{ isSelected && <Rect  {...rectProps} fill="transparent" visible={isSelected} 	{...cursorStylesEvents()} />}
 			</Group>
 			{ isSelected &&
 			<Transformer
