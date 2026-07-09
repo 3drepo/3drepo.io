@@ -88,6 +88,7 @@ function* fetchData({ teamspace, model }) {
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(CommentsActions.fetchUsers(teamspace)),
 			put(UsersActions.fetchUsers(teamspace)),
+			put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE)),
 		]);
 
 		yield all([
