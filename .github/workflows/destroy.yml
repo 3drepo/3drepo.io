@@ -19,18 +19,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  deriveReleaseName:
+    if: inputs.branch || github.event.client_payload.pull_request != null || github.event.client_payload.branch != null
+    uses: ./.github/workflows/_deriveReleaseName.yml
+    with:
+      branch: ${{ inputs.branch || github.event.client_payload.pull_request.head.ref || github.event.client_payload.branch }}
+
   destroy:
     name: Destroy instance
-    if: inputs.branch || github.event.client_payload.pull_request != null || github.event.client_payload.branch != null
+    needs: deriveReleaseName
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
-      - id: release
-        uses: ./.github/actions/derive-release-name
-        with:
-          branch: ${{ inputs.branch || github.event.client_payload.pull_request.head.ref || github.event.client_payload.branch }}
-
       - uses: azure/setup-helm@v4
         with:
           version: '4.0.1'
@@ -46,7 +45,7 @@ jobs:
 
       - name: Destroy Helm release
         env:
-          RELEASE_NAME: ${{ steps.release.outputs.release_name }}
+          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
         run: |
           set -euo pipefail
           if [[ "$RELEASE_NAME" == "master" || "$RELEASE_NAME" == "staging" ]]; then

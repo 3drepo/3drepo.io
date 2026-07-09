@@ -33,10 +33,8 @@ jobs:
       checkout_repository: ${{ steps.meta.outputs.checkout_repository }}
       checkout_ref: ${{ steps.meta.outputs.checkout_ref }}
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
-      release_name: ${{ steps.release.outputs.release_name }}
+      source_branch: ${{ steps.meta.outputs.source_branch }}
     steps:
-      - uses: actions/checkout@v4
-
       - id: meta
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -73,15 +71,16 @@ jobs:
             echo "source_branch=$source_branch"
           } >> "$GITHUB_OUTPUT"
 
-      - id: release
-        uses: ./.github/actions/derive-release-name
-        with:
-          branch: ${{ steps.meta.outputs.source_branch }}
+  deriveReleaseName:
+    needs: metadata
+    uses: ./.github/workflows/_deriveReleaseName.yml
+    with:
+      branch: ${{ needs.metadata.outputs.source_branch }}
 
   deploy:
     name: Build and deploy instance
     if: github.event_name == 'push' || github.event.action == 'deploy-command'
-    needs: metadata
+    needs: [metadata, deriveReleaseName]
     runs-on: ubuntu-24.04
     steps:
       - name: Check out source
@@ -118,7 +117,7 @@ jobs:
 
       - name: Build Docker image
         env:
-          BRANCH_TAG: ${{ needs.metadata.outputs.release_name }}
+          BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -130,7 +129,7 @@ jobs:
 
       - name: Push Docker image
         env:
-          BRANCH_TAG: ${{ needs.metadata.outputs.release_name }}
+          BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -166,7 +165,7 @@ jobs:
 
       - name: Deploy with Helm
         env:
-          RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
+          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
