@@ -1,0 +1,195 @@
+name: Deploy 3drepo.io
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+  repository_dispatch:
+    types:
+      - deploy-command
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event.client_payload.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_BUILDKIT: 1
+  IMAGE_REPOSITORY: 3drepo.io
+  DOCKERFILE_PATH: docker/3drepo.io/Dockerfile
+  # Sourced from the deployed branch so per-branch config applies despite
+  # repository_dispatch running this file from the default branch.
+  DEPLOY_CONFIG_FILE: .github/deploy/config.env
+
+jobs:
+  metadata:
+    name: Prepare deployment metadata
+    if: github.event_name == 'push' || github.event.client_payload.pull_request != null
+    runs-on: ubuntu-24.04
+    outputs:
+      checkout_repository: ${{ steps.meta.outputs.checkout_repository }}
+      checkout_ref: ${{ steps.meta.outputs.checkout_ref }}
+      commit_sha: ${{ steps.meta.outputs.commit_sha }}
+      source_branch: ${{ steps.meta.outputs.source_branch }}
+    steps:
+      - id: meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY_NAME: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          PUSH_SHA: ${{ github.sha }}
+          PR_HEAD_REF: ${{ github.event.client_payload.pull_request.head.ref }}
+          PR_HEAD_SHA: ${{ github.event.client_payload.pull_request.head.sha }}
+          PR_HEAD_REPO: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            source_branch="$REF_NAME"
+            checkout_repository="$REPOSITORY_NAME"
+            checkout_ref="$PUSH_SHA"
+            commit_sha="$PUSH_SHA"
+          else
+            # Registry and cluster secrets are used below, so forks are refused.
+            if [[ "$PR_HEAD_REPO" != "$REPOSITORY_NAME" ]]; then
+              echo "Refusing to deploy forked PR from '$PR_HEAD_REPO'." >&2
+              exit 1
+            fi
+            source_branch="$PR_HEAD_REF"
+            checkout_repository="$PR_HEAD_REPO"
+            checkout_ref="$PR_HEAD_SHA"
+            commit_sha="$PR_HEAD_SHA"
+          fi
+
+          {
+            echo "checkout_repository=$checkout_repository"
+            echo "checkout_ref=$checkout_ref"
+            echo "commit_sha=$commit_sha"
+            echo "source_branch=$source_branch"
+          } >> "$GITHUB_OUTPUT"
+
+  deriveReleaseName:
+    needs: metadata
+    uses: ./.github/workflows/_deriveReleaseName.yml
+    with:
+      branch: ${{ needs.metadata.outputs.source_branch }}
+
+  deploy:
+    name: Build and deploy instance
+    if: github.event_name == 'push' || github.event.action == 'deploy-command'
+    needs: [metadata, deriveReleaseName]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.metadata.outputs.checkout_repository }}
+          ref: ${{ needs.metadata.outputs.checkout_ref }}
+          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+
+      - name: Load deploy config
+        run: |
+          set -euo pipefail
+          if [[ ! -f "$DEPLOY_CONFIG_FILE" ]]; then
+            echo "Missing required $DEPLOY_CONFIG_FILE" >&2
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1090
+          source "$DEPLOY_CONFIG_FILE"
+          set +a
+          if [[ -z "${HELM_CHART_VERSION:-}" ]]; then
+            echo "HELM_CHART_VERSION is not set in $DEPLOY_CONFIG_FILE" >&2
+            exit 1
+          fi
+          {
+            echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+            echo "CUSTOM_HELM_OVERRIDE=${CUSTOM_HELM_OVERRIDE:-}"
+          } >> "$GITHUB_ENV"
+
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        env:
+          BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            -t "${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$BRANCH_TAG" \
+            -t "${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$COMMIT_SHA" \
+            -f "$DOCKERFILE_PATH" \
+            .
+
+      - name: Push Docker image
+        env:
+          BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          docker push "${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$BRANCH_TAG"
+          docker push "${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$COMMIT_SHA"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '4.0.1'
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.34.2'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: Get default Helm values file
+        run: |
+          set -euo pipefail
+          curl -fsS -u "${{ secrets.TESTS_USER }}:${{ secrets.TESTS_PASSWORD }}" "${{ secrets.HELM_DEFAULTS_URL }}" \
+            --output "$RUNNER_TEMP/values.yaml"
+
+      - name: Login to ACR for Helm
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
+            -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Deploy with Helm
+        env:
+          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
+          COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+        run: |
+          set -euo pipefail
+
+          helm_set_args=(
+            --set "image.tag=$COMMIT_SHA"
+            --set "branchName=$RELEASE_NAME"
+          )
+
+          override="${CUSTOM_HELM_OVERRIDE#,}"
+          if [[ -n "$override" ]]; then
+            helm_set_args+=(--set "$override")
+          fi
+
+          helm upgrade --install \
+            "$RELEASE_NAME" \
+            oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
+            --version "$HELM_CHART_VERSION" \
+            --namespace default \
+            -f "$RUNNER_TEMP/values.yaml" \
+            "${helm_set_args[@]}"
+
+      - name: Log out from registries
+        if: always()
+        run: |
+          docker logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
+          helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
