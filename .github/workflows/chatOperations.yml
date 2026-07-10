@@ -5,11 +5,16 @@ on:
 jobs:
   chatOperation:
     runs-on: ubuntu-latest
+    # contents: write lets GITHUB_TOKEN create the repository_dispatch;
+    # issues: write lets it set the acknowledgement reaction on the comment.
+    permissions:
+      contents: write
+      issues: write
     steps:
       - name: Slash Command Dispatch
         uses: peter-evans/slash-command-dispatch@v5
         with:
-          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           # Deployment commands use registry and cluster secrets, so only
           # users with write access or above can dispatch them.
           permission: write

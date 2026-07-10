@@ -153,10 +153,13 @@ jobs:
           kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
 
       - name: Get default Helm values file
-        run: |
-          set -euo pipefail
-          curl -fsS -u "${{ secrets.TESTS_USER }}:${{ secrets.TESTS_PASSWORD }}" "${{ secrets.HELM_DEFAULTS_URL }}" \
-            --output "$RUNNER_TEMP/values.yaml"
+        uses: actions/checkout@v4
+        with:
+          repository: 3drepo/DevOps
+          token: ${{ secrets.REPO_INSTALLER_TOKEN }}
+          sparse-checkout: deployments/asite-stg/helm/3drepo.io
+          sparse-checkout-cone-mode: false
+          path: devops
 
       - name: Login to ACR for Helm
         run: |
@@ -185,7 +188,7 @@ jobs:
             oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
             --version "$HELM_CHART_VERSION" \
             --namespace default \
-            -f "$RUNNER_TEMP/values.yaml" \
+            -f devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml \
             "${helm_set_args[@]}"
 
       - name: Log out from registries
