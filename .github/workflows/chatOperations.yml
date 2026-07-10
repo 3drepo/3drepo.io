@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: write
       issues: write
+      pull-requests: write
     steps:
       - name: Slash Command Dispatch
         uses: peter-evans/slash-command-dispatch@v5
