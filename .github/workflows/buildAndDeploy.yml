@@ -156,7 +156,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 3drepo/DevOps
-          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          token: ${{ secrets.REPO_INSTALLER_TOKEN }}
           sparse-checkout: deployments/asite-stg/helm/3drepo.io
           sparse-checkout-cone-mode: false
           path: devops
