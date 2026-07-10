@@ -82,20 +82,7 @@ jobs:
     if: github.event_name == 'push' || github.event.action == 'deploy-command'
     needs: [metadata, deriveReleaseName]
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      issues: write
     steps:
-      # ChatOps deploys post a status comment on the PR and edit it in place as
-      # the run progresses. Skipped for master/staging pushes (no PR).
-      - name: Comment deploy started
-        id: deploy_comment
-        if: github.event.client_payload.pull_request.number
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.client_payload.pull_request.number }}
-          body: "🚀 Deploying `${{ needs.deriveReleaseName.outputs.release_name }}`… ([run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
-
       - name: Check out source
         uses: actions/checkout@v4
         with:
@@ -209,19 +196,3 @@ jobs:
         run: |
           docker logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
           helm registry logout "${{ secrets.REGISTRY_LOGIN_SERVER }}" || true
-
-      - name: Comment deploy succeeded
-        if: success() && github.event.client_payload.pull_request.number
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.deploy_comment.outputs.comment-id }}
-          edit-mode: replace
-          body: "✅ Deployed `${{ needs.deriveReleaseName.outputs.release_name }}` → https://${{ needs.deriveReleaseName.outputs.release_name }}.dev.3drepo.io ([run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
-
-      - name: Comment deploy failed
-        if: failure() && github.event.client_payload.pull_request.number
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.deploy_comment.outputs.comment-id }}
-          edit-mode: replace
-          body: "❌ Deploy failed for `${{ needs.deriveReleaseName.outputs.release_name }}` ([run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
