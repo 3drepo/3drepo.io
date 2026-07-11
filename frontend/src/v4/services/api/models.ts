@@ -15,7 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AxiosResponse } from 'axios';
+import apiV5 from '@/v5/services/api/default';
 import { API as api } from './default';
+
+type ModelMapLayer = {
+	name: string;
+	source: string;
+	mapType?: string;
+};
+
+type ModelMapProvider = {
+	name: string;
+	layers: ModelMapLayer[];
+};
+
+type GetModelMapsResponse = {
+	maps: ModelMapProvider[];
+};
+
 
 export const fetchModelsPermissions = async (teamspace, models) => {
 	return api.get(`${teamspace}/models/permissions?models=${models.join(',')}`);
@@ -118,10 +136,15 @@ export const getSubModelsRevisions = (teamspace, modelId, revision) => {
 /**
  * Get model maps
  * @param teamspace
+ * @param projectId
  * @param modelId
  */
-export const getModelMaps = (teamspace, modelId) => {
-	return api.get(`${teamspace}/${modelId}/maps`);
+export const getModelMaps = (teamspace, projectId, modelId, isFederation) => {
+	const modelType = (isFederation) => (isFederation ? 'federations' : 'containers');
+
+	return apiV5.get(
+		`teamspaces/${teamspace}/projects/${projectId}/${modelType(isFederation)}/${modelId}/maps`
+	) as Promise<AxiosResponse<GetModelMapsResponse>>;
 };
 
 /**
