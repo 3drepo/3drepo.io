@@ -1,0 +1,55 @@
+name: Destroy 3drepo.io instance
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: Branch whose deployment should be destroyed.
+        required: true
+        type: string
+  repository_dispatch:
+    types:
+      - destroy-command
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destroy-${{ inputs.branch || github.event.client_payload.pull_request.number || github.event.client_payload.branch }}
+  cancel-in-progress: true
+
+jobs:
+  deriveReleaseName:
+    if: inputs.branch || github.event.client_payload.pull_request != null || github.event.client_payload.branch != null
+    uses: ./.github/workflows/_deriveReleaseName.yml
+    with:
+      branch: ${{ inputs.branch || github.event.client_payload.pull_request.head.ref || github.event.client_payload.branch }}
+
+  destroy:
+    name: Destroy instance
+    needs: deriveReleaseName
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: azure/setup-helm@v4
+        with:
+          version: '4.0.1'
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.34.2'
+
+      - uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+
+      - name: Destroy Helm release
+        env:
+          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$RELEASE_NAME" == "master" || "$RELEASE_NAME" == "staging" ]]; then
+            echo "Refusing to destroy protected release '$RELEASE_NAME'." >&2
+            exit 1
+          fi
+          helm uninstall "$RELEASE_NAME" --namespace default --ignore-not-found
