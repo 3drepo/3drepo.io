@@ -1,7 +1,7 @@
 <p>This is a notification that the 3D Repo teamspace, <b>
         <%= teamspace %>
     </b>, is about to expire at <b>
-        <%= expiryDate %>
+        <%= expiryDate.toISOString().slice(0, 16).replace('T', ' ') %> UTC
     </b>. </p>
 <p>If this is not expected, or you would like to renew access to this teamspace, please contact your Sales
     Representative or Customer Success Manager. </p>

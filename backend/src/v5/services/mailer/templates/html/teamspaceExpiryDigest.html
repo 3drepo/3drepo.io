@@ -23,7 +23,7 @@
 				</td>
 				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
 					<p>
-						<%= expiryDate %>
+						<%= expiryDate.toISOString().slice(0, 16).replace('T', ' ') %> UTC
 					</p>
 				</td>
 			</tr>
