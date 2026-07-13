@@ -49,6 +49,9 @@ const LogsModel = require(`${src}/models/tickets.logs`);
 jest.mock('../../../../../../../../src/v5/models/tickets.comments');
 const CommentsModel = require(`${src}/models/tickets.comments`);
 
+jest.mock('../../../../../../../../src/v5/models/clashes.plans');
+const ClashPlanModel = require(`${src}/models/clashes.plans`);
+
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -1348,7 +1351,7 @@ const testOnTemplateUpdated = () => {
 			if (fetchedTickets) {
 				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledWith(teamspace,
-					template._id, { number: 1, _id: 1, project: 1, model: 1 });
+					template._id, { number: 1, _id: 1, project: 1, model: 1, modules: 1 });
 			} else {
 				expect(TicketsModel.getTicketsByTemplateId).not.toHaveBeenCalled();
 			}
@@ -1452,10 +1455,123 @@ const testOnModelNameUpdated = () => {
 				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
 				templates.forEach((template) => {
 					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
-						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1 });
+						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1, modules: 1 });
 				});
 			} else {
 				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
+			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(templates.length);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => updateData), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(templates.length);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
+const testOnClashPlanNameUpdated = () => {
+	const { CLOUD_CLASH } = presetModules;
+	const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
+
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const planId = generateUUID();
+	const modelName = generateRandomString();
+	const planName = generateRandomString();
+	const moduleName = generateRandomString();
+	const propName = generateRandomString();
+	const templatePropertyValue = `plan name: {${supportedPatterns.CLASH_PLAN_NAME}}`;
+
+	describe.each([
+		['Should do nothing if there are no templates', { value: templatePropertyValue }, undefined, false, false],
+		['Should do nothing if there is no ticket associated with the templates', { value: templatePropertyValue }, undefined, true, false],
+		['Should do nothing if the template does not contain automated properties', { }],
+		[`Should do nothing if the template automated property does not contain ${supportedPatterns.CLASH_PLAN_NAME}`, { value: 'xyz' }],
+		[`Should update the field if it is automated (${supportedPatterns.CLASH_PLAN_NAME})`, { value: templatePropertyValue }, `plan name: ${planName}`],
+	])('On clash plan name updated', (desc, config, value, hasTemplates = true, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const templates = times(hasTemplates ? 2 : 0, () => ({
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}, {
+					type: CLOUD_CLASH,
+					properties: [],
+				}],
+			}));
+			const clashPlanId = generateRandomString();
+			const nTickets = hasTickets ? 5 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					title: generateRandomString(),
+					project,
+					model,
+					properties: {},
+					modules: {
+						[moduleName]: {},
+						[presetModules.CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_ID]: clashPlanId },
+					},
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+			TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(templates);
+
+			templates.forEach(() => {
+				TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
+				if (value !== undefined) {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				}
+			});
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.CLASH_PLAN_NAME}}`);
+			if (fetchedTickets) {
+				templates.forEach(() => {
+					ClashPlanModel.getPlanById.mockResolvedValueOnce({ name: planName });
+					TicketsModel.getTicketsByClashPlanId.mockResolvedValueOnce(tickets);
+				});
+			}
+
+			await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId))
+				.resolves.toBeUndefined();
+
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace,
+				{ 'modules.type': presetModules.CLOUD_CLASH });
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByClashPlanId).toHaveBeenCalledTimes(templates.length);
+				templates.forEach((template) => {
+					expect(TicketsModel.getTicketsByClashPlanId)
+						.toHaveBeenCalledWith(teamspace, project, template._id, planId,
+							{ _id: 1, number: 1, project: 1, model: 1, modules: 1 });
+				});
+			} else {
+				expect(TicketsModel.getTicketsByClashPlanId).not.toHaveBeenCalled();
 			}
 
 			const updateData = {
@@ -1546,4 +1662,5 @@ describe(determineTestGroup(__filename), () => {
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
+	testOnClashPlanNameUpdated();
 });

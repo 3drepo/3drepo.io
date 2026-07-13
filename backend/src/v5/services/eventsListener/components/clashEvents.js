@@ -29,6 +29,7 @@ const { events } = require('../../eventsManager/eventsManager.constants');
 const { getFederationById } = require('../../../models/modelSettings');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
+const { onClashPlanNameUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const {
 	processClashResults: processTicketClashResults,
 } = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');
@@ -147,6 +148,17 @@ const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun,
 	}
 };
 
+const clashPlanUpdated = async ({ teamspace, project, planId, data }) => {
+	try {
+		if (data.name) {
+			await onClashPlanNameUpdated(teamspace, project, planId);
+		}
+	} catch (error) {
+		logger.logError(`Error processing clash plan update event for plan ${UUIDToString(planId)} `
+			+ `and project ${UUIDToString(project)} in teamspace ${teamspace}: ${error.message}`);
+	}
+};
+
 const ClashEventsListener = {};
 
 ClashEventsListener.init = () => {
@@ -154,6 +166,7 @@ ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
 	subscribe(events.MODEL_IMPORT_FINISHED, onNewContainerRevision);
 	subscribe(events.CLASH_RUN_RESULTS_PROCESSED, clashRunProcessed);
+	subscribe(events.CLASH_PLAN_UPDATED, clashPlanUpdated);
 };
 
 module.exports = ClashEventsListener;
