@@ -21,7 +21,7 @@ export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
 	background-color: ${({ $highlighted, theme: { palette } }) => {
 		return $highlighted ? palette.base.lightest : palette.primary.contrast;
 	}};
-	cursor: default;
+	cursor: inherit;
 	position: relative;
 `;
 
