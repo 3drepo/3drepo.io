@@ -20,10 +20,9 @@ const Path = require('path');
 const { v5Path } = require('../../../interop');
 
 const { getTeamspaceList } = require('../../utils');
-const { SUBSCRIPTION_TYPES } = require('../../../v5/models/teamspaces.constants');
-const { sendSystemEmail } = require('../../../v5/services/mailer');
 
-const { sendEmail } = require(`${v5Path}/services/mailer`);
+const { SUBSCRIPTION_TYPES } = require(`${v5Path}/models/teamspaces.constants`);
+const { sendEmail, sendSystemEmail } = require(`${v5Path}/services/mailer`);
 const { getTeamspaceSettingsByQuery } = require(`${v5Path}/models/teamspaceSettings`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const { getUsersByQuery } = require(`${v5Path}/models/users`);
@@ -103,13 +102,13 @@ const runExternal = async (teamspaces) => {
 	await findAdminPromise;
 
 	await Promise.all([
-		...expireNow.map(async ({ teamspace, expiryDate }) => {
+		...expireNow.map(async ({ teamspace }) => {
 			const admins = teamspacesToAdminsInfo[teamspace];
 			await Promise.all(admins.map(async ({ firstName, email }) => {
 				await sendEmail(
 					templates.TEAMSPACE_EXPIRING_TODAY.name,
 					email,
-					{ firstName, teamspace, expiryDate },
+					{ firstName, teamspace },
 				);
 			}));
 		}),

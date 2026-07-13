@@ -28,7 +28,7 @@ const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiringSoon.html`;
 
 const TeamspaceExpiringSoon = {};
 
-TeamspaceExpiringSoon.subject = ({ teamspace }) => `Your teamspace ${teamspace} is about to expire`;
+TeamspaceExpiringSoon.subject = ({ teamspace }) => `[${teamspace}] Your teamspace subscription is about to expire`;
 
 TeamspaceExpiringSoon.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 

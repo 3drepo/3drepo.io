@@ -30,7 +30,7 @@ const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiryDigest.html`;
 
 const TeamspaceExpiryDigest = {};
 
-TeamspaceExpiryDigest.subject = () => 'Teamspaces with upcoming expiry';
+TeamspaceExpiryDigest.subject = () => 'Teamspaces with subscriptions that are about to expire';
 
 TeamspaceExpiryDigest.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 

@@ -25,7 +25,6 @@ const testHtml = () => {
 	describe('get teamspaceExpiringToday template html', () => {
 		const standardData = {
 			teamspace: generateRandomString(),
-			expiryDate: new Date(),
 		};
 		describe.each([
 			['data is undefined', undefined],
@@ -49,7 +48,7 @@ const testSubject = () => {
 	describe('Email subject', () => {
 		test('Should return the subject title as expected', () => {
 			const teamspace = generateRandomString();
-			expect(TeamspaceExpiringToday.subject({ teamspace })).toEqual(`Your teamspace ${teamspace} has expired`);
+			expect(TeamspaceExpiringToday.subject({ teamspace })).toEqual(`[${teamspace}] Your teamspace subscription has expired`);
 		});
 	});
 };

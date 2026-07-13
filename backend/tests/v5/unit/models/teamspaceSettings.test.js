@@ -29,7 +29,7 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { ADD_ONS_MODULES, SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
+const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 

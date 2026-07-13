@@ -17,18 +17,16 @@
 
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
-const { types } = require('../../../utils/helper/yup');
 
 const dataSchema = Yup.object({
 	teamspace: Yup.string().required(),
-	expiryDate: types.date.required(),
 }).required(true);
 
 const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiringToday.html`;
 
 const TeamspaceExpiringToday = {};
 
-TeamspaceExpiringToday.subject = ({ teamspace }) => `Your teamspace ${teamspace} has expired`;
+TeamspaceExpiringToday.subject = ({ teamspace }) => `[${teamspace}] Your teamspace subscription has expired`;
 
 TeamspaceExpiringToday.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 

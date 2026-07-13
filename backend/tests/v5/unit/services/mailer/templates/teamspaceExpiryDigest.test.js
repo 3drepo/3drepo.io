@@ -51,7 +51,7 @@ const testHtml = () => {
 const testSubject = () => {
 	describe('Email subject', () => {
 		test('Should return the subject title as expected', () => {
-			expect(teamspaceExpiryDigest.subject()).toEqual('Teamspaces with upcoming expiry');
+			expect(teamspaceExpiryDigest.subject()).toEqual('Teamspaces with subscriptions that are about to expire');
 		});
 	});
 };
