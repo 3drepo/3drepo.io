@@ -5,20 +5,28 @@
 <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
 	<thead>
 		<tr>
-			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">Teamspace</th>
-			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">Expiry Date</th>
+			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">
+				<p>Teamspace</p>
+			</th>
+			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">
+				<p>Expiry Date</p>
+			</th>
 		</tr>
 	</thead>
 	<tbody>
 		<% for(const { name, expiryDate } of teamspaces) { %>
 			<tr>
 				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
-					<%= name %>
+					<p>
+						<%= name %>
+					</p>
 				</td>
 				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
-					<%= expiryDate %>
+					<p>
+						<%= expiryDate %>
+					</p>
 				</td>
 			</tr>
-		<% } %>
+			<% } %>
 	</tbody>
 </table>

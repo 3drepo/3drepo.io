@@ -726,29 +726,35 @@ const testGetTeamspaceInvites = () => {
 	});
 };
 
-const testGetTeamspaceSettingByExpiry = () => {
-	describe('Get teamspace setting by subscription expiry', () => {
-		test('should return teamspace settings if there are subscriptions expiring within the given time frame', async () => {
+const testGetTeamspaceSettingsByQuery = () => {
+	describe('Get teamspace settings by query', () => {
+		test('should call db.find with the given query and projection', async () => {
 			const teamspace = generateRandomString();
-			const startDate = new Date();
-			const endDate = new Date();
-			endDate.setDate(endDate.getDate() + 2);
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
 			const fn = jest.spyOn(db, 'find');
-			await Teamspace.getTeamspaceSettingByExpiry(teamspace, startDate, endDate);
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query, projection);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(
 				teamspace,
 				TEAMSPACE_SETTINGS_COL,
-				{
-					_id: teamspace,
-					$or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({
-						[`subscriptions.${type}.expiryDate`]: {
-							$gte: startDate,
-							$lte: endDate,
-						},
-					})),
-				},
+				query,
+				projection,
+			);
+		});
+
+		test('should use default projection if none provided', async () => {
+			const teamspace = generateRandomString();
+			const query = generateRandomObject();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				query,
 				{ refId: 0 },
 			);
 		});
@@ -777,5 +783,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
 	testGetTeamspaceInvites();
-	testGetTeamspaceSettingByExpiry();
+	testGetTeamspaceSettingsByQuery();
 });

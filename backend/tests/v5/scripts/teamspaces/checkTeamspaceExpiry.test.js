@@ -18,14 +18,12 @@
 const { times } = require('lodash');
 
 const {
-	determineTestGroup,
 	db: { reset: resetDB, createTeamspace, createUser },
 	generateUserCredentials,
 } = require('../../helper/services');
 
 const { src, utilScripts } = require('../../helper/path');
-
-const config = require(`${src}/utils/config`);
+const { determineTestGroup } = require('../../helper/utils');
 
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -33,7 +31,7 @@ const checkTeamspaceExpiry = require(`${utilScripts}/teamspaces/checkTeamspaceEx
 const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../src/v5/services/mailer');
-const { sendEmail } = require(`${src}/services/mailer`);
+const { sendEmail, sendSystemEmail } = require(`${src}/services/mailer`);
 
 const { disconnect, updateMany } = require(`${src}/handler/db`);
 const { USERS_COL, USERS_DB_NAME } = require(`${src}/models/users.constants`);
@@ -42,8 +40,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 	const currentDate = new Date();
 	const expiryThreshold = new Date();
 	expiryThreshold.setDate(currentDate.getDate() + 30);
-	const expiryWithinThreshold = new Date();
-	expiryWithinThreshold.setDate(currentDate.getDate() + 15);
+	const expiryIn30Days = new Date(expiryThreshold);
 	const expiryToday = new Date();
 	expiryToday.setHours(12, 0, 0, 0);
 	const expiredYesterday = new Date();
@@ -77,15 +74,15 @@ const setupData = async ({ users, ...teamspaces }) => {
 			[users[0].user],
 			{
 				internal: { expiryDate: expireInFourDays },
-				pilot: { expiryDate: expiredYesterday },
+				pilot: { expiryDate: null },
 				discretionary: { expiryDate: expireInTenDays },
-				enterprise: { expiryDate: null },
+				enterprise: { expiryDate: expiryIn30Days },
 			},
 			false),
 		createTeamspace(
 			teamspaces.teamspaceExpiringIn30Days.user,
 			[users[0].user],
-			{ internal: { expiryDate: expiryWithinThreshold }, discretionary: { expiryDate: expiredYesterday } },
+			{ internal: { expiryDate: expiryIn30Days }, discretionary: { expiryDate: expiredYesterday } },
 			false),
 		createTeamspace(
 			teamspaces.teamspaceExpiringToday.user,
@@ -95,7 +92,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 		createTeamspace(
 			teamspaces.teamspaceExpiringIn30DaysMultipleAdmins.user,
 			users.map(({ user }) => user),
-			{ internal: { expiryDate: expiryWithinThreshold }, discretionary: { expiryDate: expiredYesterday } },
+			{ internal: { expiryDate: expiryIn30Days }, discretionary: { expiryDate: expiredYesterday } },
 			false),
 		createTeamspace(
 			teamspaces.teamspaceExpiringTodayMultipleAdmins.user,
@@ -181,10 +178,9 @@ const runTest = () => {
 		});
 		test('sends an internal digest email', async () => {
 			await checkTeamspaceExpiry.run('internal');
-			expect(sendEmail).toHaveBeenCalledTimes(1);
-			expect(sendEmail).toHaveBeenCalledWith(
+			expect(sendSystemEmail).toHaveBeenCalledTimes(1);
+			expect(sendSystemEmail).toHaveBeenCalledWith(
 				emailTemplates.TEAMSPACE_EXPIRY_DIGEST.name,
-				config.contact.support,
 				expect.any(Object),
 			);
 		});
@@ -210,6 +206,7 @@ const runTest = () => {
 			);
 			await checkTeamspaceExpiry.run('internal');
 			expect(sendEmail).not.toHaveBeenCalled();
+			expect(sendSystemEmail).not.toHaveBeenCalled();
 		});
 	});
 };
