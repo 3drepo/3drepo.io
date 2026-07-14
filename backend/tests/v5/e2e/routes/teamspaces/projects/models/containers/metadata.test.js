@@ -392,6 +392,64 @@ const testGetMetadata = (internalService) => {
 	});
 };
 
+const testGetMetadataById = (internalService) => {
+	describe('Get metadata by id', () => {
+		const { users, teamspace, project, con, fed, conNoRev, revisions, metadata } = generateBasicData();
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed];
+			await setupData(users, teamspace, project, models, con, metadata);
+			await ServiceHelper.db.createRevision(teamspace, project, con._id,
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+		});
+
+		const createRoute = ({
+			projectId = project.id,
+			containerId = con._id,
+			metadataId = metadata._id,
+			key = users.tsAdmin.apiKey,
+			revId,
+		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key, revId })}`;
+
+		const expectedMetadata = metadata.metadata.reduce((obj, item) => Object.assign(obj,
+			{ [item.key]: item.value }), {});
+
+		const externalTests = [
+			['the user does not have a valid session', createRoute({ key: null }), false, templates.notLoggedIn],
+			['the user is not a member of the teamspace', createRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+			['the user does not have access to the container', createRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+		];
+
+		const generalTests = [
+			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
+			['the container does not have a revision', createRoute({ containerId: conNoRev._id }), false, templates.revisionNotFound],
+			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), true, { meta: [] }],
+			['metadata exists', createRoute(), true, { meta: [{ _id: metadata._id, metadata: expectedMetadata }] }],
+			['a revision is provided by the user', createRoute({ revId: revisions[0]._id }), true, { meta: [{ _id: metadata._id, metadata: expectedMetadata }] }],
+		];
+
+		const testData = [
+			...generalTests,
+			...(internalService ? [] : externalTests),
+		];
+
+		describe.each(testData)('Containers', (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		});
+	});
+};
+
 const testGetMetadataFields = (internalService) => {
 	describe('Get metadata fields', () => {
 		const { users, teamspace, project, con, fed, metadata } = generateBasicData();
@@ -475,6 +533,7 @@ describe(determineTestGroup(__filename), () => {
 
 		testUpdateCustomMetadata();
 		testGetMetadata();
+		testGetMetadataById();
 		testGetMetadataFields();
 	});
 
@@ -485,6 +544,7 @@ describe(determineTestGroup(__filename), () => {
 		});
 
 		testGetMetadata(true);
+		testGetMetadataById(true);
 		testGetMetadataFields(true);
 	});
 });

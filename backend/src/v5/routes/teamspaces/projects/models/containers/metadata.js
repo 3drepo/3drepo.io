@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { formatMetadata, formatMetadataSingle } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata');
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions');
 const Metadata = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
 const { Router } = require('express');
-const { formatMetadata } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -57,6 +57,19 @@ const getModelMetadataFields = async (req, res) => {
 		const fields = await Metadata.getAllMetadataFieldNames(teamspace, container);
 
 		respond(req, res, templates.ok, { fields });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getMetadataById = async (req, res, next) => {
+	const { teamspace, container, metadata } = req.params;
+
+	try {
+		req.metadata = await Metadata.getMetadataById(teamspace, container, metadata);
+
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -285,6 +298,84 @@ const establishRoutes = (isInternal) => {
 	 *               ]
 	 */
 	router.get('/fields', hasReadAccessToContainer, getModelMetadataFields);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
+	 *   get:
+	 *     description: Returns metadata for a specific metadata node in a container revision. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is used.
+	 *     tags: [v:internal, v:external, Metadata]
+	 *     operationId: getMetadataById
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: metadata
+	 *         description: Metadata ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revId
+	 *         description: Revision ID
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Returns the requested metadata entry. If the metadata ID is not found in the revision, the response contains an empty array.
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 meta:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                       metadata:
+	 *                         type: object
+	 *                         additionalProperties: true
+	 *             examples:
+	 *               found:
+	 *                 value:
+	 *                   meta:
+	 *                     - _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
+	 *                       metadata:
+	 *                         "IFC Type": "IfcBuilding"
+	 *                         "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A"
+	 *                         "NumberOfStoreys": 2
+	 *               notFound:
+	 *                 value:
+	 *                   meta: []
+	 */
+	router.get('/:metadata', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getMetadataById, formatMetadataSingle);
 
 	return router;
 };

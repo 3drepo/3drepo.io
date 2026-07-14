@@ -76,6 +76,55 @@ const testFormatMetadata = () => {
 	});
 };
 
+const testFormatMetadataSingle = () => {
+	describe('Format metadata single', () => {
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
+			const req = { metadata: [{ _id: generateRandomNumber() }] };
+
+			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+
+		test('Should cast ids correctly', () => {
+			const req = { metadata: times(10, () => ({
+				_id: generateUUID(),
+				parents: times(10, () => generateUUID()),
+			})) };
+
+			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+
+			const output = req.metadata.map((meta) => ({
+				_id: UUIDToString(meta._id),
+				parents: meta.parents.map(UUIDToString),
+			}));
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { meta: output });
+		});
+
+		test('Should cast metadata correctly', () => {
+			const req = { metadata: times(10, () => ({
+				metadata: times(10, () => ({ key: generateRandomString(), value: generateRandomString() })),
+			})) };
+
+			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+
+			const output = req.metadata.map((meta) => ({
+				metadata: meta.metadata.reduce((acc, { key, value }) => {
+					acc[key] = value;
+					return acc;
+				}, {}),
+			}));
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { meta: output });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testFormatMetadata();
+	testFormatMetadataSingle();
 });

@@ -20,6 +20,8 @@ const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
@@ -81,7 +83,57 @@ const getMetadata = () => {
 	});
 };
 
+const getMetadataById = () => {
+	describe('Get metadata by id', () => {
+		test('should return the data getMetadataByQuery returns in the correct format', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const metadataId = generateUUID();
+			const metadata = [{
+				_id: generateUUID(),
+				shared_id: generateUUID(),
+				paths: [generateUUID()],
+				type: generateRandomString(),
+				api: generateRandomString(),
+				rev_id: generateUUID(),
+				metadata: times(5, () => ({
+					key: generateRandomString(),
+					value: generateRandomString(),
+				})),
+			}];
+
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+
+			const res = await Metadata.getMetadataById(teamspace, container, metadataId);
+
+			expect(res).toEqual(metadata);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
+				{ _id: stringToUUID(metadataId) },
+				{ shared_id: 0, paths: 0, type: 0, api: 0, parents: 0, rev_id: 0 });
+		});
+
+		test('should return the data getMetadataByQuery returns (metadata with just id)', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const metadataId = generateUUID();
+			const metadata = [{ _id: generateUUID() }];
+
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+
+			const res = await Metadata.getMetadataById(teamspace, container, metadataId);
+
+			expect(res).toEqual(metadata);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
+				{ _id: stringToUUID(metadataId) },
+				{ shared_id: 0, paths: 0, type: 0, api: 0, parents: 0, rev_id: 0 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	getMetadata();
+	getMetadataById();
 });
