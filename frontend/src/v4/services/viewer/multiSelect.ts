@@ -23,6 +23,9 @@ const ALT_KEY = 18;
 const COMMAND_CHROME_KEY = 91;
 const COMMAND_FF_KEY = 224;
 
+export const TREE_LIST_CLASS = 'tree-list';
+export const GROUPS_LIST_CLASS = 'groups-list';
+
 export class MultiSelectService {
 	private isMac = (navigator.platform.indexOf('Mac') !== -1);
 	private accumMode = false;
@@ -122,12 +125,12 @@ export class MultiSelectService {
 			document.getElementById('unityViewer').style.cursor = canvasIcon;
 		}
 
-		const groupElements: any = document.getElementsByClassName('groups-list');
+		const groupElements: any = document.getElementsByClassName(GROUPS_LIST_CLASS);
 		for (let i = 0; i < groupElements.length; ++i) {
 			groupElements[i].style.cursor = panelIcon;
 		}
 
-		const treeNodeElements: any = document.getElementsByClassName('tree-list');
+		const treeNodeElements: any = document.getElementsByClassName(TREE_LIST_CLASS);
 		for (let i = 0; i < treeNodeElements.length; ++i) {
 			treeNodeElements[i].style.cursor = panelIcon;
 		}
