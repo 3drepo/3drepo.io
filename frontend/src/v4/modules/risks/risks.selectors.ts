@@ -172,7 +172,7 @@ export const selectPins = createSelector(
 
 		let pinsToShow = [];
 
-		if (showPins) {
+		if (showPins && !showDetails) {
 			pinsToShow = risks.reduce((pins, risk) => {
 				if (!hasPin(risk, selectedSequence, sequenceStartDate, sequenceEndDate)) {
 					return pins;
@@ -183,10 +183,8 @@ export const selectPins = createSelector(
 			} , []);
 		}
 
-		// if is not showing pins show the pin while editing
-		// if is shoiwng the pins and is editing an existing risk, then dont add it here because is already been added in the if block 171
-		// if is a new risk show the pin.
-		if (showDetails && detailedRisk && (!showPins || !detailedRisk._id) && hasPin(detailedRisk)) {
+		// if you are within a risk's details view it should always show the pin
+		if (showDetails && detailedRisk) {
 			pinsToShow.push(riskToPin(detailedRisk, true));
 		}
 

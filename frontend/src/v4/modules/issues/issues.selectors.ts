@@ -167,7 +167,7 @@ export const selectPins = createSelector(
 
 	let pinsToShow = [];
 
-	if (showPins) {
+	if (showPins && !showDetails) {
 		pinsToShow =  issues.reduce((pins, issue) => {
 			if (!hasPin(issue, selectedSequence, sequenceStartDate, sequenceEndDate)) {
 				return pins;
@@ -178,10 +178,8 @@ export const selectPins = createSelector(
 		} , []);
 	}
 
-	// if is not showing pins show the pin while editing
-	// if is shoiwng the pins and is editing an existing issue, then dont add it here because is already been added in the if block 167
-	// if is a new issue show the pin.
-	if (showDetails && detailedIssue && (!showPins || !detailedIssue._id)  && hasPin(detailedIssue)) {
+	// if you are within an issue details view it should always show the pin
+	if (showDetails && detailedIssue) {
 		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
 	}
