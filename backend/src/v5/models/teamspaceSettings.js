@@ -39,6 +39,9 @@ const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPAC
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
+TeamspaceSetting.getTeamspaceSettingsByQuery = (ts, query, projection = { refId: 0 }) => db.find(ts,
+	TEAMSPACE_SETTINGS_COL, query, projection);
+
 TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {

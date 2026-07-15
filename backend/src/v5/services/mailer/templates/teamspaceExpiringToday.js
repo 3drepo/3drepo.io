@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ELEMENT_TYPES } from '../../markupStage/markupStage.helpers';
-import { Arrow, Circle, Cloud, Line, Rectangle, Triangle } from './shape.helpers';
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
 
-export const SHAPE_TYPES = {
-	RECTANGLE: 1,
-	TRIANGLE: 2,
-	CIRCLE: 3,
-	LINE: 4,
-	CLOUD: 5,
-	ARROW: 6,
-	POLYGON: 7,
-	CALLOUT_DOT: 8,
-	CALLOUT_CIRCLE: 9,
-	CALLOUT_RECTANGLE: 10,
-};
+const dataSchema = Yup.object({
+	teamspace: Yup.string().required(),
+}).required(true);
 
-export const SHAPE_COMPONENTS = {
-	[SHAPE_TYPES.RECTANGLE]: Rectangle,
-	[SHAPE_TYPES.TRIANGLE]: Triangle,
-	[SHAPE_TYPES.CIRCLE]: Circle,
-	[SHAPE_TYPES.LINE]: Line,
-	[SHAPE_TYPES.CLOUD]: Cloud,
-	[SHAPE_TYPES.ARROW]: Arrow,
-	[ELEMENT_TYPES.DRAWING]: Line,
-};
+const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiringToday.html`;
+
+const TeamspaceExpiringToday = {};
+
+TeamspaceExpiringToday.subject = ({ teamspace }) => `[${teamspace}] Your teamspace subscription has expired`;
+
+TeamspaceExpiringToday.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = TeamspaceExpiringToday;

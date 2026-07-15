@@ -5,12 +5,21 @@ on:
 jobs:
   chatOperation:
     runs-on: ubuntu-latest
+    # contents: write lets GITHUB_TOKEN create the repository_dispatch;
+    # issues: write lets it set the acknowledgement reaction on the comment.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - name: Slash Command Dispatch
-        uses: peter-evans/slash-command-dispatch@v3
+        uses: peter-evans/slash-command-dispatch@v5
         with:
-          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Deployment commands use registry and cluster secrets, so only
+          # users with write access or above can dispatch them.
+          permission: write
           commands: |
             deploy
             destroy
-          issue-type: pull-request  # initially we only require pull request for operations to match /azp run
+          issue-type: pull-request  # deploy/destroy operations only apply to pull requests
