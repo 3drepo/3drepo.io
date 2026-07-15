@@ -17,7 +17,7 @@
 import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ClearDateAction, DateField, FieldsRow, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime, getLocaleDateFormat } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
@@ -177,7 +177,7 @@ export const DateTimePicker = ({
 								<FieldsRow>
 									<DateField
 										enableAccessibleFieldDOMStructure={false}
-										format="DD/MM/YYYY"
+										format={getLocaleDateFormat()}
 										value={dateValue}
 										onChange={(newValue: Dayjs | null, context: any) => {
 											if (newValue?.isValid() && !context.validationError) {
