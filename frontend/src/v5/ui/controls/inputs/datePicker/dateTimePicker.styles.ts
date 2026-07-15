@@ -17,6 +17,8 @@
 import styled from 'styled-components';
 import TextFieldBase from '@mui/material/TextField';
 import { Box } from '@mui/system';
+import { DateField as MuiDateField } from '@mui/x-date-pickers/DateField';
+import { TimeField as MuiTimeField } from '@mui/x-date-pickers/TimeField';
 
 export const TextField = styled(TextFieldBase)`
 	caret-color: transparent;
@@ -71,4 +73,54 @@ export const PopperWrapper = styled(Box)`
 	box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
 	padding: 1px;
 	border: none;
+`;
+
+export const FieldsRow = styled(Box)`
+	display: flex;
+	gap: 8px;
+	padding: 16px 22px 8px;
+`;
+
+const pickerFieldStyles = ({ theme }) => `
+	flex: 1;
+
+	.MuiOutlinedInput-root {
+		border-radius: 8px;
+		padding-left: 10px;
+		font-size: 13px;
+		cursor: pointer;
+
+		&.Mui-focused .MuiOutlinedInput-notchedOutline {
+			border-color: ${theme.palette.primary.main};
+			border-width: 1px;
+		}
+
+		.MuiOutlinedInput-notchedOutline {
+			border-color: ${theme.palette.base.lightest};
+		}
+	}
+
+	.MuiInputAdornment-root {
+		margin-right: 4px;
+		color: ${theme.palette.base.main};
+
+		svg {
+			width: 15px;
+			height: 15px;
+		}
+	}
+
+	.MuiOutlinedInput-input,
+	.MuiPickersSectionList-root {
+		padding: 8px 10px 8px 0;
+		cursor: pointer;
+	}
+`;
+
+export const DateField = styled(MuiDateField)`
+	${pickerFieldStyles}
+`;
+
+export const TimeField = styled(MuiTimeField)`
+	${pickerFieldStyles}
 `;

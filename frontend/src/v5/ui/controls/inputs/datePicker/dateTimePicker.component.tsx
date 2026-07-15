@@ -16,13 +16,14 @@
  */
 import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClearDateAction, PopperWrapper, TextField } from './dateTimePicker.styles';
+import { ClearDateAction, DateField, FieldsRow, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import { FormattedMessage } from 'react-intl';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
+import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
 
 export type PickerValue = Date | number | null;
 	
@@ -173,6 +174,58 @@ export const DateTimePicker = ({
 							onBlur?.();
 						}}>
 							<PopperWrapper>
+								<FieldsRow>
+									<DateField
+										enableAccessibleFieldDOMStructure={false}
+										format="DD/MM/YYYY"
+										value={dateValue}
+										onChange={(newValue: Dayjs | null, context: any) => {
+											if (newValue?.isValid() && !context.validationError) {
+												setDateValue(newValue);
+												setView(DatePickerView.time);
+											}
+										}}
+										onFocus={() => setView(DatePickerView.calendar)}
+										slotProps={{
+											textField: {
+												InputProps: {
+													startAdornment: (
+														<InputAdornment position="start">
+															<CalendarIcon />
+														</InputAdornment>
+													),
+												},
+											},
+										}}
+									/>
+									<TimeField
+										enableAccessibleFieldDOMStructure={false}
+										format="HH:mm"
+										ampm={false}
+										value={timeValue}
+										onChange={(newValue: Dayjs | null, context: any) => {
+											if (newValue?.isValid() && !context.validationError) {
+												setTimeValue(newValue);
+												if (dateValue?.isValid()) {
+													const combined = dateValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
+													consolidateNewValue(combined);
+												}
+											}
+										}}
+										onFocus={() => setView(DatePickerView.time)}
+										slotProps={{
+											textField: {
+												InputProps: {
+													startAdornment: (
+														<InputAdornment position="start">
+															<ClockIcon />
+														</InputAdornment>
+													),
+												},
+											},
+										}}
+									/>
+								</FieldsRow>
 								{view === DatePickerView.calendar && (
 									<DateCalendar 
 										value={dateValue} 
