@@ -16,7 +16,7 @@
  */
 import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClearDateAction, DateField, FieldsRow, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
+import { ClearDateAction, ApplyAction, ActionsRow, DateField, FieldsRow, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
 import { formatDateTime, getLocaleDateFormat } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
@@ -182,7 +182,6 @@ export const DateTimePicker = ({
 										onChange={(newValue: Dayjs | null, context: any) => {
 											if (newValue?.isValid() && !context.validationError) {
 												setDateValue(newValue);
-												setView(DatePickerView.time);
 											}
 										}}
 										onFocus={() => setView(DatePickerView.calendar)}
@@ -206,10 +205,6 @@ export const DateTimePicker = ({
 										onChange={(newValue: Dayjs | null, context: any) => {
 											if (newValue?.isValid() && !context.validationError) {
 												setTimeValue(newValue);
-												if (dateValue?.isValid()) {
-													const combined = dateValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
-													consolidateNewValue(combined);
-												}
 											}
 										}}
 										onFocus={() => setView(DatePickerView.time)}
@@ -232,7 +227,6 @@ export const DateTimePicker = ({
 										onChange={(newValue: Dayjs, selectionState) => {
 											if (selectionState === 'finish') {
 												setDateValue(newValue);
-												setView(DatePickerView.time);
 											}
 										}}
 										minDate={minDate}
@@ -248,8 +242,6 @@ export const DateTimePicker = ({
 											setTimeValue(newValue);
 											if (selectionState === 'finish') {
 												if (!dateValue || !newValue) return;
-												const valueToSet = dateValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
-												consolidateNewValue(valueToSet);
 											}
 										}}
 										minTime={minTime}
@@ -257,9 +249,20 @@ export const DateTimePicker = ({
 										disableFuture={disableFuture}
 									/>
 								)}
-								<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
-									<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
-								</ClearDateAction>
+								<ActionsRow>
+									<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
+										<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
+									</ClearDateAction>
+									<ApplyAction
+										onClick={() => {
+											if (!dateValue) return;
+											const tv = timeValue ?? DefaultTime;
+											consolidateNewValue(dateValue.hour(tv.hour()).minute(tv.minute()).toDate().getTime());
+										}}
+									>
+										<FormattedMessage id="datePicker.actionBar.apply" defaultMessage="Apply" />
+									</ApplyAction>
+								</ActionsRow>
 							</PopperWrapper>
 						</Fade>
 					</ClickAwayListener>

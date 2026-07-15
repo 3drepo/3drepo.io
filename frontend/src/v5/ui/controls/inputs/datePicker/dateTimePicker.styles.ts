@@ -57,14 +57,26 @@ export const TextField = styled(TextFieldBase)`
 	}
 `;
 
+export const ActionsRow = styled(Box)`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 22px;
+	height: 40px;
+`;
+
 export const ClearDateAction = styled.div`
 	${({ theme }) => theme.typography.body1}
 	font-weight: 500;
 	color: ${({ theme }) => theme.palette.error.main};
-	margin-right: 22px;
 	cursor: pointer;
-	height: 32px;
-	text-align: right;
+`;
+
+export const ApplyAction = styled.div`
+	${({ theme }) => theme.typography.body1}
+	font-weight: 500;
+	color: ${({ theme }) => theme.palette.primary.main};
+	cursor: pointer;
 `;
 
 export const PopperWrapper = styled(Box)`
