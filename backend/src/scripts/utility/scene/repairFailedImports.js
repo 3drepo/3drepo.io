@@ -69,7 +69,7 @@ const getReferencedIdsFromHierarchy = async (teamspace, collection, revision, ro
 		}
 	}
 
-	// BFS from the known-good root node.
+	// Traverse from the known-good root node.
 	const referencedIds = new Set();
 	const queue = [uuidToString(rootSharedId)];
 	while (queue.length) {
@@ -102,22 +102,27 @@ const getRootNodeSharedId = async (teamspace, collection, revision) => {
 
 	if (rootNodes.length > 1) {
 		// If we have multiple root nodes, get the live one from the tree.
-		const contents = await getFile(
-			teamspace,
-			`${collection}.stash.json_mpc.ref`,
-			`${UUIDToString(revision)}/fulltree.json`,
-		);
-		const fullTree = JSON.parse(contents);
-		const rootNode = fullTree?.nodes;
-		if (!rootNode) {
-			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json is missing or is missing the root node`);
+		try {
+			const contents = await getFile(
+				teamspace,
+				`${collection}.stash.json_mpc.ref`,
+				`${UUIDToString(revision)}/fulltree.json`,
+			);
+			const fullTree = JSON.parse(contents);
+			const rootNode = fullTree?.nodes;
+			if (!rootNode) {
+				logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json is missing or is missing the root node`);
+				return null;
+			}
+			if (!rootNode.shared_id) {
+				logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json root node does not contain a shared_id`);
+				return null;
+			}
+			return stringToUUID(rootNode.shared_id);
+		} catch (err) {
+			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: failed to read/parse fulltree.json (${err?.message ?? err})`);
 			return null;
 		}
-		if (!rootNode.shared_id) {
-			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json root node does not contain a shared_id`);
-			return null;
-		}
-		return stringToUUID(rootNode.shared_id);
 	}
 
 	return rootNodes[0].shared_id;
@@ -147,7 +152,7 @@ const cleanupOrphanedNodesForRevision = async (teamspace, collection, revision, 
 
 	logger.logInfo(`\t\tRemoving ${idsToDelete.length} orphaned nodes from ${collection}/${UUIDToString(revision)}`);
 
-	await deleteMany(teamspace, `${collection}.scene`, { shared_id: { $in: idsToDelete } });
+	await deleteMany(teamspace, `${collection}.scene`, { rev_id: revision, shared_id: { $in: idsToDelete } });
 };
 
 const processRevision = async (teamspace, collection, revision) => {
