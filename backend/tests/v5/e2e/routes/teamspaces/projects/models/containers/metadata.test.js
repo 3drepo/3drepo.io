@@ -70,7 +70,7 @@ const generateBasicData = () => {
 	return data;
 };
 
-const setupData = async (users, teamspace, project, models, con, metadata) => {
+const setupData = async (users, teamspace, project, models, con, metadata, revId) => {
 	const { tsAdmin, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
@@ -88,7 +88,7 @@ const setupData = async (users, teamspace, project, models, con, metadata) => {
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map((m) => m._id),
 			[users.projectAdmin.user]),
-		ServiceHelper.db.createMetadata(teamspace, con._id, metadata._id, metadata.metadata),
+		ServiceHelper.db.createMetadata(teamspace, con._id, metadata._id, metadata.metadata, revId),
 	]);
 };
 
@@ -398,7 +398,7 @@ const testGetMetadataById = (internalService) => {
 
 		beforeAll(async () => {
 			const models = [con, conNoRev, fed];
-			await setupData(users, teamspace, project, models, con, metadata);
+			await setupData(users, teamspace, project, models, con, metadata, revisions[0]._id);
 			await ServiceHelper.db.createRevision(teamspace, project, con._id,
 				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
 		});
@@ -408,8 +408,7 @@ const testGetMetadataById = (internalService) => {
 			containerId = con._id,
 			metadataId = metadata._id,
 			key = users.tsAdmin.apiKey,
-			revId,
-		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key, revId })}`;
+		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
 
 		const expectedMetadata = metadata.metadata.reduce((obj, item) => Object.assign(obj,
 			{ [item.key]: item.value }), {});

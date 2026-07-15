@@ -64,10 +64,10 @@ const getModelMetadataFields = async (req, res) => {
 };
 
 const getMetadataById = async (req, res, next) => {
-	const { teamspace, container, metadata } = req.params;
+	const { teamspace, container, revision, metadata } = req.params;
 
 	try {
-		req.metadata = await Metadata.getMetadataById(teamspace, container, metadata);
+		req.metadata = await Metadata.getMetadataById(teamspace, container, revision, metadata);
 
 		await next();
 	} catch (err) {

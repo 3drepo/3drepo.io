@@ -16,7 +16,6 @@
  */
 
 const { getMetadataByQuery, getMetadataKeyList, updateCustomMetadata } = require('../../../../../models/metadata');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const Metadata = {};
 
@@ -28,8 +27,8 @@ Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery
 
 Metadata.getAllMetadataFieldNames = getMetadataKeyList;
 
-Metadata.getMetadataById = (teamspace, container, metadataId) => getMetadataByQuery(teamspace, container,
-	{ _id: stringToUUID(metadataId) },
+Metadata.getMetadataById = (teamspace, container, revision, metadataId) => getMetadataByQuery(teamspace, container,
+	{ _id: metadataId, rev_id: revision },
 	{
 		shared_id: 0,
 		paths: 0,
