@@ -16,7 +16,7 @@
  */
 import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClearDateAction, ApplyAction, ActionsRow, DateField, FieldsRow, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
+import { ClearDateAction, ApplyAction, ActionsRow, DateField, FieldsRow, PickerViewContainer, TimeClockContainer, PopperWrapper, TextField, TimeField } from './dateTimePicker.styles';
 import { formatDateTime, getLocaleDateFormat } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
@@ -221,34 +221,38 @@ export const DateTimePicker = ({
 										}}
 									/>
 								</FieldsRow>
-								{view === DatePickerView.calendar && (
-									<DateCalendar 
-										value={dateValue} 
-										onChange={(newValue: Dayjs, selectionState) => {
-											if (selectionState === 'finish') {
-												setDateValue(newValue);
-											}
-										}}
-										minDate={minDate}
-										maxDate={maxDate}
-										disableFuture={disableFuture}
-										disableHighlightToday={disableHighlightToday}
-									/>)}
-								{view === DatePickerView.time && (
-									<TimeClock
-										value={timeValue}
-										views={['hours', 'minutes']}
-										onChange={(newValue: Dayjs, selectionState) => {
-											setTimeValue(newValue);
-											if (selectionState === 'finish') {
-												if (!dateValue || !newValue) return;
-											}
-										}}
-										minTime={minTime}
-										maxTime={maxTime}
-										disableFuture={disableFuture}
-									/>
-								)}
+								<PickerViewContainer>
+									{view === DatePickerView.calendar && (
+										<DateCalendar 
+											value={dateValue} 
+											onChange={(newValue: Dayjs, selectionState) => {
+												if (selectionState === 'finish') {
+													setDateValue(newValue);
+												}
+											}}
+											minDate={minDate}
+											maxDate={maxDate}
+											disableFuture={disableFuture}
+											disableHighlightToday={disableHighlightToday}
+										/>)}
+									{view === DatePickerView.time && (
+										<TimeClockContainer>
+											<TimeClock
+												value={timeValue}
+												views={['hours', 'minutes']}
+												onChange={(newValue: Dayjs, selectionState) => {
+													setTimeValue(newValue);
+													if (selectionState === 'finish') {
+														if (!dateValue || !newValue) return;
+													}
+												}}
+												minTime={minTime}
+												maxTime={maxTime}
+												disableFuture={disableFuture}
+											/>
+										</TimeClockContainer>
+									)}
+								</PickerViewContainer>
 								<ActionsRow>
 									<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
 										<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
