@@ -228,7 +228,7 @@ export function Board(props: IProps) {
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
-	const isDraggable = !hasViewerPermissions && get(
+	const isDraggable = get(
 		isIssuesBoard ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS,
 		[props.filterProp, 'draggable'],
 		false
@@ -335,10 +335,15 @@ export function Board(props: IProps) {
 	};
 
 	const handleCardDrop = () => {
-		if (!isDraggable) {
+		if (hasViewerPermissions) {
 			props.showSnackbar('Insufficient permissions to perform this action');
+			return;
 		}
-		return isDraggable;
+		if (!isDraggable) {
+			props.showSnackbar('The current property is not draggable');
+			return;
+		}
+		return true;
 	};
 
 	const handleSearchClose = () => {

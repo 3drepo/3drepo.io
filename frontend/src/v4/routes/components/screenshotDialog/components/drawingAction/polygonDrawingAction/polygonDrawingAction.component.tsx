@@ -119,6 +119,8 @@ export class PolygonDrawingAction
 			const newPoints = this.lastLine.points().slice(0, -2);
 
 			this.lastLine.points(newPoints.concat([firstX, firstY]));
+			this.lastLine.closed(true);
+
 			this.handlePolygonCreationEnd();
 		}
 	}
