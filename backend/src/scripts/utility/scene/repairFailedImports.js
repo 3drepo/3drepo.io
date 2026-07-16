@@ -109,16 +109,7 @@ const getRootNodeSharedId = async (teamspace, collection, revision) => {
 				`${UUIDToString(revision)}/fulltree.json`,
 			);
 			const fullTree = JSON.parse(contents);
-			const rootNode = fullTree?.nodes;
-			if (!rootNode) {
-				logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json is missing or is missing the root node`);
-				return null;
-			}
-			if (!rootNode.shared_id) {
-				logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: fulltree.json root node does not contain a shared_id`);
-				return null;
-			}
-			return stringToUUID(rootNode.shared_id);
+			return stringToUUID(fullTree.nodes.shared_id);
 		} catch (err) {
 			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: failed to read/parse fulltree.json (${err?.message ?? err})`);
 			return null;
