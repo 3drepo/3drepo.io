@@ -61,7 +61,7 @@ export const ActionsRow = styled(Box)`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 0 22px;
+	padding: 0 12px;
 	height: 40px;
 `;
 
@@ -90,8 +90,8 @@ export const PopperWrapper = styled(Box)`
 
 export const FieldsRow = styled(Box)`
 	display: flex;
-	gap: 8px;
-	padding: 16px 22px 8px;
+	gap: 10px;
+	padding: 16px 12px 8px;
 `;
 
 export const PickerViewContainer = styled(Box)`
@@ -116,37 +116,23 @@ export const TimeClockContainer = styled(Box)`
 	height: 100%;
 `;
 
-const pickerFieldStyles = ({ theme }) => `
+const pickerFieldStyles = `
 	.MuiOutlinedInput-root {
-		border-radius: 8px;
 		padding-left: 10px;
-		font-size: 13px;
 		cursor: pointer;
-		height: 38px;
-
-		&.Mui-focused .MuiOutlinedInput-notchedOutline {
-			border-color: ${theme.palette.primary.main};
-			border-width: 1px;
-		}
-
-		.MuiOutlinedInput-notchedOutline {
-			border-color: ${theme.palette.base.lightest};
-		}
 	}
 
 	.MuiInputAdornment-root {
-		margin-right: 4px;
-		color: ${theme.palette.base.main};
+		margin-right: 6px;
 
 		svg {
-			width: 15px;
-			height: 15px;
+			width: 16px;
+			height: 16px;
 		}
 	}
 
-	.MuiOutlinedInput-input,
-	.MuiPickersSectionList-root {
-		padding: 8px 10px 8px 0;
+	.MuiOutlinedInput-input {
+		padding-left: 0;
 		cursor: pointer;
 	}
 `;
