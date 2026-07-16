@@ -19,6 +19,7 @@ import TextFieldBase from '@mui/material/TextField';
 import { Box } from '@mui/system';
 import { DateField as MuiDateField } from '@mui/x-date-pickers/DateField';
 import { TimeField as MuiTimeField } from '@mui/x-date-pickers/TimeField';
+import { Button } from '@controls/button';
 
 export const TextField = styled(TextFieldBase)`
 	caret-color: transparent;
@@ -72,11 +73,22 @@ export const ClearDateAction = styled.div`
 	cursor: pointer;
 `;
 
-export const ApplyAction = styled.div`
-	${({ theme }) => theme.typography.body1}
-	font-weight: 500;
-	color: ${({ theme }) => theme.palette.primary.main};
-	cursor: pointer;
+export const ApplyAction = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	&& {
+		margin: 0;
+		height: 27px;
+		min-width: unset;
+		padding: 0 12px;
+		font-size: 0.75rem;
+
+		&.Mui-disabled {
+			color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) => theme.palette.base.lightest};
+		}
+	}
 `;
 
 export const PopperWrapper = styled(Box)`
@@ -86,6 +98,8 @@ export const PopperWrapper = styled(Box)`
 	padding: 1px;
 	border: none;
 	width: 320px;
+	border-radius: 10px;
+	overflow: hidden;
 `;
 
 export const FieldsRow = styled(Box)`
@@ -138,11 +152,11 @@ const pickerFieldStyles = `
 `;
 
 export const DateField = styled(MuiDateField)`
-	flex: 3;
+	flex: 1;
 	${pickerFieldStyles}
 `;
 
 export const TimeField = styled(MuiTimeField)`
-	flex: 2;
+	flex: 1;
 	${pickerFieldStyles}
 `;

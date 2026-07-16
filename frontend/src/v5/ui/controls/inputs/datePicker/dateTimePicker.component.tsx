@@ -57,7 +57,7 @@ enum DatePickerView {
 	calendar = 'calendar',
 }
 
-const DefaultTime = dayjs().hour(0).minute(0);
+const DefaultTime = dayjs().hour(23).minute(59);
 
 export const DateTimePicker = ({
 	disabled,
@@ -254,6 +254,7 @@ export const DateTimePicker = ({
 										<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
 									</ClearDateAction>
 									<ApplyAction
+										disabled={!dateValue?.isValid()}
 										onClick={() => {
 											if (!dateValue?.isValid()) return;
 											const tv = (timeValue?.isValid() ? timeValue : null) ?? DefaultTime;
