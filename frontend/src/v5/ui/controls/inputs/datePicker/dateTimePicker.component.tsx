@@ -179,10 +179,8 @@ export const DateTimePicker = ({
 										enableAccessibleFieldDOMStructure={false}
 										format={getLocaleDateFormat()}
 										value={dateValue}
-										onChange={(newValue: Dayjs | null, context: any) => {
-											if (newValue?.isValid() && !context.validationError) {
-												setDateValue(newValue);
-											}
+										onChange={(newValue: Dayjs | null) => {
+											setDateValue(newValue);
 										}}
 										onFocus={() => setView(DatePickerView.calendar)}
 										slotProps={{
@@ -202,10 +200,8 @@ export const DateTimePicker = ({
 										format="HH:mm"
 										ampm={false}
 										value={timeValue}
-										onChange={(newValue: Dayjs | null, context: any) => {
-											if (newValue?.isValid() && !context.validationError) {
-												setTimeValue(newValue);
-											}
+										onChange={(newValue: Dayjs | null) => {
+											setTimeValue(newValue);
 										}}
 										onFocus={() => setView(DatePickerView.time)}
 										slotProps={{
@@ -259,8 +255,8 @@ export const DateTimePicker = ({
 									</ClearDateAction>
 									<ApplyAction
 										onClick={() => {
-											if (!dateValue) return;
-											const tv = timeValue ?? DefaultTime;
+											if (!dateValue?.isValid()) return;
+											const tv = (timeValue?.isValid() ? timeValue : null) ?? DefaultTime;
 											consolidateNewValue(dateValue.hour(tv.hour()).minute(tv.minute()).toDate().getTime());
 										}}
 									>
