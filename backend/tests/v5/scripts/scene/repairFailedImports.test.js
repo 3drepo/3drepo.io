@@ -19,13 +19,8 @@ const { determineTestGroup } = require('../../helper/utils');
 const { db: { reset: resetDB }, generateRandomString, generateRandomBuffer } = require('../../helper/services');
 const { utilScripts, src } = require('../../helper/path');
 
-const { disconnect, insertMany, find } = require(`${src}/handler/db`);
-const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
-
-jest.doMock(`${src}/utils/logger`);
-
-// Mock getFile for stash collection reads in multi-root scenarios
 const stashFiles = new Map(); // Map of "${teamspace}/${collection}/${path}" -> content
+jest.doMock(`${src}/utils/logger`);
 jest.doMock(`${src}/services/filesManager`, () => ({
 	// eslint-disable-next-line require-await
 	getFile: async (teamspace, collection, path) => {
@@ -37,6 +32,8 @@ jest.doMock(`${src}/services/filesManager`, () => ({
 	},
 }));
 
+const { disconnect, insertMany, find } = require(`${src}/handler/db`);
+const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const RepairFailedImports = require(`${utilScripts}/scene/repairFailedImports`);
 
 /**

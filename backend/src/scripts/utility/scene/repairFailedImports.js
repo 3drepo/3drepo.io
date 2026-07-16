@@ -111,7 +111,7 @@ const getRootNodeSharedId = async (teamspace, collection, revision) => {
 			const fullTree = JSON.parse(contents);
 			return stringToUUID(fullTree.nodes.shared_id);
 		} catch (err) {
-			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: failed to read/parse fulltree.json (${err?.message ?? err})`);
+			logger.logWarning(`\t\tSkipping ${collection}/${UUIDToString(revision)}: failed to read/parse fulltree.json (${err})`);
 			return null;
 		}
 	}
