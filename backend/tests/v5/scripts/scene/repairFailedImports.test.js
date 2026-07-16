@@ -16,7 +16,7 @@
  */
 
 const { determineTestGroup } = require('../../helper/utils');
-const { db: { reset: resetDB }, generateRandomString, generateRandomBuffer } = require('../../helper/services');
+const { db: { reset: resetDB }, generateRandomString, generateRandomBuffer, generateRandomNumber } = require('../../helper/services');
 const { utilScripts, src } = require('../../helper/path');
 
 const stashFiles = new Map(); // Map of "${teamspace}/${collection}/${path}" -> content
@@ -45,7 +45,11 @@ const RepairFailedImports = require(`${utilScripts}/scene/repairFailedImports`);
  * @param {number} maxParents - Max parent references per node
  * @returns {Array} Array of node objects
  */
-const buildConnectedNodes = (rootId, iterations = 3, nodesPerIteration = 4, maxParents = 100) => {
+const buildConnectedNodes = (
+	rootId,
+	iterations = 3,
+	nodesPerIteration = 40,
+	maxParents = 100) => {
 	const nodes = [{ shared_id: rootId, parents: [] }];
 
 	for (let i = 0; i < iterations; i++) {
@@ -62,6 +66,34 @@ const buildConnectedNodes = (rootId, iterations = 3, nodesPerIteration = 4, maxP
 	return nodes;
 };
 
+const addRefNodes = (sceneNodes, numRefNodes = 10) => {
+	const refNodes = [];
+	for (let i = 0; i < numRefNodes; i++) {
+		const name = UUIDToString(generateUUID());
+		refNodes.push({
+			_id: name,
+			type: 'fs',
+			link: generateRandomString(),
+			size: generateRandomNumber(1000, 10000000),
+		});
+		const blobRef = {
+			elements: {},
+			buffer: {
+				start: generateRandomNumber(0, 1000),
+				size: generateRandomNumber(0, 10000),
+				name,
+			},
+		};
+		const shuffled = [...sceneNodes].sort(() => Math.random() - 0.5);
+		const nodes = shuffled.slice(0, Math.min(10, shuffled.length));
+		for (const node of nodes) {
+			// eslint-disable-next-line no-underscore-dangle
+			node._blobRef = blobRef;
+		}
+	}
+	return refNodes;
+};
+
 /**
  * Creates a history entry for a revision
  * @param {string} teamspace - Teamspace name
@@ -70,12 +102,15 @@ const buildConnectedNodes = (rootId, iterations = 3, nodesPerIteration = 4, maxP
  * @param {boolean} options.incomplete - Whether to mark revision as incomplete
  * @returns {Object} Object with revisionId and revUUID
  */
-const createRevisionHistory = async (teamspace, container, { incomplete = false } = {}) => {
+const createRevisionHistory = async (teamspace, container, { incomplete = false, void: isVoid = false } = {}) => {
 	const revisionId = generateUUID();
 
 	const historyDoc = { _id: revisionId };
 	if (incomplete) {
 		historyDoc.incomplete = 2;
+	}
+	if (isVoid) {
+		historyDoc.void = true;
 	}
 	await insertMany(teamspace, `${container}.history`, [historyDoc]);
 
@@ -105,12 +140,16 @@ const addSuccessfulImport = async (teamspace, container, revisionId) => {
 		return nodeDoc;
 	});
 
+	const refNodes = addRefNodes(sceneNodesWithRev);
+
 	await insertMany(teamspace, `${container}.scene`, sceneNodesWithRev);
+	await insertMany(teamspace, `${container}.scene.ref`, refNodes);
 
 	return {
 		nodeIds: sceneNodesWithRev.map((n) => n.shared_id),
 		nodeCount: connectedNodes.length,
 		orphanCount: 0,
+		refNodeNames: refNodes.map((n) => n._id),
 	};
 };
 
@@ -141,6 +180,7 @@ const addFailedImport = async (teamspace, container, revisionId, orphanCount = 5
 		orphanIds: orphanNodes.map((n) => n.shared_id),
 		nodeCount: 0,
 		orphanCount: orphanNodes.length,
+		refNodeNames: [],
 	};
 };
 
@@ -155,11 +195,16 @@ const addFailedImport = async (teamspace, container, revisionId, orphanCount = 5
  * @param {boolean} options.incomplete - Whether to mark revision as incomplete
  * @returns {Object} Revision object with all metadata and node tracking for testing
  */
-const createRevision = async (teamspace, container, imports = [], { incomplete = false } = {}) => {
-	const { revisionId } = await createRevisionHistory(teamspace, container, { incomplete });
+const createRevision = async (teamspace,
+	container,
+	imports = [],
+	{ incomplete = false, void: isVoid = false } = {}) => {
+	const { revisionId } = await createRevisionHistory(teamspace, container, { incomplete, void: isVoid });
 
 	const goodNodeIds = [];
 	const orphanNodeIds = [];
+	const goodRefNodeNames = [];
+	const orphanRefNodeNames = [];
 	let goodNodeCount = 0;
 	let orphanCount = 0;
 
@@ -184,6 +229,9 @@ const createRevision = async (teamspace, container, imports = [], { incomplete =
 			if (result.nodeIds) {
 				goodNodeIds.push(...result.nodeIds);
 			}
+			if (result.refNodeNames) {
+				goodRefNodeNames.push(...result.refNodeNames);
+			}
 			goodNodeCount += result.nodeCount;
 			// orphanIds from first import still go to orphans
 			if (result.orphanIds) {
@@ -198,6 +246,9 @@ const createRevision = async (teamspace, container, imports = [], { incomplete =
 			if (result.orphanIds) {
 				orphanNodeIds.push(...result.orphanIds);
 			}
+			if (result.refNodeNames) {
+				orphanRefNodeNames.push(...result.refNodeNames);
+			}
 			orphanCount += result.nodeCount + result.orphanCount;
 		}
 	}
@@ -210,6 +261,8 @@ const createRevision = async (teamspace, container, imports = [], { incomplete =
 		orphanCount,
 		goodNodeIds,
 		orphanNodeIds,
+		goodRefNodeNames,
+		orphanRefNodeNames,
 		stashKey,
 	};
 };
@@ -238,6 +291,17 @@ const checkRevisionRepaired = async (revision) => {
 
 	// Verify we have the right count
 	expect(nodes.length).toBe(revision.goodNodeCount);
+
+	// Verify ref nodes for orphaned scene nodes are also deleted
+	const refNodes = await find(revision.teamspace, `${revision.container}.scene.ref`, {});
+	const refNodeNames = refNodes.map((n) => n._id);
+	for (const refName of revision.orphanRefNodeNames) {
+		expect(refNodeNames).not.toContain(refName);
+	}
+	// Verify ref nodes for good scene nodes still exist
+	for (const refName of revision.goodRefNodeNames) {
+		expect(refNodeNames).toContain(refName);
+	}
 };
 
 /**
@@ -264,6 +328,33 @@ const checkRevisionUntouched = async (revision) => {
 
 	// Verify we have the right count
 	expect(nodes.length).toBe(revision.goodNodeCount + revision.orphanCount);
+
+	// Verify all ref nodes still exist (both good and orphaned)
+	const refNodes = await find(revision.teamspace, `${revision.container}.scene.ref`, {});
+	const refNodeNames = refNodes.map((n) => n._id);
+	for (const refName of revision.goodRefNodeNames) {
+		expect(refNodeNames).toContain(refName);
+	}
+	for (const refName of revision.orphanRefNodeNames) {
+		expect(refNodeNames).toContain(refName);
+	}
+};
+
+/**
+ * Creates a project document associated with container(s)
+ * @param {string} teamspace - Teamspace name
+ * @param {string} projectName - Project name
+ * @param {Array<string>} containerNames - Array of container names to associate
+ * @returns {Promise<Object>} Project object with _id and metadata
+ */
+const createProject = async (teamspace, projectName, revisions) => {
+	const models = [...new Set(revisions.map((revision) => revision.container))];
+	const projectDoc = {
+		_id: generateUUID(),
+		name: projectName,
+		models,
+	};
+	await insertMany(teamspace, 'projects', [projectDoc]);
 };
 
 /**
@@ -356,6 +447,27 @@ const setupData = async () => {
 
 		stashFiles.set(corruptTreeRevision.stashKey, generateRandomBuffer(100));
 
+		// Scenario 8: Void revision (marked void but should still be processed)
+		const voidRevision = await createRevision(
+			teamspace,
+			`void_${generateRandomString()}`,
+			[
+				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
+				(ts, c, rev) => addFailedImport(ts, c, rev, 2),
+			],
+			{ void: true },
+		);
+
+		// Create projects for each container
+		await createProject(teamspace, 'Clean Project', [cleanRevision]);
+		await createProject(teamspace, 'Corrupted Project', [corruptedRevision]);
+		await createProject(teamspace, 'Mixed Project', [mixedContainer]);
+		await createProject(teamspace, 'Incomplete Project', [incompleteRevision]);
+		await createProject(teamspace, 'MultiRoot Project', [multiRootRevision]);
+		await createProject(teamspace, 'NoRoot Project', [noRootRevision]);
+		await createProject(teamspace, 'CorruptTree Project', [corruptTreeRevision]);
+		await createProject(teamspace, 'Void Project', [voidRevision]);
+
 		return {
 			cleanRevision,
 			corruptedRevision,
@@ -365,6 +477,7 @@ const setupData = async () => {
 			multiRootRevision,
 			noRootRevision,
 			corruptTreeRevision,
+			voidRevision,
 		};
 	};
 
@@ -399,6 +512,7 @@ const runTest = () => {
 			await checkRevisionRepaired(data.teamspace1.corruptedRevision);
 			await checkRevisionRepaired(data.teamspace1.mixedCorruptedRevision);
 			await checkRevisionRepaired(data.teamspace1.multiRootRevision);
+			await checkRevisionRepaired(data.teamspace1.voidRevision);
 			// Verify teamspace1 clean revisions untouched
 			await checkRevisionUntouched(data.teamspace1.cleanRevision);
 			await checkRevisionUntouched(data.teamspace1.mixedCleanRevision);
@@ -410,6 +524,7 @@ const runTest = () => {
 			await checkRevisionUntouched(data.teamspace2.mixedCorruptedRevision);
 			await checkRevisionUntouched(data.teamspace2.incompleteRevision);
 			await checkRevisionUntouched(data.teamspace2.multiRootRevision);
+			await checkRevisionUntouched(data.teamspace2.voidRevision);
 			// Revisions with irrecoverable issues should be ignored
 			await checkRevisionUntouched(data.teamspace2.noRootRevision);
 			await checkRevisionUntouched(data.teamspace1.noRootRevision);
@@ -445,9 +560,11 @@ const runTest = () => {
 			await checkRevisionRepaired(data.teamspace1.corruptedRevision);
 			await checkRevisionRepaired(data.teamspace1.mixedCorruptedRevision);
 			await checkRevisionRepaired(data.teamspace1.multiRootRevision);
+			await checkRevisionRepaired(data.teamspace1.voidRevision);
 			await checkRevisionRepaired(data.teamspace2.corruptedRevision);
 			await checkRevisionRepaired(data.teamspace2.mixedCorruptedRevision);
 			await checkRevisionRepaired(data.teamspace2.multiRootRevision);
+			await checkRevisionRepaired(data.teamspace2.voidRevision);
 			// Verify all clean/unchanged revisions remain untouched in both teamspaces
 			await checkRevisionUntouched(data.teamspace1.cleanRevision);
 			await checkRevisionUntouched(data.teamspace1.mixedCleanRevision);
