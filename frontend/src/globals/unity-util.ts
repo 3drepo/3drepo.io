@@ -59,6 +59,21 @@ export interface ClientPosition {
 	clientY: number,
 }
 
+export interface PointInfo {
+	id: string,
+	database: string,
+	model: string,
+	pin: boolean,
+	mousePos: number[],
+	position: number[],
+	normal: number[],
+}
+
+export interface PickInfo {
+	mousePos: number[],
+	position: number[],
+}
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -718,11 +733,11 @@ export class UnityUtil {
 	/** @hidden */
 	public static respondToPointInfoRequest(pointInfo) {
 
-		let data;
+		let data: PointInfo;
 		
 		// Parse data
 		try {
-			data = JSON.parse(pointInfo);
+			data = JSON.parse(pointInfo) as PointInfo;
 		} catch (error) {
 			// In the case of malformed data, we can't recover the key and reject all currently open requests.
 			// This is preferrable to leaving them hanging indefinitely.
@@ -759,7 +774,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
-		const point = JSON.parse(pointInfo);
+		const point = JSON.parse(pointInfo) as PickInfo;
 		if (UnityUtil.verbose) {
 			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
@@ -1782,7 +1797,7 @@ export class UnityUtil {
 	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
 	 * @returns A promise that resolves with the point information object returned by the viewer.
  	 */
-	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<object> {
+	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<PointInfo> {
 		
 		let x: number;
 		let y: number;
@@ -1831,7 +1846,7 @@ export class UnityUtil {
 
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
-		return newPointInfoPromise as Promise<object>;
+		return newPointInfoPromise as Promise<PointInfo>;
 	}
 
 	/**
