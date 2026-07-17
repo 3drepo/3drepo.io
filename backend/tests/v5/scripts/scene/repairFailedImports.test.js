@@ -16,106 +16,50 @@
  */
 
 const { determineTestGroup } = require('../../helper/utils');
-const { db: { reset: resetDB }, generateRandomString, generateRandomBuffer, generateRandomNumber } = require('../../helper/services');
+const { db, generateRandomString, generateRevisionEntry, generateBasicNode, generateMeshNode, generateTextureNode } = require('../../helper/services');
 const { utilScripts, src } = require('../../helper/path');
+const { modelTypes } = require('../../../../src/v5/models/modelSettings.constants');
+const { uuidToString } = require('../../../../src/v4/utils');
+const { getNodesByQuery } = require('../../../../src/v5/models/scenes');
+const { stringToUUID } = require('../../../../src/v5/utils/helper/uuids');
 
-const stashFiles = new Map(); // Map of "${teamspace}/${collection}/${path}" -> content
-jest.doMock(`${src}/utils/logger`);
-jest.doMock(`${src}/services/filesManager`, () => ({
-	// eslint-disable-next-line require-await
-	getFile: async (teamspace, collection, path) => {
-		const key = `${teamspace}/${collection}/${path}`;
-		if (stashFiles.has(key)) {
-			return stashFiles.get(key);
-		}
-		throw new Error(`Stash file not found: ${key}`);
-	},
-}));
-
-const { disconnect, insertMany, find } = require(`${src}/handler/db`);
+const { disconnect, find } = require(`${src}/handler/db`);
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const RepairFailedImports = require(`${utilScripts}/scene/repairFailedImports`);
 
-/**
- * Builds a connected scene graph with realistic multi-level hierarchy
- * Emulates asymmetric behaviour where nodes have multiple parents across multiple levels
- * @param {string} rootId - The root node shared_id
- * @param {number} iterations - Number of levels to create
- * @param {number} nodesPerIteration - Nodes to add per level
- * @param {number} maxParents - Max parent references per node
- * @returns {Array} Array of node objects
- */
-const buildConnectedNodes = (
-	rootId,
-	iterations = 3,
-	nodesPerIteration = 40,
-	maxParents = 100) => {
-	const nodes = [{ shared_id: rootId, parents: [] }];
-
-	for (let i = 0; i < iterations; i++) {
-		const existingIds = nodes.map((n) => n.shared_id);
-		for (let j = 0; j < nodesPerIteration; j++) {
-			// Pick a random number of parents (1 to maxParents) from any existing node
-			const parentCount = 1 + Math.floor(Math.random() * maxParents);
-			const shuffled = [...existingIds].sort(() => Math.random() - 0.5);
-			const parents = shuffled.slice(0, Math.min(parentCount, shuffled.length));
-			nodes.push({ shared_id: generateUUID(), parents });
-		}
+const buildRandomNode = (revisionId, parents, i, j) => {
+	if (i < j / 3) {
+		return generateBasicNode(
+			generateRandomString(),
+			revisionId,
+			parents,
+		);
+	} if (i < ((j / 3) * 2)) {
+		return generateMeshNode(
+			revisionId,
+			parents,
+		);
 	}
-
-	return nodes;
+	return generateTextureNode(
+		revisionId,
+		parents,
+	);
 };
 
-const addRefNodes = (sceneNodes, numRefNodes = 10) => {
-	const refNodes = [];
-	for (let i = 0; i < numRefNodes; i++) {
-		const name = UUIDToString(generateUUID());
-		refNodes.push({
-			_id: name,
-			type: 'fs',
-			link: generateRandomString(),
-			size: generateRandomNumber(1000, 10000000),
-		});
-		const blobRef = {
-			elements: {},
-			buffer: {
-				start: generateRandomNumber(0, 1000),
-				size: generateRandomNumber(0, 10000),
-				name,
-			},
-		};
-		const shuffled = [...sceneNodes].sort(() => Math.random() - 0.5);
-		const nodes = shuffled.slice(0, Math.min(10, shuffled.length));
-		for (const node of nodes) {
-			// eslint-disable-next-line no-underscore-dangle
-			node._blobRef = blobRef;
-		}
-	}
-	return refNodes;
+// eslint-disable-next-line no-underscore-dangle
+const getRefNodeNames = async (teamspace, project, container, nodes) => {
+	const nn = await getNodesByQuery(
+		teamspace,
+		project,
+		container,
+		{ shared_id: { $in: nodes.map((n) => n.shared_id) } },
+		{ _blobRef: 1 },
+	);
+	// eslint-disable-next-line no-underscore-dangle
+	return nn.filter((n) => n._blobRef).map((n) => n._blobRef.buffer.name);
 };
 
-/**
- * Creates a history entry for a revision
- * @param {string} teamspace - Teamspace name
- * @param {string} container - Container name
- * @param {Object} options - Configuration options
- * @param {boolean} options.incomplete - Whether to mark revision as incomplete
- * @returns {Object} Object with revisionId and revUUID
- */
-const createRevisionHistory = async (teamspace, container, { incomplete = false, void: isVoid = false } = {}) => {
-	const revisionId = generateUUID();
-
-	const historyDoc = { _id: revisionId };
-	if (incomplete) {
-		historyDoc.incomplete = 2;
-	}
-	if (isVoid) {
-		historyDoc.void = true;
-	}
-	await insertMany(teamspace, `${container}.history`, [historyDoc]);
-
-	return { revisionId };
-};
+const getSharedIds = (nodes) => nodes.map((n) => n.shared_id);
 
 /**
  * Adds a successful import (connected nodes) to a revision
@@ -124,32 +68,33 @@ const createRevisionHistory = async (teamspace, container, { incomplete = false,
  * @param {Buffer} revisionId - Revision UUID
  * @returns {Object} Object with nodeIds (shared_ids) and counts
  */
-const addSuccessfulImport = async (teamspace, container, revisionId) => {
-	const rootId = generateUUID();
-	const connectedNodes = buildConnectedNodes(rootId);
-	const sceneNodesWithRev = connectedNodes.map((node) => {
-		const nodeDoc = {
-			_id: generateUUID(),
-			shared_id: node.shared_id,
-			rev_id: revisionId,
-		};
-		// Only include parents field if there are parents (script queries for $exists: false)
-		if (node.parents && node.parents.length > 0) {
-			nodeDoc.parents = node.parents;
+const addSuccessfulImport = async (teamspace, project, container, revisionId) => {
+	const iterations = 2;
+	const nodesPerIteration = 20;
+	const maxParents = 100;
+	const nodes = [generateBasicNode('transformation', revisionId, undefined)];
+	for (let i = 0; i < iterations; i++) {
+		const existingIds = nodes.map((n) => n.shared_id);
+		for (let j = 0; j < nodesPerIteration; j++) {
+			// Pick a random number of parents (1 to maxParents) from any existing node
+			const parentCount = 1 + Math.floor(Math.random() * maxParents);
+			const shuffled = [...existingIds].sort(() => Math.random() - 0.5);
+			const parents = shuffled.slice(0, Math.min(parentCount, shuffled.length));
+			nodes.push(buildRandomNode(revisionId, parents, j, nodesPerIteration));
 		}
-		return nodeDoc;
-	});
+	}
 
-	const refNodes = addRefNodes(sceneNodesWithRev);
-
-	await insertMany(teamspace, `${container}.scene`, sceneNodesWithRev);
-	await insertMany(teamspace, `${container}.scene.ref`, refNodes);
+	await db.createScene(
+		teamspace,
+		project,
+		container,
+		revisionId,
+		nodes,
+		undefined,
+	);
 
 	return {
-		nodeIds: sceneNodesWithRev.map((n) => n.shared_id),
-		nodeCount: connectedNodes.length,
-		orphanCount: 0,
-		refNodeNames: refNodes.map((n) => n._id),
+		nodes,
 	};
 };
 
@@ -161,26 +106,23 @@ const addSuccessfulImport = async (teamspace, container, revisionId) => {
  * @param {number} orphanCount - Number of orphaned nodes to add
  * @returns {Object} Object with orphanIds (shared_ids) and counts
  */
-const addFailedImport = async (teamspace, container, revisionId, orphanCount = 5) => {
-	const orphanNodes = [];
+const addFailedImport = async (teamspace, project, container, revisionId, orphanCount = 10) => {
+	const nodes = [];
 	for (let i = 0; i < orphanCount; i++) {
-		orphanNodes.push({
-			_id: generateUUID(),
-			shared_id: generateUUID(),
-			parents: [generateUUID()],
-			rev_id: revisionId,
-		});
+		nodes.push(buildRandomNode(revisionId, undefined, i, orphanCount));
 	}
 
-	if (orphanNodes.length > 0) {
-		await insertMany(teamspace, `${container}.scene`, orphanNodes);
-	}
+	await db.createScene(
+		teamspace,
+		project,
+		container,
+		revisionId,
+		nodes,
+		undefined,
+	);
 
 	return {
-		orphanIds: orphanNodes.map((n) => n.shared_id),
-		nodeCount: 0,
-		orphanCount: orphanNodes.length,
-		refNodeNames: [],
+		orphanNodes: nodes,
 	};
 };
 
@@ -195,75 +137,89 @@ const addFailedImport = async (teamspace, container, revisionId, orphanCount = 5
  * @param {boolean} options.incomplete - Whether to mark revision as incomplete
  * @returns {Object} Revision object with all metadata and node tracking for testing
  */
-const createRevision = async (teamspace,
+const createRevision = async (
+	teamspace,
+	project,
 	container,
 	imports = [],
 	{ incomplete = false, void: isVoid = false } = {}) => {
-	const { revisionId } = await createRevisionHistory(teamspace, container, { incomplete, void: isVoid });
+	const revisionEntry = generateRevisionEntry(
+		isVoid,
+		false,
+		modelTypes.CONTAINER,
+		new Date(),
+		undefined);
+	if (incomplete) {
+		revisionEntry.incomplete = incomplete;
+	}
+
+	await db.createRevision(
+		teamspace,
+		project,
+		container,
+		revisionEntry,
+		modelTypes.CONTAINER,
+	);
+
+	const revisionId = stringToUUID(revisionEntry._id);
 
 	const goodNodeIds = [];
 	const orphanNodeIds = [];
 	const goodRefNodeNames = [];
 	const orphanRefNodeNames = [];
-	let goodNodeCount = 0;
-	let orphanCount = 0;
-
-	const stashKey = `${teamspace}/${container}.stash.json_mpc.ref/${UUIDToString(revisionId)}/fulltree.json`;
 
 	for (let i = 0; i < imports.length; i++) {
 		const importFn = imports[i];
 		// eslint-disable-next-line no-await-in-loop
-		const result = await importFn(teamspace, container, revisionId);
+		const result = await importFn(teamspace, project, container, revisionId);
 
 		if (i === 0) {
 			// First import: all nodes are good
 			// Track the root node for stash file to emulate the final import
-			if (result.nodeIds && result.nodeIds.length > 0) {
+			if (result.nodes && result.nodes.length > 0) {
 				const fullTreeContent = {
 					nodes: {
-						shared_id: UUIDToString(result.nodeIds[0]),
+						shared_id: UUIDToString(result.nodes[0].shared_id),
 					},
 				};
-				stashFiles.set(stashKey, JSON.stringify(fullTreeContent));
+				// eslint-disable-next-line no-await-in-loop
+				await db.addJSONFile(teamspace, container, `${UUIDToString(revisionId)}/fulltree.json`, JSON.stringify(fullTreeContent));
 			}
-			if (result.nodeIds) {
-				goodNodeIds.push(...result.nodeIds);
+			if (result.nodes) {
+				goodNodeIds.push(...getSharedIds(result.nodes));
+				// eslint-disable-next-line no-await-in-loop
+				goodRefNodeNames.push(...await getRefNodeNames(teamspace, project, container, result.nodes));
 			}
-			if (result.refNodeNames) {
-				goodRefNodeNames.push(...result.refNodeNames);
-			}
-			goodNodeCount += result.nodeCount;
 			// orphanIds from first import still go to orphans
-			if (result.orphanIds) {
-				orphanNodeIds.push(...result.orphanIds);
+			if (result.orphanNodes) {
+				orphanNodeIds.push(...getSharedIds(result.orphanNodes));
+				// eslint-disable-next-line no-await-in-loop
+				orphanRefNodeNames.push(...await getRefNodeNames(teamspace, project, container, result.orphanNodes));
 			}
-			orphanCount += result.orphanCount;
 		} else {
 			// Subsequent imports: all nodes are orphaned
-			if (result.nodeIds) {
-				orphanNodeIds.push(...result.nodeIds);
+			if (result.nodes) {
+				orphanNodeIds.push(...getSharedIds(result.nodes));
+				// eslint-disable-next-line no-await-in-loop
+				orphanRefNodeNames.push(...await getRefNodeNames(teamspace, project, container, result.nodes));
 			}
-			if (result.orphanIds) {
-				orphanNodeIds.push(...result.orphanIds);
+			if (result.orphanNodes) {
+				orphanNodeIds.push(...getSharedIds(result.orphanNodes));
+				// eslint-disable-next-line no-await-in-loop
+				orphanRefNodeNames.push(...await getRefNodeNames(teamspace, project, container, result.orphanNodes));
 			}
-			if (result.refNodeNames) {
-				orphanRefNodeNames.push(...result.refNodeNames);
-			}
-			orphanCount += result.nodeCount + result.orphanCount;
 		}
 	}
 
 	return {
 		teamspace,
+		project,
 		container,
 		revisionId,
-		goodNodeCount,
-		orphanCount,
 		goodNodeIds,
 		orphanNodeIds,
 		goodRefNodeNames,
 		orphanRefNodeNames,
-		stashKey,
 	};
 };
 
@@ -272,7 +228,12 @@ const createRevision = async (teamspace,
  * @param {Object} revision - Revision object with teamspace, container, revisionId, goodNodeIds, orphanNodeIds
  */
 const checkRevisionRepaired = async (revision) => {
-	const nodes = await find(revision.teamspace, `${revision.container}.scene`, { rev_id: revision.revisionId });
+	const nodes = await getNodesByQuery(
+		revision.teamspace,
+		revision.project,
+		revision.container,
+		{ rev_id: revision.revisionId },
+	);
 
 	// Convert all IDs to strings for comparison
 	const remainingIds = nodes.map((n) => UUIDToString(n.shared_id));
@@ -290,7 +251,7 @@ const checkRevisionRepaired = async (revision) => {
 	}
 
 	// Verify we have the right count
-	expect(nodes.length).toBe(revision.goodNodeCount);
+	expect(nodes.length).toBe(revision.goodNodeIds.length);
 
 	// Verify ref nodes for orphaned scene nodes are also deleted
 	const refNodes = await find(revision.teamspace, `${revision.container}.scene.ref`, {});
@@ -309,7 +270,12 @@ const checkRevisionRepaired = async (revision) => {
  * @param {Object} revision - Revision object with teamspace, container, revisionId, goodNodeIds, orphanNodeIds
  */
 const checkRevisionUntouched = async (revision) => {
-	const nodes = await find(revision.teamspace, `${revision.container}.scene`, { rev_id: revision.revisionId });
+	const nodes = await getNodesByQuery(
+		revision.teamspace,
+		revision.project,
+		revision.container,
+		{ rev_id: revision.revisionId },
+	);
 
 	// Convert all IDs to strings for comparison
 	const nodeIds = nodes.map((n) => UUIDToString(n.shared_id));
@@ -327,7 +293,7 @@ const checkRevisionUntouched = async (revision) => {
 	}
 
 	// Verify we have the right count
-	expect(nodes.length).toBe(revision.goodNodeCount + revision.orphanCount);
+	expect(nodes.length).toBe(revision.goodNodeIds.length + revision.orphanNodeIds.length);
 
 	// Verify all ref nodes still exist (both good and orphaned)
 	const refNodes = await find(revision.teamspace, `${revision.container}.scene.ref`, {});
@@ -341,76 +307,62 @@ const checkRevisionUntouched = async (revision) => {
 };
 
 /**
- * Creates a project document associated with container(s)
- * @param {string} teamspace - Teamspace name
- * @param {string} projectName - Project name
- * @param {Array<string>} containerNames - Array of container names to associate
- * @returns {Promise<Object>} Project object with _id and metadata
- */
-const createProject = async (teamspace, projectName, revisions) => {
-	const models = [...new Set(revisions.map((revision) => revision.container))];
-	const projectDoc = {
-		_id: generateUUID(),
-		name: projectName,
-		models,
-	};
-	await insertMany(teamspace, 'projects', [projectDoc]);
-};
-
-/**
  * Sets up test data with multiple containers and scenarios by composing different import states
  * Creates the same scenarios in both teamspaces to test multi-teamspace behavior
  * @returns {Object} Test data object with revision objects
  */
 const setupData = async () => {
-	const teamspace1 = `teamspace_${generateRandomString()}`;
-	const teamspace2 = `teamspace_${generateRandomString()}`;
-
 	const createScenarios = async (teamspace) => {
 		// Scenario 1: Clean container (successful import only)
 		const cleanRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`clean_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
 			],
 		);
 
 		// Scenario 2: Corrupted container (successful import + failed import with orphans)
 		const corruptedRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`corrupted_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addFailedImport(ts, c, rev, 5),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 5),
 			],
 		);
 
 		// Scenario 3: Mixed container (2 revisions: one clean, one corrupted)
 		const mixedContainer = `mixed_${generateRandomString()}`;
+		const mixedProject = generateUUID();
 		const mixedCleanRevision = await createRevision(
 			teamspace,
+			mixedProject,
 			mixedContainer,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
 			],
 		);
 		const mixedCorruptedRevision = await createRevision(
 			teamspace,
+			mixedProject,
 			mixedContainer,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addFailedImport(ts, c, rev, 3),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 3),
 			],
 		);
 
 		// Scenario 4: Incomplete container (should not be processed)
 		const incompleteRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`incomplete_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addFailedImport(ts, c, rev, 4),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 4),
 			],
 			{ incomplete: true },
 		);
@@ -418,55 +370,75 @@ const setupData = async () => {
 		// Scenario 5: Multiple roots container (two successful imports)
 		const multiRootRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`multiroot_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
 			],
 		);
 
 		// Scenario 6: A revision with only failed imports (no root nodes)
 		const noRootRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`noroot_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addFailedImport(ts, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
 			],
 		);
 
 		// Scenario 7: A revision with a corrupted fulltree response
 		const corruptTreeRevision = await createRevision(
 			teamspace,
-			`noroot_${generateRandomString()}`,
+			generateUUID(),
+			`corruptTree_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
 
 			],
 		);
-
-		stashFiles.set(corruptTreeRevision.stashKey, generateRandomBuffer(100));
+		await db.addJSONFile(
+			teamspace,
+			corruptTreeRevision.container,
+			`${uuidToString(corruptTreeRevision.revisionId)}/fulltree.json`,
+			generateRandomString(),
+		);
 
 		// Scenario 8: Void revision (marked void but should still be processed)
 		const voidRevision = await createRevision(
 			teamspace,
+			generateUUID(),
 			`void_${generateRandomString()}`,
 			[
-				(ts, c, rev) => addSuccessfulImport(ts, c, rev),
-				(ts, c, rev) => addFailedImport(ts, c, rev, 2),
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
 			],
 			{ void: true },
 		);
 
-		// Create projects for each container
-		await createProject(teamspace, 'Clean Project', [cleanRevision]);
-		await createProject(teamspace, 'Corrupted Project', [corruptedRevision]);
-		await createProject(teamspace, 'Mixed Project', [mixedContainer]);
-		await createProject(teamspace, 'Incomplete Project', [incompleteRevision]);
-		await createProject(teamspace, 'MultiRoot Project', [multiRootRevision]);
-		await createProject(teamspace, 'NoRoot Project', [noRootRevision]);
-		await createProject(teamspace, 'CorruptTree Project', [corruptTreeRevision]);
-		await createProject(teamspace, 'Void Project', [voidRevision]);
+		// Scenario 9: A revision with no project - should be skipped
+		const noProjectRevision = await createRevision(
+			teamspace,
+			generateUUID(),
+			`noProject_${generateRandomString()}`,
+			[
+				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
+			],
+		);
+
+		await Promise.all([
+			db.createProject(teamspace, cleanRevision.project, 'Clean Project', [cleanRevision.container]),
+			db.createProject(teamspace, corruptedRevision.project, 'Corrupted Project', [corruptedRevision.container]),
+			db.createProject(teamspace, mixedCleanRevision.project, 'Mixed Project', [mixedCleanRevision.container]),
+			db.createProject(teamspace, incompleteRevision.project, 'Incomplete Project', [incompleteRevision.container]),
+			db.createProject(teamspace, multiRootRevision.project, 'MultiRoot Project', [multiRootRevision.container]),
+			db.createProject(teamspace, noRootRevision.project, 'NoRoot Project', [noRootRevision.container]),
+			db.createProject(teamspace, corruptTreeRevision.project, 'CorruptTree Project', [corruptTreeRevision.container]),
+			db.createProject(teamspace, voidRevision.project, 'Void Project', [voidRevision.container]),
+		]);
 
 		return {
 			cleanRevision,
@@ -478,11 +450,17 @@ const setupData = async () => {
 			noRootRevision,
 			corruptTreeRevision,
 			voidRevision,
+			noProjectRevision,
 		};
 	};
 
-	const teamspace1Scenarios = await createScenarios(teamspace1);
-	const teamspace2Scenarios = await createScenarios(teamspace2);
+	const teamspace1 = `teamspace_${generateRandomString()}`;
+	const teamspace2 = `teamspace_${generateRandomString()}`;
+
+	const [teamspace1Scenarios, teamspace2Scenarios] = await Promise.all([
+		createScenarios(teamspace1),
+		createScenarios(teamspace2),
+	]);
 
 	return {
 		teamspace1: {
@@ -501,8 +479,7 @@ const runTest = () => {
 		let data;
 
 		beforeEach(async () => {
-			await resetDB();
-			stashFiles.clear(); // Clear stash files from previous tests
+			await db.reset();
 			data = await setupData();
 		});
 
@@ -516,7 +493,6 @@ const runTest = () => {
 			// Verify teamspace1 clean revisions untouched
 			await checkRevisionUntouched(data.teamspace1.cleanRevision);
 			await checkRevisionUntouched(data.teamspace1.mixedCleanRevision);
-			await checkRevisionUntouched(data.teamspace1.incompleteRevision);
 			// Verify teamspace2 completely untouched
 			await checkRevisionUntouched(data.teamspace2.cleanRevision);
 			await checkRevisionUntouched(data.teamspace2.corruptedRevision);
@@ -526,10 +502,11 @@ const runTest = () => {
 			await checkRevisionUntouched(data.teamspace2.multiRootRevision);
 			await checkRevisionUntouched(data.teamspace2.voidRevision);
 			// Revisions with irrecoverable issues should be ignored
-			await checkRevisionUntouched(data.teamspace2.noRootRevision);
 			await checkRevisionUntouched(data.teamspace1.noRootRevision);
-			await checkRevisionUntouched(data.teamspace2.corruptTreeRevision);
 			await checkRevisionUntouched(data.teamspace1.corruptTreeRevision);
+			await checkRevisionUntouched(data.teamspace1.incompleteRevision);
+			await checkRevisionUntouched(data.teamspace2.noRootRevision);
+			await checkRevisionUntouched(data.teamspace2.corruptTreeRevision);
 		});
 
 		test('Should scope to a specific container when one is provided', async () => {

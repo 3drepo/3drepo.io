@@ -38,6 +38,7 @@ const { v5Path } = require('../../../interop');
 const { getProjectList } = require('../../../v5/models/projectSettings');
 const { getRevisions } = require('../../../v5/models/revisions');
 const { getNodesByQuery, getNodesBySharedIds } = require('../../../v5/models/scenes');
+const { removeFilesWithMeta } = require('../../../v5/services/filesManager');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
@@ -148,7 +149,7 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 
 	logger.logInfo(`\t\tRemoving ${idsToDelete.length} orphaned nodes from ${container}/${UUIDToString(revision)}`);
 
-	// Get the blob references to delete
+	// Get the nodes to delete with their blob references
 	const nodesToDelete = await getNodesBySharedIds(
 		teamspace,
 		project,
@@ -160,8 +161,10 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 	// eslint-disable-next-line no-underscore-dangle
 	const blobRefNames = [...new Set(nodesToDelete.filter((n) => n._blobRef).map((n) => n._blobRef.buffer.name))];
 
-	await deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsToDelete } });
-	await deleteMany(teamspace, `${container}.scene.ref`, { _id: { $in: blobRefNames } });
+	await Promise.all([
+		deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsToDelete } }),
+		removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefNames } }),
+	]);
 };
 
 const processRevision = async (teamspace, project, container, revision) => {
@@ -205,8 +208,14 @@ const processTeamspace = async (teamspace, specificContainer) => {
 			continue;
 		}
 		logger.logInfo(`\t- Checking container ${container}`);
+		const project = projectLookup[container];
+		if (!project) {
+			logger.logInfo(`\t\t- Skipping ${container} because it does not have a project.`);
+			// eslint-disable-next-line no-continue
+			continue;
+		}
 		// eslint-disable-next-line no-await-in-loop
-		await processContainer(teamspace, projectLookup[container], container);
+		await processContainer(teamspace, project, container);
 	}
 };
 
