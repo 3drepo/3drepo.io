@@ -21,7 +21,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, normalizeTicketAssignees, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { selectTicketById } from '@/v5/store/tickets/tickets.selectors';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -77,13 +77,14 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	};
 
 	useEffect(()=> {
-		const ticketInRedux = selectTicketById(getState(), containerOrFederation, ticketId) 
+		const ticketInRedux = selectTicketById(getState(), containerOrFederation, ticketId);
+		const normalizedTicket = normalizeTicketAssignees(ticketInRedux);
 
-		if (!isEqual(ticketInRedux, ticket) && ticketInRedux) {
-			setTicket(ticketInRedux);
+		if (!isEqual(normalizedTicket, ticket) && normalizedTicket) {
+			setTicket(normalizedTicket);
 		}
 
-	},[ticketData, setTicket, ticket]);
+	}, [ticketData, setTicket, ticket]);
 
 	useEffect(() => {
 		formData.reset(ticket);

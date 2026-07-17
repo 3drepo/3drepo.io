@@ -51,8 +51,8 @@ const pinColSchema = Yup.lazy((val) => {
 
 		mapping: Yup.array().of(Yup.object({
 			default: types.color3Arr,
-			value: Yup.mixed().when('default', (def, schema) => (def ? schema.strip() : schema.required())),
-			color: types.color3Arr.when('default', (def, schema) => (def ? schema.strip() : schema.required())),
+			value: Yup.mixed().when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+			color: types.color3Arr.when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
 		})).test('Color mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
 
 	});
@@ -68,6 +68,7 @@ const uniqueTypeBlackList = [
 	propTypes.VIEW,
 	propTypes.MEASUREMENTS,
 	propTypes.COORDS,
+	propTypes.MANY_OF,
 ];
 
 const complexTypes = [
@@ -83,11 +84,12 @@ const propSchema = Yup.object().shape({
 	required: defaultFalse,
 	immutable: defaultFalse,
 	readOnlyOnUI: defaultFalse,
+	hiddenOnUI: defaultFalse,
 	readOnly: defaultFalse,
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
-		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
+		.when('type', ([typeVal], schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
 			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
-	value: Yup.string().when(['readOnly', 'type'], (readOnlyVal, propType, schema) => schema
+	value: Yup.string().when(['readOnly', 'type'], ([readOnlyVal, propType], schema) => schema
 		.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
 		.test('text properties only', `Value configuration is only supported if the property type is ${propTypes.TEXT} or ${propTypes.LONG_TEXT}`, (v) => v === undefined || propType === propTypes.TEXT || propType === propTypes.LONG_TEXT)
 		.test('Pattern string check', `Value contains unrecognised placeholders (accepted patterns: ${Object.values(supportedPatterns).join(', ')})`, (value) => {
@@ -104,7 +106,7 @@ const propSchema = Yup.object().shape({
 			}
 			return true;
 		})),
-	values: Yup.mixed().when('type', (val, schema) => {
+	values: Yup.mixed().when('type', ([val], schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of unique values or the name of a preset', (value) => {
 				if (value === undefined) return false;
@@ -128,10 +130,10 @@ const propSchema = Yup.object().shape({
 		}
 		return schema.strip();
 	}),
-	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
-	icon: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinIconSchema : schema.strip())),
+	color: Yup.mixed().when('type', ([val], schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
+	icon: Yup.mixed().when('type', ([val], schema) => (val === propTypes.COORDS ? pinIconSchema : schema.strip())),
 
-	default: Yup.mixed().when(['type', 'values'], (type, values) => {
+	default: Yup.mixed().when(['type', 'values'], ([type, values]) => {
 		const res = propTypesToValidator(type);
 		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
@@ -175,7 +177,7 @@ const moduleSchema = Yup.object().shape({
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	color: types.colorStr.test('color-on-preset-module', 'Color cannot be set on a preset module.', (value, context) => !(value && context.parent.type)),
-	properties: propertyArray.when('type', (type, schema) => {
+	properties: propertyArray.when('type', ([type], schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];
 			return schema.test((val, context) => {
@@ -204,14 +206,18 @@ const configSchema = Yup.object().shape({
 	issueProperties: defaultFalse,
 	attachments: defaultFalse,
 	defaultView: defaultFalse,
-	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
+	defaultImage: Yup.boolean().when('defaultView', ([defaultView], schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: Yup.lazy((val) => (val?.color || val?.icon
 		? Yup.object({ color: pinColSchema, icon: pinIconSchema })
 		: defaultFalse)),
 	status: Yup.object({
 		values: Yup.array().of(customStatus).min(1).required()
-			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
-		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
+			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length)
+			.test('Open status', `values must contain at least one "${statusTypes.OPEN}" status`, (vals) => vals.some(({ type }) => type === statusTypes.OPEN))
+			.test('Done status', `values must contain at least one "${statusTypes.DONE}" status`, (vals) => vals.some(({ type }) => type === statusTypes.DONE)),
+		default: Yup.mixed().when('values', ([values], schema) => (values
+			? schema.oneOf(values.map(({ name }) => name)).required()
+			: schema)),
 	}).default(undefined),
 	tabular: Yup.object({
 		columns: Yup.array().of(Yup.object({
@@ -309,21 +315,21 @@ const schema = Yup.object().shape({
 	.test(validTabularPropsTest)
 	.noUnknown();
 
-TemplateSchema.getClosedStatuses = (template) => {
+TemplateSchema.getClosedStatuses = (template, includeVoid = true) => {
 	if (template?.config?.status) {
 		return template.config.status.values.flatMap(
-			({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
+			({ type, name }) => (type === statusTypes.DONE || (includeVoid && type === statusTypes.VOID)
 				? name : []));
 	}
 
-	return [statuses.CLOSED, statuses.VOID];
+	return includeVoid ? [statuses.CLOSED, statuses.VOID] : [statuses.CLOSED];
 };
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 
 TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	const result = cloneDeep(template);
-	result.properties = [...getApplicableDefaultProperties(template.config, isImport), ...result.properties];
+	result.properties = [...getApplicableDefaultProperties(template.config ?? {}, isImport), ...result.properties];
 	result.modules.forEach((module) => {
 		if (module.type && presetModulesProperties[module.type]) {
 			// eslint-disable-next-line no-param-reassign
@@ -332,6 +338,17 @@ TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	});
 
 	return result;
+};
+
+TemplateSchema.getStatusDefinition = (template) => template?.config?.status ?? {
+	values: [
+		{ name: statuses.OPEN, type: statusTypes.OPEN },
+		{ name: statuses.IN_PROGRESS, type: statusTypes.ACTIVE },
+		{ name: statuses.FOR_APPROVAL, type: statusTypes.REVIEW },
+		{ name: statuses.CLOSED, type: statusTypes.DONE },
+		{ name: statuses.VOID, type: statusTypes.VOID },
+	],
+	default: statuses.OPEN,
 };
 
 module.exports = TemplateSchema;

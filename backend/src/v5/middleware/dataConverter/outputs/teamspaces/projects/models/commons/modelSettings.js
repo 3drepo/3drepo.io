@@ -16,12 +16,24 @@
  */
 
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const Yup = require('yup');
 const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
-const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
+const { types } = require('../../../../../../../utils/helper/yup');
 
 const ModelSettings = {};
+
+const serialisedModelStatsSchema = Yup.object({
+	lastUpdated: types.timestamp,
+	revisions: Yup.object({
+		lastUpdated: types.timestamp,
+		latestRevision: types.id,
+	}).default(undefined),
+	errorReason: Yup.object({
+		timestamp: types.timestamp,
+	}).default(undefined),
+});
 
 ModelSettings.formatModelSettings = (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
@@ -45,21 +57,22 @@ ModelSettings.formatModelSettings = (req, res) => {
 	respond(req, res, templates.ok, formattedSettings);
 };
 
-ModelSettings.formatModelStats = (modelType) => (req, res) => {
+ModelSettings.formatModelStats = (req, res) => {
 	const { outputData } = req;
+	const stats = serialisedModelStatsSchema.cast(deleteIfUndefined(outputData));
 
-	if (modelType === modelTypes.FEDERATION) {
-		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
-	} else {
-		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated
-			? outputData.revisions.lastUpdated.getTime() : undefined;
-		if (outputData.errorReason?.timestamp) {
-			outputData.errorReason.timestamp = outputData.errorReason.timestamp.getTime();
-		}
-		outputData.revisions.latestRevision = UUIDToString(outputData.revisions.latestRevision);
-	}
+	respond(req, res, templates.ok, deleteIfUndefined(stats));
+};
 
-	respond(req, res, templates.ok, outputData);
+ModelSettings.serialiseModelStats = (req, res) => {
+	const { outputData } = req;
+	const data = {
+		stats: Object.entries(outputData).map(
+			([key, value]) => deleteIfUndefined({ modelId: key, ...serialisedModelStatsSchema.cast(value) }),
+		),
+	};
+
+	respond(req, res, templates.ok, data);
 };
 
 module.exports = ModelSettings;

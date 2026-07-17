@@ -28,9 +28,11 @@ export default css`
 		height: 26px;
 		display: flex;
 		align-items: center;
+		overflow: visible;
 
 		> :first-child {
-			max-width: 294px;
+			width: auto;
+			min-width: 107px;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 			overflow: hidden;
@@ -40,7 +42,6 @@ export default css`
 
 	${SelectField} {
 		margin: 2px;
-		height: 24px;
 		min-width: 107px;
 	}
 

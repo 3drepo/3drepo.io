@@ -121,8 +121,8 @@ const OpenPanelButton = ({color, onClick, disabled, colorSelectRef}) =>
 			disabled={disabled}
 			ref={colorSelectRef}
 		>
-			<Dot item color={color} />
-			<Grid item>
+			<Dot color={color} />
+			<Grid>
 				<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
 					<ArrowDropDown />
 				</StyledIconButton>
@@ -140,7 +140,6 @@ const PredefinedColors = ({colors, onChange}) => (
 			{
 				colors.slice(0, 7).map((color, index) =>
 						<PredefinedColor
-							item
 							key={index}
 							color={color}
 							onClick={(e) => onChange(color)}
@@ -200,7 +199,7 @@ const ColorSquareSelector = ({value, onChange}) => {
 	};
 
 	return (
-		<CanvasContainer item>
+		<CanvasContainer>
 			<Canvas
 				ref={canvasRef}
 				width={185}
@@ -246,7 +245,7 @@ const ColorSlider = ({ onChange }) => {
 	};
 
 	return (
-		<CanvasContainer item>
+		<CanvasContainer>
 			<Canvas
 				ref={canvasRef}
 				width={23}
@@ -303,10 +302,10 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 			justifyContent="flex-start"
 			alignItems="center"
 		>
-			<Grid item>
+			<Grid>
 				<OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
 			</Grid>
-			<Grid item>
+			<Grid>
 				Set Opacity
 			</Grid>
 		</Grid>
@@ -317,7 +316,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 				justifyContent="flex-start"
 				alignItems="center"
 			>
-				<Grid item>
+				<Grid>
 					<OpacitySlider
 						max={255}
 						min={1}
@@ -325,7 +324,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 						onChange={(e, val) => onOpacityChanged(val)}
 					/>
 				</Grid>
-				<Grid item>
+				<Grid>
 					<OpacityValue>
 						<OpacityInput
 							value={inputVal}
@@ -522,10 +521,10 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 					justifyContent="flex-start"
 					alignItems="center"
 				>
-					<Grid item>
+					<Grid>
 						<ColorSample color={selectedColor} />
 					</Grid>
-					<Grid item>
+					<Grid>
 						<FormControl className='colorPicker'>
 							<SelectedHash
 								value={hashInput.replace('#', '')}

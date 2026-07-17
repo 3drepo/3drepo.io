@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const {
-	determineTestGroup,
-	db: { reset: resetDB, createModel, createRevision },
+	db: { reset: resetDB, createModel, createRevision, createClashRuns },
 	generateRandomString,
+	generateRandomProject,
 	generateRandomModel,
 	generateRevisionEntry,
+	generateClashPlan,
+	generateClashRun,
 } = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
@@ -29,12 +32,22 @@ const { find } = require(`${src}/handler/db`);
 const { findModels } = require(`${src}/models/modelSettings`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { disconnect } = require(`${src}/handler/db`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
 
 const ResetProcessingFlags = require(`${utilScripts}/modelProcessing/resetProcessingFlags`);
 
 const modelStates = ['ok', 'failed', 'processing', 'queued'];
+const clashRunStates = Object.values(clashRunStatus);
+const terminalClashRunStates = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED];
+const manualCancellationReason = 'Cancelled manually';
+const resetTypes = {
+	MODELS: 'models',
+	DRAWINGS: 'drawings',
+	CLASHES: 'clashes',
+};
 const project = generateRandomString();
 
 const setupData = () => {
@@ -59,18 +72,39 @@ const setupData = () => {
 			},
 			),
 		);
+		const clashProject = generateRandomProject();
+		const clashRuns = clashRunStates.map((status, index) => {
+			const plan = generateClashPlan(models[index % models.length], models[0]);
+			const run = generateClashRun(plan, undefined, { status });
+			return { plan, run: run._id, status };
+		});
 
-		return { teamspace, models, drawings };
+		await Promise.all(clashRuns.map(({ plan, run, status }) => createClashRuns(teamspace, clashProject.id,
+			plan, [generateClashRun(plan, undefined, { _id: run, status })])));
+
+		return { teamspace, models, drawings, clashRuns };
 	});
 	return Promise.all(modelProms);
 };
 
-const checkModelsStatus = async (teamspace, models, drawings, expectedResetModelIds = []) => {
+const getAllResetIds = ({ models, drawings, clashRuns }) => ({
+	resetModelIds: models,
+	resetDrawingIds: drawings,
+	resetClashRunIds: clashRuns.map(({ run }) => run),
+});
+
+const checkProcessingStatuses = async (teamspace, models, drawings, clashRuns, expectedResetIds = {}) => {
+	const {
+		resetModelIds = [],
+		resetDrawingIds = [],
+		resetClashRunIds = [],
+	} = expectedResetIds;
+
 	const modelsData = await findModels(teamspace, { _id: { $in: models } }, { _id: 1, status: 1 });
 
 	const expectedModelsData = models.map((_id, ind) => ({
 		_id,
-		status: expectedResetModelIds.includes(_id) ? undefined : modelStates[ind],
+		status: resetModelIds.includes(_id) ? undefined : modelStates[ind],
 	}),
 	);
 
@@ -81,15 +115,40 @@ const checkModelsStatus = async (teamspace, models, drawings, expectedResetModel
 	const expectedDrawingsData = drawings.map((_id, ind) => ({
 		model: _id,
 		status:
-			expectedResetModelIds.includes(_id) && !['ok', 'failed'].includes(modelStates[ind]) ? 'failed' : modelStates[ind],
+			resetDrawingIds.includes(_id) && !['ok', 'failed'].includes(modelStates[ind]) ? 'failed' : modelStates[ind],
 	}));
+	const clashRunsData = await find(teamspace, CLASH_RUNS_COL,
+		{ _id: { $in: clashRuns.map(({ run }) => stringToUUID(run)) } },
+		{ _id: 1, status: 1, results: 1 },
+	);
+	const expectedClashRunsData = clashRuns.map(({ run, status }) => {
+		const shouldAbort = resetClashRunIds.includes(run) && !terminalClashRunStates.includes(status);
+		return {
+			_id: stringToUUID(run),
+			status: shouldAbort ? clashRunStatus.ABORTED : status,
+			...(shouldAbort ? { results: { error: { reason: manualCancellationReason } } } : {}),
+		};
+	});
 
 	expect(modelsData.length).toBe(expectedModelsData.length);
 	expect(modelsData).toEqual(expect.arrayContaining(expectedModelsData));
 
 	expect(drawingsData.length).toBe(expectedDrawingsData.length);
 	expect(drawingsData).toEqual(expect.arrayContaining(expectedDrawingsData));
+
+	expect(clashRunsData.length).toBe(expectedClashRunsData.length);
+	expect(clashRunsData).toEqual(expect.arrayContaining(expectedClashRunsData));
 };
+
+const checkAllProcessingStatuses = (data, getExpectedResetIds = () => ({})) => Promise.all(data.map(
+	({ teamspace, models, drawings, clashRuns }, ind) => checkProcessingStatuses(
+		teamspace,
+		models,
+		drawings,
+		clashRuns,
+		getExpectedResetIds({ models, drawings, clashRuns }, ind),
+	),
+));
 
 const runTest = () => {
 	describe('Reset Processing flags', () => {
@@ -99,79 +158,77 @@ const runTest = () => {
 			data = await setupData();
 		});
 
-		test('Should throw an error if model is provided but not teamspace', async () => {
-			const error = new Error('Teamspace must be provided if model is defined');
+		test('Should throw an error if id is provided but not teamspace', async () => {
+			const error = new Error('Teamspace must be provided if id is defined');
 			await expect(ResetProcessingFlags.run(undefined, generateRandomString())).rejects.toEqual(error);
-			await Promise.all(
-				data.map(
-					({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings),
-				));
+			await checkAllProcessingStatuses(data);
+		});
+
+		test('Should throw an error if type is invalid', async () => {
+			const invalidType = generateRandomString();
+			const error = new Error(`Type must be one of: ${Object.values(resetTypes).join(', ')}`);
+			await expect(ResetProcessingFlags.run(data[0].teamspace, undefined, invalidType)).rejects.toEqual(error);
+			await checkAllProcessingStatuses(data);
 		});
 
 		test('Should only process the predefined teamspace if it is defined', async () => {
 			await ResetProcessingFlags.run(data[0].teamspace);
-			await Promise.all(data.map(
-				({ teamspace, models, drawings }, ind) => checkModelsStatus(
-					teamspace, models, drawings, ind === 0 ? [...models, ...drawings] : [],
-				),
-			));
+			await checkAllProcessingStatuses(data, (entry, ind) => (ind === 0 ? getAllResetIds(entry) : {}));
 		});
 
-		test('Should only process the predefined model if it is defined', async () => {
+		test('Should only process the predefined model id if it is defined', async () => {
 			const lastInd = data[0].models.length - 1;
-			await ResetProcessingFlags.run(data[0].teamspace, data[0].models[lastInd]);
-			await Promise.all([
-				...data.map(
-					({ teamspace, models, drawings }, ind) => checkModelsStatus(
-						teamspace,
-						models,
-						drawings,
-						ind === 0 ? [data[0].models[lastInd]] : [],
-					),
-				),
-			]);
+			const resetModelIds = [data[0].models[lastInd]];
+			await ResetProcessingFlags.run(data[0].teamspace, resetModelIds[0]);
+			await checkAllProcessingStatuses(data, (_, ind) => (ind === 0 ? {
+				resetModelIds,
+			} : {}));
 		});
 
-		test('Should only process the predefined drawing if it is defined', async () => {
+		test('Should only process the predefined drawing id if it is defined', async () => {
 			const lastInd = data[0].drawings.length - 1;
-			await ResetProcessingFlags.run(data[0].teamspace, data[0].drawings[lastInd]);
-			await Promise.all([
-				...data.map(
-					({ teamspace, models, drawings }, ind) => checkModelsStatus(
-						teamspace,
-						models,
-						drawings,
-						ind === 0 ? [data[0].drawings[lastInd]] : [],
-					),
-				),
-			]);
+			const resetDrawingIds = [data[0].drawings[lastInd]];
+			await ResetProcessingFlags.run(data[0].teamspace, resetDrawingIds[0]);
+			await checkAllProcessingStatuses(data, (entry, ind) => (ind === 0 ? { resetDrawingIds } : {}));
 		});
 
-		test('Should process all models if no parameters are provided', async () => {
+		test('Should only process the predefined clash run id if it is defined', async () => {
+			const resetClashRun = data[0].clashRuns.find(({ status }) => !terminalClashRunStates.includes(status));
+			await ResetProcessingFlags.run(data[0].teamspace, resetClashRun.run, resetTypes.CLASHES);
+			await checkAllProcessingStatuses(data, (entry, ind) => (ind === 0
+				? { resetClashRunIds: [resetClashRun.run] } : {}));
+		});
+
+		test('Should only process models if type is defined', async () => {
+			await ResetProcessingFlags.run(data[0].teamspace, undefined, resetTypes.MODELS);
+			await checkAllProcessingStatuses(data, ({ models }, ind) => (ind === 0 ? { resetModelIds: models } : {}));
+		});
+
+		test('Should only process drawings if type is defined', async () => {
+			await ResetProcessingFlags.run(data[0].teamspace, undefined, resetTypes.DRAWINGS);
+			await checkAllProcessingStatuses(data, ({ drawings }, ind) => (ind === 0
+				? { resetDrawingIds: drawings } : {}));
+		});
+
+		test('Should only process clash runs if type is defined', async () => {
+			await ResetProcessingFlags.run(data[0].teamspace, undefined, resetTypes.CLASHES);
+			await checkAllProcessingStatuses(data, ({ clashRuns }, ind) => (ind === 0
+				? { resetClashRunIds: clashRuns.map(({ run }) => run) } : {}));
+		});
+
+		test('Should process all items if no parameters are provided', async () => {
 			await ResetProcessingFlags.run();
-			await Promise.all(data.map(
-				({ teamspace, models, drawings }) => checkModelsStatus(
-					teamspace,
-					models,
-					drawings,
-					[...models, ...drawings],
-				),
-			));
+			await checkAllProcessingStatuses(data, getAllResetIds);
 		});
 
 		test('Should do nothing if teamspace is not found', async () => {
 			await ResetProcessingFlags.run(generateRandomString());
-			await Promise.all(data.map(
-				({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, []),
-			));
+			await checkAllProcessingStatuses(data);
 		});
 
-		test('Should do nothing if model is not found', async () => {
-			const nonExistentModel = generateRandomString();
-			await ResetProcessingFlags.run(data[0].teamspace, nonExistentModel);
-			await Promise.all(data.map(
-				({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, [nonExistentModel]),
-			));
+		test('Should do nothing if id is not found', async () => {
+			await ResetProcessingFlags.run(data[0].teamspace, generateRandomString());
+			await checkAllProcessingStatuses(data);
 		});
 	});
 };

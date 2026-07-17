@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const FronteggCache = require(`${src}/models/frontegg.cache`);
 
@@ -57,12 +58,13 @@ const testSaveCache = () => {
 		test('Should insert the cache entry into the database', async () => {
 			const key = generateRandomString();
 			const data = generateRandomObject();
+			dbMock.count.mockResolvedValueOnce(0);
 			await FronteggCache.saveCache(key, data);
 
 			expect(dbMock.updateOne).toHaveBeenCalledTimes(1);
 			expect(dbMock.updateOne).toHaveBeenCalledWith(INTERNAL_DB, CACHE_COL,
 				{ _id: key },
-				{ $set: { data, created: expect.any(Date) } }, { upsert: true });
+				{ $set: { data, created: expect.any(Date) } }, true);
 		});
 	});
 };
