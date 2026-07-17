@@ -101,7 +101,10 @@ export const revisionProcessingSuccess = (state, {
 }: RevisionProcessingSuccessAction) => {
 	const revisions = state.revisionsByDrawing;
 	revisions[drawingId] ||= [];
-	revisions[drawingId].unshift(revision);
+
+	if (!revisions[drawingId].find(({ _id }) => _id === revision._id)) {
+		revisions[drawingId].unshift(revision);
+	}
 };
 
 export const fetchStatusCodesSuccess = (state, { statusCodes }) => {

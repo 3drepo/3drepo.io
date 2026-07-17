@@ -18,7 +18,7 @@
 import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ChangeEvent, useContext } from 'react';
+import { ChangeEvent, useContext, useRef } from 'react';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
@@ -30,8 +30,9 @@ type ISearchInput = {
 	onClear?: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ onClear, variant = 'filled', ...props }: ISearchInput) => {
 	const { query, setQuery } = useContext(SearchContext);
+	const inputref = useRef<HTMLInputElement>(null);
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 		setQuery(event.currentTarget.value);
@@ -41,27 +42,32 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 	const onClickClear = () => {
 		onClear?.();
 		setQuery('');
+		if (inputref.current) {
+			inputref.current.value = '';
+		}
 	};
 
-	const val = query || value || '';
+	const val = query || props.value || '';
 
 	return (
 		<TextField
-			value={val}
-			InputProps={{
-				startAdornment: (
-					<StartAdornment>
-						<SearchIcon />
-					</StartAdornment>
-				),
-				endAdornment: (
-					<EndAdornment $isVisible={Boolean(val)}>
-						<IconButton onClick={onClickClear} size="large">
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				),
+			slotProps={{
+				input: {
+					startAdornment: (
+						<StartAdornment>
+							<SearchIcon />
+						</StartAdornment>
+					),
+					endAdornment: (
+						<EndAdornment $isVisible={Boolean(val)}>
+							<IconButton onClick={onClickClear} size="large">
+								<CloseIcon />
+							</IconButton>
+						</EndAdornment>
+					),
+				},
 			}}
+			inputRef={inputref}
 			variant={variant}
 			{...props}
 			onChange={onChange}

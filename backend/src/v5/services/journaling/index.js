@@ -41,6 +41,9 @@ const userRemoved = async ({ teamspace, executor, user }) => {
 };
 
 const permissionsSchema = Yup.array().of(Yup.string()).nullable().min(1);
+const modelPermissionsSchema = Yup.lazy((value) => (
+	Array.isArray(value) ? permissionsSchema : Yup.string().nullable()
+));
 
 const teamspacePermissionsUpdated = async ({ teamspace, executor, users, from, to }) => {
 	try {
@@ -78,8 +81,8 @@ const modelsPermissionsUpdated = async ({ teamspace, executor, users, permission
 		const schema = Yup.array().of(Yup.object({
 			project: types.id.required(),
 			model: Yup.string().required(),
-			from: permissionsSchema,
-			to: permissionsSchema,
+			from: modelPermissionsSchema,
+			to: modelPermissionsSchema,
 		}));
 
 		await schema.validate(permissions, { stripUnknown: true });

@@ -15,46 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const UnitsHelper = require(`${src}/utils/helper/units`);
+const { units } = UnitsHelper;
 
-const UNITS_CONVERSION_FACTORS_TO_METRES = {
-	m: 1,
-	dm: 10,
-	cm: 100,
-	mm: 1000,
-	ft: 3.28084,
+const unitsConversionFactorsToMetres = {
+	[units.M]: 1,
+	[units.DM]: 10,
+	[units.CM]: 100,
+	[units.MM]: 1000,
+	[units.FT]: 3.28084,
 };
 
 const getScaleFactor = (fromUnit, toUnit) => {
-	const fromFactor = UNITS_CONVERSION_FACTORS_TO_METRES[fromUnit];
-	const toFactor = UNITS_CONVERSION_FACTORS_TO_METRES[toUnit];
+	const fromFactor = unitsConversionFactorsToMetres[fromUnit];
+	const toFactor = unitsConversionFactorsToMetres[toUnit];
 	return toFactor / fromFactor;
 };
 
 const testConvertArrayUnits = () => {
 	describe.each([
-		['invalid fromUnit', [1, 5], generateRandomString(), 'm', true],
-		['invalid toUnit', [1, 5], 'm', generateRandomString(), true],
-		['array with non numbers', [generateRandomString(), 5], 'm', 'mm', true],
-		['m to dm', [1, 5], 'm', 'dm'],
-		['m to cm', [1, 5], 'm', 'cm'],
-		['m to mm', [1, 5], 'm', 'mm'],
-		['m to ft', [1, 5], 'm', 'ft'],
-		['dm to m', [1, 5], 'dm', 'm'],
-		['dm to cm', [1, 5], 'dm', 'cm'],
-		['dm to mm', [1, 5], 'dm', 'mm'],
-		['dm to ft', [1, 5], 'dm', 'ft'],
-		['mm to dm', [1, 5], 'mm', 'dm'],
-		['mm to cm', [1, 5], 'mm', 'cm'],
-		['mm to m', [1, 5], 'mm', 'm'],
-		['mm to ft', [1, 5], 'mm', 'ft'],
-		['ft to dm', [1, 5], 'ft', 'dm'],
-		['ft to cm', [1, 5], 'ft', 'cm'],
-		['ft to m', [1, 5], 'ft', 'm'],
-		['ft to mm', [1, 5], 'ft', 'mm'],
+		['invalid fromUnit', [1, 5], generateRandomString(), units.M, true],
+		['invalid toUnit', [1, 5], units.M, generateRandomString(), true],
+		['array with non numbers', [generateRandomString(), 5], units.M, units.MM, true],
+		['m to dm', [1, 5], units.M, units.DM],
+		['m to cm', [1, 5], units.M, units.CM],
+		['m to mm', [1, 5], units.M, units.MM],
+		['m to ft', [1, 5], units.M, units.FT],
+		['dm to m', [1, 5], units.DM, units.M],
+		['dm to cm', [1, 5], units.DM, units.CM],
+		['dm to mm', [1, 5], units.DM, units.MM],
+		['dm to ft', [1, 5], units.DM, units.FT],
+		['mm to dm', [1, 5], units.MM, units.DM],
+		['mm to cm', [1, 5], units.MM, units.CM],
+		['mm to m', [1, 5], units.MM, units.M],
+		['mm to ft', [1, 5], units.MM, units.FT],
+		['ft to dm', [1, 5], units.FT, units.DM],
+		['ft to cm', [1, 5], units.FT, units.CM],
+		['ft to m', [1, 5], units.FT, units.M],
+		['ft to mm', [1, 5], units.FT, units.MM],
 	])('Convert array units', (description, array, fromUnit, toUnit, invalidInput) => {
 		test(`with ${description} should return ${invalidInput ? 'the same array' : 'the converted array'}`, () => {
 			const res = UnitsHelper.convertArrayUnits(array, fromUnit, toUnit);
@@ -69,6 +71,6 @@ const testConvertArrayUnits = () => {
 	});
 };
 
-describe('utils/helper/units', () => {
+describe(determineTestGroup(__filename), () => {
 	testConvertArrayUnits();
 });

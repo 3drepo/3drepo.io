@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useEffect } from 'react';
+import { memo, useContext } from 'react';
 import { generatePath, useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -28,7 +28,6 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
-import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardParams, DRAWINGS_ROUTE } from '@/v5/ui/routes/routes.constants';
@@ -37,9 +36,6 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionDetails } from '@components/shared/drawingRevisionDetails/drawingRevisionDetails.component';
 import { DrawingsCalibrationMenu } from '@/v5/ui/routes/viewer/drawings/drawingCalibrationMenu/drawingCalibrationMenu.component';
 import { SelectModelForCalibration } from './selectModelForCalibration/selectModelForCalibration.component';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate } from '@/v5/services/realtime/drawings.events';
-import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
 import { CalibrationContext } from '../../../calibration/calibrationContext';
 
 interface IDrawingsListItem {
@@ -54,7 +50,6 @@ export const DrawingsListItem = memo(({
 	onSelectOrToggleItem,
 }: IDrawingsListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isMainList = useContext(IsMainList);
 	const { setOrigin } = useContext(CalibrationContext);
 	const drawingId = drawing._id;
 
@@ -70,20 +65,6 @@ export const DrawingsListItem = memo(({
 		setOrigin(generatePath(DRAWINGS_ROUTE, { teamspace, project }));
 		DialogsActionsDispatchers.open(SelectModelForCalibration, { drawingId });
 	};
-
-	useEffect(() => {
-		if (isMainList) {
-			
-
-			return combineSubscriptions(
-				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
-				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),
-				enableRealtimeDrawingRevisionUpdate(teamspace, project, drawing._id),
-				enableRealtimeDrawingNewRevision(teamspace, project, drawing._id),
-			);
-		}
-		return null;
-	}, [drawingId]);
 
 	return (
 		<DashboardListItem selected={isSelected} key={drawingId}>
