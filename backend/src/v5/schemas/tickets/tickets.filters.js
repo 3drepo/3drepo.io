@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { isBooleanString, isNumberString } = require('../../utils/helper/typeCheck');
+const { isBooleanString, isNumberString, isString } = require('../../utils/helper/typeCheck');
 
 const Yup = require('yup');
 const { types } = require('../../utils/helper/yup');
@@ -70,7 +70,7 @@ Filters.queryParamSchema = Yup.object().shape({
 			throw createResponseCode(templates.invalidArguments, 'Property name cannot have more than one colon');
 		}).required(),
 	operator: Yup.string().required()
-		.when('propertyName', (propertyName, schema) => {
+		.when('propertyName', ([propertyName], schema) => {
 			const validOperators = Object.values(Filters.specialQueryFields).includes(propertyName)
 				? Filters.specialQueryFieldsOperators
 				: Object.values(Filters.queryOperators);
@@ -78,14 +78,21 @@ Filters.queryParamSchema = Yup.object().shape({
 			return schema.oneOf(validOperators);
 		}),
 	value: Yup.mixed()
-		.when('operator', (operator, schema) => {
+		.when('operator', ([operator], schema) => {
 			if (operator === Filters.queryOperators.EXISTS || operator === Filters.queryOperators.NOT_EXISTS) {
 				return schema.strip();
 			}
 
 			if (operator === Filters.queryOperators.RANGE || operator === Filters.queryOperators.NOT_IN_RANGE) {
 				return Yup.array().of(types.range).required()
-					.transform((v, value) => value.split(/,(?=\[)/));
+					.transform((v, value) => {
+						if (!isString(value)) return value;
+						try {
+							return value.split(/,(?=\[)/).map((range) => JSON.parse(range));
+						} catch {
+							return value;
+						}
+					});
 			}
 
 			if (operator === Filters.queryOperators.GREATER_OR_EQUAL_TO

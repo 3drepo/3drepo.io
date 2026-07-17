@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
@@ -260,7 +261,7 @@ const testGetGroup = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey,
 				projectId: project.id,
 				model,
@@ -340,7 +341,7 @@ const testUpdateGroup = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			const payload = { name: ServiceHelper.generateRandomString() };
@@ -355,6 +356,7 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
+				['the payload has excludeDefinedObjects', { ...baseRouteParams, checkOutput: false }, { excludeDefinedObjects: true }, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id, [idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
 				] }, true],
@@ -368,7 +370,7 @@ const testUpdateGroup = () => {
 					{ container: con._id,
 						[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()],
 						[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
-				] }, false, templates.invalidArguments],
+				] }, true],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
 					operator: valueOperators.IS.name,
@@ -418,7 +420,7 @@ const testUpdateGroup = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

@@ -21,7 +21,7 @@ const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
 
-const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
+const YupHelper = { validators: {}, transformer: {}, types: { strings: {} }, utils: {} };
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
@@ -29,6 +29,9 @@ YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 	allowFullStops ? /^[\w|_|.|-]*$/ : /^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
 	`\${path} can only contain alpha-numeric characters, ${allowFullStops ? 'full stops, ' : ''}hyphens or underscores`);
+
+YupHelper.transformer.uniqueArray = (yupObj) => yupObj.transform(
+	(values) => (values ? Array.from(new Set(values)) : values));
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
@@ -140,12 +143,13 @@ const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity
 });
 
 YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
-	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	Yup.mixed().nullable()
+		.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
 	isNullable,
 );
 
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
-	Yup.mixed()
+	Yup.mixed().nullable()
 		.transform((currValue, orgVal) => {
 			if (isString(orgVal)) {
 				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');

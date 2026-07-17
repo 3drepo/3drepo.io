@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src, image, svg, pdfModel, dwgModel } = require('../../../helper/path');
 
 const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
-const { determineTestGroup } = require('../../../helper/services');
 const { readFileSync } = require('fs');
 
 const ImgHelper = require(`${src}/utils/helper/images`);

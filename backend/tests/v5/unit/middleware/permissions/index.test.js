@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
@@ -31,7 +32,7 @@ jest.mock('../../../../../src/v5/processors/teamspaces');
 const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
 
 const PermMiddlewares = require(`${src}/middleware/permissions`);
-const { determineTestGroup, generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/services');
 
 const authenticatedTeamspace = generateRandomString();
 

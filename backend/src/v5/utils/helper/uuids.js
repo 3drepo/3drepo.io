@@ -31,7 +31,7 @@ UuidUtils.stringToUUID = (uuid) => {
 	const bytes = UUIDParse.parse(uuid);
 	// eslint-disable-next-line new-cap
 	const buf = new Buffer.from(bytes);
-	return Mongo.Binary(buf, 3);
+	return new Mongo.Binary(buf, 3);
 };
 
 UuidUtils.UUIDToString = (uuid) => {
@@ -55,6 +55,18 @@ class LookUpTable {
 		this.items.add(UuidUtils.UUIDToString(id));
 	}
 }
+
+UuidUtils.unique = (ids = []) => {
+	const seenIds = new LookUpTable();
+	const uniqueIds = [];
+	ids.forEach((id) => {
+		if (seenIds.has(id)) return;
+		seenIds.add(id);
+		uniqueIds.push(id);
+	});
+
+	return uniqueIds;
+};
 
 UuidUtils.UUIDLookUpTable = LookUpTable;
 module.exports = UuidUtils;

@@ -54,7 +54,7 @@ interface IDrawingRevisionDetails {
 	revisionsCount: number;
 	status?: UploadStatus;
 }
-export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails): JSX.Element => {
+export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
@@ -76,7 +76,7 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 		let emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessage', defaultMessage: 'You haven’t added any Files.' }); 
 		
 		if (!canUploadToBackend(status)) {
-			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this container.' }); 
+			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this drawing.' }); 
 		}
 
 		if (!hasPermissionsToUpload) {
@@ -104,10 +104,10 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 		<Container>
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="drawingRevisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="drawingRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.statusCode" defaultMessage="Status code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="drawingRevisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="drawingRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={155}><FormattedMessage id="drawingRevisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={100} tabletWidth={200}><FormattedMessage id="drawingRevisionDetails.statusCode" defaultMessage="Status code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={120} tabletWidth={200}><FormattedMessage id="drawingRevisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={1200}><FormattedMessage id="drawingRevisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="drawingRevisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
@@ -129,10 +129,10 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 								hasPermission={selectHasCollaboratorAccess(getState(), drawingId)}
 							>
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
-								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />
-								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.statusCode || ''} </RevisionsListItemTag>
-								<RevisionsListItemTag width={150} tabletWidth={300}> {revision.revCode} </RevisionsListItemTag>
-								<RevisionsListItemText hideWhenSmallerThan={1140}> {revision.desc || ''} </RevisionsListItemText>
+								<RevisionsListItemAuthor width={150} tabletWidth={155} authorName={revision.author} />
+								<RevisionsListItemTag width={100} tabletWidth={200}> {revision.statusCode || ''} </RevisionsListItemTag>
+								<RevisionsListItemTag width={120} tabletWidth={200}> {revision.revCode} </RevisionsListItemTag>
+								<RevisionsListItemText hideWhenSmallerThan={1200}> {revision.desc || ''} </RevisionsListItemText>
 								<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(revision.format || '').toLowerCase()} </RevisionsListItemText>
 							</RevisionsListItem>
 						</RevisionsListItemWrapper>
