@@ -111,7 +111,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 		const diffIndexes = xor(indexes, selectedHiddenIndexes);
 		const hideNodes = indexes.length > selectedHiddenIndexes.length;
-		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes((state.hidden[i]?.group as Group)?.objects));
+		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes(state.hidden[i]?.group as Group));
 		if (hideNodes) {
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		} else {

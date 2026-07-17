@@ -27,6 +27,19 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
+// The contents of this type will change in line with the needs of
+// the Test Automation or Profiling Tools.
+type ModelStatistics = {
+	bundlesLoaded: number,
+	bundleLoadingTasks: number,
+	frameCount: number,
+};
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -55,6 +68,11 @@ export class UnityUtil {
 	 * **viewer.pickPointEvent(**_object_**)**: Notify the user what position within the 3D world was
 	 * clicked after a mouse event.
 	 *
+	 * **viewer.onAutorecovery(canvas)**: Called when an autorecovery has been
+	 * performed, with the new canvas. This will occur in response to a WebGL
+	 * Context Loss event. Any handlers or members that are not preserved by
+	 * the clone method must be re-created on the new canvas.
+	 *
 	 * @example UnityUtil.viewer = {
 	 *  numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
 	 */
@@ -72,6 +90,14 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static externalWebRequestHandler;
+
+	/** Stores an offset into the WASM heap were the model statistics counters
+	 * can be found. These are in the same order as the Statistics in the
+	 * viewer's GUI display. This is an internal property and subject to change
+	 * without notice.
+	 *  @hidden
+	*/
+	public static modelStatisticsArrayOffset: number = 0;
 
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
@@ -151,6 +177,13 @@ export class UnityUtil {
 	 */
 	/** @hidden */
 	private static domTextureReferenceCounter = 0;
+
+	/**
+	 * Called from Unity to retrieve joystick input.
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY, rightTrigger]
+	 */
+	/** @hidden */
+	private static virtualJoystickProvider: (() => [number, number, number, number, number] | null | undefined) | null = null;
 
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
@@ -304,7 +337,9 @@ export class UnityUtil {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
 			// as of Unity 2019.1
-			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			if (!(XMLHttpRequest.prototype as any).originalOpen) {
+				(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			}
 			// eslint-disable-next-line func-names
 			const newOpen = function () {
 				// eslint-disable-next-line
@@ -316,7 +351,7 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
-		if (this.indexedDBAvailable) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
+		if (this.indexedDBAvailable && !this.externalWebRequestHandler) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
 			this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 		}
 
@@ -337,11 +372,23 @@ export class UnityUtil {
 			},
 		};
 
+		// These next lines ensure that the resolution functions that Unity will
+		// call are created by the time the viewer starts up.
+		UnityUtil.onLoading();
+		UnityUtil.onLoaded();
+
 		createUnityInstance(canvas, config, (progress) => {
 			this.onProgress(progress);
 		}).then((unityInstance) => {
 			UnityUtil.unityInstance = unityInstance;
 		}).catch(UnityUtil.onUnityError);
+
+		// Note we do not call preventDefault because we handle this case by
+		// reloading the viewer, which will explicitly re-create a new
+		// context.
+
+		canvas.removeEventListener('webglcontextlost', UnityUtil.doAutorecovery);
+		canvas.addEventListener('webglcontextlost', UnityUtil.doAutorecovery);
 
 		return UnityUtil.onReady();
 	}
@@ -581,7 +628,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static comparatorLoaded() {
-		UnityUtil.loadComparatorResolve.resolve();
+		UnityUtil.loadComparatorResolve?.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
 	}
@@ -1247,6 +1294,15 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
 	 /**
 	 * Enable Cursor
 	 * Note: Changing the snap mode can affect the cursor.
@@ -1777,7 +1833,16 @@ export class UnityUtil {
 	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
+	 * @param assetGroups? - When specified, only load the assets that belong to the groups in the list. To include assets without a groups, include an empty string ("") as part of the list.
 	 * @return returns a promise that resolves when the model start loading.
+	 * @example 
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "16854ce0-6e82-11ea-9043-f5b42de4172c")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "11da8980-6e82-11ea-a9b4-253aa7f93e55", "e2bf461d-b1a8-4068-b26f-75925a14345f")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true)
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true, null, true, ["Level 0", "Level 1", ""])
 	 */
 	public static loadModel(
 		teamspace: string,
@@ -1787,6 +1852,7 @@ export class UnityUtil {
 		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
+		assetGroups?: string[],
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
@@ -1806,6 +1872,11 @@ export class UnityUtil {
 		if (initView) {
 			params.initView = initView;
 		}
+
+		if (assetGroups?.length) {
+			params.assetGroups = assetGroups;
+		}
+
 		UnityUtil.onLoaded();
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
@@ -1882,20 +1953,22 @@ export class UnityUtil {
 	/**
 	 * Override the colour of given object(s)
 	 * @category Object Highlighting
-	 * @param account - teamspace the meshes resides in
-	 * @param model - model ID the meshes resides in
+	 * @param teamspace - teamspace the meshes resides in
+	 * @param container - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
+	 * @param excludeIds - If set to true, the color override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
-	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
+	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
-			if (account && model) {
-				param.nameSpace = `${account}.${model}`;
+			if (teamspace && container) {
+				param.nameSpace = `${teamspace}.${container}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1906,15 +1979,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1927,9 +2002,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param opacity - opacity (>0 - 1) value to override with
+	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -1937,6 +2013,7 @@ export class UnityUtil {
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.opacity = opacity;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1947,15 +2024,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2052,15 +2131,15 @@ export class UnityUtil {
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with an object with a screenshot in base64 format
+	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
 	 */
-	public static requestScreenShot(): Promise<object> {
+	public static requestScreenShot(): Promise<string> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
-		return newScreenshotPromise as Promise<object>;
+		return newScreenshotPromise as Promise<string>;
 	}
 
 	/**
@@ -2092,9 +2171,9 @@ export class UnityUtil {
 	 */
 	public static setAPIHost(hostNames: { hostNames: string[] }) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
-		if (UnityUtil.externalWebRequestHandler !== undefined) {
-			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
-		}
+		UnityUtil.onReady().then(() => { // Make sure not to check externalWebRequestHandler until after we know whether it will be initialised or not
+			UnityUtil.externalWebRequestHandler?.setAPIHost(hostNames.hostNames);
+		});
 	}
 
 	/**
@@ -2104,6 +2183,9 @@ export class UnityUtil {
 	 */
 	public static setAPIKey(apiKey: string) {
 		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+		UnityUtil.onReady().then(() => {
+			UnityUtil.externalWebRequestHandler?.setAPIKey(apiKey);
+		});
 	}
 
 	/**
@@ -2199,7 +2281,7 @@ export class UnityUtil {
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
-	 * @param pos - 3D point in space where the camera should be
+	 * @param position - 3D point in space where the camera should be
 	 * @param up - Up vector
 	 * @param forward - forward vector
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
@@ -2208,11 +2290,11 @@ export class UnityUtil {
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
-		pos: [number],
-		up: [number],
-		forward: [number],
-		lookAt: [number],
-		projectionType?: boolean,
+		position: number[],
+		up: number[],
+		forward: number[],
+		lookAt: number[],
+		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
@@ -2237,7 +2319,7 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
-		param.position = pos;
+		param.position = position;
 		param.up = up;
 		param.forward = forward;
 		param.lookAt = lookAt;
@@ -2294,11 +2376,36 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use the meshes API when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static enableOnlineSnapping() {
+		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
+	}
+
+	/**
+	 * Use the WebGL buffers when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static disableOnlineSnapping() {
+		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
+	}
+
+	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 5000) {
+		if (arrLength == 0) {
+			//pass the message as is
+			return new Promise((resolve) => {
+				func(0, 0);
+				this.unityOnUpdateActions.push(resolve);
+			});
+		}
 		return new Promise((resolve) => {
 			let index = 0;
 			while (index < arrLength) {
@@ -2322,7 +2429,7 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
-	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
+	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2331,6 +2438,7 @@ export class UnityUtil {
 
 			param.ids = ids.slice(start, end);
 			param.visible = visibility;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2739,5 +2847,216 @@ export class UnityUtil {
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+	}
+
+	/**
+	 * Utility method for use by the viewer to invalidate cache entries, if any,
+	 * for a Container based on a bundles version number.
+	 * @hidden
+	 */
+	public static invalidateCache(json: string) {
+		const info = JSON.parse(json);
+		if (this.externalWebRequestHandler) {
+			// Currently cache invalidations are done on a per-container basis.
+			this.externalWebRequestHandler.invalidateCache(info.container, info.version);
+		}
+	}
+
+	/**
+	 * Enable the virtual joystick feature.
+	 *
+	 * The viewer polls `fn` once per frame to retrieve the current joystick
+	 * state. Each axis value should be in the range **-1 to 1**, where 0
+	 * represents the neutral (centred) position.
+	 *
+	 * @param fn - A provider function that returns the current joystick state
+	 * as a five-element tuple
+	 * `[leftStickX, leftStickY, rightStickX, rightStickY, trigger]`.
+	 * Return `null` or `undefined` to indicate no input this frame.
+	 *
+	 * @example
+	 * // Simulates a static right-stick push to the right (e.g. for testing)
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0, 0]);
+	 */
+	public static enableVirtualJoystick(fn: () => [number, number, number, number, number]) {
+		if (typeof fn !== 'function') {
+			console.error('enableVirtualJoystick: fn must be a function');
+			return;
+		}
+		UnityUtil.virtualJoystickProvider = fn;
+		UnityUtil.toUnity('EnableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the virtual joystick feature.
+	 */
+	public static disableVirtualJoystick() {
+		UnityUtil.virtualJoystickProvider = null;
+		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable the Gamepad feature.
+	 */
+	public static enableGamepad() {
+		UnityUtil.toUnity('EnableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the Gamepad feature.
+	 */
+	public static disableGamepad() {
+		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Set offline fetch interceptor for mobile/Flutter integration
+	 * @param interceptor - Function that handles fetch requests
+	 */
+	public static setOfflineFetchInterceptor(interceptor: (url: string, options?: RequestInit) => Promise<Response>) {
+		if (UnityUtil.externalWebRequestHandler) {
+			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
+		}
+	}
+
+	/** Polls the viewer for a number of model statistics. This is an internal
+	 * API for the use of the Automated Tests and is subject to change without
+	 * notice.
+	 * @hidden
+	 */
+	public static getModelStatistics(): ModelStatistics {
+		const statistics: ModelStatistics = {
+			bundlesLoaded: 0,
+			bundleLoadingTasks: 0,
+			frameCount: 0,
+		};
+		if (UnityUtil.modelStatisticsArrayOffset) {
+			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
+			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.bundlesLoaded = heap[ptr64 + 23];
+			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.frameCount = heap[ptr64 + 30];
+		}
+		return statistics;
+	}
+
+	/**
+	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
+	 * with additional options for clipping and gizmo display. rect should be the 
+	 * size and location of the image, given as the location of three corners 
+	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project 
+	 * coordinates. If image is null, the location of the existing image is updated. 
+	 * If no image has ever been loaded, a white rectangle is shown in its place. 
+	 * The clip and gizmo parameters control whether the drawing plane is clipped and 
+	 * whether the gizmo is shown, respectively.
+	 * @param image - DrawingImageSource for the drawing plane
+	 * @param rect - number[] specifying the world rectangle
+	 * @param clip - boolean to enable or disable clipping
+	 * @param gizmo - boolean to show or hide the gizmo
+	 */
+	public static enableDrawingPlane(image: DrawingImageSource, rect: number[], clip: boolean = true, gizmo: boolean = true) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image;
+			dimensions = [image.width, image.height];
+		}
+
+		const parms = {
+			worldRect: rect,
+			domId: index,
+			dimensions,
+			clip,
+			gizmo,
+		};
+
+		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/** 
+	 * Disable the drawing plane
+	 */
+	public static disableDrawingPlane() {
+		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Called by the viewer on-demand when an autorecovery capture has been
+	 * made.
+	 * @hidden
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	public static postAutorecoveryCapture: (buffer: ArrayBuffer) => void;
+
+	/**
+	 * Returns the autorecovery buffer that the viewer posted with a call to
+	 * postAutorecoveryCapture. This call must be idempotent as it will be
+	 * made a number of times.
+	 * @hidden
+	 */
+	static getAutorecoveryCapture: () => ArrayBuffer;
+
+	/**
+	 * Tear down and rebuild the viewer to recover from a crashed or damaged
+	 * state. The viewer should be restored identically, including all
+	 * Containers, overrides and tool states. This method returns a Promise
+	 * that is resolved when the recovery is complete. This method must never
+	 * be called again while that Promise remains unresolved; doing so will
+	 * result in undefined behaviour.
+	 */
+	public static async doAutorecovery() {
+		// Capture the viewer state
+		const state = await new Promise<ArrayBuffer>((resolve) => {
+			UnityUtil.postAutorecoveryCapture = (buffer: ArrayBuffer) => {
+				resolve(buffer);
+			};
+			UnityUtil.toUnity('CaptureAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+		});
+
+		await UnityUtil.unityInstance.Quit();
+
+		// The Quit method doesn't quite clean up the canvas, so it is
+		// best to re-create it. Event handlers specified by attributes
+		// are cloned, but others are not, so the frontend must be
+		// robust to this.
+
+		const oldCanvas = UnityUtil.unityInstance.Module.canvas;
+		const newCanvas = oldCanvas.cloneNode(false);
+		oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+
+		UnityUtil.unityInstance = null;
+
+		// This 'resets' the promise by forcing it to be re-created by onReady()
+		UnityUtil.readyPromise = undefined;
+		UnityUtil.loadingPromise = undefined;
+		UnityUtil.loadingResolve = undefined;
+		UnityUtil.loadedPromise = undefined;
+		UnityUtil.loadedResolve = undefined;
+		UnityUtil.loadedFlag = false;
+
+		UnityUtil.hideProgressBar();
+
+		// Tear down and rebuild the viewer.
+		await UnityUtil._loadUnity(newCanvas, undefined);
+
+		UnityUtil.getAutorecoveryCapture = () => {
+			return state;
+		};
+		UnityUtil.toUnity('RestoreAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+
+		if (UnityUtil.viewer && UnityUtil.viewer.onAutorecovery) {
+			UnityUtil.viewer.onAutorecovery(newCanvas);
+		}
+	}
+
+	/** 
+	 * Increases or decreases the size of measurement tool labels. This takes
+	 * effect immediately and applies to existing and new labels.
+	 * @param scale Scale factor, where 1 is the default scale.
+	 */
+	public static setLabelScale(scale: number) {
+		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
 	}
 }

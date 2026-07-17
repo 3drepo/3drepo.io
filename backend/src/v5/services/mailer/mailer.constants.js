@@ -16,9 +16,13 @@
  */
 
 const auditLogPassword = require('./templates/auditLogPassword');
+const clashError = require('./templates/clashError');
 const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
 const modelImportError = require('./templates/modelImportError');
+const teamspaceExpiringSoon = require('./templates/teamspaceExpiringSoon');
+const teamspaceExpiringToday = require('./templates/teamspaceExpiringToday');
+const teamspaceExpiryDigest = require('./templates/teamspaceExpiryDigest');
 const { toConstantCase } = require('../../utils/helper/strings');
 const zombieProcessingStatuses = require('./templates/zombieProcessingStatuses');
 
@@ -30,6 +34,10 @@ const templates = {
 	modelImportError,
 	zombieProcessingStatuses,
 	auditLogPassword,
+	clashError,
+	teamspaceExpiryDigest,
+	teamspaceExpiringSoon,
+	teamspaceExpiringToday,
 };
 
 MailerConstants.templates = {};

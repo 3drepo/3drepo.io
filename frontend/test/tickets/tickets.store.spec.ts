@@ -140,6 +140,89 @@ describe('Tickets: store', () => {
 			expect(ticketFromStore).toEqual(newTemplate);
 		});
 
+		it('should remove hidden fields from fetched templates', () => {
+			const templateWithHiddenProperties = templateMockFactory({
+				properties: [
+					{ name: 'Prop1', type: 'text' },
+					{ name: 'Hidden prop', type: 'text', hiddenOnUI: true },
+				],
+				modules: [
+					{
+						name: 'a module',
+						properties: [
+							{ name: 'Modules Prop', type: 'text' },
+							{ name: 'Hidden module prop', type: 'text', hiddenOnUI: true },
+						],
+					},
+					{
+						name: 'hidden module',
+						properties: [
+							{ name: 'Only hidden prop', type: 'text', hiddenOnUI: true },
+						],
+					},
+				],
+			});
+			const templateWithoutHiddenProperties = {
+				...templateWithHiddenProperties,
+				properties: [
+					{ name: 'Prop1', type: 'text' },
+				],
+				modules: [
+					{
+						name: 'a module',
+						properties: [
+							{ name: 'Modules Prop', type: 'text' },
+						],
+					},
+				],
+			};
+
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [templateWithHiddenProperties]));
+			const templatesFromState = selectTemplates(getState(), modelId);
+
+			expect(templatesFromState[0]).toEqual(templateWithoutHiddenProperties);
+		});
+
+		it('should remove hidden fields when replacing a template', () => {
+			const template = templateMockFactory();
+			const replacementTemplateWithHiddenProperties = templateMockFactory({
+				_id: template._id,
+				properties: [
+					{ name: 'Prop1', type: 'text' },
+					{ name: 'Hidden prop', type: 'text', hiddenOnUI: true },
+				],
+				modules: [
+					{
+						name: 'a module',
+						properties: [
+							{ name: 'Modules Prop', type: 'text' },
+							{ name: 'Hidden module prop', type: 'text', hiddenOnUI: true },
+						],
+					},
+				],
+			});
+			const replacementTemplateWithoutHiddenProperties = {
+				...replacementTemplateWithHiddenProperties,
+				properties: [
+					{ name: 'Prop1', type: 'text' },
+				],
+				modules: [
+					{
+						name: 'a module',
+						properties: [
+							{ name: 'Modules Prop', type: 'text' },
+						],
+					},
+				],
+			};
+
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
+			dispatch(TicketsActions.replaceTemplateSuccess(modelId, replacementTemplateWithHiddenProperties));
+			const templateFromStore = selectTemplateById(getState(), modelId, template._id);
+
+			expect(templateFromStore).toEqual(replacementTemplateWithoutHiddenProperties);
+		});
+
 		it('deprecated fields shouldnt be there', () => {
 			const templateWithDeprecated = templateMockFactory({ 
 				properties: [

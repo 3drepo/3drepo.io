@@ -32,7 +32,7 @@ interface IProps {
 	breadcrumbs: BreadcrumbItemOrOptions[];
 }
 
-export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
+export const Breadcrumbs = ({ breadcrumbs }:IProps) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [indexOpened, setIndexOpened] = useState<null | number>(null);
 
