@@ -32,7 +32,7 @@ interface INavigationMenu {
 
 export const BreadcrumbDropdown = ({
 	anchorEl, handleClose, options, open,
-}: INavigationMenu): JSX.Element => (
+}: INavigationMenu) => (
 	<MenuList
 		anchorEl={anchorEl}
 		onClose={handleClose}

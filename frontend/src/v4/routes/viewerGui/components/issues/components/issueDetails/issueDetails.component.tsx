@@ -156,6 +156,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 				teamspace={this.props.teamspace}
 				currentUser={this.props.currentUser}
 				setCameraOnViewpoint={this.setCameraOnViewpoint}
+				canComment={this.userCanComment()}
 			/>
 		);
 	});

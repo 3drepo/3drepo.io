@@ -50,7 +50,7 @@ import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
-import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {

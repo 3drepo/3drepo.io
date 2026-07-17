@@ -24,7 +24,7 @@ import { generatePath, useParams } from 'react-router-dom';
 import { VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Overlay, Link } from './viewerInputContainer.styles';
-import { NEW_TICKET_ID } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { NEW_TICKET_ID } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 
 export const ViewerInputContainer = ({ inputRef = undefined, ...props }) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);

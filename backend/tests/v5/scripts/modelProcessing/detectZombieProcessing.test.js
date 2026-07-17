@@ -15,17 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const {
-	determineTestGroup,
-	db: { reset: resetDB, createModel, createRevision },
+	db: { reset: resetDB, createModel, createRevision, createClashRuns },
 	generateRandomString,
+	generateRandomProject,
 	generateRandomModel,
 	generateRevisionEntry,
+	generateClashPlan,
+	generateClashRun,
 } = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { disconnect } = require(`${src}/handler/db`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -37,6 +41,8 @@ const DetectZombieProcessing = require(`${utilScripts}/modelProcessing/detectZom
 const Path = require('path');
 
 const modelStates = Object.values(processStatuses);
+const clashRunStates = Object.values(clashRunStatus);
+const terminalClashRunStates = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED];
 
 const recentDate = new Date((new Date()) - 36 * 60 * 60 * 1000);
 
@@ -56,36 +62,51 @@ const setupData = () => {
 			await createRevision(teamspace, project, revision._id, revision, modelTypes.DRAWING);
 			return { drawing: revision._id, status: modelStates[n] };
 		}));
+		const project = generateRandomProject();
+		const plan = generateClashPlan(models[0].model, models[1].model);
+		const clashRuns = clashRunStates.map((status) => (
+			generateClashRun(plan, undefined, {
+				status,
+				triggeredAt: recentDate.getTime(),
+				updatedAt: recentDate.getTime(),
+			})
+		));
+		await createClashRuns(teamspace, project.id, plan, clashRuns);
 
-		return { teamspace, models, drawings };
+		return { teamspace, models, drawings, clashRuns: clashRuns.map(({ _id, status }) => ({ run: _id, status })) };
 	});
 	return Promise.all(modelProms);
 };
 
 const checkMail = (data, filteredTeamspace) => {
-	const expectedLogExcerpt = data.map(({ teamspace, models, drawings }) => {
+	const expectedZombieEntries = data.reduce((acc, { teamspace, models, drawings, clashRuns }) => {
 		if (!filteredTeamspace || teamspace === filteredTeamspace) {
-			const expectedModels = models.map(({ model, status }) => (
-				(status !== processStatuses.OK && status !== processStatuses.FAILED)
-					? `${teamspace}, model, ${model}, ${status}, ${recentDate}` : ''));
-			const expectedDrawings = drawings.map(({ drawing, status }) => (
-				(status !== processStatuses.OK && status !== processStatuses.FAILED)
-					? `${teamspace}, drawing, ${drawing}, ${status}, ${recentDate}` : ''));
-			return [...expectedModels, ...expectedDrawings];
+			acc.models.push(...models
+				.filter(({ status }) => status !== processStatuses.OK && status !== processStatuses.FAILED)
+				.map(({ model, status }) => ({ teamspace, id: model, status, timestamp: recentDate })));
+			acc.drawings.push(...drawings
+				.filter(({ status }) => status !== processStatuses.OK && status !== processStatuses.FAILED)
+				.map(({ drawing, status }) => ({ teamspace, id: drawing, status, timestamp: recentDate })));
+			acc.clashRuns.push(...clashRuns
+				.filter(({ status }) => !terminalClashRunStates.includes(status))
+				.map(({ run, status }) => ({ teamspace, id: run, status, timestamp: recentDate })));
 		}
-		return undefined;
-	}).flat().filter(Boolean);
+		return acc;
+	}, { models: [], drawings: [], clashRuns: [] });
+	const zombieCount = Object.values(expectedZombieEntries).reduce((sum, entries) => sum + entries.length, 0);
 	const expectedData = {
 		script: Path.basename(__filename, Path.extname(__filename)).replace(/\.test/, ''),
 		title: 'Zombie processing statuses found',
-		message: `${expectedLogExcerpt.length} zombie processing statuses found`,
+		message: `${zombieCount} zombie processing statuses found`,
 	};
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		emailTemplates.ZOMBIE_PROCESSING_STATUSES.name,
 		expect.objectContaining(expectedData),
 	);
-	const actualLogExcerpt = JSON.parse(Mailer.sendSystemEmail.mock.calls[0][1].logExcerpt);
-	expect(actualLogExcerpt).toEqual(expect.arrayContaining(expectedLogExcerpt));
+	const { zombieEntries } = Mailer.sendSystemEmail.mock.calls[0][1];
+	expect(zombieEntries.models).toEqual(expect.arrayContaining(expectedZombieEntries.models));
+	expect(zombieEntries.drawings).toEqual(expect.arrayContaining(expectedZombieEntries.drawings));
+	expect(zombieEntries.clashRuns).toEqual(expect.arrayContaining(expectedZombieEntries.clashRuns));
 };
 
 const runTest = () => {

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
@@ -54,7 +55,7 @@ const testSubject = () => {
 	});
 };
 
-describe('services/mailer/templates/auditLogPassword', () => {
+describe(determineTestGroup(__filename), () => {
 	testHtml();
 	testSubject();
 });

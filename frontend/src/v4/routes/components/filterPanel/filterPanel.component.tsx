@@ -21,6 +21,8 @@ import ExpandIcon from '@mui/icons-material/ChevronRight';
 import CollapseIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
+import { SnackbarActions } from '@/v4/modules/snackbar/snackbar.redux';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
@@ -168,7 +170,9 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 
 	public renderCopyButton = renderWhenTrue(() => (
 		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
-			<ButtonContainer>
+			<ButtonContainer
+				onClick={() => dispatch(SnackbarActions.show('Search filters copied to clipboard'))}
+			>
 				<CopyButton fontSize="small" disabled={!this.props.selectedFilters.length} />
 			</ButtonContainer>
 		</CopyToClipboard>
@@ -194,7 +198,17 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			<ButtonContainer>
 				<ButtonMenu
 					renderButton={FilterButton}
-					renderContent={this.renderFiltersMenu}
+					renderContent={() => (
+						<FiltersMenu
+							items={this.props.filters}
+							selectedItems={this.state.selectedFilters}
+							onToggleFilter={this.onToggleFilter}
+							onToggleDataType={this.onToggleDataType}
+							left={this.props.left}
+							dataTypes={this.props.dataTypes}
+							selectedDataTypes={this.state.selectedDataTypes}
+						/>)
+					}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={popoverProps}
 					ButtonProps={{ disabled: false }}
@@ -233,18 +247,6 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			);
 		}
 	}
-
-	public renderFiltersMenu = () => (
-		<FiltersMenu
-			items={this.props.filters}
-			selectedItems={this.state.selectedFilters}
-			onToggleFilter={this.onToggleFilter}
-			onToggleDataType={this.onToggleDataType}
-			left={this.props.left}
-			dataTypes={this.props.dataTypes}
-			selectedDataTypes={this.state.selectedDataTypes}
-		/>
-	)
 
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({

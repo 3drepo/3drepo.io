@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
@@ -80,7 +81,7 @@ const getMetadata = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/metadata', () => {
+describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	getMetadata();
 });
