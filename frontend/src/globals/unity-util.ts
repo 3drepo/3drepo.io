@@ -27,6 +27,11 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
 // The contents of this type will change in line with the needs of
 // the Test Automation or Profiling Tools.
 type ModelStatistics = {
@@ -1287,6 +1292,15 @@ export class UnityUtil {
 	 */
 	public static disableSnapping() {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
+	}
+
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
 	}
 
 	 /**
