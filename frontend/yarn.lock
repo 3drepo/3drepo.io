@@ -1923,10 +1923,10 @@
   dependencies:
     pako "^1.0.10"
 
-"@pdftron/webviewer@11.12.0":
-  version "11.12.0"
-  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-11.12.0.tgz#f41919820da45b05381f6ad5fcaf3b3a9d1967dc"
-  integrity sha512-9GqjbLQTIR5jgFVKX99dcRHtfqFk0ctej3vy4eD9u3Xx5wAhrnZJjYCD4H7l+IWdr8CIqMSkl0K2RNWeiq86rw==
+"@pdftron/webviewer@11.13.0":
+  version "11.13.0"
+  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-11.13.0.tgz#fac95ec1202ad2f72b67fb2a926f39b3bd464349"
+  integrity sha512-isIddLMhSeix0DPw819HHY+YS50HoG5/ZSA1mTLpHhpXNV5UlHtkYcP16/Os1Aylrjvvc6lKpX3dZ3ZQqS0aJA==
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -8926,10 +8926,10 @@ react-highlight-words@0.21.0:
     highlight-words-core "^1.2.0"
     memoize-one "^4.0.0"
 
-react-hook-form@7.74.0:
-  version "7.74.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.74.0.tgz#7c55ac360290e7e7a78cc3169b0f07bce11a36c0"
-  integrity sha512-yR6wHr99p9wFv686jhRWVSFhUvDvNbdUf2dKlbno8/VKOCuoNobDGC6S+M2dua9A9Yo8vpcrp8assIYbsZCQ9g==
+react-hook-form@7.76.1:
+  version "7.76.1"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.76.1.tgz#0ef905eae5c17e32b6edc2ac628921917e87aafa"
+  integrity sha512-rYM7tPiWlu3nZchkR/ex7piyzui2vFPyaLnXnI/RnblB/L4qfMmyses8llJVtF1NpE9WBBsJlGtcSZzPCXW1qQ==
 
 react-intl@10.1.0:
   version "10.1.0"
@@ -10606,10 +10606,10 @@ type-detect@4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.3.2.tgz#bb91f7ff24788ed81e28463eb94e5a1306f5bab3"
-  integrity sha512-cfvZ1nOC/VqAt8bVOIlFz8x+HdDASpiFYrSi0U0nzcAFlOnzzQ/gsPg2PP1uqjreO7sQCtraYJHMduXSewQsSA==
+type-fest@2.19.0, type-fest@^2.19.0, type-fest@~2.19:
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
+  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
 type-fest@^0.18.0:
   version "0.18.1"
@@ -10636,10 +10636,10 @@ type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
-type-fest@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
-  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
+type-is@~1.6.18:
+  version "1.6.18"
+  resolved "https://registry.yarnpkg.com/type-is/-/type-is-1.6.18.tgz#4e552cd05df09467dcbc4ef739de89f2cf37c131"
+  integrity sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==
 
 typed-array-buffer@^1.0.3:
   version "1.0.3"
