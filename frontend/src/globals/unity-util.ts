@@ -1810,9 +1810,17 @@ export class UnityUtil {
 
 			const canvas = this.unityInstance.Module.canvas;
 			const rect = canvas.getBoundingClientRect();
-
-			x = position.clientX - rect.left;
-			y = rect.height - 1 - (position.clientY - rect.top);
+			
+			// Apply display scale
+			const scale = window.devicePixelRatio || 1;
+			const scaledX = position.clientX * scale;
+			const scaledY = position.clientY * scale;
+			const scaledHeight = rect.height * scale;
+			const scaledLeft = rect.left * scale;
+			const scaledTop = rect.top * scale;
+			
+			x = Math.floor(scaledX - scaledLeft);
+			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
 		} else if ('x' in position && 'y' in position) {
 
 			// If it is a CanvasPosition, we can extract the coordinates directly.
