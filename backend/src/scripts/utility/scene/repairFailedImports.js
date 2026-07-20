@@ -33,6 +33,8 @@
  * bundle generation.
  */
 
+const { JSONParser } = require('@streamparser/json-node');
+
 const { v5Path } = require('../../../interop');
 const { getProjectList } = require('../../../v5/models/projectSettings');
 const { getRevisions } = require('../../../v5/models/revisions');
@@ -45,7 +47,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
 
 const { deleteMany } = require(`${v5Path}/handler/db`);
-const { getFile } = require(`${v5Path}/services/filesManager`);
+const { getFileStream } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
 const getReferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
@@ -60,7 +62,7 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 	);
 
 	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
-	logger.logInfo('\t\tCreating parent-child map nodes from database...');
+	logger.logInfo('\t\tCreating parent-child map...');
 
 	const childrenOf = new Map();
 	for (const node of allNodes) {
@@ -79,18 +81,19 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 	logger.logInfo('\t\tCollecting referenced ids...');
 
 	// Traverse from the known-good root node.
-	const referencedIds = new Set();
-	const queue = [UUIDToString(rootSharedId)];
+	const rootId = UUIDToString(rootSharedId);
+	const referencedIds = new Set([rootId]);
+	const queue = [rootId];
 	while (queue.length) {
-		const id = queue.pop();
-		if (referencedIds.has(id)) {
-			// eslint-disable-next-line no-continue
-			continue;
-		}
-		referencedIds.add(id);
+		const id = queue.shift();
 		const children = childrenOf.get(id);
 		if (children) {
-			queue.push(...children);
+			for (const child of children) {
+				if (!referencedIds.has(child)) {
+					referencedIds.add(child);
+					queue.push(child);
+				}
+			}
 		}
 	}
 
@@ -114,13 +117,41 @@ const getRootNodeSharedId = async (teamspace, project, container, revision) => {
 	if (rootNodes.length > 1) {
 		// If we have multiple root nodes, get the live one from the tree.
 		try {
-			const contents = await getFile(
+			const stream = await getFileStream(
 				teamspace,
 				`${container}.stash.json_mpc.ref`,
 				`${UUIDToString(revision)}/fulltree.json`,
 			);
-			const fullTree = JSON.parse(contents);
-			return stringToUUID(fullTree.nodes.shared_id);
+
+			const parser = new JSONParser({
+				paths: ['$.nodes.shared_id'],
+			});
+
+			return await new Promise((resolve) => {
+				let found = false;
+
+				parser.on('data', ({ value }) => {
+					if (!found) {
+						found = true;
+						stream.destroy();
+						resolve(stringToUUID(value));
+					}
+				});
+
+				parser.on('error', (err) => {
+					logger.logWarning(`\t\tSkipping ${container}/${UUIDToString(revision)}: failed to parse fulltree.json (${err})`);
+					resolve(null);
+				});
+
+				stream.on('error', (err) => {
+					logger.logWarning(`\t\tSkipping ${container}/${UUIDToString(revision)}: failed to read fulltree.json (${err})`);
+					resolve(null);
+				});
+
+				stream
+					.pipe(parser)
+					.on('end', () => resolve(null));
+			});
 		} catch (err) {
 			logger.logWarning(`\t\tSkipping ${container}/${UUIDToString(revision)}: failed to read/parse fulltree.json (${err})`);
 			return null;
