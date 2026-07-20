@@ -49,6 +49,8 @@ const { getFile } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
 const getReferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
+	logger.logInfo(`\t\tFinding ids referenced by ${UUIDToString(rootSharedId)}...`);
+
 	const allNodes = await getNodesByQuery(
 		teamspace,
 		project,
@@ -56,6 +58,9 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 		{ rev_id: revision },
 		{ shared_id: 1, parents: 1 },
 	);
+
+	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
+	logger.logInfo('\t\tCreating parent-child map nodes from database...');
 
 	const childrenOf = new Map();
 	for (const node of allNodes) {
@@ -70,6 +75,8 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 			}
 		}
 	}
+
+	logger.logInfo('\t\tCollecting referenced ids...');
 
 	// Traverse from the known-good root node.
 	const referencedIds = new Set();
@@ -135,6 +142,8 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 		revision,
 		rootSharedId,
 	);
+
+	logger.logInfo('\t\tFinding ids to delete...');
 
 	// get the set difference — allNodes already contains every node for the
 	// revision so no second query is needed.
