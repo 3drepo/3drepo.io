@@ -103,13 +103,17 @@ const addSuccessfulImport = async (teamspace, project, container, revisionId) =>
  * @param {string} teamspace - Teamspace name
  * @param {string} container - Container name
  * @param {Buffer} revisionId - Revision UUID
- * @param {number} orphanCount - Number of orphaned nodes to add
+ * @param {number} rootCount - Number of orphaned nodes (no parents at all) to add
+ * @param {number} orphanCount - Number of orphaned nodes (parent does not exist) to add
  * @returns {Object} Object with orphanIds (shared_ids) and counts
  */
-const addFailedImport = async (teamspace, project, container, revisionId, orphanCount = 10) => {
+const addFailedImport = async (teamspace, project, container, revisionId, rootCount = 10, orphanCount = 10) => {
 	const nodes = [];
+	for (let i = 0; i < rootCount; i++) {
+		nodes.push(buildRandomNode(revisionId, undefined, i, rootCount));
+	}
 	for (let i = 0; i < orphanCount; i++) {
-		nodes.push(buildRandomNode(revisionId, undefined, i, orphanCount));
+		nodes.push(buildRandomNode(revisionId, [generateUUID()], i, orphanCount));
 	}
 
 	await db.createScene(
@@ -384,7 +388,7 @@ const setupData = async () => {
 			generateUUID(),
 			`noroot_${generateRandomString()}`,
 			[
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 0, 10),
 			],
 		);
 
