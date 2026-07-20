@@ -2028,10 +2028,10 @@
   dependencies:
     pako "^1.0.10"
 
-"@pdftron/webviewer@11.12.0":
-  version "11.12.0"
-  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-11.12.0.tgz#f41919820da45b05381f6ad5fcaf3b3a9d1967dc"
-  integrity sha512-9GqjbLQTIR5jgFVKX99dcRHtfqFk0ctej3vy4eD9u3Xx5wAhrnZJjYCD4H7l+IWdr8CIqMSkl0K2RNWeiq86rw==
+"@pdftron/webviewer@11.13.0":
+  version "11.13.0"
+  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-11.13.0.tgz#fac95ec1202ad2f72b67fb2a926f39b3bd464349"
+  integrity sha512-isIddLMhSeix0DPw819HHY+YS50HoG5/ZSA1mTLpHhpXNV5UlHtkYcP16/Os1Aylrjvvc6lKpX3dZ3ZQqS0aJA==
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
