@@ -206,13 +206,13 @@ const processTeamspace = async (teamspace, specificContainer) => {
 			// eslint-disable-next-line no-continue
 			continue;
 		}
-		logger.logInfo(`\t- Checking container ${container}`);
 		const project = projectLookup[container];
 		if (!project) {
 			logger.logInfo(`\t\t- Skipping ${container} because it does not have a project.`);
 			// eslint-disable-next-line no-continue
 			continue;
 		}
+		logger.logInfo(`\t- Checking container ${teamspace} ${UUIDToString(project)} ${container}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processContainer(teamspace, project, container);
 	}
