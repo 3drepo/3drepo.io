@@ -428,6 +428,43 @@ describe('UnityUtil.requestPointInfo', () => {
         expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedPosition));
     });
 
+    it('should apply DPI scaling to a ClientPosition according to the canvas before passing it off to the viewer', async () => {
+        const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
+            UnityUtil.respondToPointInfoRequest(JSON.stringify({
+                mousePos: [200, 499],
+            }));
+        });
+
+        // @ts-ignore
+        jest.replaceProperty(window, 'devicePixelRatio', 2);
+
+        UnityUtil.unityInstance = {
+            Module: {
+                canvas: {
+                    getBoundingClientRect: () => ({
+                        left: 50,
+                        top: 100,
+                        height: 400,
+                    }),
+                },
+            },
+        } as any;
+
+        const clientPosition = {
+            clientX: 150,
+            clientY: 250,
+        };
+
+        await UnityUtil.requestPointInfo(clientPosition);
+
+        const expectedPosition = {
+            x: 200, // 300 (clientX scaled) - 100 (canvas left, scaled)
+            y: 499, // 800 (canvas height scaled) - 1 (to offset pixel 0) - (500 (clientY scaled) - 200 (canvas top scaled))
+        };
+
+        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedPosition));        
+    });
+
     it('should resolve a valid request with point info', async () => {
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             const mockPointInfo = {
