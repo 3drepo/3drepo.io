@@ -17,11 +17,12 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { db, generateRandomString, generateRevisionEntry, generateBasicNode, generateMeshNode, generateTextureNode } = require('../../helper/services');
-const { utilScripts, src } = require('../../helper/path');
-const { modelTypes } = require('../../../../src/v5/models/modelSettings.constants');
-const { uuidToString } = require('../../../../src/v4/utils');
-const { getNodesByQuery } = require('../../../../src/v5/models/scenes');
-const { stringToUUID } = require('../../../../src/v5/utils/helper/uuids');
+const { utilScripts, src, srcV4 } = require('../../helper/path');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { uuidToString } = require(`${srcV4}/utils`);
+const { getNodesByQuery } = require(`${src}/models/scenes`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { disconnect, find } = require(`${src}/handler/db`);
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
