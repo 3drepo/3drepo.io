@@ -66,10 +66,8 @@ const eventTriggeredPromise = (event) => new Promise(
 const expectErrorNotification = () => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-		mailTemplates.ERROR_NOTIFICATION.name,
-		expect.objectContaining({
-			scope: 'eventsListener',
-		}),
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		expect.any(Object),
 	);
 };
 const publishAndWaitForEvent = async (event, data) => {
@@ -213,7 +211,7 @@ const testClashRunProcessed = () => {
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
 			}
 			if (processClashResultsError) {
-				jest.spyOn(logger, 'logError').mockImplementationOnce(() => {});
+				jest.spyOn(logger, 'logError').mockImplementationOnce(() => { });
 				TicketsClashes.processClashResults.mockRejectedValueOnce(processClashResultsError);
 			}
 
@@ -304,7 +302,7 @@ const testOnNewContainerRevision = () => {
 				ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
 			}
 			if (setLastRevError) {
-				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(setLastRevError);
 			}
 
@@ -341,7 +339,11 @@ const testOnNewContainerRevision = () => {
 			if (setLastRevError) {
 				expect(loggerSpy).not.toHaveBeenCalled();
 			}
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			if (getPlansError && getPlansError instanceof Error && !getPlansError.code) {
+				expectErrorNotification();
+			} else {
+				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			}
 			if (loggerSpy) {
 				loggerSpy.mockRestore();
 			}
@@ -366,7 +368,7 @@ const testOnNewContainerRevision = () => {
 				selectionB: [{ container: generateRandomString() }],
 			};
 			const error = new Error(generateRandomString());
-			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 
 			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([plan]);
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
@@ -388,6 +390,7 @@ const testOnNewContainerRevision = () => {
 				planId: UUIDToString(plan._id),
 				runId: 'N/A',
 			});
+			expect(loggerSpy).toHaveBeenCalledTimes(1);
 			expect(loggerSpy).toHaveBeenCalledWith(
 				`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${error.message}`,
 			);
@@ -398,6 +401,10 @@ const testOnNewContainerRevision = () => {
 
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
+
+	beforeEach(() => {
+		Mailer.sendSystemEmail.mockResolvedValue();
+	});
 
 	afterAll(() => {
 		EventsManager.reset();
