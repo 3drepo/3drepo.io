@@ -64,6 +64,7 @@ const getSharedIds = (nodes) => nodes.map((n) => n.shared_id);
 /**
  * Adds a successful import (connected nodes) to a revision
  * @param {string} teamspace - Teamspace name
+ * @param {string} project - Project ID
  * @param {string} container - Container name
  * @param {Buffer} revisionId - Revision UUID
  * @returns {Object} Object with nodeIds (shared_ids) and counts
@@ -101,6 +102,7 @@ const addSuccessfulImport = async (teamspace, project, container, revisionId) =>
 /**
  * Adds a failed import (orphaned nodes) to a revision
  * @param {string} teamspace - Teamspace name
+ * @param {string} project - Project ID
  * @param {string} container - Container name
  * @param {Buffer} revisionId - Revision UUID
  * @param {number} rootCount - Number of orphaned nodes (no parents at all) to add
@@ -135,6 +137,7 @@ const addFailedImport = async (teamspace, project, container, revisionId, rootCo
  * Only the first import's nodes are marked as good; all subsequent imports' nodes are marked as orphans
  * For multi-import scenarios, stores the first import's root node in stash for getFile to find
  * @param {string} teamspace - Teamspace name
+ * @param {string} project - Project ID
  * @param {string} container - Container name
  * @param {Array<Function>} imports - Array of import builder functions
  * @param {Object} options - Configuration options

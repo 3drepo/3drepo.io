@@ -28,10 +28,9 @@
  * Nodes are found by traversal of the parents array, which will capture both
  * the traditional tree but also material and metadata nodes in one go.
  *
- * This script will only clean up the scene collection. It will not clean up
- * zombie stash files, if bouncer failed during bundle generation. It will also
- * not delete any ref nodes or their binaries on disk - a separate script must
- * be used for that.
+ * This script will only clean up the scene collection and associated blob ref
+ * files. It will not clean up zombie stash files, if bouncer failed during
+ * bundle generation.
  */
 
 const { v5Path } = require('../../../interop');
