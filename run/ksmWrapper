@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# Ensure a command was supplied.
+if [[ $# -eq 0 ]]; then
+    echo "Usage: $0 <command> [args...]" >&2
+    exit 1
+fi
+
+if [[ -z "${NODE_ENV:-}" ]]; then
+    echo "Error: NODE_ENV is not set." >&2
+    exit 1
+fi
+
+ENV_FILE="$SCRIPT_DIR/../config/$NODE_ENV/.env"
+
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "Error: .env file not found: $ENV_FILE" >&2
+    exit 1
+fi
+
+# Export all Keeper-backed environment variables.
+while IFS= read -r kv; do
+    export "$kv"
+done < <(
+    grep -E '^[A-Za-z_][A-Za-z0-9_]*=keeper://' "$ENV_FILE"
+)
+
+exec ksm --ini-file "$HOME/.keeper/keeper.ini" exec -- "$@"
