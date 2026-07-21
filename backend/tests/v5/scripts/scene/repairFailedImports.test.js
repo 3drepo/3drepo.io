@@ -24,6 +24,7 @@ const { utilScripts, src, srcV4 } = require('../../helper/path');
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { uuidToString } = require(`${srcV4}/utils`);
 const { getNodesByQuery } = require(`${src}/models/scenes`);
+const FilesManager = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { disconnect, find } = require(`${src}/handler/db`);
@@ -561,40 +562,54 @@ const runTest = () => {
 			await checkRevisionUntouched(data.teamspace2.incompleteRevision);
 		});
 
-		test('Stream error should skip that one collection and leave others untouched', async () => {
-			const targetRevision = data.teamspace1.multiRootRevision;
-			const targetCollection = `${targetRevision.container}.stash.json_mpc.ref`;
+		test('Stream error should skip that collection, leaving it untouched, and fix the others', async () => {
+			const streamErrorRevision = data.teamspace1.multiRootRevision;
+			const exceptionRevision = data.teamspace2.multiRootRevision;
+			const streamErrorCollection = `${streamErrorRevision.container}.stash.json_mpc.ref`;
+			const exceptionCollection = `${exceptionRevision.container}.stash.json_mpc.ref`;
+			const originalGetFileAsStream = FilesManager.getFileAsStream;
+			const getFileAsStreamSpy = jest.spyOn(FilesManager, 'getFileAsStream');
 
-			await jest.isolateModulesAsync(async () => {
-				jest.doMock(`${src}/services/filesManager`, () => {
-					const actual = jest.requireActual(`${src}/services/filesManager`);
-					return {
-						...actual,
-						getFileAsStream: jest.fn((teamspace, collection, filePath) => {
-							if (
-								teamspace === targetRevision.teamspace
-								&& collection === targetCollection
-								&& filePath.endsWith('/fulltree.json')
-							) {
-								return new Readable({
-									read() {
-										this.destroy(new Error('Injected stream read error'));
-									},
-								});
-							}
+			try {
+				getFileAsStreamSpy.mockImplementation((teamspace, collection, filePath) => {
+					if (
+						teamspace === exceptionRevision.teamspace
+						&& collection === exceptionCollection
+						&& filePath.endsWith('/fulltree.json')
+					) {
+						throw new Error('Injected getFileAsStream exception');
+					}
 
-							return actual.getFileAsStream(teamspace, collection, filePath);
-						}),
-					};
+					if (
+						teamspace === streamErrorRevision.teamspace
+						&& collection === streamErrorCollection
+						&& filePath.endsWith('/fulltree.json')
+					) {
+						const readStream = new Readable({
+							read() {
+								this.push(null);
+							},
+						});
+
+						// Trigger the stream error path after listeners are attached.
+						process.nextTick(() => {
+							readStream.emit('error', new Error('Injected stream read error'));
+						});
+
+						return { readStream };
+					}
+
+					return originalGetFileAsStream.call(FilesManager, teamspace, collection, filePath);
 				});
 
-				// eslint-disable-next-line global-require
-				const RepairFailedImportsWithStreamError = require(`${utilScripts}/scene/repairFailedImports`);
-				await RepairFailedImportsWithStreamError.run();
-			});
+				await RepairFailedImports.run();
+			} finally {
+				getFileAsStreamSpy.mockRestore();
+			}
 
-			// Only the targeted collection should be skipped due to stream read error.
+			// Both targeted collections should be skipped due to injected fulltree read failures.
 			await checkRevisionUntouched(data.teamspace1.multiRootRevision);
+			await checkRevisionUntouched(data.teamspace2.multiRootRevision);
 
 			// Other reparable revisions should still be repaired.
 			await checkRevisionRepaired(data.teamspace1.corruptedRevision);
@@ -602,7 +617,6 @@ const runTest = () => {
 			await checkRevisionRepaired(data.teamspace1.voidRevision);
 			await checkRevisionRepaired(data.teamspace2.corruptedRevision);
 			await checkRevisionRepaired(data.teamspace2.mixedCorruptedRevision);
-			await checkRevisionRepaired(data.teamspace2.multiRootRevision);
 			await checkRevisionRepaired(data.teamspace2.voidRevision);
 
 			// Non-repairable scenarios should remain untouched.
