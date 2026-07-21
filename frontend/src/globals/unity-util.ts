@@ -1849,8 +1849,7 @@ export class UnityUtil {
 			const key = requestId;
 			if (!this.pointInfoPromises.has(key)) {
 				this.pointInfoPromises.set(key, { resolve, reject });
-			}
-			else {
+			} else {
 				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
 				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
 			}
