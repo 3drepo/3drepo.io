@@ -23,12 +23,26 @@ const { utilScripts, src, srcV4 } = require('../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { uuidToString } = require(`${srcV4}/utils`);
-const { getNodesByQuery } = require(`${src}/models/scenes`);
+const Scenes = require(`${src}/models/scenes`);
 const FilesManager = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { disconnect, find } = require(`${src}/handler/db`);
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
+
+// Randomise the order of the returned nodes to fully exercise robustness
+// to this, since Mongo does not guarantee nodes are returned in the order
+// they are inserted, even though this can often happen.
+const originalGetNodesByQuery = Scenes.getNodesByQuery;
+Scenes.getNodesByQuery = async (...args) => {
+	const nodes = await originalGetNodesByQuery(...args);
+	if (!Array.isArray(nodes) || nodes.length < 2) {
+		return nodes;
+	}
+	return [...nodes].sort(() => Math.random() - 0.5);
+};
+
+const { getNodesByQuery } = Scenes;
 const RepairFailedImports = require(`${utilScripts}/scene/repairFailedImports`);
 
 const buildRandomNode = (revisionId, parents, i, j) => {
@@ -74,8 +88,8 @@ const getSharedIds = (nodes) => nodes.map((n) => n.shared_id);
  * @returns {Object} Object with nodeIds (shared_ids) and counts
  */
 const addSuccessfulImport = async (teamspace, project, container, revisionId) => {
-	const iterations = 2;
-	const nodesPerIteration = 20;
+	const iterations = 4;
+	const nodesPerIteration = 40;
 	const maxParents = 100;
 	const nodes = [generateBasicNode('transformation', revisionId, undefined)];
 	for (let i = 0; i < iterations; i++) {
@@ -341,7 +355,7 @@ const setupData = async () => {
 			`corrupted_${generateRandomString()}`,
 			[
 				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 5),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 5, 5),
 			],
 		);
 
@@ -362,7 +376,7 @@ const setupData = async () => {
 			mixedContainer,
 			[
 				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 3),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 3, 3),
 			],
 		);
 
@@ -373,7 +387,7 @@ const setupData = async () => {
 			`incomplete_${generateRandomString()}`,
 			[
 				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 4),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 4, 6),
 			],
 			{ incomplete: true },
 		);
@@ -424,7 +438,7 @@ const setupData = async () => {
 			`void_${generateRandomString()}`,
 			[
 				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 3, 3),
 			],
 			{ void: true },
 		);
@@ -436,7 +450,7 @@ const setupData = async () => {
 			`noProject_${generateRandomString()}`,
 			[
 				(ts, p, c, rev) => addSuccessfulImport(ts, p, c, rev),
-				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 2),
+				(ts, p, c, rev) => addFailedImport(ts, p, c, rev, 1, 1),
 			],
 		);
 

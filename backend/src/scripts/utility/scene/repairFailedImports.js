@@ -50,6 +50,8 @@ const { deleteMany } = require(`${v5Path}/handler/db`);
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
+const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
+
 const getReferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
 	logger.logInfo(`\t\tFinding ids referenced by ${UUIDToString(rootSharedId)}...`);
 
@@ -62,38 +64,68 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 	);
 
 	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
-	logger.logInfo('\t\tCreating parent-child map...');
-
-	const childrenOf = new Map();
-	for (const node of allNodes) {
-		const id = UUIDToString(node.shared_id);
-		if (node.parents?.length) {
-			for (const parent of node.parents) {
-				const parentId = UUIDToString(parent);
-				if (!childrenOf.has(parentId)) {
-					childrenOf.set(parentId, []);
-				}
-				childrenOf.get(parentId).push(id);
-			}
-		}
-	}
 
 	logger.logInfo('\t\tCollecting referenced ids...');
 
-	// Traverse from the known-good root node.
-	const rootId = UUIDToString(rootSharedId);
-	const referencedIds = new Set([rootId]);
-	const queue = [rootId];
-	while (queue.length) {
-		const id = queue.shift();
-		const children = childrenOf.get(id);
-		if (children) {
-			for (const child of children) {
-				if (!referencedIds.has(child)) {
-					referencedIds.add(child);
-					queue.push(child);
+	const rootKey = getUUIDKey(rootSharedId);
+	const nodeByKey = new Map(allNodes.map((node) => [getUUIDKey(node.shared_id), node]));
+	const status = new Map([[rootKey, 1]]); // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
+
+	const resolveNode = (startKey) => {
+		const startStatus = status.get(startKey);
+		if (startStatus === 1 || startStatus === 2) {
+			return startStatus === 1;
+		}
+
+		const stack = [{ key: startKey, expanded: false }];
+
+		while (stack.length) {
+			const frame = stack[stack.length - 1];
+			const currentKey = frame.key;
+			const currentStatus = status.get(currentKey);
+
+			if (currentStatus === 1 || currentStatus === 2) {
+				stack.pop();
+			} else {
+				const currentNode = nodeByKey.get(currentKey);
+
+				if (!currentNode?.parents?.length) {
+					status.set(currentKey, 2);
+					stack.pop();
+				} else if (!frame.expanded) {
+					status.set(currentKey, 3);
+					frame.expanded = true;
+
+					for (const parent of currentNode.parents) {
+						const parentKey = getUUIDKey(parent);
+						const parentStatus = status.get(parentKey);
+						if (parentStatus !== 1 && parentStatus !== 2 && parentStatus !== 3) {
+							stack.push({ key: parentKey, expanded: false });
+						}
+					}
+				} else {
+					let isReferenced = false;
+					for (const parent of currentNode.parents) {
+						if (status.get(getUUIDKey(parent)) === 1) {
+							isReferenced = true;
+							break;
+						}
+					}
+
+					status.set(currentKey, isReferenced ? 1 : 2);
+					stack.pop();
 				}
 			}
+		}
+
+		return status.get(startKey) === 1;
+	};
+
+	const referencedIds = new Set([rootKey]);
+	for (const node of allNodes) {
+		const key = getUUIDKey(node.shared_id);
+		if (resolveNode(key)) {
+			referencedIds.add(key);
 		}
 	}
 
@@ -174,7 +206,7 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 	// get the set difference — allNodes already contains every node for the
 	// revision so no second query is needed.
 	const idsToDelete = allNodes
-		.filter((node) => !referencedIds.has(UUIDToString(node.shared_id)))
+		.filter((node) => !referencedIds.has(getUUIDKey(node.shared_id)))
 		.map((node) => node.shared_id);
 
 	if (idsToDelete.length === 0) {
