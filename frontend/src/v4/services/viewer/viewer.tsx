@@ -861,8 +861,8 @@ export class ViewerService {
 	 * Mesh Color
 	 */
 
-	public overrideMeshColor(teamspace, model, meshIDs, color) {
-		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color);
+	public overrideMeshColor(teamspace, model, meshIDs, color, excludeIds) {
+		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color, excludeIds);
 	}
 
 	public resetMeshColor(teamspace, model, meshIDs) {
@@ -1218,8 +1218,8 @@ export class ViewerService {
 		}
 	}
 
-	public switchObjectVisibility(account, model, ids, visibility) {
-		UnityUtil.toggleVisibility(account, model, ids, visibility);
+	public switchObjectVisibility(account, model, ids, visibility, excludeIds) {
+		UnityUtil.toggleVisibility(account, model, ids, visibility, excludeIds);
 	}
 
 	public setShadows = (type: string) => {

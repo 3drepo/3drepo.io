@@ -77,7 +77,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 	return Promise.all(promises);
 };
 
-const toggleMeshesVisibility = (meshes, visibility) => {
+const toggleMeshesVisibility = (meshes, visibility, excludeIds = false) => {
 	if (meshes && meshes.length > 0) {
 		meshes.forEach((entry) => {
 			if (entry.meshes && entry.meshes.length) {
@@ -85,7 +85,8 @@ const toggleMeshesVisibility = (meshes, visibility) => {
 					entry.teamspace,
 					entry.modelId,
 					entry.meshes,
-					visibility
+					visibility,
+					excludeIds,
 				);
 			}
 		});
@@ -396,9 +397,8 @@ function* isolateNodes(nodesIds = []) {
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
-
-			toggleMeshesVisibility(result.meshesToHide, false);
-			toggleMeshesVisibility(result.meshesToShow, true);
+			toggleMeshesVisibility(result.meshesToShow, false, true);
+			toggleMeshesVisibility(result.meshesToShow, true, false);
 
 			yield put(TreeActions.updateDataRevision());
 		}
@@ -409,7 +409,6 @@ function* isolateNodes(nodesIds = []) {
 
 function* isolateSelectedNodes({ nodeId }) {
 	yield waitForTreeToBeReady();
-
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);

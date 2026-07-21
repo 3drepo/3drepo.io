@@ -169,24 +169,24 @@ export class Processing {
 		const isParent = {};
 		const toShow = [];
 		const toHide = [];
+		const isolateMeshes = this.getMeshesByNodeIds(nodesIds);
 
 		nodesIds.forEach((id) => {
 			const [node] = this.getNodesByIds([id]);
 			toIsolate[id] = 1;
+			const parents = this.getParentsByPath(node);
+			for (let index = 0; index < parents.length ; ++index) {
+				const parentLevel = parents.length - index - 1;
+				if (parentNodesByLevel[parentLevel]) {
+					parentNodesByLevel[parentLevel].add(parents[index]);
+				} else {
+					parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+				}
+				isParent[parents[index]._id] = 1;
+			}
 
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.VISIBLE) {
 				toShow.push(id);
-			} else {
-				const parents = this.getParentsByPath(node);
-				for (let index = 0; index < parents.length ; ++index) {
-					const parentLevel = parents.length - index - 1;
-					if (parentNodesByLevel[parentLevel]) {
-						parentNodesByLevel[parentLevel].add(parents[index]);
-					} else {
-						parentNodesByLevel[parentLevel] = new Set([parents[index]]);
-					}
-					isParent[parents[index]._id] = 1;
-				}
 			}
 		});
 
@@ -209,15 +209,17 @@ export class Processing {
 		}
 
 		const { unhighlightedObjects, meshesToHide } = this.hideNodes(toHide, true);
-		const { meshesToShow, meshesToHide: extraMeshesToHide }  = this.showNodes(toShow, ifcSpacesHidden);
+		const { meshesToHide: extraMeshesToHide }  = this.showNodes(toShow, ifcSpacesHidden);
 		mergeArrays(meshesToHide, extraMeshesToHide);
+		const visibleIsolateMeshes = this.filterVisibleMeshes(isolateMeshes);
+		const filteredUnhighlightedObjects = this.excludeMeshes(unhighlightedObjects, visibleIsolateMeshes);
 
 		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
 			this.updateParentsVisibility(parentNodesByLevel[i]);
 			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
 
-		return { unhighlightedObjects, meshesToHide, meshesToShow};
+		return { unhighlightedObjects: filteredUnhighlightedObjects, meshesToHide, meshesToShow: isolateMeshes};
 	}
 
 	private hideNodes = (nodesId, skipParent = false) => {
@@ -445,6 +447,48 @@ export class Processing {
 	private isVisibleNode = (nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;
 
 	private isSelectedNode = (nodeId) => this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED;
+
+	private excludeMeshes = (meshGroups = [], meshesToExclude = []) => {
+		const excludedMeshesByModel = {};
+
+		meshesToExclude.forEach(({ modelId, teamspace, meshes }) => {
+			excludedMeshesByModel[`${teamspace}__${modelId}`] = new Set(meshes);
+		});
+
+		return meshGroups.reduce((filteredGroups, meshGroup) => {
+			const excludedMeshes = excludedMeshesByModel[`${meshGroup.teamspace}__${meshGroup.modelId}`];
+
+			if (!excludedMeshes) {
+				filteredGroups.push(meshGroup);
+				return filteredGroups;
+			}
+
+			const meshes = meshGroup.meshes.filter((meshId) => !excludedMeshes.has(meshId));
+			if (meshes.length) {
+				filteredGroups.push({
+					...meshGroup,
+					meshes,
+				});
+			}
+
+			return filteredGroups;
+		}, []);
+	}
+
+	private filterVisibleMeshes = (meshGroups = []) => {
+		return meshGroups.reduce((visibleGroups, meshGroup) => {
+			const meshes = meshGroup.meshes.filter((meshId) => this.isVisibleNode(meshId));
+
+			if (meshes.length) {
+				visibleGroups.push({
+					...meshGroup,
+					meshes,
+				});
+			}
+
+			return visibleGroups;
+		}, []);
+	}
 
 	private getMeshesByNodes = (nodes = []) => {
 		if (!nodes.length) {
