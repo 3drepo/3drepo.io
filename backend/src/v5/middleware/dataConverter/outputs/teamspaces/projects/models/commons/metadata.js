@@ -43,7 +43,7 @@ Metadata.formatMetadata = (req, res) => {
 Metadata.formatMetadataSingle = (req, res) => {
 	try {
 		const formattedMetadata = schema.cast(req.metadata, { stripUnknown: true });
-		respond(req, res, templates.ok, { meta: formattedMetadata });
+		respond(req, res, templates.ok, formattedMetadata[0]);
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}

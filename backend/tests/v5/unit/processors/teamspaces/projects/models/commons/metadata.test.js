@@ -88,7 +88,6 @@ const getMetadataById = () => {
 		test('should return the data getMetadataByQuery returns in the correct format', async () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
-			const revision = generateUUID();
 			const metadataId = generateUUID();
 			const metadata = [{
 				_id: generateUUID(),
@@ -96,7 +95,6 @@ const getMetadataById = () => {
 				paths: [generateUUID()],
 				type: generateRandomString(),
 				api: generateRandomString(),
-				rev_id: generateUUID(),
 				metadata: times(5, () => ({
 					key: generateRandomString(),
 					value: generateRandomString(),
@@ -105,31 +103,30 @@ const getMetadataById = () => {
 
 			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
 
-			const res = await Metadata.getMetadataById(teamspace, container, revision, stringToUUID(metadataId));
+			const res = await Metadata.getMetadataById(teamspace, container, stringToUUID(metadataId));
 
 			expect(res).toEqual(metadata);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-				{ _id: stringToUUID(metadataId), rev_id: revision },
-				{ shared_id: 0, paths: 0, type: 0, api: 0, parents: 0, rev_id: 0 });
+				{ _id: stringToUUID(metadataId) },
+				{ metadata: 1 });
 		});
 
 		test('should return the data getMetadataByQuery returns (metadata with just id)', async () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
-			const revision = generateUUID();
 			const metadataId = generateUUID();
 			const metadata = [{ _id: generateUUID() }];
 
 			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
 
-			const res = await Metadata.getMetadataById(teamspace, container, revision, stringToUUID(metadataId));
+			const res = await Metadata.getMetadataById(teamspace, container, stringToUUID(metadataId));
 
 			expect(res).toEqual(metadata);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-				{ _id: stringToUUID(metadataId), rev_id: revision },
-				{ shared_id: 0, paths: 0, type: 0, api: 0, parents: 0, rev_id: 0 });
+				{ _id: stringToUUID(metadataId) },
+				{ metadata: 1 });
 		});
 	});
 };

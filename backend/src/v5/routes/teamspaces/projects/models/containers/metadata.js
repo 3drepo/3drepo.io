@@ -64,10 +64,10 @@ const getModelMetadataFields = async (req, res) => {
 };
 
 const getMetadataById = async (req, res, next) => {
-	const { teamspace, container, revision, metadata } = req.params;
+	const { teamspace, container, metadata } = req.params;
 
 	try {
-		req.metadata = await Metadata.getMetadataById(teamspace, container, revision, metadata);
+		req.metadata = await Metadata.getMetadataById(teamspace, container, metadata);
 
 		await next();
 	} catch (err) {
@@ -334,13 +334,6 @@ const establishRoutes = (isInternal) => {
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - name: revId
-	 *         description: Revision ID
-	 *         in: query
-	 *         required: false
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -351,29 +344,24 @@ const establishRoutes = (isInternal) => {
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 meta:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       _id:
-	 *                         type: string
-	 *                         format: uuid
-	 *                       metadata:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                 metadata:
 	 *                         type: object
 	 *                         additionalProperties: true
 	 *             examples:
 	 *               found:
 	 *                 value:
-	 *                   meta:
-	 *                     - _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
-	 *                       metadata:
-	 *                         "IFC Type": "IfcBuilding"
-	 *                         "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A"
-	 *                         "NumberOfStoreys": 2
+	 *                   _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
+	 *                   metadata:
+	 *                     "IFC Type": "IfcBuilding"
+	 *                     "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A"
+	 *                     "NumberOfStoreys": 2
 	 *               notFound:
 	 *                 value:
-	 *                   meta: []
+	 *                   _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
+	 *                   metadata: {}
 	 */
 	router.get('/:metadata', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getMetadataById, formatMetadataSingle);
 

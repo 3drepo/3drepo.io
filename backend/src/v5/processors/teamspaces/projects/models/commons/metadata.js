@@ -27,14 +27,9 @@ Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery
 
 Metadata.getAllMetadataFieldNames = getMetadataKeyList;
 
-Metadata.getMetadataById = (teamspace, container, revision, metadataId) => getMetadataByQuery(teamspace, container,
-	{ _id: metadataId, rev_id: revision },
+Metadata.getMetadataById = (teamspace, container, metadataId) => getMetadataByQuery(teamspace, container,
+	{ _id: metadataId },
 	{
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0,
-		rev_id: 0,
+		metadata: 1,
 	});
 module.exports = Metadata;

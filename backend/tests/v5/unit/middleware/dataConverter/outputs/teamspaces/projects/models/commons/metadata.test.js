@@ -101,7 +101,7 @@ const testFormatMetadataSingle = () => {
 			}));
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { meta: output });
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output[0]);
 		});
 
 		test('Should cast metadata correctly', () => {
@@ -119,7 +119,7 @@ const testFormatMetadataSingle = () => {
 			}));
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { meta: output });
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output[0]);
 		});
 	});
 };

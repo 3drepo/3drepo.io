@@ -424,9 +424,8 @@ const testGetMetadataById = (internalService) => {
 			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
 			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
 			['the container does not have a revision', createRoute({ containerId: conNoRev._id }), false, templates.revisionNotFound],
-			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), true, { meta: [] }],
-			['metadata exists', createRoute(), true, { meta: [{ _id: metadata._id, metadata: expectedMetadata }] }],
-			['a revision is provided by the user', createRoute({ revId: revisions[0]._id }), true, { meta: [{ _id: metadata._id, metadata: expectedMetadata }] }],
+			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), true, { }],
+			['metadata exists', createRoute(), true, { _id: metadata._id, metadata: expectedMetadata }],
 		];
 
 		const testData = [
