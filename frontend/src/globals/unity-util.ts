@@ -20,7 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
-import { uuid } from '@/v4/helpers/uuid';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -1801,7 +1801,7 @@ export class UnityUtil {
 	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
 	 * @returns A promise that resolves with the point information object returned by the viewer.
  	 */
-	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = {useSnapping: true, }): Promise<PointInfo> {
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
 		
 		let x: number;
 		let y: number;
@@ -1840,7 +1840,7 @@ export class UnityUtil {
 		x = Math.floor(x);
 		y = Math.floor(y);
 
-		const requestId = uuid();
+		const requestId = uuidGen();
 
 		const newPointInfoPromise = new Promise((resolve, reject) => {
 			
