@@ -87,6 +87,15 @@ const testFormatMetadataSingle = () => {
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 
+		test('Should respond with empty object if metadata is empty', () => {
+			const req = { metadata: [] };
+
+			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {});
+		});
+
 		test('Should cast ids correctly', () => {
 			const req = { metadata: times(10, () => ({
 				_id: generateUUID(),
