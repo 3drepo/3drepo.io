@@ -303,7 +303,7 @@ const establishRoutes = (isInternal) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
 	 *   get:
-	 *     description: Returns metadata for a specific metadata node in a container revision. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is used.
+	 *     description: Returns metadata for a specific metadata node in a container revision.
 	 *     tags: [v:internal, v:external, Metadata]
 	 *     operationId: getMetadataById
 	 *     parameters:
@@ -348,8 +348,8 @@ const establishRoutes = (isInternal) => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                 metadata:
-	 *                         type: object
-	 *                         additionalProperties: true
+	 *                   type: object
+	 *                   additionalProperties: true
 	 *             examples:
 	 *               found:
 	 *                 value:
