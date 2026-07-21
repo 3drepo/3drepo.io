@@ -25,10 +25,9 @@ const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const getRabbitMQQueues = () => new Promise((resolve, reject) => {
-	const { host } = config.cn_queue;
-	const [, mgmtHost] = host.replace(/:[0-9]+$/, '').split('://');
+	const { hostname } = new URL(config.cn_queue.host);
 	const options = {
-		hostname: mgmtHost,
+		hostname,
 		port: 15672,
 		path: '/api/queues',
 		headers: { Authorization: `Basic ${Buffer.from('guest:guest').toString('base64')}` },
@@ -198,6 +197,14 @@ const testExchangeQueueCleanup = () => {
 			expect(await countAnonQueues()).toBe(before + 1);
 
 			await Queue.close();
+
+			/* eslint-disable no-await-in-loop */
+			for (let i = 0; i < 3; i++) {
+				const count = await countAnonQueues();
+				if (count === before) return;
+				await sleepMS(100);
+			}
+			/* eslint-enable no-await-in-loop */
 			expect(await countAnonQueues()).toBe(before);
 		});
 	});
