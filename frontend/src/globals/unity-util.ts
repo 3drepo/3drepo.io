@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -59,6 +60,10 @@ export interface ClientPosition {
 	clientY: number,
 }
 
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
 export interface PointInfo {
 	id: string,
 	database: string,
@@ -67,6 +72,7 @@ export interface PointInfo {
 	mousePos: number[],
 	position: number[],
 	normal: number[],
+	requestId: string,
 }
 
 export interface PickInfo {
@@ -181,7 +187,7 @@ export class UnityUtil {
 	public static objectStatusPromises = [];
 
 	/** @hidden */
-	public static pointInfoPromises = new Map<string, Deferred<object>[]>();
+	public static pointInfoPromises = new Map<string, Deferred<object>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -743,7 +749,7 @@ export class UnityUtil {
 			// This is preferrable to leaving them hanging indefinitely.
 			// If the viewer is sending malformed data they are probably all shot anyway.
 			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
- 			UnityUtil.pointInfoPromises.forEach((promises) => promises.forEach((promise) => promise.reject(error)));
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
  			UnityUtil.pointInfoPromises.clear();
  			return;
 		}
@@ -753,11 +759,9 @@ export class UnityUtil {
 		}
 
 		// If there are any promises waiting for this point info, resolve or reject them
-		const key = data.mousePos[0] + ',' + data.mousePos[1];
+		const key = data.requestId;
 		if (this.pointInfoPromises.has(key)) {
-			this.pointInfoPromises.get(key).forEach((promise) => {
-				promise.resolve(data);
-			});
+			this.pointInfoPromises.get(key).resolve(data);
 			this.pointInfoPromises.delete(key);
 		} else {
 			console.warn('No entries found for point info request');
@@ -1797,7 +1801,7 @@ export class UnityUtil {
 	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
 	 * @returns A promise that resolves with the point information object returned by the viewer.
  	 */
-	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<PointInfo> {
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = {useSnapping: true, }): Promise<PointInfo> {
 		
 		let x: number;
 		let y: number;
@@ -1836,20 +1840,23 @@ export class UnityUtil {
 		x = Math.floor(x);
 		y = Math.floor(y);
 
+		const requestId = uuid();
+
 		const newPointInfoPromise = new Promise((resolve, reject) => {
 			
 			// Store the promise in a map with the key being the coordinates, so that when Unity responds
 			// with the point info, we can resolve the correct promise.
-			const key = x + ',' + y;
+			const key = requestId;
 			if (!this.pointInfoPromises.has(key)) {
-				this.pointInfoPromises.set(key, []);
+				this.pointInfoPromises.set(key, { resolve, reject });
 			}
-			this.pointInfoPromises.get(key).push({ resolve, reject });
 		});
 
 		const params = {
 			x,
 			y,
+			requestId,
+			options,
 		};
 
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
