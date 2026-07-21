@@ -187,7 +187,7 @@ export class UnityUtil {
 	public static objectStatusPromises = [];
 
 	/** @hidden */
-	public static pointInfoPromises = new Map<string, Deferred<object>>();
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -1844,11 +1844,15 @@ export class UnityUtil {
 
 		const newPointInfoPromise = new Promise((resolve, reject) => {
 			
-			// Store the promise in a map with the key being the coordinates, so that when Unity responds
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
 			// with the point info, we can resolve the correct promise.
 			const key = requestId;
 			if (!this.pointInfoPromises.has(key)) {
 				this.pointInfoPromises.set(key, { resolve, reject });
+			}
+			else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
 			}
 		});
 

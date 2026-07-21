@@ -400,7 +400,7 @@ describe('UnityUtil.requestPointInfo', () => {
             options: {
                 useSnapping: true,
             },
-        }
+        };
 
         expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
@@ -441,7 +441,7 @@ describe('UnityUtil.requestPointInfo', () => {
             options: {
                 useSnapping: true,
             },
-        }
+        };
 
         expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
@@ -484,7 +484,7 @@ describe('UnityUtil.requestPointInfo', () => {
             options: {
                 useSnapping: true,
             },
-        }
+        };
 
         expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
@@ -543,7 +543,7 @@ describe('UnityUtil.requestPointInfo', () => {
             options: {
                 useSnapping: false,
             },
-        }
+        };
 
         expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
