@@ -64,7 +64,7 @@ const listenToQueue = async (conn, queueName, callback) => {
 const listenToExchange = async (conn, exchangeName, callback) => {
 	const channel = await conn.createChannel();
 	await channel.assertExchange(exchangeName, 'fanout', { durable: true });
-	const { queue } = await channel.assertQueue('', { exclusive: true, arguments: { 'x-expires': queueConfig.exchange_queue_ttl ?? 300000 } });
+	const { queue } = await channel.assertQueue('', { exclusive: true, arguments: { 'x-expires': queueConfig.exchangeQueueTtl } });
 	await channel.bindQueue(queue, exchangeName, '');
 	const { consumerTag } = await channel.consume(queue, callbackWrapper(callback), { noAck: true, exclusive: true });
 
@@ -88,7 +88,7 @@ const connect = async () => {
 	if (connectionPromise) return connectionPromise;
 	try {
 		logger.logInfo(`Connecting to ${queueConfig.host}...`);
-		connectionPromise = amqp.connect(queueConfig.host, { heartbeat: queueConfig.heartbeat ?? 60 });
+		connectionPromise = amqp.connect(queueConfig.host, { heartbeat: queueConfig.heartbeat });
 		const conn = await connectionPromise;
 		retry = 0;
 		connClosed = false;
