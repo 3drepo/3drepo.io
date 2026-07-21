@@ -77,7 +77,7 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 			return startStatus === 1;
 		}
 
-		const stack = [{ key: startKey, expanded: false }];
+		const stack = [{ key: startKey, checkedParents: false }];
 
 		while (stack.length) {
 			const frame = stack[stack.length - 1];
@@ -92,15 +92,15 @@ const getReferencedIdsFromHierarchy = async (teamspace, project, container, revi
 				if (!currentNode?.parents?.length) {
 					status.set(currentKey, 2);
 					stack.pop();
-				} else if (!frame.expanded) {
+				} else if (!frame.checkedParents) {
 					status.set(currentKey, 3);
-					frame.expanded = true;
+					frame.checkedParents = true;
 
 					for (const parent of currentNode.parents) {
 						const parentKey = getUUIDKey(parent);
 						const parentStatus = status.get(parentKey);
 						if (parentStatus !== 1 && parentStatus !== 2 && parentStatus !== 3) {
-							stack.push({ key: parentKey, expanded: false });
+							stack.push({ key: parentKey, checkedParents: false });
 						}
 					}
 				} else {
