@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { Readable } = require('stream');
+
 const { determineTestGroup } = require('../../helper/utils');
 const { db, generateRandomString, generateRevisionEntry, generateBasicNode, generateMeshNode, generateTextureNode } = require('../../helper/services');
 const { utilScripts, src, srcV4 } = require('../../helper/path');
@@ -556,6 +558,59 @@ const runTest = () => {
 			await checkRevisionUntouched(data.teamspace1.incompleteRevision);
 			await checkRevisionUntouched(data.teamspace2.cleanRevision);
 			await checkRevisionUntouched(data.teamspace2.mixedCleanRevision);
+			await checkRevisionUntouched(data.teamspace2.incompleteRevision);
+		});
+
+		test('Stream error should skip that one collection and leave others untouched', async () => {
+			const targetRevision = data.teamspace1.multiRootRevision;
+			const targetCollection = `${targetRevision.container}.stash.json_mpc.ref`;
+
+			await jest.isolateModulesAsync(async () => {
+				jest.doMock(`${src}/services/filesManager`, () => {
+					const actual = jest.requireActual(`${src}/services/filesManager`);
+					return {
+						...actual,
+						getFileAsStream: jest.fn((teamspace, collection, filePath) => {
+							if (
+								teamspace === targetRevision.teamspace
+								&& collection === targetCollection
+								&& filePath.endsWith('/fulltree.json')
+							) {
+								return new Readable({
+									read() {
+										this.destroy(new Error('Injected stream read error'));
+									},
+								});
+							}
+
+							return actual.getFileAsStream(teamspace, collection, filePath);
+						}),
+					};
+				});
+
+				// eslint-disable-next-line global-require
+				const RepairFailedImportsWithStreamError = require(`${utilScripts}/scene/repairFailedImports`);
+				await RepairFailedImportsWithStreamError.run();
+			});
+
+			// Only the targeted collection should be skipped due to stream read error.
+			await checkRevisionUntouched(data.teamspace1.multiRootRevision);
+
+			// Other reparable revisions should still be repaired.
+			await checkRevisionRepaired(data.teamspace1.corruptedRevision);
+			await checkRevisionRepaired(data.teamspace1.mixedCorruptedRevision);
+			await checkRevisionRepaired(data.teamspace1.voidRevision);
+			await checkRevisionRepaired(data.teamspace2.corruptedRevision);
+			await checkRevisionRepaired(data.teamspace2.mixedCorruptedRevision);
+			await checkRevisionRepaired(data.teamspace2.multiRootRevision);
+			await checkRevisionRepaired(data.teamspace2.voidRevision);
+
+			// Non-repairable scenarios should remain untouched.
+			await checkRevisionUntouched(data.teamspace1.noRootRevision);
+			await checkRevisionUntouched(data.teamspace1.corruptTreeRevision);
+			await checkRevisionUntouched(data.teamspace1.incompleteRevision);
+			await checkRevisionUntouched(data.teamspace2.noRootRevision);
+			await checkRevisionUntouched(data.teamspace2.corruptTreeRevision);
 			await checkRevisionUntouched(data.teamspace2.incompleteRevision);
 		});
 	});

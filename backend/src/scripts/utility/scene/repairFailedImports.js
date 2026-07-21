@@ -47,7 +47,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
 
 const { deleteMany } = require(`${v5Path}/handler/db`);
-const { getFileStream } = require(`${v5Path}/services/filesManager`);
+const { getFileAsStream } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
 const getReferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
@@ -117,7 +117,7 @@ const getRootNodeSharedId = async (teamspace, project, container, revision) => {
 	if (rootNodes.length > 1) {
 		// If we have multiple root nodes, get the live one from the tree.
 		try {
-			const stream = await getFileStream(
+			const { readStream: stream } = await getFileAsStream(
 				teamspace,
 				`${container}.stash.json_mpc.ref`,
 				`${UUIDToString(revision)}/fulltree.json`,
