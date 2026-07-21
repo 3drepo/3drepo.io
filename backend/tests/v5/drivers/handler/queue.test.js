@@ -18,10 +18,34 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { generateRandomString, sleepMS } = require('../../helper/services');
+const http = require('http');
 
 const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const getRabbitMQQueues = () => new Promise((resolve, reject) => {
+	const { host } = config.cn_queue;
+	const [, mgmtHost] = host.replace(/:[0-9]+$/, '').split('://');
+	const options = {
+		hostname: mgmtHost,
+		port: 15672,
+		path: '/api/queues',
+		headers: { Authorization: `Basic ${Buffer.from('guest:guest').toString('base64')}` },
+	};
+	http.get(options, (res) => {
+		let data = '';
+		res.on('data', (chunk) => { data += chunk; });
+		res.on('end', () => {
+			try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+		});
+	}).on('error', reject);
+});
+
+const countAnonQueues = async () => {
+	const queues = await getRabbitMQQueues();
+	return queues.filter((q) => q.name.startsWith('amq.gen-')).length;
+};
 
 const sendQueueMessage = async (queueName) => {
 	const message = generateRandomString();
@@ -163,8 +187,25 @@ const testConnection = () => {
 	});
 };
 
+const testExchangeQueueCleanup = () => {
+	describe('Exchange queue cleanup', () => {
+		afterEach(Queue.close);
+
+		test('Exchange listener should create a temporary queue that is removed on connection close', async () => {
+			const before = await countAnonQueues();
+
+			await Queue.listenToExchange(generateRandomString(), jest.fn());
+			expect(await countAnonQueues()).toBe(before + 1);
+
+			await Queue.close();
+			expect(await countAnonQueues()).toBe(before);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testQueueMessages();
 	testExchangeMessages();
+	testExchangeQueueCleanup();
 	testConnection();
 });
