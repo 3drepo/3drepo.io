@@ -17,13 +17,15 @@
 
 const { createDirectMessage, createInternalMessage } = require('../../chat');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { notifyListenerFailure } = require('../listenerErrorNotification');
 const { removeOldSessions } = require('../../sessions');
 const { saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
+const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = async ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => {
+const userLoggedIn = async (payload) => {
+	const { username, sessionID, socketId, ipAddress, userAgent, referer } = payload;
 	try {
 		await Promise.all([
 			saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
@@ -31,37 +33,23 @@ const userLoggedIn = async ({ username, sessionID, socketId, ipAddress, userAgen
 			...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 		]);
 	} catch (err) {
-		await notifyListenerFailure({
-			eventName: events.SESSION_CREATED,
-			listenerName: 'userLoggedIn',
-			component: 'authEvents',
-			payload: {
-				username,
-				sessionID,
-				socketId,
-				ipAddress,
-				userAgent,
-				referer,
-			},
-			error: err,
-		});
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+		}
 	}
 };
 
-const sessionsRemoved = async ({ ids, elective }) => {
+const sessionsRemoved = async (payload) => {
+	const { ids, elective } = payload;
 	try {
 		if (!elective) {
 			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 		}
 		await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 	} catch (err) {
-		await notifyListenerFailure({
-			eventName: events.SESSIONS_REMOVED,
-			listenerName: 'sessionsRemoved',
-			component: 'authEvents',
-			payload: { ids, elective },
-			error: err,
-		});
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+		}
 	}
 };
 

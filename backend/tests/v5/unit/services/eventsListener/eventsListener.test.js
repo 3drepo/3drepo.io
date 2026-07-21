@@ -51,13 +51,11 @@ const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
 
-const expectErrorNotification = () => {
+const expectErrorNotification = (payload) => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
-		mailTemplates.ERROR_NOTIFICATION.name,
-		expect.objectContaining({
-			scope: 'eventsListener',
-		}),
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		payload,
 	);
 };
 
@@ -109,19 +107,20 @@ const testAuthEventsListener = () => {
 
 			test(`Should send an error notification if ${events.SESSION_CREATED} processing fails`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
-				const username = generateRandomString();
-				const sessionID = generateRandomString();
-				const socketId = generateRandomString();
-				const ipAddress = generateRandomString();
-				const userAgent = generateRandomString();
-				const referer = generateRandomString();
+				const data = {
+					username: generateRandomString(),
+					sessionID: generateRandomString(),
+					socketId: generateRandomString(),
+					ipAddress: generateRandomString(),
+					userAgent: generateRandomString(),
+					referer: generateRandomString(),
+				};
 				LoginRecords.saveSuccessfulLoginRecord.mockRejectedValueOnce(new Error(generateRandomString()));
 
-				EventsManager.publish(events.SESSION_CREATED,
-					{ username, sessionID, socketId, ipAddress, userAgent, referer });
+				EventsManager.publish(events.SESSION_CREATED, data);
 
 				await waitOnEvent;
-				expectErrorNotification();
+				expectErrorNotification(data);
 			});
 		});
 
@@ -176,7 +175,7 @@ const testAuthEventsListener = () => {
 				EventsManager.publish(events.SESSIONS_REMOVED, data);
 
 				await waitOnEvent;
-				expectErrorNotification();
+				expectErrorNotification(data);
 			});
 		});
 	});
@@ -196,13 +195,13 @@ const testUserEventsListener = () => {
 
 		test(`Should send an error notification if ${events.USER_CREATED} processing fails`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
-			const username = generateRandomString();
+			const data = { username: generateRandomString() };
 			Invitations.unpack.mockRejectedValueOnce(new Error(generateRandomString()));
 
-			EventsManager.publish(events.USER_CREATED, { username });
+			EventsManager.publish(events.USER_CREATED, data);
 
 			await waitOnEvent;
-			expectErrorNotification();
+			expectErrorNotification(data);
 		});
 	});
 };

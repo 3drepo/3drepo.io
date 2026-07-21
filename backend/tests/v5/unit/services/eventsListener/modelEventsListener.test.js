@@ -1310,14 +1310,14 @@ const testDeleteModel = () => {
 	});
 };
 const testUpdateTicket = () => {
-	const updateTicketTest = async (isFederation, changes, expectedData) => {
+	const updateTicketTest = async (isFederation, changes, expectedData, templateOverride) => {
 		const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
-		const template = generateTemplate();
+		const template = templateOverride ?? generateTemplate();
 		const data = {
 			teamspace: generateRandomString(),
 			project: generateRandomString(),
 			model: generateRandomString(),
-			ticket: { _id: generateRandomString(), title: generateRandomString() },
+			ticket: { _id: generateRandomString(), title: generateRandomString(), type: template._id },
 			author: generateRandomString(),
 			timestamp: generateRandomDate(),
 			changes,
@@ -1331,10 +1331,19 @@ const testUpdateTicket = () => {
 		await waitOnEvent;
 		expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 		expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+		expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+		expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 			data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 		expect(TicketSchema.serialiseTicket).toHaveBeenCalledTimes(1);
+		expect(TicketSchema.serialiseTicket).toHaveBeenCalledWith(
+			{
+				_id: data.ticket._id,
+				...expectedData,
+			},
+			template,
+		);
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			event,
@@ -1407,9 +1416,30 @@ const testUpdateTicket = () => {
 			await updateTicketTest(true, changes, expectedData);
 		});
 
+		test(`Should serialise combined root, property and module changes for ${events.UPDATE_TICKET}`, async () => {
+			const changes = {
+				title: { from: generateRandomString(), to: generateRandomString() },
+				properties: {
+					prop: { from: generateRandomString(), to: generateRandomString() },
+				},
+				modules: {
+					mod: {
+						modProp: { from: generateRandomString(), to: generateRandomString() },
+					},
+				},
+			};
+			const expectedData = {
+				title: changes.title.to,
+				properties: { prop: changes.properties.prop.to },
+				modules: { mod: { modProp: changes.modules.mod.modProp.to } },
+			};
+
+			await updateTicketTest(false, changes, expectedData);
+		});
+
 		test(`!Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} and a module default date prop has been updated (Container)`, async () => {
-			TicketTemplates.getTemplateById.mockResolvedValueOnce({ ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] });
+			const template = { ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] };
 			const changes = {
 				modules: {
 					sequencing: {
@@ -1418,7 +1448,7 @@ const testUpdateTicket = () => {
 				},
 			};
 			const expectedData = { modules: { sequencing: { 'Start Time': changes.modules.sequencing['Start Time'].to } } };
-			await updateTicketTest(false, changes, expectedData);
+			await updateTicketTest(false, changes, expectedData, template);
 		});
 	});
 };
@@ -1846,6 +1876,7 @@ const testUpdateTicketGroup = () => {
 	describe(events.UPDATE_TICKET_GROUP, () => {
 		const updateTicketGroupTest = async (isFederation) => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET_GROUP);
+			const changes = generateRandomObject();
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -1853,7 +1884,7 @@ const testUpdateTicketGroup = () => {
 				ticket: { _id: generateRandomString(), title: generateRandomString() },
 				author: generateRandomString(),
 				timestamp: generateRandomDate(),
-				changes: generateRandomString(),
+				changes,
 				_id: generateRandomString(),
 			};
 
@@ -1872,6 +1903,12 @@ const testUpdateTicketGroup = () => {
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, data._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(TicketGroupSchemas.serialiseGroup).toHaveBeenCalledTimes(1);
+			expect(TicketGroupSchemas.serialiseGroup).toHaveBeenCalledWith({
+				_id: data._id,
+				ticket: data.ticket,
+				...data.changes,
+			});
 
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(

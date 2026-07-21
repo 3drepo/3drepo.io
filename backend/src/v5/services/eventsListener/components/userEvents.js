@@ -15,22 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { notifyListenerFailure } = require('../listenerErrorNotification');
+const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
 
-const userCreated = async ({ username }) => {
+const userCreated = async (payload) => {
+	const { username } = payload;
 	try {
 		await unpackInvitations(username);
 	} catch (err) {
-		await notifyListenerFailure({
-			eventName: events.USER_CREATED,
-			listenerName: 'userCreated',
-			component: 'userEvents',
-			payload: { username },
-			error: err,
-		});
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+		}
 	}
 };
 
