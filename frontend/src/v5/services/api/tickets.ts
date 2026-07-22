@@ -19,6 +19,16 @@ import api from './default';
 
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
 
+const TAGS_TEMPLATE_ID = 'af09f79a-b530-4c08-b222-c1828f17012b';
+
+const applyTagsTemplateOverride = (template: ITemplate): ITemplate => {
+	if (template._id !== TAGS_TEMPLATE_ID) return template;
+	return {
+		...template,
+		properties: template.properties?.map((p) => p.name === 'Tags' ? { ...p, type: 'tag' } : p),
+	};
+};
+
 export const fetchContainerTemplates = async (
 	teamspace: string,
 	projectId: string,
@@ -37,7 +47,7 @@ export const fetchContainerTemplates = async (
 	}
 
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates?${urlSearchParams}`);
-	return data.templates;
+	return data.templates.map(applyTagsTemplateOverride);
 };
 
 export const fetchContainerTemplate = async (
@@ -47,7 +57,7 @@ export const fetchContainerTemplate = async (
 	templateId:string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates/${templateId}`);
-	return data;
+	return applyTagsTemplateOverride(data);
 };
 
 export const fetchFederationTemplates = async (
@@ -68,7 +78,7 @@ export const fetchFederationTemplates = async (
 	}
 
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?${urlSearchParams}`);
-	return data.templates;
+	return data.templates.map(applyTagsTemplateOverride);
 };
 
 export const fetchFederationTemplate = async (
@@ -78,7 +88,7 @@ export const fetchFederationTemplate = async (
 	templateId: string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates/${templateId}`);
-	return data;
+	return applyTagsTemplateOverride(data);
 };
 
 type TicketsQueryParams = {

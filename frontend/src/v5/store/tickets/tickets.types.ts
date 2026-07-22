@@ -18,7 +18,7 @@
 import { RgbArray } from '@/v5/helpers/colors.helper';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
 
-export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'pastDate' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords';
+export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'pastDate' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords' | 'tag';
 
 export interface PropertyDefinition {
 	name: string;
