@@ -138,18 +138,59 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public async renderColorOverrides(prev, curr) {
-		const hasExcludeIdsOverride = (overrides = {}) => Object.values(overrides)
-			.some((override: any) => override && typeof override === 'object' && override.excludeIds);
+		const getExcludeColorSets = (overrides = {}) => {
+			const map = {} as Record<string, Set<string>>;
 
-		const requiresFullRebuild = hasExcludeIdsOverride(prev) || hasExcludeIdsOverride(curr);
-		const emptyOverrides = {};
+			Object.entries(overrides).forEach(([meshId, override]: any) => {
+				if (!override || typeof override !== 'object' || !override.excludeIds || !override.color) {
+					return;
+				}
 
-		const toAdd = requiresFullRebuild
-			? overridesColorDiff(curr, emptyOverrides)
-			: overridesColorDiff(curr, prev);
-		const toRemove = requiresFullRebuild
-			? overridesColorDiff(prev, emptyOverrides)
-			: overridesColorDiff(prev, curr);
+				map[override.color] ||= new Set();
+				map[override.color].add(meshId);
+			});
+
+			return map;
+		};
+
+		const baseToAdd = overridesColorDiff(curr, prev);
+		const baseToRemove = overridesColorDiff(prev, curr);
+
+		const toAdd = baseToAdd.filter((entry) => !entry.excludeIds);
+		const toRemove = baseToRemove.filter((entry) => !entry.excludeIds);
+
+		const prevExcludeByColor = getExcludeColorSets(prev);
+		const currExcludeByColor = getExcludeColorSets(curr);
+		const allExcludeColors = new Set([
+			...Object.keys(prevExcludeByColor),
+			...Object.keys(currExcludeByColor),
+		]);
+
+		allExcludeColors.forEach((color) => {
+			const prevExcludeSet = prevExcludeByColor[color] || new Set<string>();
+			const currExcludeSet = currExcludeByColor[color] || new Set<string>();
+
+			if (!prevExcludeSet.size && currExcludeSet.size) {
+				toAdd.push({ color, shared_ids: Array.from(currExcludeSet), excludeIds: true });
+				return;
+			}
+
+			if (prevExcludeSet.size && !currExcludeSet.size) {
+				toRemove.push({ color, shared_ids: Array.from(prevExcludeSet), excludeIds: true });
+				return;
+			}
+
+			const idsToAdd = Array.from(prevExcludeSet).filter((id) => !currExcludeSet.has(id));
+			const idsToRemove = Array.from(currExcludeSet).filter((id) => !prevExcludeSet.has(id));
+
+			if (idsToAdd.length) {
+				toAdd.push({ color, shared_ids: idsToAdd });
+			}
+
+			if (idsToRemove.length) {
+				toRemove.push({ color, shared_ids: idsToRemove });
+			}
+		});
 
 		await removeColorOverrides(toRemove);
 		await addColorOverrides(toAdd);
