@@ -29,7 +29,12 @@ import { CircularProgress, Tooltip } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { TreeActions, selectNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
+import {
+	TreeActions,
+	selectGetAllMeshes,
+	selectGetSharedIdsFromNodeIds,
+	selectNumNodesByMeshSharedIdsArray,
+} from '@/v4/modules/tree';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	Buttons,
@@ -61,9 +66,25 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const checked = getGroupIsChecked(index);
 	const isHidden = groupType === 'hidden';
 	const isHighlighted = highlightedIndex === index;
+	const isExcludeDefinedObjects = Boolean((group as Group).excludeDefinedObjects);
 
 	const sharedIds = convertToV4GroupNodes(group as Group).flatMap(({ shared_ids }) => shared_ids);
-	const objectsCount = useSelector((state) => selectNumNodesByMeshSharedIdsArray(state, sharedIds));
+	const objectsCount = useSelector((state) => {
+		const currentCount = selectNumNodesByMeshSharedIdsArray(state, sharedIds);
+		if (!isExcludeDefinedObjects) {
+			return currentCount;
+		}
+
+		const targetContainers = new Set(((group as Group).objects || []).map(({ container }) => container));
+		const meshesByContainer = selectGetAllMeshes(state);
+		const containerMeshIds = meshesByContainer
+			.filter(({ model }) => targetContainers.has(model))
+			.flatMap(({ meshes }) => meshes);
+		const containerSharedIds = selectGetSharedIdsFromNodeIds(state, containerMeshIds);
+		const totalCount = selectNumNodesByMeshSharedIdsArray(state, containerSharedIds);
+
+		return Math.max(0, totalCount - currentCount);
+	});
 
 	const preventPropagation = (e) => {
 		e.preventDefault();
