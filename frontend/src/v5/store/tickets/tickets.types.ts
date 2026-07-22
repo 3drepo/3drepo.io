@@ -223,7 +223,12 @@ export type MeshColorOverride = string | {
 };
 
 type MeshIdColorDict = Record<string, MeshColorOverride>;
-type MeshIdTransparencyDict = Record<string, number>;
+export type MeshTransparencyOverride = number | {
+	transparency: number;
+	excludeIds?: boolean;
+};
+
+type MeshIdTransparencyDict = Record<string, MeshTransparencyOverride>;
 export type MeshIdTransformDict = Record<string, TransformMatrix>;
 
 export type OverridesDicts = {

@@ -194,7 +194,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 
 			if (opacity !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-				dict.transparencies[id] = opacity;
+				dict.transparencies[id] = excludeIds ? { transparency: opacity, excludeIds } : opacity;
 			}
 
 			return dict;

@@ -680,14 +680,14 @@ export class ViewerService {
 		return this.currentNavMode;
 	}
 
-	public async overrideMeshOpacity(account, model, meshIDs, opacity) {
+	public async overrideMeshOpacity(account, model, meshIDs, opacity, excludeIds = false) {
 		await this.isViewerReady();
-		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity);
+		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity, excludeIds);
 	}
 
-	public async resetMeshOpacity(account, model, meshIDs) {
+	public async resetMeshOpacity(account, model, meshIDs, excludeIds = false) {
 		await this.isViewerReady();
-		UnityUtil.resetMeshOpacity(account, model, meshIDs);
+		UnityUtil.resetMeshOpacity(account, model, meshIDs, excludeIds);
 	}
 
 	/**
@@ -865,8 +865,8 @@ export class ViewerService {
 		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color, excludeIds);
 	}
 
-	public resetMeshColor(teamspace, model, meshIDs) {
-		UnityUtil.resetMeshColor(teamspace, model, meshIDs);
+	public resetMeshColor(teamspace, model, meshIDs, excludeIds = false) {
+		UnityUtil.resetMeshColor(teamspace, model, meshIDs, excludeIds);
 	}
 
 	/**

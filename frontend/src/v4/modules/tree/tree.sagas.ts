@@ -677,14 +677,22 @@ function* zoomToHighlightedNodes() {
 }
 
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
+	const hasExcludeIdsOverride = (overrides = {}) => Object.values(overrides)
+		.some((override: any) => override && typeof override === 'object' && override.excludeIds);
+
+	const requiresFullRebuild = hasExcludeIdsOverride(previousOverrides) || hasExcludeIdsOverride(currentOverrides);
+	const emptyOverrides = {};
+
+	const toAdd = requiresFullRebuild
+		? overridesTransparencyDiff(currentOverrides, emptyOverrides)
+		: overridesTransparencyDiff(currentOverrides, previousOverrides);
+	const toRemove = requiresFullRebuild
+		? overridesTransparencyDiff(previousOverrides, emptyOverrides)
+		: overridesTransparencyDiff(previousOverrides, currentOverrides);
 
 	yield waitForTreeToBeReady();
-	yield all([
-		removeTransparencyOverrides(toRemove),
-		addTransparencyOverrides(toAdd)
-	]);
+	yield call(removeTransparencyOverrides, toRemove);
+	yield call(addTransparencyOverrides, toAdd);
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {
