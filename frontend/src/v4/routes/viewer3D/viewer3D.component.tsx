@@ -137,12 +137,63 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 	}
 
-	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesColorDiff(curr, prev);
-		const toRemove = overridesColorDiff(prev, curr);
+	public async renderColorOverrides(prev, curr) {
+		const getExcludeColorSets = (overrides = {}) => {
+			const map = {} as Record<string, Set<string>>;
 
-		removeColorOverrides(toRemove);
-		addColorOverrides(toAdd);
+			Object.entries(overrides).forEach(([meshId, override]: any) => {
+				if (!override || typeof override !== 'object' || !override.excludeIds || !override.color) {
+					return;
+				}
+
+				map[override.color] ||= new Set();
+				map[override.color].add(meshId);
+			});
+
+			return map;
+		};
+
+		const baseToAdd = overridesColorDiff(curr, prev);
+		const baseToRemove = overridesColorDiff(prev, curr);
+
+		const toAdd = baseToAdd.filter((entry) => !entry.excludeIds);
+		const toRemove = baseToRemove.filter((entry) => !entry.excludeIds);
+
+		const prevExcludeByColor = getExcludeColorSets(prev);
+		const currExcludeByColor = getExcludeColorSets(curr);
+		const allExcludeColors = new Set([
+			...Object.keys(prevExcludeByColor),
+			...Object.keys(currExcludeByColor),
+		]);
+
+		allExcludeColors.forEach((color) => {
+			const prevExcludeSet = prevExcludeByColor[color] || new Set<string>();
+			const currExcludeSet = currExcludeByColor[color] || new Set<string>();
+
+			if (!prevExcludeSet.size && currExcludeSet.size) {
+				toAdd.push({ color, shared_ids: Array.from(currExcludeSet), excludeIds: true });
+				return;
+			}
+
+			if (prevExcludeSet.size && !currExcludeSet.size) {
+				toRemove.push({ color, shared_ids: Array.from(prevExcludeSet), excludeIds: true });
+				return;
+			}
+
+			const idsToAdd = Array.from(prevExcludeSet).filter((id) => !currExcludeSet.has(id));
+			const idsToRemove = Array.from(currExcludeSet).filter((id) => !prevExcludeSet.has(id));
+
+			if (idsToAdd.length) {
+				toAdd.push({ color, shared_ids: idsToAdd });
+			}
+
+			if (idsToRemove.length) {
+				toRemove.push({ color, shared_ids: idsToRemove });
+			}
+		});
+
+		await removeColorOverrides(toRemove);
+		await addColorOverrides(toAdd);
 	}
 
 	public renderTransformations(prev, curr) {
@@ -203,7 +254,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+			await this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
 		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {

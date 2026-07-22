@@ -35,19 +35,30 @@ export const overridesDiff = (field) => (overrideA, overrideB) => {
 	const keys = Object.keys(overrideA);
 	const diff = {};
 	const result = [];
-	let value = null;
+
+	const getOverrideValue = (override) => {
+		if (typeof override === 'object' && override !== null) {
+			return {
+				value: override[field],
+				excludeIds: Boolean(override.excludeIds),
+			};
+		}
+
+		return { value: override, excludeIds: false };
+	};
 
 	keys.forEach((key) => {
 		if (overrideA[key] !== overrideB[key]) {
-			value = overrideA[key];
+			const { value, excludeIds } = getOverrideValue(overrideA[key]);
+			const overrideKey = `${value}__${excludeIds}`;
 
-			if (!diff[value]) {
-				const overrideByColor = {[field]: value, shared_ids: []};
-				diff[value] = overrideByColor;
+			if (!diff[overrideKey]) {
+				const overrideByColor = { [field]: value, shared_ids: [], excludeIds };
+				diff[overrideKey] = overrideByColor;
 				result.push(overrideByColor);
 			}
 
-			diff[value].shared_ids.push(key);
+			diff[overrideKey].shared_ids.push(key);
 		}
 	});
 
@@ -78,7 +89,7 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					addOverride(teamspace, modelId, meshes, value);
+					addOverride(teamspace, modelId, meshes, value, override.excludeIds);
 				}
 			}
 		}
@@ -88,9 +99,9 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 export const addColorOverrides = addOverrides('color', hexToGLColor, Viewer.overrideMeshColor.bind(Viewer));
 
 export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
-	(teamspace, modelId, meshes, transparency) => {
+	(teamspace, modelId, meshes, transparency, excludeIds) => {
 		if (transparency !== 0) {
-			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency);
+			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency, excludeIds);
 		}
 	});
 
@@ -114,7 +125,7 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					resetMesh(teamspace, modelId, meshes);
+					resetMesh(teamspace, modelId, meshes, override.excludeIds);
 				}
 			}
 		}
@@ -122,6 +133,6 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 };
 
 export const removeColorOverrides = removeOverrides(Viewer.resetMeshColor.bind(Viewer));
-export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes) => {
-	Viewer.resetMeshOpacity(teamspace, modelId, meshes);
+export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes, excludeIds) => {
+	Viewer.resetMeshOpacity(teamspace, modelId, meshes, excludeIds);
 });
