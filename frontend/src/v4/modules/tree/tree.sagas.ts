@@ -93,6 +93,30 @@ const toggleMeshesVisibility = (meshes, visibility, excludeIds = false) => {
 	}
 };
 
+const splitObjectsByExcludeFlag = (objects = []) => objects.reduce((acc, obj: any) => {
+	if (obj?.excludeDefinedObjects) {
+		acc.exclude.push(obj);
+	} else {
+		acc.include.push(obj);
+	}
+
+	return acc;
+}, { include: [], exclude: [] } as { include: any[]; exclude: any[] });
+
+function* toggleSharedIdsVisibility(objects = [], visibility: boolean, excludeIds = false) {
+	for (let index = 0; index < objects.length; index++) {
+		const { account, model, shared_ids } = objects[index];
+		if (!shared_ids?.length) {
+			continue;
+		}
+
+		const meshIds = yield select(selectGetNodesIdsFromSharedIds([{ shared_ids }]));
+		if (meshIds?.length) {
+			Viewer.switchObjectVisibility(account, model, meshIds, visibility, excludeIds);
+		}
+	}
+}
+
 function* handleMetadata(node: any) {
 	if (node?.meta) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
@@ -335,9 +359,15 @@ function* showAllExceptMeshIDs(meshes = []) {
 
 export function* showNodesBySharedIds({ objects = [] }) {
 	yield waitForTreeToBeReady();
+	const { include, exclude } = splitObjectsByExcludeFlag(objects);
+	if (include.length) {
+		const nodesIds = yield select(selectGetNodesIdsFromSharedIds(include));
+		yield showTreeNodes(nodesIds);
+	}
 
-	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
-	yield showTreeNodes(nodesIds);
+	if (exclude.length) {
+		yield call(toggleSharedIdsVisibility, exclude, true, true);
+	}
 }
 
 function* showTreeNodes(nodesIds = [], skipNested = false) {
@@ -362,13 +392,20 @@ function* hideSelectedNodes() {
 
 function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
 	yield waitForTreeToBeReady();
+	const { include, exclude } = splitObjectsByExcludeFlag(objects);
 
-	const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(objects));
+	if (include.length) {
+		const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(include));
 
-	if (resetTree) {
-		yield showAllExceptMeshIDs(nodesIds);
-	} else {
-		yield hideTreeNodes(nodesIds, true);
+		if (resetTree) {
+			yield showAllExceptMeshIDs(nodesIds);
+		} else {
+			yield hideTreeNodes(nodesIds, true);
+		}
+	}
+
+	if (exclude.length) {
+		yield call(toggleSharedIdsVisibility, exclude, false, true);
 	}
 }
 
