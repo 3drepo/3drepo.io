@@ -137,12 +137,22 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 	}
 
-	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesColorDiff(curr, prev);
-		const toRemove = overridesColorDiff(prev, curr);
+	public async renderColorOverrides(prev, curr) {
+		const hasExcludeIdsOverride = (overrides = {}) => Object.values(overrides)
+			.some((override: any) => override && typeof override === 'object' && override.excludeIds);
 
-		removeColorOverrides(toRemove);
-		addColorOverrides(toAdd);
+		const requiresFullRebuild = hasExcludeIdsOverride(prev) || hasExcludeIdsOverride(curr);
+		const emptyOverrides = {};
+
+		const toAdd = requiresFullRebuild
+			? overridesColorDiff(curr, emptyOverrides)
+			: overridesColorDiff(curr, prev);
+		const toRemove = requiresFullRebuild
+			? overridesColorDiff(prev, emptyOverrides)
+			: overridesColorDiff(prev, curr);
+
+		await removeColorOverrides(toRemove);
+		await addColorOverrides(toAdd);
 	}
 
 	public renderTransformations(prev, curr) {
@@ -203,7 +213,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
+			await this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
 		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
