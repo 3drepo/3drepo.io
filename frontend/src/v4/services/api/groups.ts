@@ -42,10 +42,24 @@ export const getGroups = (teamspace, modelId, revision?) => {
  * @param revision
  */
 export const getGroup = (teamspace, modelId, groupId, revision?) => {
+	let res;
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`);
+		res = api.get(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`);
+	} else {
+		res = api.get(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`);
 	}
-	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`);
+
+	return res.then((response) => {
+		response.data.objects.forEach(obj => {
+			if (!(obj.shared_ids?.forEach)) {
+				console.error('Object does not have shared_ids property', obj);
+				Object.assign(obj, { shared_ids: [] });
+				return;
+			}
+		});
+
+		return response;
+	});
 };
 
 /**
