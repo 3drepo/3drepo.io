@@ -17,6 +17,9 @@
 import styled from 'styled-components';
 import TextFieldBase from '@mui/material/TextField';
 import { Box } from '@mui/system';
+import { DateField as MuiDateField } from '@mui/x-date-pickers/DateField';
+import { TimeField as MuiTimeField } from '@mui/x-date-pickers/TimeField';
+import { Button } from '@controls/button';
 
 export const TextField = styled(TextFieldBase)`
 	caret-color: transparent;
@@ -55,14 +58,37 @@ export const TextField = styled(TextFieldBase)`
 	}
 `;
 
+export const ActionsRow = styled(Box)`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 12px;
+	height: 40px;
+`;
+
 export const ClearDateAction = styled.div`
 	${({ theme }) => theme.typography.body1}
 	font-weight: 500;
 	color: ${({ theme }) => theme.palette.error.main};
-	margin-right: 22px;
 	cursor: pointer;
-	height: 32px;
-	text-align: right;
+`;
+
+export const ApplyAction = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	&& {
+		margin: 0;
+		height: 27px;
+		min-width: unset;
+		padding: 0 12px;
+		font-size: 0.75rem;
+
+		&.Mui-disabled {
+			color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) => theme.palette.base.lightest};
+		}
+	}
 `;
 
 export const PopperWrapper = styled(Box)`
@@ -71,4 +97,66 @@ export const PopperWrapper = styled(Box)`
 	box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
 	padding: 1px;
 	border: none;
+	width: 320px;
+	border-radius: 10px;
+	overflow: hidden;
+`;
+
+export const FieldsRow = styled(Box)`
+	display: flex;
+	gap: 10px;
+	padding: 16px 12px 8px;
+`;
+
+export const PickerViewContainer = styled(Box)`
+	height: 336px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+
+	.MuiDateCalendar-root {
+		width: 100%;
+		height: 100%;
+		max-height: 100%;
+	}
+`;
+
+export const TimeClockContainer = styled(Box)`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+`;
+
+const pickerFieldStyles = `
+	.MuiOutlinedInput-root {
+		padding-left: 10px;
+		cursor: pointer;
+	}
+
+	.MuiInputAdornment-root {
+		margin-right: 6px;
+
+		svg {
+			width: 16px;
+			height: 16px;
+		}
+	}
+
+	.MuiOutlinedInput-input {
+		padding-left: 0;
+		cursor: pointer;
+	}
+`;
+
+export const DateField = styled(MuiDateField)`
+	flex: 1;
+	${pickerFieldStyles}
+`;
+
+export const TimeField = styled(MuiTimeField)`
+	flex: 1;
+	${pickerFieldStyles}
 `;
