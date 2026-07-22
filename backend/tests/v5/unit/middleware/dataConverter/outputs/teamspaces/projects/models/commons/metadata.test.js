@@ -28,12 +28,12 @@ const Responder = require(`${src}/utils/responder`);
 
 const Metadata = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata`);
 
-const testFormatMetadata = () => {
-	describe('Format metadata', () => {
+const testFormatMetadataArray = () => {
+	describe('Format metadata array', () => {
 		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
 			const req = { metadata: [{ _id: generateRandomNumber() }] };
 
-			expect(Metadata.formatMetadata(req, {})).toBeUndefined();
+			expect(Metadata.formatMetadataArray(req, {})).toBeUndefined();
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
@@ -45,7 +45,7 @@ const testFormatMetadata = () => {
 				parents: times(10, () => generateUUID()),
 			})) };
 
-			expect(Metadata.formatMetadata(req, {})).toBeUndefined();
+			expect(Metadata.formatMetadataArray(req, {})).toBeUndefined();
 
 			const output = req.metadata.map((meta) => ({
 				_id: UUIDToString(meta._id),
@@ -61,7 +61,7 @@ const testFormatMetadata = () => {
 				metadata: times(10, () => ({ key: generateRandomString(), value: generateRandomString() })),
 			})) };
 
-			expect(Metadata.formatMetadata(req, {})).toBeUndefined();
+			expect(Metadata.formatMetadataArray(req, {})).toBeUndefined();
 
 			const output = req.metadata.map((meta) => ({
 				metadata: meta.metadata.reduce((acc, { key, value }) => {
@@ -76,64 +76,42 @@ const testFormatMetadata = () => {
 	});
 };
 
-const testFormatMetadataSingle = () => {
-	describe('Format metadata single', () => {
+const testFormatMetadata = () => {
+	describe('Format metadata', () => {
 		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
-			const req = { metadata: [{ _id: generateRandomNumber() }] };
+			const req = { metadata: { _id: generateRandomNumber() } };
 
-			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+			expect(Metadata.formatMetadata(req, {})).toBeUndefined();
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
 
-		test('Should respond with empty object if metadata is empty', () => {
-			const req = { metadata: [] };
-
-			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, {});
-		});
-
-		test('Should cast ids correctly', () => {
-			const req = { metadata: times(10, () => ({
+		test('Should cast ids and metadata correctly', () => {
+			const req = { metadata: {
 				_id: generateUUID(),
 				parents: times(10, () => generateUUID()),
-			})) };
-
-			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
-
-			const output = req.metadata.map((meta) => ({
-				_id: UUIDToString(meta._id),
-				parents: meta.parents.map(UUIDToString),
-			}));
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output[0]);
-		});
-
-		test('Should cast metadata correctly', () => {
-			const req = { metadata: times(10, () => ({
 				metadata: times(10, () => ({ key: generateRandomString(), value: generateRandomString() })),
-			})) };
+			} };
 
-			expect(Metadata.formatMetadataSingle(req, {})).toBeUndefined();
+			expect(Metadata.formatMetadata(req, {})).toBeUndefined();
 
-			const output = req.metadata.map((meta) => ({
-				metadata: meta.metadata.reduce((acc, { key, value }) => {
+			const output = {
+				_id: UUIDToString(req.metadata._id),
+				parents: req.metadata.parents.map(UUIDToString),
+				metadata: req.metadata.metadata.reduce((acc, { key, value }) => {
 					acc[key] = value;
 					return acc;
 				}, {}),
-			}));
+			};
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output[0]);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, output);
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
+	testFormatMetadataArray();
 	testFormatMetadata();
-	testFormatMetadataSingle();
 });

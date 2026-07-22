@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { formatMetadata, formatMetadataSingle } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata');
+const { formatMetadata, formatMetadataArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata');
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions');
 const Metadata = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
 const { Router } = require('express');
@@ -173,7 +173,7 @@ const establishRoutes = (isInternal) => {
 		*                  }
 		*               ]
 		*/
-		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata, formatMetadata);
+		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata, formatMetadataArray);
 	} else {
 		/**
 		 * @openapi
@@ -363,7 +363,7 @@ const establishRoutes = (isInternal) => {
 	 *                   _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
 	 *                   metadata: {}
 	 */
-	router.get('/:metadata', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getMetadataById, formatMetadataSingle);
+	router.get('/:metadata', hasReadAccessToContainer, getMetadataById, formatMetadata);
 
 	return router;
 };

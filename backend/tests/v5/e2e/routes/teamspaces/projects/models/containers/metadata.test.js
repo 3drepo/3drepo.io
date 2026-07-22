@@ -404,11 +404,12 @@ const testGetMetadataById = (internalService) => {
 		});
 
 		const createRoute = ({
+			teamspaceId = teamspace,
 			projectId = project.id,
 			containerId = con._id,
 			metadataId = metadata._id,
 			key = users.tsAdmin.apiKey,
-		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
+		} = {}) => `/v5/teamspaces/${teamspaceId}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
 
 		const expectedMetadata = metadata.metadata.reduce((obj, item) => Object.assign(obj,
 			{ [item.key]: item.value }), {});
@@ -420,11 +421,11 @@ const testGetMetadataById = (internalService) => {
 		];
 
 		const generalTests = [
+			['the teamspace does not exist', createRoute({ teamspaceId: ServiceHelper.generateRandomString() }), false, templates.teamspaceNotFound],
 			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
 			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
-			['the container does not have a revision', createRoute({ containerId: conNoRev._id }), false, templates.revisionNotFound],
-			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), true, { }],
+			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), false, templates.metadataNotFound],
 			['metadata exists', createRoute(), true, { _id: metadata._id, metadata: expectedMetadata }],
 		];
 
