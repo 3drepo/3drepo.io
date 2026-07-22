@@ -1,7 +1,8 @@
-import { UnityUtil } from '../../src/globals/unity-util';
+import { PointInfoOptions, UnityUtil } from '../../src/globals/unity-util';
 import { ExternalWebRequestHandler } from '../../src/globals/unity-externalwebrequesthandler';
 import { IndexedDbCache } from '../../src/globals/unity-indexedbcache';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import * as uuidApi from '../../src/v4/helpers/uuid';
 
 const TEST_TEXT = 'Hello World Test Data';
 const TEST_JSON = { name: 'Test Model', version: 1.0, data: [1, 2, 3] };
@@ -379,10 +380,12 @@ describe('UnityUtil.requestPointInfo', () => {
     it('should not alter a CanvasPosition when passing it off to the viewer', async () => {
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             UnityUtil.respondToPointInfoRequest(JSON.stringify({
-                mousePos: [150, 250],
+                requestId: 'test-request-id',
             }));
         });
-        
+
+        jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
+
         const canvasPosition = {
             x: 150,
             y: 250,
@@ -390,17 +393,28 @@ describe('UnityUtil.requestPointInfo', () => {
 
         await UnityUtil.requestPointInfo(canvasPosition);
 
-        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(canvasPosition));
+        const expectedObject = {
+            x: 150,
+            y: 250,
+            requestId: 'test-request-id',
+            options: {
+                useSnapping: true,
+            },
+        };
+
+        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
 
 
     it('should alter a ClientPosition according to the canvas before passing it off to the viewer', async () => {
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             UnityUtil.respondToPointInfoRequest(JSON.stringify({
-                mousePos: [100, 249],
+                requestId: 'test-request-id',
             }));
         });
         
+        jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
+
         UnityUtil.unityInstance = {
             Module: {
                 canvas: {
@@ -420,20 +434,26 @@ describe('UnityUtil.requestPointInfo', () => {
 
         await UnityUtil.requestPointInfo(clientPosition);
 
-        const expectedPosition = {
+        const expectedObject = {
             x: 100, // 150 - 50 (canvas left)
             y: 249, // 400 (canvas height) - 1 (to offset pixel 0) - (250 - 100 (canvas top))
+            requestId: 'test-request-id',
+            options: {
+                useSnapping: true,
+            },
         };
 
-        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedPosition));
+        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
 
     it('should apply DPI scaling to a ClientPosition according to the canvas before passing it off to the viewer', async () => {
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             UnityUtil.respondToPointInfoRequest(JSON.stringify({
-                mousePos: [200, 499],
+                requestId: 'test-request-id',
             }));
         });
+
+        jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
 
         // @ts-ignore
         jest.replaceProperty(window, 'devicePixelRatio', 2);
@@ -457,23 +477,29 @@ describe('UnityUtil.requestPointInfo', () => {
 
         await UnityUtil.requestPointInfo(clientPosition);
 
-        const expectedPosition = {
+        const expectedObject = {
             x: 200, // 300 (clientX scaled) - 100 (canvas left, scaled)
             y: 499, // 800 (canvas height scaled) - 1 (to offset pixel 0) - (500 (clientY scaled) - 200 (canvas top scaled))
+            requestId: 'test-request-id',
+            options: {
+                useSnapping: true,
+            },
         };
 
-        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedPosition));        
+        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
 
     it('should resolve a valid request with point info', async () => {
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             const mockPointInfo = {
-                mousePos: [100, 200],
+                requestId: 'test-request-id',
                 foo: 'bar', // Some dummy
             }
             
             UnityUtil.respondToPointInfoRequest(JSON.stringify(mockPointInfo));
         });
+
+        jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
 
         const canvasPosition = {
             x: 100,
@@ -485,9 +511,41 @@ describe('UnityUtil.requestPointInfo', () => {
         expect(toUnitySpy).toHaveBeenCalledTimes(1);
 
         expect(pointInfo).toEqual({
-            mousePos: [100, 200],
+            requestId: 'test-request-id',
             foo: 'bar',
         });
+    });
+
+    it('should correctly pass on an option object', async () => {
+        const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
+            UnityUtil.respondToPointInfoRequest(JSON.stringify({
+                requestId: 'test-request-id',
+            }));
+        });
+
+        jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
+
+        const canvasPosition = {
+            x: 150,
+            y: 250,
+        };
+
+        const options: PointInfoOptions = {
+            useSnapping: false,
+        };
+
+        await UnityUtil.requestPointInfo(canvasPosition, options);
+
+        const expectedObject = {
+            x: 150,
+            y: 250,
+            requestId: 'test-request-id',
+            options: {
+                useSnapping: false,
+            },
+        };
+
+        expect(toUnitySpy).toHaveBeenCalledWith('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(expectedObject));
     });
 
     it('should drop all requests if the point info coming from the viewer is malformed', async () => {
