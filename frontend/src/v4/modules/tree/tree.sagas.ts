@@ -42,6 +42,7 @@ import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
+	selectGetAllMeshes,
 	selectGetNodesByIds,
 	selectSelectedObjects,
 	selectGetNodesIdsFromSharedIds,
@@ -103,18 +104,34 @@ const splitObjectsByExcludeFlag = (objects = []) => objects.reduce((acc, obj: an
 	return acc;
 }, { include: [], exclude: [] } as { include: any[]; exclude: any[] });
 
-function* toggleSharedIdsVisibility(objects = [], visibility: boolean, excludeIds = false) {
+function* getComplementNodesIdsForExcludeObjects(objects = []) {
+	const allMeshesByModel = yield select(selectGetAllMeshes);
+	const complementNodes = new Set<string>();
+
 	for (let index = 0; index < objects.length; index++) {
 		const { account, model, shared_ids } = objects[index];
 		if (!shared_ids?.length) {
 			continue;
 		}
 
-		const meshIds = yield select(selectGetNodesIdsFromSharedIds([{ shared_ids }]));
-		if (meshIds?.length) {
-			Viewer.switchObjectVisibility(account, model, meshIds, visibility, excludeIds);
+		const includedNodes = yield select(selectGetNodesIdsFromSharedIds([{ shared_ids }]));
+		const includedNodesSet = new Set(includedNodes);
+		const modelMeshesEntry = allMeshesByModel.find(({ teamspace, model: modelId }) => (
+			teamspace === account && modelId === model
+		));
+
+		if (!modelMeshesEntry?.meshes?.length) {
+			continue;
 		}
+
+		modelMeshesEntry.meshes.forEach((meshId) => {
+			if (!includedNodesSet.has(meshId)) {
+				complementNodes.add(meshId);
+			}
+		});
 	}
+
+	return Array.from(complementNodes);
 }
 
 function* handleMetadata(node: any) {
@@ -366,7 +383,8 @@ export function* showNodesBySharedIds({ objects = [] }) {
 	}
 
 	if (exclude.length) {
-		yield call(toggleSharedIdsVisibility, exclude, true, true);
+		const complementNodes = yield call(getComplementNodesIdsForExcludeObjects, exclude);
+		yield showTreeNodes(complementNodes, true);
 	}
 }
 
@@ -405,7 +423,8 @@ function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
 	}
 
 	if (exclude.length) {
-		yield call(toggleSharedIdsVisibility, exclude, false, true);
+		const complementNodes = yield call(getComplementNodesIdsForExcludeObjects, exclude);
+		yield hideTreeNodes(complementNodes, true);
 	}
 }
 
