@@ -329,8 +329,8 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
-	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
+db.createMetadata = (teamspace, modelId, metadataId, metadata, revId) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata, rev_id: stringToUUID(revId) });
 
 const createImage = async (dbName, colName, type, imageId, imageData) => {
 	const { defaultStorage } = config;

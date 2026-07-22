@@ -22,18 +22,27 @@ const { types } = require('../../../../../../../utils/helper/yup');
 
 const Metadata = {};
 
-const schema = Yup.array().of(Yup.object({
+const objectSchema = Yup.object({
 	_id: types.id,
 	parents: Yup.array().of(types.id),
 	metadata: Yup.mixed().transform((metaArr) => metaArr.reduce((acc, { key, value }) => {
 		acc[key] = value;
 		return acc;
 	}, {})),
-}));
+});
+
+Metadata.formatMetadataArray = (req, res) => {
+	try {
+		const formattedMetadata = Yup.array().of(objectSchema).cast(req.metadata, { stripUnknown: true });
+		respond(req, res, templates.ok, formattedMetadata);
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
+};
 
 Metadata.formatMetadata = (req, res) => {
 	try {
-		const formattedMetadata = schema.cast(req.metadata, { stripUnknown: true });
+		const formattedMetadata = objectSchema.cast(req.metadata, { stripUnknown: true });
 		respond(req, res, templates.ok, formattedMetadata);
 	} catch (err) {
 		respond(req, res, templates.unknown);
