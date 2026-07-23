@@ -179,7 +179,7 @@ export const selectPins = createSelector(
 	}
 
 	// if you are within an issue details view it should always show the pin
-	if (showDetails && detailedIssue) {
+	if (showDetails && hasPin(detailedIssue)) {
 		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
 	}

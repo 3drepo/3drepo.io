@@ -184,7 +184,7 @@ export const selectPins = createSelector(
 		}
 
 		// if you are within a risk's details view it should always show the pin
-		if (showDetails && detailedRisk) {
+		if (showDetails && hasPin(detailedRisk)) {
 			pinsToShow.push(riskToPin(detailedRisk, true));
 		}
 
