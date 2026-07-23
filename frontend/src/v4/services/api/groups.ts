@@ -18,6 +18,18 @@
 import { splitValuesIfNecessary } from '../../helpers/requests';
 import { API as api } from './default';
 
+
+const sanitizeGroup = ({objects}) => {
+	objects.forEach(obj => {
+		if (!(obj.shared_ids?.forEach)) {
+			console.error('Object does not have shared_ids property', obj);
+			Object.assign(obj, { shared_ids: [] });
+			return;
+		}
+	});
+};
+
+
 /**
  * Get groups list
  * @param teamspace
@@ -28,10 +40,17 @@ import { API as api } from './default';
 
 export const getGroups = (teamspace, modelId, revision?) => {
 	const query = 'noIssues=true&noRisks=true&noViews=true&noSequences=true';
+	let res;
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?${query}`);
+		res = api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?${query}`);
+	} else {
+		res = api.get(`${teamspace}/${modelId}/revision/master/head/groups/?${query}`);
 	}
-	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?${query}`);
+
+	return res.then((response) => {
+		response.data?.forEach?.(sanitizeGroup);
+		return response;
+	});
 };
 
 /**
@@ -50,14 +69,7 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
 	}
 
 	return res.then((response) => {
-		response.data.objects.forEach(obj => {
-			if (!(obj.shared_ids?.forEach)) {
-				console.error('Object does not have shared_ids property', obj);
-				Object.assign(obj, { shared_ids: [] });
-				return;
-			}
-		});
-
+		sanitizeGroup(response.data);
 		return response;
 	});
 };
