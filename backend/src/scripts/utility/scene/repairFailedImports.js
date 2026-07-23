@@ -55,7 +55,7 @@ const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
 const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
 	logger.logInfo('\t\tReading nodes...');
 
-	if (process.memoryUsage().rss > 1024 * 2) {
+	if (process.memoryUsage().rss > 1024 * 1024 * 1024 * 1) {
 		logger.logInfo(`\t\tForce garbage collection. Before: ${JSON.stringify(process.memoryUsage())}`);
 		global.gc();
 		logger.logInfo(`\t\tAfter: ${JSON.stringify(process.memoryUsage())}.`);
