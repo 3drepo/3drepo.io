@@ -19,7 +19,7 @@ import { useRef, useState } from 'react';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { ChipContainer, DeleteButton } from '@components/viewer/cards/cardFilters/filterChip/filterChip.styles';
+import { ChipContainer, DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
 import { ChipsInputBox, FieldHint, HelperText, Kbd, Label, TagInput, TagPropertyContainer } from './tagProperty.styles';
 
 type TagPropertyProps = FormInputProps & {
