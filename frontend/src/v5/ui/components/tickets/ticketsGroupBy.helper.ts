@@ -200,7 +200,7 @@ const getKey = (ticket: ITicket, groupBy: string, templatesDict: Record<string, 
 	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return getKeyByDueDate(ticket);
 	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus(ticket, groupBy, template);
 	if (['text', 'oneOf'].includes(propertyType)) return getKeyBySingleValue(ticket, groupBy);
-	if (propertyType === 'manyOf') return getKeyManyValues(ticket, groupBy);
+	if (['manyOf', 'tag'].includes(propertyType)) return getKeyManyValues(ticket, groupBy);
 };
 
 

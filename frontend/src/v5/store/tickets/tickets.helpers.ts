@@ -344,7 +344,7 @@ export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProper
 
 export const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
 export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => definitionsAsArray
-	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+	.filter((definition) => ['manyOf', 'oneOf', 'text', 'tag'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 	.map((definition) => definition.name);
 
 export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {
