@@ -16,6 +16,7 @@
  */
 
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
+import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 import { InputLabel, FormHelperText } from '@mui/material';
 import styled, { css } from 'styled-components';
 
@@ -32,6 +33,16 @@ export const Label = styled(InputLabel)`
 	transform: none;
 	color: inherit;
 	max-width: 100%;
+`;
+
+export const TagChipContainer = styled(ChipContainer)`
+	max-width: 140px;
+`;
+
+export const TagChipLabel = styled.span`
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 `;
 
 export const ChipsInputBox = styled(InputContainer)`

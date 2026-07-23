@@ -19,8 +19,9 @@ import { useRef, useState } from 'react';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { ChipContainer, DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
-import { ChipsInputBox, FieldHint, HelperText, Kbd, Label, TagInput, TagPropertyContainer } from './tagProperty.styles';
+import { Tooltip } from '@mui/material';
+import { DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
+import { ChipsInputBox, FieldHint, HelperText, Kbd, Label, TagChipContainer, TagChipLabel, TagInput, TagPropertyContainer } from './tagProperty.styles';
 
 type TagPropertyProps = FormInputProps & {
 	value: string[];
@@ -77,14 +78,16 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 			{label && <Label shrink={false}>{label}</Label>}
 			<ChipsInputBox selected={focused} error={error} disabled={disabled} required={required}>
 				{tags.map((val) => (
-					<ChipContainer key={val} selected={false}>
-						<span>{val}</span>
-						{isEditable && (
-							<DeleteButton onClick={(e) => { e.stopPropagation(); removeTag(val); }}>
-								<CloseIcon />
-							</DeleteButton>
-						)}
-					</ChipContainer>
+					<Tooltip key={val} title={val}>
+						<TagChipContainer selected={false}>
+							<TagChipLabel>{val}</TagChipLabel>
+							{isEditable && (
+								<DeleteButton onClick={(e) => { e.stopPropagation(); removeTag(val); }}>
+									<CloseIcon />
+								</DeleteButton>
+							)}
+						</TagChipContainer>
+					</Tooltip>
 				))}
 				{isEditable && (
 					<TagInput
