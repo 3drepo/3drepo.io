@@ -17,22 +17,52 @@
 
 const { createDirectMessage, createInternalMessage } = require('../../chat');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { removeOldSessions } = require('../../sessions');
 const { saveSuccessfulLoginRecord } = require('../../../models/loginRecords');
+const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = ({ username, sessionID, socketId, ipAddress, userAgent, referer }) => Promise.all([
-	saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
-	removeOldSessions(username, sessionID, referer),
-	...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
-]);
-
-const sessionsRemoved = async ({ ids, elective }) => {
-	if (!elective) {
-		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+const userLoggedIn = async (payload) => {
+	const { username, sessionID, socketId, ipAddress, userAgent, referer } = payload;
+	try {
+		await Promise.all([
+			saveSuccessfulLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+			removeOldSessions(username, sessionID, referer),
+			...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
+		]);
+	} catch (err) {
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'AuthEventsListener',
+				listenerName: 'userLoggedIn',
+				eventName: events.SESSION_CREATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
-	await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
+};
+
+const sessionsRemoved = async (payload) => {
+	const { ids, elective } = payload;
+	try {
+		if (!elective) {
+			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+		}
+		await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
+	} catch (err) {
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'AuthEventsListener',
+				listenerName: 'sessionsRemoved',
+				eventName: events.SESSIONS_REMOVED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
+	}
 };
 
 const AuthEventsListener = {};

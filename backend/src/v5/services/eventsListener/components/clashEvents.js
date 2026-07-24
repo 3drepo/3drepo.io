@@ -37,7 +37,8 @@ const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
-const onNewContainerRevision = async ({ teamspace, project, model, modelType, data }) => {
+const onNewContainerRevision = async (payload) => {
+	const { teamspace, project, model, modelType, data } = payload;
 	try {
 		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
 			const relatedPlans = await getPlansByQuery(teamspace, project, {
@@ -88,10 +89,20 @@ const onNewContainerRevision = async ({ teamspace, project, model, modelType, da
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'onNewContainerRevision',
+				eventName: events.MODEL_IMPORT_FINISHED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const clashRunStatusUpdate = async ({ teamspace, project, runId, status }) => {
+const clashRunStatusUpdate = async (payload) => {
+	const { teamspace, project, runId, status } = payload;
 	try {
 		await updateRunStatus(teamspace, project, runId, status);
 	} catch (err) {
@@ -100,10 +111,20 @@ const clashRunStatusUpdate = async ({ teamspace, project, runId, status }) => {
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'clashRunStatusUpdate',
+				eventName: events.CLASH_RUN_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, runId, results, value }) => {
+const clashRunCompleted = async (payload) => {
+	const { teamspace, project, runId, results, value } = payload;
 	try {
 		const resInfo = getInfoFromCode(value);
 		resInfo.retVal = value;
@@ -119,6 +140,15 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 			+ `with id ${UUIDToString(runId)}: ${err.message}`);
 		if (err.stack) {
 			logger.logError(err.stack);
+		}
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'clashRunCompleted',
+				eventName: events.CLASH_RUN_COMPLETED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };

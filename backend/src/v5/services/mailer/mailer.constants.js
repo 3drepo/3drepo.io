@@ -19,6 +19,7 @@ const auditLogPassword = require('./templates/auditLogPassword');
 const clashError = require('./templates/clashError');
 const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
+const listenerErrorNotification = require('./templates/listenerErrorNotification');
 const modelImportError = require('./templates/modelImportError');
 const teamspaceExpiringSoon = require('./templates/teamspaceExpiringSoon');
 const teamspaceExpiringToday = require('./templates/teamspaceExpiringToday');
@@ -38,6 +39,7 @@ const templates = {
 	teamspaceExpiryDigest,
 	teamspaceExpiringSoon,
 	teamspaceExpiringToday,
+	listenerErrorNotification,
 };
 
 MailerConstants.templates = {};

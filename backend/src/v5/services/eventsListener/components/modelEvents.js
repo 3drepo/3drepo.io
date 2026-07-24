@@ -42,7 +42,8 @@ const { serialiseComment } = require('../../../schemas/tickets/tickets.comments'
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
 
-const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
+const queueStatusUpdate = async (payload) => {
+	const { teamspace, model, modelType, status, corId } = payload;
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const revId = stringToUUID(corId);
@@ -57,10 +58,20 @@ const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status })
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueStatusUpdate',
+				eventName: events.QUEUED_TASK_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, user }) => {
+const queueTasksCompleted = async (payload) => {
+	const { teamspace, model, modelType, value, corId, user } = payload;
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const errorInfo = getInfoFromCode(value);
@@ -78,10 +89,20 @@ const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, 
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueTasksCompleted',
+				eventName: events.QUEUED_TASK_COMPLETED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const revisionAdded = async ({ teamspace, project, model, revId, modelType, calibration }) => {
+const revisionAdded = async (payload) => {
+	const { teamspace, project, model, revId, modelType, calibration } = payload;
 	try {
 		const {
 			tag, author, timestamp, desc, rFile, format, statusCode, revCode,
@@ -89,11 +110,11 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1, format: 1, statusCode: 1, revCode: 1 });
 
 		if (modelTypes.DRAWING === modelType) {
-			await createDrawingThumbnail(teamspace, project, model, revId).catch((err) => {
-				// It is not critical error if we failed to create a thumbnail.
-				// So catch the error and proceed
+			try {
+				await createDrawingThumbnail(teamspace, project, model, revId);
+			} catch (err) {
 				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
-			});
+			}
 		}
 
 		const modelEvents = {
@@ -115,59 +136,83 @@ const revisionAdded = async ({ teamspace, project, model, revId, modelType, cali
 		}), teamspace, UUIDToString(project), model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'revisionAdded',
+				eventName: events.MODEL_IMPORT_FINISHED,
+				payload,
+				error: { message: err?.message, code: err?.code, stack: err?.stack },
+			});
+		}
 	}
 };
 
-const modelProcessingCompleted = async ({ teamspace, project, model, revId, user, modelType, data }) => {
+const modelProcessingCompleted = async (payload) => {
+	const { teamspace, project, model, revId, user, modelType, data } = payload;
 	const { errorReason, status } = data;
 
-	if (status === processStatuses.OK) {
-		const calibration = modelType === modelTypes.DRAWING
-			? await getCalibrationStatus(teamspace, project, model, revId)
-			: undefined;
+	try {
+		if (status === processStatuses.OK) {
+			const calibration = modelType === modelTypes.DRAWING
+				? await getCalibrationStatus(teamspace, project, model, revId)
+				: undefined;
 
-		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
-	} else if (!errorReason.userErr) {
-		try {
-			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
+		} else if (!errorReason.userErr) {
+			try {
+				const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 
-			let fileName = 'N/A';
+				let fileName = 'N/A';
 
-			if (modelType === modelTypes.DRAWING) {
-				const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
-					{ rev_id: revId }, { name: 1 });
-				fileName = name;
-			} else if (modelType === modelTypes.CONTAINER) {
-				fileName = await getContainerFileName(UUIDToString(revId));
-			}
+				if (modelType === modelTypes.DRAWING) {
+					const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+						{ rev_id: revId }, { name: 1 });
+					fileName = name;
+				} else if (modelType === modelTypes.CONTAINER) {
+					fileName = await getContainerFileName(UUIDToString(revId));
+				}
 
-			const { errorCode } = errorReason;
-			const { internalError, message } = getInfoFromCode(errorCode);
+				const { errorCode } = errorReason;
+				const { internalError, message } = getInfoFromCode(errorCode);
 
-			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
-				{
-					errInfo: {
-						code: `${errorCode} ${internalError}`,
-						message,
+				await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+					{
+						errInfo: {
+							code: `${errorCode} ${internalError}`,
+							message,
+						},
+						teamspace,
+						model,
+						user,
+						project: UUIDToString(project),
+						revId: UUIDToString(revId),
+						modelType,
+						fileName,
+						logExcerpt: logPreview,
+
 					},
-					teamspace,
-					model,
-					user,
-					project: UUIDToString(project),
-					revId: UUIDToString(revId),
-					modelType,
-					fileName,
-					logExcerpt: logPreview,
-
-				},
-				zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
-			);
-		} catch (err) {
-			logger.logError('Failed to send email for model import failures');
-			if (err.stack) {
-				logger.logError(err.stack);
+					zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
+				);
+			} catch (err) {
+				logger.logError('Failed to send email for model import failures');
+				if (err.stack) {
+					logger.logError(err.stack);
+				}
 			}
 		}
+	} catch (err) {
+		logger.logError(`Failed to process model import completion for ${teamspace}.${model}: ${err?.message}`);
+		if (err?.stack) {
+			logger.logError(err.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'modelProcessingCompleted',
+			eventName: events.MODEL_IMPORT_FINISHED,
+			payload,
+			error: { message: err?.message, code: err?.code, stack: err?.stack },
+		});
 	}
 
 	publish(events.MODEL_SETTINGS_UPDATE, {
@@ -179,7 +224,8 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 	});
 };
 
-const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
+const modelSettingsUpdated = async (payload) => {
+	const { teamspace, project, model, data, sender, modelType } = payload;
 	try {
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_SETTINGS_UPDATE,
@@ -195,10 +241,20 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		}
 	} catch (err) {
 		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelSettingsUpdated',
+				eventName: events.MODEL_SETTINGS_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
+const revisionUpdated = async (payload) => {
+	const { teamspace, project, model, data, sender, modelType } = payload;
 	try {
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_REVISION_UPDATE,
@@ -209,10 +265,20 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender, modelT
 			teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'revisionUpdated',
+				eventName: events.REVISION_UPDATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {
+const modelAdded = async (payload) => {
+	const { teamspace, project, model, data, sender, modelType } = payload;
 	try {
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.NEW_CONTAINER,
@@ -223,10 +289,20 @@ const modelAdded = async ({ teamspace, project, model, data, sender, modelType }
 		await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
 	} catch (err) {
 		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelAdded',
+				eventName: events.NEW_MODEL,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const modelDeleted = async ({ teamspace, project, model, sender, modelType }) => {
+const modelDeleted = async (payload) => {
+	const { teamspace, project, model, sender, modelType } = payload;
 	try {
 		const modelEvents = {
 			[modelTypes.CONTAINER]: chatEvents.CONTAINER_REMOVED,
@@ -237,19 +313,39 @@ const modelDeleted = async ({ teamspace, project, model, sender, modelType }) =>
 		await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelDeleted',
+				eventName: events.DELETE_MODEL,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const templateUpdated = async ({ teamspace, template: templateId }) => {
+const templateUpdated = async (payload) => {
+	const { teamspace, template: templateId } = payload;
 	try {
 		const template = await getTemplateById(teamspace, templateId);
 		await onTemplateUpdated(teamspace, template);
 	} catch (err) {
 		logger.logError(`Failed to process template updated event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'templateUpdated',
+				eventName: events.TICKET_TEMPLATE_UPDATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const ticketAdded = async ({ teamspace, project, model, ticket }) => {
+const ticketAdded = async (payload) => {
+	const { teamspace, project, model, ticket } = payload;
 	try {
 		const [isFed, template] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -264,10 +360,20 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket added event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketAdded',
+				eventName: events.NEW_TICKET,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const ticketsImported = async ({ teamspace, project, model, tickets }) => {
+const ticketsImported = async (payload) => {
+	const { teamspace, project, model, tickets } = payload;
 	try {
 		const [isFed, template] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -284,6 +390,15 @@ const ticketsImported = async ({ teamspace, project, model, tickets }) => {
 		}));
 	} catch (err) {
 		logger.logError(`Failed to process tickets imported event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketsImported',
+				eventName: events.TICKETS_IMPORTED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
@@ -307,7 +422,8 @@ const constructUpdatedObject = (changes) => {
 	return updateData;
 };
 
-const ticketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
+const ticketUpdated = async (payload) => {
+	const { teamspace, project, model, ticket, author, changes, timestamp } = payload;
 	try {
 		const [isFed, template] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -322,10 +438,20 @@ const ticketUpdated = async ({ teamspace, project, model, ticket, author, change
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketUpdated',
+				eventName: events.UPDATE_TICKET,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const ticketGroupUpdated = async ({ teamspace, project, model, ticket, _id, author, changes, timestamp }) => {
+const ticketGroupUpdated = async (payload) => {
+	const { teamspace, project, model, ticket, _id, author, changes, timestamp } = payload;
 	try {
 		const [isFed] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -337,10 +463,20 @@ const ticketGroupUpdated = async ({ teamspace, project, model, ticket, _id, auth
 		await createModelMessage(event, serialisedMsg, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process group updated event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketGroupUpdated',
+				eventName: events.UPDATE_TICKET_GROUP,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const ticketCommentAdded = async ({ teamspace, project, model, data }) => {
+const ticketCommentAdded = async (payload) => {
+	const { teamspace, project, model, data } = payload;
 	try {
 		const isFed = await isFederationCheck(teamspace, model);
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET_COMMENT : chatEvents.CONTAINER_NEW_TICKET_COMMENT;
@@ -348,10 +484,20 @@ const ticketCommentAdded = async ({ teamspace, project, model, data }) => {
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process comment added event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketCommentAdded',
+				eventName: events.NEW_COMMENT,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 
-const ticketCommentUpdated = async ({ teamspace, project, model, data }) => {
+const ticketCommentUpdated = async (payload) => {
+	const { teamspace, project, model, data } = payload;
 	try {
 		const isFed = await isFederationCheck(teamspace, model);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_COMMENT : chatEvents.CONTAINER_UPDATE_TICKET_COMMENT;
@@ -359,6 +505,15 @@ const ticketCommentUpdated = async ({ teamspace, project, model, data }) => {
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process comment updated event ${err.message}`);
+		if (err.status !== 404) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketCommentUpdated',
+				eventName: events.UPDATE_COMMENT,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
+		}
 	}
 };
 

@@ -63,6 +63,13 @@ const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
 
+const expectErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		expect.any(Object),
+	);
+};
 const publishAndWaitForEvent = async (event, data) => {
 	const waitOnEvent = eventTriggeredPromise(event);
 	EventsManager.publish(event, data);
@@ -79,10 +86,10 @@ const testClashRunUpdate = () => {
 		};
 
 		test.each([
-			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined],
-			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound],
-			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString())],
-		])('%s', async (desc, rejectUpdateRunStatus) => {
+			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined, false],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound, false],
+			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString()), true],
+		])('%s', async (desc, rejectUpdateRunStatus, shouldNotifyError) => {
 			if (rejectUpdateRunStatus) {
 				ClashesModel.updateRunStatus.mockRejectedValueOnce(rejectUpdateRunStatus);
 			}
@@ -92,6 +99,11 @@ const testClashRunUpdate = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, data.status);
+			if (shouldNotifyError) {
+				expectErrorNotification();
+			} else {
+				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			}
 		});
 	});
 };
@@ -199,7 +211,7 @@ const testClashRunProcessed = () => {
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
 			}
 			if (processClashResultsError) {
-				jest.spyOn(logger, 'logError').mockImplementationOnce(() => {});
+				jest.spyOn(logger, 'logError').mockImplementationOnce(() => { });
 				TicketsClashes.processClashResults.mockRejectedValueOnce(processClashResultsError);
 			}
 
@@ -290,7 +302,7 @@ const testOnNewContainerRevision = () => {
 				ClashPlansModel.getPlansByQuery.mockResolvedValueOnce(plans);
 			}
 			if (setLastRevError) {
-				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 				ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(setLastRevError);
 			}
 
@@ -327,7 +339,11 @@ const testOnNewContainerRevision = () => {
 			if (setLastRevError) {
 				expect(loggerSpy).not.toHaveBeenCalled();
 			}
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			if (getPlansError && getPlansError instanceof Error && !getPlansError.code) {
+				expectErrorNotification();
+			} else {
+				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			}
 			if (loggerSpy) {
 				loggerSpy.mockRestore();
 			}
@@ -352,7 +368,7 @@ const testOnNewContainerRevision = () => {
 				selectionB: [{ container: generateRandomString() }],
 			};
 			const error = new Error(generateRandomString());
-			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+			const loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 
 			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([plan]);
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
@@ -374,6 +390,7 @@ const testOnNewContainerRevision = () => {
 				planId: UUIDToString(plan._id),
 				runId: 'N/A',
 			});
+			expect(loggerSpy).toHaveBeenCalledTimes(1);
 			expect(loggerSpy).toHaveBeenCalledWith(
 				`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${error.message}`,
 			);
@@ -384,6 +401,10 @@ const testOnNewContainerRevision = () => {
 
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
+
+	beforeEach(() => {
+		Mailer.sendSystemEmail.mockResolvedValue();
+	});
 
 	afterAll(() => {
 		EventsManager.reset();
