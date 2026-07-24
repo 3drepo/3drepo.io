@@ -34,6 +34,7 @@
  */
 
 const { JSONParser } = require('@streamparser/json-node');
+const Mongo = require('mongodb');
 
 const { v5Path } = require('../../../interop');
 const { getProjectList } = require('../../../v5/models/projectSettings');
@@ -51,6 +52,7 @@ const FilesManager = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
 const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
+const getUUIDFromKey = (key) => new Mongo.Binary(Buffer.from(key, 'latin1'), 3);
 
 const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
 	logger.logInfo('\t\tReading nodes...');
@@ -75,6 +77,7 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		if (node.parents) {
 			node.parents = node.parents.map((parent_id) => getUUIDKey(parent_id));
 		}
+		node.shared_id = getUUIDKey(node.shared_id);
 		allNodes.push(node);
 	}
 
@@ -82,7 +85,10 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 	logger.logInfo('\t\tIndexing nodes...');
 
-	const nodeByKey = new Map(allNodes.map((node) => [getUUIDKey(node.shared_id), node]));
+	const nodeByKey = new Map();
+	for (const node of allNodes) {
+		nodeByKey.set(node.shared_id, node);
+	}
 
 	logger.logInfo('\t\tDereferencing parents...');
 
@@ -145,7 +151,7 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 	const unreferencedNodes = [];
 	for (const node of allNodes) {
 		if (!resolveNode(node)) {
-			unreferencedNodes.push(node.shared_id);
+			unreferencedNodes.push(getUUIDFromKey(node.shared_id));
 		}
 	}
 
