@@ -70,37 +70,33 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		{ _id: 0, shared_id: 1, parents: 1 },
 	);
 
-	const allNodes = [];
+	const nodeByKey = {};
 	for await (const node of cursor) {
 		node.status = 0; // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
 		node.checkedParents = false;
 		if (node.parents) {
 			node.parents = node.parents.map((parent_id) => getUUIDKey(parent_id));
 		}
-		node.shared_id = getUUIDKey(node.shared_id);
-		allNodes.push(node);
+		nodeByKey[getUUIDKey(node.shared_id)] = node;
+		delete node.shared_id;
 	}
 
-	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
-
-	logger.logInfo('\t\tIndexing nodes...');
-
-	const nodeByKey = new Map();
-	for (const node of allNodes) {
-		nodeByKey.set(node.shared_id, node);
-	}
+	logger.logInfo(`\t\tRead ${Object.keys(nodeByKey).length} nodes from database.`);
 
 	logger.logInfo('\t\tDereferencing parents...');
 
-	for (const node of allNodes) {
-		if (node.parents) {
-			node.parents = node.parents.map((parent_key) => nodeByKey.get(parent_key));
+	for (const key in nodeByKey) {
+		if (Object.hasOwn(nodeByKey, key)) {
+			const node = nodeByKey[key];
+			if (node.parents) {
+				node.parents = node.parents.map((parent_key) => nodeByKey[parent_key]);
+			}
 		}
 	}
 
 	logger.logInfo('\t\tSetting initial conditions...');
 
-	const root = nodeByKey.get(getUUIDKey(rootSharedId));
+	const root = nodeByKey[getUUIDKey(rootSharedId)];
 	root.status = 1;
 
 	logger.logInfo('\t\tResolving...');
@@ -149,9 +145,12 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 	};
 
 	const unreferencedNodes = [];
-	for (const node of allNodes) {
-		if (!resolveNode(node)) {
-			unreferencedNodes.push(getUUIDFromKey(node.shared_id));
+	for (const key in nodeByKey) {
+		if (Object.hasOwn(nodeByKey, key)) {
+			const node = nodeByKey[key];
+			if (!resolveNode(node)) {
+				unreferencedNodes.push(getUUIDFromKey(key));
+			}
 		}
 	}
 
