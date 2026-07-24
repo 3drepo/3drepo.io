@@ -39,8 +39,6 @@ jest.mock('../../../../../src/v5/handler/db', () => ({
 }));
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
-jest.mock('../../../../../src/v5/processors/teamspaces');
-const Teamspaces = require(`${src}/processors/teamspaces`);
 jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
 const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -51,12 +49,26 @@ const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
 );
 
-const expectErrorNotification = (payload) => {
+const expectErrorNotification = (listenerName, eventName, payload) => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
-		payload,
+		{
+			component: listenerName === 'userCreated' ? 'UserEventsListener' : 'AuthEventsListener',
+			listenerName,
+			eventName,
+			payload,
+			error: {
+				message: expect.any(String),
+				code: undefined,
+				stack: expect.any(String),
+			},
+		},
 	);
+};
+
+const expectNoErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 };
 
 const testAuthEventsListener = () => {
@@ -120,11 +132,32 @@ const testAuthEventsListener = () => {
 				EventsManager.publish(events.SESSION_CREATED, data);
 
 				await waitOnEvent;
-				expectErrorNotification(data);
+				expectErrorNotification('userLoggedIn', events.SESSION_CREATED, data);
+			});
+
+			test(`Should not send an error notification if ${events.SESSION_CREATED} processing fails with 404`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+				const data = {
+					username: generateRandomString(),
+					sessionID: generateRandomString(),
+					socketId: generateRandomString(),
+					ipAddress: generateRandomString(),
+					userAgent: generateRandomString(),
+					referer: generateRandomString(),
+				};
+				LoginRecords.saveSuccessfulLoginRecord.mockRejectedValueOnce({
+					status: 404,
+					message: generateRandomString(),
+				});
+
+				EventsManager.publish(events.SESSION_CREATED, data);
+
+				await waitOnEvent;
+				expectNoErrorNotification();
 			});
 		});
 
-		describe(events.SESSION_REMOVED, () => {
+		describe(events.SESSIONS_REMOVED, () => {
 			test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
 				const data = {
@@ -175,7 +208,23 @@ const testAuthEventsListener = () => {
 				EventsManager.publish(events.SESSIONS_REMOVED, data);
 
 				await waitOnEvent;
-				expectErrorNotification(data);
+				expectErrorNotification('sessionsRemoved', events.SESSIONS_REMOVED, data);
+			});
+
+			test(`Should not send an error notification if ${events.SESSIONS_REMOVED} processing fails with 404`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+				const data = {
+					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+				};
+				ChatService.createInternalMessage.mockRejectedValueOnce({
+					status: 404,
+					message: generateRandomString(),
+				});
+
+				EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+				await waitOnEvent;
+				expectNoErrorNotification();
 			});
 		});
 	});
@@ -188,7 +237,6 @@ const testUserEventsListener = () => {
 			const username = generateRandomString();
 			EventsManager.publish(events.USER_CREATED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
 			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
 			expect(Invitations.unpack).toHaveBeenCalledWith(username);
 		});
@@ -201,7 +249,21 @@ const testUserEventsListener = () => {
 			EventsManager.publish(events.USER_CREATED, data);
 
 			await waitOnEvent;
-			expectErrorNotification(data);
+			expectErrorNotification('userCreated', events.USER_CREATED, data);
+		});
+
+		test(`Should not send an error notification if ${events.USER_CREATED} processing fails with 404`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
+			const data = { username: generateRandomString() };
+			Invitations.unpack.mockRejectedValueOnce({
+				status: 404,
+				message: generateRandomString(),
+			});
+
+			EventsManager.publish(events.USER_CREATED, data);
+
+			await waitOnEvent;
+			expectNoErrorNotification();
 		});
 	});
 };

@@ -17,42 +17,26 @@
 
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
+const { isObject } = require('../../../utils/helper/typeCheck');
 
-const TEMPLATE_PATH = `${__dirname}/html/errorNotification.html`;
+const TEMPLATE_PATH = `${__dirname}/html/listenerErrorNotification.html`;
 
 const dataSchema = Yup.object({
-	eventName: Yup.string().required(),
-	listenerName: Yup.string().required(),
-	component: Yup.string().required(),
-	payload: Yup.mixed(),
+	eventName: Yup.string().default('Unknown event'),
+	listenerName: Yup.string().default('unknownListener'),
+	component: Yup.string().default('unknownComponent'),
+	payload: Yup.string().transform((payload, orgVal) => (
+		isObject(orgVal) ? JSON.stringify(orgVal) : JSON.stringify({ orgVal }))).default('{}'),
 	error: Yup.object({
-		message: Yup.string(),
-		stack: Yup.string(),
-		code: Yup.string(),
-		status: Yup.number(),
-	}).required(),
-}).transform((values) => {
-	const { eventName, listenerName, component, payload, error } = values;
-
-	return {
-		title: `Event listener failure: ${eventName}`,
-		scope: 'eventsListener',
-		message: [
-			`Event: ${eventName}`,
-			`Listener: ${component}.${listenerName}`,
-			`Error: ${error.message || 'Unknown error'}`,
-			`Code: ${error.code || 'N/A'}`,
-			payload ? `Payload: ${JSON.stringify(payload)}` : '',
-		].filter(Boolean).join('\n'),
-		err: {
-			message: error.message || 'No error message available',
-			stack: error.stack || 'No stack trace provided',
-		},
-	};
+		message: Yup.string().default('Unknown error'),
+		code: Yup.string().default('N/A'),
+		stack: Yup.mixed().default('no stack trace provided'),
+	}).transform((err, orgVal) => (isObject(orgVal)
+		? { message: orgVal.message, stack: orgVal.stack } : { message: orgVal || undefined })),
 }).required(true);
 
 const ListenerErrorNotification = {};
-ListenerErrorNotification.subject = () => 'Event listener failure';
+ListenerErrorNotification.subject = () => 'Event Listener Failure ';
 
 ListenerErrorNotification.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 

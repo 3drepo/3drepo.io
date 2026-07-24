@@ -90,7 +90,13 @@ const onNewContainerRevision = async (payload) => {
 			logger.logError(err.stack);
 		}
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'onNewContainerRevision',
+				eventName: events.MODEL_IMPORT_FINISHED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -106,7 +112,13 @@ const clashRunStatusUpdate = async (payload) => {
 			logger.logError(err.stack);
 		}
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'clashRunStatusUpdate',
+				eventName: events.CLASH_RUN_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -130,7 +142,13 @@ const clashRunCompleted = async (payload) => {
 			logger.logError(err.stack);
 		}
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ClashEventsListener',
+				listenerName: 'clashRunCompleted',
+				eventName: events.CLASH_RUN_COMPLETED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };

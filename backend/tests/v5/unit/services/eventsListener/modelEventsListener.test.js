@@ -113,6 +113,24 @@ const expectErrorNotification = () => {
 	);
 };
 
+const expectListenerErrorNotification = (listenerName, eventName, payload, err) => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		{
+			component: 'ModelEventsListener',
+			listenerName,
+			eventName,
+			payload,
+			error: {
+				message: err.message,
+				code: err.code,
+				stack: err.stack,
+			},
+		},
+	);
+};
+
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
 		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.CONTAINER})`, async () => {
@@ -122,7 +140,7 @@ const testQueueTaskUpdate = () => {
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				status: generateRandomString(),
 				modelType: modelTypes.CONTAINER,
 			};
@@ -130,7 +148,7 @@ const testQueueTaskUpdate = () => {
 			await waitOnEvent;
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledWith(data.teamspace, project,
-				data.model, data.status, data.corId);
+				data.model, data.status, stringToUUID(data.corId));
 		});
 
 		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
@@ -201,7 +219,7 @@ const testQueueTaskCompleted = () => {
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				value: 0,
 				user: generateRandomString(),
 			};
@@ -215,7 +233,7 @@ const testQueueTaskCompleted = () => {
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user);
+				stringToUUID(data.corId), dataInfo, data.user);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
@@ -228,7 +246,7 @@ const testQueueTaskCompleted = () => {
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				value: 0,
 				user: generateRandomString(),
 				modelType: modelTypes.DRAWING,
@@ -243,7 +261,7 @@ const testQueueTaskCompleted = () => {
 
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, modelTypes.DRAWING);
+				stringToUUID(data.corId), dataInfo, modelTypes.DRAWING);
 			expect(ModelSettings.newRevisionProcessed).not.toHaveBeenCalled();
 		});
 
@@ -978,14 +996,38 @@ const testModelSettingsUpdate = () => {
 				data: { name: generateRandomString() },
 				modelType: modelTypes.DRAWING,
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
 
 			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('modelSettingsUpdated', events.MODEL_SETTINGS_UPDATE, data, err);
+		});
+
+		test(`Should create a ${chatEvents.DRAWING_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (drawing)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
 		});
 	});
 };
@@ -1097,14 +1139,14 @@ const testRevisionUpdated = () => {
 				data: { _id: generateUUID() },
 				modelType: modelTypes.DRAWING,
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
 
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('revisionUpdated', events.REVISION_UPDATED, data, err);
 		});
 	});
 };
@@ -1176,6 +1218,27 @@ const testNewModel = () => {
 			);
 		});
 
+		test(`Should create a ${chatEvents.NEW_DRAWING} chat event if there is a ${events.NEW_MODEL} (drawing)`, async () => {
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
+			await EventsManager.publish(events.NEW_MODEL, data);
+			await waitOnEvent;
+			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_DRAWING,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined,
+			);
+		});
+
 		test('Should not send email notification if error has 404 status for NEW_MODEL', async () => {
 			const data = {
 				teamspace: generateRandomString(),
@@ -1200,11 +1263,11 @@ const testNewModel = () => {
 				modelType: modelTypes.DRAWING,
 			};
 			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
-			ChatService.createProjectMessage.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			const err = { status: 500, message: generateRandomString() };
+			ChatService.createProjectMessage.mockRejectedValueOnce(err);
 			await EventsManager.publish(events.NEW_MODEL, data);
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('modelAdded', events.NEW_MODEL, data, err);
 		});
 	});
 };
@@ -1277,6 +1340,28 @@ const testDeleteModel = () => {
 			);
 		});
 
+		test(`Should create a ${chatEvents.DRAWING_REMOVED} chat event if there is a ${events.DELETE_MODEL} (drawing)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+			};
+			EventsManager.publish(events.DELETE_MODEL, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_REMOVED,
+				{},
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+		});
+
 		test('Should not send email notification if error has 404 status for DELETE_MODEL', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
 			const data = {
@@ -1300,12 +1385,12 @@ const testDeleteModel = () => {
 				project: generateRandomString(),
 				modelType: modelTypes.DRAWING,
 			};
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			const err = { status: 500, message: generateRandomString() };
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
 			EventsManager.publish(events.DELETE_MODEL, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('modelDeleted', events.DELETE_MODEL, data, err);
 		});
 	});
 };
@@ -1435,6 +1520,27 @@ const testUpdateTicket = () => {
 			};
 
 			await updateTicketTest(false, changes, expectedData);
+		});
+
+		test('Should not send email notification if error has 404 status for UPDATE_TICKET', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
+			const template = generateTemplate();
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString(), type: template._id },
+				author: generateRandomString(),
+				timestamp: generateRandomDate(),
+				changes: { title: { from: generateRandomString(), to: generateRandomString() } },
+			};
+
+			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
+			ModelSettings.isFederation.mockResolvedValueOnce(false);
+			EventsManager.publish(events.UPDATE_TICKET, data);
+
+			await waitOnEvent;
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`!Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
@@ -1615,6 +1721,27 @@ const testNewTicket = () => {
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
 				expectErrorNotification();
 			});
+
+			test('Should not send email notification if error has 404 status for TICKETS_IMPORTED', async () => {
+				const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
+				const template = generateTemplate();
+				const data = {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					model: generateRandomString(),
+					tickets: times(10, () => ({
+						type: template._id,
+						...generateRandomObject(),
+					})),
+				};
+
+				TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
+				ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+				EventsManager.publish(events.TICKETS_IMPORTED, data);
+
+				await waitOnEvent;
+				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			});
 		});
 
 		test('Should not send email notification if error has 404 status for NEW_TICKET', async () => {
@@ -1650,14 +1777,14 @@ const testNewTicket = () => {
 					[generateRandomString()]: generateRandomString(),
 				},
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(err);
 
 			EventsManager.publish(events.NEW_TICKET, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('ticketAdded', events.NEW_TICKET, data, err);
 		});
 	});
 };
@@ -1756,13 +1883,13 @@ const testNewComment = () => {
 					[generateRandomString()]: generateRandomString(),
 				},
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
 			EventsManager.publish(events.NEW_COMMENT, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('ticketCommentAdded', events.NEW_COMMENT, data, err);
 		});
 	});
 };
@@ -1861,13 +1988,13 @@ const testUpdateComment = () => {
 					[generateRandomString()]: generateRandomString(),
 				},
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
 			EventsManager.publish(events.UPDATE_COMMENT, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('ticketCommentUpdated', events.UPDATE_COMMENT, data, err);
 		});
 	});
 };
@@ -1986,13 +2113,13 @@ const testUpdateTicketGroup = () => {
 				changes: generateRandomString(),
 				_id: generateRandomString(),
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
 			EventsManager.publish(events.UPDATE_TICKET_GROUP, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('ticketGroupUpdated', events.UPDATE_TICKET_GROUP, data, err);
 		});
 	});
 };
@@ -2059,14 +2186,14 @@ const testTemplateUpdated = () => {
 				template: generateRandomString(),
 				data: { code: generateRandomString() },
 			};
+			const err = { status: 500, message: generateRandomString() };
 
-			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 500, message: generateRandomString() });
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(err);
 
 			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.LISTENER_ERROR_NOTIFICATION.name, data);
+			expectListenerErrorNotification('templateUpdated', events.TICKET_TEMPLATE_UPDATED, data, err);
 		});
 	});
 };

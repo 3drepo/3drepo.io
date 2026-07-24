@@ -34,7 +34,13 @@ const userLoggedIn = async (payload) => {
 		]);
 	} catch (err) {
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'AuthEventsListener',
+				listenerName: 'userLoggedIn',
+				eventName: events.SESSION_CREATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -48,7 +54,13 @@ const sessionsRemoved = async (payload) => {
 		await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
 	} catch (err) {
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'AuthEventsListener',
+				listenerName: 'sessionsRemoved',
+				eventName: events.SESSIONS_REMOVED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };

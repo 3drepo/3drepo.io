@@ -59,7 +59,13 @@ const queueStatusUpdate = async (payload) => {
 			logger.logError(err.stack);
 		}
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueStatusUpdate',
+				eventName: events.QUEUED_TASK_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -84,7 +90,13 @@ const queueTasksCompleted = async (payload) => {
 			logger.logError(err.stack);
 		}
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueTasksCompleted',
+				eventName: events.QUEUED_TASK_COMPLETED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -125,7 +137,13 @@ const revisionAdded = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'revisionAdded',
+				eventName: events.MODEL_IMPORT_FINISHED,
+				payload,
+				error: { message: err?.message, code: err?.code, stack: err?.stack },
+			});
 		}
 	}
 };
@@ -188,7 +206,13 @@ const modelProcessingCompleted = async (payload) => {
 		if (err?.stack) {
 			logger.logError(err.stack);
 		}
-		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'modelProcessingCompleted',
+			eventName: events.MODEL_IMPORT_FINISHED,
+			payload,
+			error: { message: err?.message, code: err?.code, stack: err?.stack },
+		});
 	}
 
 	publish(events.MODEL_SETTINGS_UPDATE, {
@@ -218,7 +242,13 @@ const modelSettingsUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelSettingsUpdated',
+				eventName: events.MODEL_SETTINGS_UPDATE,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -236,7 +266,13 @@ const revisionUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'revisionUpdated',
+				eventName: events.REVISION_UPDATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -254,7 +290,13 @@ const modelAdded = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelAdded',
+				eventName: events.NEW_MODEL,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -272,7 +314,13 @@ const modelDeleted = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'modelDeleted',
+				eventName: events.DELETE_MODEL,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -285,7 +333,13 @@ const templateUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process template updated event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'templateUpdated',
+				eventName: events.TICKET_TEMPLATE_UPDATED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -307,7 +361,13 @@ const ticketAdded = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process ticket added event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketAdded',
+				eventName: events.NEW_TICKET,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -331,7 +391,13 @@ const ticketsImported = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process tickets imported event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketsImported',
+				eventName: events.TICKETS_IMPORTED,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -373,7 +439,13 @@ const ticketUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketUpdated',
+				eventName: events.UPDATE_TICKET,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -392,7 +464,13 @@ const ticketGroupUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process group updated event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketGroupUpdated',
+				eventName: events.UPDATE_TICKET_GROUP,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -407,7 +485,13 @@ const ticketCommentAdded = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process comment added event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketCommentAdded',
+				eventName: events.NEW_COMMENT,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
@@ -422,7 +506,13 @@ const ticketCommentUpdated = async (payload) => {
 	} catch (err) {
 		logger.logError(`Failed to process comment updated event ${err.message}`);
 		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, payload);
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'ticketCommentUpdated',
+				eventName: events.UPDATE_COMMENT,
+				payload,
+				error: { message: err.message, code: err.code, stack: err.stack },
+			});
 		}
 	}
 };
