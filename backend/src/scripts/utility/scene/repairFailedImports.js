@@ -63,56 +63,121 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		logger.logInfo(`\t\tAfter: ${JSON.stringify(process.memoryUsage())}.`);
 	}
 
-	const cursor = await findCursor(
-		teamspace,
-		`${container}.scene`,
-		{ rev_id: revision },
-		{ _id: 0, shared_id: 1, parents: 1 },
-	);
-
-	const nodeByKey = {};
-	for await (const document of cursor) {
-		let parents;
-		if (document.parents) {
-			parents = [];
-			for (const parent_id of document.parents) {
-				parents.push(getUUIDKey(parent_id));
-			}
+	class GraphStore {
+		constructor(map, totalParents) {
+			this.map = map;
+			this.status = new Uint8Array(map.size); // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
+			this.parentsStart = new Uint32Array(map.size);
+			this.parentsSize = new Uint32Array(map.size);
+			this.parents = new Uint32Array(totalParents);
+			this.parentsChecked = new Uint8Array(map.size);
+			this.totalParents = 0;
 		}
-		nodeByKey[getUUIDKey(document.shared_id)] = {
-			status: 0, // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
-			checkedParents: false,
-			parents,
-		};
+
+		setStatus(i, s) { this.status[i] = s; }
+
+		checkedParents(i) { return this.parentsChecked[i]; }
+
+		setCheckedParents(i) { this.parentsChecked[i] = 1; }
+
+		isResolved(i) { return this.status[i] === 1 || this.status[i] === 2; }
+
+		isReferenced(i) { return this.status[i] === 1; }
+
+		isUnknown(i) { return this.status[i] === 0; }
+
+		getIndex(key) { return this.map.get(key); }
+
+		startParents(i) {
+			this.parentsStart[i] = this.totalParents;
+			this.parentsSize[i] = 0;
+		}
+
+		addParent(i, key) {
+			const start = this.parentsStart[i];
+			const offset = this.parentsSize[i];
+			const index = this.map.get(key);
+			if (index === undefined) return;
+			this.parents[start + offset] = index;
+			this.parentsSize[i]++;
+			this.totalParents++;
+		}
+
+		hasParents(i) { return this.parentsSize[i] > 0; }
+
+		getParents(i) {
+			const start = this.parentsStart[i];
+			const end = start + this.parentsSize[i];
+			return (function* rangeIterator(arr, from, to) {
+				for (let j = from; j < to; j += 1) {
+					yield arr[j];
+				}
+			}(this.parents, start, end));
+		}
+
+		size() { return this.map.size; }
 	}
 
-	logger.logInfo(`\t\tRead ${Object.keys(nodeByKey).length} nodes from database.`);
+	let store;
 
-	logger.logInfo('\t\tDereferencing parents...');
+	// Prime the contiguous arrays to hold the graph
+	{
+		logger.logInfo('\t\tPriming graph store...');
 
-	for (const key in nodeByKey) {
-		if (Object.hasOwn(nodeByKey, key)) {
-			const node = nodeByKey[key];
-			if (node.parents) {
-				const references = [];
-				for (const parent_key of node.parents) {
-					references.push(nodeByKey[parent_key]);
+		let totalNodes = 0;
+		let totalParents = 0;
+
+		const cursor = await findCursor(
+			teamspace,
+			`${container}.scene`,
+			{ rev_id: revision },
+			{ _id: 0, shared_id: 1, parents: 1 },
+		);
+
+		const map = new Map();
+
+		for await (const document of cursor) {
+			totalParents += document.parents ? document.parents.length : 0;
+			map.set(getUUIDKey(document.shared_id), totalNodes++);
+		}
+
+		store = new GraphStore(map, totalParents);
+
+		logger.logInfo(`\t\tRead ${store.size()} nodes from database.`);
+	}
+
+	// Run the query again to dereference the parents
+	{
+		logger.logInfo('\t\tDereferencing parents...');
+
+		const cursor = await findCursor(
+			teamspace,
+			`${container}.scene`,
+			{ rev_id: revision },
+			{ _id: 0, shared_id: 1, parents: 1 },
+		);
+
+		for await (const document of cursor) {
+			const node = store.getIndex(getUUIDKey(document.shared_id));
+			store.startParents(node);
+			if (document.parents) {
+				for (const parent of document.parents) {
+					store.addParent(node, getUUIDKey(parent));
 				}
-				node.parents = references;
 			}
 		}
 	}
 
 	logger.logInfo('\t\tSetting initial conditions...');
 
-	const root = nodeByKey[getUUIDKey(rootSharedId)];
-	root.status = 1;
+	const root = store.getIndex(getUUIDKey(rootSharedId));
+	store.setStatus(root, 1);
 
 	logger.logInfo('\t\tResolving...');
 
 	const resolveNode = (node) => {
-		if (node.status === 1 || node.status === 2) {
-			return node.status === 1;
+		if (store.isResolved(node)) {
+			return store.isReferenced(node);
 		}
 
 		const stack = [node];
@@ -120,46 +185,39 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		while (stack.length) {
 			const currentNode = stack[stack.length - 1];
 
-			if (currentNode.status === 1 || currentNode.status === 2) {
+			if (store.isResolved(currentNode)) {
 				stack.pop();
-			} else if (!currentNode?.parents?.length) {
-				currentNode.status = 2;
+			} else if (!store.hasParents(currentNode)) {
+				store.setStatus(currentNode, 2);
 				stack.pop();
-			} else if (!currentNode.checkedParents) {
-				currentNode.status = 3;
-				currentNode.checkedParents = true;
-
-				for (const parent of currentNode.parents) {
-					if (parent) {
-						if (parent.status !== 1 && parent.status !== 2 && parent.status !== 3) {
-							stack.push(parent);
-						}
+			} else if (!store.checkedParents(currentNode)) {
+				store.setStatus(currentNode, 3);
+				store.setCheckedParents(currentNode);
+				for (const parent of store.getParents(currentNode)) {
+					if (store.isUnknown(parent)) {
+						stack.push(parent);
 					}
 				}
 			} else {
 				let isReferenced = false;
-				for (const parent of currentNode.parents) {
-					if (parent?.status === 1) {
+				for (const parent of store.getParents(currentNode)) {
+					if (store.isReferenced(parent)) {
 						isReferenced = true;
 						break;
 					}
 				}
-
-				currentNode.status = isReferenced ? 1 : 2;
+				store.setStatus(currentNode, isReferenced ? 1 : 2);
 				stack.pop();
 			}
 		}
 
-		return node.status === 1;
+		return store.isReferenced(node);
 	};
 
 	const unreferencedNodes = [];
-	for (const key in nodeByKey) {
-		if (Object.hasOwn(nodeByKey, key)) {
-			const node = nodeByKey[key];
-			if (!resolveNode(node)) {
-				unreferencedNodes.push(getUUIDFromKey(key));
-			}
+	for (const [key, value] of store.map) {
+		if (!resolveNode(value)) {
+			unreferencedNodes.push(getUUIDFromKey(key));
 		}
 	}
 
