@@ -88,7 +88,7 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 		getIndex(key) { return this.map.get(key); }
 
-		startParents(i) {
+		resetParents(i) {
 			this.parentsStart[i] = this.totalParents;
 			this.parentsSize[i] = 0;
 		}
@@ -105,14 +105,27 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 		hasParents(i) { return this.parentsSize[i] > 0; }
 
-		getParents(i) {
-			const start = this.parentsStart[i];
-			const end = start + this.parentsSize[i];
-			return (function* rangeIterator(arr, from, to) {
-				for (let j = from; j < to; j += 1) {
-					yield arr[j];
+		pushUnknownParents(nodeIndex, stack) {
+			const start = this.parentsStart[nodeIndex];
+			const end = start + this.parentsSize[nodeIndex];
+			for (let i = start; i < end; i++) {
+				const parent = this.parents[i];
+				if (this.isUnknown(parent)) {
+					stack.push(parent);
 				}
-			}(this.parents, start, end));
+			}
+		}
+
+		hasReferencedParent(nodeIndex) {
+			const start = this.parentsStart[nodeIndex];
+			const end = start + this.parentsSize[nodeIndex];
+			for (let i = start; i < end; i++) {
+				const parent = this.parents[i];
+				if (this.isReferenced(parent)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		size() { return this.map.size; }
@@ -159,7 +172,7 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 		for await (const document of cursor) {
 			const node = store.getIndex(getUUIDKey(document.shared_id));
-			store.startParents(node);
+			store.resetParents(node);
 			if (document.parents) {
 				for (const parent of document.parents) {
 					store.addParent(node, getUUIDKey(parent));
@@ -175,12 +188,13 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 	logger.logInfo('\t\tResolving...');
 
+	const stack = [];
 	const resolveNode = (node) => {
 		if (store.isResolved(node)) {
 			return store.isReferenced(node);
 		}
 
-		const stack = [node];
+		stack.push(node);
 
 		while (stack.length) {
 			const currentNode = stack[stack.length - 1];
@@ -193,19 +207,9 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 			} else if (!store.checkedParents(currentNode)) {
 				store.setStatus(currentNode, 3);
 				store.setCheckedParents(currentNode);
-				for (const parent of store.getParents(currentNode)) {
-					if (store.isUnknown(parent)) {
-						stack.push(parent);
-					}
-				}
+				store.pushUnknownParents(currentNode, stack);
 			} else {
-				let isReferenced = false;
-				for (const parent of store.getParents(currentNode)) {
-					if (store.isReferenced(parent)) {
-						isReferenced = true;
-						break;
-					}
-				}
+				const isReferenced = store.hasReferencedParent(currentNode);
 				store.setStatus(currentNode, isReferenced ? 1 : 2);
 				stack.pop();
 			}
