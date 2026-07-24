@@ -213,6 +213,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		this.props.viewer.destroy();
 		this.props.resetModel();
 		this.props.resetViewerGui();
+		this.props.resetClipping();
 		this.toggleViewerListeners(false);
 		this.props.clearCurrentlySelected();
 	}

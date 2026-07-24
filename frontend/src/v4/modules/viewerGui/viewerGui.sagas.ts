@@ -88,7 +88,6 @@ function* fetchData({ teamspace, model }) {
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(CommentsActions.fetchUsers(teamspace)),
 			put(UsersActions.fetchUsers(teamspace)),
-			put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE)),
 		]);
 
 		yield all([
@@ -301,8 +300,7 @@ function* setClippingMode({ mode }) {
 		if (currentClipMode !== mode) {
 			yield put(ViewerGuiActions.setClipModeSuccess(mode));
 			if (!mode) {
-				yield Viewer.clipToolDelete();
-				yield put(ViewerGuiActions.setClipEdit(false));
+				yield put(ViewerGuiActions.resetClipping());
 			}
 		}
 	} catch (error) {
@@ -345,6 +343,17 @@ function* setClipEdit({ isClipEdit }) {
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clip edit', error));
+	}
+}
+
+function* resetClipping() {
+	try {
+		yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
+		yield Viewer.clipToolDelete();
+		yield put(ViewerGuiActions.setClipEdit(false));
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'clipping', error));
 	}
 }
 
@@ -431,6 +440,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.SET_GIZMO_MODE, setGizmoMode);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
+	yield takeLatest(ViewerGuiTypes.RESET_CLIPPING, resetClipping);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
