@@ -71,14 +71,19 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 	);
 
 	const nodeByKey = {};
-	for await (const node of cursor) {
-		node.status = 0; // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
-		node.checkedParents = false;
-		if (node.parents) {
-			node.parents = node.parents.map((parent_id) => getUUIDKey(parent_id));
+	for await (const document of cursor) {
+		let parents;
+		if (document.parents) {
+			parents = [];
+			for (const parent_id of document.parents) {
+				parents.push(getUUIDKey(parent_id));
+			}
 		}
-		nodeByKey[getUUIDKey(node.shared_id)] = node;
-		delete node.shared_id;
+		nodeByKey[getUUIDKey(document.shared_id)] = {
+			status: 0, // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
+			checkedParents: false,
+			parents,
+		};
 	}
 
 	logger.logInfo(`\t\tRead ${Object.keys(nodeByKey).length} nodes from database.`);
@@ -89,7 +94,11 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		if (Object.hasOwn(nodeByKey, key)) {
 			const node = nodeByKey[key];
 			if (node.parents) {
-				node.parents = node.parents.map((parent_key) => nodeByKey[parent_key]);
+				const references = [];
+				for (const parent_key of node.parents) {
+					references.push(nodeByKey[parent_key]);
+				}
+				node.parents = references;
 			}
 		}
 	}
