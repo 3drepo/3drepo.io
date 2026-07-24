@@ -46,7 +46,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const Path = require('path');
 
-const { deleteMany } = require(`${v5Path}/handler/db`);
+const { deleteMany, findCursor } = require(`${v5Path}/handler/db`);
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
@@ -61,31 +61,34 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		logger.logInfo(`\t\tAfter: ${JSON.stringify(process.memoryUsage())}.`);
 	}
 
-	const allNodes = await getNodesByQuery(
+	const cursor = await findCursor(
 		teamspace,
-		project,
-		container,
+		`${container}.scene`,
 		{ rev_id: revision },
 		{ _id: 0, shared_id: 1, parents: 1 },
 	);
 
-	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
+	const allNodes = [];
+	for await (const node of cursor) {
+		node.status = 0; // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
+		node.checkedParents = false;
+		if (node.parents) {
+			node.parents = node.parents.map((parent_id) => getUUIDKey(parent_id));
+		}
+		allNodes.push(node);
+	}
 
-	logger.logInfo('\t\tCollecting referenced ids...');
+	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
 
 	logger.logInfo('\t\tIndexing nodes...');
 
-	for (const node of allNodes) {
-		node.status = 0; // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
-		node.checkedParents = false;
-	}
 	const nodeByKey = new Map(allNodes.map((node) => [getUUIDKey(node.shared_id), node]));
 
 	logger.logInfo('\t\tDereferencing parents...');
 
 	for (const node of allNodes) {
 		if (node.parents) {
-			node.parents = node.parents.map((parent_id) => nodeByKey.get(getUUIDKey(parent_id)));
+			node.parents = node.parents.map((parent_key) => nodeByKey.get(parent_key));
 		}
 	}
 
