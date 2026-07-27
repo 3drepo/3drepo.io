@@ -22,12 +22,12 @@ import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { isDateType, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { FormBooleanSelect, FormJobsAndUsersSelect, FormMultiSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormJobsAndUsersSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { getFilterFromEvent, getOptionFromValue, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
-import { ArrayFields, MultiSelectContainer, Value } from './filterFormValues.styles';
+import { ArrayFields, Value } from './filterFormValues.styles';
 import {
 	FIELD_ARRAY_NAME,
 	FilterFormValuesForm,
@@ -43,7 +43,8 @@ import {
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { BusyMultiSelect } from '@controls/inputs/multiSelect/busyMultiSelect/busyMultiSelect.component';
+import { formatMessage } from '@/v5/services/intl';
 
 const EMPTY_VALUE = { value: '' };
 
@@ -148,29 +149,27 @@ export const FilterFormNonRangeValues = ({
 
 		if (isSelectType(type)) {
 			return (
-				<MultiSelectContainer>
-					<FormMultiSelect
-						name={FIELD_ARRAY_NAME}
-						disabled={isFetchingOptions}
-						transformInputValue={mapFormArrayToArray}
-						transformOutputValue={(e) => getFilterFromEvent(e)}
-						renderValue={(values: string[]) => arrToDisplayValue(
-							values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value),
-						)}
-						formError={error?.[0]}
-					>
-						{selectOptions.map(
-							(option) => (
-								<MultiSelectMenuItem key={option.value} value={option.value}>
-									<Value>
-										{option.displayValue ?? option.value}
-									</Value>
-								</MultiSelectMenuItem>
-							),
-						)}
-					</FormMultiSelect>
-					{isFetchingOptions && <Spinner />}
-				</MultiSelectContainer>
+				<BusyMultiSelect
+					name={FIELD_ARRAY_NAME}
+					busy={isFetchingOptions}
+					busyLabel={formatMessage({ id: 'filterForm.multiSelect.fetchingValues', defaultMessage: 'Fetching available values...' })}
+					transformInputValue={mapFormArrayToArray}
+					transformOutputValue={(e) => getFilterFromEvent(e)}
+					renderValue={(values: string[]) => arrToDisplayValue(
+						values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value),
+					)}
+					formError={error?.[0]}
+				>
+					{selectOptions.map(
+						(option) => (
+							<MultiSelectMenuItem key={option.value} value={option.value}>
+								<Value>
+									{option.displayValue ?? option.value}
+								</Value>
+							</MultiSelectMenuItem>
+						),
+					)}
+				</BusyMultiSelect>
 			);
 		}
 

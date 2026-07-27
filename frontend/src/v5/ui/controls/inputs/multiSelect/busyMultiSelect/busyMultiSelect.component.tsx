@@ -15,18 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextOverflow } from '@controls/textOverflow';
+import { FormMultiSelect } from '@controls/inputs/formInputs.component';
+import { InputControllerProps } from '@controls/inputs/inputController.component';
+import { SelectProps } from '@controls/inputs/select/select.component';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import styled from 'styled-components';
 
-export const Value = styled(TextOverflow)`
-	height: fit-content;
-	max-width: 299px;
+const BusyIndicator = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
 `;
 
-export const ArrayFields = styled.div<{ maxHeight: number }>`
-	max-height: ${({ maxHeight }) => maxHeight ? `${maxHeight}px` : 'unset'};
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	overflow-y: scroll;
-`;
+type BusyMultiSelectProps = InputControllerProps<SelectProps> & {
+	busy?: boolean;
+	busyLabel?: string;
+};
+
+export const BusyMultiSelect = ({ busy, busyLabel, ...props }: BusyMultiSelectProps) => (
+	<FormMultiSelect
+		{...props}
+		disabled={busy || props.disabled}
+		renderValue={busy ? () => (
+			<BusyIndicator>
+				<Spinner />
+				{busyLabel}
+			</BusyIndicator>
+		) : props.renderValue}
+	/>
+);
