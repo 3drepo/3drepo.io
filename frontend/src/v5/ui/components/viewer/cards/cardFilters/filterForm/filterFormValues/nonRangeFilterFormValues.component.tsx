@@ -38,9 +38,7 @@ import {
 	getSelectOptions,
 	isOperatorDirty,
 	mapFilterFormValuesToFilter,
-	useTagsSelectOptions,
-} from './filterFormValues.helpers';
-import { FilterFormActions } from './filterFormActions.component';
+} from './filterFormValues.helpers';import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { BusyMultiSelect } from '@controls/inputs/multiSelect/busyMultiSelect/busyMultiSelect.component';
@@ -57,6 +55,8 @@ export const FilterFormNonRangeValues = ({
 	isBackButton,
 	onClickCancelOrBack,
 	onSubmit,
+	tagOptions = [],
+	isFetchingOptions = false,
 }: FilterFormValuesComponentProps) => {
 	const { templates, modelsIds } = useTicketFiltersContext();
 
@@ -78,9 +78,8 @@ export const FilterFormNonRangeValues = ({
 	FederationsHooksSelectors.selectFederations();
 	ContainersHooksSelectors.selectContainers();
 
-	const { selectOptions: tagSelectOptions, isFetchingOptions } = useTagsSelectOptions(module, property, type);
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-	const selectOptions = type === 'tag' ? tagSelectOptions : getSelectOptions(module, property, type, templates, modelsIds);
+	const selectOptions = type === 'tag' ? tagOptions : getSelectOptions(module, property, type, templates, modelsIds);
 	const isJobsAndUsers = getIsJobsAndUsersProperty(templates, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;

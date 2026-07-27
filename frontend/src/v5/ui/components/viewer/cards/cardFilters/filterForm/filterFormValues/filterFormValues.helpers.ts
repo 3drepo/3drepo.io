@@ -21,7 +21,7 @@ import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { isBoolean, uniqBy } from 'lodash';
 import { BaseFilter, TicketFilter, TicketFilterOperator, TicketFilterType, TicketFilterValue } from '../../cardFilters.types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { fetchTagsValues, modelType as getModelType } from '@/v5/services/api/tickets';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -68,6 +68,8 @@ export type FilterFormValuesProps = {
 	isBackButton?: boolean,
 	onSubmit: (newFilter: TicketFilter) => void,
 	onClickCancelOrBack?: () => void,
+	tagOptions?: SelectOption[],
+	isFetchingOptions?: boolean,
 };
 
 export type FilterFormValuesComponentProps = FilterFormValuesProps;
@@ -189,6 +191,7 @@ export const useTagsSelectOptions = (
 	const { templates, modelsIds } = useTicketFiltersContext();
 	const { teamspace, project } = useParams<{ teamspace: string; project: string }>();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const cache = useRef<Record<string, SelectOption[]>>({});
 	const [selectOptions, setSelectOptions] = useState<SelectOption[]>([]);
 	// For now isFetchingOptions is only used for tag properties
 	const [isFetchingOptions, setIsFetchingOptions] = useState(false);
@@ -202,13 +205,22 @@ export const useTagsSelectOptions = (
 		if (!matchingTemplate) return;
 
 		const propName = module ? `${module}::${property}` : property;
+		const cacheKey = `${matchingTemplate._id}:${propName}`;
+
+		if (cache.current[cacheKey]) {
+			setSelectOptions(cache.current[cacheKey]);
+			return;
+		}
+
 		let cancelled = false;
 
 		setIsFetchingOptions(true);
 		fetchTagsValues(teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName)
 			.then(({ values }) => {
 				if (cancelled) return;
-				setSelectOptions(values.map((value) => ({ value })));
+				const options = values.map((value) => ({ value }));
+				cache.current[cacheKey] = options;
+				setSelectOptions(options);
 			})
 			.finally(() => {
 				if (!cancelled) setIsFetchingOptions(false);
