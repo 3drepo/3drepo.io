@@ -274,9 +274,29 @@ export const updateTicketGroup = async (
 	return data;
 };
 
+export const fetchTagsValues = async (
+	teamspace: string,
+	project: string,
+	type: string,
+	model: string,
+	template: string,
+	propertyName: string,
+): Promise<FetchTagsValuesResponse> => {
+	// const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/templates/${template}/properties/${propertyName}/values`);
+	// return data;
+	return new Promise((resolve) => setTimeout(() => resolve({
+		values: [
+			'tag 1', 'tag 2', 'tag 3', 'tag 4', 'tag 5',
+			'tag 6', 'tag 7', 'tag 8', 'tag 9', 'tag 10',
+			'Structural Inspection', 'Foundation Works', 'Concrete Pour',
+		],
+	}), 250));
+};
+
 /**
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };
+type FetchTagsValuesResponse = { values: string[] };
