@@ -21,6 +21,10 @@ import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { isBoolean, uniqBy } from 'lodash';
 import { BaseFilter, TicketFilter, TicketFilterOperator, TicketFilterType, TicketFilterValue } from '../../cardFilters.types';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
+import { fetchTagsValues, modelType as getModelType } from '@/v5/services/api/tickets';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {
 	amendDateUpperBounds,
 	floorToMinute,
@@ -175,4 +179,43 @@ export const getSelectOptions = (module, property, type, templates, modelsIds): 
 	});
 
 	return uniqBy(options, (({ value }) => value));
+};
+
+export const useTagsSelectOptions = (
+	module: string,
+	property: string,
+	type: TicketFilterType,
+): { selectOptions: SelectOption[], isFetchingOptions: boolean } => {
+	const { templates, modelsIds } = useTicketFiltersContext();
+	const { teamspace, project } = useParams<{ teamspace: string; project: string }>();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const [selectOptions, setSelectOptions] = useState<SelectOption[]>([]);
+	// For now isFetchingOptions is only used for tag properties
+	const [isFetchingOptions, setIsFetchingOptions] = useState(false);
+
+	useEffect(() => {
+		if (type !== 'tag') return;
+		const modelId = modelsIds[0];
+		if (!modelId || !teamspace || !project) return;
+
+		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tag');
+		if (!matchingTemplate) return;
+
+		const propName = module ? `${module}::${property}` : property;
+		let cancelled = false;
+
+		setIsFetchingOptions(true);
+		fetchTagsValues(teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName)
+			.then(({ values }) => {
+				if (cancelled) return;
+				setSelectOptions(values.map((value) => ({ value })));
+			})
+			.finally(() => {
+				if (!cancelled) setIsFetchingOptions(false);
+			});
+
+		return () => { cancelled = true; };
+	}, [type, modelsIds[0], JSON.stringify(templates)]);
+
+	return { selectOptions, isFetchingOptions };
 };

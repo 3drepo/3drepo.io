@@ -33,7 +33,7 @@ export enum TicketFilterOperatorEnum {
 	'lt' = 12,
 	'lte' = 13,
 }
-export type TicketFilterType = 'text' | 'longText' | 'date' | 'sequencing' | 'pastDate' | 'createdAt' | 'updatedAt' | 'oneOf' | 'manyOf' | 'status' | 'boolean' | 'number' | 'title' | 'ticketCode' | 'template' | 'owner';
+export type TicketFilterType = 'text' | 'longText' | 'date' | 'sequencing' | 'pastDate' | 'createdAt' | 'updatedAt' | 'oneOf' | 'manyOf' | 'status' | 'boolean' | 'number' | 'title' | 'ticketCode' | 'template' | 'owner' | 'tag';
 export type ValueType = string | number | Date | boolean;
 export type TicketFilterValue = ValueType | ValueType[] | [ValueType, ValueType][]; // last one is for the range operator
 export type BaseFilter = { operator: TicketFilterOperator, values: TicketFilterValue[], displayValues?: string };

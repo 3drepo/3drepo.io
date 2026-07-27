@@ -27,7 +27,7 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { getFilterFromEvent, getOptionFromValue, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
-import { ArrayFields, Value } from './filterFormValues.styles';
+import { ArrayFields, MultiSelectContainer, Value } from './filterFormValues.styles';
 import {
 	FIELD_ARRAY_NAME,
 	FilterFormValuesForm,
@@ -38,10 +38,12 @@ import {
 	getSelectOptions,
 	isOperatorDirty,
 	mapFilterFormValuesToFilter,
+	useTagsSelectOptions,
 } from './filterFormValues.helpers';
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 const EMPTY_VALUE = { value: '' };
 
@@ -75,8 +77,9 @@ export const FilterFormNonRangeValues = ({
 	FederationsHooksSelectors.selectFederations();
 	ContainersHooksSelectors.selectContainers();
 
+	const { selectOptions: tagSelectOptions, isFetchingOptions } = useTagsSelectOptions(module, property, type);
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-	const selectOptions = getSelectOptions(module, property, type, templates, modelsIds);
+	const selectOptions = type === 'tag' ? tagSelectOptions : getSelectOptions(module, property, type, templates, modelsIds);
 	const isJobsAndUsers = getIsJobsAndUsersProperty(templates, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
@@ -145,25 +148,29 @@ export const FilterFormNonRangeValues = ({
 
 		if (isSelectType(type)) {
 			return (
-				<FormMultiSelect
-					name={FIELD_ARRAY_NAME}
-					transformInputValue={mapFormArrayToArray}
-					transformOutputValue={(e) => getFilterFromEvent(e)}
-					renderValue={(values: string[]) => arrToDisplayValue(
-						values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value),
-					)}
-					formError={error?.[0]}
-				>
-					{selectOptions.map(
-						(option) => (
-							<MultiSelectMenuItem key={option.value} value={option.value}>
-								<Value>
-									{option.displayValue ?? option.value}
-								</Value>
-							</MultiSelectMenuItem>
-						),
-					)}
-				</FormMultiSelect>
+				<MultiSelectContainer>
+					<FormMultiSelect
+						name={FIELD_ARRAY_NAME}
+						disabled={isFetchingOptions}
+						transformInputValue={mapFormArrayToArray}
+						transformOutputValue={(e) => getFilterFromEvent(e)}
+						renderValue={(values: string[]) => arrToDisplayValue(
+							values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value),
+						)}
+						formError={error?.[0]}
+					>
+						{selectOptions.map(
+							(option) => (
+								<MultiSelectMenuItem key={option.value} value={option.value}>
+									<Value>
+										{option.displayValue ?? option.value}
+									</Value>
+								</MultiSelectMenuItem>
+							),
+						)}
+					</FormMultiSelect>
+					{isFetchingOptions && <Spinner />}
+				</MultiSelectContainer>
 			);
 		}
 

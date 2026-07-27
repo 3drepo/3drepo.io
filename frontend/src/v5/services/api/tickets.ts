@@ -290,7 +290,7 @@ export const fetchTagsValues = async (
 			'tag 6', 'tag 7', 'tag 8', 'tag 9', 'tag 10',
 			'Structural Inspection', 'Foundation Works', 'Concrete Pour',
 		],
-	}), 250));
+	}), 30000));
 };
 
 /**

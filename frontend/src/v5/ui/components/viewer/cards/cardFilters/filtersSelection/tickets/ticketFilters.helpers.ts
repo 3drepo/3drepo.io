@@ -52,6 +52,7 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'owner': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
+	'tag': ListIcon,
 };
 
 const filterTypeIsValid = (type: string): type is TicketFilterType => Object.keys(TYPE_TO_ICON).includes(type);

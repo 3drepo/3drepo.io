@@ -30,3 +30,13 @@ export const ArrayFields = styled.div<{ maxHeight: number }>`
 	gap: 10px;
 	overflow-y: scroll;
 `;
+
+export const MultiSelectContainer = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	& > :first-child {
+		flex: 1;
+	}
+`;
