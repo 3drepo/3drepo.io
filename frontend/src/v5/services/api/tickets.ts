@@ -19,14 +19,16 @@ import api from './default';
 
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
 
-const TAGS_TEMPLATE_ID = 'af09f79a-b530-4c08-b222-c1828f17012b';
 
+// TODO: Remove before flight 🔖
 const applyTagsTemplateOverride = (template: ITemplate): ITemplate => {
-	if (template._id !== TAGS_TEMPLATE_ID) return template;
-	return {
+	if (template.code !== 'TGS' || !template.properties) return template;
+	const t =  {
 		...template,
-		properties: template.properties?.map((p) => p.name === 'Tags' ? { ...p, type: 'tag' } : p),
+		properties: template.properties?.map((p) => p.name === 'Tags' ? { ...p, type: 'tag' as const } : p),
 	};
+
+	return t;
 };
 
 export const fetchContainerTemplates = async (
@@ -284,6 +286,8 @@ export const fetchTagsValues = async (
 ): Promise<FetchTagsValuesResponse> => {
 	// const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/templates/${template}/properties/${propertyName}/values`);
 	// return data;
+
+	// TODO: Remove before flight 🔖
 	return new Promise((resolve) => setTimeout(() => resolve({
 		values: [
 			'tag 1', 'tag 2', 'tag 3', 'tag 4', 'tag 5',
