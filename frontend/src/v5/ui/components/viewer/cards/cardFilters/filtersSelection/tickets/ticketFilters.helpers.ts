@@ -314,7 +314,9 @@ export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFil
 		};
 
 		serializedValues = values.map(serializeValue).join(',');
-		if (isSelectType(ticketFilter.type)) {
+		if (ticketFilter.type === 'tag') {
+			serializedValues = values.map((v) => escapeString(v as string)).join(',');
+		} else if (isSelectType(ticketFilter.type)) {
 			if (!propertyDefs.values.length) {
 				throw (new InvalidPropertyError(ticketFilter.property, ticketFilter.type));
 			}
@@ -359,13 +361,18 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		values: undefined,
 	};
 	if (!filter.operator || !filterTypeIsValid(type)) throw (new InvalidPropertyError(property, type));
-	if (isSelectType(type)) {
+	if (isSelectType(type) && type !== 'tag') {
 		if (!propertyDefs.values.length) {
 			throw (new InvalidPropertyError(property, type));
 		}
 		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
 		filter.values = indexes.filter((i) => propertyDefs.values[i]).map((i) => propertyDefs.values[i]);
 		filter.displayValues = arrToDisplayValue(indexes.filter((i) => propertyDefs.displayValues[i]).map((i) => propertyDefs.displayValues[i]));
+	}
+
+	if (type === 'tag') {
+		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
+		filter.displayValues = arrToDisplayValue(filter.values as string[]);
 	}
 
 	if (isDateType(type)) {

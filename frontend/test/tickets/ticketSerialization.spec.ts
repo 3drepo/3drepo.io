@@ -95,6 +95,10 @@ describe('Tickets: filters', () => {
 					'Gray, John',
 					'Ye:asda',
 				]
+			},
+			{
+				name: 'Labels',
+				type: 'tag',
 			}
 
 		],
@@ -106,6 +110,10 @@ describe('Tickets: filters', () => {
 						name:'Cool users',
 						type:'oneOf',
 						values: 'jobsAndUsers',
+					},
+					{
+						name: 'Module Labels',
+						type: 'tag',
 					}
 				]
 			},
@@ -631,6 +639,38 @@ describe('Tickets: filters', () => {
 	
 			const serialized = serializeFilter(templates, filter, jobsAndUsers, risks);
 			expect(deserializeFilter(templates, serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
+
+		it('should work with tag type property', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'Labels',
+				type: 'tag',
+				filter: {
+					operator: 'is',
+					values: ['tag 1', 'Foundation Works', 'Concrete Pour'],
+					displayValues: 'tag 1, Foundation Works, Concrete Pour',
+				},
+			};
+
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
+
+		it('should work with tag type property in a module', () => {
+			const filter: TicketFilter = {
+				module: 'Users module',
+				property: 'Module Labels',
+				type: 'tag',
+				filter: {
+					operator: 'is',
+					values: ['tag 3', 'Structural Inspection'],
+					displayValues: 'tag 3, Structural Inspection',
+				},
+			};
+
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should throw an error when serializing if a property doesnt exist in the template', () => {
