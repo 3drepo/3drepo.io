@@ -110,24 +110,23 @@ const expectErrorNotification = () => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
 		expect.any(Object),
+		undefined,
+		true,
 	);
 };
 
-const expectListenerErrorNotification = (listenerName, eventName, payload, err) => {
+const expectListenerErrorNotification = (listenerName, payload, err) => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
 		{
 			component: 'ModelEventsListener',
 			listenerName,
-			eventName,
 			payload,
-			error: {
-				message: err.message,
-				code: err.code,
-				stack: err.stack,
-			},
+			error: err,
 		},
+		undefined,
+		true,
 	);
 };
 
@@ -185,7 +184,7 @@ const testQueueTaskUpdate = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE} (Rejected with an error object)`,
@@ -282,7 +281,7 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED} (Rejected with an error object)`, async () => {
@@ -615,7 +614,7 @@ const testNewRevision = () => {
 			UUIDToString(data.project),
 			data.model,
 			undefined);
-		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expectErrorNotification();
 	});
 
 	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)(Rejected with an error object)`, async () => {
@@ -984,7 +983,7 @@ const testModelSettingsUpdate = () => {
 			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status', async () => {
@@ -1003,7 +1002,7 @@ const testModelSettingsUpdate = () => {
 			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('modelSettingsUpdated', events.MODEL_SETTINGS_UPDATE, data, err);
+			expectListenerErrorNotification('modelSettingsUpdated', data, err);
 		});
 
 		test(`Should create a ${chatEvents.DRAWING_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (drawing)`, async () => {
@@ -1127,7 +1126,7 @@ const testRevisionUpdated = () => {
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for REVISION_UPDATED', async () => {
@@ -1146,7 +1145,7 @@ const testRevisionUpdated = () => {
 			EventsManager.publish(events.REVISION_UPDATED, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('revisionUpdated', events.REVISION_UPDATED, data, err);
+			expectListenerErrorNotification('revisionUpdated', data, err);
 		});
 	});
 };
@@ -1251,7 +1250,7 @@ const testNewModel = () => {
 			ChatService.createProjectMessage.mockRejectedValueOnce({ status: 404 });
 			await EventsManager.publish(events.NEW_MODEL, data);
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for NEW_MODEL', async () => {
@@ -1267,7 +1266,7 @@ const testNewModel = () => {
 			ChatService.createProjectMessage.mockRejectedValueOnce(err);
 			await EventsManager.publish(events.NEW_MODEL, data);
 			await waitOnEvent;
-			expectListenerErrorNotification('modelAdded', events.NEW_MODEL, data, err);
+			expectListenerErrorNotification('modelAdded', data, err);
 		});
 	});
 };
@@ -1374,7 +1373,7 @@ const testDeleteModel = () => {
 			EventsManager.publish(events.DELETE_MODEL, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for DELETE_MODEL', async () => {
@@ -1390,7 +1389,7 @@ const testDeleteModel = () => {
 			EventsManager.publish(events.DELETE_MODEL, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('modelDeleted', events.DELETE_MODEL, data, err);
+			expectListenerErrorNotification('modelDeleted', data, err);
 		});
 	});
 };
@@ -1540,7 +1539,7 @@ const testUpdateTicket = () => {
 			EventsManager.publish(events.UPDATE_TICKET, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`!Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
@@ -1740,7 +1739,7 @@ const testNewTicket = () => {
 				EventsManager.publish(events.TICKETS_IMPORTED, data);
 
 				await waitOnEvent;
-				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+				expectErrorNotification();
 			});
 		});
 
@@ -1762,7 +1761,7 @@ const testNewTicket = () => {
 			EventsManager.publish(events.NEW_TICKET, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for NEW_TICKET', async () => {
@@ -1784,7 +1783,7 @@ const testNewTicket = () => {
 			EventsManager.publish(events.NEW_TICKET, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('ticketAdded', events.NEW_TICKET, data, err);
+			expectListenerErrorNotification('ticketAdded', data, err);
 		});
 	});
 };
@@ -1870,7 +1869,7 @@ const testNewComment = () => {
 			EventsManager.publish(events.NEW_COMMENT, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for NEW_COMMENT', async () => {
@@ -1889,7 +1888,7 @@ const testNewComment = () => {
 			EventsManager.publish(events.NEW_COMMENT, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('ticketCommentAdded', events.NEW_COMMENT, data, err);
+			expectListenerErrorNotification('ticketCommentAdded', data, err);
 		});
 	});
 };
@@ -1975,7 +1974,7 @@ const testUpdateComment = () => {
 			EventsManager.publish(events.UPDATE_COMMENT, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for UPDATE_COMMENT', async () => {
@@ -1994,7 +1993,7 @@ const testUpdateComment = () => {
 			EventsManager.publish(events.UPDATE_COMMENT, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('ticketCommentUpdated', events.UPDATE_COMMENT, data, err);
+			expectListenerErrorNotification('ticketCommentUpdated', data, err);
 		});
 	});
 };
@@ -2098,7 +2097,7 @@ const testUpdateTicketGroup = () => {
 			EventsManager.publish(events.UPDATE_TICKET_GROUP, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for UPDATE_TICKET_GROUP', async () => {
@@ -2119,7 +2118,7 @@ const testUpdateTicketGroup = () => {
 			EventsManager.publish(events.UPDATE_TICKET_GROUP, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('ticketGroupUpdated', events.UPDATE_TICKET_GROUP, data, err);
+			expectListenerErrorNotification('ticketGroupUpdated', data, err);
 		});
 	});
 };
@@ -2176,7 +2175,7 @@ const testTemplateUpdated = () => {
 			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
 
 			await waitOnEvent;
-			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should send email notification if error has non-404 status for TEMPLATE_UPDATED', async () => {
@@ -2193,7 +2192,7 @@ const testTemplateUpdated = () => {
 			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
 
 			await waitOnEvent;
-			expectListenerErrorNotification('templateUpdated', events.TICKET_TEMPLATE_UPDATED, data, err);
+			expectListenerErrorNotification('templateUpdated', data, err);
 		});
 	});
 };

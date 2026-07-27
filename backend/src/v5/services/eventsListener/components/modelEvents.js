@@ -53,20 +53,17 @@ const queueStatusUpdate = async (payload) => {
 		} else {
 			await updateModelStatus(teamspace, projectId, model, status, revId);
 		}
-	} catch (err) {
-		logger.logError(`Failed to update model status for ${teamspace}.${model}: ${err.message}`);
-		if (err.stack) {
-			logger.logError(err.stack);
+	} catch (error) {
+		logger.logError(`Failed to update model status for ${teamspace}.${model}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
 		}
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'queueStatusUpdate',
-				eventName: events.QUEUED_TASK_UPDATE,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'queueStatusUpdate',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -84,20 +81,17 @@ const queueTasksCompleted = async (payload) => {
 		} else {
 			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user);
 		}
-	} catch (err) {
-		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
-		if (err.stack) {
-			logger.logError(err.stack);
+	} catch (error) {
+		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
 		}
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'queueTasksCompleted',
-				eventName: events.QUEUED_TASK_COMPLETED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'queueTasksCompleted',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -112,8 +106,8 @@ const revisionAdded = async (payload) => {
 		if (modelTypes.DRAWING === modelType) {
 			try {
 				await createDrawingThumbnail(teamspace, project, model, revId);
-			} catch (err) {
-				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${err?.message}`);
+			} catch (error) {
+				logger.logError(`Failed to create thumbnail for drawing ${teamspace}.${model}.${revId}: ${error?.message}`);
 			}
 		}
 
@@ -134,17 +128,14 @@ const revisionAdded = async (payload) => {
 			format: format ?? getRevisionFormat(rFile),
 			calibration,
 		}), teamspace, UUIDToString(project), model);
-	} catch (err) {
-		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'revisionAdded',
-				eventName: events.MODEL_IMPORT_FINISHED,
-				payload,
-				error: { message: err?.message, code: err?.code, stack: err?.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to send a model message to queue: ${error?.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'revisionAdded',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -194,25 +185,24 @@ const modelProcessingCompleted = async (payload) => {
 					},
 					zipPath ? [{ filename: 'logs.zip', path: zipPath }] : undefined,
 				);
-			} catch (err) {
+			} catch (error) {
 				logger.logError('Failed to send email for model import failures');
-				if (err.stack) {
-					logger.logError(err.stack);
+				if (error.stack) {
+					logger.logError(error.stack);
 				}
 			}
 		}
-	} catch (err) {
-		logger.logError(`Failed to process model import completion for ${teamspace}.${model}: ${err?.message}`);
-		if (err?.stack) {
-			logger.logError(err.stack);
+	} catch (error) {
+		logger.logError(`Failed to process model import completion for ${teamspace}.${model}: ${error?.message}`);
+		if (error?.stack) {
+			logger.logError(error.stack);
 		}
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
 			component: 'ModelEventsListener',
 			listenerName: 'modelProcessingCompleted',
-			eventName: events.MODEL_IMPORT_FINISHED,
 			payload,
-			error: { message: err?.message, code: err?.code, stack: err?.stack },
-		});
+			error,
+		}, undefined, true);
 	}
 
 	publish(events.MODEL_SETTINGS_UPDATE, {
@@ -239,17 +229,14 @@ const modelSettingsUpdated = async (payload) => {
 		if (data.name) {
 			await onModelNameUpdated(teamspace, project, model);
 		}
-	} catch (err) {
-		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'modelSettingsUpdated',
-				eventName: events.MODEL_SETTINGS_UPDATE,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'modelSettingsUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -263,17 +250,14 @@ const revisionUpdated = async (payload) => {
 
 		await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
 			teamspace, project, model, sender);
-	} catch (err) {
-		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'revisionUpdated',
-				eventName: events.REVISION_UPDATED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'revisionUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -287,17 +271,14 @@ const modelAdded = async (payload) => {
 		};
 
 		await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
-	} catch (err) {
-		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'modelAdded',
-				eventName: events.NEW_MODEL,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'modelAdded',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -311,17 +292,14 @@ const modelDeleted = async (payload) => {
 		};
 
 		await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
-	} catch (err) {
-		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'modelDeleted',
-				eventName: events.DELETE_MODEL,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'modelDeleted',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -330,17 +308,14 @@ const templateUpdated = async (payload) => {
 	try {
 		const template = await getTemplateById(teamspace, templateId);
 		await onTemplateUpdated(teamspace, template);
-	} catch (err) {
-		logger.logError(`Failed to process template updated event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'templateUpdated',
-				eventName: events.TICKET_TEMPLATE_UPDATED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process template updated event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'templateUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -358,17 +333,14 @@ const ticketAdded = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 		const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to process ticket added event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketAdded',
-				eventName: events.NEW_TICKET,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process ticket added event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketAdded',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -388,17 +360,14 @@ const ticketsImported = async (payload) => {
 			const serialisedTicket = serialiseTicket(ticket, fullTemplate);
 			await createModelMessage(event, serialisedTicket, teamspace, project, model);
 		}));
-	} catch (err) {
-		logger.logError(`Failed to process tickets imported event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketsImported',
-				eventName: events.TICKETS_IMPORTED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process tickets imported event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketsImported',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -436,17 +405,14 @@ const ticketUpdated = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
 		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to process ticket updated event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketUpdated',
-				eventName: events.UPDATE_TICKET,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process ticket updated event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -461,17 +427,14 @@ const ticketGroupUpdated = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_GROUP : chatEvents.CONTAINER_UPDATE_TICKET_GROUP;
 		const serialisedMsg = serialiseGroup({ _id, ticket, ...changes });
 		await createModelMessage(event, serialisedMsg, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to process group updated event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketGroupUpdated',
-				eventName: events.UPDATE_TICKET_GROUP,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process group updated event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketGroupUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -482,17 +445,14 @@ const ticketCommentAdded = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET_COMMENT : chatEvents.CONTAINER_NEW_TICKET_COMMENT;
 		const serialisedComment = serialiseComment(data);
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to process comment added event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketCommentAdded',
-				eventName: events.NEW_COMMENT,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process comment added event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketCommentAdded',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -503,17 +463,14 @@ const ticketCommentUpdated = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_COMMENT : chatEvents.CONTAINER_UPDATE_TICKET_COMMENT;
 		const serialisedComment = serialiseComment(data);
 		await createModelMessage(event, serialisedComment, teamspace, project, model);
-	} catch (err) {
-		logger.logError(`Failed to process comment updated event ${err.message}`);
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'ModelEventsListener',
-				listenerName: 'ticketCommentUpdated',
-				eventName: events.UPDATE_COMMENT,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		logger.logError(`Failed to process comment updated event ${error.message}`);
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ModelEventsListener',
+			listenerName: 'ticketCommentUpdated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 

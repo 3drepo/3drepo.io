@@ -68,6 +68,8 @@ const expectErrorNotification = () => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
 		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
 		expect.any(Object),
+		undefined,
+		true,
 	);
 };
 const publishAndWaitForEvent = async (event, data) => {
@@ -87,7 +89,7 @@ const testClashRunUpdate = () => {
 
 		test.each([
 			[`Should call updateRunStatus if there is a ${events.CLASH_RUN_UPDATE}`, undefined, false],
-			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound, false],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, templates.clashRunNotFound, true],
 			[`Should handle rejected error objects for ${events.CLASH_RUN_UPDATE}`, new Error(generateRandomString()), true],
 		])('%s', async (desc, rejectUpdateRunStatus, shouldNotifyError) => {
 			if (rejectUpdateRunStatus) {
@@ -194,7 +196,9 @@ const testClashRunProcessed = () => {
 			['Should not process clash tickets if the federation cannot be found', basePlan, undefined, new Error(), undefined, undefined],
 			['Should not process clash tickets if the template cannot be found', basePlan, undefined, undefined, new Error(), undefined],
 			['Should log an error if processing clash tickets fails', basePlan, undefined, undefined, undefined, new Error(generateRandomString())],
+			['Should log an error if processing clash tickets fails with no stack error', basePlan, undefined, undefined, undefined, { message: generateRandomString() }],
 		])('%s', async (desc, plan, getPlanError, getFederationError, getTemplateError, processClashResultsError) => {
+			let loggerSpy;
 			if (getPlanError) {
 				ClashPlansModel.getPlanById.mockRejectedValueOnce(getPlanError);
 			} else {
@@ -211,7 +215,7 @@ const testClashRunProcessed = () => {
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
 			}
 			if (processClashResultsError) {
-				jest.spyOn(logger, 'logError').mockImplementationOnce(() => { });
+				loggerSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 				TicketsClashes.processClashResults.mockRejectedValueOnce(processClashResultsError);
 			}
 
@@ -249,12 +253,14 @@ const testClashRunProcessed = () => {
 				eventData.project, fed._id, template, eventData.results,
 				{ plan: { ...eventData.plan, tickets: plan.tickets, name: plan.name }, runId: eventData.runId });
 			if (processClashResultsError) {
-				expect(logger.logError).toHaveBeenCalledTimes(1);
-				expect(logger.logError).toHaveBeenCalledWith(
+				expect(loggerSpy).toHaveBeenCalledTimes(processClashResultsError.stack ? 2 : 1);
+				expect(loggerSpy).toHaveBeenCalledWith(
 					`Error processing clash run ${UUIDToString(eventData.runId)} `
 					+ `for project ${UUIDToString(eventData.project)} `
 					+ `in teamspace ${eventData.teamspace}: ${processClashResultsError.message}`,
 				);
+				loggerSpy.mockRestore();
+				expectErrorNotification();
 			}
 		});
 	});
@@ -339,7 +345,7 @@ const testOnNewContainerRevision = () => {
 			if (setLastRevError) {
 				expect(loggerSpy).not.toHaveBeenCalled();
 			}
-			if (getPlansError && getPlansError instanceof Error && !getPlansError.code) {
+			if (getPlansError) {
 				expectErrorNotification();
 			} else {
 				expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
@@ -349,10 +355,7 @@ const testOnNewContainerRevision = () => {
 			}
 		});
 
-		test.each([
-			['send a clash error email if a plan cannot be triggered due to an unexpected error', true, undefined],
-			['gracefully handle the error if the clash error email cannot be sent', false, new Error(generateRandomString())],
-		])('Should %s', async (desc, emailSendSucceeds, emailError) => {
+		test('Should send a clash error email if a plan cannot be triggered due to an unexpected error', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -372,9 +375,6 @@ const testOnNewContainerRevision = () => {
 
 			ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([plan]);
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
-			if (!emailSendSucceeds) {
-				Mailer.sendSystemEmail.mockRejectedValueOnce(emailError);
-			}
 
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -389,7 +389,7 @@ const testOnNewContainerRevision = () => {
 				project: UUIDToString(data.project),
 				planId: UUIDToString(plan._id),
 				runId: 'N/A',
-			});
+			}, undefined, true);
 			expect(loggerSpy).toHaveBeenCalledTimes(1);
 			expect(loggerSpy).toHaveBeenCalledWith(
 				`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${error.message}`,

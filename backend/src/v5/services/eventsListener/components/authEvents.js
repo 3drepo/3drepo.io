@@ -32,16 +32,13 @@ const userLoggedIn = async (payload) => {
 			removeOldSessions(username, sessionID, referer),
 			...(socketId ? [createInternalMessage(chatEvents.LOGGED_IN, { sessionID, socketId })] : []),
 		]);
-	} catch (err) {
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'AuthEventsListener',
-				listenerName: 'userLoggedIn',
-				eventName: events.SESSION_CREATED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'AuthEventsListener',
+			listenerName: 'userLoggedIn',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
@@ -52,16 +49,13 @@ const sessionsRemoved = async (payload) => {
 			await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 		}
 		await createInternalMessage(chatEvents.LOGGED_OUT, { sessionIds: ids });
-	} catch (err) {
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'AuthEventsListener',
-				listenerName: 'sessionsRemoved',
-				eventName: events.SESSIONS_REMOVED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'AuthEventsListener',
+			listenerName: 'sessionsRemoved',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 

@@ -17,22 +17,20 @@
 
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
-const { isObject } = require('../../../utils/helper/typeCheck');
 
 const TEMPLATE_PATH = `${__dirname}/html/listenerErrorNotification.html`;
 
 const dataSchema = Yup.object({
-	eventName: Yup.string().default('Unknown event'),
-	listenerName: Yup.string().default('unknownListener'),
-	component: Yup.string().default('unknownComponent'),
-	payload: Yup.string().transform((payload, orgVal) => (
-		isObject(orgVal) ? JSON.stringify(orgVal) : JSON.stringify({ orgVal }))).default('{}'),
+	listenerName: Yup.string().required(),
+	component: Yup.string().required(),
+	payload: Yup.object().required(),
 	error: Yup.object({
-		message: Yup.string().default('Unknown error'),
-		code: Yup.string().default('N/A'),
-		stack: Yup.mixed().default('no stack trace provided'),
-	}).transform((err, orgVal) => (isObject(orgVal)
-		? { message: orgVal.message, stack: orgVal.stack } : { message: orgVal || undefined })),
+		message: Yup.string().required(),
+		code: Yup.string(),
+		stack: Yup.mixed(),
+	}).transform((value) => (value instanceof Error
+		? { message: value.message, code: value.code, stack: value.stack }
+		: value)).required(),
 }).required(true);
 
 const ListenerErrorNotification = {};

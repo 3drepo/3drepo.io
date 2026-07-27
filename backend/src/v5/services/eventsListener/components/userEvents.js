@@ -25,16 +25,13 @@ const userCreated = async (payload) => {
 	const { username } = payload;
 	try {
 		await unpackInvitations(username);
-	} catch (err) {
-		if (err.status !== 404) {
-			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-				component: 'UserEventsListener',
-				listenerName: 'userCreated',
-				eventName: events.USER_CREATED,
-				payload,
-				error: { message: err.message, code: err.code, stack: err.stack },
-			});
-		}
+	} catch (error) {
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'UserEventsListener',
+			listenerName: 'userCreated',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 

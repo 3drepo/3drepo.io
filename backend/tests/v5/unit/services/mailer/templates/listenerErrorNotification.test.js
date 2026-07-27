@@ -26,7 +26,6 @@ const testHtml = () => {
 	describe('get template html', () => {
 		test('should get listenerErrorNotification template html', async () => {
 			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				payload: { data: generateRandomString() },
@@ -35,57 +34,47 @@ const testHtml = () => {
 			expect(isHtml(res)).toEqual(true);
 		});
 
-		test('should get listenerErrorNotification template html if payload is undefined', async () => {
-			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
+		test('should throw if payload is undefined', async () => {
+			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				error: new Error(generateRandomString()),
-			});
-			expect(isHtml(res)).toEqual(true);
+			})).rejects.toThrow();
 		});
 
-		test('should get listenerErrorNotification template html if error object is just a string', async () => {
-			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
+		test('should throw if error is not an object', async () => {
+			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				payload: { data: generateRandomString() },
 				error: generateRandomString(),
-			});
-			expect(isHtml(res)).toEqual(true);
+			})).rejects.toThrow();
 		});
 
-		test('should get listenerErrorNotification template html if error object is null', async () => {
-			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
+		test('should throw if error is null', async () => {
+			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				payload: { data: generateRandomString() },
 				error: null,
-			});
-			expect(isHtml(res)).toEqual(true);
+			})).rejects.toThrow();
 		});
 
-		test('should get listenerErrorNotification template html if payload object is not an object', async () => {
-			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
+		test('should throw if payload is not an object', async () => {
+			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				payload: generateRandomString(),
-				error: generateRandomString(),
-			});
-			expect(isHtml(res)).toEqual(true);
+				error: new Error(generateRandomString()),
+			})).rejects.toThrow();
 		});
 
-		test('should get listenerErrorNotification template html if error object is undefined', async () => {
-			const res = await ListenerErrorNotification.html({
-				eventName: generateRandomString(),
+		test('should throw if error is undefined', async () => {
+			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),
 				component: generateRandomString(),
 				payload: { data: generateRandomString() },
-			});
-			expect(isHtml(res)).toEqual(true);
+			})).rejects.toThrow();
 		});
 	});
 };
@@ -93,7 +82,7 @@ const testHtml = () => {
 const testSubject = () => {
 	describe.each([
 		['data object is empty', {}],
-		['data object is not empty', { eventName: generateRandomString(), listenerName: generateRandomString(), component: generateRandomString() }],
+		['data object is not empty', { listenerName: generateRandomString(), component: generateRandomString() }],
 	])('get subject', (desc, data) => {
 		test(`should succeed if ${desc}`, () => {
 			expect(ListenerErrorNotification.subject(data).length).not.toEqual(0);

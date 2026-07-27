@@ -1,13 +1,11 @@
 <p>
-	Event: <%= eventName %>
-	<br>
 	Listener: <%= component %>.<%= listenerName %>
 	<br>
 	Error: <%= error.message %>
 	<br>
 	Code: <%= error.code %>
 	<br>
-  Stack trace: <%= error.stack %>
-  <br>
-	Payload: <%= payload %>
+	Stack trace: <%= error.stack %>
+	<br>
+	Payload: <%- JSON.stringify(payload) %>
 </p>
