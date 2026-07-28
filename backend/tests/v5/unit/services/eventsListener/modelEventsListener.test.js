@@ -1687,7 +1687,7 @@ const testNewTicket = () => {
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
 				expectErrorNotification();
 			});
-
+		});
 
 		test('Should send email notification on error for NEW_TICKET', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
@@ -1712,6 +1712,7 @@ const testNewTicket = () => {
 		});
 	});
 };
+
 const testNewComment = () => {
 	const addCommentTest = async (isFederation) => {
 		const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);

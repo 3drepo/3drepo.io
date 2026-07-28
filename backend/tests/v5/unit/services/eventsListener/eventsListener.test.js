@@ -64,7 +64,6 @@ const expectErrorNotification = (listenerName, payload) => {
 	);
 };
 
-
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
 		describe(events.SESSION_CREATED, () => {

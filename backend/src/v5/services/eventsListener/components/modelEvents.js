@@ -318,7 +318,7 @@ const templateUpdated = async (payload) => {
 		const template = await getTemplateById(teamspace, templateId);
 		await onTemplateUpdated(teamspace, template);
 	} catch (error) {
-		logger.logError(`Failed to process template updated event ${error.message}`);		
+		logger.logError(`Failed to process template updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
 			component: 'ModelEventsListener',
 			listenerName: 'templateUpdated',
