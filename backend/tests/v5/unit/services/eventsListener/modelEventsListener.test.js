@@ -1001,25 +1001,7 @@ const testModelSettingsUpdate = () => {
 			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledWith(data.teamspace, data.project, data.model);
 		});
 
-		test('Should not send email notification if error has 404 status', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				data: { name: generateRandomString() },
-				modelType: modelTypes.DRAWING,
-			};
-
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 404 });
-
-			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status', async () => {
+		test('Should send email notification on error', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1144,25 +1126,7 @@ const testRevisionUpdated = () => {
 			);
 		});
 
-		test('Should not send email notification if error has 404 status for REVISION_UPDATED', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				data: { _id: generateUUID() },
-				modelType: modelTypes.DRAWING,
-			};
-
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 404 });
-
-			EventsManager.publish(events.REVISION_UPDATED, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for REVISION_UPDATED', async () => {
+		test('Should send email notification on error for REVISION_UPDATED', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1271,22 +1235,7 @@ const testNewModel = () => {
 			);
 		});
 
-		test('Should not send email notification if error has 404 status for NEW_MODEL', async () => {
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				data: { [generateRandomString()]: generateRandomString() },
-				modelType: modelTypes.DRAWING,
-			};
-			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
-			ChatService.createProjectMessage.mockRejectedValueOnce({ status: 404 });
-			await EventsManager.publish(events.NEW_MODEL, data);
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for NEW_MODEL', async () => {
+		test('Should send email notification on error for NEW_MODEL', async () => {
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -1394,22 +1343,7 @@ const testDeleteModel = () => {
 			);
 		});
 
-		test('Should not send email notification if error has 404 status for DELETE_MODEL', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				project: generateRandomString(),
-				modelType: modelTypes.DRAWING,
-			};
-			ChatService.createModelMessage.mockRejectedValueOnce({ status: 404 });
-			EventsManager.publish(events.DELETE_MODEL, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for DELETE_MODEL', async () => {
+		test('Should send email notification on error for DELETE_MODEL', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1554,7 +1488,7 @@ const testUpdateTicket = () => {
 			await updateTicketTest(false, changes, expectedData);
 		});
 
-		test('Should not send email notification if error has 404 status for UPDATE_TICKET', async () => {
+		test('Should fail gracefully if getTemplateById fails for UPDATE_TICKET', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
 			const template = generateTemplate();
 			const data = {
@@ -1567,7 +1501,7 @@ const testUpdateTicket = () => {
 				changes: { title: { from: generateRandomString(), to: generateRandomString() } },
 			};
 
-			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(generateRandomString());
 			ModelSettings.isFederation.mockResolvedValueOnce(false);
 			EventsManager.publish(events.UPDATE_TICKET, data);
 
@@ -1754,50 +1688,8 @@ const testNewTicket = () => {
 				expectErrorNotification();
 			});
 
-			test('Should not send email notification if error has 404 status for TICKETS_IMPORTED', async () => {
-				const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
-				const template = generateTemplate();
-				const data = {
-					teamspace: generateRandomString(),
-					project: generateRandomString(),
-					model: generateRandomString(),
-					tickets: times(10, () => ({
-						type: template._id,
-						...generateRandomObject(),
-					})),
-				};
 
-				TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
-				ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
-				EventsManager.publish(events.TICKETS_IMPORTED, data);
-
-				await waitOnEvent;
-				expectErrorNotification();
-			});
-		});
-
-		test('Should not send email notification if error has 404 status for NEW_TICKET', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
-			const template = generateTemplate();
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				ticket: {
-					type: template._id,
-					[generateRandomString()]: generateRandomString(),
-				},
-			};
-
-			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
-
-			EventsManager.publish(events.NEW_TICKET, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for NEW_TICKET', async () => {
+		test('Should send email notification on error for NEW_TICKET', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
 			const template = generateTemplate();
 			const data = {
@@ -1887,25 +1779,7 @@ const testNewComment = () => {
 			expectErrorNotification();
 		});
 
-		test('Should not send email notification if error has 404 status for NEW_COMMENT', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				data: {
-					[generateRandomString()]: generateRandomString(),
-				},
-			};
-
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 404 });
-			EventsManager.publish(events.NEW_COMMENT, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for NEW_COMMENT', async () => {
+		test('Should send email notification on error for NEW_COMMENT', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1992,25 +1866,7 @@ const testUpdateComment = () => {
 			expectErrorNotification();
 		});
 
-		test('Should not send email notification if error has 404 status for UPDATE_COMMENT', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				data: {
-					[generateRandomString()]: generateRandomString(),
-				},
-			};
-
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 404 });
-			EventsManager.publish(events.UPDATE_COMMENT, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for UPDATE_COMMENT', async () => {
+		test('Should send email notification on error for UPDATE_COMMENT', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
 			const data = {
 				teamspace: generateRandomString(),
@@ -2113,27 +1969,7 @@ const testUpdateTicketGroup = () => {
 			expectErrorNotification();
 		});
 
-		test('Should not send email notification if error has 404 status for UPDATE_TICKET_GROUP', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET_GROUP);
-			const data = {
-				teamspace: generateRandomString(),
-				project: generateRandomString(),
-				model: generateRandomString(),
-				ticket: { _id: generateRandomString(), title: generateRandomString() },
-				author: generateRandomString(),
-				timestamp: generateRandomDate(),
-				changes: generateRandomString(),
-				_id: generateRandomString(),
-			};
-
-			ModelSettings.isFederation.mockRejectedValueOnce({ status: 404 });
-			EventsManager.publish(events.UPDATE_TICKET_GROUP, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for UPDATE_TICKET_GROUP', async () => {
+		test('Should send email notification on error for UPDATE_TICKET_GROUP', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET_GROUP);
 			const data = {
 				teamspace: generateRandomString(),
@@ -2195,23 +2031,7 @@ const testTemplateUpdated = () => {
 			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledWith(data.teamspace, templateObject);
 		});
 
-		test('Should not send email notification if error has 404 status for TEMPLATE_UPDATED', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
-			const data = {
-				teamspace: generateRandomString(),
-				template: generateRandomString(),
-				data: { code: generateRandomString() },
-			};
-
-			TicketTemplates.getTemplateById.mockRejectedValueOnce({ status: 404 });
-
-			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
-
-			await waitOnEvent;
-			expectErrorNotification();
-		});
-
-		test('Should send email notification if error has non-404 status for TEMPLATE_UPDATED', async () => {
+		test('Should send email notification on error for TEMPLATE_UPDATED', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
 			const data = {
 				teamspace: generateRandomString(),
