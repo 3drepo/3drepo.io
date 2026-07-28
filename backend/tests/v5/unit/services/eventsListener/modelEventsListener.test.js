@@ -184,7 +184,22 @@ const testQueueTaskUpdate = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
-			expectErrorNotification();
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		});
+
+		test(`Should not send error email if ${events.QUEUED_TASK_UPDATE} fails with revisionNotFound`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.revisionNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
+			await waitOnEvent;
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE} (Rejected with an error object)`,
@@ -281,7 +296,25 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
-			expectErrorNotification();
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		});
+
+		test(`Should not send error email if ${events.QUEUED_TASK_COMPLETED} fails with revisionNotFound`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.revisionNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				value: generateRandomString(),
+				user: generateRandomString(),
+				containers: [generateRandomString()],
+			};
+			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED} (Rejected with an error object)`, async () => {
@@ -614,7 +647,7 @@ const testNewRevision = () => {
 			UUIDToString(data.project),
 			data.model,
 			undefined);
-		expectErrorNotification();
+		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 	});
 
 	test(`Should fail gracefully on error if there is a ${events.MODEL_IMPORT_FINISHED} (container)(Rejected with an error object)`, async () => {

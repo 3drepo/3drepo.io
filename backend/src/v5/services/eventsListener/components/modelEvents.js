@@ -41,6 +41,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
+const { templates } = require('../../../utils/responseCodes');
 
 const queueStatusUpdate = async (payload) => {
 	const { teamspace, model, modelType, status, corId } = payload;
@@ -58,12 +59,15 @@ const queueStatusUpdate = async (payload) => {
 		if (error.stack) {
 			logger.logError(error.stack);
 		}
-		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-			component: 'ModelEventsListener',
-			listenerName: 'queueStatusUpdate',
-			payload,
-			error,
-		}, undefined, true);
+
+		if (![templates.projectNotFound.code, templates.revisionNotFound.code].includes(error.code)) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueStatusUpdate',
+				payload,
+				error,
+			}, undefined, true);
+		}
 	}
 };
 
@@ -86,12 +90,15 @@ const queueTasksCompleted = async (payload) => {
 		if (error.stack) {
 			logger.logError(error.stack);
 		}
-		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-			component: 'ModelEventsListener',
-			listenerName: 'queueTasksCompleted',
-			payload,
-			error,
-		}, undefined, true);
+
+		if (![templates.projectNotFound.code, templates.revisionNotFound.code].includes(error.code)) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'queueTasksCompleted',
+				payload,
+				error,
+			}, undefined, true);
+		}
 	}
 };
 
@@ -130,12 +137,14 @@ const revisionAdded = async (payload) => {
 		}), teamspace, UUIDToString(project), model);
 	} catch (error) {
 		logger.logError(`Failed to send a model message to queue: ${error?.message}`);
-		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
-			component: 'ModelEventsListener',
-			listenerName: 'revisionAdded',
-			payload,
-			error,
-		}, undefined, true);
+		if (templates.revisionNotFound.code !== error.code) {
+			await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+				component: 'ModelEventsListener',
+				listenerName: 'revisionAdded',
+				payload,
+				error,
+			}, undefined, true);
+		}
 	}
 };
 
@@ -309,7 +318,7 @@ const templateUpdated = async (payload) => {
 		const template = await getTemplateById(teamspace, templateId);
 		await onTemplateUpdated(teamspace, template);
 	} catch (error) {
-		logger.logError(`Failed to process template updated event ${error.message}`);
+		logger.logError(`Failed to process template updated event ${error.message}`);		
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
 			component: 'ModelEventsListener',
 			listenerName: 'templateUpdated',
