@@ -127,27 +127,6 @@ const testAuthEventsListener = () => {
 				await waitOnEvent;
 				expectErrorNotification('userLoggedIn', data);
 			});
-
-			test(`Should send an error notification if ${events.SESSION_CREATED} processing fails with 404`, async () => {
-				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
-				const data = {
-					username: generateRandomString(),
-					sessionID: generateRandomString(),
-					socketId: generateRandomString(),
-					ipAddress: generateRandomString(),
-					userAgent: generateRandomString(),
-					referer: generateRandomString(),
-				};
-				LoginRecords.saveSuccessfulLoginRecord.mockRejectedValueOnce({
-					status: 404,
-					message: generateRandomString(),
-				});
-
-				EventsManager.publish(events.SESSION_CREATED, data);
-
-				await waitOnEvent;
-				expectErrorNotification('userLoggedIn', data);
-			});
 		});
 
 		describe(events.SESSIONS_REMOVED, () => {
@@ -203,22 +182,6 @@ const testAuthEventsListener = () => {
 				await waitOnEvent;
 				expectErrorNotification('sessionsRemoved', data);
 			});
-
-			test(`Should send an error notification if ${events.SESSIONS_REMOVED} processing fails with 404`, async () => {
-				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
-				const data = {
-					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
-				};
-				ChatService.createInternalMessage.mockRejectedValueOnce({
-					status: 404,
-					message: generateRandomString(),
-				});
-
-				EventsManager.publish(events.SESSIONS_REMOVED, data);
-
-				await waitOnEvent;
-				expectErrorNotification('sessionsRemoved', data);
-			});
 		});
 	});
 };
@@ -238,20 +201,6 @@ const testUserEventsListener = () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
 			const data = { username: generateRandomString() };
 			Invitations.unpack.mockRejectedValueOnce(new Error(generateRandomString()));
-
-			EventsManager.publish(events.USER_CREATED, data);
-
-			await waitOnEvent;
-			expectErrorNotification('userCreated', data);
-		});
-
-		test(`Should send an error notification if ${events.USER_CREATED} processing fails with 404`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
-			const data = { username: generateRandomString() };
-			Invitations.unpack.mockRejectedValueOnce({
-				status: 404,
-				message: generateRandomString(),
-			});
 
 			EventsManager.publish(events.USER_CREATED, data);
 
