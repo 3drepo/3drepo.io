@@ -10613,7 +10613,7 @@ type-detect@4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@2.19.0, type-fest@^2.19.0, type-fest@~2.19:
+type-fest@2.19.0, type-fest@^2.19.0:
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
   integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
@@ -10642,11 +10642,6 @@ type-fest@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
-
-type-is@~1.6.18:
-  version "1.6.18"
-  resolved "https://registry.yarnpkg.com/type-is/-/type-is-1.6.18.tgz#4e552cd05df09467dcbc4ef739de89f2cf37c131"
-  integrity sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==
 
 typed-array-buffer@^1.0.3:
   version "1.0.3"
@@ -11219,9 +11214,9 @@ webpack@5.104.1:
     webpack-sources "^3.3.3"
 
 websocket-driver@>=0.5.1:
-  version "0.7.4"
-  resolved "https://registry.yarnpkg.com/websocket-driver/-/websocket-driver-0.7.4.tgz#89ad5295bbf64b480abcba31e4953aca706f5760"
-  integrity sha512-b17KeDIQVjvb0ssuSDF2cYXSg2iztliJ4B9WdsuB6J952qCPKmnVq4DyW5motImXHDC1cBT/1UezrJVsKw5zjg==
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/websocket-driver/-/websocket-driver-0.7.5.tgz#569d22764ab21f2de20af0e74b411e8ae5a0fa46"
+  integrity sha512-ZL2+3c7kMBdIRCMz6l8jQMHyGVxj+UL+xVk74Ombiciboca8rHa15L86B19E5oh1pL9Ii/uj54gtsIrZGMo6zA==
   dependencies:
     http-parser-js ">=0.5.1"
     safe-buffer ">=5.1.0"
