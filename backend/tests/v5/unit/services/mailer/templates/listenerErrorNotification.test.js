@@ -34,6 +34,18 @@ const testHtml = () => {
 			expect(isHtml(res)).toEqual(true);
 		});
 
+		test('should default code and stack trace if error does not have them', async () => {
+			const res = await ListenerErrorNotification.html({
+				listenerName: generateRandomString(),
+				component: generateRandomString(),
+				payload: { data: generateRandomString() },
+				error: { message: generateRandomString() },
+			});
+			expect(isHtml(res)).toEqual(true);
+			expect(res).toContain('undefined');
+			expect(res).toContain('No stack trace available');
+		});
+
 		test('should throw if payload is undefined', async () => {
 			await expect(ListenerErrorNotification.html({
 				listenerName: generateRandomString(),

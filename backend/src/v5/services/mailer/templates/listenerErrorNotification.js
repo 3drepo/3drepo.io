@@ -26,8 +26,8 @@ const dataSchema = Yup.object({
 	payload: Yup.object().required(),
 	error: Yup.object({
 		message: Yup.string().required(),
-		code: Yup.string(),
-		stack: Yup.mixed(),
+		code: Yup.string().default('undefined'),
+		stack: Yup.mixed().default('No stack trace available'),
 	}).transform((value) => (value instanceof Error
 		? { message: value.message, code: value.code, stack: value.stack }
 		: value)).required(),
