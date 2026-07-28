@@ -17,22 +17,13 @@
 
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
-import { InputLabel, FormHelperText } from '@mui/material';
+import { FormControl, FormHelperText } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const TagPropertyContainer = styled.div`
+export const TagPropertyContainer = styled(FormControl)`
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
 	width: 100%;
-`;
-
-export const Label = styled(InputLabel)`
-	${({ theme }) => theme.typography.h5};
-	position: static;
-	transform: none;
-	color: inherit;
-	max-width: 100%;
 `;
 
 export const TagChipContainer = styled(ChipContainer)`
@@ -51,6 +42,7 @@ export const ChipsInputBox = styled(InputContainer)`
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 5px;
+	margin: 0;
 	padding: 8px 10px 8px 12px;
 	cursor: text;
 `;
@@ -78,10 +70,11 @@ export const TagInput = styled.input`
 
 export const FieldHint = styled.div<{ $visible: boolean }>`
 	${({ theme }) => theme.typography.caption};
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) => theme.palette.base.main};
 	display: flex;
 	align-items: center;
 	gap: 4px;
+	margin-top: 4px;
 	overflow: hidden;
 	pointer-events: none;
 	max-height: 0;
@@ -108,5 +101,5 @@ export const Kbd = styled.kbd`
 `;
 
 export const HelperText = styled(FormHelperText)`
-	margin: 0;
+	margin: 4px 0 0;
 `;

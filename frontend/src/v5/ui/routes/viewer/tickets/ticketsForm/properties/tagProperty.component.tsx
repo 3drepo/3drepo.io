@@ -19,9 +19,9 @@ import { useRef, useState } from 'react';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { Tooltip } from '@mui/material';
+import { InputLabel, Tooltip } from '@mui/material';
 import { DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
-import { ChipsInputBox, FieldHint, HelperText, Kbd, Label, TagChipContainer, TagChipLabel, TagInput, TagPropertyContainer } from './tagProperty.styles';
+import { ChipsInputBox, FieldHint, HelperText, Kbd, TagChipContainer, TagChipLabel, TagInput, TagPropertyContainer } from './tagProperty.styles';
 
 type TagPropertyProps = FormInputProps & {
 	value: string[];
@@ -74,8 +74,8 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 	};
 
 	return (
-		<TagPropertyContainer onClick={() => inputRef.current?.focus()}>
-			{label && <Label shrink={false}>{label}</Label>}
+		<TagPropertyContainer onClick={() => inputRef.current?.focus()} disabled={disabled} required={required} error={error}>
+			{label && <InputLabel shrink={false}>{label}</InputLabel>}
 			<ChipsInputBox selected={focused} error={error} disabled={disabled} required={required}>
 				{tags.map((val) => (
 					<Tooltip key={val} title={val}>
