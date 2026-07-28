@@ -129,7 +129,7 @@ export const DateTimePicker = ({
 	}, [open, anchorEl]);
 
 	return (
-		<div>
+		<>
 			<InputComponent
 				onKeyDown={(e) => e.preventDefault()}
 				placeholder={placeholder ?? formatMessage({
@@ -212,6 +212,6 @@ export const DateTimePicker = ({
 					</ClickAwayListener>
 				)}
 			</Popper>
-		</div>
+		</>
 	);
 };
