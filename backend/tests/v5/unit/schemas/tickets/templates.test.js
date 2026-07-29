@@ -73,25 +73,66 @@ const testValidate = () => {
 			config: {
 				pin: {
 					color: [50, 50, 50],
-					icon: 'RISK',
+					icon: {
+						property: {
+							name: 'fixedName',
+						},
+						mapping: [{
+							default: 'RISK',
+						}],
+					},
 				},
 
 			},
-			properties: undefined,
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
 			modules: undefined,
 		}, true],
-		['pin with a colour defined but icon is wrong', {
+		['pin with an icon mapping with an invalid default icon', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
 				pin: {
 					color: [50, 50, 50],
-					icon: generateRandomString(),
+					icon: {
+						property: {
+							name: 'fixedName',
+						},
+						mapping: [{
+							default: generateRandomString(),
+						}],
+					},
 				},
 
 			},
-			properties: undefined,
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
 			modules: undefined,
+		}, false],
+		['pin with a legacy scalar icon', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: 'RISK',
+				},
+			},
+		}, false],
+		['pin with an icon mapping with no mapping entries', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
 		}, false],
 		['pin with a colour logic defined', {
 			name: generateRandomString(),
@@ -148,7 +189,20 @@ const testValidate = () => {
 							},
 						],
 					},
-					icon: 'ISSUE',
+					icon: {
+						property: {
+							name: 'fixedName',
+						},
+						mapping: [
+							{
+								default: 'ISSUE',
+							},
+							{
+								value: generateRandomString(),
+								icon: 'RISK',
+							},
+						],
+					},
 				},
 
 			},
@@ -158,7 +212,7 @@ const testValidate = () => {
 			}],
 			modules: undefined,
 		}, true],
-		['pin with a colour logic definde but the icon is wrong ', {
+		['pin with an icon mapping that has an invalid conditional icon', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
@@ -181,7 +235,20 @@ const testValidate = () => {
 							},
 						],
 					},
-					icon: generateRandomString(),
+					icon: {
+						property: {
+							name: 'fixedName',
+						},
+						mapping: [
+							{
+								default: 'ISSUE',
+							},
+							{
+								value: generateRandomString(),
+								icon: generateRandomString(),
+							},
+						],
+					},
 				},
 
 			},
@@ -191,6 +258,86 @@ const testValidate = () => {
 			}],
 			modules: undefined,
 		}, false],
+		['pin with an icon mapping that has no default entry', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ value: generateRandomString(), icon: 'RISK' }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}, false],
+		['pin with an icon mapping that has multiple default entries', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { default: 'ISSUE' }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}, false],
+		['pin with an icon mapping whose conditional entry has no value', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { icon: 'ISSUE' }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}, false],
+		['pin with an icon mapping whose conditional entry has no icon', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { value: generateRandomString() }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}, false],
+		['pin with an icon mapping that has no property name', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: {},
+						mapping: [{ default: 'RISK' }],
+					},
+				},
+			},
+		}, false],
+		['pin with an icon mapping that references a module property', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName', module: 'mod' },
+						mapping: [{ default: 'MARKER' }],
+					},
+				},
+			},
+			modules: [{
+				name: 'mod',
+				properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+			}],
+		}, true],
 		['pin with a colour logic defined but no default specified', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -1430,6 +1577,36 @@ const testValidate = () => {
 
 		expect(output.properties[0].hiddenOnUI).toEqual(true);
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
+	});
+
+	test('Icon mapping default entries strip conditional value and icon fields', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'reference' },
+						mapping: [{
+							default: 'RISK',
+							value: generateRandomString(),
+							icon: 'ISSUE',
+						}, {
+							value: generateRandomString(),
+							icon: 'MARKER',
+						}],
+					},
+				},
+			},
+			properties: [{ name: 'reference', type: propTypes.TEXT }],
+		};
+
+		const output = TemplateSchema.validate(data);
+
+		expect(output.config.pin.icon.mapping).toEqual([
+			{ default: 'RISK' },
+			{ value: data.config.pin.icon.mapping[1].value, icon: 'MARKER' },
+		]);
 	});
 };
 

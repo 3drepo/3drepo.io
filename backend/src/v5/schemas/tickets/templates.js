@@ -37,7 +37,21 @@ const TemplateSchema = {};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
-const pinIconSchema = Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']).default('DEFAULT');
+const pinIconSchema = Yup.lazy((val) => {
+	if (val === undefined) return Yup.mixed().strip();
+	return Yup.object({
+		property: Yup.object({
+			name: nameSchema.required(),
+			module: nameSchema,
+		}),
+
+		mapping: Yup.array().of(Yup.object({
+			default: Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']),
+			value: Yup.mixed().when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+			icon: Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']).when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+		})).test('Icon mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
+	});
+});
 
 const pinColSchema = Yup.lazy((val) => {
 	if (val === undefined) return Yup.mixed().strip();
