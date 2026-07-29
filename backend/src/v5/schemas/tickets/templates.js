@@ -18,14 +18,14 @@
 const {
 	basePropertyLabels,
 	getApplicableDefaultProperties,
+	pinIcons,
 	presetEnumValues,
 	presetModules,
 	presetModulesProperties,
 	propTypes,
 	statusTypes,
 	statuses,
-	pinIcons,
-	supportedPatterns
+	supportedPatterns,
 } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
@@ -56,7 +56,7 @@ const createPinSchema = (type) => Yup.lazy((val) => {
 			[type]: type === 'icon'
 				? Yup.string().oneOf(Object.values(pinIcons)).when('default', ([def], schema) => (def ? schema.strip() : schema.required()))
 				: types.color3Arr.when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
-		})).test(`${type} mapping`, `Must contain one default entry`, (arr) => arr.filter((obj) => !!obj.default).length === 1),
+		})).test(`${type} mapping`, 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
 	});
 });
 

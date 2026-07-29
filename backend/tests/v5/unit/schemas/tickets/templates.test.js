@@ -35,7 +35,7 @@ const testValidate = () => {
 		modules,
 		properties,
 		config,
-		deprecated: deprecated,
+		deprecated,
 	});
 
 	const nameTests = [
@@ -67,7 +67,7 @@ const testValidate = () => {
 			generateBasicSchema({
 				config: {
 					pin: { color: [50, 50, 50] },
-				}
+				},
 			}),
 			true],
 		['pin with a colour and icon defined',
@@ -88,7 +88,7 @@ const testValidate = () => {
 				properties: [{
 					name: 'fixedName',
 					type: propTypes.TEXT,
-				}]
+				}],
 			}),
 			true],
 		['pin with an icon mapping with an invalid default icon',
@@ -159,7 +159,7 @@ const testValidate = () => {
 				properties: [{
 					name: 'fixedName',
 					type: propTypes.TEXT,
-				}]
+				}],
 			}), true],
 		['pin with a colour logic and icon defined ',
 			generateBasicSchema({
@@ -203,7 +203,7 @@ const testValidate = () => {
 				properties: [{
 					name: 'fixedName',
 					type: propTypes.TEXT,
-				}]
+				}],
 			}), true],
 		['pin with an icon mapping that has an invalid conditional icon', generateBasicSchema({
 			config: {
@@ -596,7 +596,7 @@ const testValidate = () => {
 				type: propTypes.BOOLEAN,
 				unique: true,
 
-			}]
+			}],
 		}), false],
 		['property is unique for manyOf type', generateBasicSchema({
 			properties: [{
@@ -605,14 +605,14 @@ const testValidate = () => {
 				values: [generateRandomString(), generateRandomString()],
 				unique: true,
 
-			}]
+			}],
 		}), false],
 		['property is readOnly', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
 				readOnly: true,
-			}]
+			}],
 		}), true],
 		['property is readOnly and required', generateBasicSchema({
 			properties: [{
@@ -620,14 +620,14 @@ const testValidate = () => {
 				type: propTypes.BOOLEAN,
 				readOnly: true,
 				required: true,
-			}]
+			}],
 		}), false],
 		['property is not readOnly but value is configured', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				value: generateRandomString(),
-			}]
+			}],
 		}), false],
 		['property is readOnly but value contains no placeholder', generateBasicSchema({
 			properties: [{
@@ -635,7 +635,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: generateRandomString(),
-			}]
+			}],
 		}), true],
 		['property is readOnly but type is not supported', generateBasicSchema({
 			properties: [{
@@ -643,7 +643,7 @@ const testValidate = () => {
 				type: propTypes.DATE,
 				readOnly: true,
 				value: generateRandomString(),
-			}]
+			}],
 		}), false],
 		['property is readOnly but value contains unknown placeholder', generateBasicSchema({
 			properties: [{
@@ -651,7 +651,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: `{${generateRandomString()}}`,
-			}]
+			}],
 		}), false],
 		['property is readOnly but value contains known placeholders', generateBasicSchema({
 			properties: [{
@@ -659,7 +659,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
-			}]
+			}],
 		}), true],
 		['property is readOnly but value contains known placeholders (long text)', generateBasicSchema({
 			properties: [{
@@ -667,7 +667,7 @@ const testValidate = () => {
 				type: propTypes.LONG_TEXT,
 				readOnly: true,
 				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
-			}]
+			}],
 		}), true],
 		['property is readOnlyOnUI', generateBasicSchema({
 			properties: [{
@@ -1176,7 +1176,6 @@ const testValidate = () => {
 		]),
 	];
 
-
 	const basicModules = [{
 		type: presetModules.SAFETIBASE,
 		properties: times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT })),
@@ -1471,7 +1470,7 @@ const testGenerateFullSchema = () => {
 
 			const expectedOutput = cloneDeep(template);
 			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
-			...expectedOutput.properties];
+				...expectedOutput.properties];
 			expect(output).toEqual(expectedOutput);
 		});
 
@@ -1562,7 +1561,7 @@ const testGenerateFullSchema = () => {
 
 			const expectedOutput = cloneDeep(template);
 			expectedOutput.properties = [...getApplicableDefaultProperties(template.config),
-			...expectedOutput.properties];
+				...expectedOutput.properties];
 			expectedOutput.modules.forEach((module) => {
 				if (module.type) {
 					// eslint-disable-next-line no-param-reassign

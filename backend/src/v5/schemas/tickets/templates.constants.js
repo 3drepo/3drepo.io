@@ -113,7 +113,6 @@ TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 const riskLevelConfig = { [propOptions.VALUES]: riskLevelsArr, [propOptions.DEFAULT]: riskLevels.VERY_LOW };
 const idTypeLabels = ['Revit', 'IFC', 'DWG', 'DGN', '3D Repo ID', 'Unknown'];
 
-
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
 		createPropertyEntry('Start Time', propTypes.DATE),
