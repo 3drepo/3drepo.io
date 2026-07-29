@@ -35,7 +35,7 @@ export const TicketProperty = {
 	sequencing: SequencingProperty,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
-	tag: TagProperty,
+	tags: TagProperty,
 	boolean: Toggle,
 	coords: CoordsProperty,
 	number: NumberField,

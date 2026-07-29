@@ -193,15 +193,15 @@ export const useTagsSelectOptions = (
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const cache = useRef<Record<string, SelectOption[]>>({});
 	const [selectOptions, setSelectOptions] = useState<SelectOption[]>([]);
-	// For now isFetchingOptions is only used for tag properties
+	// For now isFetchingOptions is only used for tags properties
 	const [isFetchingOptions, setIsFetchingOptions] = useState(false);
 
 	useEffect(() => {
-		if (type !== 'tag') return;
+		if (type !== 'tags') return;
 		const modelId = modelsIds[0];
 		if (!modelId || !teamspace || !project) return;
 
-		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tag');
+		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tags');
 		if (!matchingTemplate) return;
 
 		const propName = module ? `${module}::${property}` : property;

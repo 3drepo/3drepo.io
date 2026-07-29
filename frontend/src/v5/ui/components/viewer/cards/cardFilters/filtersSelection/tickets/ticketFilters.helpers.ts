@@ -52,7 +52,7 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'owner': ListIcon,
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
-	'tag': ListIcon,
+	'tags': ListIcon,
 };
 
 const filterTypeIsValid = (type: string): type is TicketFilterType => Object.keys(TYPE_TO_ICON).includes(type);
@@ -314,7 +314,7 @@ export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFil
 		};
 
 		serializedValues = values.map(serializeValue).join(',');
-		if (ticketFilter.type === 'tag') {
+		if (ticketFilter.type === 'tags') {
 			serializedValues = values.map((v) => escapeString(v as string)).join(',');
 		} else if (isSelectType(ticketFilter.type)) {
 			if (!propertyDefs.values.length) {
@@ -361,7 +361,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		values: undefined,
 	};
 	if (!filter.operator || !filterTypeIsValid(type)) throw (new InvalidPropertyError(property, type));
-	if (isSelectType(type) && type !== 'tag') {
+	if (isSelectType(type) && type !== 'tags') {
 		if (!propertyDefs.values.length) {
 			throw (new InvalidPropertyError(property, type));
 		}
@@ -370,7 +370,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		filter.displayValues = arrToDisplayValue(indexes.filter((i) => propertyDefs.displayValues[i]).map((i) => propertyDefs.displayValues[i]));
 	}
 
-	if (type === 'tag') {
+	if (type === 'tags') {
 		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
 		filter.displayValues = arrToDisplayValue(filter.values as string[]);
 	}

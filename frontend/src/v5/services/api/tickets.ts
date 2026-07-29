@@ -20,17 +20,6 @@ import api from './default';
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
 
 
-// TODO: Remove before flight 🔖
-const applyTagsTemplateOverride = (template: ITemplate): ITemplate => {
-	if (template.code !== 'TGS' || !template.properties) return template;
-	const t =  {
-		...template,
-		properties: template.properties?.map((p) => p.name === 'Tags' ? { ...p, type: 'tag' as const } : p),
-	};
-
-	return t;
-};
-
 export const fetchContainerTemplates = async (
 	teamspace: string,
 	projectId: string,
@@ -49,7 +38,7 @@ export const fetchContainerTemplates = async (
 	}
 
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates?${urlSearchParams}`);
-	return data.templates.map(applyTagsTemplateOverride);
+	return data.templates;
 };
 
 export const fetchContainerTemplate = async (
@@ -59,7 +48,7 @@ export const fetchContainerTemplate = async (
 	templateId:string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates/${templateId}`);
-	return applyTagsTemplateOverride(data);
+	return data;
 };
 
 export const fetchFederationTemplates = async (
@@ -80,7 +69,7 @@ export const fetchFederationTemplates = async (
 	}
 
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?${urlSearchParams}`);
-	return data.templates.map(applyTagsTemplateOverride);
+	return data.templates;
 };
 
 export const fetchFederationTemplate = async (
@@ -90,7 +79,7 @@ export const fetchFederationTemplate = async (
 	templateId: string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates/${templateId}`);
-	return applyTagsTemplateOverride(data);
+	return data;
 };
 
 type TicketsQueryParams = {
@@ -284,17 +273,8 @@ export const fetchTagsValues = async (
 	template: string,
 	propertyName: string,
 ): Promise<FetchTagsValuesResponse> => {
-	// const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/templates/${template}/properties/${propertyName}/values`);
-	// return data;
-
-	// TODO: Remove before flight 🔖
-	return new Promise((resolve) => setTimeout(() => resolve({
-		values: [
-			'tag 1', 'tag 2', 'tag 3', 'tag 4', 'tag 5',
-			'tag 6', 'tag 7', 'tag 8', 'tag 9', 'tag 10',
-			'Structural Inspection', 'Foundation Works', 'Concrete Pour',
-		],
-	}), 30000));
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/templates/${template}/properties/${propertyName}/values`);
+	return data;
 };
 
 /**

@@ -79,7 +79,7 @@ export const FilterFormNonRangeValues = ({
 	ContainersHooksSelectors.selectContainers();
 
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-	const selectOptions = type === 'tag' ? tagOptions : getSelectOptions(module, property, type, templates, modelsIds);
+	const selectOptions = type === 'tags' ? tagOptions : getSelectOptions(module, property, type, templates, modelsIds);
 	const isJobsAndUsers = getIsJobsAndUsersProperty(templates, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;

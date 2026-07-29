@@ -98,7 +98,7 @@ describe('Tickets: filters', () => {
 			},
 			{
 				name: 'Labels',
-				type: 'tag',
+				type: 'tags',
 			}
 
 		],
@@ -113,7 +113,7 @@ describe('Tickets: filters', () => {
 					},
 					{
 						name: 'Module Labels',
-						type: 'tag',
+						type: 'tags',
 					}
 				]
 			},
@@ -641,11 +641,11 @@ describe('Tickets: filters', () => {
 			expect(deserializeFilter(templates, serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
-		it('should work with tag type property', () => {
+		it('should work with tags type property', () => {
 			const filter: TicketFilter = {
 				module: '',
 				property: 'Labels',
-				type: 'tag',
+				type: 'tags',
 				filter: {
 					operator: 'is',
 					values: ['tag 1', 'Foundation Works', 'Concrete Pour'],
@@ -657,11 +657,11 @@ describe('Tickets: filters', () => {
 			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
-		it('should work with tag type property in a module', () => {
+		it('should work with tags type property in a module', () => {
 			const filter: TicketFilter = {
 				module: 'Users module',
 				property: 'Module Labels',
-				type: 'tag',
+				type: 'tags',
 				filter: {
 					operator: 'is',
 					values: ['tag 3', 'Structural Inspection'],

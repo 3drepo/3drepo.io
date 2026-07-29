@@ -79,7 +79,7 @@ const DATE_FILTER_OPERATOR_LABEL: Record<TicketFilterOperator, string> = {
 
 export const isDateType = (type: TicketFilterType) => ['date', 'pastDate', 'createdAt', 'updatedAt', 'sequencing'].includes(type);
 export const isTextType = (type: TicketFilterType) => ['ticketCode', 'title', 'text', 'longText'].includes(type);
-export const isSelectType = (type: TicketFilterType) => ['template', 'oneOf', 'manyOf', 'owner', 'status', 'tag'].includes(type);
+export const isSelectType = (type: TicketFilterType) => ['template', 'oneOf', 'manyOf', 'owner', 'status', 'tags'].includes(type);
 
 export const getFilterOperatorLabels = (type: TicketFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
 

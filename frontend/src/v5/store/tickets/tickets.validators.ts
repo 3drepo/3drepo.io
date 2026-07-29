@@ -45,7 +45,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			validator = Yup.array().nullable();
 			break;
 		case 'manyOf':
-		case 'tag':
+		case 'tags':
 			validator = Yup.array();
 			break;
 		case 'image':
@@ -78,7 +78,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			},
 			{ name }),
 		);
-		if (type === 'manyOf' || type === 'tag') {
+		if (type === 'manyOf' || type === 'tags') {
 			validator = validator.min(1,
 				formatMessage({
 					id: 'validation.ticket.manyOf.required',
