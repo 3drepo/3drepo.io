@@ -501,6 +501,15 @@ const testValidate = () => {
 			}],
 
 		}, true],
+		['tags property has all required properties', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+			}],
+
+		}, true],
 		['property is unique', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -568,6 +577,15 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString()],
+				unique: true,
+
+			}] }, false],
+		['property is unique for tags type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
 				unique: true,
 
 			}] }, false],
@@ -777,6 +795,56 @@ const testValidate = () => {
 			}],
 
 		}, true],
+		['tags property with default values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: ['a', 'b'],
+			}],
+
+		}, true],
+		['tags property with values configured strips values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				values: ['a', 'b'],
+			}],
+
+		}, true],
+		['tags property with duplicated default values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: ['a', 'a'],
+			}],
+
+		}, true],
+		['tags property with empty default values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: [],
+			}],
+
+		}, false],
+		['tags property with too long default value', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: [generateRandomString(121)],
+			}],
+
+		}, false],
 		['property with enum type with values being the wrong type', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -819,7 +887,7 @@ const testValidate = () => {
 				default: ['a', 'a'],
 			}],
 
-		}, false],
+		}, true],
 		['property name is too long', {
 			name: generateRandomString(),
 			code: generateRandomString(3),

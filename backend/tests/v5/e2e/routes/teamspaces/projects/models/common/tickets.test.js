@@ -655,6 +655,10 @@ const testGetTicketList = () => {
 			type: propTypes.MANY_OF,
 			values: times(5, () => ServiceHelper.generateRandomString()),
 		};
+		const tagsProp = {
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.TAGS,
+		};
 
 		const templatesToUse = times(3, () => {
 			const template = ServiceHelper.generateTemplate();
@@ -664,7 +668,7 @@ const testGetTicketList = () => {
 
 		const templateWithAllProps = templatesToUse[0];
 		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp,
-			oneOfProp, manyOfProp);
+			oneOfProp, manyOfProp, tagsProp);
 
 		con.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 		fed.tickets = times(13, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
@@ -675,6 +679,7 @@ const testGetTicketList = () => {
 		delete con.tickets[12].properties[dateProp.name];
 		delete con.tickets[12].properties[oneOfProp.name];
 		delete con.tickets[12].properties[manyOfProp.name];
+		delete con.tickets[12].properties[tagsProp.name];
 
 		delete fed.tickets[12].properties[textProp.name];
 		delete fed.tickets[12].properties[longTextProp.name];
@@ -682,6 +687,7 @@ const testGetTicketList = () => {
 		delete fed.tickets[12].properties[dateProp.name];
 		delete fed.tickets[12].properties[oneOfProp.name];
 		delete fed.tickets[12].properties[manyOfProp.name];
+		delete fed.tickets[12].properties[tagsProp.name];
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets],
@@ -814,6 +820,35 @@ const testGetTicketList = () => {
 							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 			];
 
+			const tagsPropertyFilters = [
+				...existsPropertyFilters(propTypes.TAGS, tagsProp.name),
+				[`${queryOperators.IS} operator is used in ${propTypes.TAGS} property`,
+					{ ...baseRouteParams, options: { query: `'${tagsProp.name}::${queryOperators.IS}::${model.tickets[0].properties[tagsProp.name][0]}'` } }, true,
+					model.tickets
+						.filter((t) => (t.properties[tagsProp.name]
+							?.some((val) => val === model.tickets[0].properties[tagsProp.name][0])))],
+				[`${queryOperators.NOT_IS} operator is used in ${propTypes.TAGS} property`,
+					{ ...baseRouteParams, options: { query: `'${tagsProp.name}::${queryOperators.NOT_IS}::${model.tickets[0].properties[tagsProp.name][0]}'` } }, true,
+					model.tickets
+						.filter((t) => (!t.properties[tagsProp.name]
+							?.some((val) => val === model.tickets[0].properties[tagsProp.name][0])))],
+				[`${queryOperators.CONTAINS} operator is used in ${propTypes.TAGS} property`,
+					{ ...baseRouteParams, options: { query: `'${tagsProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[tagsProp.name][0].slice(0, 5)}'` } }, true,
+					model.tickets
+						.filter((t) => t.properties[tagsProp.name]?.some((val) => val.slice(0, 5)
+						=== model.tickets[0].properties[tagsProp.name][0].slice(0, 5)))],
+				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.TAGS} property`,
+					{
+						...baseRouteParams,
+						options: { query: `'${tagsProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[tagsProp.name][0].slice(0, 5)}'` },
+					},
+					true,
+					model.tickets
+						.filter((t) => !t.properties[tagsProp.name]
+							?.some((val) => val.slice(0, 5)
+							=== model.tickets[0].properties[tagsProp.name][0].slice(0, 5)))],
+			];
+
 			const numberPropertyFilters = (propType, propertyName) => [
 				...existsPropertyFilters(propType, propertyName),
 				...equalsPropertyFilters(propType, propertyName),
@@ -872,6 +907,7 @@ const testGetTicketList = () => {
 				...textPropertyFilters(propTypes.LONG_TEXT, longTextProp.name),
 				...textPropertyFilters(propTypes.ONE_OF, oneOfProp.name),
 				...manyOfPropertyFilters,
+				...tagsPropertyFilters,
 				...numberPropertyFilters(propTypes.NUMBER, numberProp.name),
 				...numberPropertyFilters(propTypes.DATE, dateProp.name),
 				...booleanPropertyFilters,
