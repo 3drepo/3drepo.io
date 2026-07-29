@@ -39,19 +39,23 @@ let agent;
 
 const TICKET_HISTORY_COL = 'tickets.logs';
 
-const generateBasicData = () => ({
-	users: {
+const generateBasicData = () => {
+	const users = {
 		tsAdmin: ServiceHelper.generateUserCredentials(),
 		viewer: ServiceHelper.generateUserCredentials(),
 		noProjectAccess: ServiceHelper.generateUserCredentials(),
 		nobody: ServiceHelper.generateUserCredentials(),
 		projectAdmin: ServiceHelper.generateUserCredentials(),
-	},
-	teamspace: ServiceHelper.generateRandomString(),
-	project: ServiceHelper.generateRandomProject(),
-	con: ServiceHelper.generateRandomModel(),
-	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-});
+	};
+
+	return {
+		users,
+		teamspace: ServiceHelper.generateRandomString(),
+		project: ServiceHelper.generateRandomProject(),
+		con: ServiceHelper.generateRandomModel({ viewers: [users.viewer.user] }),
+		fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION, viewers: [users.viewer.user] }),
+	};
+};
 
 const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
 	const { tsAdmin, ...otherUsers } = users;
@@ -196,6 +200,115 @@ const testGetTemplateDetails = () => {
 
 				if (success) {
 					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
+const testGetTagPropertyValues = () => {
+	describe('Get tag property values', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const [rootTagProp, moduleName, moduleTagProp, emptyTagProp, textProp] = times(
+			5, () => ServiceHelper.generateRandomString());
+		const tagPropWithSlash = `${ServiceHelper.generateRandomString()}/${ServiceHelper.generateRandomString()}`;
+		const template = ServiceHelper.generateTemplate();
+		template.properties.push(
+			{ name: rootTagProp, type: propTypes.TAGS },
+			{ name: tagPropWithSlash, type: propTypes.TAGS },
+			{ name: emptyTagProp, type: propTypes.TAGS },
+			{ name: textProp, type: propTypes.TEXT },
+		);
+		template.modules.push({
+			name: moduleName,
+			properties: [{ name: moduleTagProp, type: propTypes.TAGS }],
+		});
+		const [
+			conTagA, conTagB, conTagC, conModuleTagA, conModuleTagB, conEncodedTagValue,
+			fedTagA, fedTagB, fedTagC, fedModuleTagA, fedModuleTagB, fedEncodedTagValue,
+		] = times(12, () => ServiceHelper.generateRandomString());
+		const modelTagValues = {
+			[con._id]: {
+				root: [conTagA, conTagB, conTagC],
+				module: [conModuleTagA, conModuleTagB],
+				encoded: conEncodedTagValue,
+			},
+			[fed._id]: {
+				root: [fedTagA, fedTagB, fedTagC],
+				module: [fedModuleTagA, fedModuleTagB],
+				encoded: fedEncodedTagValue,
+			},
+		};
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await Promise.all([con, fed].flatMap((model) => {
+				const tagValues = modelTagValues[model._id];
+				const ticketA = ServiceHelper.generateTicket(template);
+				ticketA.properties[rootTagProp] = tagValues.root.slice(0, 2);
+				ticketA.properties[tagPropWithSlash] = [tagValues.encoded];
+				ticketA.modules[moduleName][moduleTagProp] = [tagValues.module[0]];
+				delete ticketA.properties[emptyTagProp];
+
+				const ticketB = ServiceHelper.generateTicket(template);
+				ticketB.properties[rootTagProp] = tagValues.root.slice(1);
+				delete ticketB.properties[tagPropWithSlash];
+				ticketB.modules[moduleName][moduleTagProp] = [tagValues.module[1], tagValues.module[0]];
+				delete ticketB.properties[emptyTagProp];
+
+				return [ticketA, ticketB].map(
+					(ticket) => ServiceHelper.db.createTicket(teamspace, project.id, model._id, ticket));
+			}));
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? con : fed;
+			const modelWithTickets = isFed ? fed : con;
+			const tagValues = modelTagValues[modelWithTickets._id];
+			const { modelNotFound } = templates;
+			const getRoute = ({
+				key = users.viewer.apiKey,
+				projectId = project.id,
+				modelId = modelWithTickets._id,
+				templateId = template._id,
+				property = rootTagProp,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets`
+				+ `/templates/${templateId}/properties/${encodeURIComponent(property)}/values${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', false, getRoute({ key: null }), templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, getRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				['the project does not exist', false, getRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is not a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the user does not have access to the model', false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the template id is invalid', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
+				['the property does not exist', false, getRoute({ property: ServiceHelper.generateRandomString() }), templates.invalidArguments],
+				['the property is not a tag property', false, getRoute({ property: textProp }), templates.invalidArguments],
+				['the tag property has no values', true, getRoute({ property: emptyTagProp }), []],
+				['the user has view access and the property is a root tag property', true, getRoute(), tagValues.root],
+				['the user has view access and the property is a module tag property', true,
+					getRoute({ property: `${moduleName}::${moduleTagProp}` }), tagValues.module],
+				['the user has view access and the property name requires URI encoding', true,
+					getRoute({ property: tagPropWithSlash }), [tagValues.encoded]],
+				['the admin has access and the property is a root tag property', true,
+					getRoute({ key: users.tsAdmin.apiKey }), tagValues.root],
+			];
+		};
+
+		const runTest = (desc, success, route, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const res = await agent.get(route).expect(success ? templates.ok.status : expectedOutput.status);
+
+				if (success) {
+					expect(res.body.values).toEqual(expect.arrayContaining(expectedOutput));
+					expect(res.body.values).toHaveLength(expectedOutput.length);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -1582,6 +1695,7 @@ describe(determineTestGroup(__filename), () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetAllTemplates();
 	testGetTemplateDetails();
+	testGetTagPropertyValues();
 	testAddTicket();
 	testImportTickets();
 	testGetTicketResource();
