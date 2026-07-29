@@ -24,7 +24,9 @@ const {
 	propTypes,
 	statusTypes,
 	statuses,
-	supportedPatterns } = require('./templates.constants');
+	pinIcons,
+	supportedPatterns
+} = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -37,8 +39,11 @@ const TemplateSchema = {};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
-const pinIconSchema = Yup.lazy((val) => {
+
+const createPinSchema = (type) => Yup.lazy((val) => {
 	if (val === undefined) return Yup.mixed().strip();
+	if (typeof val === 'string' && type === 'icon') return Yup.string().oneOf(Object.values(pinIcons));
+	if (isArray(val) && type === 'color') return types.color3Arr;
 	return Yup.object({
 		property: Yup.object({
 			name: nameSchema.required(),
@@ -46,31 +51,18 @@ const pinIconSchema = Yup.lazy((val) => {
 		}),
 
 		mapping: Yup.array().of(Yup.object({
-			default: Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']),
+			default: type === 'icon' ? Yup.string().oneOf(Object.values(pinIcons)) : types.color3Arr,
 			value: Yup.mixed().when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
-			icon: Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']).when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
-		})).test('Icon mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
+			[type]: type === 'icon'
+				? Yup.string().oneOf(Object.values(pinIcons)).when('default', ([def], schema) => (def ? schema.strip() : schema.required()))
+				: types.color3Arr.when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+		})).test(`${type} mapping`, `Must contain one default entry`, (arr) => arr.filter((obj) => !!obj.default).length === 1),
 	});
 });
 
-const pinColSchema = Yup.lazy((val) => {
-	if (val === undefined) return Yup.mixed().strip();
-	if (isArray(val)) return types.color3Arr;
+const pinIconSchema = createPinSchema('icon');
 
-	return Yup.object({
-		property: Yup.object({
-			name: nameSchema.required(),
-			module: nameSchema,
-		}),
-
-		mapping: Yup.array().of(Yup.object({
-			default: types.color3Arr,
-			value: Yup.mixed().when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
-			color: types.color3Arr.when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
-		})).test('Color mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
-
-	});
-});
+const pinColSchema = createPinSchema('color');
 
 const blackListedChrsRegex = /^(?!\$)(?!.*&&)[^.,[\]":]*$/;
 
