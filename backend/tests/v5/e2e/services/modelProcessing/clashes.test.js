@@ -24,6 +24,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const {
 	CLASH_RUNS_COL,
+	clashObjectIdTypes,
 	clashRunStatus,
 } = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
@@ -36,6 +37,7 @@ const { getTicketsByQuery } = require(`${src}/models/tickets`);
 const { addModelToProject } = require(`${src}/models/projectSettings`);
 const { fileExists, getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const { getLatestRevision } = require(`${src}/models/revisions`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { modulePropertyLabels, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
@@ -308,6 +310,93 @@ const testParseClashResults = () => {
 					expect(run.results.error.reason).toEqual(expect.any(String));
 				}
 			});
+		});
+
+		test('Should populate cloud clash tags from metadata placeholders when creating tickets', async () => {
+			const { CLOUD_CLASH } = presetModules;
+			const { CLASH_PLAN_ID, CLASH_RUN_ID, TAGS } = modulePropertyLabels[CLOUD_CLASH];
+			const metadataField = `${ServiceHelper.generateRandomString()}::${ServiceHelper.generateRandomString()}`;
+			const staticTag = ServiceHelper.generateRandomString();
+			const objectATag = ServiceHelper.generateRandomString();
+			const objectBTag = ServiceHelper.generateRandomString();
+			const tagTicketTemplate = { ...ServiceHelper.generateTemplate(), properties: [] };
+			tagTicketTemplate.modules.push({ type: CLOUD_CLASH, properties: [] });
+			const [revA, revB] = await Promise.all([
+				getLatestRevision(teamspace, modelA._id, modelTypes.CONTAINER, { _id: 1 }),
+				getLatestRevision(teamspace, modelB._id, modelTypes.CONTAINER, { _id: 1 }),
+			]);
+			const [objectAId, objectBId] = [ServiceHelper.generateUUIDString(), ServiceHelper.generateUUIDString()];
+			const objectANode = ServiceHelper.generateBasicNode('mesh', revA._id, [], { _id: stringToUUID(objectAId) });
+			const objectBNode = ServiceHelper.generateBasicNode('mesh', revB._id, [], { _id: stringToUUID(objectBId) });
+			const objectAMetadata = ServiceHelper.generateBasicNode('meta', revA._id, [objectANode.shared_id], {
+				metadata: [{ key: metadataField, value: objectATag }],
+			});
+			const objectBMetadata = ServiceHelper.generateBasicNode('meta', revB._id, [objectBNode.shared_id], {
+				metadata: [{ key: metadataField, value: objectBTag }],
+			});
+			const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id,
+				{ federation: ticketFederation, template: tagTicketTemplate, creator: user.user });
+			plan.selectionA[0].revision = revA._id;
+			plan.selectionB[0].revision = revB._id;
+			plan.tickets.template = stringToUUID(plan.tickets.template);
+			plan.tickets.valuesAtCreation = [{
+				module: CLOUD_CLASH,
+				property: TAGS,
+				value: [staticTag, `{$meta-${metadataField}}`],
+			}];
+			const run = ServiceHelper.generateClashRun(plan);
+			const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+			const clash = {
+				a: [modelA._id, clashObjectIdTypes.INTERNAL, objectAId, bbox].join('::'),
+				b: [modelB._id, clashObjectIdTypes.INTERNAL, objectBId, bbox].join('::'),
+				positions: [[0, 0, 0], [1, 1, 1]],
+				fingerprint: ServiceHelper.generateRandomNumber(),
+			};
+			const callbackObj = { ...basicCBData, results: getResultsPath(run), value: 0 };
+
+			await Promise.all([
+				ServiceHelper.db.createScene(teamspace, project.id, modelA._id, revA, [objectANode, objectAMetadata]),
+				ServiceHelper.db.createScene(teamspace, project.id, modelB._id, revB, [objectBNode, objectBMetadata]),
+				ServiceHelper.db.createTemplates(teamspace, [tagTicketTemplate]),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, plan, [run]),
+			]);
+
+			try {
+				writeResultsFile(run, [clash]);
+
+				await queueMessage(callbackq, run._id, JSON.stringify(callbackObj));
+
+				await ServiceHelper.sleepMS(1000);
+				const processedRun = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+					{ _id: stringToUUID(run._id) }, { _id: 1, status: 1, results: 1 });
+				expect(processedRun.status).toEqual(clashRunStatus.COMPLETED);
+				expect(processedRun.results.stats).toEqual({ new: 1, active: 0, resolved: 0 });
+
+				let tickets = [];
+				for (let i = 0; i < 10; i += 1) {
+					// eslint-disable-next-line no-await-in-loop
+					tickets = await getTicketsByQuery(
+						teamspace,
+						stringToUUID(project.id),
+						ticketFederation._id,
+						{
+							type: stringToUUID(tagTicketTemplate._id),
+							[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: plan._id,
+							[`modules.${CLOUD_CLASH}.${CLASH_RUN_ID}`]: run._id,
+						},
+						{ [`modules.${CLOUD_CLASH}.${TAGS}`]: 1 },
+					);
+					if (tickets.length) break;
+					// eslint-disable-next-line no-await-in-loop
+					await ServiceHelper.sleepMS(500);
+				}
+
+				expect(tickets).toHaveLength(1);
+				expect(tickets[0].modules[CLOUD_CLASH][TAGS]).toEqual([staticTag, objectATag, objectBTag]);
+			} finally {
+				removeResultsFiles([run]);
+			}
 		});
 
 		test('Should abort an older completed run and still process the latest run', async () => {
