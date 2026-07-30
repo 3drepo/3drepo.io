@@ -247,4 +247,6 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
+TemplateConstants.pinIcons = createConstantMapping(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']);
+
 module.exports = TemplateConstants;
