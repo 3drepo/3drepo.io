@@ -428,9 +428,9 @@ const testProcessClashResults = () => {
 								[CLASH_PLAN_NAME]: context.planName,
 								[CLASH_TYPE]: context.clashType,
 								[DISTANCE_M]: 0,
-								[OBJECT_A_ID_TYPE]: '3D Repo ID',
+								[OBJECT_A_ID_TYPE]: idTypeLabels['3_D_REPO_ID'],
 								[OBJECT_A_ID]: expectedClash.a.id,
-								[OBJECT_B_ID_TYPE]: 'IFC',
+								[OBJECT_B_ID_TYPE]: idTypeLabels.IFC,
 								[OBJECT_B_ID]: expectedClash.b.id,
 								...expectedTicketData.modules?.[CLOUD_CLASH],
 							},
@@ -526,9 +526,9 @@ const testProcessClashResults = () => {
 							[CLASH_PLAN_NAME]: baseContext.planName,
 							[CLASH_TYPE]: baseContext.clashType,
 							[DISTANCE_M]: 0,
-							[OBJECT_A_ID_TYPE]: '3D Repo ID',
+							[OBJECT_A_ID_TYPE]: idTypeLabels['3_D_REPO_ID'],
 							[OBJECT_A_ID]: clash.a.id,
-							[OBJECT_B_ID_TYPE]: 'IFC',
+							[OBJECT_B_ID_TYPE]: idTypeLabels.IFC,
 							[OBJECT_B_ID]: clash.b.id,
 							[TAGS]: [staticTag, sharedMetadataValue, objectBMetadataValue],
 						},
@@ -592,9 +592,9 @@ const testProcessClashResults = () => {
 							[CLASH_PLAN_NAME]: baseContext.planName,
 							[CLASH_TYPE]: baseContext.clashType,
 							[DISTANCE_M]: 0,
-							[OBJECT_A_ID_TYPE]: '3D Repo ID',
+							[OBJECT_A_ID_TYPE]: idTypeLabels['3_D_REPO_ID'],
 							[OBJECT_A_ID]: clash.a.id,
-							[OBJECT_B_ID_TYPE]: 'IFC',
+							[OBJECT_B_ID_TYPE]: idTypeLabels.IFC,
 							[OBJECT_B_ID]: clash.b.id,
 						},
 					},
@@ -712,16 +712,42 @@ const testProcessClashResults = () => {
 					federation, baseTemplate, { new: [clashWithoutMetadataLookup] }, clashPlan);
 
 				expect(ScenesModel.getNodesByQuery).not.toHaveBeenCalled();
-				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-				expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(
-					teamspace,
-					baseContext.selectionA[0].container,
-					{
-						rev_id: baseContext.selectionA[0].revision,
-						$or: [],
-					},
-					{ metadata: 1 },
+				expect(MetadataModel.getMetadataByQuery).not.toHaveBeenCalled();
+				expect(TicketSchema.validateTickets).toHaveBeenLastCalledWith(
+					teamspace, project, federation, baseTemplate,
+					[expect.objectContaining({
+						modules: expect.objectContaining({
+							[CLOUD_CLASH]: expect.not.objectContaining({ [TAGS]: expect.any(Array) }),
+						}),
+					})],
+					{ author: baseContext.creator },
 				);
+			});
+
+			test('Should skip metadata lookup when internal clash objects have no scene nodes', async () => {
+				const metadataField = generateRandomString();
+				const clashPlan = generateClashPlan(baseContext, { valuesAtCreation: [{
+					module: CLOUD_CLASH,
+					property: TAGS,
+					value: [`{$meta-${metadataField}}`],
+				}] });
+				const internalClash = {
+					...clash,
+					b: {
+						container: baseContext.selectionB[0].container,
+						idType: clashObjectIdTypes.INTERNAL,
+						id: generateUUIDString(),
+					},
+				};
+
+				TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+				ScenesModel.getNodesByQuery.mockResolvedValue([]);
+
+				await TicketsClashes.processClashResults(teamspace, project,
+					federation, baseTemplate, { new: [internalClash] }, clashPlan);
+
+				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
+				expect(MetadataModel.getMetadataByQuery).not.toHaveBeenCalled();
 				expect(TicketSchema.validateTickets).toHaveBeenLastCalledWith(
 					teamspace, project, federation, baseTemplate,
 					[expect.objectContaining({

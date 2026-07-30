@@ -297,13 +297,18 @@ const getClashMetadata = async (teamspace, project, clashContext, clash, fields)
 			if (internalIds.length) {
 				const nodes = await getNodesByQuery(teamspace, project, container,
 					{ rev_id: revision, _id: { $in: internalIds } }, { shared_id: 1 });
-				queriesOrCondition.push({ parents: { $in: nodes.map(({ shared_id }) => shared_id) } });
+				if (nodes.length) {
+					const sharedIds = nodes.map(({ shared_id }) => shared_id);
+					queriesOrCondition.push({ parents: { $in: sharedIds } });
+				}
 			}
 
 			Object.entries(externalIds).forEach(([idType, ids]) => {
 				queriesOrCondition.push({ metadata: { $elemMatch: {
 					key: { $in: idTypesToKeys[idType] }, value: { $in: ids } } } });
 			});
+
+			if (!queriesOrCondition.length) return [];
 
 			return getMetadataByQuery(teamspace, container,
 				{ rev_id: revision, $or: queriesOrCondition }, { metadata: 1 });

@@ -42,6 +42,7 @@ const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { modulePropertyLabels, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
 const path = require('path');
+const { times } = require('lodash');
 
 jest.mock('../../../../../src/v5/services/mailer');
 
@@ -165,8 +166,13 @@ const testParseClashResults = () => {
 	const basicData = generateBasicData();
 	const { user, teamspace, project, modelA, modelB } = basicData;
 	const ticketFederation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-	const ticketTemplate = ServiceHelper.generateTemplate();
-	ticketTemplate.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
+	const { CLOUD_CLASH } = presetModules;
+	const { CLASH_PLAN_ID, CLASH_RUN_ID, TAGS } = modulePropertyLabels[CLOUD_CLASH];
+	const ticketTemplate = { ...ServiceHelper.generateTemplate(), properties: [] };
+	ticketTemplate.modules.push({ type: CLOUD_CLASH, properties: [] });
+	const tagMetadataField = `${ServiceHelper.generateRandomString()}::${ServiceHelper.generateRandomString()}`;
+	const [staticTag, objectATag, objectBTag] = times(3, () => ServiceHelper.generateRandomString());
+	const [tagObjectAId, tagObjectBId] = times(2, () => ServiceHelper.generateUUIDString());
 	const planWithPreviousRun = ServiceHelper.generateClashPlan(modelA._id, modelA._id);
 	const planForBouncerError = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
 	const planWithoutPreviousRun = ServiceHelper.generateClashPlan(
@@ -174,12 +180,23 @@ const testParseClashResults = () => {
 		modelB._id,
 		{ federation: ticketFederation, template: ticketTemplate, creator: user.user },
 	);
-	planWithoutPreviousRun.tickets.template = stringToUUID(planWithoutPreviousRun.tickets.template);
+	const tagPlan = ServiceHelper.generateClashPlan(modelA._id, modelB._id,
+		{
+			federation: ticketFederation,
+			template: ticketTemplate,
+			creator: user.user,
+			valuesAtCreation: [{
+				module: CLOUD_CLASH,
+				property: TAGS,
+				value: [staticTag, `{$meta-${tagMetadataField}}`],
+			}],
+		});
 	const previousRunDate = new Date(Date.now() - DAY_IN_MS);
-	const [runWithPreviousRun, bouncerErrorRun, runWithoutPreviousRun] = [
+	const [runWithPreviousRun, bouncerErrorRun, runWithoutPreviousRun, tagRun] = [
 		planWithPreviousRun,
 		planForBouncerError,
 		planWithoutPreviousRun,
+		tagPlan,
 	]
 		.map((plan) => ServiceHelper.generateClashRun(plan));
 	const clashes = ServiceHelper.generateClashes(planWithPreviousRun);
@@ -205,25 +222,54 @@ const testParseClashResults = () => {
 		{ plan: planWithPreviousRun, runs: [runWithPreviousRun, previousCompletedRun] },
 		{ plan: planForBouncerError, runs: [bouncerErrorRun] },
 		{ plan: planWithoutPreviousRun, runs: [runWithoutPreviousRun] },
+		{ plan: tagPlan, runs: [tagRun] },
 		...[missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData]
 			.map(({ run, previousRun }) => ({ plan: run.plan, runs: [run, previousRun].filter(Boolean) })),
 	];
 	const scenarioRuns = [
 		missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData,
 	].map(({ run }) => run);
+	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+	const tagClash = {
+		a: [modelA._id, clashObjectIdTypes.INTERNAL, tagObjectAId, bbox].join('::'),
+		b: [modelB._id, clashObjectIdTypes.INTERNAL, tagObjectBId, bbox].join('::'),
+		positions: [[0, 0, 0], [1, 1, 1]],
+		fingerprint: ServiceHelper.generateRandomNumber(),
+	};
+	const tagCallbackObj = { ...basicCBData, results: getResultsPath(tagRun), value: 0 };
 
 	describe('Parse clash results', () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			const [revA, revB] = await Promise.all([
+				getLatestRevision(teamspace, modelA._id, modelTypes.CONTAINER, { _id: 1 }),
+				getLatestRevision(teamspace, modelB._id, modelTypes.CONTAINER, { _id: 1 }),
+			]);
+			const objectANode = ServiceHelper.generateBasicNode('mesh',
+				revA._id, [], { _id: stringToUUID(tagObjectAId) });
+			const objectBNode = ServiceHelper.generateBasicNode('mesh',
+				revB._id, [], { _id: stringToUUID(tagObjectBId) });
+			const objectAMetadata = ServiceHelper.generateBasicNode('meta', revA._id, [objectANode.shared_id], {
+				metadata: [{ key: tagMetadataField, value: objectATag }],
+			});
+			const objectBMetadata = ServiceHelper.generateBasicNode('meta', revB._id, [objectBNode.shared_id], {
+				metadata: [{ key: tagMetadataField, value: objectBTag }],
+			});
+			tagPlan.selectionA[0].revision = revA._id;
+			tagPlan.selectionB[0].revision = revB._id;
+
 			await Promise.all([
 				ServiceHelper.db.createModel(teamspace, ticketFederation._id,
 					ticketFederation.name, ticketFederation.properties),
 				addModelToProject(teamspace, stringToUUID(project.id), ticketFederation._id),
+				ServiceHelper.db.createScene(teamspace, project.id, modelA._id, revA, [objectANode, objectAMetadata]),
+				ServiceHelper.db.createScene(teamspace, project.id, modelB._id, revB, [objectBNode, objectBMetadata]),
 				ServiceHelper.db.createTemplates(teamspace, [ticketTemplate]),
 				ServiceHelper.db.createClashPlans(teamspace, project.id, [
 					planWithPreviousRun,
 					planForBouncerError,
 					planWithoutPreviousRun,
+					tagPlan,
 				]),
 				...clashRunData.map(({ plan, runs }) => (
 					ServiceHelper.db.createClashRuns(teamspace, project.id, plan, runs)
@@ -285,8 +331,6 @@ const testParseClashResults = () => {
 						}));
 						expect(ticketImportEvent.tickets).toHaveLength(expectedTickets.count);
 
-						const { CLOUD_CLASH } = presetModules;
-						const { CLASH_PLAN_ID, CLASH_RUN_ID } = modulePropertyLabels[CLOUD_CLASH];
 						const tickets = await getTicketsByQuery(
 							teamspace,
 							stringToUUID(project.id),
@@ -312,64 +356,21 @@ const testParseClashResults = () => {
 			});
 		});
 
-		test('Should populate cloud clash tags from metadata placeholders when creating tickets', async () => {
-			const { CLOUD_CLASH } = presetModules;
-			const { CLASH_PLAN_ID, CLASH_RUN_ID, TAGS } = modulePropertyLabels[CLOUD_CLASH];
-			const metadataField = `${ServiceHelper.generateRandomString()}::${ServiceHelper.generateRandomString()}`;
-			const staticTag = ServiceHelper.generateRandomString();
-			const objectATag = ServiceHelper.generateRandomString();
-			const objectBTag = ServiceHelper.generateRandomString();
-			const tagTicketTemplate = { ...ServiceHelper.generateTemplate(), properties: [] };
-			tagTicketTemplate.modules.push({ type: CLOUD_CLASH, properties: [] });
-			const [revA, revB] = await Promise.all([
-				getLatestRevision(teamspace, modelA._id, modelTypes.CONTAINER, { _id: 1 }),
-				getLatestRevision(teamspace, modelB._id, modelTypes.CONTAINER, { _id: 1 }),
-			]);
-			const [objectAId, objectBId] = [ServiceHelper.generateUUIDString(), ServiceHelper.generateUUIDString()];
-			const objectANode = ServiceHelper.generateBasicNode('mesh', revA._id, [], { _id: stringToUUID(objectAId) });
-			const objectBNode = ServiceHelper.generateBasicNode('mesh', revB._id, [], { _id: stringToUUID(objectBId) });
-			const objectAMetadata = ServiceHelper.generateBasicNode('meta', revA._id, [objectANode.shared_id], {
-				metadata: [{ key: metadataField, value: objectATag }],
+		describe('Tag metadata placeholders', () => {
+			beforeEach(() => {
+				writeResultsFile(tagRun, [tagClash]);
 			});
-			const objectBMetadata = ServiceHelper.generateBasicNode('meta', revB._id, [objectBNode.shared_id], {
-				metadata: [{ key: metadataField, value: objectBTag }],
+
+			afterEach(() => {
+				removeResultsFiles([tagRun]);
 			});
-			const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id,
-				{ federation: ticketFederation, template: tagTicketTemplate, creator: user.user });
-			plan.selectionA[0].revision = revA._id;
-			plan.selectionB[0].revision = revB._id;
-			plan.tickets.template = stringToUUID(plan.tickets.template);
-			plan.tickets.valuesAtCreation = [{
-				module: CLOUD_CLASH,
-				property: TAGS,
-				value: [staticTag, `{$meta-${metadataField}}`],
-			}];
-			const run = ServiceHelper.generateClashRun(plan);
-			const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
-			const clash = {
-				a: [modelA._id, clashObjectIdTypes.INTERNAL, objectAId, bbox].join('::'),
-				b: [modelB._id, clashObjectIdTypes.INTERNAL, objectBId, bbox].join('::'),
-				positions: [[0, 0, 0], [1, 1, 1]],
-				fingerprint: ServiceHelper.generateRandomNumber(),
-			};
-			const callbackObj = { ...basicCBData, results: getResultsPath(run), value: 0 };
 
-			await Promise.all([
-				ServiceHelper.db.createScene(teamspace, project.id, modelA._id, revA, [objectANode, objectAMetadata]),
-				ServiceHelper.db.createScene(teamspace, project.id, modelB._id, revB, [objectBNode, objectBMetadata]),
-				ServiceHelper.db.createTemplates(teamspace, [tagTicketTemplate]),
-				ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
-				ServiceHelper.db.createClashRuns(teamspace, project.id, plan, [run]),
-			]);
-
-			try {
-				writeResultsFile(run, [clash]);
-
-				await queueMessage(callbackq, run._id, JSON.stringify(callbackObj));
+			test('Should populate cloud clash tags from metadata placeholders when creating tickets', async () => {
+				await queueMessage(callbackq, tagRun._id, JSON.stringify(tagCallbackObj));
 
 				await ServiceHelper.sleepMS(1000);
 				const processedRun = await getClashRunByQuery(teamspace, stringToUUID(project.id),
-					{ _id: stringToUUID(run._id) }, { _id: 1, status: 1, results: 1 });
+					{ _id: stringToUUID(tagRun._id) }, { _id: 1, status: 1, results: 1 });
 				expect(processedRun.status).toEqual(clashRunStatus.COMPLETED);
 				expect(processedRun.results.stats).toEqual({ new: 1, active: 0, resolved: 0 });
 
@@ -381,9 +382,9 @@ const testParseClashResults = () => {
 						stringToUUID(project.id),
 						ticketFederation._id,
 						{
-							type: stringToUUID(tagTicketTemplate._id),
-							[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: plan._id,
-							[`modules.${CLOUD_CLASH}.${CLASH_RUN_ID}`]: run._id,
+							type: stringToUUID(ticketTemplate._id),
+							[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: tagPlan._id,
+							[`modules.${CLOUD_CLASH}.${CLASH_RUN_ID}`]: tagRun._id,
 						},
 						{ [`modules.${CLOUD_CLASH}.${TAGS}`]: 1 },
 					);
@@ -394,9 +395,7 @@ const testParseClashResults = () => {
 
 				expect(tickets).toHaveLength(1);
 				expect(tickets[0].modules[CLOUD_CLASH][TAGS]).toEqual([staticTag, objectATag, objectBTag]);
-			} finally {
-				removeResultsFiles([run]);
-			}
+			});
 		});
 
 		test('Should abort an older completed run and still process the latest run', async () => {
