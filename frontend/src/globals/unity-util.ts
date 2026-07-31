@@ -21,6 +21,8 @@
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 import { uuid as uuidGen } from '@/v4/helpers/uuid';
+import { PrimaryWithHeadingAndSubheading } from '../../stories/dashboard/LinkCard.stories';
+import { defer } from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -73,6 +75,11 @@ export interface PointInfo {
 	position: number[],
 	normal: number[],
 	requestId: string,
+}
+
+export interface Bounds {
+	min: number[],
+	max: number[]
 }
 
 export interface PickInfo {
@@ -188,6 +195,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -766,6 +776,19 @@ export class UnityUtil {
 		} else {
 			console.warn('No entries found for point info request');
 		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		deferred.resolve({
+			min, 
+			max,
+		});
 	}
 
 	/** @hidden */
@@ -1865,6 +1888,19 @@ export class UnityUtil {
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	public static requestObjectBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<{ min: number[], max: number[] }> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
 	}
 
 	/**
