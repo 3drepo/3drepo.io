@@ -38,7 +38,7 @@ const dataSchema = Yup.object({
 const ListenerErrorNotification = {};
 ListenerErrorNotification.subject = (data) => {
 	const { domain, component, listenerName } = dataSchema.cast(data, { assert: false });
-	return `[${domain}][${component}.${listenerName}] Event Listener Failure `;
+	return `[${domain}][${component}.${listenerName}] Event Listener Failure`;
 };
 
 ListenerErrorNotification.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
