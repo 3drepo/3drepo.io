@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getMetadataById, getMetadataByQuery, getMetadataKeyList, updateCustomMetadata } = require('../../../../../models/metadata');
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
+const { types } = require('../../../utils/helper/yup');
 
-const Metadata = {};
+const dataSchema = Yup.object({
+	teamspaces: Yup.array().of(Yup.object({
+		name: Yup.string().required(),
+		expiryDate: types.date.required(),
+	})).min(1).required(),
+}).required(true);
 
-Metadata.updateCustomMetadata = updateCustomMetadata;
+const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiryDigest.html`;
 
-Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery(teamspace, container,
-	{ rev_id: revision, type: 'meta' },
-	{ metadata: 1, parents: 1 });
+const TeamspaceExpiryDigest = {};
 
-Metadata.getAllMetadataFieldNames = getMetadataKeyList;
+TeamspaceExpiryDigest.subject = () => 'Teamspaces with subscriptions that are about to expire';
 
-Metadata.getMetadataById = (
-	teamspace, container, metadataId, projection = { metadata: 1 },
-) => getMetadataById(teamspace, container,
-	metadataId,
-	projection);
-module.exports = Metadata;
+TeamspaceExpiryDigest.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = TeamspaceExpiryDigest;

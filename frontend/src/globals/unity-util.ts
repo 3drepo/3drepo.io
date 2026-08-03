@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -39,6 +40,45 @@ type ModelStatistics = {
 	bundleLoadingTasks: number,
 	frameCount: number,
 };
+
+type Deferred<T> = {
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
+};
+
+// Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
+// Used for requestPointInfo.
+export interface CanvasPosition {
+	x: number,
+	y: number,
+}
+
+// Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
+// Used for requestPointInfo.
+export interface ClientPosition {
+	clientX: number,
+	clientY: number,
+}
+
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
+export interface PointInfo {
+	id: string,
+	database: string,
+	model: string,
+	pin: boolean,
+	mousePos: number[],
+	position: number[],
+	normal: number[],
+	requestId: string,
+}
+
+export interface PickInfo {
+	mousePos: number[],
+	position: number[],
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -145,6 +185,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectStatusPromises = [];
+
+	/** @hidden */
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -694,6 +737,38 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
+	public static respondToPointInfoRequest(pointInfo) {
+
+		let data: PointInfo;
+		
+		// Parse data
+		try {
+			data = JSON.parse(pointInfo) as PointInfo;
+		} catch (error) {
+			// In the case of malformed data, we can't recover the key and reject all currently open requests.
+			// This is preferrable to leaving them hanging indefinitely.
+			// If the viewer is sending malformed data they are probably all shot anyway.
+			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
+ 			UnityUtil.pointInfoPromises.clear();
+ 			return;
+		}
+
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', data);
+		}
+
+		// If there are any promises waiting for this point info, resolve or reject them
+		const key = data.requestId;
+		if (this.pointInfoPromises.has(key)) {
+			this.pointInfoPromises.get(key).resolve(data);
+			this.pointInfoPromises.delete(key);
+		} else {
+			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden */
 	public static ready() {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
@@ -703,7 +778,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
-		const point = JSON.parse(pointInfo);
+		const point = JSON.parse(pointInfo) as PickInfo;
 		if (UnityUtil.verbose) {
 			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
@@ -1714,6 +1789,82 @@ export class UnityUtil {
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
 		return newObjectStatusPromise as Promise<object>;
+	}
+
+	/**
+ 	 * Request point information for an arbitrary location on the Unity canvas.
+ 	 *
+ 	 * Accepts either:
+ 	 * - ClientPosition: `clientX`/`clientY` from PointerEvent/MouseEvent/Touch in viewport coordinates
+ 	 * - CanvasPosition: canvas pixel coordinates with (0,0) at the bottom-left corner
+ 	 * @category Model Interactions
+	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
+	 * @returns A promise that resolves with the point information object returned by the viewer.
+ 	 */
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
+		
+		let x: number;
+		let y: number;
+
+		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
+		if ('clientX' in position && 'clientY' in position) {
+
+			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
+			// bottom left-corner.
+
+			const canvas = this.unityInstance.Module.canvas;
+			const rect = canvas.getBoundingClientRect();
+			
+			// Apply display scale
+			const scale = window.devicePixelRatio || 1;
+			const scaledX = position.clientX * scale;
+			const scaledY = position.clientY * scale;
+			const scaledHeight = rect.height * scale;
+			const scaledLeft = rect.left * scale;
+			const scaledTop = rect.top * scale;
+			
+			x = Math.floor(scaledX - scaledLeft);
+			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
+		} else if ('x' in position && 'y' in position) {
+
+			// If it is a CanvasPosition, we can extract the coordinates directly.
+
+			x = position.x;
+			y = position.y;
+		} else {
+			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
+		}
+
+		// Round down the coordinates to the nearest integer, as Unity expects integer
+		// values for pixel coordinates and will truncate any decimal values.
+		x = Math.floor(x);
+		y = Math.floor(y);
+
+		const requestId = uuidGen();
+
+		const newPointInfoPromise = new Promise((resolve, reject) => {
+			
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
+			// with the point info, we can resolve the correct promise.
+			const key = requestId;
+			if (!this.pointInfoPromises.has(key)) {
+				this.pointInfoPromises.set(key, { resolve, reject });
+			} else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
+			}
+		});
+
+		const params = {
+			x,
+			y,
+			requestId,
+			options,
+		};
+
+		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		return newPointInfoPromise as Promise<PointInfo>;
 	}
 
 	/**
