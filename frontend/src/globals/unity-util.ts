@@ -157,6 +157,12 @@ export class UnityUtil {
 	*/
 	public static modelStatisticsArrayOffset: number = 0;
 
+	/** Stores an offset into the WASM heap were the screenshot data can be found.
+	 * This is an internal property and subject to change without notice.
+	 *  @hidden
+	*/
+	public static screenshotDataArrayOffset: number = 0;
+
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
 	/** @hidden */
@@ -780,7 +786,7 @@ export class UnityUtil {
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
-				promise.resolve(ssJSON.ssBytes);
+				promise.resolve(ssJSON.length);
 			});
 		} catch (error) {
 			UnityUtil.screenshotPromises.forEach((promise) => {
