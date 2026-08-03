@@ -100,7 +100,7 @@ const testSubject = () => {
 		['domain is not provided', { listenerName, component }],
 		['domain is provided', { domain: generateRandomString(), listenerName, component }],
 	])('get subject', (desc, data) => {
-		test(`should return the expected title if ${desc}`, () => expect(ListenerErrorNotification.subject(data)).toEqual(`[${data.domain ?? config.getBaseURL()}][${component}.${listenerName}] Event Listener Failure `));
+		test(`should return the expected title if ${desc}`, () => expect(ListenerErrorNotification.subject(data)).toEqual(`[${data.domain ?? config.getBaseURL()}][${data.component}.${data.listenerName}] Event Listener Failure`));
 	});
 };
 
