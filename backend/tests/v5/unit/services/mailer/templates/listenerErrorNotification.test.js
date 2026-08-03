@@ -21,6 +21,7 @@ const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
 const ListenerErrorNotification = require(`${src}/services/mailer/templates/listenerErrorNotification`);
+const config = require(`${src}/utils/config`);
 
 const testHtml = () => {
 	describe('get template html', () => {
@@ -92,13 +93,14 @@ const testHtml = () => {
 };
 
 const testSubject = () => {
+	const listenerName = generateRandomString();
+	const component = generateRandomString();
+
 	describe.each([
-		['data object is empty', {}],
-		['data object is not empty', { listenerName: generateRandomString(), component: generateRandomString() }],
+		['domain is not provided', { listenerName, component }],
+		['domain is provided', { domain: generateRandomString(), listenerName, component }],
 	])('get subject', (desc, data) => {
-		test(`should succeed if ${desc}`, () => {
-			expect(ListenerErrorNotification.subject(data).length).not.toEqual(0);
-		});
+		test(`should return the expected title if ${desc}`, () => expect(ListenerErrorNotification.subject(data)).toEqual(`[${data.domain ?? config.getBaseURL()}][${component}.${listenerName}] Event Listener Failure `));
 	});
 };
 

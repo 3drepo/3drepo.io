@@ -16,6 +16,7 @@
  */
 
 const Yup = require('yup');
+const config = require('../../../utils/config');
 const { generateTemplateFn } = require('./common');
 
 const TEMPLATE_PATH = `${__dirname}/html/listenerErrorNotification.html`;
@@ -23,6 +24,7 @@ const TEMPLATE_PATH = `${__dirname}/html/listenerErrorNotification.html`;
 const dataSchema = Yup.object({
 	listenerName: Yup.string().required(),
 	component: Yup.string().required(),
+	domain: Yup.string().default(() => config.getBaseURL()),
 	payload: Yup.object().required(),
 	error: Yup.object({
 		message: Yup.string().required(),
@@ -34,7 +36,10 @@ const dataSchema = Yup.object({
 }).required(true);
 
 const ListenerErrorNotification = {};
-ListenerErrorNotification.subject = () => 'Event Listener Failure ';
+ListenerErrorNotification.subject = (data) => {
+	const { domain, component, listenerName } = dataSchema.cast(data, { assert: false });
+	return `[${domain}][${component}.${listenerName}] Event Listener Failure `;
+};
 
 ListenerErrorNotification.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
