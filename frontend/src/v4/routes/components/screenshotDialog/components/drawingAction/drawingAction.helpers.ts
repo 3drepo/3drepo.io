@@ -28,7 +28,7 @@ const rectangleProps = { height: 1, width: 1 };
 const cloudProps = {
 	data: cloud.path,
 	scaleX: 0,
-	scaleY: 0
+	scaleY: 0,
 };
 
 export const createShape = (shapeType, commonProps, initialPositionProps) => {
@@ -85,8 +85,10 @@ export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 			shape.radius(distance);
 		},
 		[SHAPE_TYPES.RECTANGLE]: () => {
-			shape.height(currentPos.y - initialPos.y);
-			shape.width(currentPos.x - initialPos.x);
+			shape.x(Math.min(initialPos.x, currentPos.x));
+			shape.y(Math.min(initialPos.y, currentPos.y));
+			shape.height(Math.abs(currentPos.y - initialPos.y));
+			shape.width(Math.abs(currentPos.x - initialPos.x));
 		},
 		[SHAPE_TYPES.LINE]: () => {
 			shape.points([initialPos.x, initialPos.y, currentPos.x, currentPos.y]);

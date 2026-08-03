@@ -300,6 +300,7 @@ function* setClippingMode({ mode }) {
 		if (currentClipMode !== mode) {
 			yield put(ViewerGuiActions.setClipModeSuccess(mode));
 			if (!mode) {
+				yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
 				yield Viewer.clipToolDelete();
 				yield put(ViewerGuiActions.setClipEdit(false));
 			}

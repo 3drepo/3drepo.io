@@ -22,7 +22,6 @@ import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/se
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormattedMessage } from 'react-intl';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { IsMainList } from '../containers/mainList.context';
 import { Button } from '@controls/button';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { DrawingsList } from './drawingsList/drawingsList.component';
@@ -31,7 +30,9 @@ import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/serv
 import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList/dashboardSkeletonList.component';
 import { SkeletonListItem } from '../containers/containersList/skeletonListItem/skeletonListItem.component';
-import { enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate, enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import { enableRealtimeDrawingRevisionUpdate, enableRealtimeDrawingNewRevision } from '@/v5/services/realtime/drawingRevision.events';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -49,6 +50,19 @@ export const Drawings = () => {
 
 	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
 	useEffect(() => () => { DrawingsActionsDispatchers.resetDrawingStatsQueue(); }, []);
+
+	const drawingsIds = drawings.map(({ _id }) => _id);
+
+	useEffect(() => {
+		const subscriptions = drawingsIds.flatMap((id) => [
+			enableRealtimeDrawingRemoved(teamspace, project, id),
+			enableRealtimeDrawingUpdate(teamspace, project, id),
+			enableRealtimeDrawingRevisionUpdate(teamspace, project, id),
+			enableRealtimeDrawingNewRevision(teamspace, project, id),
+		]);
+
+		return combineSubscriptions(...subscriptions);
+	}, [drawingsIds.join()]);
 
 	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
 
@@ -78,40 +92,38 @@ export const Drawings = () => {
 				/>
 			</SearchContextComponent>
 			<Divider />
-			<IsMainList.Provider value>
-				<SearchContextComponent items={drawings} fieldsToFilter={DRAWINGS_SEARCH_FIELDS}>
-					<DrawingsList
-						title={(
-							<FormattedMessage
-								id="drawings.all.collapseTitle"
-								defaultMessage="All Drawings"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="drawings.all.collapse.tooltip.show" defaultMessage="Show all" />,
-							visible: <FormattedMessage id="drawings.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
-						}}
-						onClickCreate={onClickCreate}
-						emptyMessage={(
-							<>
-								<DashboardListEmptyText>
-									<FormattedMessage id="drawings.all.emptyMessage" defaultMessage="You haven’t created any drawings." />
-								</DashboardListEmptyText>
-								{ isProjectAdmin && (
-									<Button
-										startIcon={<AddCircleIcon />}
-										variant="contained"
-										color="primary"
-										onClick={onClickCreate}
-									>
-										<FormattedMessage id="drawings.all.newDrawing" defaultMessage="New Drawing" />
-									</Button>
-								)}
-							</>
-						)}
-					/>
-				</SearchContextComponent>
-			</IsMainList.Provider>
+			<SearchContextComponent items={drawings} fieldsToFilter={DRAWINGS_SEARCH_FIELDS}>
+				<DrawingsList
+					title={(
+						<FormattedMessage
+							id="drawings.all.collapseTitle"
+							defaultMessage="All Drawings"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="drawings.all.collapse.tooltip.show" defaultMessage="Show all" />,
+						visible: <FormattedMessage id="drawings.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+					}}
+					onClickCreate={onClickCreate}
+					emptyMessage={(
+						<>
+							<DashboardListEmptyText>
+								<FormattedMessage id="drawings.all.emptyMessage" defaultMessage="You haven’t created any drawings." />
+							</DashboardListEmptyText>
+							{ isProjectAdmin && (
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={onClickCreate}
+								>
+									<FormattedMessage id="drawings.all.newDrawing" defaultMessage="New Drawing" />
+								</Button>
+							)}
+						</>
+					)}
+				/>
+			</SearchContextComponent>
 		</>
 	);
 };
