@@ -861,7 +861,11 @@ export class UnityUtil {
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
-				promise.resolve(ssJSON.length);
+				if(ssJSON.ssBytes) {
+					promise.resolve(ssJSON.ssBytes);
+				} else {
+					promise.resolve(ssJSON.length);
+				}
 			});
 		} catch (error) {
 			UnityUtil.screenshotPromises.forEach((promise) => {
@@ -2343,15 +2347,18 @@ export class UnityUtil {
 	/**
 	 * Request a screenshot. The screenshot will be returned as a JSON
 	 * object with a single field, ssByte, containing the screenshot in
-	 * base64.
+	 * base64 or as a length value that can be used to read from shared memory.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
+	 * @return returns a promise which will resolve with a base64 encoded string holding
+	 * the screenshot or the length of the screenshot data in shared memory.
+	 * @param useSharedMemory - If true, the screenshot will be written to shared memory and the promise will resolve with the length of the data in shared memory.
+	 * If false, the promise will resolve with a base64 encoded string of the screenshot.
 	 */
-	public static requestScreenShot(): Promise<string> {
+	public static requestScreenShot(useSharedMemory = false): Promise<string> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
-		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, useSharedMemory ? 1 : 0);
 
 		return newScreenshotPromise as Promise<string>;
 	}
