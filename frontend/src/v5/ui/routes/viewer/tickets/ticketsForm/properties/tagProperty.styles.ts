@@ -74,16 +74,17 @@ export const FieldHint = styled.div<{ $visible: boolean }>`
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	margin-top: 4px;
+	margin-top: 0;
 	overflow: hidden;
 	pointer-events: none;
 	max-height: 0;
 	opacity: 0;
-	transition: max-height 160ms ease, opacity 140ms ease;
+	transition: max-height 160ms ease, opacity 140ms ease, margin-top 160ms ease;
 
 	${({ $visible }) => $visible && css`
 		max-height: 22px;
 		opacity: 1;
+		margin-top: 4px;
 	`}
 `;
 
@@ -101,5 +102,13 @@ export const Kbd = styled.kbd`
 `;
 
 export const HelperText = styled(FormHelperText)`
-	margin: 4px 0 0;
+	&.MuiFormHelperText-contained {
+		position: relative;
+		margin: 4px 0 0;
+		bottom: auto;
+		height: 0;
+		max-height: none;
+		line-height: 1rem;
+		overflow: visible;
+	}
 `;
