@@ -1905,7 +1905,7 @@ export class UnityUtil {
 	 * @param container name of the container - this must be the exact
 	 * container holding the unique id, it cannot be a federation.
 	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
-	 * them. The array may not be empty.
+	 * them. If the array is empty, will return the bounds of the whole container.
 	 * @returns a promise containing the bounds in project coordinates. If the
 	 * teamspace/project/container/id combination are not valid, the promise
 	 * will be rejected.
