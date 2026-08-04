@@ -1919,7 +1919,7 @@ export class UnityUtil {
 		})
 	  }```
 	 */
-	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<{ min: number[], max: number[] }> {
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
 		const params = {
 			requestId: uuidGen(),
 			nameSpace: `${teamspace}.${container}`,
