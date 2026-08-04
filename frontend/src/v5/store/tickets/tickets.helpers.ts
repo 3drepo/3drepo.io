@@ -55,7 +55,8 @@ export const getEditableProperties = (template) => {
 const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
 	if (defaultValue != null) return defaultValue;
 	switch (type) {
-		case 'manyOf': return [];
+		case 'manyOf':
+		case 'tags': return [];
 		case 'boolean': return false;
 		case 'text':
 		case 'longText':

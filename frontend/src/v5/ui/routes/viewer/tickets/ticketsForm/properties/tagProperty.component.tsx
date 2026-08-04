@@ -22,6 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { InputLabel, Tooltip } from '@mui/material';
 import { DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
 import { ChipsInputBox, FieldHint, HelperText, Kbd, TagChipContainer, TagChipLabel, TagInput, TagPropertyContainer } from './tagProperty.styles';
+import { formatMessage } from '@/v5/services/intl';
 
 type TagPropertyProps = FormInputProps & {
 	value: string[];
@@ -105,7 +106,7 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 						onPaste={handlePaste}
 						onFocus={() => setFocused(true)}
 						onBlur={handleBlur}
-						placeholder={!tags.length ? 'New tag…' : ''}
+						placeholder={formatMessage({ id: 'tagProperty.placeholder.newTag', defaultMessage: 'New tag…' })}
 					/>
 				)}
 			</ChipsInputBox>
