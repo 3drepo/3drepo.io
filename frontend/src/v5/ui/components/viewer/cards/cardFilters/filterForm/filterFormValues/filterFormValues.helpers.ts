@@ -19,7 +19,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { mapArrayToFormArray, mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
 import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
-import { isBoolean, uniqBy } from 'lodash';
+import { isBoolean, uniq, uniqBy } from 'lodash';
 import { BaseFilter, TicketFilter, TicketFilterOperator, TicketFilterType, TicketFilterValue } from '../../cardFilters.types';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
@@ -198,14 +198,13 @@ export const useTagsSelectOptions = (
 
 	useEffect(() => {
 		if (type !== 'tags') return;
-		const modelId = modelsIds[0];
-		if (!modelId || !teamspace || !project) return;
+		if (!modelsIds.length || !teamspace || !project) return;
 
 		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tags');
 		if (!matchingTemplate) return;
 
 		const propName = module ? `${module}::${property}` : property;
-		const cacheKey = `${matchingTemplate._id}:${propName}`;
+		const cacheKey = `${matchingTemplate._id}:${propName}:${modelsIds.join(',')}`;
 
 		if (cache.current[cacheKey]) {
 			setSelectOptions(cache.current[cacheKey]);
@@ -215,9 +214,14 @@ export const useTagsSelectOptions = (
 		let cancelled = false;
 
 		setIsFetchingOptions(true);
-		fetchTagsValues(teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName)
-			.then(({ values }) => {
+		Promise.all(
+			modelsIds.map((modelId) => fetchTagsValues(
+				teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName,
+			).catch(() => ({ values: [] as string[] }))),
+		)
+			.then((results) => {
 				if (cancelled) return;
+				const values = uniq(results.flatMap(({ values: v }) => v));
 				const options = values.map((value) => ({ value }));
 				cache.current[cacheKey] = options;
 				setSelectOptions(options);
@@ -227,7 +231,7 @@ export const useTagsSelectOptions = (
 			});
 
 		return () => { cancelled = true; };
-	}, [type, modelsIds[0], JSON.stringify(templates)]);
+	}, [type, JSON.stringify(modelsIds), JSON.stringify(templates)]);
 
 	return { selectOptions, isFetchingOptions };
 };
