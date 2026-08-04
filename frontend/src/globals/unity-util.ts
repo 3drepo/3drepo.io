@@ -21,8 +21,6 @@
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 import { uuid as uuidGen } from '@/v4/helpers/uuid';
-import { PrimaryWithHeadingAndSubheading } from '../../stories/dashboard/LinkCard.stories';
-import { defer } from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
