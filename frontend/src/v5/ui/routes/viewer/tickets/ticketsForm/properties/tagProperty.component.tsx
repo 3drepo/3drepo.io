@@ -63,6 +63,7 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 			commitTag(inputValue);
 			setInputValue('');
 		}
+		onBlur?.();
 		setFocused(false);
 	};
 
@@ -93,7 +94,13 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 					<TagInput
 						ref={inputRef}
 						value={inputValue}
-						onChange={(e) => setInputValue(e.target.value)}
+						onChange={(e) => {
+							const next = e.target.value;
+							// Trigger RHF validation (mode: 'onChange') when the raw,
+							// uncommitted text is cleared, same as a text field going empty.
+							if (inputValue && !next) onChange?.({ target: { value: tags } } as any);
+							setInputValue(next);
+						}}
 						onKeyDown={handleKeyDown}
 						onPaste={handlePaste}
 						onFocus={() => setFocused(true)}
