@@ -72,7 +72,7 @@ export const UploadFiles = ({
 			isValid={isValid}
 			contrastColorHeader
 			fields={fields}
-			isUploading={isUploading}
+			isuploading={isUploading}
 			{...modalLabels}
 		>
 			<UploadsContainer>

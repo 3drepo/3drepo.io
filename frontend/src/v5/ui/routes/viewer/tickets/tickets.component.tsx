@@ -20,7 +20,7 @@ import { useParams } from 'react-router-dom';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetailsCard/ticketsDetailsCard.component';
@@ -30,7 +30,7 @@ import { TicketContextComponent } from './ticket.context';
 import { Viewer } from '@/v4/services/viewer/viewer';
 
 export const Tickets = () => {
-	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
@@ -41,9 +41,6 @@ export const Tickets = () => {
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
-		JobsActionsDispatchers.fetchJobs(teamspace);
-		UsersActionsDispatchers.fetchUsers(teamspace);
-		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
 	useEffect(() => {

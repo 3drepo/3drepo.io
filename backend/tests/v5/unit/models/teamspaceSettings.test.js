@@ -753,6 +753,41 @@ const testIsAddOnEnabled = () => {
 	});
 };
 
+const testGetTeamspaceSettingsByQuery = () => {
+	describe('Get teamspace settings by query', () => {
+		test('should call db.find with the given query and projection', async () => {
+			const teamspace = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query, projection);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				query,
+				projection,
+			);
+		});
+
+		test('should use default projection if none provided', async () => {
+			const teamspace = generateRandomString();
+			const query = generateRandomObject();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				query,
+				{ refId: 0 },
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testGetSubscriptions();
@@ -776,4 +811,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceSetting();
 	testGetTeamspaceInvites();
 	testIsAddOnEnabled();
+	testGetTeamspaceSettingsByQuery();
 });

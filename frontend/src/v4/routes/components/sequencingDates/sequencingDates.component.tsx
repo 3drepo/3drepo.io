@@ -23,7 +23,6 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
-import dayjs from 'dayjs';
 import {
 	FieldsRow,
 	StyledFormControl,
@@ -47,27 +46,20 @@ interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, hasSequences, canEdit, ...props }) => {
-	const [value, setValue] = useState(props.value);
+const SequenceDate = ({ name, onChange, value, showSequenceDate, min, max, initialFocusedDate, hasSequences, canEdit, ...props }) => {
 	const deleteValue = () => {
-		onChange({target: { value: null, name }})
-		setValue(null);
-	};
-
-	const handleChange = ({ target }) => {
-		onChange({ target })
-		setValue(target.value);
+		onChange({ target: { name, value: null } });
 	};
 
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
-				minDateTime={min ? dayjs(min) : null}
-				maxDateTime={max ? dayjs(max) : null}
+				minDateTime={min}
+				maxDateTime={max}
 				// shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
 				name={name}
 				value={value}
-				onChange={handleChange}
+				onChange={onChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
 				placeholder="Set time and date"

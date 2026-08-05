@@ -56,5 +56,17 @@ class LookUpTable {
 	}
 }
 
+UuidUtils.unique = (ids = []) => {
+	const seenIds = new LookUpTable();
+	const uniqueIds = [];
+	ids.forEach((id) => {
+		if (seenIds.has(id)) return;
+		seenIds.add(id);
+		uniqueIds.push(id);
+	});
+
+	return uniqueIds;
+};
+
 UuidUtils.UUIDLookUpTable = LookUpTable;
 module.exports = UuidUtils;

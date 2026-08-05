@@ -26,7 +26,7 @@ import Typography from '@mui/material/Typography';
 import { COLOR } from '../../../../../styles';
 
 export const StyledTypography = styled(Typography).attrs({
-	component: 'span'
+	variantMapping: { body1 : 'span'}
 })<{ inline: boolean }>`
 	&& {
 		display: ${({ inline }) => inline ? 'inline' : 'inherit'};
@@ -75,7 +75,6 @@ export const TextContainer = styled(Grid)`
 export const Container = styled.div`
 	position: relative;
 	width: 600px;
-	min-height: 40vh;
 	overflow: auto;
 `;
 

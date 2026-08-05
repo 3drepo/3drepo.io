@@ -17,9 +17,9 @@
 import { PureComponent, createRef } from 'react';
 import Check from '@mui/icons-material/Check';
 import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList as List } from 'react-window';
 
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { TREE_LIST_CLASS } from '@/v4/services/viewer/multiSelect';
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -102,7 +102,6 @@ export class Tree extends PureComponent<IProps, IState> {
 	};
 
 	public nodeListRef = createRef() as any;
-	private scrollbarRef = createRef() as any;
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
@@ -114,35 +113,14 @@ export class Tree extends PureComponent<IProps, IState> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { nodesList, dataRevision, visibleNodesIds, activeNode } = this.props;
-		const size = nodesList.length;
-		const maxHeight = 842;
-
-		const treeHeight = TREE_ITEM_SIZE * size;
-		const treeNodesHeight = Math.min(maxHeight, treeHeight) + 1;
-
-		return (
-			<div style={{ height: treeNodesHeight, flex: 1 }}>
-				<AutoSizer>
-					{({ width, height }) => (
-						<List
-							dataRevision={dataRevision}
-							ref={this.nodeListRef}
-							height={height - 1}
-							width={width - 1}
-							itemData={nodesList}
-							itemCount={size}
-							itemSize={TREE_ITEM_SIZE}
-							itemKey={this.getNodeId}
-							className="tree-list"
-							outerRef={this.scrollbarRef}
-						>
-							{this.renderTreeNode}
-						</List>
-					)}
-				</AutoSizer>
-			</div>
-		);
+		const { nodesList } = this.props;
+		return (<VirtualList
+			className={TREE_LIST_CLASS}
+			handle={this.nodeListRef}
+			items={nodesList}
+			itemHeight={TREE_ITEM_SIZE}
+			ItemComponent={(node, index) => this.renderTreeNode(node, index)}
+		/>);
 	});
 
 	private renderNotFound = renderWhenTrue(() => (
@@ -154,7 +132,7 @@ export class Tree extends PureComponent<IProps, IState> {
 		if (prevProps.activeNode !== activeNode && activeNode) {
 			if (this.state.isScrollToActive) {
 				const index = nodesList.findIndex(({ _id }) => _id === activeNode);
-				this.nodeListRef.current.scrollToItem(index, 'start');
+				this.nodeListRef.current.gotoIndex(index);
 			} else {
 				this.setState({ isScrollToActive: true });
 			}
@@ -223,16 +201,14 @@ export class Tree extends PureComponent<IProps, IState> {
 		});
 	}
 
-	private renderTreeNode = (props) => {
-		const { index, style, data } = props;
+	private renderTreeNode = (treeNode, index) => {
 		const { expandedNodesMap, activeNode, visibleNodesIds } = this.props;
-		const treeNode = data[index];
 
 		const activeNodeIsVisible = visibleNodesIds.includes(activeNode);
 
 		const treeNodeProps = {
 			index,
-			style,
+			style: {},
 			activeNodeIsVisible,
 			key: treeNode._id,
 			data: treeNode,

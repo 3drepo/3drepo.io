@@ -21,7 +21,7 @@ import { StyledIconButton } from '../../teamspaces/components/tooltipButton/tool
 
 export const Container = styled.div``;
 
-export const ShowModelButtonContainer = styled.div`
+export const ShowModelButtonContainer = styled.div.attrs<{preview: boolean}>(props => props)`
 	&& {
 		position: absolute;
 		z-index: 10;
@@ -29,7 +29,7 @@ export const ShowModelButtonContainer = styled.div`
 		right: 71px;
 		padding: 0 !important;
 
-		${({ preview }: { preview: boolean }) => preview ? css`
+		${({ preview }) => preview ? css`
 			${StyledIconButton} {
 				padding: 6px;
 				color: ${COLOR.SOFT_BLUE};

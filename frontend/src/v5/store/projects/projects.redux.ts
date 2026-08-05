@@ -23,6 +23,7 @@ import { OnError, OnSuccess, ProjectId, TeamspaceAndProjectId } from '../store.t
 import { IProject } from './projects.types';
 import { ITemplate } from '../tickets/tickets.types';
 import { mergeWithArray } from '../store.helpers';
+import { removeHiddenPropertiesFromTemplates } from '../tickets/ticketsTemplates.helpers';
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
@@ -71,17 +72,18 @@ export const deleteProjectSuccess = (state, { teamspace, projectId }: DeleteProj
 };
 
 export const fetchTemplatesSuccess = (state, { projectId, templates }: FetchTemplatesSuccessAction) => {
-	state.templatesByProject[projectId] = templates;
+	state.templatesByProject[projectId] = removeHiddenPropertiesFromTemplates(templates);
 };
 
 export const replaceTemplateSuccess = (state, { projectId, template }: ReplaceTemplateSuccessAction) => {
 	state.templatesByProject[projectId] ||= [];
-	const teamspaceTemplate = state.templatesByProject[projectId].find((loadedTemplate) => loadedTemplate._id === template._id);
+	const [templateWithoutHiddenProperties] = removeHiddenPropertiesFromTemplates([template]);
+	const teamspaceTemplate = state.templatesByProject[projectId].find((loadedTemplate) => loadedTemplate._id === templateWithoutHiddenProperties._id);
 
 	if (teamspaceTemplate) {
-		mergeWithArray(teamspaceTemplate, template);
+		mergeWithArray(teamspaceTemplate, templateWithoutHiddenProperties);
 	} else {
-		state.templatesByProject[projectId].push(template);
+		state.templatesByProject[projectId].push(templateWithoutHiddenProperties);
 	}
 };
 

@@ -24,7 +24,7 @@ import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
 
 export const Modal = styled(Dialog)`
-	.MuiPaper-root {
+	>.MuiDialog-container > .MuiPaper-root {
 		border-radius: 0;
 		width: 100vw;
 		max-width: unset;

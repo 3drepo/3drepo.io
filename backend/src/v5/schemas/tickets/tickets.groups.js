@@ -16,11 +16,11 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
+const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { idTypes } = require('../../models/metadata.constants');
 const { isUUIDString } = require('../../utils/helper/typeCheck');
 const { schema: rulesSchema } = require('../rules');
-const { types } = require('../../utils/helper/yup');
 
 const Groups = {};
 
@@ -33,11 +33,9 @@ const objectEntryValidator = Yup.object().shape({
 	[idTypes.REVIT]: Yup.array().of(Yup.number()).min(1),
 }).test(
 	'Object item check',
-	`Can only contain either _ids or ${[idTypes.IFC]} or ${[idTypes.REVIT]}`,
+	`Must contain at least one of _ids, ${[idTypes.IFC]} or ${[idTypes.REVIT]}`,
 	/* eslint-disable no-underscore-dangle */
-	(value) => (value._ids && !(value[idTypes.IFC] || value[idTypes.REVIT]))
-	|| (value[idTypes.IFC] && !(value._ids || value[idTypes.REVIT]))
-	|| (value[idTypes.REVIT] && !(value._ids || value[idTypes.IFC])));
+	(value) => !!(value._ids || value[idTypes.IFC] || value[idTypes.REVIT]));
 	/* eslint-enable no-underscore-dangle */
 
 Groups.schema = (allowIds, isUpdate) => {
@@ -46,6 +44,10 @@ Groups.schema = (allowIds, isUpdate) => {
 		description: types.strings.longDescription.nullable(isUpdate),
 		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
 		objects: Yup.array().of(objectEntryValidator).min(1),
+		excludeDefinedObjects: stripWhen(
+			(isUpdate ? Yup.boolean().strict().nullable() : Yup.boolean().strict()).default(undefined),
+			(value) => value === false,
+		),
 	}).test(
 		'Rules and objects', 'Groups cannot contain both objects and rules.',
 		({ rules, objects }) => !(rules && objects),

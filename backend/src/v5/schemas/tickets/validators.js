@@ -26,6 +26,7 @@ const CameraType = {
 	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective',
 };
+Validators.CameraType = CameraType;
 
 Validators.generateViewValidator = (isUpdate, required, isComment) => {
 	const imposeNullableRule = (val, optional) => {
@@ -75,7 +76,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		position: types.position.required(),
 		forward: types.position.required(),
 		up: types.position.required(),
-		size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
+		size: Yup.number().when('type', ([type], schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 	}).default(undefined), false);
 
 	const clippingPlanes = imposeNullableRule(Yup.array().of(

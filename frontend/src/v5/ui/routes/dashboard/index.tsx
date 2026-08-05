@@ -29,7 +29,7 @@ import { PRIVACY_ROUTE } from '../routes.constants';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { AuthHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
 import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
 import { RouteTitle } from '@/v5/services/routing/routeTitle.component';

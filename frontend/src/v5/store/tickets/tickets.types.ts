@@ -28,6 +28,7 @@ export interface PropertyDefinition {
 	unique?: boolean;
 	readOnly?: boolean;
 	readOnlyOnUI?: boolean;
+	hiddenOnUI?: boolean;
 	immutable?: boolean;
 	required?: boolean;
 	deprecated?: boolean;
@@ -168,6 +169,7 @@ export type Group = {
 	description?: string,
 	objects?: { container: string, _ids: string[] }[],
 	rules?: IGroupRule[],
+	excludeDefinedObjects?: boolean,
 };
 
 export type V4GroupObjects = {

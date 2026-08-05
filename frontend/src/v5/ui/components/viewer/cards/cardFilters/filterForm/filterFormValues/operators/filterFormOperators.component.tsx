@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormSelect } from '@controls/inputs/formInputs.component';
 import { FILTER_OPERATOR_ICON, getFilterOperatorLabels } from '../../../cardFilters.helpers';
 import { getValidOperators } from '../../../filtersSelection/tickets/ticketFilters.helpers';
 import { MenuItem } from '@mui/material';
 import { TicketFilterOperator, TicketFilterType } from '../../../cardFilters.types';
 import { FilterIconContainer } from './filterFormOperators.styles';
+import { Select } from '@controls/inputs/select/select.component';
 
 const MenuItemContent = ({ operator, type }) => {
 	const Icon = FILTER_OPERATOR_ICON[operator];
@@ -36,22 +36,29 @@ const MenuItemContent = ({ operator, type }) => {
 	);
 };
 
-type FilterFormOperatorsProps = { type: TicketFilterType };
-export const FilterFormOperators = ({ type }: FilterFormOperatorsProps) => {
+type FilterFormOperatorsProps = {
+	type: TicketFilterType,
+	operator: TicketFilterOperator,
+	onOperatorChange: (operator: TicketFilterOperator) => void,
+};
+
+export const FilterFormOperators = ({ type, operator, onOperatorChange }: FilterFormOperatorsProps) => {
 	const operators = getValidOperators(type);
 
 	const renderValue = (op: TicketFilterOperator) => getFilterOperatorLabels(type)[op];
 
 	return (
-		<FormSelect
+		<Select
 			name='operator'
+			value={operator}
+			onChange={(event) => onOperatorChange(event.target.value as TicketFilterOperator)}
 			renderValue={renderValue}
 		>
-			{operators.map((operator) => (
-				<MenuItem value={operator} key={operator}>
-					<MenuItemContent operator={operator} type={type} />
+			{operators.map((op) => (
+				<MenuItem value={op} key={op}>
+					<MenuItemContent operator={op} type={type} />
 				</MenuItem>
 			))}
-		</FormSelect>
+		</Select>
 	);
 };

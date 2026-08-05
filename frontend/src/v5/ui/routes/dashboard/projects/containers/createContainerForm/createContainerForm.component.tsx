@@ -25,10 +25,10 @@ import { MODEL_UNITS } from '../../models.helpers';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
-import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FlexContainer } from './createContainerForm.styles';
+import { TwoColumnRow } from './createContainerForm.styles';
 
 interface ICreateContainer {
 	open: boolean;
@@ -43,16 +43,9 @@ interface IFormInput {
 	type: string;
 }
 
-export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
-	const {
-		handleSubmit,
-		getValues,
-		trigger,
-		control,
-		formState,
-		formState: { errors },
-	} = useForm<IFormInput>({
+	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
 		context: { alreadyExistingNames },
@@ -64,16 +57,26 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 			code: '',
 		},
 	});
+
+	const {
+		handleSubmit,
+		getValues,
+		control,
+		formState,
+		formState: { errors },
+	} = formData;
+
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
-			trigger('name');
 		}
 	};
-
+	
+	useExistingValuesTrigger('name', alreadyExistingNames, formData);
+	
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body, onClickClose, onSubmitError);
 	};
@@ -95,7 +98,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 				formError={errors.name}
 				required
 			/>
-			<FlexContainer>
+			<TwoColumnRow>
 				<FormSelect
 					required
 					control={control}
@@ -120,7 +123,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 						</MenuItem>
 					))}
 				</FormSelect>
-			</FlexContainer>
+			</TwoColumnRow>
 			<FormTextField
 				control={control}
 				name="desc"
@@ -137,3 +140,4 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		</FormModal>
 	);
 };
+

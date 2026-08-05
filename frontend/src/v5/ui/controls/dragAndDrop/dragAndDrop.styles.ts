@@ -27,7 +27,7 @@ export const DropArea = styled.div`
 
 export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $isDragActive }: any) => ({
 	$dashSize: 5,
-	strokeColor: theme.palette.primary.main,
+	$strokeColor: theme.palette.primary.main,
 	$gapSize: $isDragActive ? 0 : 5,
 	$borderRadius: 10,
 }))<{ $isDragActive?: boolean }>`

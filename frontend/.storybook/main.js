@@ -3,7 +3,6 @@ const { resolve } = require('path');
 
 module.exports = {
   "stories": [
-    "../**/*.stories.mdx",
     "../**/*.stories.@(js|jsx|ts|tsx)"
   ],
 
@@ -47,6 +46,19 @@ module.exports = {
       module: {
         ...config.module,
         strictExportPresence: true,
+        rules: [
+          ...(config.module?.rules || []),
+          {
+            test: /\.(ts|tsx|js|jsx)$/,
+            loader: 'esbuild-loader',
+            exclude: /node_modules/,
+            options: {
+              loader: 'tsx',
+              target: 'es2015',
+              tsconfigRaw: require('../tsconfig.json'),
+            },
+          },
+        ],
       }
     };
 

@@ -24,12 +24,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
-import TrelloBoard from 'react-trello';
 import { BOARD_ROUTE, BOARD_ROUTE_WITH_MODEL, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
+import { KanbanBoard, KanbanMoveAcrossLanesEvent } from '@components/kanbanBoard/kanbanBoard.component';
 import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
@@ -59,6 +59,7 @@ import {
 	DataConfig,
 	FormControl,
 	LoaderContainer,
+	ModelSelectFormControl,
 	NoDataMessage,
 	SelectContainer,
 	ViewConfig
@@ -166,10 +167,7 @@ export function Board(props: IProps) {
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = v5Project;
 	const modelId = containerOrFederation;
-	const projectParam = `${project ? `/${project}` : ''}`;
-	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
-	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
 
 	const {
@@ -230,7 +228,7 @@ export function Board(props: IProps) {
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
-	const isDraggable = !hasViewerPermissions && get(
+	const isDraggable = get(
 		isIssuesBoard ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS,
 		[props.filterProp, 'draggable'],
 		false
@@ -320,13 +318,13 @@ export function Board(props: IProps) {
 		return toLaneId;
 	};
 
-	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
-		if (fromLaneId === toLaneId) {
+	const handleCardMove = ({ sourceLaneId, targetLaneId, cardId }: KanbanMoveAcrossLanesEvent) => {
+		if (sourceLaneId === targetLaneId) {
 			return;
 		}
 
 		const updatedProps = {
-			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId })
+			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId: targetLaneId })
 		};
 
 		if (isIssuesBoard) {
@@ -337,10 +335,15 @@ export function Board(props: IProps) {
 	};
 
 	const handleCardDrop = () => {
-		if (!isDraggable) {
+		if (hasViewerPermissions) {
 			props.showSnackbar('Insufficient permissions to perform this action');
+			return;
 		}
-		return isDraggable;
+		if (!isDraggable) {
+			props.showSnackbar('The current property is not draggable');
+			return;
+		}
+		return true;
 	};
 
 	const handleSearchClose = () => {
@@ -348,43 +351,10 @@ export function Board(props: IProps) {
 		props.setFilters([]);
 	};
 
-	const renderTeamspacesSelect = () => (
-		<FormControl>
-			<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-			<CellSelect
-				placeholder="Select teamspace"
-				items={teamspacesItems}
-				value={teamspacesItems.length ? teamspace : ''}
-				onChange={handleTeamspaceChange}
-				disabled={!teamspacesItems.length}
-				disabledPlaceholder
-				inputId="teamspace-select"
-			/>
-		</FormControl>
-	);
-
-	const renderProjectsSelect = () => {
-		const projects = getTeamspaceProjects(props.teamspaces, props.projectsMap, teamspace);
-		return (
-			<FormControl>
-				<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-				<CellSelect
-					placeholder="Select project"
-					items={projects}
-					value={projects.length ? project : ''}
-					onChange={handleProjectChange}
-					disabled={!projects.length}
-					disabledPlaceholder
-					inputId="project-select"
-				/>
-			</FormControl>
-		);
-	};
-
 	const renderModelsSelect = () => {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
-			<FormControl>
+			<ModelSelectFormControl>
 				<InputLabel shrink htmlFor="model-select">
 					<FormattedMessage id="board.select.federationOrContainer.label" defaultMessage="Federation / Container" />
 				</InputLabel>
@@ -397,7 +367,7 @@ export function Board(props: IProps) {
 					disabledPlaceholder
 					inputId="model-select"
 				/>
-			</FormControl>
+			</ModelSelectFormControl>
 		);
 	};
 
@@ -464,14 +434,12 @@ export function Board(props: IProps) {
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<div ref={boardRef}>
-				<TrelloBoard
-					data={boardData}
-					hideCardDeleteIcon
+				<KanbanBoard
+					data={props.lanes}
 					handleDragEnd={handleCardDrop}
 					onCardClick={handleOpenDialog}
 					onCardMoveAcrossLanes={handleCardMove}
 					components={components}
-					cardDraggable
 				/>
 			</div>
 		</BoardContainer>
@@ -575,25 +543,21 @@ export function Board(props: IProps) {
 	const BoardTitle = (<BoardTitleComponent renderActions={renderActions} />);
 
 	return (
-		<Panel {...PANEL_PROPS} title={BoardTitle}>
-			<Container>
-				{renderSearchPanel(props.searchEnabled)}
-				<Config>
-					<DataConfig>
-						{renderTeamspacesSelect()}
-						{renderProjectsSelect()}
-						{renderModelsSelect()}
-					</DataConfig>
-					<ViewConfig>
-						{renderFilters()}
-						{renderAddButton()}
-					</ViewConfig>
-				</Config>
-				{renderLoader(props.isPending)}
-				{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
-				{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
-				{renderNoSelected(!props.isPending && (!Boolean(props.lanes.length) || (!project || !modelId)))}
-			</Container>
-		</Panel>
+		<Container>
+		{renderSearchPanel(props.searchEnabled)}
+		<Config>
+			<DataConfig>
+				{renderModelsSelect()}
+			</DataConfig>
+			<ViewConfig>
+				{renderFilters()}
+				{renderAddButton()}
+			</ViewConfig>
+		</Config>
+		{renderLoader(props.isPending)}
+		{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
+		{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
+		{renderNoSelected(!props.isPending && (!Boolean(props.lanes.length) || (!project || !modelId)))}
+		</Container>
 	);
 }

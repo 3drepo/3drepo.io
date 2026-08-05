@@ -970,6 +970,45 @@ const testIsTeamspaceMember = () => {
 			}
 		});
 	});
+
+	describe.each([
+		['membership is active', membershipStatus.ACTIVE, false, true],
+		['membership is pending login', membershipStatus.PENDING_LOGIN, false, true],
+		['membership is pending invite', membershipStatus.PENDING_INVITE, false, false, templates.pendingInviteAcceptance],
+		['membership is inactive', membershipStatus.INACTIVE, false, false, templates.membershipInactive],
+		['membership is not a member', membershipStatus.NOT_MEMBER, false, false, templates.teamspaceNotFound],
+		['an unexpected error occurs', membershipStatus.NOT_MEMBER, false, false, undefined, true],
+		['bypass is set and user is a member', membershipStatus.ACTIVE, true, true],
+		['bypass is set and user is not a member', membershipStatus.NOT_MEMBER, true, false, templates.teamspaceNotFound],
+		['bypass is set and an unexpected error occurs', membershipStatus.NOT_MEMBER, true, false, undefined, true],
+	])('Is teamspace member (throwWithDetails=true)', (desc, memStatus, byPassStatusCheck, succeeds, expectedError, getRefShouldThrow) => {
+		const teamspace = generateRandomString();
+		const user = generateRandomString();
+		test(desc, async () => {
+			const teamspaceRef = generateRandomString();
+			const userId = generateRandomString();
+			const error = new Error('Unexpected error');
+			if (getRefShouldThrow) {
+				TeamspacesModel.getTeamspaceRefId.mockRejectedValueOnce(error);
+			} else {
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceRef);
+				UsersModel.getUserId.mockResolvedValueOnce(userId);
+				if (byPassStatusCheck) {
+					const dataToReturn = memStatus === membershipStatus.NOT_MEMBER ? [] : [{ id: userId }];
+					FronteggService.getAllUsersInAccount.mockResolvedValueOnce(dataToReturn);
+				} else {
+					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
+				}
+			}
+
+			const call = Teamspaces.isTeamspaceMember(teamspace, user, byPassStatusCheck, true);
+			if (succeeds) {
+				await expect(call).resolves.toBe(true);
+			} else {
+				await expect(call).rejects.toEqual(expectedError ?? error);
+			}
+		});
+	});
 };
 
 describe(determineTestGroup(__filename), () => {

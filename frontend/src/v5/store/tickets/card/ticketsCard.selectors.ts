@@ -129,13 +129,9 @@ export const selectFilteredTicketIds = createSelector(
 ) as (state) => Set<string>;
 
 export const selectFilteredTickets = createSelector(
-	selectCardFilters,
 	selectCurrentTickets,
 	selectFilteredTicketIds,
-	(filters, tickets, ids) => {
-		if (!filters.length) return tickets;
-		return tickets.filter((t) => ids.has(t._id));
-	},
+	(tickets, ids) =>  tickets.filter((t) => ids.has(t._id)),
 );
 
 export const selectIsShowingPins = createSelector(

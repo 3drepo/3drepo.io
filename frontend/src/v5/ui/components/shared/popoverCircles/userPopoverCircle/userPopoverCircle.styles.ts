@@ -25,7 +25,7 @@ type IUserCircle = Omit<IPopoverCircle, 'children'> & {
 	children?: any;
 };
 
-export const UserCircle = styled(PopoverCircle).attrs(({ user }: IUserCircle) => ({
+export const UserCircle = styled(PopoverCircle as React.ForwardRefExoticComponent<IUserCircle>).attrs(({ user }) => ({
 	src: user.hasAvatar ? user.avatarUrl : '',
 	children: getUserInitials(user),
 }))<IUserCircle>`

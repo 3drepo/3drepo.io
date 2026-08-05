@@ -28,14 +28,14 @@ type ILegalAppBar = {
 	activePage: string;
 };
 
-export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
+export const LegalAppBar = ({ activePage }: ILegalAppBar) => (
 	<AppBarContainer>
 		<Items>
 			<Link to={DASHBOARD_ROUTE}>
 				<LogoIcon />
 			</Link>
 			<NavLinks>
-				<NavLink as="a" href={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
+				<NavLink as="a" href={PRIVACY_ROUTE} to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="legalAppBar.privacy" defaultMessage="Privacy Policy" />
 				</NavLink>
 				<NavLink to={TERMS_ROUTE} selected={activePage === 'terms'}>

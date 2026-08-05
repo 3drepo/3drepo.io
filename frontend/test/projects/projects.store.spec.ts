@@ -16,7 +16,7 @@
  */
 
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjectTemplates, selectCurrentProjects, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjectTemplateById, selectCurrentProjectTemplates, selectCurrentProjects, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { times } from 'lodash';
 import { projectMockFactory } from './projects.fixtures';
@@ -111,5 +111,94 @@ describe('Projects: store', () => {
 
 		const currentTemlates = selectCurrentProjectTemplates(getState());
 		expect(currentTemlates).toEqual(mockTemplates);
+	});
+
+	it('should remove hidden fields from fetched templates', () => {
+		const mockProject = projectMockFactory();
+		const templateWithHiddenProperties = templateMockFactory({
+			properties: [
+				{ name: 'Prop1', type: 'text' },
+				{ name: 'Hidden prop', type: 'text', hiddenOnUI: true },
+			],
+			modules: [
+				{
+					name: 'a module',
+					properties: [
+						{ name: 'Modules Prop', type: 'text' },
+						{ name: 'Hidden module prop', type: 'text', hiddenOnUI: true },
+					],
+				},
+				{
+					name: 'hidden module',
+					properties: [
+						{ name: 'Only hidden prop', type: 'text', hiddenOnUI: true },
+					],
+				},
+			],
+		});
+		const templateWithoutHiddenProperties = {
+			...templateWithHiddenProperties,
+			properties: [
+				{ name: 'Prop1', type: 'text' },
+			],
+			modules: [
+				{
+					name: 'a module',
+					properties: [
+						{ name: 'Modules Prop', type: 'text' },
+					],
+				},
+			],
+		};
+
+		dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+		dispatch(ProjectsActions.setCurrentProject(mockProject._id));
+		dispatch(ProjectsActions.fetchTemplatesSuccess(mockProject._id, [templateWithHiddenProperties]));
+
+		const currentTemplates = selectCurrentProjectTemplates(getState());
+		expect(currentTemplates[0]).toEqual(templateWithoutHiddenProperties);
+	});
+
+	it('should remove hidden fields when replacing a template', () => {
+		const mockProject = projectMockFactory();
+		const template = templateMockFactory();
+		const replacementTemplateWithHiddenProperties = templateMockFactory({
+			_id: template._id,
+			properties: [
+				{ name: 'Prop1', type: 'text' },
+				{ name: 'Hidden prop', type: 'text', hiddenOnUI: true },
+			],
+			modules: [
+				{
+					name: 'a module',
+					properties: [
+						{ name: 'Modules Prop', type: 'text' },
+						{ name: 'Hidden module prop', type: 'text', hiddenOnUI: true },
+					],
+				},
+			],
+		});
+		const replacementTemplateWithoutHiddenProperties = {
+			...replacementTemplateWithHiddenProperties,
+			properties: [
+				{ name: 'Prop1', type: 'text' },
+			],
+			modules: [
+				{
+					name: 'a module',
+					properties: [
+						{ name: 'Modules Prop', type: 'text' },
+					],
+				},
+			],
+		};
+
+		dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+		dispatch(ProjectsActions.setCurrentProject(mockProject._id));
+		dispatch(ProjectsActions.fetchTemplatesSuccess(mockProject._id, [template]));
+		dispatch(ProjectsActions.replaceTemplateSuccess(mockProject._id, replacementTemplateWithHiddenProperties));
+
+		const templateFromStore = selectCurrentProjectTemplateById(getState(), template._id);
+		expect(templateFromStore).toEqual(replacementTemplateWithoutHiddenProperties);
 	});
 });

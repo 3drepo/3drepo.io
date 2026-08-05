@@ -17,8 +17,6 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { deleteIfUndefined, isEqual } = require('../../../../../../../utils/helper/objects');
-const { deserialiseUUIDsInTicket, processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
 const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
@@ -27,21 +25,9 @@ const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
+const { validateTickets } = require('../../../../../../../schemas/tickets');
 
 const TicketsMiddleware = {};
-
-const processTicket = async (teamspace, project, model, template, author, newTicket, existingData, isImport) => {
-	const validatedTicket = await validateTicketSchema(teamspace, project, model,
-		template, newTicket, existingData, isImport);
-
-	if (existingData && isEqual(validatedTicket, { modules: {}, properties: {} })) {
-		return null;
-	}
-
-	const deserialised = deserialiseUUIDsInTicket(validatedTicket, template);
-	processReadOnlyValues(existingData, deserialised, author);
-	return deserialised;
-};
 
 const validateTicket = (isNewTicket) => async (req, res, next) => {
 	try {
@@ -53,7 +39,11 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
+		const [processedTicket] = await validateTickets(teamspace, project, model, template, [req.body], {
+			author: user,
+			existingData: req.ticketData ? [req.ticketData] : undefined,
+		});
+		req.body = processedTicket?.newTicket;
 
 		// this is not a new ticket and there is nothing to update
 		if (!isNewTicket && !req.body) {
@@ -83,21 +73,6 @@ const bodyContainsTicketsArray = async (req, res, next) => {
 	}
 };
 
-const extractUniqueProperties = (template) => {
-	const uniqueProps = new Map();
-
-	template.properties.forEach((property) => {
-		if (property.unique) uniqueProps.set(property.name, new Set());
-	});
-	template.modules.forEach((templateModule) => {
-		templateModule.properties.forEach((property) => {
-			if (property.unique) uniqueProps.set(`${templateModule.name}..${property.name}`, new Set());
-		});
-	});
-
-	return uniqueProps;
-};
-
 const validateTicketImportData = (isNew) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 	try {
@@ -108,38 +83,11 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		const uniqueProps = extractUniqueProperties(template);
-
-		for (const { modules, properties } of req.body.tickets) {
-			for (const [key, value] of uniqueProps) {
-				const keyArray = key.split('..');
-
-				if (keyArray.length > 1) {
-					if (value.has(modules[keyArray[0]][keyArray[1]])) {
-						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]}.${keyArray[1]} can not have the same value multiple times.`);
-					}
-					value.add(modules[keyArray[0]][keyArray[1]]);
-				} else {
-					if (value.has(properties[keyArray[0]])) {
-						throw createResponseCode(templates.invalidArguments, `The unique property ${keyArray[0]} can not have the same value multiple times.`);
-					}
-					value.add(properties[keyArray[0]]);
-				}
-			}
-		}
-
-		const filteredTickets = [];
-
-		await Promise.all(req.body.tickets.map(async (ticket, i) => {
-			const existingData = isNew ? undefined : req.ticketsData[i];
-			const processedTicket = await processTicket(teamspace, project,
-				model, template, user, ticket, existingData, true);
-
-			// if processedTicket is null, then there are no valid changes
-			if (processedTicket) {
-				filteredTickets.push(deleteIfUndefined({ newTicket: processedTicket, existingData }));
-			}
-		}));
+		const filteredTickets = await validateTickets(teamspace, project, model, template, req.body.tickets, {
+			author: user,
+			existingData: isNew ? undefined : req.ticketsData,
+			isImport: true,
+		});
 
 		// If none of the tickets had any valid changes, return ok
 		if (!filteredTickets.length) {

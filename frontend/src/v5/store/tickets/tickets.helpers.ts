@@ -52,12 +52,23 @@ export const getEditableProperties = (template) => {
 	};
 };
 
+const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
+	if (defaultValue != null) return defaultValue;
+	switch (type) {
+		case 'manyOf': return [];
+		case 'boolean': return false;
+		case 'text':
+		case 'longText':
+		case 'oneOf': return '';
+		default: return null;
+	}
+};
 
 const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
 		(ticketProperties, prop) => ({
 			...ticketProperties,
-			[prop.name]: prop.default ?? (prop.type === 'manyOf' ? [] : ''),
+			[prop.name]: prop.default ?? getPropertyDefault(prop),
 		}),
 		{},
 	)
@@ -137,6 +148,7 @@ export const filterEmptyTicketValues = (ticket) => {
 
 const moduleTypeProperties = {
 	clash: { title: formatMessage({ id: 'customTicket.panel.clash', defaultMessage: 'Clash' }), Icon: ClashIcon },
+	cloudClash: { title: formatMessage({ id: 'customTicket.panel.cloudClash', defaultMessage: 'Cloud Clash' }), Icon: ClashIcon },
 	safetibase: { title: formatMessage({ id: 'customTicket.panel.safetibase', defaultMessage: 'Safetibase' }), Icon: SafetibaseIcon },
 	sequencing: { title: formatMessage({ id: 'customTicket.panel.sequencing', defaultMessage: 'Sequencing' }), Icon: SequencingIcon },
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
@@ -145,7 +157,7 @@ const moduleTypeProperties = {
 export const getModulePanelProps = (module) => {
 	const CustomModuleIcon = module.color ? FilledCircleIcon : OutlinedCircleIcon;
 	if (module.name) return { title: module.name, Icon: CustomModuleIcon, color: module.color };
-	return moduleTypeProperties[module.type];
+	return moduleTypeProperties[module.type] || { title: module.type, Icon: CustomModuleIcon };
 };
 
 export const getTicketResourceUrl = (
@@ -290,6 +302,19 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 
+export const normalizeTicketAssignees = (ticket: ITicket) => {
+	if (!ticket) return ticket;
+	if (ticket.properties?.[IssueProperties.ASSIGNEES] !== undefined) return ticket;
+
+	return {
+		...ticket,
+		properties: {
+			...(ticket.properties || {}),
+			[IssueProperties.ASSIGNEES]: [],
+		},
+	};
+};
+
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
 
 const fillEmptyOverrides = (values: Partial<ITicket>) => {
@@ -322,11 +347,11 @@ export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => d
 	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 	.map((definition) => definition.name);
 
-export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
-	if (!template.properties) return [];
+export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {
+	if (!template) return [];
 	return [
-		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+		...(template.properties || []).map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...(template.modules || []).flatMap((module) => (module.properties || []).map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
 
@@ -334,18 +359,18 @@ export const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[]
 	propOrModule?.find((p) => p.name === name);
 
 export const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
-	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype);
+	(templateModules || []).find((t) => t.name === nameOrtype || t.type === nameOrtype);
 
 export const findPropertyDefinition = (template:ITemplate,  property:string) => {
 	const propertyChunks = property.split('.');
 
 	if (propertyChunks[0] === 'modules') {
-		const module = findModuleByNameOrType(template.modules, propertyChunks[1]);
-		return findByName(module?.properties, propertyChunks[2]) as PropertyDefinition;
+		const module = findModuleByNameOrType(template.modules || [], propertyChunks[1]);
+		return findByName(module?.properties || [], propertyChunks[2]) as PropertyDefinition;
 	}
 
 	if (propertyChunks[0] === 'properties') {
-		return findByName(template?.properties, propertyChunks[1]) as PropertyDefinition;
+		return findByName(template?.properties || [], propertyChunks[1]) as PropertyDefinition;
 	}
 };
 

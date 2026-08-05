@@ -52,9 +52,9 @@ export const TicketsList = ({ groupBy, loading }: any) => {
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 
-	const tableHandle = useRef<VListHandle>();
-	const subTableHandle = useRef<VListHandle>();
-	const scrollerRef = useRef<Element>();
+	const tableHandle = useRef<VListHandle>(null);
+	const subTableHandle = useRef<VListHandle>(null);
+	const scrollerRef = useRef<Element>(null);
 
 	let selectedIndex = -1;
 	let selectedSubIndex = -1;

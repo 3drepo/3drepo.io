@@ -101,7 +101,7 @@ export const StyledForm = styled(StyledFormComponent)`
 export const StyledTextField = styled(TextField)`
 	width: 100%;
 	overflow: hidden;
-	margin-left: 36px !important;
+	margin-left: 2px;
 
 	input {
 		margin-right: 60px;

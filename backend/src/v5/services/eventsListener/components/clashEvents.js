@@ -1,0 +1,188 @@
+/**
+ *  Copyright (C) 2026 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const { clashRunStatus, triggerOptions } = require('../../../models/clashes.constants');
+const {
+	createRun,
+	processClashResults: processClashRunResults,
+	setLastRevForSelections,
+} = require('../../../processors/teamspaces/projects/clashes');
+const { getInfoFromCode, modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
+const { getPlanById, getPlansByQuery } = require('../../../models/clashes.plans');
+const { UUIDToString } = require('../../../utils/helper/uuids');
+const { templates: emailTemplates } = require('../../mailer/mailer.constants');
+const { events } = require('../../eventsManager/eventsManager.constants');
+const { getFederationById } = require('../../../models/modelSettings');
+const { getTemplateById } = require('../../../models/tickets.templates');
+const { logger } = require('../../../utils/logger');
+const {
+	processClashResults: processTicketClashResults,
+} = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');
+const { templates: responseCodes } = require('../../../utils/responseCodes');
+const { sendSystemEmail } = require('../../mailer');
+const { subscribe } = require('../../eventsManager/eventsManager');
+const { updateRunStatus } = require('../../../models/clashes.runs');
+
+const onNewContainerRevision = async (payload) => {
+	const { teamspace, project, model, modelType, data } = payload;
+	try {
+		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
+			const relatedPlans = await getPlansByQuery(teamspace, project, {
+				trigger: triggerOptions.NEW_REVISION,
+				$or: [
+					{ 'selectionA.container': model },
+					{ 'selectionB.container': model },
+				],
+			}, { project: 0 });
+
+			await Promise.all(
+				relatedPlans.map(async (plan) => {
+					try {
+						const selectionsHaveRevisions = await setLastRevForSelections(
+							teamspace, plan.selectionA, plan.selectionB)
+							.then(() => true)
+							.catch((error) => {
+								// If a container is deleted or has no revisions, we just skip this run.
+								if ([
+									responseCodes.containerNotFound.code,
+									responseCodes.revisionNotFound.code,
+								].includes(error?.code)) return false;
+								throw error;
+							});
+
+						if (selectionsHaveRevisions) {
+							await createRun(teamspace, project, plan, `auto:${triggerOptions.NEW_REVISION}::${UUIDToString(model)}`);
+						}
+					} catch (error) {
+						const errorMessage = error.message;
+						logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${errorMessage}`);
+						await sendSystemEmail(emailTemplates.CLASH_ERROR.name, {
+							errorMessage,
+							teamspace,
+							project: UUIDToString(project),
+							planId: UUIDToString(plan._id),
+							runId: 'N/A',
+						}, undefined, true);
+					}
+				}),
+			);
+		}
+	} catch (error) {
+		const errorMessage = error.message;
+		logger.logError(`Failed to start clash runs after new revision for container ${UUIDToString(model)}: ${errorMessage}`);
+		if (error.stack) {
+			logger.logError(error.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'onNewContainerRevision',
+			payload,
+			error,
+		}, undefined, true);
+	}
+};
+
+const clashRunStatusUpdate = async (payload) => {
+	const { teamspace, project, runId, status } = payload;
+	try {
+		await updateRunStatus(teamspace, project, runId, status);
+	} catch (error) {
+		logger.logError(`Failed to update the status of clash run for ${teamspace} `
+			+ `with id ${UUIDToString(runId)}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunStatusUpdate',
+			payload,
+			error,
+		}, undefined, true);
+	}
+};
+
+const clashRunCompleted = async (payload) => {
+	const { teamspace, project, runId, results, value } = payload;
+	try {
+		const resInfo = getInfoFromCode(value);
+		resInfo.retVal = value;
+
+		if (resInfo.success) {
+			await processClashRunResults(teamspace, project, runId, results);
+		} else {
+			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
+				{ error: { code: resInfo.retVal, reason: resInfo.message } });
+		}
+	} catch (error) {
+		logger.logError(`Failed to process a complete clash run for ${teamspace} `
+			+ `with id ${UUIDToString(runId)}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunCompleted',
+			payload,
+			error,
+		}, undefined, true);
+	}
+};
+
+const clashRunProcessed = async (payload) => {
+	const { teamspace, project, runId, plan: planFromRun, results } = payload;
+	try {
+		const { tickets, name } = await getPlanById(teamspace, project, planFromRun._id,
+			{ tickets: 1, name: 1 }).catch(() => ({}));
+		if (!tickets?.federation) return;
+
+		const fed = await getFederationById(teamspace,
+			tickets.federation, { _id: 1 }).catch(() => undefined);
+		if (!fed) return;
+
+		const template = await getTemplateById(teamspace, tickets.template).catch(() => undefined);
+		if (!template) return;
+
+		// Use the run's plan details, but keep current ticket settings from the latest plan data.
+		const plan = { ...planFromRun, tickets, name };
+
+		await processTicketClashResults(teamspace, project, fed._id, template, results,
+			{ plan, runId });
+	} catch (error) {
+		logger.logError(`Error processing clash run ${UUIDToString(runId)} `
+			+ `for project ${UUIDToString(project)} in teamspace ${teamspace}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunProcessed',
+			payload,
+			error,
+		}, undefined, true);
+	}
+};
+
+const ClashEventsListener = {};
+
+ClashEventsListener.init = () => {
+	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
+	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
+	subscribe(events.MODEL_IMPORT_FINISHED, onNewContainerRevision);
+	subscribe(events.CLASH_RUN_RESULTS_PROCESSED, clashRunProcessed);
+};
+
+module.exports = ClashEventsListener;

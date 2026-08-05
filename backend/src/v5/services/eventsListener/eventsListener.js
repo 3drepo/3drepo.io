@@ -16,6 +16,7 @@
  */
 
 const authEventsListener = require('./components/authEvents');
+const clashEventsListener = require('./components/clashEvents');
 const modelEventsListener = require('./components/modelEvents');
 const userEventsListener = require('./components/userEvents');
 
@@ -23,6 +24,7 @@ const EventsListener = {};
 
 EventsListener.init = () => {
 	modelEventsListener.init();
+	clashEventsListener.init();
 	authEventsListener.init();
 	userEventsListener.init();
 };

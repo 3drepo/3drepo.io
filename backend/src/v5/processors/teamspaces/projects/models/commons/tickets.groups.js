@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { UUIDLookUpTable, UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
@@ -60,9 +60,9 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 			unwantedMeshIds,
 		] = await Promise.all([
 			matched.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				matched.flatMap(({ parents }) => parents)) : Promise.resolve([]),
+				matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 			unwanted.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				unwanted.flatMap(({ parents }) => parents)) : Promise.resolve([]),
+				unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 		]);
 
 		return { container: model, _ids: getArrayDifference(unwantedMeshIds, matchedMeshIds).map(stringToUUID) };
@@ -109,7 +109,7 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			convertedObject[res.key] = res.values;
+			convertedObject[res.key] = [...(convertedObject[res.key] ?? []), ...res.values];
 		}
 		return convertedObject;
 	}));
@@ -118,8 +118,9 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 };
 
 const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
-	// eslint-disable-next-line no-underscore-dangle
-	if (containerEntry._ids) {
+	const idTypesToConvert = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys));
+
+	if (!idTypesToConvert.length) {
 		return containerEntry;
 	}
 
@@ -137,16 +138,31 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 			return undefined;
 		}
 	}
-	const formattedEntry = { ...containerEntry };
+	const { _ids: internalIds, ...formattedEntry } = { ...containerEntry };
 
-	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
-	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
-		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
-	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
-		metadata.flatMap(({ parents }) => parents));
+	const meshIdsFromExternalIds = (await Promise.all(idTypesToConvert.map(async (idType) => {
+		const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
+			idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
+		delete formattedEntry[idType];
+		return getMeshesWithParentIds(teamspace, project, container, revision,
+			metadata.flatMap(({ parents }) => parents), true);
+	}))).flat();
 
-	delete formattedEntry[idType];
-	return { ...formattedEntry, _ids: meshIds };
+	const resultingMeshIds = internalIds ?? [];
+
+	// remove any duplicate mesh Ids that might come from multiple external id types mapping to the same mesh ids
+	const meshIdsSet = new UUIDLookUpTable(resultingMeshIds);
+
+	meshIdsFromExternalIds.forEach((id) => {
+		const meshId = UUIDToString(id);
+		if (!meshIdsSet.has(meshId)) {
+			meshIdsSet.add(meshId);
+			resultingMeshIds.push(id);
+		}
+	});
+
+	// eslint-disable-next-line no-underscore-dangle
+	return { ...formattedEntry, _ids: resultingMeshIds };
 };
 
 TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {

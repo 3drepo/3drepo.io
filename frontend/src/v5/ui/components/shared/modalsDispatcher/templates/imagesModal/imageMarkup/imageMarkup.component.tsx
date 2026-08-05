@@ -18,7 +18,7 @@ import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/marku
 import { MarkupToolbar } from './markupToolbar/markupToolbar.component';
 import { CALLOUTS, FONT_SIZE, SHAPES, STROKE_WIDTH } from './imageMarkup.types';
 import { Container, ImageSizesRefContainer, MarkupStageContainer, MarkupToolbarContainer } from './imageMarkup.styles';
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { MarkupRefObject, MarkupStage } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.component';
 import { CanvasHistoryActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
@@ -45,7 +45,7 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 	const cursor = !selectedObjectName && [MODES.SHAPE, MODES.CALLOUT].includes(mode) ? 'crosshair' : 'default';
 	const activeShape = mode === MODES.SHAPE ? shape : callout;
 
-	const onScaleStage = (scaledImg) => {
+	const onScaleStage = useCallback((scaledImg) => {
 		const computedProperties = window.getComputedStyle(imageSizesRef.current, null);
 
 		const maxHeight = Number(computedProperties.getPropertyValue('height').replace('px', ''));
@@ -61,50 +61,50 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 		}
 		scaledImg.setAttrs(newStageSizes);
 		setStageSizes(newStageSizes);
-	};
+	}, []);
 
-	const handleSave = async () => {
+	const updateElement = useCallback((updatedElement) => {
+		if (selectedObjectName) {
+			CanvasHistoryActionsDispatchers.update(selectedObjectName, updatedElement);
+		}
+	}, [selectedObjectName]);
+
+	const handleSave = useCallback(async () => {
 		flushSync(() => setSelectedObjectName(''));
 		const screenshot = await markupRef.current.getScreenshot();
 		onSave(screenshot);
 		onClose();
-	};
+	}, [onSave, onClose]);
 
-	const updateElement = (updatedElement) => {
-		if (selectedObjectName) {
-			CanvasHistoryActionsDispatchers.update(selectedObjectName, updatedElement);
-		}
-	};
-
-	const handleStrokeWidthChange = (value) => {
+	const handleStrokeWidthChange = useCallback((value) => {
 		setStrokeWidth(value);
 		updateElement({ strokeWidth: value });
-	};
+	}, [updateElement]);
 
-	const handleFontSizeChange = (value) => {
+	const handleFontSizeChange = useCallback((value) => {
 		setFontSize(value);
 		updateElement({ fontSize: value });
-	};
+	}, [updateElement]);
 
-	const handleColorChange = (value) => {
+	const handleColorChange = useCallback((value) => {
 		setColor(value);
 		updateElement({ color: value });
-	};
+	}, [updateElement]);
 
-	const handleModeChange = (newMode) => {
+	const handleModeChange = useCallback((newMode) => {
 		if (selectedObjectName) {
 			setSelectedObjectName('');
 		}
 	
 		setMode(newMode);
-	};
+	}, [selectedObjectName]);
 
-	const handleCalloutChange = (newCallout) => {
+	const handleCalloutChange = useCallback((newCallout) => {
 		setCallout(newCallout);
 		setMode(MODES.CALLOUT);
-	};
+	}, []);
 
-	const handleShapeChange = (newShape) => {
+	const handleShapeChange = useCallback((newShape) => {
 		setShape(newShape);
 
 		if (newShape === SHAPES.POLYGON) {
@@ -115,18 +115,15 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 		if (mode !== MODES.SHAPE) {
 			setMode(MODES.SHAPE);
 		}
-	};
+	}, [mode]);
 
-	const onClear = () => {
+	const onClear = useCallback(() => {
 		markupRef.current.clearCanvas();
-		handleModeChange(MODES.BRUSH);
-	};
+	}, [handleModeChange]);
 
-	const onUndo = () => {
+	const onUndo = useCallback(() => {
 		CanvasHistoryActionsDispatchers.undo();
-		handleModeChange(MODES.BRUSH);
-	};
-
+	}, [handleModeChange]);
 	return (
 		<Container $cursor={cursor}>
 			<ImageSizesRefContainer src={image} ref={imageSizesRef} />

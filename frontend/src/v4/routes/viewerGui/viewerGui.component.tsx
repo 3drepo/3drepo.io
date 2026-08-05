@@ -16,10 +16,9 @@
  */
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
@@ -135,8 +134,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			currentTeamspace,
 			fetchTeamspaces,
 		} = this.props;
-
-		viewer.init();
 
 		if (issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
@@ -315,7 +312,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private renderRightPanels = (panels) => (
 		<RightPanels>
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
-			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
 		</RightPanels>
 	)
 

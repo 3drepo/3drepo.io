@@ -35,7 +35,7 @@ export const DashboardListItemButton = ({
 	startIcon,
 	endIcon,
 	...containerProps
-}: DashboardListItemButtonProps): JSX.Element => (
+}: DashboardListItemButtonProps) => (
 	<FixedOrGrowContainer {...containerProps}>
 		<Tooltip title={tooltipTitle}>
 			<span>

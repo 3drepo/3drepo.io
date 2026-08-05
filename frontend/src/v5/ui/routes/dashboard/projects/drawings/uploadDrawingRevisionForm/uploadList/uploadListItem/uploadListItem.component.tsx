@@ -81,7 +81,7 @@ export const UploadListItem = ({
 	fileData,
 	isUploading,
 	isMultiPagePdf,
-}: IUploadListItem): JSX.Element => {
+}: IUploadListItem) => {
 	const revisionPrefix:`uploads.${number}` = `uploads.${index}`;
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
@@ -141,7 +141,10 @@ export const UploadListItem = ({
 	}, [drawingId, revCodeError]);
 
 	useEffect(() => {
-		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
+		const sanitized = sanitiseDrawing(selectedDrawing);
+		for (const [key, val] of Object.entries(sanitized)) {
+			setValue(`${revisionPrefix}.${key}`, val);
+		}
 	}, [JSON.stringify(selectedDrawing)]);
 
 	useEffect(() => {

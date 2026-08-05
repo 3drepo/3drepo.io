@@ -178,7 +178,7 @@ const generateModuleValidator = async (teamspace, project, model, templateId, mo
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket, isImport) => {
+const validateTicket = async (teamspace, project, model, template, newTicket, oldTicket, isImport) => {
 	const isNewTicket = !oldTicket;
 	const fullTem = generateFullSchema(template, isNewTicket && isImport);
 
@@ -284,6 +284,83 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 			);
 		}
 	}
+};
+
+const getUniqueProperties = (template) => {
+	const fullTem = generateFullSchema(template);
+	const uniqueProperties = [];
+
+	fullTem.properties.forEach(({ name, unique }) => {
+		if (unique) uniqueProperties.push({ property: name });
+	});
+
+	fullTem.modules.forEach(({ name, type, properties }) => {
+		const moduleName = name ?? type;
+		properties.forEach(({ name: property, unique }) => {
+			if (unique) uniqueProperties.push({ module: moduleName, property });
+		});
+	});
+
+	return uniqueProperties;
+};
+
+const getTicketPropertyValue = (ticket, { module, property }) => (
+	module ? ticket.modules?.[module]?.[property] : ticket.properties?.[property]
+);
+
+const validateUniqueValuesInTickets = (template, tickets) => {
+	const uniqueProperties = getUniqueProperties(template);
+
+	uniqueProperties.forEach((uniqueProperty) => {
+		const values = new Set();
+
+		tickets.forEach((ticket) => {
+			const value = getTicketPropertyValue(ticket, uniqueProperty);
+			if (value === undefined || value === null) return;
+
+			if (values.has(value)) {
+				const propertyName = uniqueProperty.module
+					? `${uniqueProperty.module}.${uniqueProperty.property}` : uniqueProperty.property;
+				throw new Error(`The unique property ${propertyName} can not have the same value multiple times.`);
+			}
+
+			values.add(value);
+		});
+	});
+};
+
+Tickets.validateTickets = async (
+	teamspace,
+	project,
+	model,
+	template,
+	tickets,
+	{ author, existingData, isImport, processValidatedData = true } = {},
+) => {
+	const processedTickets = await Promise.all(tickets.map(async (ticket, i) => {
+		const oldTicket = existingData?.[i];
+		const validatedTicket = await validateTicket(teamspace, project, model,
+			template, ticket, oldTicket, isImport);
+
+		if (!processValidatedData) {
+			return { newTicket: validatedTicket, existingData: oldTicket };
+		}
+
+		if (oldTicket && isEqual(validatedTicket, { modules: {}, properties: {} })) {
+			return undefined;
+		}
+
+		const newTicket = Tickets.deserialiseUUIDsInTicket(validatedTicket, template);
+		Tickets.processReadOnlyValues(oldTicket, newTicket, author);
+
+		return deleteIfUndefined({ newTicket, existingData: oldTicket });
+	}));
+
+	const filteredTickets = processedTickets.filter(Boolean);
+	if (filteredTickets.length > 1) {
+		validateUniqueValuesInTickets(template, filteredTickets.map(({ newTicket }) => newTicket));
+	}
+	return filteredTickets;
 };
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));

@@ -24,7 +24,7 @@ interface IErrorTooltip {
 	children: ReactNode;
 }
 
-export const ErrorTooltip = ({ className, children }: IErrorTooltip): JSX.Element => (
+export const ErrorTooltip = ({ className, children }: IErrorTooltip) => (
 	<Container className={className}>
 		<Tooltip
 			placement="right-start"

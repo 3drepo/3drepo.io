@@ -30,7 +30,7 @@ export const CentredContainer = ({
 	horizontal = true,
 	children,
 	...props
-}: ICentredContainer): JSX.Element => (
+}: ICentredContainer) => (
 	<PositionedWrapper {...props}>
 		<MarginWrapper vertical={vertical} horizontal={horizontal}>
 			{children}

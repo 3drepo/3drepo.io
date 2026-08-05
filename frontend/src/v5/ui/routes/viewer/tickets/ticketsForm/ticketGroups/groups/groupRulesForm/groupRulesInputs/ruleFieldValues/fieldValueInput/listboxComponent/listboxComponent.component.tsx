@@ -16,7 +16,7 @@
  */
 
 import { VariableSizeList, ListChildComponentProps } from 'react-window';
-import { forwardRef, createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@mui/material';
 import { InnerElementType, OverflowContainer } from './listboxComponent.styles';
@@ -24,11 +24,12 @@ import { InnerElementType, OverflowContainer } from './listboxComponent.styles';
 const LISTBOX_PADDING = 8; // px
 
 const Row = ({ data, index, style }: ListChildComponentProps) => {
-	const [liProps, optionValue, searchQuery] = data[index];
 	const inlineStyle = {
 		...style,
 		top: (style.top as number) + LISTBOX_PADDING,
 	};
+
+	const { optionValue, searchQuery, ...liProps } = data[index];
 
 	return (
 		<Tooltip title={optionValue}>
@@ -44,15 +45,15 @@ const Row = ({ data, index, style }: ListChildComponentProps) => {
 };
 
 const OuterElementContext = createContext({});
-const OuterElementType = forwardRef<HTMLDivElement>((props, ref) => {
+const OuterElementType = (props) => {
 	const outerProps = useContext(OuterElementContext);
-	return (<div ref={ref} {...props} {...outerProps} />);
-});
+	return (<div {...props} {...outerProps} />);
+};
 
 // Adapter for react-window
-export const ListboxComponent = forwardRef<HTMLDivElement, any>(({ children, ...other }, ref) => {
+export const ListboxComponent = ({ children, searchQuery, ref, ...other }) => {
 	const MAX_HEIGHT = document.documentElement.clientHeight * 0.4; // 40vh
-	const itemData = children.flatMap((item) => [item, ...(item.children || [])]);
+	const itemData = children.map((item) => ({ ...item.props, optionValue: item.props.children, searchQuery }));
 	const itemCount = itemData.length;
 
 	const getChildSize = () => 30;
@@ -77,4 +78,4 @@ export const ListboxComponent = forwardRef<HTMLDivElement, any>(({ children, ...
 			</OuterElementContext.Provider>
 		</div>
 	);
-});
+};

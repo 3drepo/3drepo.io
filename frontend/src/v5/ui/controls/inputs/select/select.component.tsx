@@ -23,7 +23,9 @@ import {
 } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 
-export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children?: any[] };
+
+// TODO Issue 5588 ignoring the type of children from here, check if this has any consequence
+export type SelectProps = Omit<MuiSelectProps, 'variant' | 'children'> &  FormInputProps & { children?: any[] };
 
 export const Select = ({
 	required = false,
@@ -34,7 +36,7 @@ export const Select = ({
 }: SelectProps) => (
 	<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
 		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-		<MuiSelect renderValue={(value) => props.children.find(({ key }) => key === value)?.props.children ?? value} {...props} />
+		<MuiSelect {...props} />
 		<FormHelperText>{helperText}</FormHelperText>
 	</FormControl>
 );

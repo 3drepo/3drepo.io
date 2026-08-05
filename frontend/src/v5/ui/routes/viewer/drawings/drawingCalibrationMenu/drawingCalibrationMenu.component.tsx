@@ -53,7 +53,7 @@ export const DrawingsCalibrationMenu = ({ calibrationStatus, onCalibrateClick, d
 			disabled={disableButton}
 			TriggerButton={(
 				<DrawingsCalibrationButton
-					calibrationStatus={calibrationStatus}
+					$calibrationStatus={calibrationStatus}
 					disabled={disableButton}
 					tooltipTitle={!disableButton && <FormattedMessage id="calibration.menu.tooltip" defaultMessage="Calibrate" />}
 					{...props}

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ELEMENT_TYPES } from '../../markupStage/markupStage.helpers';
 import { Arrow, Circle, Cloud, Line, Rectangle, Triangle } from './shape.helpers';
 
 export const SHAPE_TYPES = {
@@ -37,4 +38,5 @@ export const SHAPE_COMPONENTS = {
 	[SHAPE_TYPES.LINE]: Line,
 	[SHAPE_TYPES.CLOUD]: Cloud,
 	[SHAPE_TYPES.ARROW]: Arrow,
+	[ELEMENT_TYPES.DRAWING]: Line,
 };

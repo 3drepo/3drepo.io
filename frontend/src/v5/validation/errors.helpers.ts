@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 export const getErrorMessage = (error: any) => error?.response?.data?.message || error?.message;
 export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error?.response?.status;
@@ -60,4 +62,12 @@ export const errorNeedsRedirecting = (error) => {
 	const unauthorized = isNotAuthed(error);
 	const forbidden = isForbidden(error);
 	return pathNotFound || teamspaceInvalid || unauthorized || forbidden;
+};
+
+export const useExistingValuesTrigger =  (field: string, existingValues: string[], formData: UseFormReturn<any>) => {
+	const { trigger, formState: { dirtyFields } } = formData;
+	useEffect(() => {
+		if (!existingValues.length || !dirtyFields[field]) return;
+		trigger(field);
+	}, [JSON.stringify(existingValues), field, trigger, JSON.stringify(dirtyFields)]);
 };

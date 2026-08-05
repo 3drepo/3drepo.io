@@ -41,6 +41,9 @@ const TemplatesModel = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
 
+jest.mock('../../../../../../src/v5/processors/teamspaces/projects/clashes');
+const { deleteClashDataInProject } = require(`${src}/processors/teamspaces/projects/clashes`);
+
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
@@ -132,6 +135,8 @@ const testDeleteProject = () => {
 			expect(ModelHelper.removeModelData).toHaveBeenCalledWith(teamspace, projectId, contId);
 			expect(DrawingsModel.deleteDrawing).toHaveBeenCalledTimes(1);
 			expect(DrawingsModel.deleteDrawing).toHaveBeenCalledWith(teamspace, projectId, drawId);
+			expect(deleteClashDataInProject).toHaveBeenCalledTimes(1);
+			expect(deleteClashDataInProject).toHaveBeenCalledWith(teamspace, projectId);
 			expect(ProjectsModel.deleteProject).toHaveBeenCalledTimes(1);
 			expect(ProjectsModel.deleteProject).toHaveBeenCalledWith(teamspace, projectId);
 		});
@@ -148,6 +153,8 @@ const testDeleteProject = () => {
 			expect(ModelSettingsModel.getModelById).not.toHaveBeenCalled();
 			expect(ModelHelper.removeModelData).not.toHaveBeenCalled();
 			expect(DrawingsModel.deleteDrawing).not.toHaveBeenCalled();
+			expect(deleteClashDataInProject).toHaveBeenCalledTimes(1);
+			expect(deleteClashDataInProject).toHaveBeenCalledWith(teamspace, projectId);
 			expect(ProjectsModel.deleteProject).toHaveBeenCalledTimes(1);
 			expect(ProjectsModel.deleteProject).toHaveBeenCalledWith(teamspace, projectId);
 		});
