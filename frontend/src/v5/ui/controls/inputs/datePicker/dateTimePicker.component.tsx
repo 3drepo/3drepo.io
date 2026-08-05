@@ -78,7 +78,7 @@ export const DateTimePicker = ({
 	const [dateValue, setDateValue] = useState<Dayjs | null>(null);
 	const [timeValue, setTimeValue] = useState<Dayjs | null>(DefaultTime);
 	const markForUpdateRef =  useRef(false);
-	const temporalValue = useRef(value);
+	const consolidatedValue = useRef(value);
 	const inputRef = useRef<HTMLDivElement>(null);
 	const [anchorEl, setAnchorEl] = useState(inputRef.current);
 
@@ -100,7 +100,7 @@ export const DateTimePicker = ({
 
 	const consolidateNewValue = (newValue: any) => {
 		markForUpdateRef.current = true;
-		temporalValue.current = newValue;
+		consolidatedValue.current = newValue;
 		closePicker();
 	};
 
@@ -170,7 +170,7 @@ export const DateTimePicker = ({
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
 							markForUpdateRef.current = false;
-							onChange?.(temporalValue.current ? temporalValue.current : null);
+							onChange?.(consolidatedValue.current ? consolidatedValue.current : null);
 							onBlur?.();
 						}}>
 							<PopperWrapper>
@@ -254,7 +254,7 @@ export const DateTimePicker = ({
 										<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
 									</ClearDateAction>
 									<ApplyAction
-										disabled={!dateValue?.isValid()}
+										disabled={!dateValue?.isValid() || !timeValue?.isValid()}
 										onClick={() => {
 											if (!dateValue?.isValid()) return;
 											const tv = (timeValue?.isValid() ? timeValue : null) ?? DefaultTime;
