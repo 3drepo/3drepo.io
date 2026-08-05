@@ -118,16 +118,22 @@ export const DateTimePicker = ({
 			return;
 		}
 
+		let cancelled = false;
+
 		const onFrame = () => {
-			if (document.body.contains(inputRef.current)) {
+			if (document.body.contains(inputRef.current) && anchorEl !== inputRef.current) {
 				setAnchorEl(inputRef.current);
-			} else {
-				window.requestAnimationFrame(onFrame);
 			}
+			
+			if (!cancelled) window.requestAnimationFrame(onFrame);
 		};
 
 		window.requestAnimationFrame(onFrame);
-	}, [open, anchorEl]);
+
+		return () => {
+			cancelled = true;
+		};
+	}, [open, anchorEl, inputRef.current]);
 
 	return (
 		<>
@@ -170,7 +176,7 @@ export const DateTimePicker = ({
 					{
 						name: 'preventOverflow',
 						enabled: true,
-						options: { boundary: 'clippingParents', altAxis: true, padding: 8 },
+						options: { boundary: 'clippingParents', padding: 8 },
 					},
 				]}>
 				{({ TransitionProps }) => (
