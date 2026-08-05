@@ -130,7 +130,7 @@ export const DateTimePicker = ({
 	}, [open, anchorEl]);
 
 	return (
-		<div>
+		<>
 			<InputComponent
 				onKeyDown={(e) => e.preventDefault()}
 				placeholder={placeholder ?? formatMessage({
@@ -160,7 +160,19 @@ export const DateTimePicker = ({
 				{...props}
 			/>
 			<Popper id={id} open={canopen} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }}  
-				onClick={(e) => { e.stopPropagation();}}>
+				onClick={(e) => { e.stopPropagation();}}
+				modifiers={[
+					{
+						name: 'flip',
+						enabled: true,
+						options: { fallbackPlacements: ['top', 'bottom', 'left', 'right'] },
+					},
+					{
+						name: 'preventOverflow',
+						enabled: true,
+						options: { boundary: 'clippingParents', altAxis: true, padding: 8 },
+					},
+				]}>
 				{({ TransitionProps }) => (
 					<ClickAwayListener onClickAway={(e) => {
 						e.stopImmediatePropagation();
@@ -269,6 +281,6 @@ export const DateTimePicker = ({
 					</ClickAwayListener>
 				)}
 			</Popper>
-		</div>
+		</>
 	);
 };
