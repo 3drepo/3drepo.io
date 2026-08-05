@@ -96,13 +96,17 @@ const tileConfig = {
 };
 
 const generateTileURI = (domain, resource, zoomLevel, x, y, mapConfig) => {
-	const query = new URLSearchParams(deleteIfUndefined({
+	const url = new URL(`https://${domain}`);
+	url.pathname = ['v3', resource, 'mc', zoomLevel, x, y, 'png8'].join('/');
+
+	const query = deleteIfUndefined({
 		apiKey: config.here.apiKey,
 		features: mapConfig?.features,
 		style: mapConfig?.style,
-	}));
+	});
+	Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
 
-	return `https://${domain}/v3/${resource}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`;
+	return url.toString();
 };
 
 HereService.getAvailableMaps = () => opaqueTiles.map(({ name, mapType }) => ({

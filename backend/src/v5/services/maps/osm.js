@@ -31,12 +31,11 @@ const mapTypes = {
 const getDefaultTile = async (zoomLevel, x, y) => {
 	try {
 		const { domain, prefix, key } = config.osm;
-		const query = new URLSearchParams({
-			key,
-		});
-		const uri = `https://${domain}${prefix}/${zoomLevel}/${x}/${y}.png?${query.toString()}`;
+		const url = new URL(`https://${domain}`);
+		url.pathname = [prefix, zoomLevel, x, `${y}.png`].join('/');
+		url.searchParams.set('key', key);
 
-		const { data } = await WebRequests.getArrayBuffer(uri);
+		const { data } = await WebRequests.getArrayBuffer(url.toString());
 
 		return data;
 	} catch (error) {
