@@ -85,6 +85,7 @@ interface IProps {
 	fetchTeamspaces: (username) => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
+	resetClipping: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
 	resetViewerGui: () => void;
