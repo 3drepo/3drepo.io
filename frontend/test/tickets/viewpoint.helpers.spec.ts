@@ -84,18 +84,17 @@ describe('viewpoint helpers', () => {
 		} as any);
 	});
 
-	it('expands excludeDefinedObjects hidden groups to all non-defined objects', () => {
+	it('keeps excludeDefinedObjects metadata in hidden groups', () => {
 		const result = viewpointV5ToV4({
 			state: { hidden: [{ group: inverseGroup }] },
 		} as any);
 
 		expect(result.viewpoint.hidden_group.objects).toEqual([
-			{ account: teamspace, model: modelA, shared_ids: [meshB.shared_id] },
-			{ account: teamspace, model: modelB, shared_ids: [meshC.shared_id] },
+			{ account: teamspace, model: modelA, shared_ids: [meshA.shared_id], excludeDefinedObjects: true },
 		]);
 	});
 
-	it('applies coloured excludeDefinedObjects groups to all non-defined objects', () => {
+	it('applies coloured excludeDefinedObjects groups using excludeIds metadata', () => {
 		const result = toGroupPropertiesDicts([{
 			group: inverseGroup,
 			color: [182, 188, 193],
@@ -104,25 +103,22 @@ describe('viewpoint helpers', () => {
 
 		expect(result).toEqual({
 			overrides: {
-				[meshB.shared_id]: '#B6BCC1',
-				[meshC.shared_id]: '#B6BCC1',
+				[meshA.shared_id]: { color: '#B6BCC1', excludeIds: true },
 			},
 			transparencies: {
-				[meshB.shared_id]: 0.02,
-				[meshC.shared_id]: 0.02,
+				[meshA.shared_id]: { transparency: 0.02, excludeIds: true },
 			},
 		});
 	});
 
-	it('only excludes meshes from the container they are listed against', () => {
+	it('keeps mapped shared ids as provided container entries', () => {
 		const result = convertToV4GroupNodes({
 			...inverseGroup,
 			objects: [{ container: modelA, _ids: [meshC._id] }],
 		});
 
 		expect(result).toEqual([
-			{ account: teamspace, model: modelA, shared_ids: [meshA.shared_id, meshB.shared_id] },
-			{ account: teamspace, model: modelB, shared_ids: [meshC.shared_id] },
+			{ account: teamspace, model: modelA, shared_ids: [meshC.shared_id], excludeDefinedObjects: true },
 		]);
 	});
 

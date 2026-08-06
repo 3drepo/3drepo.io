@@ -149,12 +149,17 @@ export const selectOverridesDict = createSelector(
 
 		return groups.reduce((overrides, group) => {
 			const { color, opacity } = group;
+			const excludeIds = Boolean(group.objects?.some(({ excludeDefinedObjects }) => excludeDefinedObjects));
+			const colorValue = excludeIds ? { color, excludeIds } : color;
+			const transparencyValue = excludeIds
+				? { transparency: opacity ?? getTransparency(color), excludeIds }
+				: (opacity ?? getTransparency(color));
 			if (color) {
-				addToGroupDictionary(overrides.colors, group, color);
+				addToGroupDictionary(overrides.colors, group, colorValue);
 			}
 
 			if (isNumber(opacity) || hasTransparency(color)) {
-				addToGroupDictionary(overrides.transparencies, group, opacity ?? getTransparency(color));
+				addToGroupDictionary(overrides.transparencies, group, transparencyValue);
 			}
 
 			return overrides;

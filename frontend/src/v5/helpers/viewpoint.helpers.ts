@@ -26,7 +26,7 @@ import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroups
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
-import { selectGetAllMeshes, selectIsTreeProcessed } from '@/v4/modules/tree';
+import { selectIsTreeProcessed } from '@/v4/modules/tree';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -34,32 +34,11 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 }));
 
 export const convertToV4GroupNodes = (group?: Group) => {
-	if (group?.excludeDefinedObjects) {
-		const excludedMeshesByContainer = new Map<string, Set<string>>();
-		(group.objects || []).forEach(({ container, _ids }) => {
-			const excludedMeshes = excludedMeshesByContainer.get(container) || new Set<string>();
-			_ids.forEach((id) => excludedMeshes.add(id));
-			excludedMeshesByContainer.set(container, excludedMeshes);
-		});
-
-		const allMeshes = selectGetAllMeshes(getState());
-		return allMeshes.flatMap(({ teamspace: account, model, meshes }) => {
-			const excludedMeshes = excludedMeshesByContainer.get(model) || new Set();
-			const filteredMeshes = excludedMeshes.size ? meshes.filter((mesh) => !excludedMeshes.has(mesh)) : meshes;
-			if (!filteredMeshes.length) return [];
-
-			return [{
-				account,
-				model,
-				shared_ids: toSharedIds(filteredMeshes),
-			}];
-		});
-	}
-
 	return (group?.objects || []).map(({ container: model, _ids }) => ({
 		account: selectCurrentTeamspace(getState()),
 		model,
 		shared_ids: toSharedIds(_ids),
+		excludeDefinedObjects: group?.excludeDefinedObjects || false,
 	}));
 };
 
@@ -201,16 +180,21 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 }));
 
 export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDicts => {
-	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => 
+	const toMeshDictionary = (
+		objects: V4GroupObjects,
+		color: string,
+		opacity: number,
+		excludeIds = false,
+	): OverridesDicts => 
 		objects.shared_ids.reduce((dict, id) => {
 			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-				dict.overrides[id] = color;
+				dict.overrides[id] = excludeIds ? { color, excludeIds } : color;
 			} 
 
 			if (opacity !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-				dict.transparencies[id] = opacity;
+				dict.transparencies[id] = excludeIds ? { transparency: opacity, excludeIds } : opacity;
 			}
 
 			return dict;
@@ -219,9 +203,9 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
 		const v4Objects = convertToV4GroupNodes(current.group as Group);
-
+		const excludeIds = Boolean((current.group as Group)?.excludeDefinedObjects);
 		return v4Objects.reduce((dict, objects) => {
-			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1);
+			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1, excludeIds);
 
 			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };

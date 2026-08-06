@@ -42,6 +42,7 @@ import {
 	selectActiveNode,
 	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
+	selectGetAllMeshes,
 	selectGetNodesByIds,
 	selectSelectedObjects,
 	selectGetNodesIdsFromSharedIds,
@@ -77,7 +78,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 	return Promise.all(promises);
 };
 
-const toggleMeshesVisibility = (meshes, visibility) => {
+const toggleMeshesVisibility = (meshes, visibility, excludeIds = false) => {
 	if (meshes && meshes.length > 0) {
 		meshes.forEach((entry) => {
 			if (entry.meshes && entry.meshes.length) {
@@ -85,12 +86,53 @@ const toggleMeshesVisibility = (meshes, visibility) => {
 					entry.teamspace,
 					entry.modelId,
 					entry.meshes,
-					visibility
+					visibility,
+					excludeIds,
 				);
 			}
 		});
 	}
 };
+
+const splitObjectsByExcludeFlag = (objects = []) => objects.reduce((acc, obj: any) => {
+	if (obj?.excludeDefinedObjects) {
+		acc.exclude.push(obj);
+	} else {
+		acc.include.push(obj);
+	}
+
+	return acc;
+}, { include: [], exclude: [] } as { include: any[]; exclude: any[] });
+
+function* getComplementNodesIdsForExcludeObjects(objects = []) {
+	const allMeshesByModel = yield select(selectGetAllMeshes);
+	const complementNodes = new Set<string>();
+
+	for (let index = 0; index < objects.length; index++) {
+		const { account, model, shared_ids } = objects[index];
+		if (!shared_ids?.length) {
+			continue;
+		}
+
+		const includedNodes = yield select(selectGetNodesIdsFromSharedIds([{ shared_ids }]));
+		const includedNodesSet = new Set(includedNodes);
+		const modelMeshesEntry = allMeshesByModel.find(({ teamspace, model: modelId }) => (
+			teamspace === account && modelId === model
+		));
+
+		if (!modelMeshesEntry?.meshes?.length) {
+			continue;
+		}
+
+		modelMeshesEntry.meshes.forEach((meshId) => {
+			if (!includedNodesSet.has(meshId)) {
+				complementNodes.add(meshId);
+			}
+		});
+	}
+
+	return Array.from(complementNodes);
+}
 
 function* handleMetadata(node: any) {
 	if (node?.meta) {
@@ -334,9 +376,16 @@ function* showAllExceptMeshIDs(meshes = []) {
 
 export function* showNodesBySharedIds({ objects = [] }) {
 	yield waitForTreeToBeReady();
+	const { include, exclude } = splitObjectsByExcludeFlag(objects);
+	if (include.length) {
+		const nodesIds = yield select(selectGetNodesIdsFromSharedIds(include));
+		yield showTreeNodes(nodesIds);
+	}
 
-	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
-	yield showTreeNodes(nodesIds);
+	if (exclude.length) {
+		const complementNodes = yield call(getComplementNodesIdsForExcludeObjects, exclude);
+		yield showTreeNodes(complementNodes, true);
+	}
 }
 
 function* showTreeNodes(nodesIds = [], skipNested = false) {
@@ -361,13 +410,21 @@ function* hideSelectedNodes() {
 
 function* hideNodesBySharedIds({ objects = [], resetTree = false }) {
 	yield waitForTreeToBeReady();
+	const { include, exclude } = splitObjectsByExcludeFlag(objects);
 
-	const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(objects));
+	if (include.length) {
+		const nodesIds: any[] = yield select(selectGetNodesIdsFromSharedIds(include));
 
-	if (resetTree) {
-		yield showAllExceptMeshIDs(nodesIds);
-	} else {
-		yield hideTreeNodes(nodesIds, true);
+		if (resetTree) {
+			yield showAllExceptMeshIDs(nodesIds);
+		} else {
+			yield hideTreeNodes(nodesIds, true);
+		}
+	}
+
+	if (exclude.length) {
+		const complementNodes = yield call(getComplementNodesIdsForExcludeObjects, exclude);
+		yield hideTreeNodes(complementNodes, true);
 	}
 }
 
@@ -396,9 +453,8 @@ function* isolateNodes(nodesIds = []) {
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
-
-			toggleMeshesVisibility(result.meshesToHide, false);
-			toggleMeshesVisibility(result.meshesToShow, true);
+			toggleMeshesVisibility(result.meshesToShow, false, true);
+			toggleMeshesVisibility(result.meshesToShow, true, false);
 
 			yield put(TreeActions.updateDataRevision());
 		}
@@ -409,7 +465,6 @@ function* isolateNodes(nodesIds = []) {
 
 function* isolateSelectedNodes({ nodeId }) {
 	yield waitForTreeToBeReady();
-
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
 		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
@@ -678,14 +733,22 @@ function* zoomToHighlightedNodes() {
 }
 
 function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
+	const hasExcludeIdsOverride = (overrides = {}) => Object.values(overrides)
+		.some((override: any) => override && typeof override === 'object' && override.excludeIds);
+
+	const requiresFullRebuild = hasExcludeIdsOverride(previousOverrides) || hasExcludeIdsOverride(currentOverrides);
+	const emptyOverrides = {};
+
+	const toAdd = requiresFullRebuild
+		? overridesTransparencyDiff(currentOverrides, emptyOverrides)
+		: overridesTransparencyDiff(currentOverrides, previousOverrides);
+	const toRemove = requiresFullRebuild
+		? overridesTransparencyDiff(previousOverrides, emptyOverrides)
+		: overridesTransparencyDiff(previousOverrides, currentOverrides);
 
 	yield waitForTreeToBeReady();
-	yield all([
-		removeTransparencyOverrides(toRemove),
-		addTransparencyOverrides(toAdd)
-	]);
+	yield call(removeTransparencyOverrides, toRemove);
+	yield call(addTransparencyOverrides, toAdd);
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {

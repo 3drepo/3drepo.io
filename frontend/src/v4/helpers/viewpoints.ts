@@ -54,6 +54,14 @@ function createModelBySharedIdDictionary(sharedIdnodes) {
 }
 
 function createGroupsByColor(overrides) {
+	const getOverrideColor = (override) => {
+		if (typeof override === 'object' && override !== null) {
+			return override.color;
+		}
+
+		return override;
+	};
+
 	const sharedIdnodes = Object.keys(overrides);
 	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
 
@@ -104,14 +112,20 @@ function createGroupsByColor(overrides) {
 	return sharedIdnodes
 		.filter((objectId) => objectId in modelsDict)
 		.reduce((arr, objectId, i) =>  {
+			const colorHex = getOverrideColor(overrides[objectId]);
+			if (!colorHex) {
+				return arr;
+			}
+
 			const { teamspace, modelId } = modelsDict[objectId];
+			const rgbColor = hexToRgb(colorHex);
 
 			// if there is a group with that color already use that one
-			let colorGroup = arr.find(({color}) => color.join(',') === hexToRgb(overrides[objectId]).join(','));
+			let colorGroup = arr.find(({color}) => color.join(',') === rgbColor.join(','));
 
 			if (!colorGroup) {
 				// Otherwise create a group with that color
-				colorGroup = { color: hexToRgb(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+				colorGroup = { color: rgbColor, objects: [] , totalSavedMeshes: 0};
 
 				arr.push(colorGroup);
 			}

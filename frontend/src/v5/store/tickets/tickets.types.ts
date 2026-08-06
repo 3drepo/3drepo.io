@@ -217,8 +217,18 @@ export type Viewpoint = {
 
 export type IGroupSettingsForm = GroupOverride & { group: Group };
 
-type MeshIdColorDict = Record<string, string>;
-type MeshIdTransparencyDict = Record<string, number>;
+export type MeshColorOverride = string | {
+	color: string;
+	excludeIds?: boolean;
+};
+
+type MeshIdColorDict = Record<string, MeshColorOverride>;
+export type MeshTransparencyOverride = number | {
+	transparency: number;
+	excludeIds?: boolean;
+};
+
+type MeshIdTransparencyDict = Record<string, MeshTransparencyOverride>;
 export type MeshIdTransformDict = Record<string, TransformMatrix>;
 
 export type OverridesDicts = {
