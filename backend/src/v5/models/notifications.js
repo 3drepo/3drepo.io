@@ -51,6 +51,15 @@ const generateNotification = (type, user, data) => ({
 	data,
 });
 
+Notifications.insertClashNotifications = async (teamspace, project, notificationData, recipients) => {
+	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_COMPLETED,
+		recipient, { ...notificationData, teamspace, project }));
+
+	if (records?.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+	}
+};
+
 Notifications.insertTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
 	const records = notifications.flatMap(({ users, ticket, assignedBy }) => {
 		if (users?.length && ticket && assignedBy) {
@@ -103,41 +112,178 @@ const getGroupedNotificationsByQuery = (query) => {
 	const pipelines = [
 		query,
 		{
-			// group by user/teamspace/project/model/type, count up the tickets
-			$group: {
-				_id: {
-					user: '$user',
-					teamspace: '$data.teamspace',
-					project: '$data.project',
-					model: '$data.model',
-					type: '$type',
+			$facet: {
+				ticketNotifications: [
+					// Only process notifications containing ticket and model data.
+					{
+						$match: {
+							'data.ticket': { $exists: true, $ne: null },
+							'data.model': { $exists: true, $ne: null },
+						},
+					},
+					// Group tickets by user/teamspace/project/model/type.
+					{
+						$group: {
+							_id: {
+								user: '$user',
+								teamspace: '$data.teamspace',
+								project: '$data.project',
+								model: '$data.model',
+								type: '$type',
+							},
+							tickets: {
+								$addToSet: '$data.ticket',
+							},
+						},
+					},
+					// Group notification types under each model.
+					{
+						$group: {
+							_id: {
+								user: '$_id.user',
+								teamspace: '$_id.teamspace',
+								project: '$_id.project',
+								model: '$_id.model',
+							},
+							data: {
+								$push: {
+									type: '$_id.type',
+									tickets: '$tickets',
+								},
+							},
+						},
+					},
+					{
+						$sort: {
+							'_id.project': 1,
+							'_id.model': 1,
+						},
+					},
+					// Group models under each project.
+					{
+						$group: {
+							_id: {
+								user: '$_id.user',
+								teamspace: '$_id.teamspace',
+								project: '$_id.project',
+							},
+							ticketData: {
+								$push: {
+									model: '$_id.model',
+									data: '$data',
+								},
+							},
+						},
+					},
+					// Normalize the shape before merging both facets.
+					{
+						$project: {
+							_id: 1,
+							ticketData: 1,
+							clashData: { $literal: [] },
+						},
+					},
+				],
+				clashNotifications: [
+					// Only process completed clash-run notifications.
+					{
+						$match: { type: 'CLASH_RUN_COMPLETED' },
+					},
+					// Group clash runs under each plan.
+					{
+						$group: {
+							_id: {
+								user: '$user',
+								teamspace: '$data.teamspace',
+								project: '$data.project',
+								plan: '$data.plan',
+							},
+							runs: {
+								$push: {
+									status: '$data.status',
+									stats: '$data.results.stats',
+									error: '$data.results.error',
+									triggeredAt: '$data.triggeredAt',
+								},
+							},
+							planName: {
+								$first: '$data.planName',
+							},
+						},
+					},
+					// Group plans under each project.
+					{
+						$group: {
+							_id: {
+								user: '$_id.user',
+								teamspace: '$_id.teamspace',
+								project: '$_id.project',
+							},
+							clashData: {
+								$push: {
+									planName: '$planName',
+									runs: '$runs',
+								},
+							},
+						},
+					},
+					// Normalize the shape before merging both facets.
+					{
+						$project: { _id: 1, ticketData: { $literal: [] }, clashData: 1 },
+					},
+				],
+			},
+		},
+		// Combine project documents produced by both facets.
+		{
+			$project: {
+				notifications: {
+					$concatArrays: ['$ticketNotifications', '$clashNotifications'],
 				},
-				tickets: { $addToSet: '$data.ticket' },
 			},
 		},
 		{
-			// group the data by user/temaspace/project/model
+			$unwind: '$notifications',
+		},
+		// Merge ticket and clash data belonging to the same project.
+		{
 			$group: {
-				_id: {
-					user: '$_id.user',
-					teamspace: '$_id.teamspace',
-					project: '$_id.project',
-					model: '$_id.model',
+				_id: '$notifications._id',
+				ticketDataArrays: {
+					$push: '$notifications.ticketData',
 				},
-				notification: {
-					$push: {
-						type: '$_id.type',
-						tickets: '$tickets',
+				clashDataArrays: {
+					$push: '$notifications.clashData',
+				},
+			},
+		},
+		{
+			$project: {
+				_id: 1,
+				ticketData: {
+					$reduce: {
+						input: '$ticketDataArrays',
+						initialValue: [],
+						in: {
+							$concatArrays: ['$$value', '$$this'],
+						},
+					},
+				},
+				clashData: {
+					$reduce: {
+						input: '$clashDataArrays',
+						initialValue: [],
+						in: {
+							$concatArrays: ['$$value', '$$this'],
+						},
 					},
 				},
 			},
 		},
 		{
-			$sort: {
-				'_id.project': 1,
-				'_id.model': 1,
-			},
+			$sort: { '_id.project': 1 },
 		},
+		// Group projects under each user/teamspace.
 		{
 			$group: {
 				_id: {
@@ -146,7 +292,11 @@ const getGroupedNotificationsByQuery = (query) => {
 
 				},
 				data: {
-					$push: { project: '$_id.project', model: '$_id.model', data: '$notification' },
+					$push: {
+						project: '$_id.project',
+						ticketData: '$ticketData',
+						clashData: '$clashData',
+					},
 				},
 			},
 		},

@@ -92,57 +92,59 @@ const getUserDetails = async (users) => {
 	return userLUT;
 };
 
-const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
-	data.map(async ({ _id: { teamspace, user }, data: modelList }) => {
+const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
+	emailData.map(async ({ _id: { teamspace, user }, data: notificationData }) => {
 		const userInfo = usersToUserInfo[user];
 		const tsData = dataRef[teamspace];
 
 		if (!userInfo || !tsData) return;
-		const notifications = modelList.flatMap(({ model: modelID, project: projectID, data: notifData }) => {
-			const modelIDStr = UUIDToString(modelID);
-			const projectIDStr = UUIDToString(projectID);
-			const model = tsData.models[modelIDStr];
-			const project = tsData.projects[projectIDStr];
 
-			if (!model || !project) return [];
+		const notifications = notificationData.map((notification) => {
+			const projectIDStr = UUIDToString(notification.project);
 
-			const tickets = {};
-			const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+			const ticketData = notification.ticketData.flatMap(({ model: modelID, data }) => {
+				const modelIDStr = UUIDToString(modelID);
 
-			notifData.forEach(({ type, tickets: ticketsArr }) => {
-				const ticketCodes = ticketsArr.flatMap(
-					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
-				if (!ticketCodes.length) return;
-				const ticketData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
-				switch (type) {
-				case notificationTypes.TICKET_UPDATED:
-					tickets.updated = ticketData;
-					break;
-				case notificationTypes.TICKET_CLOSED:
-					tickets.closed = ticketData;
-					tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
-					break;
-				case notificationTypes.TICKET_ASSIGNED:
-					tickets.assigned = ticketData;
-					break;
-				default:
-					logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
-				}
+				const model = tsData.models[modelIDStr];
+				const project = tsData.projects[projectIDStr];
+
+				if (!model || !project) return [];
+
+				const tickets = {};
+				const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+
+				data.forEach(({ type, tickets: ticketsArr }) => {
+					const ticketCodes = ticketsArr.flatMap(
+						(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
+					if (!ticketCodes.length) return;
+					const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+					switch (type) {
+					case notificationTypes.TICKET_UPDATED:
+						tickets.updated = tickData;
+						break;
+					case notificationTypes.TICKET_CLOSED:
+						tickets.closed = tickData;
+						tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
+						break;
+					case notificationTypes.TICKET_ASSIGNED:
+						tickets.assigned = tickData;
+						break;
+					default:
+						logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
+					}
+				});
+
+				return Object.keys(tickets).length ? { model, tickets } : [];
 			});
 
-			return Object.keys(tickets).length ? { project, model, tickets } : [];
+			return { ...notification, ticketData };
 		});
 
 		if (notifications.length) {
-			const emailData = {
-				username: user,
-				firstName: userInfo.firstName,
-				teamspace,
-				notifications,
-			};
-
 			logger.logInfo(`Sending email to ${user} for ${teamspace}`);
-			await sendEmail(templates.DAILY_DIGEST.name, userInfo.email, emailData);
+			await sendEmail(templates.DAILY_DIGEST.name, userInfo.email,
+				{ username: user, firstName: userInfo.firstName, teamspace, notifications },
+			);
 		}
 	}));
 
