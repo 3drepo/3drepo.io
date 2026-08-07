@@ -72,10 +72,26 @@ export type IPinColorMapping = {
 
 export type PinIcon =  'DEFAULT' | 'RISK' | 'ISSUE' | 'MARKER';
 
+export type IPinIconMapping = {
+	property: {
+		name: string,
+		module?: string,
+	}
+	mapping: [
+		{
+			default: PinIcon;
+		},
+		{
+			value: any;
+			icon: PinIcon;
+		}[],
+	]
+};
+
 export type PinConfig = {
 	name?: string;
 	color?: RgbArray | IPinColorMapping;
-	icon?: PinIcon;
+	icon?: PinIcon | IPinIconMapping;
 };
 
 export type StatusValue = {

@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { getColorTriggerPropName, getPinColorHexForProperty, NEW_TICKET_ID, toPin, getPinId, getPinIconForProperty } from './coordsProperty.helpers';
+import { getColorTriggerPropName, getIconTriggerPropName, getPinColorHexForProperty, NEW_TICKET_ID, toPin, getPinId, getPinIconForProperty } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -61,16 +61,26 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		colorTriggerPropValue = get(ticket, colorTriggerPropPath);
 	}
 
+	let iconTriggerPropPath = '';
+	let iconTriggerPropValue = '';
+
+	iconTriggerPropPath = getIconTriggerPropName(name, template);
+	iconTriggerPropValue = useWatch({ name: iconTriggerPropPath });
+	if (!iconTriggerPropValue) {
+		iconTriggerPropValue = get(ticket, iconTriggerPropPath);
+	}
+
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
-	const minimumPinTicket = set({ _id: ticketId }, colorTriggerPropPath, colorTriggerPropValue) as ITicket;
+	let minimumPinTicket = set({ _id: ticketId }, colorTriggerPropPath, colorTriggerPropValue) as ITicket;
+	minimumPinTicket = set(minimumPinTicket, iconTriggerPropPath, iconTriggerPropValue) as ITicket;
 	
 	const pinId = getPinId(name, ticket);
 	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
 	const colorHex = getPinColorHexForProperty(name, template, minimumPinTicket);
-	const pinIcon = getPinIconForProperty(name, template);
+	const pinIcon = getPinIconForProperty(name, template, minimumPinTicket);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
