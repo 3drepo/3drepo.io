@@ -136,11 +136,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	};
 
-	// Update pin when colour changes
+	// Update pin when colour or icon changes
 	useEffect(() => {
 		if (!prevValue.current) return;
 		refreshPin();
-	}, [colorHex]);
+	}, [colorHex, pinIcon]);
 
 	// Update pin when position changes
 	useEffect(() => {
