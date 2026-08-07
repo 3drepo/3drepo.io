@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { compact, get, isArray, isEmpty, isObject } from 'lodash';
-import { IPinColorMapping, IPinIconMapping, PinConfig, ITemplate, ITicket, PinIcon } from '@/v5/store/tickets/tickets.types';
+import { PinColorMapping, PinIconMapping, PinConfig, ITemplate, ITicket, PinIcon } from '@/v5/store/tickets/tickets.types';
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin, PinType } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
@@ -58,7 +58,7 @@ export const getIconTriggerPropName = (pinPropName, template): string => {
 	return getTriggerPropName(pinConfig, 'icon');
 };
 
-const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
+const getColorFromMapping = (ticket: ITicket, pinMapping: PinColorMapping) => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
 	const defaultColorHex = rgbToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
@@ -70,7 +70,7 @@ const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
 };
 
-const getIconFromMapping = (ticket: ITicket, pinMapping: IPinIconMapping): PinIcon => {
+const getIconFromMapping = (ticket: ITicket, pinMapping: PinIconMapping): PinIcon => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
 	const defaultIcon = mapping.find((option) => option.default)?.default || 'DEFAULT';
