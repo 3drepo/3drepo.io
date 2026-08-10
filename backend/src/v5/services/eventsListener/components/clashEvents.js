@@ -38,6 +38,7 @@ const {
 const { templates: responseCodes } = require('../../../utils/responseCodes');
 const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
+const { uniqueElements } = require('../../../utils/helper/arrays');
 
 const onNewContainerRevision = async (payload) => {
 	const { teamspace, project, model, modelType, data } = payload;
@@ -125,7 +126,7 @@ const getNotificationRecipients = async (teamspace, notify) => {
 		jobToUsers[_id] = users;
 	});
 
-	return notify.map((entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry));
+	return uniqueElements(notify.flatMap((entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry)));
 };
 
 const clashRunCompleted = async (payload) => {
@@ -156,7 +157,7 @@ const clashRunCompleted = async (payload) => {
 		const { plan, results: completeResults, status, triggeredAt } = await getClashRunById(teamspace,
 			project, runId, { plan: 1, results: 1, status: 1, triggeredAt: 1 });
 
-		if (plan?.notify?.length) {
+		if (plan.notify?.length) {
 			const recipients = await getNotificationRecipients(teamspace, plan.notify);
 			const { name } = await getPlanById(teamspace, project, plan._id,
 				{ name: 1 }).catch(() => ({}));
@@ -166,7 +167,7 @@ const clashRunCompleted = async (payload) => {
 				planName: name,
 				status,
 				triggeredAt };
-			await insertClashNotifications(teamspace, project, notificationData, recipients.flat());
+			await insertClashNotifications(teamspace, project, notificationData, recipients);
 		}
 	}
 };

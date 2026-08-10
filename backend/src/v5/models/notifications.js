@@ -55,7 +55,7 @@ Notifications.insertClashNotifications = async (teamspace, project, notification
 	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_COMPLETED,
 		recipient, { ...notificationData, teamspace, project }));
 
-	if (records?.length) {
+	if (records.length) {
 		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
 	}
 };
