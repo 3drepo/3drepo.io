@@ -16,6 +16,7 @@
  */
 
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import ExpandArrowsIcon from '@assets/icons/outlined/expand_arrows-outlined.svg';
 import styled from 'styled-components';
 
 const CommonChevronStyle = styled(ChevronIcon)`
@@ -32,6 +33,11 @@ export const ChevronLeft = styled(CommonChevronStyle)`
 export const ChevronRight = styled(CommonChevronStyle)`
 	transform: rotate(-90deg);
 	margin-left: 2px;
+`;
+
+export const ExpandIcon = styled(ExpandArrowsIcon)`
+	transform: rotate(-45deg);
+	padding: 6px;
 `;
 
 export const BreakableText = styled.div`

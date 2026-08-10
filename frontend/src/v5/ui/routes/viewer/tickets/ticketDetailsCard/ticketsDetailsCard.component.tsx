@@ -31,7 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { BreakableText, ChevronLeft, ChevronRight } from './ticketDetailsCard.styles';
+import { BreakableText, ChevronLeft, ChevronRight, ExpandIcon } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
@@ -53,6 +53,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	
+	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView();
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 	const ticketsIds = groups.flatMap((group) => group.tickets.map((tckt) => tckt._id));
 	const currentIndex = ticketsIds.indexOf(ticketId);
@@ -85,6 +86,10 @@ export const TicketDetailsCard = () => {
 
 	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
 	const cycleToNextTicket = () => changeTicketIndex(IndexChange.NEXT);
+
+	const onClickExpandTicketMode = () => {
+		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
+	};
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
@@ -196,6 +201,7 @@ export const TicketDetailsCard = () => {
 							actions={<>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
+								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} selected={isExpanded}><ExpandIcon /></CircleButton>
 							</>}
 						/>
 						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
