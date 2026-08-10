@@ -138,6 +138,10 @@ export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
+export const selectIsExpandedTicketView = createSelector(
+	selectTicketsCardDomain, (state) => state.isExpandedTicketView,
+);
+
 export const selectGroupBy = createSelector(
 	selectTicketsCardDomain, (state) => state.groupByField || NONE_OPTION,
 );
