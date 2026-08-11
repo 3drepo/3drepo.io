@@ -16,10 +16,10 @@
  */
 
 const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
+const { getIcon, getIconNames } = require('../../services/pinIcons');
 const { events } = require('../../services/eventsManager/eventsManager.constants');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { publish } = require('../../services/eventsManager/eventsManager');
-const { getIconNames, getIcon } = require('../../services/pinIcons');
 
 const Settings = {};
 

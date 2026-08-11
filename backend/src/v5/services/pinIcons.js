@@ -14,24 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const fs = require('fs');
 const Path = require('path');
+const fs = require('fs');
+
 const { templates } = require('../utils/responseCodes');
 
 const ICONS_DIR = Path.resolve(__dirname, '../../../resources/pinIcons');
 const variants = ['normal', 'selected'];
 const filenameRegex = /^(?<name>.+)\.(?<variant>[^.]+)\.svg$/;
 
-
 const getIconDetails = () => {
-	const directories = [ICONS_DIR]
+	const directories = [ICONS_DIR];
 	const iconFiles = {};
-	
+
 	for (const directory of directories) {
 		fs.readdirSync(directory, { withFileTypes: true }).forEach((entry) => {
 			if (!entry.isFile()) throw templates.pinIconNotFound;
-			
+
 			const match = entry.name.match(filenameRegex);
 			if (!match) throw templates.pinIconNotFound;
 

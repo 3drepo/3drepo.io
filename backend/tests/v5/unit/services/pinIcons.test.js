@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const fs = require('fs');
+
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { outOfOrderArrayEqual } = require('../../helper/services');
-const { templates } = require(`${src}/utils/responseCodes`);
 
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const PinIcons = require(`${src}/services/pinIcons`);
 
@@ -37,20 +39,20 @@ const testBuiltInProvider = () => {
 		});
 
 		test('should throw when an icon is missing a required variant', () => {
-			const returnValue = fullIconNames.filter((name) => name !== 'RISK.selected.svg').map((name) => toFsEntry(name))
-			jest.spyOn(require('fs'), 'readdirSync').mockReturnValue(returnValue);
+			const returnValue = fullIconNames.filter((name) => name !== 'RISK.selected.svg').map((name) => toFsEntry(name));
+			jest.spyOn(fs, 'readdirSync').mockReturnValue(returnValue);
 			expect(() => PinIcons.getIconNames()).toThrow('Pin icon "RISK" is missing selected variant assets');
 		});
 
 		test('should throw for entries that are not valid icon asset files', () => {
-			const returnValue = fullIconNames.map((name) =>  name === 'RISK.selected.svg' ?  toFsEntry('RISK.svg') : toFsEntry(name));
-			jest.spyOn(require('fs'), 'readdirSync').mockReturnValue(returnValue);
+			const returnValue = fullIconNames.map((name) => (name === 'RISK.selected.svg' ? toFsEntry('RISK.svg') : toFsEntry(name)));
+			jest.spyOn(fs, 'readdirSync').mockReturnValue(returnValue);
 
 			expect(() => PinIcons.getIconNames()).toThrow(templates.pinIconNotFound);
 		});
 
 		test('should throw for nested directories', () => {
-			jest.spyOn(require('fs'), 'readdirSync').mockReturnValue([toFsEntry('nested', false)]);
+			jest.spyOn(fs, 'readdirSync').mockReturnValue([toFsEntry('nested', false)]);
 
 			expect(() => PinIcons.getIconNames()).toThrow(templates.pinIconNotFound);
 		});
@@ -58,15 +60,15 @@ const testBuiltInProvider = () => {
 
 	describe('getIcon', () => {
 		test('should read the requested icon file', () => {
-			jest.spyOn(require('fs'), 'readdirSync').mockReturnValue(fullIconNames.map((name) => toFsEntry(name)));
-			jest.spyOn(require('fs'), 'readFileSync').mockImplementation((filePath) => Buffer.from(filePath));
+			jest.spyOn(fs, 'readdirSync').mockReturnValue(fullIconNames.map((name) => toFsEntry(name)));
+			jest.spyOn(fs, 'readFileSync').mockImplementation((filePath) => Buffer.from(filePath));
 
 			const result = PinIcons.getIcon('RISK', 'selected');
-			expect(require('fs').readFileSync).toHaveBeenCalledWith(expect.stringContaining('RISK.selected.svg'));
+			expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringContaining('RISK.selected.svg'));
 			expect(result).toBeInstanceOf(Buffer);
 		});
 		test('should throw when the iconName is not in the files', () => {
-			jest.spyOn(require('fs'), 'readdirSync').mockReturnValue(fullIconNames.filter((name) => name !== 'RISK.selected.svg').map((name) => toFsEntry(name)));
+			jest.spyOn(fs, 'readdirSync').mockReturnValue(fullIconNames.filter((name) => name !== 'RISK.selected.svg').map((name) => toFsEntry(name)));
 
 			expect(() => PinIcons.getIcon('RISK', 'selected')).toThrow(templates.pinIconNotFound);
 		});

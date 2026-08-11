@@ -69,8 +69,8 @@ const getPinIconNames = (req, res) => {
 const getPinIcon = (req, res) => {
 	try {
 		const { pinIcon, variant } = req.params;
-		const icon = TeamspaceSettings.getPinIcon( pinIcon, variant);
-		respond(req, res, templates.ok , icon, { mimeType: MimeTypes.SVG });
+		const icon = TeamspaceSettings.getPinIcon(pinIcon, variant);
+		respond(req, res, templates.ok, icon, { mimeType: MimeTypes.SVG });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -370,7 +370,7 @@ const establishRoutes = () => {
 	*       400:
 	*         $ref: "#/components/responses/invalidArguments"
 	*/
-	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace,  getPinIcon);
+	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace, getPinIcon);
 
 	/**
 	 * @openapi
