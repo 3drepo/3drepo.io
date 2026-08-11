@@ -18,22 +18,18 @@
 const {
 	basePropertyLabels,
 	getApplicableDefaultProperties,
-	pinIcons,
 	presetEnumValues,
 	presetModules,
 	presetModulesProperties,
 	propTypes,
 	statusTypes,
 	statuses,
-	supportedPatterns,
-} = require('./templates.constants');
+	supportedPatterns } = require('./templates.constants');
 
-const { isObject, isString } = require('../../utils/helper/typeCheck');
+const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
-
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
-
 const { propTypesToValidator } = require('./validators');
 const { uniqueElements } = require('../../utils/helper/arrays');
 
@@ -41,35 +37,26 @@ const TemplateSchema = {};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
+const pinIconSchema = Yup.string().oneOf(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']).default('DEFAULT');
 
-const createPinConditionalSchema = (type) => {
-	const dataSchema = type === 'icon' ? Yup.string().oneOf(Object.values(pinIcons)) : types.color3Arr;
-	const stripWhenDefault = (schema) => schema.when('default', ([def], sch) => (def ? sch.strip() : sch.required()));
+const pinColSchema = Yup.lazy((val) => {
+	if (val === undefined) return Yup.mixed().strip();
+	if (isArray(val)) return types.color3Arr;
 
-	return Yup.lazy((val) => {
-		if (val === undefined) return Yup.mixed().strip();
+	return Yup.object({
+		property: Yup.object({
+			name: nameSchema.required(),
+			module: nameSchema,
+		}),
 
-		if (!isObject(val)) return dataSchema;
+		mapping: Yup.array().of(Yup.object({
+			default: types.color3Arr,
+			value: Yup.mixed().when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+			color: types.color3Arr.when('default', ([def], schema) => (def ? schema.strip() : schema.required())),
+		})).test('Color mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
 
-		// conditional mapping of colour/icon
-		return Yup.object({
-			property: Yup.object({
-				name: nameSchema.required(),
-				module: nameSchema,
-			}),
-
-			mapping: Yup.array().of(Yup.object({
-				default: dataSchema,
-				value: stripWhenDefault(Yup.mixed()),
-				[type]: stripWhenDefault(dataSchema),
-			})).test(`${type} mapping`, 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
-		});
 	});
-};
-
-const pinIconSchema = createPinConditionalSchema('icon');
-
-const pinColSchema = createPinConditionalSchema('color');
+});
 
 const blackListedChrsRegex = /^(?!\$)(?!.*&&)[^.,[\]":]*$/;
 
