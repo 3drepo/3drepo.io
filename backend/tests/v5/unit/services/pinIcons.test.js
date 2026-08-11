@@ -19,7 +19,6 @@ const fs = require('fs');
 
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { outOfOrderArrayEqual } = require('../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

@@ -289,7 +289,7 @@ const testGetPinIcon = () => {
 			['icon name is invalid', false, templates.pinIconNotFound, { key: basicData.normalUser.apiKey, pinIcon: generateRandomString() }],
 			['icon variant is invalid', false, templates.pinIconNotFound, { key: basicData.normalUser.apiKey, variant: generateRandomString() }],
 			['user is a member of teamspace and normal icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: 'normal' }],
- 			['user is a member of teamspace and selected icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: 'selected' }],
+			['user is a member of teamspace and selected icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: 'selected' }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const { key, pinIcon, variant, ts } = getTestData;

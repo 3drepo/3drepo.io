@@ -47,7 +47,7 @@ const PinIcons = {};
 
 PinIcons.getIconNames = () => {
 	const iconFiles = getIconDetails();
-	Object.entries(iconFiles).forEach(([name, icon]) => {
+	Object.values(iconFiles).forEach((icon) => {
 		const missingVariants = variants.filter((variant) => !icon[variant]);
 		if (missingVariants.length) throw templates.pinIconNotFound;
 	});
