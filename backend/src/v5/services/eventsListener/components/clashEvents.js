@@ -159,8 +159,7 @@ const clashRunCompleted = async (payload) => {
 
 		if (plan.notify?.length) {
 			const recipients = await getNotificationRecipients(teamspace, plan.notify);
-			const { name } = await getPlanById(teamspace, project, plan._id,
-				{ name: 1 }).catch(() => ({}));
+			const { name } = await getPlanById(teamspace, project, plan._id, { name: 1 });
 
 			const notificationData = { results: completeResults,
 				plan: plan._id,
