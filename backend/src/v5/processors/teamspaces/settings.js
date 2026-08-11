@@ -19,6 +19,7 @@ const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/t
 const { events } = require('../../services/eventsManager/eventsManager.constants');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { publish } = require('../../services/eventsManager/eventsManager');
+const { getIconNames, getIcon } = require('../../services/pinIcons');
 
 const Settings = {};
 
@@ -29,5 +30,7 @@ Settings.updateTicketTemplate = async (teamspace, id, data) => {
 };
 Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
 Settings.getRiskCategories = getRiskCategories;
+Settings.getPinIconNames = getIconNames;
+Settings.getPinIcon = getIcon;
 
 module.exports = Settings;

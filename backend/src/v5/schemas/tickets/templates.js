@@ -18,7 +18,6 @@
 const {
 	basePropertyLabels,
 	getApplicableDefaultProperties,
-	pinIcons,
 	presetEnumValues,
 	presetModules,
 	presetModulesProperties,
@@ -41,9 +40,10 @@ const TemplateSchema = {};
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
+const pinIconNames = require('../../services/pinIcons').getIconNames();
 
 const createPinConditionalSchema = (type) => {
-	const dataSchema = type === 'icon' ? Yup.string().oneOf(Object.values(pinIcons)) : types.color3Arr;
+	const dataSchema = type === 'icon' ? Yup.string().oneOf(pinIconNames) : types.color3Arr;
 	const stripWhenDefault = (schema) => schema.when('default', ([def], sch) => (def ? sch.strip() : sch.required()));
 
 	return Yup.lazy((val) => {

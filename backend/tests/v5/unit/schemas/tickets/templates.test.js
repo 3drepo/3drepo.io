@@ -1420,6 +1420,32 @@ const testValidate = () => {
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 
+	test('should accept every built-in pin icon in direct and conditional mappings', () => {
+		['DEFAULT', 'RISK', 'ISSUE', 'MARKER'].forEach((icon) => {
+			const directIconTemplate = generateBasicSchema({
+				properties: [{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					icon,
+				}],
+			});
+			const conditionalIconTemplate = generateBasicSchema({
+				config: {
+					pin: {
+						icon: {
+							property: { name: 'reference' },
+							mapping: [{ default: icon }],
+						},
+					},
+				},
+				properties: [{ name: 'reference', type: propTypes.TEXT }],
+			});
+
+			expect(() => TemplateSchema.validate(directIconTemplate)).not.toThrow();
+			expect(() => TemplateSchema.validate(conditionalIconTemplate)).not.toThrow();
+		});
+	});
+
 	test('Icon mapping default entries strip conditional value and icon fields', () => {
 		const data = generateBasicSchema({
 			config: {
