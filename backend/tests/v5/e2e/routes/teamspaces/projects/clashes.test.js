@@ -428,6 +428,8 @@ const testCreatePlan = () => {
 			['payload contains ticket object with empty default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: {} }) }, true],
 			['payload contains ticket object with invalid default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: ServiceHelper.generateRandomString() } }) }, false, templates.invalidArguments],
 			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
+			['payload contains notify with invalid user', { planData: { ...generatePlanData(true), notify: [ServiceHelper.generateRandomString()] } }, false, templates.invalidArguments],
+			['payload contains notify with valid user and job', { planData: { ...generatePlanData(true), notify: [users.tsAdmin.user] } }, true],
 			['creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
 			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
