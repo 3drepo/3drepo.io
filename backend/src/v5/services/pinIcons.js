@@ -49,7 +49,7 @@ PinIcons.getIconNames = () => {
 	const iconFiles = getIconDetails();
 	Object.entries(iconFiles).forEach(([name, icon]) => {
 		const missingVariants = variants.filter((variant) => !icon[variant]);
-		if (missingVariants.length) throw new Error(`Pin icon "${name}" is missing ${missingVariants.join(', ')} variant assets`);
+		if (missingVariants.length) throw templates.pinIconNotFound;
 	});
 
 	return Object.keys(iconFiles).sort();

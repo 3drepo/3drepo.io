@@ -367,8 +367,8 @@ const establishRoutes = () => {
 	*             schema:
 	*               type: string
 	*               format: binary
-	*       400:
-	*         $ref: "#/components/responses/invalidArguments"
+	*       404:
+	*         $ref: "#/components/responses/pinIconNotFound"
 	*/
 	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace, getPinIcon);
 

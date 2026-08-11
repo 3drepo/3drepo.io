@@ -35,13 +35,13 @@ const fullIconNames = ['RISK.selected.svg', 'DEFAULT.selected.svg', 'ISSUE.selec
 const testBuiltInProvider = () => {
 	describe('getIconNames', () => {
 		test('should discover complete icon pairs in alphabetical order', () => {
-			outOfOrderArrayEqual(['RISK', 'DEFAULT', 'ISSUE', 'MARKER'], PinIcons.getIconNames());
+			expect(PinIcons.getIconNames()).toEqual(['DEFAULT', 'ISSUE', 'MARKER', 'RISK']);
 		});
 
 		test('should throw when an icon is missing a required variant', () => {
 			const returnValue = fullIconNames.filter((name) => name !== 'RISK.selected.svg').map((name) => toFsEntry(name));
 			jest.spyOn(fs, 'readdirSync').mockReturnValue(returnValue);
-			expect(() => PinIcons.getIconNames()).toThrow('Pin icon "RISK" is missing selected variant assets');
+			expect(() => PinIcons.getIconNames()).toThrow(templates.pinIconNotFound);
 		});
 
 		test('should throw for entries that are not valid icon asset files', () => {
