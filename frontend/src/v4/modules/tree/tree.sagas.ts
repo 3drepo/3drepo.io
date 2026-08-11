@@ -78,9 +78,9 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 };
 
 const toggleMeshesVisibility = (meshes, visibility, excludeIds = false) => {
-	if (meshes && meshes.length > 0) {
+	if (meshes && meshes.length > 0 || excludeIds) {
 		meshes.forEach((entry) => {
-			if (entry.meshes && entry.meshes.length) {
+			if (entry.meshes && entry.meshes.length || excludeIds) {
 				Viewer.switchObjectVisibility(
 					entry.teamspace,
 					entry.modelId,
@@ -398,7 +398,11 @@ function* isolateNodes(nodesIds = []) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
 
-			toggleMeshesVisibility(result.meshesToShow, false, true);
+			const modelsToHide = result.meshesToHide.map((entry) =>
+				result.meshesToShow.find(({ modelId: modelIdShown }) => modelIdShown === entry.modelId)
+				|| ({ ...entry, meshes: [] }) // if a container has no meshes to show we must include it in the list of models to hide
+			);
+			toggleMeshesVisibility(modelsToHide, false, true);
 			toggleMeshesVisibility(result.meshesToShow, true, false);
 
 			yield put(TreeActions.updateDataRevision());
