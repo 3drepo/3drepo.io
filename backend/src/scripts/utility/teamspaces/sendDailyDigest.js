@@ -99,16 +99,17 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 
 		if (!userInfo || !tsData) return;
 
-		const notifications = notificationData.map((notification) => {
+		const notifications = notificationData.flatMap((notification) => {
 			const projectIDStr = UUIDToString(notification.project);
+			const project = tsData.projects[projectIDStr];
+
+			if (!project) return [];
 
 			const ticketData = notification.ticketData.flatMap(({ model: modelID, data }) => {
 				const modelIDStr = UUIDToString(modelID);
-
 				const model = tsData.models[modelIDStr];
-				const project = tsData.projects[projectIDStr];
 
-				if (!model || !project) return [];
+				if (!model) return [];
 
 				const tickets = {};
 				const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
@@ -137,7 +138,7 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 				return Object.keys(tickets).length ? { model, tickets } : [];
 			});
 
-			return { ...notification, ticketData };
+			return { ...notification, project, ticketData };
 		});
 
 		if (notifications.length) {
