@@ -182,6 +182,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			this.props.fetchData(params.teamspace, params.model);
 			this.props.subscribeOnIssueChanges(params.teamspace, params.model);
 			this.props.subscribeOnRiskChanges(params.teamspace, params.model);
+			this.props.resetClipping();
 		}
 
 		if (!isEmpty(changes)) {
