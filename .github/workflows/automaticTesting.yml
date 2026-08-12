@@ -85,7 +85,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
         with:
-          mongodb-version: 8.0
+          mongodb-version: 8.0.28
           mongodb-username: admintesting
           mongodb-password: admintesting
 
