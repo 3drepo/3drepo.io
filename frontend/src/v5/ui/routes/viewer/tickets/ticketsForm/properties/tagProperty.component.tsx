@@ -37,17 +37,16 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 
 	const isEditable = !disabled;
 	const isFocused = focused && isEditable;
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	const commitTag = (raw: string) => {
 		const tag = raw.trim().replace(/,+$/, '');
 		if (!tag || tags.includes(tag)) return;
 		onChange?.({ target: { value: [...tags, tag] } } as any);
-		onBlur?.();
 	};
 
 	const removeTag = (tag: string) => {
 		onChange?.({ target: { value: tags.filter((v) => v !== tag) } } as any);
-		onBlur?.();
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -65,8 +64,16 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 			commitTag(inputValue);
 			setInputValue('');
 		}
-		onBlur?.();
 		setFocused(false);
+	};
+
+	// Only save (call the field's onBlur) when focus leaves the whole
+	// component, not when it moves internally (e.g. input -> delete button),
+	// so multiple tags can be entered before an immutable field locks.
+	const handleContainerBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+		if (!containerRef.current?.contains(e.relatedTarget as Node)) {
+			onBlur?.();
+		}
 	};
 
 	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -76,10 +83,24 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 		setInputValue('');
 	};
 
+	// Prevent mousedown on chips/delete buttons from stealing focus away from
+	// the input, so clicking "x" doesn't blur the whole component and save
+	// the value while a tag is still being edited.
+	const preventFocusSteal = (e: React.MouseEvent) => {
+		if (e.target !== inputRef.current) e.preventDefault();
+	};
+
 	return (
-		<TagPropertyContainer onClick={() => inputRef.current?.focus()} disabled={disabled} required={required} error={error}>
+		<TagPropertyContainer
+			ref={containerRef}
+			onClick={() => inputRef.current?.focus()}
+			onBlur={handleContainerBlur}
+			disabled={disabled}
+			required={required}
+			error={error}
+		>
 			{label && <InputLabel shrink={false}>{label}</InputLabel>}
-			<ChipsInputBox selected={isFocused} error={error} disabled={disabled} required={required}>
+			<ChipsInputBox selected={isFocused} error={error} disabled={disabled} required={required} onMouseDown={preventFocusSteal}>
 				{tags.map((val) => (
 					<Tooltip key={val} title={val}>
 						<TagChipContainer selected={false}>
