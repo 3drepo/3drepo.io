@@ -47,6 +47,11 @@ export const TagsProperty = ({ value, onChange, onBlur, disabled, required, labe
 
 	const removeTag = (tag: string) => {
 		onChange?.({ target: { value: tags.filter((v) => v !== tag) } } as any);
+		// If the field isn't currently focused (e.g. clicking "x" without
+		// ever focusing the input), there won't be a later blur to save this
+		// change, so save right away. While focused, defer to the container's
+		// blur handler so multiple add/delete actions save together once.
+		if (!focused) onBlur?.();
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
