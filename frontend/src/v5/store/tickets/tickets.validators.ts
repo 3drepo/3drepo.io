@@ -78,13 +78,22 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			},
 			{ name }),
 		);
-		if (type === 'manyOf' || type === 'tags') {
+		if (type === 'manyOf') {
 			validator = validator.min(1,
 				formatMessage({
 					id: 'validation.ticket.manyOf.required',
 					defaultMessage: 'Select at least one option',
 				}));
 		}
+
+		if (type === 'tags') {
+			validator = validator.min(1,
+				formatMessage({
+					id: 'validation.ticket.tags.required',
+					defaultMessage: 'Create at least one tag',
+				}));
+		}
+	
 		if (type === 'number') {
 			validator = requiredNumber(
 				formatMessage({
