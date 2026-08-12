@@ -127,7 +127,8 @@
     "cross-spawn": "7.0.6",
     "micromatch": "4.0.8",
     "nanoid": "3.3.8",
-    "brace-expansion": "2.0.2"
+    "brace-expansion": "2.0.2",
+    "fast-uri": "4.1.2"
   },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",

@@ -3832,10 +3832,10 @@ fast-stream-to-buffer@^1.0.0:
   dependencies:
     end-of-stream "^1.4.1"
 
-fast-uri@^3.0.1:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.0.6.tgz#88f130b77cfaea2378d56bf970dea21257a68748"
-  integrity sha512-Atfo14OibSv5wAp4VWNsFYE1AchQRTv9cBGWET4pZWHzYshFSS9NQI6I57rdKn9croWVMbYFbLhJ+yJvmZIIHw==
+fast-uri@4.1.2, fast-uri@^3.0.1:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-4.1.2.tgz#1e225af32fb0a178db8f14d7d9ba93ff24485694"
+  integrity sha512-TyGmBcbDTZXcb2cj5MV89DrF42DKvb3y5DDUNh95iO+IMeAzMkVSxK1PZRrRIpc9yg8U2GhGdbofNa0LS/a4Bw==
 
 fastest-levenshtein@^1.0.12:
   version "1.0.16"
