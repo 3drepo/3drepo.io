@@ -24,7 +24,7 @@ module.exports = getWebpackConfig({
     filename: ({ chunk: { name }}) => outputNames[name] || '[name].js'
   },
   plugins: [
-	new ForkTsCheckerWebpackPlugin(),
+	new ForkTsCheckerWebpackPlugin({typescript:{memoryLimit: 4096}}),
 	...(customFolderExists ? [
 		new CopyWebpackPlugin({
 			patterns: [

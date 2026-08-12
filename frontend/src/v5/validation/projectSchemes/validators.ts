@@ -62,4 +62,4 @@ export const image = Yup.mixed()
 			if (!file || isString(file)) return true;
 			return !projectImageFileIsTooBig(file);
 		},
-	);
+	).notRequired();

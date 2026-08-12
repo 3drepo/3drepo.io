@@ -27,7 +27,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
-import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, useExistingValuesTrigger } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -125,21 +125,22 @@ export const SettingsModal = ({
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isValid, setIsValid] = useState(false);
 	const DEFAULT_VALUES = getDefaultValues(containerOrFederation, isContainer) as any;
-	const {
-		handleSubmit,
-		reset,
-		getValues,
-		watch,
-		trigger,
-		control,
-		formState,
-		formState: { errors, dirtyFields },
-	} = useForm<IFormInput>({
+	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(settingsSchema),
 		defaultValues: DEFAULT_VALUES,
 		context: { alreadyExistingNames },
 	});
+
+	const {
+		handleSubmit,
+		reset,
+		getValues,
+		watch,
+		control,
+		formState,
+		formState: { errors, dirtyFields },
+	} = formData;
 
 	const currentUnit = useWatch({ control, name: 'unit' });
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
@@ -169,9 +170,10 @@ export const SettingsModal = ({
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
-			trigger('name');
 		}
 	};
+
+	useExistingValuesTrigger('name', alreadyExistingNames, formData);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude, angleFromNorth,

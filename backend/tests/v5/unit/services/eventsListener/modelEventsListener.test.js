@@ -63,6 +63,9 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
+
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -78,7 +81,7 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+const ModelEventsListener = require(`${src}/services/eventsListener/components/modelEvents`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
@@ -102,6 +105,31 @@ const generateImportResult = (success, message = generateRandomString(), userErr
 	};
 };
 
+const expectErrorNotification = () => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		expect.any(Object),
+		undefined,
+		true,
+	);
+};
+
+const expectListenerErrorNotification = (listenerName, payload, err) => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		{
+			component: 'ModelEventsListener',
+			listenerName,
+			payload,
+			error: err,
+		},
+		undefined,
+		true,
+	);
+};
+
 const testQueueTaskUpdate = () => {
 	describe(events.QUEUED_TASK_UPDATE, () => {
 		test(`Should trigger updateModelStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.CONTAINER})`, async () => {
@@ -111,26 +139,27 @@ const testQueueTaskUpdate = () => {
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				status: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledWith(data.teamspace, project,
-				data.model, data.status, data.corId);
+				data.model, data.status, stringToUUID(data.corId));
 		});
 
 		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				corId: generateUUIDString(),
 				status: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -155,6 +184,22 @@ const testQueueTaskUpdate = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		});
+
+		test(`Should not send error email if ${events.QUEUED_TASK_UPDATE} fails with revisionNotFound`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.revisionNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
+			await waitOnEvent;
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE} (Rejected with an error object)`,
@@ -173,6 +218,7 @@ const testQueueTaskUpdate = () => {
 				expect(ProjectSettings.findProjectByModelId)
 					.toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 				expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+				expectErrorNotification();
 			});
 	});
 };
@@ -183,12 +229,11 @@ const testQueueTaskCompleted = () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.CONTAINER);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				value: 0,
 				user: generateRandomString(),
 			};
@@ -200,12 +245,9 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
-
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user);
+				stringToUUID(data.corId), dataInfo, data.user);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
@@ -213,14 +255,15 @@ const testQueueTaskCompleted = () => {
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
-				corId: generateRandomString(),
+				corId: generateUUIDString(),
 				value: 0,
 				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -230,12 +273,9 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
-
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, modelTypes.DRAWING);
+				stringToUUID(data.corId), dataInfo, modelTypes.DRAWING);
 			expect(ModelSettings.newRevisionProcessed).not.toHaveBeenCalled();
 		});
 
@@ -256,6 +296,25 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		});
+
+		test(`Should not send error email if ${events.QUEUED_TASK_COMPLETED} fails with revisionNotFound`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.revisionNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				value: generateRandomString(),
+				user: generateRandomString(),
+				containers: [generateRandomString()],
+			};
+			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED} (Rejected with an error object)`, async () => {
@@ -275,6 +334,7 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+			expectErrorNotification();
 		});
 	});
 };
@@ -291,6 +351,7 @@ const testNewRevision = () => {
 
 		Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
 		Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 
 		const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 		const data = {
@@ -560,6 +621,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -601,6 +663,7 @@ const testNewRevision = () => {
 			data: generateImportResult(true),
 		};
 
+		ClashPlansModel.getPlansByQuery.mockResolvedValueOnce([]);
 		Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
 		EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
@@ -626,7 +689,7 @@ const testNewRevision = () => {
 			UUIDToString(data.project),
 			data.model,
 			undefined);
-		expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		expectErrorNotification();
 	});
 };
 
@@ -658,6 +721,16 @@ const testModelProcessingCompleted = () => {
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
 				const fileName = generateRandomString();
+
+				if (success) {
+					Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({
+						tag: generateRandomString(),
+						author: generateRandomString(),
+						timestamp: generateRandomDate(),
+						rFile: [generateRandomString()],
+						desc: generateRandomString(),
+					});
+				}
 
 				if (sendMail) {
 					if (modelType === modelTypes.CONTAINER) {
@@ -724,6 +797,7 @@ const testModelProcessingCompleted = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
 			await waitOnEvent;
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
 		});
 
 		test('Should fail gracefully if an error was thrown in getLogArchive (error object)', async () => {
@@ -743,6 +817,53 @@ const testModelProcessingCompleted = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 
 			await waitOnEvent;
+			expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
+		});
+
+		test('Should notify if modelProcessingCompleted outer catch is triggered', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: generateImportResult(true),
+			};
+
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus)
+				.toHaveBeenCalledWith(data.teamspace, data.project, data.model, data.revId);
+			expectErrorNotification();
+		});
+
+		test('Should not log the stack if it does not exist in the error object', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateUUID(),
+				revId: generateUUID(),
+				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+				data: generateImportResult(true),
+			};
+
+			CalibrationProcessor.getCalibrationStatus.mockRejectedValueOnce({ message: generateRandomString() });
+
+			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
+
+			await waitOnEvent;
+			expect(CalibrationProcessor.getCalibrationStatus).toHaveBeenCalledTimes(1);
+			expect(CalibrationProcessor.getCalibrationStatus)
+				.toHaveBeenCalledWith(data.teamspace, data.project, data.model, data.revId);
+			expectErrorNotification();
 		});
 
 		testNewRevision();
@@ -777,6 +898,7 @@ const testModelSettingsUpdate = () => {
 			);
 
 			expect(TicketsProcessor.onModelNameUpdated).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 		test(`Should create a ${chatEvents.FEDERATION_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
@@ -878,6 +1000,49 @@ const testModelSettingsUpdate = () => {
 			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledTimes(1);
 			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledWith(data.teamspace, data.project, data.model);
 		});
+
+		test('Should send email notification on error', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { name: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
+
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('modelSettingsUpdated', data, err);
+		});
+
+		test(`Should create a ${chatEvents.DRAWING_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (drawing)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+		});
 	});
 };
 
@@ -909,6 +1074,7 @@ const testRevisionUpdated = () => {
 			);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should create a ${chatEvents.CONTAINER_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED}`, async () => {
@@ -959,6 +1125,25 @@ const testRevisionUpdated = () => {
 				undefined,
 			);
 		});
+
+		test('Should send email notification on error for REVISION_UPDATED', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { _id: generateUUID() },
+				modelType: modelTypes.DRAWING,
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
+
+			EventsManager.publish(events.REVISION_UPDATED, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('revisionUpdated', data, err);
+		});
 	});
 };
 const testNewModel = () => {
@@ -983,6 +1168,7 @@ const testNewModel = () => {
 				data.project,
 				undefined,
 			);
+			expectErrorNotification();
 		});
 
 		test(`Should create a ${chatEvents.NEW_FEDERATION} chat event if there is a ${events.NEW_MODEL} (federation)`, async () => {
@@ -1027,6 +1213,43 @@ const testNewModel = () => {
 				undefined,
 			);
 		});
+
+		test(`Should create a ${chatEvents.NEW_DRAWING} chat event if there is a ${events.NEW_MODEL} (drawing)`, async () => {
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
+			await EventsManager.publish(events.NEW_MODEL, data);
+			await waitOnEvent;
+			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_DRAWING,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined,
+			);
+		});
+
+		test('Should send email notification on error for NEW_MODEL', async () => {
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.DRAWING,
+			};
+			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
+			const err = { status: 500, message: generateRandomString() };
+			ChatService.createProjectMessage.mockRejectedValueOnce(err);
+			await EventsManager.publish(events.NEW_MODEL, data);
+			await waitOnEvent;
+			expectListenerErrorNotification('modelAdded', data, err);
+		});
 	});
 };
 const testDeleteModel = () => {
@@ -1052,6 +1275,7 @@ const testDeleteModel = () => {
 				data.model,
 				undefined,
 			);
+			expectErrorNotification();
 		});
 		test(`Should create a ${chatEvents.FEDERATION_REMOVED} chat event if there is a ${events.DELETE_MODEL} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
@@ -1096,18 +1320,55 @@ const testDeleteModel = () => {
 				undefined,
 			);
 		});
+
+		test(`Should create a ${chatEvents.DRAWING_REMOVED} chat event if there is a ${events.DELETE_MODEL} (drawing)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+			};
+			EventsManager.publish(events.DELETE_MODEL, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.DRAWING_REMOVED,
+				{},
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+		});
+
+		test('Should send email notification on error for DELETE_MODEL', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				modelType: modelTypes.DRAWING,
+			};
+			const err = { status: 500, message: generateRandomString() };
+			ChatService.createModelMessage.mockRejectedValueOnce(err);
+			EventsManager.publish(events.DELETE_MODEL, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('modelDeleted', data, err);
+		});
 	});
 };
-
 const testUpdateTicket = () => {
-	const updateTicketTest = async (isFederation, changes, expectedData) => {
+	const updateTicketTest = async (isFederation, changes, expectedData, templateOverride) => {
 		const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
-		const template = generateTemplate();
+		const template = templateOverride ?? generateTemplate();
 		const data = {
 			teamspace: generateRandomString(),
 			project: generateRandomString(),
 			model: generateRandomString(),
-			ticket: { _id: generateRandomString(), title: generateRandomString() },
+			ticket: { _id: generateRandomString(), title: generateRandomString(), type: template._id },
 			author: generateRandomString(),
 			timestamp: generateRandomDate(),
 			changes,
@@ -1121,10 +1382,19 @@ const testUpdateTicket = () => {
 		await waitOnEvent;
 		expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 		expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+		expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+		expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 			data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 		expect(TicketSchema.serialiseTicket).toHaveBeenCalledTimes(1);
+		expect(TicketSchema.serialiseTicket).toHaveBeenCalledWith(
+			{
+				_id: data.ticket._id,
+				...expectedData,
+			},
+			template,
+		);
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			event,
@@ -1160,6 +1430,7 @@ const testUpdateTicket = () => {
 			expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
@@ -1196,9 +1467,51 @@ const testUpdateTicket = () => {
 			await updateTicketTest(true, changes, expectedData);
 		});
 
+		test(`Should serialise combined root, property and module changes for ${events.UPDATE_TICKET}`, async () => {
+			const changes = {
+				title: { from: generateRandomString(), to: generateRandomString() },
+				properties: {
+					prop: { from: generateRandomString(), to: generateRandomString() },
+				},
+				modules: {
+					mod: {
+						modProp: { from: generateRandomString(), to: generateRandomString() },
+					},
+				},
+			};
+			const expectedData = {
+				title: changes.title.to,
+				properties: { prop: changes.properties.prop.to },
+				modules: { mod: { modProp: changes.modules.mod.modProp.to } },
+			};
+
+			await updateTicketTest(false, changes, expectedData);
+		});
+
+		test('Should fail gracefully if getTemplateById fails for UPDATE_TICKET', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET);
+			const template = generateTemplate();
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString(), type: template._id },
+				author: generateRandomString(),
+				timestamp: generateRandomDate(),
+				changes: { title: { from: generateRandomString(), to: generateRandomString() } },
+			};
+
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(generateRandomString());
+			ModelSettings.isFederation.mockResolvedValueOnce(false);
+			EventsManager.publish(events.UPDATE_TICKET, data);
+
+			await waitOnEvent;
+			expectErrorNotification();
+		});
+
 		test(`!Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} and a module default date prop has been updated (Container)`, async () => {
-			TicketTemplates.getTemplateById.mockResolvedValueOnce({ ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] });
+			const template = { ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] };
 			const changes = {
 				modules: {
 					sequencing: {
@@ -1207,11 +1520,10 @@ const testUpdateTicket = () => {
 				},
 			};
 			const expectedData = { modules: { sequencing: { 'Start Time': changes.modules.sequencing['Start Time'].to } } };
-			await updateTicketTest(false, changes, expectedData);
+			await updateTicketTest(false, changes, expectedData, template);
 		});
 	});
 };
-
 const testNewTicket = () => {
 	describe(events.NEW_TICKET, () => {
 		times(2, (i) => {
@@ -1345,6 +1657,7 @@ const testNewTicket = () => {
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
 				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+				expectErrorNotification();
 			});
 
 			test(`Should fail gracefully on error if there is an ${events.TICKETS_IMPORTED} event (${isFederation ? 'Federation' : 'Container'})`, async () => {
@@ -1372,7 +1685,30 @@ const testNewTicket = () => {
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, template._id);
 				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+				expectErrorNotification();
 			});
+		});
+
+		test('Should send email notification on error for NEW_TICKET', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
+			const template = generateTemplate();
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: {
+					type: template._id,
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(err);
+
+			EventsManager.publish(events.NEW_TICKET, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('ticketAdded', data, err);
 		});
 	});
 };
@@ -1441,10 +1777,29 @@ const testNewComment = () => {
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
+		});
+
+		test('Should send email notification on error for NEW_COMMENT', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
+			EventsManager.publish(events.NEW_COMMENT, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('ticketCommentAdded', data, err);
 		});
 	});
 };
-
 const testUpdateComment = () => {
 	describe(events.UPDATE_COMMENT, () => {
 		const updateCommentTest = async (isFederation) => {
@@ -1509,6 +1864,26 @@ const testUpdateComment = () => {
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
+		});
+
+		test('Should send email notification on error for UPDATE_COMMENT', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
+			EventsManager.publish(events.UPDATE_COMMENT, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('ticketCommentUpdated', data, err);
 		});
 	});
 };
@@ -1517,6 +1892,7 @@ const testUpdateTicketGroup = () => {
 	describe(events.UPDATE_TICKET_GROUP, () => {
 		const updateTicketGroupTest = async (isFederation) => {
 			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET_GROUP);
+			const changes = generateRandomObject();
 			const data = {
 				teamspace: generateRandomString(),
 				project: generateRandomString(),
@@ -1524,7 +1900,7 @@ const testUpdateTicketGroup = () => {
 				ticket: { _id: generateRandomString(), title: generateRandomString() },
 				author: generateRandomString(),
 				timestamp: generateRandomDate(),
-				changes: generateRandomString(),
+				changes,
 				_id: generateRandomString(),
 			};
 
@@ -1543,6 +1919,12 @@ const testUpdateTicketGroup = () => {
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, data._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+			expect(TicketGroupSchemas.serialiseGroup).toHaveBeenCalledTimes(1);
+			expect(TicketGroupSchemas.serialiseGroup).toHaveBeenCalledWith({
+				_id: data._id,
+				ticket: data.ticket,
+				...data.changes,
+			});
 
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
@@ -1585,6 +1967,28 @@ const testUpdateTicketGroup = () => {
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, data._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
 			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expectErrorNotification();
+		});
+
+		test('Should send email notification on error for UPDATE_TICKET_GROUP', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_TICKET_GROUP);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				ticket: { _id: generateRandomString(), title: generateRandomString() },
+				author: generateRandomString(),
+				timestamp: generateRandomDate(),
+				changes: generateRandomString(),
+				_id: generateRandomString(),
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			ModelSettings.isFederation.mockRejectedValueOnce(err);
+			EventsManager.publish(events.UPDATE_TICKET_GROUP, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('ticketGroupUpdated', data, err);
 		});
 	});
 };
@@ -1606,6 +2010,7 @@ const testTemplateUpdated = () => {
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
 			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
+			expectErrorNotification();
 		});
 
 		test('Should call onTemplateUpdated if template code is updated', async () => {
@@ -1626,11 +2031,28 @@ const testTemplateUpdated = () => {
 			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledTimes(1);
 			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledWith(data.teamspace, templateObject);
 		});
+
+		test('Should send email notification on error for TEMPLATE_UPDATED', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				template: generateRandomString(),
+				data: { code: generateRandomString() },
+			};
+			const err = { status: 500, message: generateRandomString() };
+
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(err);
+
+			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
+
+			await waitOnEvent;
+			expectListenerErrorNotification('templateUpdated', data, err);
+		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
-	EventsListener.init();
+	ModelEventsListener.init();
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();

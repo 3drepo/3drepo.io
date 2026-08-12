@@ -64,12 +64,12 @@ const ruleSchema = Yup.object().shape({
 	field: Yup.object().shape({
 		operator: Yup.string().uppercase().oneOf(Object.keys(fieldOperators)).required(),
 		values: Yup.mixed()
-			.when('operator', (operator) => formulateValueSchema(fieldOperators[operator])),
+			.when('operator', ([operator]) => formulateValueSchema(fieldOperators[operator])),
 	}).transform((val, oldVal) => (isString(oldVal)
 		? { operator: fieldOperators.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(valueOperators)).required(),
 	values: Yup.mixed()
-		.when('operator', (operator) => formulateValueSchema(valueOperators[operator])),
+		.when('operator', ([operator]) => formulateValueSchema(valueOperators[operator])),
 })
 	.transform((val) => (isString(val.field) && !val.name ? { ...val, name: generateRuleName(val) } : val))
 	.noUnknown();

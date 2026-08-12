@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, useEffect, useState } from 'react';
+import { JSX, ReactNode, useEffect, useState } from 'react';
 import { Collapse } from '@mui/material';
 import { Container, ControlsContainer } from './collapseControl.styles';
 
@@ -47,7 +47,7 @@ export const CollapseControl = ({
 	unmountHidden,
 	onChangeCollapse,
 	CollapseToggleComponent,
-}: CollapseControlProps): JSX.Element => {
+}: CollapseControlProps) => {
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 	const [expandedAfterTransition, setExpandedAfterTransition] = useState(defaultExpanded);
 

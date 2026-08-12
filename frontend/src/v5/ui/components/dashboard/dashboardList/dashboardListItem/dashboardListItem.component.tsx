@@ -28,7 +28,7 @@ export const DashboardListItem = ({
 	children,
 	className,
 	selected = false,
-}: IDashboardListItem): JSX.Element => (
+}: IDashboardListItem) => (
 	<Container className={className} selected={selected}>
 		{children}
 	</Container>

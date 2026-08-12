@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { Styled } from 'styled-components';
 
 import IconButton from '@mui/material/IconButton';
 import Select from '@mui/material/Select';

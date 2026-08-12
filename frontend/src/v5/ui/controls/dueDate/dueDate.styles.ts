@@ -16,14 +16,9 @@
  */
 
 import CalendarIconBase from '@assets/icons/outlined/calendar-outlined.svg';
-import { Backdrop as MuiBackdrop } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { FONT_WEIGHT } from '../../themes/theme';
 import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
-
-export const StopBackgroundInteraction = styled(MuiBackdrop)`
-	z-index: 15;
-`;
 
 export const DueDateContainer = styled.div`
 	font-weight: ${FONT_WEIGHT.MEDIUM};

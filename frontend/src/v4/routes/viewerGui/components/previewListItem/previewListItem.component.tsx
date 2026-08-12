@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PureComponent } from 'react';
+import { JSX, PureComponent } from 'react';
 import removeMd from 'remove-markdown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -183,7 +183,7 @@ export class PreviewListItem extends PureComponent<IProps, any> {
 							panelType={panelType}
 						/>
 						<Description>
-							<Truncate lines={3}>{desc || '(no description)'}</Truncate>
+							<Truncate lines={2}>{desc || '(no description)'}</Truncate>
 						</Description>
 						{this.renderActions(renderActions && active || panelType === VIEWER_PANELS.GROUPS)}
 					</Content>

@@ -1,0 +1,40 @@
+name: Derive release name
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: Source branch name.
+        required: true
+        type: string
+    outputs:
+      release_name:
+        description: Sanitised Helm release name.
+        value: ${{ jobs.derive.outputs.release_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  derive:
+    runs-on: ubuntu-24.04
+    outputs:
+      release_name: ${{ steps.derive.outputs.release_name }}
+    steps:
+      - id: derive
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+          # DNS-1035: lowercase [a-z0-9-], no leading/trailing/repeated dashes, <=53 chars.
+          release_name="$(
+            printf '%s' "$BRANCH" |
+            tr '[:upper:]' '[:lower:]' |
+            sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g' |
+            cut -c1-53 | sed -E 's/-+$//'
+          )"
+          if [[ -z "$release_name" ]]; then
+            echo "Could not derive a release name from branch '$BRANCH'." >&2
+            exit 1
+          fi
+          echo "release_name=$release_name" >> "$GITHUB_OUTPUT"

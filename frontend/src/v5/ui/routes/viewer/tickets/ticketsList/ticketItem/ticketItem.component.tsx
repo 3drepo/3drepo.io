@@ -39,7 +39,7 @@ type TicketItemProps = {
 export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { bulkModeOn, selectedItems: bulkSelection, toggleSelection } =  useContext(TicketsBulkUpdateContext);
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(null);
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);

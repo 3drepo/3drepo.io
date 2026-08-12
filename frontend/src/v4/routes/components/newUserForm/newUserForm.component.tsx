@@ -45,7 +45,7 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: JSX.Element;
+	title: ReactNode;
 	jobs: any[];
 	users: any[];
 	permissionsOnUIDisabled: boolean;
@@ -176,7 +176,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		if (
 			!this.props.addUserIsPending &&
 			prevProps.addUserIsPending !== this.props.addUserIsPending &&
-			!this.state.userNotExists
+			this.state.userNotExists
 		) {
 			// if add user is succesful then close the form
 			this.props.onCancel();

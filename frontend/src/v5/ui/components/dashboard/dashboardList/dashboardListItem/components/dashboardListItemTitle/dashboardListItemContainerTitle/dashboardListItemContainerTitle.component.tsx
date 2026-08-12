@@ -42,7 +42,7 @@ export const DashboardListItemContainerTitle = ({
 	openInNewTab = false,
 	maxCharacterLength,
 	...props
-}: IContainerTitle): JSX.Element => {
+}: IContainerTitle) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { query } = useContext(SearchContext);

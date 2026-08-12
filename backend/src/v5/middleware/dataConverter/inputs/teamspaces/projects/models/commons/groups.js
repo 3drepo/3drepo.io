@@ -26,7 +26,8 @@ const Groups = {};
 
 Groups.validateGroupsExportData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		groups: Yup.array('groups must be of type array')
+		groups: Yup.array()
+			.typeError('groups must be of type array')
 			.of(types.id)
 			.min(1, 'groups array must have at least 1 id')
 			.strict(true)

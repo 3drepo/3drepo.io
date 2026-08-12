@@ -48,7 +48,7 @@ export const Board = () => {
 	}, [projectName, username]);
 
 	if (!Object.values(BOARD_TYPES).includes(type)) {
-		return <Navigate to={NOT_FOUND_ROUTE_PATH} replace />
+		return (<Navigate to={NOT_FOUND_ROUTE_PATH} replace />);
 	}
 	
 	if (!componentIsReady) return (<></>);

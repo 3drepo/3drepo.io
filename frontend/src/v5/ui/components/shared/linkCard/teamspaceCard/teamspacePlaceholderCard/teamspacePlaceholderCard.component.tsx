@@ -17,7 +17,7 @@
 
 import { TextPlaceholder, Card } from './teamspacePlaceholderCard.styles';
 
-export const TeamspacePlaceholderCard = (): JSX.Element => (
+export const TeamspacePlaceholderCard = () => (
 	<Card variant="secondary" to="">
 		<TextPlaceholder />
 		<TextPlaceholder width="50%" />

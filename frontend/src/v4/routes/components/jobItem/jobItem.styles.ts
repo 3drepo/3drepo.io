@@ -21,7 +21,9 @@ import { COLOR } from '../../../styles';
 
 import { ellipsis } from '../../../styles';
 
-export const Name = styled(Grid)`
+export const Name = styled(Grid).attrs({
+	size: 'grow'
+})`
 	${ellipsis('calc(100% - 18px)')};
 	font-size: 14px;
 	color: ${COLOR.BLACK_60};

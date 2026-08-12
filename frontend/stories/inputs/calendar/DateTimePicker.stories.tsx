@@ -51,6 +51,7 @@ export const ControlledFormDateTimePicker: Story = {
 export const ControlledFormDateTimePickerDefaultDate: Story = {
 	args: {
 		label: 'Controlled DateTime with now as default date',
-		defaultValue: new Date('2020-01-30 16:30'),
+		// issue 5588 no longer supported
+		// defaultValue: new Date('2020-01-30 16:30'),
 	},
 };

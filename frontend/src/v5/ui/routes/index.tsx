@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
@@ -30,16 +30,18 @@ export const Root = () => {
 	const { intercomLicense } = clientConfigService;
 
 	return (
-		<ThemeProvider theme={theme}>
+		<StyledEngineProvider injectFirst>
 			<MuiThemeProvider theme={theme}>
-				<V4Adapter>
-					<IntercomProvider appId={intercomLicense}>
-						<MainRoute />
-						<NewUserHandler />
-						<ModalsDispatcher />
-					</IntercomProvider>
-				</V4Adapter>
+				<ThemeProvider theme={theme}>
+					<V4Adapter>
+						<IntercomProvider appId={intercomLicense}>
+							<MainRoute />
+							<NewUserHandler />
+							<ModalsDispatcher />
+						</IntercomProvider>
+					</V4Adapter>
+				</ThemeProvider>
 			</MuiThemeProvider>
-		</ThemeProvider>
+		</StyledEngineProvider>
 	);
 };

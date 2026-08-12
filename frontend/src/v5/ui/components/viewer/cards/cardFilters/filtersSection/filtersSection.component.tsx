@@ -19,7 +19,6 @@ import { TicketFilter } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
-import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { CardFilterActionMenu } from '../filterForm/filterForm.styles';
 import { useState } from 'react';
 import { isEqual } from 'lodash';
@@ -48,16 +47,10 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 						/>
 					)}
 				>
-					<ActionMenuContext.Consumer>
-						{({ close }) => (
-							<FilterForm
-								{...filter as any}
-								onCancel={close}
-								onSubmit={setFilter}
-								cancelButton
-							/>
-						)}
-					</ActionMenuContext.Consumer>
+					<FilterForm
+						{...filter as any}
+						onSubmit={setFilter}
+					/>
 				</CardFilterActionMenu>
 			))}
 		</Section>

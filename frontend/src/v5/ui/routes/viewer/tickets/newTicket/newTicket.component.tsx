@@ -51,6 +51,7 @@ export const NewTicketCard = () => {
 	const templateId = template._id;
 
 	let defaultTicket = getDefaultTicket(template);
+	
 	if (unsavedTicket) {
 		defaultTicket = merge(defaultTicket, unsavedTicket);
 	}
@@ -92,7 +93,12 @@ export const NewTicketCard = () => {
 		await promiseToResolve;
 	};
 
-	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+	const updateUnsavedTicket = () => {
+		// There's a clone deep because getValues returns a readonly object. 
+		// When trying to modify it without the clones by filling fields, it throws an error of with
+		// the message "Cannot assign to read only property '<propertyName>' of object '#<Object>'".
+		TicketsCardActionsDispatchers.setUnsavedTicket(cloneDeep(formData.getValues()));
+	};
 
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {

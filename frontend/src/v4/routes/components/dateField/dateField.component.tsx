@@ -16,8 +16,7 @@
  */
 import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { Dayjs } from 'dayjs';
+import { DateTimePicker, PickerValue } from '@controls/inputs/datePicker/dateTimePicker.component';
 
 interface IProps {
 	value?: any;
@@ -27,59 +26,34 @@ interface IProps {
 	disabled?: boolean;
 	placeholder?: string;
 	className?: string;
-	onChange?: (event) => void;
-	onBlur?: (event) => void;
+	onChange?: (event: any) => void;
+	onBlur?: (event: any) => void;
 	shouldDisableDate?: (day: any) => boolean;
 	shouldDisableTime?: (day: any) => boolean;
-	minDateTime?: Dayjs;
-	maxDateTime?: Dayjs;
+	minDateTime?: PickerValue;
+	maxDateTime?: PickerValue;
 }
 
 export const DateField = ({
-	onBlur,
-	onChange,
-	name,
-	value: propValue,
 	placeholder,
-	defaultValue,
+	onChange,
+	onBlur,
 	...dateFieldProps
 }: IProps) => {
-	const [value, setValue] = useState(propValue || null);
-
-	const handleAccept = (newValue) => {
-		if (newValue) {
-			setValue(newValue);
-			onChange?.({
-				target: {
-					value: newValue.valueOf(),
-					name,
-				}
-			});
-		}
-	};
-
-	useEffect(() => {
-		setValue(propValue || null);
-	}, [propValue]);
-
 	return (
 		<DateTimePicker
-			value={value}
-			onAccept={handleAccept}
-			onChange={() => {}}
 			disableHighlightToday
-			// @ts-ignore
-			inputProps={{ readOnly: true, placeholder }}
-			components={{ ActionBar: null }}
-			renderInput={(props) => (
-				<TextField
-					defaultValue={defaultValue}
-					name={name}
-					{...props}
-					InputProps={{ endAdornment: null }}
-				/>
-			)}
+			slotProps={{input: {readOnly: true, placeholder}}}
+			onChange={(newValue) => {
+				onChange?.({
+					target: {
+						value: newValue ? newValue.valueOf() : null,
+						name: dateFieldProps.name,
+					}
+				});
+			}}
 			{...dateFieldProps}
+
 		/>
 	);
 };

@@ -65,7 +65,7 @@ export function* fetchSequenceList() {
 		const { data: sequences } = yield API.getSequenceList(teamspace, model, revision);
 
 		const state = getState();
-		const viewableSequences = sequences.filter((sequence) =>  selectHasViewerAccess(state, sequence.model));
+		const viewableSequences = sequences.filter((sequence) => sequence.model === model || selectHasViewerAccess(state, sequence.model));
 
 		yield put(SequencesActions.fetchSequenceListSuccess(viewableSequences));
 	} catch (error) {

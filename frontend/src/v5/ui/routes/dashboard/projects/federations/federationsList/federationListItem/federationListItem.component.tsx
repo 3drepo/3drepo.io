@@ -46,7 +46,7 @@ interface IFederationListItem {
 
 export const FederationListItem = memo(({
 	federation,
-}: IFederationListItem): JSX.Element => {
+}: IFederationListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const navigate = useNavigate();
 

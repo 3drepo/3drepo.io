@@ -37,7 +37,7 @@ export const DashboardListHeaderLabel = ({
 	hidden = false,
 	sort = false,
 	...containerProps
-}: IDashboardListHeaderLabel): JSX.Element => (
+}: IDashboardListHeaderLabel) => (
 	<Container
 		{...containerProps}
 		hidden={hidden}

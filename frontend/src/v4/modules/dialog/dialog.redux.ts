@@ -23,10 +23,11 @@ import { ErrorDialog } from '@/v4/routes/components/dialogContainer/components/e
 import { ConfirmDialog } from '@/v4/routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
 import { RevisionsDialog } from '@/v4/routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
 import { NewUpdateDialog } from '@/v4/routes/components/dialogContainer/components/newUpdateDialog/newUpdateDialog.component';
+import { JSX } from 'react';
 
 export interface IDialogConfig {
 	id: number;
-	title: JSX.Element | string;
+	title: JSX.Element;
 	template?: () => JSX.Element;
 	content?: string;
 	data?: any;

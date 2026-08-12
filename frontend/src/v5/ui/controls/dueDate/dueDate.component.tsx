@@ -16,20 +16,21 @@
  */
 
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { Tooltip } from '@mui/material';
-import { FormattedMessage } from 'react-intl';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { CalendarIcon, DateContainer, DueDateContainer } from './dueDate.styles';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { TextOverflow } from '@controls/textOverflow';
+import { FormattedMessage } from 'react-intl';
 
-const DATE_UNSET_MESSAGE = <FormattedMessage id="dueDate.unset.enabled" defaultMessage="Date unset" />;
-const SET_DATE_MESSAGE = <FormattedMessage id="dueDate.unset.disabled" defaultMessage="Set date" />;
 
 export type DueDateProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
 	onBlur?: () => void;
 };
+
+const DATE_UNSET_MESSAGE = <FormattedMessage id="dueDate.unset.enabled" defaultMessage="Date unset" />;
+const SET_DATE_MESSAGE = <FormattedMessage id="dueDate.unset.disabled" defaultMessage="Set date" />;
 
 export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDateProps) => {
 	const isOverdue = value && value < Date.now();
@@ -39,8 +40,8 @@ export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDa
 				value={value}
 				disabled={disabled}
 				renderInput={
-					({ inputRef, ...args }: any) => (
-						<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+					({ ref, ...args }: any) => (
+						<DateContainer {...args} ref={ref} isOverdue={isOverdue} disabled={disabled}>
 							<CalendarIcon />
 							{value ? (
 								<TextOverflow>

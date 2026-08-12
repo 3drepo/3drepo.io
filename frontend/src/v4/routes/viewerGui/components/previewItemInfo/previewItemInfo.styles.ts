@@ -67,6 +67,7 @@ export const Details = styled.div<{ panelType: string }>`
 
 export const UserAndModelDetails = styled.div`
 	display: contents;
+	align-items: center;
 `;
 
 export const Icon = styled.div`

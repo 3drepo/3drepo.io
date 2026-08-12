@@ -23,7 +23,7 @@ export const TableCorner = styled.div`
 	position: absolute;
 `;
 
-export const Container = styled(Backdrop).attrs({ open: true })`
+export const Container = styled(Backdrop as any).attrs({ open: true })`
 	cursor: grabbing;
 	z-index: 1000;
 	pointer-events: all;

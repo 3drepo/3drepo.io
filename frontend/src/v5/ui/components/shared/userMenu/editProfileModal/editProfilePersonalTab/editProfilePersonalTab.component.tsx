@@ -61,7 +61,7 @@ export const EditProfilePersonalTab = ({
 		reset,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
+		formState: { errors: formErrors, isSubmitting },
 	} = useFormContext();
 	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
@@ -107,10 +107,10 @@ export const EditProfilePersonalTab = ({
 	const canSubmit = isEmpty(formErrors) && fieldsAreDirty;
 
 	useEffect(() => {
-		if (submitWasSuccessful) {
+		if (submitWasSuccessful && canSubmit) {
 			setSubmitWasSuccessful(false);
 		}
-	}, [JSON.stringify(isDirty), touchedFields]);
+	}, [canSubmit, submitWasSuccessful]);
 
 	useEffect(() => {
 		if (userIsMissingRequiredData) {

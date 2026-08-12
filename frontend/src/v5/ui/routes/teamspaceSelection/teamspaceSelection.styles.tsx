@@ -23,7 +23,7 @@ import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.st
 const WELCOME_TEXT_MARGIN = 50;
 const NAVBAR_AND_FOOTER_HEIGHT = 104;
 
-export const ScrollBar = styled(DashboardScrollArea).attrs({
+export const ScrollBar = styled(DashboardScrollArea).attrs<{ variant?: string }>({
 	variant: 'secondary',
 })`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

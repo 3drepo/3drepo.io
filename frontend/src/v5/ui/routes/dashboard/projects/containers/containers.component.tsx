@@ -36,7 +36,7 @@ import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewContainerRevisi
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { ContainersList } from './containersList/containersList.component';
 
-export const Containers = (): JSX.Element => {
+export const Containers = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const {
