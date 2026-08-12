@@ -29,13 +29,14 @@ type TagPropertyProps = FormInputProps & {
 	immutable?: boolean;
 };
 
-export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, required, label, error, helperText }: TagPropertyProps) => {
+export const TagProperty = ({ value, onChange, onBlur, disabled, required, label, error, helperText }: TagPropertyProps) => {
 	const tags = Array.isArray(value) ? value : [];
 	const [inputValue, setInputValue] = useState('');
 	const [focused, setFocused] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const isEditable = !disabled && !immutable;
+	const isEditable = !disabled;
+	const isFocused = focused && isEditable;
 
 	const commitTag = (raw: string) => {
 		const tag = raw.trim().replace(/,+$/, '');
@@ -78,7 +79,7 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 	return (
 		<TagPropertyContainer onClick={() => inputRef.current?.focus()} disabled={disabled} required={required} error={error}>
 			{label && <InputLabel shrink={false}>{label}</InputLabel>}
-			<ChipsInputBox selected={focused} error={error} disabled={disabled} required={required}>
+			<ChipsInputBox selected={isFocused} error={error} disabled={disabled} required={required}>
 				{tags.map((val) => (
 					<Tooltip key={val} title={val}>
 						<TagChipContainer selected={false}>
@@ -110,7 +111,7 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, immutable, requ
 					/>
 				)}
 			</ChipsInputBox>
-			<FieldHint $visible={focused}>
+			<FieldHint $visible={isFocused}>
 				<Kbd>Enter</Kbd>
 				<FormattedMessage id="tagProperty.hint.or" defaultMessage="or" />
 				<Kbd>,</Kbd>
