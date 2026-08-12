@@ -138,7 +138,8 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 				return Object.keys(tickets).length ? { model, tickets } : [];
 			});
 
-			return { ...notification, project, ticketData };
+			const hasData = notification.clashData?.length || ticketData.length;
+			return hasData ? { ...notification, project, ticketData } : [];
 		});
 
 		if (notifications.length) {

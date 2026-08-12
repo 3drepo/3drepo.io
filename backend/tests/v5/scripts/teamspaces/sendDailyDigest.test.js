@@ -31,7 +31,7 @@ const {
 const { src, utilScripts } = require('../../helper/path');
 
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
-const { insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
+const { insertClashNotifications, insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -77,6 +77,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 		const template = generateTemplate();
 		const ticket = generateTicket(template, true);
 
+		const clashData = { planName: generateRandomString(), results: { stats: { new: 1, active: 2, resolved: 3 } } };
 		const recipients = ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr;
 		const ticketId = stringToUUID(ticket._id);
 
@@ -98,6 +99,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 				users: recipients,
 				ticket: ticketId,
 				author: usernameArr[0] }]),
+			insertClashNotifications(ts.user, project, clashData, recipients),
 			insertBogusNotification(ts.user, project, model, recipients, ticketId),
 		]);
 	}));
@@ -124,18 +126,18 @@ const runTest = () => {
 	const testCases = [
 		['should not send email if the teamspace does not have the addOn enabled', testData.teamspaceNoDigest.user],
 		['should not send email if the teamspace does not have any notifications', testData.teamspaceNoNotifications.user],
-		['should not send email if the teamspace does not have the matching template', testData.teamspaceNoTemplate.user],
+		['should not include ticket data if the teamspace does not have the matching template', testData.teamspaceNoTemplate.user, true, 5],
 		['should not send email if the user does not exist', testData.teamspaceUserNotFound.user],
 		['should not send email if the project does not exist', testData.teamspaceProjNotFound.user],
-		['should send email if the teamspace has notifications', testData.teamspace.user, true],
-		['should work if teamspace is not specified', undefined, true],
+		['should send email if the teamspace has notifications', testData.teamspace.user, true, 5],
+		['should work if teamspace is not specified', undefined, true, 10],
 	];
 
-	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail) => {
+	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail, emailsSent) => {
 		test(desc, async () => {
 			await SendDailyDigests.run(teamspace);
 			if (sendMail) {
-				expect(mailer.sendEmail).toHaveBeenCalledTimes(testData.users.length);
+				expect(mailer.sendEmail).toHaveBeenCalledTimes(emailsSent);
 				testData.users.forEach(({ basicData: { email } }) => {
 					expect(mailer.sendEmail).toHaveBeenCalledWith(
 						emailTemplates.DAILY_DIGEST.name, email, expect.any(Object));
