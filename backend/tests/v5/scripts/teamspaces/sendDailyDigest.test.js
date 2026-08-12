@@ -84,7 +84,8 @@ const setupData = async ({ users, ...teamspaces }) => {
 		await Promise.all([
 			ts.user === teamspaces.teamspaceProjNotFound.user ? Promise.resolve()
 				: createProject(ts.user, project, generateRandomString(), [model]),
-			createModel(ts.user, model, generateRandomString()),
+			ts.user === teamspaces.teamspaceModelNotFound.user ? Promise.resolve()
+				: createModel(ts.user, model, generateRandomString()),
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
 			insertTicketAssignedNotifications(ts.user, project, model, [{
@@ -112,6 +113,7 @@ const createData = () => ({
 	teamspaceNoTemplate: generateUserCredentials(),
 	teamspaceUserNotFound: generateUserCredentials(),
 	teamspaceProjNotFound: generateUserCredentials(),
+	teamspaceModelNotFound: generateUserCredentials(),
 	users: times(5, generateUserCredentials),
 });
 
@@ -130,7 +132,7 @@ const runTest = () => {
 		['should not send email if the user does not exist', testData.teamspaceUserNotFound.user],
 		['should not send email if the project does not exist', testData.teamspaceProjNotFound.user],
 		['should send email if the teamspace has notifications', testData.teamspace.user, true, 5],
-		['should work if teamspace is not specified', undefined, true, 10],
+		['should work if teamspace is not specified', undefined, true, 15],
 	];
 
 	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail, emailsSent) => {

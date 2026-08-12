@@ -105,7 +105,7 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 
 			if (!project) return [];
 
-			const ticketData = notification.ticketData.flatMap(({ model: modelID, data }) => {
+			const ticketData = notification.ticketData.map(({ model: modelID, data }) => {
 				const modelIDStr = UUIDToString(modelID);
 				const model = tsData.models[modelIDStr];
 
@@ -138,8 +138,7 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 				return Object.keys(tickets).length ? { model, tickets } : [];
 			});
 
-			const hasData = notification.clashData?.length || ticketData.length;
-			return hasData ? { ...notification, project, ticketData } : [];
+			return { ...notification, project, ticketData };
 		});
 
 		if (notifications.length) {
