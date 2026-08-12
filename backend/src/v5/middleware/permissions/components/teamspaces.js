@@ -53,7 +53,7 @@ const checkTeamspaceMembership = (bypassStatusCheck) => async (req, res, next) =
 			await getTeamspaceSetting(teamspace, { _id: 1 });
 		} else {
 			const user = getUserFromSession(session);
-			if (!(user && await isTeamspaceMember(teamspace, user, bypassStatusCheck))) {
+			if (!(user && await isTeamspaceMember(teamspace, user, bypassStatusCheck, !bypassStatusCheck))) {
 				throw templates.teamspaceNotFound;
 			}
 		}

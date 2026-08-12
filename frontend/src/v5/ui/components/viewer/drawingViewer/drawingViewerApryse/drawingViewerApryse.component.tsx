@@ -243,7 +243,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			},
 
 			getSelectedPages: function () {
-				return 1;
+				return {
+					first: 1,
+					last: 1,
+				};
 			},
 
 			getVisiblePages: function () {

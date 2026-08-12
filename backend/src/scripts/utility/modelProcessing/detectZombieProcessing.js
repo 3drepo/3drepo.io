@@ -16,9 +16,8 @@
  */
 
 /**
- * This script is used to check the processing status of models/drawings.
- * Processing status should be 'ok' or 'failed'.
- * The utility script `resetProcessingFlag` can be used to reset zombie statuses for models.
+ * This script checks for models/drawings/clash runs stuck in non-terminal processing states.
+ * The utility script `resetProcessingFlags` can be used to reset zombie statuses.
  */
 
 const { v5Path } = require('../../../interop');
@@ -29,6 +28,7 @@ const { getTeamspaceList } = require('../../utils');
 const { find } = require(`${v5Path}/handler/db`);
 const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
+const { CLASH_RUNS_COL, clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
 const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
 const { templates: emailTemplates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
@@ -36,22 +36,38 @@ const Path = require('path');
 
 let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 
-const processTeamspace = async (teamspace) => {
+const processTeamspace = async (teamspace, results) => {
 	const expiredTimestamp = new Date(new Date() - TIME_LIMIT);
 	const zombieQuery = {
 		status: { $exists: true, $not: { $regex: `(${processStatuses.OK})|(${processStatuses.FAILED})` } },
 		timestamp: { $lt: expiredTimestamp },
+	};
+	const zombieClashRunQuery = {
+		status: { $exists: true, $nin: [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED] },
+		updatedAt: { $lt: expiredTimestamp },
 	};
 
 	logger.logInfo(`\t-${teamspace}`);
 
 	const zombieModels = await find(teamspace, SETTINGS_COL, zombieQuery, { status: 1, timestamp: 1 });
 	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
+	const zombieClashRuns = await find(teamspace, CLASH_RUNS_COL, zombieClashRunQuery, { status: 1, updatedAt: 1 });
 
-	return [
-		...zombieModels.map(({ _id, status, timestamp }) => `${teamspace}, model, ${_id}, ${status}, ${timestamp}`),
-		...zombieDrawings.map(({ _id, status, timestamp }) => `${teamspace}, drawing, ${UUIDToString(_id)}, ${status}, ${timestamp}`),
-	];
+	results.models.push(...zombieModels.map(({ _id: id, status, timestamp }) => ({
+		teamspace, id, status, timestamp,
+	})));
+	results.drawings.push(...zombieDrawings.map(({ _id: id, status, timestamp }) => ({
+		teamspace,
+		id: UUIDToString(id),
+		status,
+		timestamp,
+	})));
+	results.clashRuns.push(...zombieClashRuns.map(({ _id: id, status, updatedAt }) => ({
+		teamspace,
+		id: UUIDToString(id),
+		status,
+		timestamp: updatedAt,
+	})));
 };
 
 const run = async (teamspace, limit, notify) => {
@@ -62,15 +78,17 @@ const run = async (teamspace, limit, notify) => {
 	}
 
 	const teamspaces = teamspace ? [teamspace] : await getTeamspaceList();
-	const results = (await Promise.all(teamspaces.map((ts) => processTeamspace(ts)))).flat();
+	const results = { models: [], drawings: [], clashRuns: [] };
+	await Promise.all(teamspaces.map((ts) => processTeamspace(ts, results)));
+	const totalResults = results.models.length + results.drawings.length + results.clashRuns.length;
 
-	if (notify && results.length > 0) {
-		logger.logInfo(`Zombie processing statuses found: ${results.length}`);
+	if (notify && totalResults > 0) {
+		logger.logInfo(`Zombie processing statuses found: ${totalResults}`);
 		const data = {
 			script: Path.basename(__filename, Path.extname(__filename)),
 			title: 'Zombie processing statuses found',
-			message: `${results.length} zombie processing statuses found`,
-			logExcerpt: JSON.stringify(results),
+			message: `${totalResults} zombie processing statuses found`,
+			zombieEntries: results,
 		};
 		await sendSystemEmail(emailTemplates.ZOMBIE_PROCESSING_STATUSES.name, data);
 	}
@@ -79,17 +97,17 @@ const run = async (teamspace, limit, notify) => {
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace', {
-		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targetted)',
+		describe: 'Target a specific teamspace (if unspecified, all teamspaces will be targeted)',
 		type: 'string',
 	}).option('limit', {
-		describe: 'Time limit (hours, default: 24) where models/drawings may still be processing',
+		describe: 'Time limit (hours, default: 24) where models/drawings/clash runs may still be processing',
 		type: 'number',
 	}).option('notify', {
 		describe: 'Send e-mail notification if results are found (default: false)',
 		type: 'boolean',
 	});
 	return yargs.command(commandName,
-		'Checks the processing status of models/drawings.',
+		'Checks the processing status of models/drawings/clash runs.',
 		argsSpec,
 		(argv) => run(argv.teamspace, argv.limit, argv.notify));
 };

@@ -300,7 +300,7 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermiss
 	]);
 };
 
-Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) => {
+Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck, throwWithDetails) => {
 	try {
 		const [accountId, userId] = await Promise.all([
 			getTeamspaceRefId(teamspace),
@@ -310,11 +310,31 @@ Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) =>
 			// It is better to use this call only when we don't care about the status of the membership
 			// as this is often cached.
 			const members = await getAllUsersInAccount(accountId);
-			return members.some((member) => member.id === userId);
+			const isMember = members.some((member) => member.id === userId);
+
+			if (throwWithDetails && !isMember) {
+				throw templates.teamspaceNotFound;
+			}
+			return isMember;
 		}
 		const memStatus = await getUserStatusInAccount(accountId, userId);
-		return memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
+
+		switch (memStatus) {
+		case membershipStatus.ACTIVE:
+			return true;
+		case membershipStatus.PENDING_LOGIN:
+			return true;
+		case membershipStatus.PENDING_INVITE:
+			throw templates.pendingInviteAcceptance;
+		case membershipStatus.INACTIVE:
+			throw templates.membershipInactive;
+		default:
+			throw templates.teamspaceNotFound;
+		}
 	} catch (err) {
+		if (throwWithDetails) {
+			throw err;
+		}
 		return false;
 	}
 };

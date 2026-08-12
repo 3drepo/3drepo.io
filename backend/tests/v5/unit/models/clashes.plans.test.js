@@ -284,6 +284,63 @@ const testDeletePlan = () => {
 	});
 };
 
+const testGetAllPlansByProject = () => {
+	describe('Get all plans by project', () => {
+		const teamspace = generateRandomString();
+		const project = generateUUID();
+
+		test('should call getPlansByQuery with a project scoped query and return plans', async () => {
+			const plans = [
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).resolves.toEqual(plans);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
+		});
+
+		test('should pass the projection to getPlansByQuery when provided', async () => {
+			const projection = {
+				createdAt: 1,
+				createdBy: 1,
+				name: 1,
+				type: 1,
+			};
+			const plans = [
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+				{ _id: generateUUID(), name: generateRandomString(), type: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockResolvedValueOnce(plans);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project, projection)).resolves.toEqual(plans);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, projection);
+
+			fn.mockRestore();
+		});
+
+		test('should reject when getPlansByQuery fails', async () => {
+			const error = new Error(generateRandomString());
+			const fn = jest.spyOn(ClashPlans, 'getPlansByQuery').mockRejectedValueOnce(error);
+
+			await expect(ClashPlans.getAllPlansByProject(teamspace, project)).rejects.toEqual(error);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, project, {}, undefined);
+
+			fn.mockRestore();
+		});
+	});
+};
+
 const testDeletePlansByProject = () => {
 	describe('Delete plans by project', () => {
 		test('should delete all plans associated with a project', async () => {
@@ -306,5 +363,6 @@ describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testGetAllPlansByProject();
 	testDeletePlansByProject();
 });

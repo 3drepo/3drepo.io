@@ -21,13 +21,23 @@ const { generateTemplateFn } = require('./common');
 
 const TEMPLATE_PATH = `${__dirname}/html/zombieProcessingStatuses.html`;
 
+const zombieEntrySchema = Yup.object({
+	teamspace: Yup.string().default(''),
+	id: Yup.string().default(''),
+	status: Yup.string().default(''),
+	timestamp: Yup.mixed().default(''),
+});
+
 const dataSchema = Yup.object({
 	script: Yup.string().default(''),
 	title: Yup.string().default('Zombie Processing Statuses'),
 	domain: Yup.string().default(() => config.getBaseURL()),
-	logExcerpt: Yup.string().default('No logs found.').transform(
-		(val) => val.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/(\r\n|\n|\r)/gm, '<br>')),
-
+	message: Yup.string().default('Zombie processing statuses found'),
+	zombieEntries: Yup.object({
+		models: Yup.array().of(zombieEntrySchema).default([]),
+		drawings: Yup.array().of(zombieEntrySchema).default([]),
+		clashRuns: Yup.array().of(zombieEntrySchema).default([]),
+	}).default({ models: [], drawings: [], clashRuns: [] }),
 }).required(true);
 
 const ZombieProcessingStatusesTemplate = {};

@@ -39,6 +39,8 @@ const testHtml = () => {
 
 const testSubject = () => {
 	describe.each([
+		['data is undefined', undefined],
+		['data is null', null],
 		['data object is empty', {}],
 		['data object is not empty', { domain: generateRandomString(), title: generateRandomString(), logExcerpt: generateRandomString() }],
 	])('get subject', (desc, data) => {

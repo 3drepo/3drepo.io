@@ -106,7 +106,11 @@ export const removeEmptyObjects = (tree) => {
 			return accum;
 		}
 
-		return ({ ...accum, [key]: removeEmptyObjects(value) });
+		const sanitizedValue = removeEmptyObjects(value);
+		if (_.isEqual(sanitizedValue, {})) {
+			return accum;
+		}
+		return ({ ...accum, [key]: sanitizedValue });
 	}, {});
 };
 

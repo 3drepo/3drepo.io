@@ -143,12 +143,13 @@ const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity
 });
 
 YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
-	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	Yup.mixed().nullable()
+		.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
 	isNullable,
 );
 
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
-	Yup.mixed()
+	Yup.mixed().nullable()
 		.transform((currValue, orgVal) => {
 			if (isString(orgVal)) {
 				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');

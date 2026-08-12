@@ -49,6 +49,7 @@ const { access, stat, copyFile, rm, mkdir, writeFile } = require('fs/promises');
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { MESSAGE_TYPES } = require(`${src}/services/modelProcessing.constants`);
 const config = require(`${src}/utils/config`);
 
 const { PassThrough } = require('stream');
@@ -118,7 +119,7 @@ const testCallbackQueueConsumer = () => {
 			const content = {
 				teamspace: generateRandomString(),
 				project: generateUUIDString(),
-				type: 'clash',
+				type: MESSAGE_TYPES.CLASH,
 				status: generateRandomString(),
 			};
 			const properties = {
@@ -145,7 +146,7 @@ const testCallbackQueueConsumer = () => {
 			const content = {
 				teamspace: generateRandomString(),
 				project: generateUUIDString(),
-				type: 'clash',
+				type: MESSAGE_TYPES.CLASH,
 				container: generateRandomString(),
 				results: `${SHARED_SPACE_TAG}/${generateRandomString()}/results.json`,
 				value: 0,
@@ -180,7 +181,7 @@ const testCallbackQueueConsumer = () => {
 			const content = {
 				teamspace: generateRandomString(),
 				project: generateUUIDString(),
-				type: 'clash',
+				type: MESSAGE_TYPES.CLASH,
 				container: generateRandomString(),
 				results,
 				value: 0,
@@ -216,7 +217,7 @@ const testCallbackQueueConsumer = () => {
 			const content = {
 				teamspace: generateRandomString(),
 				project: generateUUIDString(),
-				type: 'clash',
+				type: MESSAGE_TYPES.CLASH,
 				container: generateRandomString(),
 				results,
 				value: 0,

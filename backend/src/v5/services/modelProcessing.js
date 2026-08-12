@@ -22,6 +22,7 @@ const { constants, createWriteStream, readFileSync, readdirSync } = require('fs'
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
+const { MESSAGE_TYPES } = require('./modelProcessing.constants');
 const Path = require('path');
 const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
@@ -45,11 +46,6 @@ const {
 	shared_storage: sharedDir,
 	clash_queue: clashq,
 } = queueConfig;
-
-const MESSAGE_TYPES = {
-	CLASH: 'clash',
-	IMPORT: 'import',
-};
 
 const resolveSharedPath = (filePath) => {
 	if (typeof filePath !== 'string') return undefined;

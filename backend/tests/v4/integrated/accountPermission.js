@@ -34,29 +34,33 @@ describe("Account permission::", function () {
 	let server;
 	let agent;
 	const username = "accountPerm";
-	const password = "accountPerm";
 	const project = 'Sample_Project';
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 	let testSession;
 
-	before(async () => {
+	before(async function () {
+		this.timeout(30000);
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, function () {
 				console.log("API test server is listening on port 8080!");
-
-				agent = request(server);
-				testSession = SessionTracker(agent);
-				testSession.login(username, password).then(() => {resolve()});
+				resolve();
 			});
 		});
+		agent = request(server);
+		testSession = SessionTracker(agent);
+		await testSession.login(username);
 	});
 
 	after(function(done) {
-		server.close(function() {
-			console.log("API test server is closed");
+		if (server) {
+			server.close(function() {
+				console.log("API test server is closed");
+				done();
+			});
+		} else {
 			done();
-		});
+		}
 	});
 
 	it("should fail to assign permissions to a user that doesnt exist", function(done) {

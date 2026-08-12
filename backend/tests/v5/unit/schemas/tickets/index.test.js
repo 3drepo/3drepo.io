@@ -645,7 +645,7 @@ const testAllProperties = () => {
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
-			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
+			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), new Date('3000-01-01T00:00:00.000Z').getTime()],
 			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],

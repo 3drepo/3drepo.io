@@ -23,6 +23,7 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
+const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
@@ -59,10 +60,11 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		return required ? schema.required() : schema;
 	};
 
-	const selectionSchema = Yup.object().shape({
+	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
 		rules: rulesSchema,
 	});
+	const selectionSchema = Yup.array().of(selectionEntrySchema.required()).min(1);
 
 	const defaultStatusesObject = {};
 	statusEvents.forEach((event) => {
@@ -90,7 +92,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		type: imposeCondition(Yup.string().oneOf(Object.values(CLASH_TYPES)), true, false),
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
-			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
+			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, false),
 		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string()
 			.oneOf(Object.values(triggerOptions))).min(1)), true, false),
 		selectionA: imposeCondition(selectionSchema, true, false),
@@ -186,8 +188,16 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTickets(teamspace, project, ticketData.federation,
+		const [{ newTicket: validatedTicket }] = await validateTickets(teamspace, project, ticketData.federation,
 			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
+
+		if (updateData.valuesAtCreation?.length) {
+			// Ticket validation may deserialise values, e.g. date fields, so keep the validated values.
+			updateData.valuesAtCreation = updateData.valuesAtCreation.map((entry) => {
+				const target = entry.module ? validatedTicket.modules[entry.module] : validatedTicket.properties;
+				return { ...entry, value: target[entry.property] };
+			});
+		}
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -226,9 +236,7 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					const normaliseArray = (array) => [...new Set(array)].sort();
-					if (isArray(req.planData[key])
-						&& isEqual(normaliseArray(req.planData[key]), normaliseArray(bodyVal))) {
+					if (isEqual(bodyVal, req.planData[key])) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {
@@ -258,6 +266,18 @@ Clashes.planExists = async (req, res, next) => {
 	}
 };
 
+Clashes.clashRunInPlan = async (req, res, next) => {
+	const { teamspace, project, planId, runId } = req.params;
+
+	try {
+		req.outputData = await getClashRunByQuery(
+			teamspace, project, { _id: runId, 'plan._id': planId }, { project: 0 });
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
 Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
@@ -265,11 +285,6 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
 		await next();
 	} catch (err) {
-		if (err === templates.revisionNotFound) {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
-			return;
-		}
-
 		respond(req, res, err);
 	}
 };

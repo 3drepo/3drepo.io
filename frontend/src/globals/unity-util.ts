@@ -20,12 +20,70 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
 declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
+// The contents of this type will change in line with the needs of
+// the Test Automation or Profiling Tools.
+type ModelStatistics = {
+	bundlesLoaded: number,
+	bundleLoadingTasks: number,
+	frameCount: number,
+};
+
+type Deferred<T> = {
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
+};
+
+// Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
+// Used for requestPointInfo.
+export interface CanvasPosition {
+	x: number,
+	y: number,
+}
+
+// Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
+// Used for requestPointInfo.
+export interface ClientPosition {
+	clientX: number,
+	clientY: number,
+}
+
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
+export interface PointInfo {
+	id: string,
+	database: string,
+	model: string,
+	pin: boolean,
+	mousePos: number[],
+	position: number[],
+	normal: number[],
+	requestId: string,
+}
+
+export interface Bounds {
+	min: number[],
+	max: number[]
+}
+
+export interface PickInfo {
+	mousePos: number[],
+	position: number[],
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -78,6 +136,14 @@ export class UnityUtil {
 	/** @hidden */
 	public static externalWebRequestHandler;
 
+	/** Stores an offset into the WASM heap were the model statistics counters
+	 * can be found. These are in the same order as the Statistics in the
+	 * viewer's GUI display. This is an internal property and subject to change
+	 * without notice.
+	 *  @hidden
+	*/
+	public static modelStatisticsArrayOffset: number = 0;
+
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
 	/** @hidden */
@@ -124,6 +190,12 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectStatusPromises = [];
+
+	/** @hidden */
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -673,6 +745,58 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
+	public static respondToPointInfoRequest(pointInfo) {
+
+		let data: PointInfo;
+		
+		// Parse data
+		try {
+			data = JSON.parse(pointInfo) as PointInfo;
+		} catch (error) {
+			// In the case of malformed data, we can't recover the key and reject all currently open requests.
+			// This is preferrable to leaving them hanging indefinitely.
+			// If the viewer is sending malformed data they are probably all shot anyway.
+			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
+ 			UnityUtil.pointInfoPromises.clear();
+ 			return;
+		}
+
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', data);
+		}
+
+		// If there are any promises waiting for this point info, resolve or reject them
+		const key = data.requestId;
+		if (this.pointInfoPromises.has(key)) {
+			this.pointInfoPromises.get(key).resolve(data);
+			this.pointInfoPromises.delete(key);
+		} else {
+			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToBoundsRequest', json);
+		}
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		if (min?.length === 3 && max?.length === 3) {
+			deferred.resolve({
+				min,
+				max,
+			});
+		} else {
+			deferred.reject();
+		}
+	}
+
+	/** @hidden */
 	public static ready() {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
@@ -682,7 +806,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
-		const point = JSON.parse(pointInfo);
+		const point = JSON.parse(pointInfo) as PickInfo;
 		if (UnityUtil.verbose) {
 			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
@@ -1273,6 +1397,15 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
 	 /**
 	 * Enable Cursor
 	 * Note: Changing the snap mode can affect the cursor.
@@ -1687,6 +1820,119 @@ export class UnityUtil {
 	}
 
 	/**
+ 	 * Request point information for an arbitrary location on the Unity canvas.
+ 	 *
+ 	 * Accepts either:
+ 	 * - ClientPosition: `clientX`/`clientY` from PointerEvent/MouseEvent/Touch in viewport coordinates
+ 	 * - CanvasPosition: canvas pixel coordinates with (0,0) at the bottom-left corner
+ 	 * @category Model Interactions
+	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
+	 * @returns A promise that resolves with the point information object returned by the viewer.
+ 	 */
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
+		
+		let x: number;
+		let y: number;
+
+		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
+		if ('clientX' in position && 'clientY' in position) {
+
+			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
+			// bottom left-corner.
+
+			const canvas = this.unityInstance.Module.canvas;
+			const rect = canvas.getBoundingClientRect();
+			
+			// Apply display scale
+			const scale = window.devicePixelRatio || 1;
+			const scaledX = position.clientX * scale;
+			const scaledY = position.clientY * scale;
+			const scaledHeight = rect.height * scale;
+			const scaledLeft = rect.left * scale;
+			const scaledTop = rect.top * scale;
+			
+			x = Math.floor(scaledX - scaledLeft);
+			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
+		} else if ('x' in position && 'y' in position) {
+
+			// If it is a CanvasPosition, we can extract the coordinates directly.
+
+			x = position.x;
+			y = position.y;
+		} else {
+			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
+		}
+
+		// Round down the coordinates to the nearest integer, as Unity expects integer
+		// values for pixel coordinates and will truncate any decimal values.
+		x = Math.floor(x);
+		y = Math.floor(y);
+
+		const requestId = uuidGen();
+
+		const newPointInfoPromise = new Promise((resolve, reject) => {
+			
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
+			// with the point info, we can resolve the correct promise.
+			const key = requestId;
+			if (!this.pointInfoPromises.has(key)) {
+				this.pointInfoPromises.set(key, { resolve, reject });
+			} else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
+			}
+		});
+
+		const params = {
+			x,
+			y,
+			requestId,
+			options,
+		};
+
+		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	/**
+	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
+	 * uniqueId.
+	 * @param teamspace name of the teamspace
+	 * @param project name of the project
+	 * @param container name of the container - this must be the exact
+	 * container holding the unique id, it cannot be a federation.
+	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
+	 * them. If the array is empty, will return the bounds of the whole container.
+	 * @returns a promise containing the bounds in project coordinates. If the
+	 * teamspace/project/container/id combination are not valid, the promise
+	 * will be rejected.
+	 * @example ```
+	 * UnityUtil.viewer.objectSelected = (ev) => {
+		UnityUtil.requestBounds(ev.database, "", ev.model, [ev.id]).then((bounds) => {
+			var center = [
+				(bounds.max[0] + bounds.min[0]) * 0.5,
+				(bounds.max[1] + bounds.min[1]) * 0.5,
+				(bounds.max[2] + bounds.min[2]) * 0.5
+			];
+			UnityUtil.dropIssuePin("myPin",center,[1,0,0]);
+		})
+	  }```
+	 */
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
+	}
+
+	/**
 	 * Decrease the speed of Helicopter navigation (by x0.75)
 	 * @category Navigations
 	 */
@@ -1923,20 +2169,22 @@ export class UnityUtil {
 	/**
 	 * Override the colour of given object(s)
 	 * @category Object Highlighting
-	 * @param account - teamspace the meshes resides in
-	 * @param model - model ID the meshes resides in
+	 * @param teamspace - teamspace the meshes resides in
+	 * @param container - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
+	 * @param excludeIds - If set to true, the color override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
-	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
+	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
-			if (account && model) {
-				param.nameSpace = `${account}.${model}`;
+			if (teamspace && container) {
+				param.nameSpace = `${teamspace}.${container}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1947,15 +2195,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1968,9 +2218,10 @@ export class UnityUtil {
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param opacity - opacity (>0 - 1) value to override with
+	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -1978,6 +2229,7 @@ export class UnityUtil {
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.opacity = opacity;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -1988,15 +2240,17 @@ export class UnityUtil {
 	 * @param account - teamspace the meshes resides in
 	 * @param model - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
 				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2093,15 +2347,15 @@ export class UnityUtil {
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with an object with a screenshot in base64 format
+	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
 	 */
-	public static requestScreenShot(): Promise<object> {
+	public static requestScreenShot(): Promise<string> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
-		return newScreenshotPromise as Promise<object>;
+		return newScreenshotPromise as Promise<string>;
 	}
 
 	/**
@@ -2133,9 +2387,9 @@ export class UnityUtil {
 	 */
 	public static setAPIHost(hostNames: { hostNames: string[] }) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostNames));
-		if (UnityUtil.externalWebRequestHandler !== undefined) {
-			UnityUtil.externalWebRequestHandler.setAPIHost(hostNames.hostNames);
-		}
+		UnityUtil.onReady().then(() => { // Make sure not to check externalWebRequestHandler until after we know whether it will be initialised or not
+			UnityUtil.externalWebRequestHandler?.setAPIHost(hostNames.hostNames);
+		});
 	}
 
 	/**
@@ -2145,6 +2399,9 @@ export class UnityUtil {
 	 */
 	public static setAPIKey(apiKey: string) {
 		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+		UnityUtil.onReady().then(() => {
+			UnityUtil.externalWebRequestHandler?.setAPIKey(apiKey);
+		});
 	}
 
 	/**
@@ -2240,7 +2497,7 @@ export class UnityUtil {
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
-	 * @param pos - 3D point in space where the camera should be
+	 * @param position - 3D point in space where the camera should be
 	 * @param up - Up vector
 	 * @param forward - forward vector
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
@@ -2249,11 +2506,11 @@ export class UnityUtil {
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
-		pos: [number],
-		up: [number],
-		forward: [number],
-		lookAt: [number],
-		projectionType?: boolean,
+		position: number[],
+		up: number[],
+		forward: number[],
+		lookAt: number[],
+		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
@@ -2278,7 +2535,7 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
-		param.position = pos;
+		param.position = position;
 		param.up = up;
 		param.forward = forward;
 		param.lookAt = lookAt;
@@ -2357,7 +2614,14 @@ export class UnityUtil {
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 5000) {
+		if (arrLength == 0) {
+			//pass the message as is
+			return new Promise((resolve) => {
+				func(0, 0);
+				this.unityOnUpdateActions.push(resolve);
+			});
+		}
 		return new Promise((resolve) => {
 			let index = 0;
 			while (index < arrLength) {
@@ -2381,7 +2645,7 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
-	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
+	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2390,6 +2654,7 @@ export class UnityUtil {
 
 			param.ids = ids.slice(start, end);
 			param.visible = visibility;
+			param.excludeIds = excludeIds;
 			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
@@ -2870,6 +3135,27 @@ export class UnityUtil {
 		}
 	}
 
+	/** Polls the viewer for a number of model statistics. This is an internal
+	 * API for the use of the Automated Tests and is subject to change without
+	 * notice.
+	 * @hidden
+	 */
+	public static getModelStatistics(): ModelStatistics {
+		const statistics: ModelStatistics = {
+			bundlesLoaded: 0,
+			bundleLoadingTasks: 0,
+			frameCount: 0,
+		};
+		if (UnityUtil.modelStatisticsArrayOffset) {
+			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
+			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.bundlesLoaded = heap[ptr64 + 23];
+			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.frameCount = heap[ptr64 + 30];
+		}
+		return statistics;
+	}
+
 	/**
 	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
 	 * with additional options for clipping and gizmo display. rect should be the 
@@ -2980,7 +3266,7 @@ export class UnityUtil {
 			UnityUtil.viewer.onAutorecovery(newCanvas);
 		}
 	}
-	
+
 	/** 
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.
