@@ -337,7 +337,7 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 					project: UUIDToString(project),
 					planId: UUIDToString(planId),
 					runId: UUIDToString(runId),
-				}),
+				}, undefined, true),
 			updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { reason: `Error retrieving clashes from last run: ${err.message}` } }),
 		]);
