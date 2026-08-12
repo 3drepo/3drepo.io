@@ -23,7 +23,7 @@ import { CoordsProperty } from './coordsProperty/coordsProperty.component';
 import { SequencingProperty } from '@components/viewer/cards/tickets/sequencingProperty/sequencingProperty.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
-import { TagProperty } from './tagProperty.component';
+import { TagsProperty } from './tagsProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
 import { TicketView } from './ticketView/ticketView.component';
 import { TicketImageList } from './ticketImageList/ticketImageList.component';
@@ -35,7 +35,7 @@ export const TicketProperty = {
 	sequencing: SequencingProperty,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
-	tags: TagProperty,
+	tags: TagsProperty,
 	boolean: Toggle,
 	coords: CoordsProperty,
 	number: NumberField,

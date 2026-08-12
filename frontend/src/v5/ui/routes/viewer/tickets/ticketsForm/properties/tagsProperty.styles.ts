@@ -20,17 +20,17 @@ import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 import { FormControl, FormHelperText } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const TagPropertyContainer = styled(FormControl)`
+export const TagsPropertyContainer = styled(FormControl)`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
 `;
 
-export const TagChipContainer = styled(ChipContainer)`
+export const TagsChipContainer = styled(ChipContainer)`
 	max-width: 140px;
 `;
 
-export const TagChipLabel = styled.span`
+export const TagsChipLabel = styled.span`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -47,7 +47,7 @@ export const ChipsInputBox = styled(InputContainer)`
 	cursor: text;
 `;
 
-export const TagInput = styled.input`
+export const TagsInput = styled.input`
 	flex: 1;
 	min-width: 90px;
 	height: 22px;

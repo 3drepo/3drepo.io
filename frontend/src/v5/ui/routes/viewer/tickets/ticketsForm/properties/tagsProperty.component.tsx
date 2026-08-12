@@ -21,15 +21,15 @@ import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { InputLabel, Tooltip } from '@mui/material';
 import { DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
-import { ChipsInputBox, FieldHint, HelperText, Kbd, TagChipContainer, TagChipLabel, TagInput, TagPropertyContainer } from './tagProperty.styles';
+import { ChipsInputBox, FieldHint, HelperText, Kbd, TagsChipContainer, TagsChipLabel, TagsInput, TagsPropertyContainer } from './tagsProperty.styles';
 import { formatMessage } from '@/v5/services/intl';
 
-type TagPropertyProps = FormInputProps & {
+type TagsPropertyProps = FormInputProps & {
 	value: string[];
 	immutable?: boolean;
 };
 
-export const TagProperty = ({ value, onChange, onBlur, disabled, required, label, error, helperText }: TagPropertyProps) => {
+export const TagsProperty = ({ value, onChange, onBlur, disabled, required, label, error, helperText }: TagsPropertyProps) => {
 	const tags = Array.isArray(value) ? value : [];
 	const [inputValue, setInputValue] = useState('');
 	const [focused, setFocused] = useState(false);
@@ -91,7 +91,7 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 	};
 
 	return (
-		<TagPropertyContainer
+		<TagsPropertyContainer
 			ref={containerRef}
 			onClick={() => inputRef.current?.focus()}
 			onBlur={handleContainerBlur}
@@ -103,18 +103,18 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 			<ChipsInputBox selected={isFocused} error={error} disabled={disabled} required={required} onMouseDown={preventFocusSteal}>
 				{tags.map((val) => (
 					<Tooltip key={val} title={val}>
-						<TagChipContainer selected={false}>
-							<TagChipLabel>{val}</TagChipLabel>
+						<TagsChipContainer selected={false}>
+							<TagsChipLabel>{val}</TagsChipLabel>
 							{isEditable && (
 								<DeleteButton onClick={(e) => { e.stopPropagation(); removeTag(val); }}>
 									<CloseIcon />
 								</DeleteButton>
 							)}
-						</TagChipContainer>
+						</TagsChipContainer>
 					</Tooltip>
 				))}
 				{isEditable && (
-					<TagInput
+					<TagsInput
 						ref={inputRef}
 						value={inputValue}
 						onChange={(e) => {
@@ -141,6 +141,6 @@ export const TagProperty = ({ value, onChange, onBlur, disabled, required, label
 				<FormattedMessage id="tagProperty.hint.removesLast" defaultMessage="removes last" />
 			</FieldHint>
 			{helperText && <HelperText error={error}>{helperText}</HelperText>}
-		</TagPropertyContainer>
+		</TagsPropertyContainer>
 	);
 };
