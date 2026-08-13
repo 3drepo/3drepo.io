@@ -129,7 +129,7 @@
 		"three": "0.167.1",
 		"type-fest": "2.3.2",
 		"ua-parser-js": "1.0.37",
-		"uuidv4": "5.0.1",
+		"uuid": "11.1.1",
 		"worker-loader": "3.0.8",
 		"yup": "1.7.1",
 		"zxcvbn": "4.4.2"
@@ -206,6 +206,12 @@
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
 		"@types/react": "19.2.14",
-		"@types/react-dom": "19.2.3"
+		"@types/react-dom": "19.2.3",
+		"ws": "8.21.3",
+		"brace-expansion": "2.1.4",
+		"js-yaml": "3.15.1",
+		"linkify-it": "6.1.0",
+		"form-data": "4.0.6",
+		"uuid": "11.1.1"
 	}
 }
