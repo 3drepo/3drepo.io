@@ -64,7 +64,7 @@
 		"copy-to-clipboard": "3.2.0",
 		"countries-and-timezones": "3.3.0",
 		"dayjs": "1.11.13",
-		"dompurify": "3.4.0",
+		"dompurify": "3.4.13",
 		"eventemitter3": "3.1.0",
 		"faker": "5.5.3",
 		"file-dialog": "0.0.7",
@@ -135,7 +135,7 @@
 		"zxcvbn": "4.4.2"
 	},
 	"devDependencies": {
-		"@babel/core": "7.23.7",
+		"@babel/core": "7.29.7",
 		"@babel/plugin-transform-react-jsx": "7.23.4",
 		"@babel/preset-env": "7.23.8",
 		"@babel/preset-react": "7.23.3",
@@ -182,7 +182,7 @@
 		"jest-environment-jsdom": "29.7.0",
 		"nock": "13.5.6",
 		"path": "0.12.7",
-		"postcss": "8.5.10",
+		"postcss": "8.5.26",
 		"postcss-scss": "4.0.9",
 		"storybook": "8.6.18",
 		"style-loader": "3.3.1",
@@ -201,7 +201,7 @@
 	},
 	"resolutions": {
 		"cookie": "0.7.0",
-		"postcss": "8.5.10",
+		"postcss": "8.5.26",
 		"send": "0.19.0",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
