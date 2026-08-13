@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>[QA_5_24] Activities you have missed</title>
   <style>
     /* Email-safe CSS: literal values, no CSS variables, Grid, Flexbox, gap, min(), or place-items. */
     body {
@@ -464,10 +463,12 @@
   <% } %>
 
   <% if (ticketData?.length > 0) { %>
-    <hr class="section-divider" />
+      <% if (clashData?.length > 0) { %>
+      <hr class="section-divider" />  
+      <% } %>
+    
     <h3 class="section-label">Ticket activity</h3>
-
-    <div class="model-block">
+    <div class="run-list">
     <% for(const { model, tickets } of ticketData) { %>
     <div class="model-block">
       <div class="model-label-cell">
@@ -496,6 +497,19 @@
                 updated.
           </a>
           <a class="open-link" href="<%= domain %><%= tickets?.updated?.link %>" target="_blank">OPEN ↗</a>
+        </div>
+        <% } %>
+
+        <% if(tickets.closed?.count) { %>
+        <div class="ticket-row">
+          <span class="ticket-icon" aria-label="Closed">✔</span>
+          <a href="#">		
+            <%= tickets.closed?.count %>
+              <%= tickets.closed?.count===1? "ticket" : "tickets" %> you are
+                associated with <%= tickets.closed?.count===1? "was" : "were" %>
+                closed.
+          </a>
+          <a class="open-link" href="<%= domain %><%= tickets?.closed?.link %>" target="_blank">OPEN ↗</a>
         </div>
         <% } %>
 
