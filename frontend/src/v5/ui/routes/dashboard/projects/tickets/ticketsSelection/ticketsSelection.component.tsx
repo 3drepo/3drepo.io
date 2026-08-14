@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SyntheticEvent } from 'react';
 import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath, useParams, useNavigate } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
@@ -55,7 +56,8 @@ export const TicketsSelection = () => {
 
 	const isValid = !!(template && containersAndFederations.length);
 
-	const goToTableView = () => {
+	const goToTableView = (event: SyntheticEvent) => {
+		event.preventDefault();
 		if (!isValid) return;
 
 		const search = `models=${containersAndFederations.join(',')}`;
