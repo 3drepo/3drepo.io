@@ -95,7 +95,7 @@ export const BreadcrumbsRouting = () => {
 			path = TICKETS_ROUTE;
 		}
 
-		const match = matchPath({ path, end: false }, location.pathname);
+		const match = matchPath({ path, end: false }, pathname);
 		const projectParams = match?.params || {};
 
 		options = projects.map(({ name, _id }) => ({
