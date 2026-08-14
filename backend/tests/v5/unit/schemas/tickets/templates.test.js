@@ -29,6 +29,15 @@ const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValu
 const testValidate = () => {
 	const statusValues = generateCustomStatusValues();
 
+	const generateBasicSchema = ({ modules, properties, config, deprecated }) => ({
+		name: generateRandomString(),
+		code: generateRandomString(3),
+		modules,
+		properties,
+		config,
+		deprecated,
+	});
+
 	const nameTests = [
 		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
 		['the name is an empty string', { name: '', code: generateRandomString(3) }, false],
@@ -42,60 +51,161 @@ const testValidate = () => {
 	];
 
 	const schemaFieldsTest = [
-		['all optional properties provided', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-				comments: false,
-				issueProperties: true,
-				defaultView: true,
-				defaultImage: false,
-				pin: true,
-
-			},
-			deprecated: true,
-			properties: undefined,
-			modules: undefined,
-		}, true],
-		['pin with a colour defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-				pin: { color: [50, 50, 50] },
-
-			},
-			properties: undefined,
-			modules: undefined,
-		}, true],
-		['pin with a colour and icon defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-				pin: {
-					color: [50, 50, 50],
-					icon: 'RISK',
+		['all optional properties provided',
+			generateBasicSchema({
+				config: {
+					comments: false,
+					issueProperties: true,
+					defaultView: true,
+					defaultImage: false,
+					pin: true,
 				},
-
-			},
-			properties: undefined,
-			modules: undefined,
-		}, true],
-		['pin with a colour defined but icon is wrong', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-				pin: {
-					color: [50, 50, 50],
-					icon: generateRandomString(),
+				deprecated: true,
+			}),
+			true],
+		['pin with a colour defined',
+			generateBasicSchema({
+				config: {
+					pin: { color: [50, 50, 50] },
 				},
+			}),
+			true],
+		['pin with a colour and icon defined',
+			generateBasicSchema({
+				config: {
+					pin: {
+						color: [50, 50, 50],
+						icon: {
+							property: {
+								name: 'fixedName',
+							},
+							mapping: [{
+								default: 'RISK',
+							}],
+						},
+					},
+				},
+				properties: [{
+					name: 'fixedName',
+					type: propTypes.TEXT,
+				}],
+			}),
+			true],
+		['pin with an icon mapping with an invalid default icon',
+			generateBasicSchema({
+				config: {
+					pin: {
+						color: [50, 50, 50],
+						icon: {
+							property: {
+								name: 'fixedName',
+							},
+							mapping: [{
+								default: generateRandomString(),
+							}],
+						},
+					},
 
-			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['pin with a colour logic defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+				},
+				properties: [{
+					name: 'fixedName',
+					type: propTypes.TEXT,
+				}],
+			}), false],
+		['pin with a legacy scalar icon',
+			generateBasicSchema({
+				config: {
+					pin: {
+						icon: 'RISK',
+					},
+				},
+			}), true],
+		['pin with an icon mapping with no mapping entries',
+			generateBasicSchema({
+				config: {
+					pin: {
+						icon: {
+							property: { name: 'fixedName' },
+						},
+					},
+				},
+				properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+			}), false],
+		['pin with a colour logic defined',
+			generateBasicSchema({
+				config: {
+					pin: {
+						color: {
+							property: {
+								name: 'fixedName',
+							},
+							mapping: [
+								{
+									default: [255, 255, 255],
+								},
+								{
+									value: generateRandomString(),
+									color: [50, 50, 50],
+								},
+								{
+									value: generateRandomString(),
+									color: [0, 0, 50],
+								},
+							],
+						},
+					},
+
+				},
+				properties: [{
+					name: 'fixedName',
+					type: propTypes.TEXT,
+				}],
+			}), true],
+		['pin with a colour logic and icon defined ',
+			generateBasicSchema({
+				config: {
+					pin: {
+						color: {
+							property: {
+								name: 'fixedName',
+							},
+							mapping: [
+								{
+									default: [255, 255, 255],
+								},
+								{
+									value: generateRandomString(),
+									color: [50, 50, 50],
+								},
+								{
+									value: generateRandomString(),
+									color: [0, 0, 50],
+								},
+							],
+						},
+						icon: {
+							property: {
+								name: 'fixedName',
+							},
+							mapping: [
+								{
+									default: 'ISSUE',
+								},
+								{
+									value: generateRandomString(),
+									icon: 'RISK',
+								},
+							],
+						},
+					},
+
+				},
+				properties: [{
+					name: 'fixedName',
+					type: propTypes.TEXT,
+				}],
+			}), true],
+		['pin with an icon mapping that has an invalid conditional icon', generateBasicSchema({
 			config: {
 				pin: {
 					color: {
@@ -116,39 +226,20 @@ const testValidate = () => {
 							},
 						],
 					},
-				},
-
-			},
-			properties: [{
-				name: 'fixedName',
-				type: propTypes.TEXT,
-			}],
-			modules: undefined,
-		}, true],
-		['pin with a colour logic and icon defined ', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-				pin: {
-					color: {
+					icon: {
 						property: {
 							name: 'fixedName',
 						},
 						mapping: [
 							{
-								default: [255, 255, 255],
+								default: 'ISSUE',
 							},
 							{
 								value: generateRandomString(),
-								color: [50, 50, 50],
-							},
-							{
-								value: generateRandomString(),
-								color: [0, 0, 50],
+								icon: generateRandomString(),
 							},
 						],
 					},
-					icon: 'ISSUE',
 				},
 
 			},
@@ -156,44 +247,76 @@ const testValidate = () => {
 				name: 'fixedName',
 				type: propTypes.TEXT,
 			}],
-			modules: undefined,
-		}, true],
-		['pin with a colour logic definde but the icon is wrong ', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['pin with an icon mapping that has no default entry', generateBasicSchema({
 			config: {
 				pin: {
-					color: {
-						property: {
-							name: 'fixedName',
-						},
-						mapping: [
-							{
-								default: [255, 255, 255],
-							},
-							{
-								value: generateRandomString(),
-								color: [50, 50, 50],
-							},
-							{
-								value: generateRandomString(),
-								color: [0, 0, 50],
-							},
-						],
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ value: generateRandomString(), icon: 'RISK' }],
 					},
-					icon: generateRandomString(),
 				},
-
 			},
-			properties: [{
-				name: 'fixedName',
-				type: propTypes.TEXT,
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}), false],
+		['pin with an icon mapping that has multiple default entries', generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { default: 'ISSUE' }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}), false],
+		['pin with an icon mapping whose conditional entry has no value', generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { icon: 'ISSUE' }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}), false],
+		['pin with an icon mapping whose conditional entry has no icon', generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName' },
+						mapping: [{ default: 'RISK' }, { value: generateRandomString() }],
+					},
+				},
+			},
+			properties: [{ name: 'fixedName', type: propTypes.TEXT }],
+		}), false],
+		['pin with an icon mapping that has no property name', generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: {},
+						mapping: [{ default: 'RISK' }],
+					},
+				},
+			},
+		}), false],
+		['pin with an icon mapping that references a module property', generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'fixedName', module: 'mod' },
+						mapping: [{ default: 'MARKER' }],
+					},
+				},
+			},
+			modules: [{
+				name: 'mod',
+				properties: [{ name: 'fixedName', type: propTypes.TEXT }],
 			}],
-			modules: undefined,
-		}, false],
-		['pin with a colour logic defined but no default specified', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['pin with a colour logic defined but no default specified', generateBasicSchema({
 			config: {
 				pin: {
 					color: {
@@ -214,12 +337,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['pin with a colour logic defined but more than 1 default specified', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['pin with a colour logic defined but more than 1 default specified', generateBasicSchema({
 			config: {
 				pin: {
 					color: {
@@ -238,12 +357,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['pin with a colour logic defined (module property)', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['pin with a colour logic defined (module property)', generateBasicSchema({
 			config: {
 				pin: {
 					color: {
@@ -280,61 +395,39 @@ const testValidate = () => {
 					],
 				},
 			],
-		}, true],
+		}), true],
 
-		['pin with an invalid colour', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		['pin with an invalid colour', generateBasicSchema({
 			config: {
 				pin: { color: generateRandomString() },
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['pin defined with empty object', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['pin defined with empty object', generateBasicSchema({
 			config: {
 				pin: {},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with no values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with no values', generateBasicSchema({
 			config: {
 				status: { default: generateRandomString() },
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with empty values array', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with empty values array', generateBasicSchema({
 			config: {
 				status: { values: [], default: generateRandomString() },
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with no default', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with no default', generateBasicSchema({
 			config: {
 				status: { values: statusValues },
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status that has a value with no name', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status that has a value with no name', generateBasicSchema({
 			config: {
 				status: {
 					values: [...statusValues, { type: statusTypes.OPEN }],
@@ -342,12 +435,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status that has a value with no type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status that has a value with no type', generateBasicSchema({
 			config: {
 				status: {
 					values: [...statusValues, { name: generateRandomString() }],
@@ -355,12 +444,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status that has a value with invalid type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status that has a value with invalid type', generateBasicSchema({
 			config: {
 				status: {
 					values: [...statusValues, { name: generateRandomString(), type: generateRandomString() }],
@@ -368,12 +453,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status that has a default which does not exist in values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status that has a default which does not exist in values', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues,
@@ -381,12 +462,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with duplicated values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with duplicated values', generateBasicSchema({
 			config: {
 				status: {
 					values: [...statusValues, ...statusValues],
@@ -394,12 +471,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with no open type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with no open type', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues.filter(({ type }) => type !== statusTypes.OPEN),
@@ -407,12 +480,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with no done type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with no done type', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues.filter(({ type }) => type !== statusTypes.DONE),
@@ -420,12 +489,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status with only open and void', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status with only open and void', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues.filter(({ type }) => [statusTypes.OPEN, statusTypes.VOID].includes(type)),
@@ -433,12 +498,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, false],
-		['status that is valid', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['status that is valid', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues,
@@ -446,12 +507,8 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, true],
-		['status with open and done types is valid', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['status with open and done types is valid', generateBasicSchema({
 			config: {
 				status: {
 					values: statusValues.filter(
@@ -461,98 +518,77 @@ const testValidate = () => {
 				},
 
 			},
-			properties: undefined,
-			modules: undefined,
-		}, true],
-		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
-		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
-		['property name is used by a default property', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['properties is an empty array', generateBasicSchema({ properties: [] }), true],
+		['properties is of the wrong type', generateBasicSchema({ properties: 'a' }), false],
+		['property name is used by a default property', generateBasicSchema({
 			properties: [{
 				name: basePropertyLabels.STATUS,
 				type: propTypes.TEXT,
 			}],
-
-		}, false],
-		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [] }, true],
-		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a' }, false],
+		}), false],
+		['modules is an empty array', generateBasicSchema({ modules: [] }), true],
+		['modules is of the wrong type', generateBasicSchema({ modules: 'a' }), false],
 	];
 
 	const propertiesTest = [
-		['property is undefined', { name: generateRandomString(), code: generateRandomString(3), properties: [undefined] }, false],
-		['property is not an object', { name: generateRandomString(), code: generateRandomString(3), properties: ['a'] }, false],
-		['property is an empty object', { name: generateRandomString(), code: generateRandomString(3), properties: [{}] }, false],
-		['property has an unknown type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		['property is undefined', generateBasicSchema({ properties: [undefined] }), false],
+		['property is not an object', generateBasicSchema({ properties: ['a'] }), false],
+		['property is an empty object', generateBasicSchema({ properties: [{}] }), false],
+		['property has an unknown type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: 'abc',
 			}],
 
-		}, false],
-		['property has all required properties', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property has all required properties', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 			}],
 
-		}, true],
-		['tags property has all required properties', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property has all required properties', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 			}],
 
-		}, true],
-		['property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				unique: true,
 			}],
 
-		}, true],
-		['number property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['number property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.NUMBER,
 				unique: true,
 			}],
 
-		}, true],
-		['date property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['date property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.DATE,
 				unique: true,
 			}],
 
-		}, true],
-		['pastDate property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['pastDate property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.PAST_DATE,
 				unique: true,
 			}],
 
-		}, true],
-		['oneOf property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['oneOf property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
@@ -560,222 +596,185 @@ const testValidate = () => {
 				unique: true,
 			}],
 
-		}, true],
-		['property is unique for unsupported type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property is unique for unsupported type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
 				unique: true,
 
-			}] }, false],
-		['property is unique for manyOf type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is unique for manyOf type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString()],
 				unique: true,
 
-			}] }, false],
-		['property is unique for tags type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is unique for tags type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				unique: true,
 
-			}] }, false],
-		['property is readOnly', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is readOnly', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
 				readOnly: true,
-			}] }, true],
-		['property is readOnly and required', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), true],
+		['property is readOnly and required', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
 				readOnly: true,
 				required: true,
-			}] }, false],
-		['property is not readOnly but value is configured', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is not readOnly but value is configured', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				value: generateRandomString(),
-			}] }, false],
-		['property is readOnly but value contains no placeholder', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is readOnly but value contains no placeholder', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: generateRandomString(),
-			}] }, true],
-		['property is readOnly but type is not supported', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), true],
+		['property is readOnly but type is not supported', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.DATE,
 				readOnly: true,
 				value: generateRandomString(),
-			}] }, false],
-		['property is readOnly but value contains unknown placeholder', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is readOnly but value contains unknown placeholder', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: `{${generateRandomString()}}`,
-			}] }, false],
-		['property is readOnly but value contains known placeholders', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is readOnly but value contains known placeholders', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnly: true,
 				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
-			}] }, true],
-		['property is readOnly but value contains known placeholders (long text)', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), true],
+		['property is readOnly but value contains known placeholders (long text)', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.LONG_TEXT,
 				readOnly: true,
 				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
-			}] }, true],
-		['property is readOnlyOnUI', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), true],
+		['property is readOnlyOnUI', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnlyOnUI: true,
 			}],
 
-		}, true],
-		['property is hiddenOnUI', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property is hiddenOnUI', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				hiddenOnUI: true,
 			}],
 
-		}, true],
-		['property is immutable', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property is immutable', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				immutable: true,
 			}],
 
-		}, true],
-		['property name contains fullstop', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property name contains fullstop', generateBasicSchema({
 			properties: [{
 				name: `${generateRandomString()}.`,
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['property name starts with dollar sign', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property name starts with dollar sign', generateBasicSchema({
 			properties: [{
 				name: `$${generateRandomString()}`,
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['property name contains colon', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property name contains colon', generateBasicSchema({
 			properties: [{
 				name: `${generateRandomString()}:`,
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['property name contains double quotes', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property name contains double quotes', generateBasicSchema({
 			properties: [{
 				name: `${generateRandomString()}"`,
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['property name contains square brackets', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property name contains square brackets', generateBasicSchema({
 			properties: [{
 				name: `${generateRandomString()}[]`,
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['property with enum type without values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type without values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
 			}],
 
-		}, false],
-		['property with enum type with duplicated values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type with duplicated values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
 			}],
 
-		}, false],
-		['property with enum type with duplicated values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type with duplicated values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
 			}],
 
-		}, false],
-		['property with enum type with values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type with values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 			}],
 
-		}, true],
-		['property with enum type with values where default value is not within the values provided', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property with enum type with values where default value is not within the values provided', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
@@ -783,10 +782,8 @@ const testValidate = () => {
 				default: generateRandomString(),
 			}],
 
-		}, true],
-		['property with enum type with values where default values are valid', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property with enum type with values where default values are valid', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
@@ -794,81 +791,65 @@ const testValidate = () => {
 				default: ['a', 'b'],
 			}],
 
-		}, true],
-		['tags property with default values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property with default values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				default: ['a', 'b'],
 			}],
 
-		}, true],
-		['tags property with values configured strips values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property with values configured strips values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				values: ['a', 'b'],
 			}],
 
-		}, true],
-		['tags property with duplicated default values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property with duplicated default values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				default: ['a', 'a'],
 			}],
 
-		}, true],
-		['tags property with empty default values', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property with empty default values', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				default: [],
 			}],
 
-		}, false],
-		['tags property with too long default value', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['tags property with too long default value', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TAGS,
 				default: [generateRandomString(121)],
 			}],
 
-		}, false],
-		['property with enum type with values being the wrong type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type with values being the wrong type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: [123, 12354],
 			}],
 
-		}, false],
+		}), false],
 
-		['property with enum type with values being the a preset list', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		['property with enum type with values being the a preset list', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
 				values: presetEnumValues.JOBS_AND_USERS,
 			}],
 
-		}, true],
-		['property with enum type with values is the wrong type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property with enum type with values is the wrong type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
@@ -876,10 +857,8 @@ const testValidate = () => {
 				default: ['a'],
 			}],
 
-		}, false],
-		['property with enum type with values where default values are duplicated', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['property with enum type with values where default values are duplicated', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
@@ -887,19 +866,15 @@ const testValidate = () => {
 				default: ['a', 'a'],
 			}],
 
-		}, true],
-		['property name is too long', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property name is too long', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(121),
 				type: propTypes.TEXT,
 			}],
 
-		}, false],
-		['all properties has all required properties', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['all properties has all required properties', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
@@ -909,10 +884,8 @@ const testValidate = () => {
 				default: 10,
 			}],
 
-		}, true],
-		['one of the properties doesn\'t match the schema', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['one of the properties doesn\'t match the schema', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
@@ -922,10 +895,8 @@ const testValidate = () => {
 				default: generateRandomString(),
 			}],
 
-		}, false],
-		['more than one property has the same name', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['more than one property has the same name', generateBasicSchema({
 			properties: [{
 				name: 'A',
 				type: propTypes.TEXT,
@@ -934,11 +905,9 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 			}],
 
-		}, false],
+		}), false],
 
-		['more than one property has the same name but different case', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		['more than one property has the same name but different case', generateBasicSchema({
 			properties: [{
 				name: 'A',
 				type: propTypes.TEXT,
@@ -947,59 +916,89 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 			}],
 
-		}, true],
-		['property default value type matches', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property default value type matches', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				default: generateRandomString(),
 			}],
 
-		}, true],
-		['property default value type mismatches', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property default value type mismatches', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}],
 
-		}, false],
-		['Coord property with no colour', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with no colour', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
 			}],
 
-		}, true],
-		['Coord property with color defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['Coord property with color defined', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
 				color: [50, 50, 50],
 			}],
 
-		}, true],
-		['Coord property with an invalid color defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['Coord property with an invalid color defined', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
 				color: ['a', 'b', 'c'],
 			}],
 
-		}, false],
-		['Coord property with color mapping defined', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with an icon defined', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				icon: 'RISK',
+			}],
+
+		}), true],
+		['Coord property with an invalid icon defined', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				icon: generateRandomString(),
+			}],
+
+		}), false],
+		['Coord property with icon mapping defined', generateBasicSchema({
+			properties: [
+				{
+					name: 'refMap',
+					type: propTypes.TEXT,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					icon: {
+						property: {
+							name: 'refMap',
+						},
+						mapping: [
+							{
+								default: 'RISK',
+							},
+							{
+								value: generateRandomString(),
+								icon: 'ISSUE',
+							},
+						],
+					},
+				}],
+
+		}), true],
+		['Coord property with color mapping defined', generateBasicSchema({
 			properties: [
 				{
 					name: 'refMap',
@@ -1028,10 +1027,8 @@ const testValidate = () => {
 					},
 				}],
 
-		}, true],
-		['Coord property with color mapping defined but referencing a deprecated field', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['Coord property with color mapping defined but referencing a deprecated field', generateBasicSchema({
 			properties: [
 				{
 					name: 'refMap',
@@ -1061,10 +1058,8 @@ const testValidate = () => {
 					},
 				}],
 
-		}, false],
-		['Coord property with color mapping defined but referencing a non existent field', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with color mapping defined but referencing a non existent field', generateBasicSchema({
 			properties: [
 				{
 					name: generateRandomString(),
@@ -1094,10 +1089,8 @@ const testValidate = () => {
 					},
 				}],
 
-		}, false],
-		['Coord property with color mapping defined (module property)', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with color mapping defined (module property)', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
@@ -1129,10 +1122,8 @@ const testValidate = () => {
 				}],
 			}],
 
-		}, true],
-		['Coord property with color mapping defined (no default)', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['Coord property with color mapping defined (no default)', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
@@ -1153,10 +1144,8 @@ const testValidate = () => {
 				},
 			}],
 
-		}, false],
-		['Coord property with color mapping defined (more than one default)', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with color mapping defined (more than one default)', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
@@ -1183,10 +1172,8 @@ const testValidate = () => {
 				},
 			}],
 
-		}, false],
-		['Coord property with no mapping', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), false],
+		['Coord property with no mapping', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.COORDS,
@@ -1199,8 +1186,7 @@ const testValidate = () => {
 				},
 			}],
 
-		}, false],
-
+		}), false],
 	];
 
 	const createSkeleton = (modules) => ({
@@ -1245,13 +1231,6 @@ const testValidate = () => {
 		]),
 	];
 
-	const generateBasicSchema = (modules, properties, config) => ({
-		name: generateRandomString(),
-		code: generateRandomString(3),
-		modules,
-		properties,
-		config,
-	});
 	const basicModules = [{
 		type: presetModules.SAFETIBASE,
 		properties: times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT })),
@@ -1277,10 +1256,10 @@ const testValidate = () => {
 	});
 	const tabularColumnsTest = [
 		['tabular column with all required properties filled in',
-			generateBasicSchema(
-				basicModules,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: basicModules,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1295,12 +1274,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), true],
+			}), true],
 		['tabular column that is not in properties',
-			generateBasicSchema(
-				basicModules,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: basicModules,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1311,12 +1290,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 		['tabular column module that is in module types',
-			generateBasicSchema(
-				basicModules,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: basicModules,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1328,12 +1307,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 		['tabular column module property that is in module properties',
-			generateBasicSchema(
-				basicModules,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: basicModules,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1345,12 +1324,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 		['tabular column property that is deprecated',
-			generateBasicSchema(
-				basicModules,
-				deprecatedProperties,
-				{
+			generateBasicSchema({
+				modules: basicModules,
+				properties: deprecatedProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1361,12 +1340,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 		['tabular column module property that is deprecated',
-			generateBasicSchema(
-				deprecatedModuleProperties,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: deprecatedModuleProperties,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1378,12 +1357,12 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 		['tabular column module is deprecated',
-			generateBasicSchema(
-				deprecatedModule,
-				basicProperties,
-				{
+			generateBasicSchema({
+				modules: deprecatedModule,
+				properties: basicProperties,
+				config: {
 					tabular:
 					{
 						columns:
@@ -1395,7 +1374,7 @@ const testValidate = () => {
 							],
 					},
 				},
-			), false],
+			}), false],
 	];
 
 	const createPropertiesArray = (numberOfItems, typeOfProp) => times(numberOfItems, (i) => (i % 3 === 0 ? ({
@@ -1408,12 +1387,12 @@ const testValidate = () => {
 	})));
 
 	const complexTypesDefaultTest = [
-		['image property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.IMAGE), {}), false],
-		['view property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.VIEW), {}), false],
-		['image list property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.IMAGE_LIST), {}), false],
-		['module image property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE) }], [], {}), false],
-		['module view property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.VIEW) }], [], {}), false],
-		['module image list property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }], [], {}), false],
+		['image property type with default true', generateBasicSchema({ properties: createPropertiesArray(5, propTypes.IMAGE) }), false],
+		['view property type with default true', generateBasicSchema({ properties: createPropertiesArray(5, propTypes.VIEW) }), false],
+		['image list property type with default true', generateBasicSchema({ properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }), false],
+		['module image property type with default true', generateBasicSchema({ modules: [{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE) }] }), false],
+		['module view property type with default true', generateBasicSchema({ modules: [{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.VIEW) }] }), false],
+		['module image list property type with default true', generateBasicSchema({ modules: [{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }] }), false],
 	];
 
 	describe.each([
@@ -1437,9 +1416,7 @@ const testValidate = () => {
 	});
 
 	test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
-		const data = {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		const data = generateBasicSchema({
 			config: {
 				defaultView: true,
 				defaultImage: true,
@@ -1468,7 +1445,7 @@ const testValidate = () => {
 				type: presetModules.SAFETIBASE,
 				deprecated: true,
 			}],
-		};
+		});
 		const expectedData = cloneDeep(data);
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
@@ -1480,9 +1457,7 @@ const testValidate = () => {
 	});
 
 	test('hiddenOnUI should be preserved when true and stripped when false', () => {
-		const data = {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		const data = generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
@@ -1492,12 +1467,40 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				hiddenOnUI: false,
 			}],
-		};
+		});
 
 		const output = TemplateSchema.validate(data);
 
 		expect(output.properties[0].hiddenOnUI).toEqual(true);
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
+	});
+
+	test('Icon mapping default entries strip conditional value and icon fields', () => {
+		const data = generateBasicSchema({
+			config: {
+				pin: {
+					icon: {
+						property: { name: 'reference' },
+						mapping: [{
+							default: 'RISK',
+							value: generateRandomString(),
+							icon: 'ISSUE',
+						}, {
+							value: generateRandomString(),
+							icon: 'MARKER',
+						}],
+					},
+				},
+			},
+			properties: [{ name: 'reference', type: propTypes.TEXT }],
+		});
+
+		const output = TemplateSchema.validate(data);
+
+		expect(output.config.pin.icon.mapping).toEqual([
+			{ default: 'RISK' },
+			{ value: data.config.pin.icon.mapping[1].value, icon: 'MARKER' },
+		]);
 	});
 };
 
