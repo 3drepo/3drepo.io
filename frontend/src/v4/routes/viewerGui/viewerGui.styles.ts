@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CARD_WIDTH } from '@components/viewer/cards/card.styles';
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
@@ -27,7 +28,7 @@ export const Container = styled.div`
 `;
 
 const panelStyles = css`
-	width: 380px;
+	width: ${CARD_WIDTH}px;
 	height: calc(100% - 95px);
 	position: absolute;
 	top: 0;
