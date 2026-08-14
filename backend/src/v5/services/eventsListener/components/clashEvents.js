@@ -38,7 +38,8 @@ const { sendSystemEmail } = require('../../mailer');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
-const onNewContainerRevision = async ({ teamspace, project, model, modelType, data }) => {
+const onNewContainerRevision = async (payload) => {
+	const { teamspace, project, model, modelType, data } = payload;
 	try {
 		if (modelType === modelTypes.CONTAINER && data.status === processStatuses.OK) {
 			const relatedPlans = await getPlansByQuery(teamspace, project, {
@@ -55,20 +56,20 @@ const onNewContainerRevision = async ({ teamspace, project, model, modelType, da
 						const selectionsHaveRevisions = await setLastRevForSelections(
 							teamspace, plan.selectionA, plan.selectionB)
 							.then(() => true)
-							.catch((err) => {
+							.catch((error) => {
 								// If a container is deleted or has no revisions, we just skip this run.
 								if ([
 									responseCodes.containerNotFound.code,
 									responseCodes.revisionNotFound.code,
-								].includes(err?.code)) return false;
-								throw err;
+								].includes(error?.code)) return false;
+								throw error;
 							});
 
 						if (selectionsHaveRevisions) {
 							await createRun(teamspace, project, plan, `auto:${triggerOptions.NEW_REVISION}::${UUIDToString(model)}`);
 						}
-					} catch (err) {
-						const errorMessage = err.message;
+					} catch (error) {
+						const errorMessage = error.message;
 						logger.logError(`Failed to start clash run for plan ${UUIDToString(plan._id)}: ${errorMessage}`);
 						await sendSystemEmail(emailTemplates.CLASH_ERROR.name, {
 							errorMessage,
@@ -76,35 +77,47 @@ const onNewContainerRevision = async ({ teamspace, project, model, modelType, da
 							project: UUIDToString(project),
 							planId: UUIDToString(plan._id),
 							runId: 'N/A',
-						}).catch(() => {
-							// suppress errors here - we already log it on sendSystemEmail, nothing to do.
-						});
+						}, undefined, true);
 					}
 				}),
 			);
 		}
-	} catch (err) {
-		const errorMessage = err.message;
+	} catch (error) {
+		const errorMessage = error.message;
 		logger.logError(`Failed to start clash runs after new revision for container ${UUIDToString(model)}: ${errorMessage}`);
-		if (err.stack) {
-			logger.logError(err.stack);
+		if (error.stack) {
+			logger.logError(error.stack);
 		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'onNewContainerRevision',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
-const clashRunStatusUpdate = async ({ teamspace, project, runId, status }) => {
+const clashRunStatusUpdate = async (payload) => {
+	const { teamspace, project, runId, status } = payload;
 	try {
 		await updateRunStatus(teamspace, project, runId, status);
-	} catch (err) {
+	} catch (error) {
 		logger.logError(`Failed to update the status of clash run for ${teamspace} `
-			+ `with id ${UUIDToString(runId)}: ${err.message}`);
-		if (err.stack) {
-			logger.logError(err.stack);
+			+ `with id ${UUIDToString(runId)}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
 		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunStatusUpdate',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, runId, results, value }) => {
+const clashRunCompleted = async (payload) => {
+	const { teamspace, project, runId, results, value } = payload;
 	try {
 		const resInfo = getInfoFromCode(value);
 		resInfo.retVal = value;
@@ -115,16 +128,23 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { code: resInfo.retVal, reason: resInfo.message } });
 		}
-	} catch (err) {
+	} catch (error) {
 		logger.logError(`Failed to process a complete clash run for ${teamspace} `
-			+ `with id ${UUIDToString(runId)}: ${err.message}`);
-		if (err.stack) {
-			logger.logError(err.stack);
+			+ `with id ${UUIDToString(runId)}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
 		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunCompleted',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
-const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun, results }) => {
+const clashRunProcessed = async (payload) => {
+	const { teamspace, project, runId, plan: planFromRun, results } = payload;
 	try {
 		const { tickets, name } = await getPlanById(teamspace, project, planFromRun._id,
 			{ tickets: 1, name: 1 }).catch(() => ({}));
@@ -145,6 +165,15 @@ const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun,
 	} catch (error) {
 		logger.logError(`Error processing clash run ${UUIDToString(runId)} `
 			+ `for project ${UUIDToString(project)} in teamspace ${teamspace}: ${error.message}`);
+		if (error.stack) {
+			logger.logError(error.stack);
+		}
+		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: 'ClashEventsListener',
+			listenerName: 'clashRunProcessed',
+			payload,
+			error,
+		}, undefined, true);
 	}
 };
 
