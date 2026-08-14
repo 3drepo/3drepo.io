@@ -341,6 +341,22 @@ const testGetTicketsByQuery = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, ...query }, projection);
 		});
+
+		test('Should return whatever the query returns (no model provided)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const query = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByQuery(teamspace, project, undefined, query, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, ...query }, projection);
+		});
 	});
 };
 
