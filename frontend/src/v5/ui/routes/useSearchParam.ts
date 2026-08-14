@@ -59,7 +59,12 @@ export const useSearchParam = <T = string>(name: string, transformer: ParamTrans
 
 	const setParam = useCallback((newValue: T) => {
 		const search = getSearchParams(newValue);
-		navigate({ search }, { replace: !pushInHistory });
+		// Use the real, current pathname explicitly rather than letting react-router resolve a
+		// partial location (search-only) against this component's own route context. If this hook
+		// is still mounted from a route that the user has already navigated away from (e.g. during
+		// a v7 startTransition-deferred navigation), that context can be stale and would otherwise
+		// send the user back to the old route instead of just updating the search params in place.
+		navigate({ pathname: window.location.pathname, search }, { replace: !pushInHistory });
 	}, [getSearchParams, navigate, pushInHistory]);
 
 	return [value, setParam, getSearchParams] as [T, (val?: T) => void, (val?: T, search?: string) => string];
