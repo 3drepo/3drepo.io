@@ -22,8 +22,12 @@
 // `markdown-linkify` implementation.
 import { LinkifyIt } from 'linkify-it';
 
-const linkifier: any = new (LinkifyIt as any)(undefined, {
+const linkifier: any = new (LinkifyIt as any)({
 	fuzzyEmail: false,
+	// `fuzzyLink` defaulted to `true` in linkify-it@2.x (the version this helper originally
+	// ran against); linkify-it@6.x flipped the default to `false`, so it must be re-enabled
+	// explicitly to keep matching bare domains (e.g. "example.com") without a URL scheme.
+	fuzzyLink: true,
 });
 
 linkifier.tlds(['chat'], true);
