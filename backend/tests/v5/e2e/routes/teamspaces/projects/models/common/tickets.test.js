@@ -22,8 +22,6 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 
-const { modulePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
-
 const { serialiseTicketTemplate } = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
@@ -53,11 +51,9 @@ const generateBasicData = () => ({
 	project: ServiceHelper.generateRandomProject(),
 	con: ServiceHelper.generateRandomModel(),
 	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-	clashPlan: ServiceHelper.generateClashPlan(ServiceHelper.generateRandomString(),
-		ServiceHelper.generateRandomString()),
 });
 
-const setupBasicData = async (users, teamspace, project, models, templatesToAdd, clashPlan) => {
+const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
 	const { tsAdmin, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
@@ -76,7 +72,6 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
 			[users.projectAdmin.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
-		...(clashPlan ? [ServiceHelper.db.createClashPlans(teamspace, project.id, [clashPlan])] : []),
 	]);
 };
 
@@ -1449,9 +1444,7 @@ const testGetTicketHistory = () => {
 
 const testAutomatedProperties = () => {
 	describe('Automated properties', () => {
-		const { users, teamspace, project, fed, clashPlan } = generateBasicData();
-		const { CLOUD_CLASH } = presetModules;
-		const { CLASH_PLAN_ID, CLASH_PLAN_NAME } = modulePropertyLabels[CLOUD_CLASH];
+		const { users, teamspace, project, fed } = generateBasicData();
 		const automatedPropName = ServiceHelper.generateRandomString();
 		const key = users.tsAdmin.apiKey;
 		const [template, templateToAlter] = times(2, () => ({
@@ -1464,30 +1457,24 @@ const testAutomatedProperties = () => {
 					name: automatedPropName,
 					type: propTypes.TEXT,
 					readOnly: true,
-					value: `{${supportedPatterns.MODEL_NAME}}_{${supportedPatterns.TEMPLATE_CODE}}_{${supportedPatterns.TICKET_NUMBER}}_{${supportedPatterns.CLASH_PLAN_NAME}}`,
+					value: `{${supportedPatterns.MODEL_NAME}}_{${supportedPatterns.TEMPLATE_CODE}}_{${supportedPatterns.TICKET_NUMBER}}`,
 				},
 			],
-			modules: [{
-				type: presetModules.CLOUD_CLASH,
-				properties: [],
-			}],
+			modules: [],
 		}));
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [fed], [template, templateToAlter], clashPlan);
+			await setupBasicData(users, teamspace, project, [fed], [template, templateToAlter]);
 		});
 		const getTicketRoute = (ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
 		const checkTicket = async (ticketId, valueOverride) => {
 			const { body: ticketToCheck } = await agent.get(getTicketRoute(ticketId)).expect(templates.ok.status);
 			expect(ticketToCheck.properties[automatedPropName])
-				.toBe(valueOverride ?? `${fed.name}_${template.code}_${ticketToCheck.number}_${clashPlan.name}`);
+				.toBe(valueOverride ?? `${fed.name}_${template.code}_${ticketToCheck.number}`);
 		};
 
 		const createTicket = async (templateToUse = template) => {
 			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets${key ? `?key=${key}` : ''}`;
 			const payload = ServiceHelper.generateTicket(templateToUse);
-			payload.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_ID] = clashPlan._id;
-			payload.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_NAME] = clashPlan.name;
-
 			const res = await agent.post(route).send(payload).expect(templates.ok.status);
 			return res.body._id;
 		};
@@ -1501,12 +1488,7 @@ const testAutomatedProperties = () => {
 
 		test('Should fill in automated values when a ticket is imported', async () => {
 			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets/import${ServiceHelper.createQueryString({ key, template: template._id })}`;
-			const payload = times(3, () => {
-				const ticket = ServiceHelper.generateTicket(template);
-				ticket.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_ID] = clashPlan._id;
-				ticket.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_NAME] = clashPlan.name;
-				return ticket;
-			});
+			const payload = times(3, () => ServiceHelper.generateTicket(template));
 
 			const res = await agent.post(route).send({ tickets: payload }).expect(templates.ok.status);
 			const { tickets } = res.body;
@@ -1535,18 +1517,6 @@ const testAutomatedProperties = () => {
 			template.code = newCode;
 			const ticket = await createTicket();
 			await agent.put(route).send({ code: newCode, ...template }).expect(templates.ok.status);
-
-			// let event manager does the update - this happens after response is sent
-			await ServiceHelper.sleepMS(1000);
-			await checkTicket(ticket);
-		});
-
-		test('Should update automated values if the clash plan name has been updated', async () => {
-			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/clashes/${clashPlan._id}${ServiceHelper.createQueryString({ key })}`;
-			const newName = ServiceHelper.generateRandomString();
-			clashPlan.name = newName;
-			const ticket = await createTicket();
-			await agent.patch(route).send({ name: newName }).expect(templates.ok.status);
 
 			// let event manager does the update - this happens after response is sent
 			await ServiceHelper.sleepMS(1000);
