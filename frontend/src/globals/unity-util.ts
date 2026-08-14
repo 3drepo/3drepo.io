@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -59,6 +60,10 @@ export interface ClientPosition {
 	clientY: number,
 }
 
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
 export interface PointInfo {
 	id: string,
 	database: string,
@@ -67,6 +72,12 @@ export interface PointInfo {
 	mousePos: number[],
 	position: number[],
 	normal: number[],
+	requestId: string,
+}
+
+export interface Bounds {
+	min: number[],
+	max: number[]
 }
 
 export interface PickInfo {
@@ -181,7 +192,10 @@ export class UnityUtil {
 	public static objectStatusPromises = [];
 
 	/** @hidden */
-	public static pointInfoPromises = new Map<string, Deferred<object>[]>();
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -743,7 +757,7 @@ export class UnityUtil {
 			// This is preferrable to leaving them hanging indefinitely.
 			// If the viewer is sending malformed data they are probably all shot anyway.
 			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
- 			UnityUtil.pointInfoPromises.forEach((promises) => promises.forEach((promise) => promise.reject(error)));
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
  			UnityUtil.pointInfoPromises.clear();
  			return;
 		}
@@ -753,14 +767,32 @@ export class UnityUtil {
 		}
 
 		// If there are any promises waiting for this point info, resolve or reject them
-		const key = data.mousePos[0] + ',' + data.mousePos[1];
+		const key = data.requestId;
 		if (this.pointInfoPromises.has(key)) {
-			this.pointInfoPromises.get(key).forEach((promise) => {
-				promise.resolve(data);
-			});
+			this.pointInfoPromises.get(key).resolve(data);
 			this.pointInfoPromises.delete(key);
 		} else {
 			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToBoundsRequest', json);
+		}
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		if (min?.length === 3 && max?.length === 3) {
+			deferred.resolve({
+				min,
+				max,
+			});
+		} else {
+			deferred.reject();
 		}
 	}
 
@@ -1797,7 +1829,7 @@ export class UnityUtil {
 	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
 	 * @returns A promise that resolves with the point information object returned by the viewer.
  	 */
-	public static requestPointInfo(position: CanvasPosition | ClientPosition): Promise<PointInfo> {
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
 		
 		let x: number;
 		let y: number;
@@ -1836,25 +1868,68 @@ export class UnityUtil {
 		x = Math.floor(x);
 		y = Math.floor(y);
 
+		const requestId = uuidGen();
+
 		const newPointInfoPromise = new Promise((resolve, reject) => {
 			
-			// Store the promise in a map with the key being the coordinates, so that when Unity responds
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
 			// with the point info, we can resolve the correct promise.
-			const key = x + ',' + y;
+			const key = requestId;
 			if (!this.pointInfoPromises.has(key)) {
-				this.pointInfoPromises.set(key, []);
+				this.pointInfoPromises.set(key, { resolve, reject });
+			} else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
 			}
-			this.pointInfoPromises.get(key).push({ resolve, reject });
 		});
 
 		const params = {
 			x,
 			y,
+			requestId,
+			options,
 		};
 
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	/**
+	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
+	 * uniqueId.
+	 * @param teamspace name of the teamspace
+	 * @param project name of the project
+	 * @param container name of the container - this must be the exact
+	 * container holding the unique id, it cannot be a federation.
+	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
+	 * them. If the array is empty, will return the bounds of the whole container.
+	 * @returns a promise containing the bounds in project coordinates. If the
+	 * teamspace/project/container/id combination are not valid, the promise
+	 * will be rejected.
+	 * @example ```
+	 * UnityUtil.viewer.objectSelected = (ev) => {
+		UnityUtil.requestBounds(ev.database, "", ev.model, [ev.id]).then((bounds) => {
+			var center = [
+				(bounds.max[0] + bounds.min[0]) * 0.5,
+				(bounds.max[1] + bounds.min[1]) * 0.5,
+				(bounds.max[2] + bounds.min[2]) * 0.5
+			];
+			UnityUtil.dropIssuePin("myPin",center,[1,0,0]);
+		})
+	  }```
+	 */
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
 	}
 
 	/**

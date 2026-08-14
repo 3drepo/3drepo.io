@@ -50,6 +50,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setClipEditSuccess: ['isClipEdit'],
 	setGizmoMode: ['mode'],
 	setGizmoModeSuccess: ['mode'],
+	resetClipping: [],
 	setIsPinDropMode: ['mode'],
 	setIsPinDropModeSuccess: ['isPinDropMode'],
 	setPinData: ['pinData'],
