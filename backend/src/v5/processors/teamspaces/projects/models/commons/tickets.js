@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByClashPlanId, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -38,11 +38,13 @@ const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { getModelById } = require('../../../../../models/modelSettings');
-const { getPlanById } = require('../../../../../models/clashes.plans');
 const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
+
+const { CLOUD_CLASH } = presetModules;
+const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
 
 const Tickets = {};
 
@@ -440,11 +442,8 @@ const findPropertiesToUpdate = (template, placeholdersToFind) => {
 const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, propertiesToUpdate) => {
 	const patternToVal = {};
 	const updatedTickets = tickets.map((ticket) => cloneDeep(ticket));
-	const { CLOUD_CLASH } = presetModules;
-	const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
 
 	const modelIdToName = {};
-	const clashPlanIdToName = {};
 	const modelToUpdates = {};
 
 	patternToVal[supportedPatterns.TEMPLATE_CODE] = template.code;
@@ -453,16 +452,6 @@ const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, 
 		const ticket = tickets[i];
 		const ticketData = {};
 		patternToVal[supportedPatterns.TICKET_NUMBER] = ticket.number;
-
-		const clashPlanId = ticket.modules?.[CLOUD_CLASH]?.[cloudClashProps.CLASH_PLAN_ID];
-		if (clashPlanId) {
-			if (!clashPlanIdToName[clashPlanId]) {
-				// eslint-disable-next-line no-await-in-loop
-				const clashPlan = await getPlanById(teamspace, ticket.project, stringToUUID(clashPlanId), { name: 1 });
-				clashPlanIdToName[clashPlanId] = clashPlan.name;
-			}
-		}
-		patternToVal[supportedPatterns.CLASH_PLAN_NAME] = clashPlanIdToName[clashPlanId] ?? '';
 
 		if (!modelIdToName[ticket.model]) {
 			// eslint-disable-next-line no-await-in-loop
@@ -502,7 +491,7 @@ const updatePropertiesWithPattern = async (teamspace, project, model, template, 
 	const propertiesToUpdate = findPropertiesToUpdate(template, pattern ? [pattern] : undefined);
 
 	if (propertiesToUpdate.length) {
-		const projection = { _id: 1, number: 1, project: 1, model: 1, modules: 1 };
+		const projection = { _id: 1, number: 1, project: 1, model: 1 };
 		let tickets;
 		if (project && model) {
 			tickets = await getTicketsByQuery(teamspace, project, model,
@@ -517,20 +506,13 @@ const updatePropertiesWithPattern = async (teamspace, project, model, template, 
 	}
 };
 
-Tickets.onClashPlanNameUpdated = async (teamspace, project, planId) => {
-	const templates = await getTemplatesByQuery(teamspace, { 'modules.type': presetModules.CLOUD_CLASH });
+Tickets.onClashPlanNameUpdated = async (teamspace, project, planId, planName) => {
+	const tickets = await getTicketsByQuery(teamspace, project, undefined,
+		{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) });
 
-	await Promise.all(templates.map(async (template) => {
-		const fullTemplate = generateFullSchema(template);
-		const propertiesToUpdate = findPropertiesToUpdate(fullTemplate, [supportedPatterns.CLASH_PLAN_NAME]);
-
-		if (propertiesToUpdate.length) {
-			const tickets = await getTicketsByClashPlanId(teamspace, project, template._id, planId,
-				{ _id: 1, number: 1, project: 1, model: 1, modules: 1 });
-
-			await updatePropertiesWithAutomatedValue(teamspace, tickets, template, propertiesToUpdate);
-		}
-	}));
+	if (tickets.length) {
+		await updateTickets(teamspace, project, undefined, tickets, [{ modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } }], 'system');
+	}
 };
 
 Tickets.onModelNameUpdated = async (teamspace, project, model) => {

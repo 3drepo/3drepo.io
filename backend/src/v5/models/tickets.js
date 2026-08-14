@@ -16,15 +16,12 @@
  */
 
 const { UUIDToString, generateUUID } = require('../utils/helper/uuids');
-const { basePropertyLabels, modulePropertyLabels, presetModules } = require('../schemas/tickets/templates.constants');
 const { deleteIfUndefined, isEqual } = require('../utils/helper/objects');
 const { getNestedProperty, setNestedProperty } = require('../utils/helper/objects');
 const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
+const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { templates } = require('../utils/responseCodes');
-
-const { CLOUD_CLASH } = presetModules;
-const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
 
 const { Long } = DbHandler.dataTypes;
 
@@ -180,13 +177,10 @@ Tickets.getTicketById = async (
 };
 
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
-	TICKETS_COL, { teamspace, project, model, ...query }, projection);
+	TICKETS_COL, { teamspace, project, ...(model ? { model } : {}), ...query }, projection);
 
 Tickets.getTicketsByTemplateId = (teamspace, templateId, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, type: templateId }, projection);
-
-Tickets.getTicketsByClashPlanId = (teamspace, project, templateId, clashPlanId, projection) => DbHandler.find(teamspace,
-	TICKETS_COL, { teamspace, project, type: templateId, [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(clashPlanId) }, projection);
 
 Tickets.getTicketsByFilter = (
 	teamspace,

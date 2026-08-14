@@ -151,7 +151,7 @@ const clashRunProcessed = async ({ teamspace, project, runId, plan: planFromRun,
 const clashPlanUpdated = async ({ teamspace, project, planId, data }) => {
 	try {
 		if (data.name) {
-			await onClashPlanNameUpdated(teamspace, project, planId);
+			await onClashPlanNameUpdated(teamspace, project, planId, data.name);
 		}
 	} catch (error) {
 		logger.logError(`Error processing clash plan update event for plan ${UUIDToString(planId)} `

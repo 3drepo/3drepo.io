@@ -387,13 +387,17 @@ const prepareContext = async (teamspace, project, federation, plan, runId, templ
 	};
 };
 
-const processNewClashTickets = async (teamspace, project, federation, template, ticketsToCreate, creator) => {
+const processNewClashTickets = async (teamspace, project, federation, template, ticketsToCreate, creator, planName) => {
 	if (ticketsToCreate.length === 0) return;
 
 	// run it through a validation pass to ensure we have all the default values set, and also
 	// we're not creating tickets with invalid data (e.g. if there's a unique/read only property we're setting incorrectly)
 	const validatedTicketsToCreate = (await validateTickets(teamspace, project, federation, template,
-		ticketsToCreate, { author: creator })).map(({ newTicket }) => newTicket);
+		ticketsToCreate, { author: creator })).map(({ newTicket }) => {
+		const ticket = cloneDeep(newTicket);
+		ticket.modules[CLOUD_CLASH][CLASH_PLAN_NAME] = planName;
+		return ticket;
+	});
 
 	if (validatedTicketsToCreate.length) {
 		await importTickets(teamspace, project, federation, template, validatedTicketsToCreate, creator);
@@ -459,8 +463,8 @@ TicketsClashes.processClashResults = async (
 	};
 
 	await Promise.all([
-		processNewClashTickets(
-			teamspace, project, federation, template, ticketsToProcess.ticketsToCreate, clashContext.creator),
+		processNewClashTickets(teamspace, project, federation, template,
+			ticketsToProcess.ticketsToCreate, clashContext.creator, plan.name),
 		processTicketUpdates(
 			teamspace, project, federation, template, ticketsToProcess.ticketsToUpdate, clashContext.creator),
 
