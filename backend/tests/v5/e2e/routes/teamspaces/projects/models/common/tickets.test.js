@@ -278,8 +278,7 @@ const testGetTagPropertyValues = () => {
 				modelId = modelWithTickets._id,
 				templateId = template._id,
 				property = rootTagProp,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets`
-				+ `/templates/${templateId}/properties/${encodeURIComponent(property)}/values${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/templates/${templateId}/properties/${encodeURIComponent(property)}/values${key ? `?key=${key}` : ''}`;
 
 			return [
 				['the user does not have a valid session', false, getRoute({ key: null }), templates.notLoggedIn],
