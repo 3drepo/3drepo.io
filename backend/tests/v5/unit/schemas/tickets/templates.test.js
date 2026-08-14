@@ -866,7 +866,7 @@ const testValidate = () => {
 				default: ['a', 'a'],
 			}],
 
-		}), false],
+		}), true],
 		['property name is too long', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(121),
