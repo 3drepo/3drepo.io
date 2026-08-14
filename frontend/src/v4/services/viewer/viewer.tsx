@@ -1218,8 +1218,8 @@ export class ViewerService {
 		}
 	}
 
-	public switchObjectVisibility(account, model, ids, visibility) {
-		UnityUtil.toggleVisibility(account, model, ids, visibility);
+	public switchObjectVisibility(account, model, ids, visibility, excludeIds = false) {
+		UnityUtil.toggleVisibility(account, model, ids, visibility, excludeIds);
 	}
 
 	public setShadows = (type: string) => {
