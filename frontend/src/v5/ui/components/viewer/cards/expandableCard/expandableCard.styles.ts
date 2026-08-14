@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { CARD_WIDTH } from '../card.styles';
 
 export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
+	height: 100%;
 	display: grid;
 	grid-template-columns: ${({ $isExpanded }) => ($isExpanded ? `${CARD_WIDTH}px ${CARD_WIDTH}px` : `${CARD_WIDTH}px 0`)};
 	transition: grid-template-columns 300ms ease-in-out;
