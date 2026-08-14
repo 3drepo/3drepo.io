@@ -23,6 +23,7 @@ import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
 import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 import { TextOverflow } from '@controls/textOverflow/textOverflow.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {
@@ -54,6 +55,7 @@ interface Props {
 }
 
 export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
+	const isExpandedView = TicketsCardHooksSelectors.selectIsExpandedTicketView();
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
 		const panel = target.closest('.MuiAccordion-root');
@@ -86,7 +88,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 						/>
 					))
 				}
-				{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
+				{template?.config?.comments && !isExpandedView && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
 			</PanelsContainer>
 		</CardContent>
 	);
