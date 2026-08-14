@@ -40,6 +40,7 @@ const TicketModelSchema = require(`${src}/models/tickets`);
 
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
+const { presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 const ticketArrTestErrorMsg = 'Expected body to contain an array of tickets';
@@ -541,9 +542,61 @@ const testValidateUpdateMultipleTickets = () => {
 	});
 };
 
+const testValidateTagProperty = () => {
+	const rootProp = generateRandomString();
+	const moduleName = generateRandomString();
+	const moduleProp = generateRandomString();
+	const presetModuleProp = generateRandomString();
+	const textProp = generateRandomString();
+	const template = {
+		properties: [
+			{ name: rootProp, type: propTypes.TAGS },
+			{ name: textProp, type: propTypes.TEXT },
+		],
+		modules: [{
+			name: moduleName,
+			properties: [{ name: moduleProp, type: propTypes.TAGS }],
+		}, {
+			type: presetModules.SEQUENCING,
+			properties: [{ name: presetModuleProp, type: propTypes.TAGS }],
+		}],
+	};
+	describe.each([
+		['the property is a root tags property', rootProp, true, `properties.${rootProp}`],
+		['the property is a module tags property', encodeURIComponent(`${moduleName}::${moduleProp}`), true, `modules.${moduleName}.${moduleProp}`],
+		['the property is a preset module tags property', encodeURIComponent(`${presetModules.SEQUENCING}::${presetModuleProp}`), true, `modules.${presetModules.SEQUENCING}.${presetModuleProp}`],
+		['the property does not exist', generateRandomString(), false, templates.invalidArguments],
+		['the property is not a tags property', textProp, false, templates.invalidArguments],
+		['the property path has too many module delimiters', `${moduleName}::${moduleProp}::${rootProp}`, false, templates.invalidArguments],
+	])('Validate tag property', (desc, property, success, expectedOutput) => {
+		test(`Should ${success ? 'call next()' : `respond with ${expectedOutput.code}`} if ${desc}`, async () => {
+			const req = { params: { property }, templateData: template };
+			const res = {};
+			const next = jest.fn();
+
+			await Tickets.validateTagProperty(req, res, next);
+
+			if (success) {
+				expect(next).toHaveBeenCalledTimes(1);
+				expect(req.tagProperty).toEqual(expectedOutput);
+				expect(Responder.respond).not.toHaveBeenCalled();
+			} else {
+				expect(next).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledWith(
+					req, res, expect.objectContaining({ code: expectedOutput.code }));
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	testValidateNewTicket();
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();
+	testValidateTagProperty();
 });
