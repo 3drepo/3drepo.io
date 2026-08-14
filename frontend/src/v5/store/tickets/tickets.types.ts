@@ -54,28 +54,31 @@ export interface TemplateModule {
 	properties: PropertyDefinition[];
 }
 
-export type IPinColorMapping = {
+export type PinMapping<K extends string, V> = {
 	property: {
 		name: string,
 		module?: string,
 	}
 	mapping: [
 		{
-			default: RgbArray;
+			default: V;
 		},
-		{
+		({
 			value: any;
-			color: RgbArray;
-		}[],
+		} & Record<K, V>)[],
 	]
 };
 
+export type PinColorMapping = PinMapping<'color', RgbArray>;
+
 export type PinIcon =  'DEFAULT' | 'RISK' | 'ISSUE' | 'MARKER';
+
+export type PinIconMapping = PinMapping<'icon', PinIcon>;
 
 export type PinConfig = {
 	name?: string;
-	color?: RgbArray | IPinColorMapping;
-	icon?: PinIcon;
+	color?: RgbArray | PinColorMapping;
+	icon?: PinIcon | PinIconMapping;
 };
 
 export type StatusValue = {
