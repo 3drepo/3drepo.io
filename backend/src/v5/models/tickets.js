@@ -119,7 +119,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 			});
 			return {
 				updateOne: {
-					filter: { _id: oldTicket._id, teamspace, project, model },
+					filter: { _id: oldTicket._id, teamspace, project, ...(model ? { model } : {}) },
 					update: actions,
 
 				},

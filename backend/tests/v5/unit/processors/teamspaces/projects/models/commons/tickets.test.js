@@ -1514,7 +1514,7 @@ const testOnClashPlanNameUpdated = () => {
 
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, undefined,
-			tickets, [{ modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } }], 'system');
+			tickets, tickets.map(() => ({ modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } })), 'system');
 	});
 };
 

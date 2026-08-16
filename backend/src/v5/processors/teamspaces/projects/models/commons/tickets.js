@@ -511,7 +511,9 @@ Tickets.onClashPlanNameUpdated = async (teamspace, project, planId, planName) =>
 		{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) });
 
 	if (tickets.length) {
-		await updateTickets(teamspace, project, undefined, tickets, [{ modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } }], 'system');
+		const updateData = tickets.map(() => ({
+			modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } }));
+		await updateTickets(teamspace, project, undefined, tickets, updateData, 'system');
 	}
 };
 

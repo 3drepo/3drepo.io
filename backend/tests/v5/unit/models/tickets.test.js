@@ -368,10 +368,10 @@ const testUpdateTickets = () => {
 	const propToUpdate = generateRandomString();
 	const ticketCount = 10;
 
-	const runTest = async (oldTickets, updateData, expectedCmd, changeSet) => {
+	const runTest = async (oldTickets, updateData, expectedCmd, changeSet, modelProvided = true) => {
 		const fn = jest.spyOn(db, 'bulkWrite').mockResolvedValueOnce(undefined);
 
-		await expect(Ticket.updateTickets(teamspace, project, model,
+		await expect(Ticket.updateTickets(teamspace, project, modelProvided ? model : undefined,
 			oldTickets, updateData, author)).resolves.toEqual(changeSet);
 
 		if (changeSet.length) {
@@ -495,7 +495,7 @@ const testUpdateTickets = () => {
 				modules: { module: { propToUnset: null, numProp: 0 } },
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project },
 				update: {
 					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, 'properties.numProp': 0, [propToUpdate]: newPropValue, 'modules.module.numProp': 0 },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
@@ -513,8 +513,9 @@ const testUpdateTickets = () => {
 			});
 		});
 
-		await runTest(oldTickets, updateData, expectedCmd, changeSet);
+		await runTest(oldTickets, updateData, expectedCmd, changeSet, false);
 	});
+
 	describe('Composite types', () => {
 		test('Should retain other properties within the compsite type if the embedded field has been updated', async () => {
 			const oldTickets = [];
