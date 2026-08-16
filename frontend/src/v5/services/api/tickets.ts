@@ -19,6 +19,7 @@ import api from './default';
 
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
 
+
 export const fetchContainerTemplates = async (
 	teamspace: string,
 	projectId: string,
@@ -264,9 +265,22 @@ export const updateTicketGroup = async (
 	return data;
 };
 
+export const fetchTagsValues = async (
+	teamspace: string,
+	project: string,
+	type: string,
+	model: string,
+	template: string,
+	propertyName: string,
+): Promise<FetchTagsValuesResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/templates/${template}/properties/${propertyName}/values`);
+	return data;
+};
+
 /**
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };
+type FetchTagsValuesResponse = { values: string[] };

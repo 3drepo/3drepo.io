@@ -179,6 +179,9 @@ Tickets.getTicketById = async (
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, project, ...(model ? { model } : {}), ...query }, projection);
 
+Tickets.getDistinctPropertyValues = (teamspace, project, model, template, property) => DbHandler.distinct(teamspace,
+	TICKETS_COL, property, { teamspace, project, model, type: template });
+
 Tickets.getTicketsByTemplateId = (teamspace, templateId, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, type: templateId }, projection);
 

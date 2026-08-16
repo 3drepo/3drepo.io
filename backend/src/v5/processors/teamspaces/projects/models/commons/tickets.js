@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -358,6 +358,8 @@ Tickets.getTicketList = async (teamspace, project, model,
 	return getAllTickets(teamspace, project, model,
 		deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
 };
+
+Tickets.getTagPropertyValues = getDistinctPropertyValues;
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	const openTickets = await Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, [model]);

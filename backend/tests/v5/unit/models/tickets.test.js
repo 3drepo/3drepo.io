@@ -360,6 +360,28 @@ const testGetTicketsByQuery = () => {
 	});
 };
 
+const testGetDistinctPropertyValues = () => {
+	describe('Get distinct property values', () => {
+		test('Should return whatever the query returns', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const template = generateRandomString();
+			const property = generateRandomString();
+			const expectedOutput = times(3, generateRandomString);
+
+			const fn = jest.spyOn(db, 'distinct').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getDistinctPropertyValues(teamspace, project, model, template, property))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace, ticketCol, property, { teamspace, project, model, type: template });
+		});
+	});
+};
+
 const testUpdateTickets = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
@@ -829,6 +851,7 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateTickets();
 	testGetAllTickets();
 	testGetTicketsByQuery();
+	testGetDistinctPropertyValues();
 	testGetTicketsByFilter();
 	testRemoveAllTicketsWithTemplate();
 	testGetTicketsByTemplate();
