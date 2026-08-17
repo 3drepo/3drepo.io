@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2026 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,16 @@
  */
 
 import styled from 'styled-components';
-import { CARD_WIDTH } from '../card.styles';
+import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 
-export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
-	height: 100%;
-	display: grid;
-	grid-template-columns: ${({ $isExpanded }) => ($isExpanded ? `${CARD_WIDTH}px ${CARD_WIDTH}px` : `${CARD_WIDTH}px 0`)};
-	grid-template-rows: 100%;
-	transition: grid-template-columns 300ms ease-in-out;
-	overflow-y: auto;
-`;
+export const Accordion = styled(AccordionBase)`
+	&& {
+		.MuiAccordionDetails-root {
+			padding: 0;
 
-export const MainColumn = styled.div`
-	overflow-y: overlay;
+			& > :not(:first-child) {
+				margin-top: 0;
+			}
+		}
+	}
 `;

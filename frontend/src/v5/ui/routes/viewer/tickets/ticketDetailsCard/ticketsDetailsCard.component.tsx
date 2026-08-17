@@ -38,7 +38,7 @@ import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { ViewerParams } from '../../../routes.constants';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
-import { CommentsPanel } from '../ticketsForm/commentsPanel/commentsPanel.component';
+import { CommentsExpanded } from '../ticketsForm/commentsPanel/commentsExpanded/commentsExpanded.component';
 import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 
 enum IndexChange {
@@ -187,7 +187,7 @@ export const TicketDetailsCard = () => {
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
 						/>
-						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsPanel />}>
+						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
 							<InputController
 								Input={TicketGroups}
 								name={viewProps.name}
@@ -207,7 +207,7 @@ export const TicketDetailsCard = () => {
 								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} selected={isExpanded}><ExpandIcon /></CircleButton>
 							</>}
 						/>
-						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsPanel />}>
+						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
 							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 						</ExpandableCard>
 					</>

@@ -15,18 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { CARD_WIDTH } from '../card.styles';
+import { IconContainer, TitleContainer } from '@controls/accordion/accordion.styles';
+import { CommentsList } from '../commentsList/commentsList.component';
+import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
+import { AccordionSummary } from '@mui/material';
+export const CommentsExpanded = () => {
 
-export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
-	height: 100%;
-	display: grid;
-	grid-template-columns: ${({ $isExpanded }) => ($isExpanded ? `${CARD_WIDTH}px ${CARD_WIDTH}px` : `${CARD_WIDTH}px 0`)};
-	grid-template-rows: 100%;
-	transition: grid-template-columns 300ms ease-in-out;
-	overflow-y: auto;
-`;
-
-export const MainColumn = styled.div`
-	overflow-y: overlay;
-`;
+	return (
+		<div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'white' }}>
+			<AccordionSummary expandIcon={null}>
+				<IconContainer>
+					<CommentIcon />
+				</IconContainer>
+				<TitleContainer>Comments</TitleContainer>
+			</AccordionSummary>
+			<CommentsList />
+		</ div>
+	);
+};

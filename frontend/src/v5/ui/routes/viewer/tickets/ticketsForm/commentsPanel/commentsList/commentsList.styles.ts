@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,26 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { TableVirtuoso } from 'react-virtuoso';
+import styled from 'styled-components';
+import { CommentBox } from '../commentBox/commentBox.component';
 import { isFirefox } from '@/v4/styles';
-import { CommentBox } from './commentBox/commentBox.component';
-
-export const Accordion = styled(AccordionBase)`
-	&& {
-		.MuiAccordionDetails-root {
-			padding: 0;
-
-			& > :not(:first-child) {
-				margin-top: 0;
-			}
-		}
-	}
-`;
 
 export const Comments = styled.div`
-	height: 400px;
+	height: 100%;
+	/* height: calc(100% - 120px); */
+	min-height: 400px;
+	/* display: grid;
+	grid-template-rows: 1fr; */
+
+`;
+
+export const CreateCommentBox = styled(CommentBox)`
+	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
+	border-top-width: 1px;
+
+	/* bottom: 0;
+    position: absolute;
+	width: 100%; */
+`;
+
+
+export const CommentsContainer = styled.div`
+	height: 100%;
+	display: grid;
+	grid-template-rows: 1fr;
 `;
 
 export const VirtualisedList = styled(TableVirtuoso as any).attrs({
@@ -68,9 +76,4 @@ export const TableRow = styled.div`
 
 export const FillerRow = styled.div<{ height: number }>`
 	height: ${({ height }) => height}px;
-`;
-
-export const CreateCommentBox = styled(CommentBox)`
-	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
-	border-top-width: 1px;
 `;
