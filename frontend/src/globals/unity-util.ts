@@ -75,6 +75,11 @@ export interface PointInfo {
 	requestId: string,
 }
 
+export interface Bounds {
+	min: number[],
+	max: number[]
+}
+
 export interface PickInfo {
 	mousePos: number[],
 	position: number[],
@@ -188,6 +193,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -765,6 +773,26 @@ export class UnityUtil {
 			this.pointInfoPromises.delete(key);
 		} else {
 			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToBoundsRequest', json);
+		}
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		if (min?.length === 3 && max?.length === 3) {
+			deferred.resolve({
+				min,
+				max,
+			});
+		} else {
+			deferred.reject();
 		}
 	}
 
@@ -1841,6 +1869,43 @@ export class UnityUtil {
 		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	/**
+	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
+	 * uniqueId.
+	 * @param teamspace name of the teamspace
+	 * @param project name of the project
+	 * @param container name of the container - this must be the exact
+	 * container holding the unique id, it cannot be a federation.
+	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
+	 * them. If the array is empty, will return the bounds of the whole container.
+	 * @returns a promise containing the bounds in project coordinates. If the
+	 * teamspace/project/container/id combination are not valid, the promise
+	 * will be rejected.
+	 * @example ```
+	 * UnityUtil.viewer.objectSelected = (ev) => {
+		UnityUtil.requestBounds(ev.database, "", ev.model, [ev.id]).then((bounds) => {
+			var center = [
+				(bounds.max[0] + bounds.min[0]) * 0.5,
+				(bounds.max[1] + bounds.min[1]) * 0.5,
+				(bounds.max[2] + bounds.min[2]) * 0.5
+			];
+			UnityUtil.dropIssuePin("myPin",center,[1,0,0]);
+		})
+	  }```
+	 */
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
 	}
 
 	/**

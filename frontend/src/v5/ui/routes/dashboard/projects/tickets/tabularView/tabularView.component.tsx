@@ -250,7 +250,7 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 			console.error(e);
 			return undefined;
 		}
-	}, [selectedTemplate, containersAndFederations, jobsAndUsers, filters, riskCategories]);
+	}, [selectedTemplate, containersAndFederations, jobsAndUsers, filters, riskCategories, paramFilters]);
 
 	/**
 	 * When the filter objects are changed this bit changes
