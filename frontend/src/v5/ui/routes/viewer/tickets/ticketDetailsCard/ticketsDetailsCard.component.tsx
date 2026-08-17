@@ -55,7 +55,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	
-	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView();
+	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && template?.config.comments;
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 	const ticketsIds = groups.flatMap((group) => group.tickets.map((tckt) => tckt._id));
 	const currentIndex = ticketsIds.indexOf(ticketId);
@@ -63,6 +63,7 @@ export const TicketDetailsCard = () => {
 	const listLength = ticketsIds.length;
 	const ticketWasRemoved = currentIndex === -1;
 	const disableCycleButtons = listLength < 2;
+	const disableExpandButton = !template.config.comments;
 	const templateValidationSchema = getValidators(template);
 	const [,setTicketIdState] = useSearchParam('ticketId');
 	
@@ -204,7 +205,7 @@ export const TicketDetailsCard = () => {
 							actions={<>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
-								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} selected={isExpanded}><ExpandIcon /></CircleButton>
+								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}><ExpandIcon /></CircleButton>
 							</>}
 						/>
 						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
