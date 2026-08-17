@@ -500,10 +500,15 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 			}],
 
-		}, true],
-		['property is unique', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property has all required properties', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+			}],
+
+		}), true],
+		['property is unique', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
@@ -570,10 +575,17 @@ const testValidate = () => {
 				values: [generateRandomString(), generateRandomString()],
 				unique: true,
 
-			}] }, false],
-		['property is readOnly', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+			}],
+		}), false],
+		['property is unique for tags type', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				unique: true,
+
+			}],
+		}), false],
+		['property is readOnly', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
@@ -776,10 +788,48 @@ const testValidate = () => {
 				default: ['a', 'b'],
 			}],
 
-		}, true],
-		['property with enum type with values being the wrong type', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['tags property with default values', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: ['a', 'b'],
+			}],
+
+		}), true],
+		['tags property with values configured strips values', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				values: ['a', 'b'],
+			}],
+
+		}), true],
+		['tags property with duplicated default values', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: ['a', 'a'],
+			}],
+
+		}), true],
+		['tags property with empty default values', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: [],
+			}],
+
+		}), false],
+		['tags property with too long default value', generateBasicSchema({
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TAGS,
+				default: [generateRandomString(121)],
+			}],
+
+		}), false],
+		['property with enum type with values being the wrong type', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.MANY_OF,
@@ -819,10 +869,8 @@ const testValidate = () => {
 				default: ['a', 'a'],
 			}],
 
-		}, false],
-		['property name is too long', {
-			name: generateRandomString(),
-			code: generateRandomString(3),
+		}), true],
+		['property name is too long', generateBasicSchema({
 			properties: [{
 				name: generateRandomString(121),
 				type: propTypes.TEXT,
