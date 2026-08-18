@@ -26,7 +26,7 @@
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn circular:test && yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",
-		"docs": "typedoc --out ./docs --entryPointStrategy expand ./src/globals --options ./internals/typedoc.js",
+		"docs": "typedoc --options ./internals/typedoc.js",
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
 		"storybook": "storybook dev -p 6006",
