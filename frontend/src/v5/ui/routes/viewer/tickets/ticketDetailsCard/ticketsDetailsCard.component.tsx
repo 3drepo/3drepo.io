@@ -188,13 +188,11 @@ export const TicketDetailsCard = () => {
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
 						/>
-						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
-							<InputController
-								Input={TicketGroups}
-								name={viewProps.name}
-								onBlur={onBlurHandler}
-							/>
-						</ExpandableCard>
+						<InputController
+							Input={TicketGroups}
+							name={viewProps.name}
+							onBlur={onBlurHandler}
+						/>
 					</>
 				)}
 				{detailsView === TicketDetailsView.Form && (
