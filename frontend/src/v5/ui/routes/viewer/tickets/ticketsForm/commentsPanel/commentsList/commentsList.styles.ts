@@ -22,20 +22,11 @@ import { isFirefox } from '@/v4/styles';
 
 export const Comments = styled.div`
 	height: 100%;
-	/* height: calc(100% - 120px); */
-	min-height: 400px;
-	/* display: grid;
-	grid-template-rows: 1fr; */
-
 `;
 
 export const CreateCommentBox = styled(CommentBox)`
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
-
-	/* bottom: 0;
-    position: absolute;
-	width: 100%; */
 `;
 
 

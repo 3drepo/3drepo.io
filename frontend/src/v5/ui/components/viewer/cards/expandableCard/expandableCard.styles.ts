@@ -20,11 +20,10 @@ import { CARD_WIDTH } from '../card.styles';
 
 export const TRANSITION_DURATION = 400;
 export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean, $reverse: boolean }>`
-	position: relative;
 	height: 100%;
 	display: flex;
 	flex-direction: ${({ $reverse }) => $reverse ? 'row-reverse' : 'row'};
-	overflow: hidden auto;
+	overflow: hidden;
 	transition: width ${TRANSITION_DURATION}ms ease-in-out;
 	width: ${({ $isExpanded }) => $isExpanded ? `${CARD_WIDTH * 2}px` : `${CARD_WIDTH}px`};
 
