@@ -89,7 +89,6 @@ export const SidePanel = styled(Drawer).attrs({
 	SlideProps: { unmountOnExit: true },
 	PaperProps: {
 		style: {
-			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
 			zIndex: 12,

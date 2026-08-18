@@ -15,19 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ExpandableCardContainer, MainColumn } from './expandableCard.styles';
+import { ExpandableCardContainer, MainColumn, TRANSITION_DURATION } from './expandableCard.styles';
+import { useEffect, useState } from 'react';
 
 type IExpandableCard = React.HTMLAttributes<HTMLDivElement> & {
 	ExpandedComponent: React.ReactNode;
 	isExpanded?: boolean;
+	direction?: 'left' | 'right';
 	children: React.ReactNode;
 };
 
-export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false, ...rest }: IExpandableCard) => {
+export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false, direction = 'right', ...rest }: IExpandableCard) => {
+	const [shouldRenderExpanded, setShouldRenderExpanded] = useState(isExpanded);
+
+	useEffect(() => {
+		if (isExpanded) {
+			setShouldRenderExpanded(true);
+		} else {
+			const timer = setTimeout(() => setShouldRenderExpanded(false), TRANSITION_DURATION); // Match transition duration
+			return () => clearTimeout(timer);
+		}
+	}, [isExpanded]);
+
 	return (
-		<ExpandableCardContainer $isExpanded={isExpanded} {...rest}>
+		<ExpandableCardContainer $reverse={direction === 'left'} $isExpanded={isExpanded} {...rest}>
 			<MainColumn> {children} </MainColumn>
-			{isExpanded && ExpandedComponent}
+			{shouldRenderExpanded && ExpandedComponent}
 		</ExpandableCardContainer>
 	);
 };

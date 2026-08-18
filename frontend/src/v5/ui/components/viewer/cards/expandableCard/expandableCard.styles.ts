@@ -18,13 +18,20 @@
 import styled from 'styled-components';
 import { CARD_WIDTH } from '../card.styles';
 
-export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
+export const TRANSITION_DURATION = 400;
+export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean, $reverse: boolean }>`
+	position: relative;
 	height: 100%;
-	display: grid;
-	grid-template-columns: ${({ $isExpanded }) => ($isExpanded ? `${CARD_WIDTH}px ${CARD_WIDTH}px` : `${CARD_WIDTH}px 0`)};
-	grid-template-rows: 100%;
-	transition: grid-template-columns 300ms ease-in-out;
-	overflow-y: auto;
+	display: flex;
+	flex-direction: ${({ $reverse }) => $reverse ? 'row-reverse' : 'row'};
+	overflow: hidden auto;
+	transition: width ${TRANSITION_DURATION}ms ease-in-out;
+	width: ${({ $isExpanded }) => $isExpanded ? `${CARD_WIDTH * 2}px` : `${CARD_WIDTH}px`};
+
+	> * {
+		width: ${CARD_WIDTH}px;
+		flex-shrink: 0;
+	}
 `;
 
 export const MainColumn = styled.div`

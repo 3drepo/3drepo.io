@@ -37,7 +37,7 @@ export const ChevronRight = styled(CommonChevronStyle)`
 
 export const ExpandIcon = styled(ExpandArrowsIcon)`
 	transform: rotate(-45deg);
-	padding: 6px;
+	padding: 5px;
 `;
 
 export const BreakableText = styled.div`
