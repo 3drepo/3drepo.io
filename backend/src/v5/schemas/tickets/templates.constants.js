@@ -162,7 +162,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash Plan ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Run ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash ID', propTypes.LONG_TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
-		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY]: true }),
 		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: Object.values(CLASH_TYPES), [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
@@ -240,6 +240,7 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
+
 TemplateConstants.supportedPatterns = createConstantMapping([
 	'model_name',
 	'template_code',

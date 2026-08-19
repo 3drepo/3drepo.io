@@ -1623,7 +1623,6 @@ const testAutomatedProperties = () => {
 		const createTicket = async (templateToUse = template) => {
 			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets${key ? `?key=${key}` : ''}`;
 			const payload = ServiceHelper.generateTicket(templateToUse);
-
 			const res = await agent.post(route).send(payload).expect(templates.ok.status);
 			return res.body._id;
 		};

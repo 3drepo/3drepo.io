@@ -119,7 +119,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 			});
 			return {
 				updateOne: {
-					filter: { _id: oldTicket._id, teamspace, project, model },
+					filter: { _id: oldTicket._id, teamspace, project, ...(model ? { model } : {}) },
 					update: actions,
 
 				},
@@ -177,7 +177,7 @@ Tickets.getTicketById = async (
 };
 
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
-	TICKETS_COL, { teamspace, project, model, ...query }, projection);
+	TICKETS_COL, { teamspace, project, ...(model ? { model } : {}), ...query }, projection);
 
 Tickets.getDistinctPropertyValues = (teamspace, project, model, template, property) => DbHandler.distinct(teamspace,
 	TICKETS_COL, property, { teamspace, project, model, type: template });
@@ -234,7 +234,7 @@ Tickets.getAllTickets = (
 	{
 		projection = { teamspace: 0, project: 0, model: 0 },
 		updatedSince,
-		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
+		sort = { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 },
 		limit,
 		skip = 0,
 	} = {},

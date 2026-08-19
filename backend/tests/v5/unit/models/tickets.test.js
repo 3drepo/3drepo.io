@@ -191,7 +191,7 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, 0);
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, undefined, 0);
 		});
 
 		test('Should impose query for updated since a certain date if it is provided', async () => {
@@ -208,7 +208,7 @@ const testGetAllTickets = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
-				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, limit, skip);
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, limit, skip);
 		});
 	});
 };
@@ -341,6 +341,22 @@ const testGetTicketsByQuery = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, ...query }, projection);
 		});
+
+		test('Should return whatever the query returns (no model provided)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const query = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByQuery(teamspace, project, undefined, query, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, ...query }, projection);
+		});
 	});
 };
 
@@ -374,10 +390,10 @@ const testUpdateTickets = () => {
 	const propToUpdate = generateRandomString();
 	const ticketCount = 10;
 
-	const runTest = async (oldTickets, updateData, expectedCmd, changeSet) => {
+	const runTest = async (oldTickets, updateData, expectedCmd, changeSet, modelProvided = true) => {
 		const fn = jest.spyOn(db, 'bulkWrite').mockResolvedValueOnce(undefined);
 
-		await expect(Ticket.updateTickets(teamspace, project, model,
+		await expect(Ticket.updateTickets(teamspace, project, modelProvided ? model : undefined,
 			oldTickets, updateData, author)).resolves.toEqual(changeSet);
 
 		if (changeSet.length) {
@@ -501,7 +517,7 @@ const testUpdateTickets = () => {
 				modules: { module: { propToUnset: null, numProp: 0 } },
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project },
 				update: {
 					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, 'properties.numProp': 0, [propToUpdate]: newPropValue, 'modules.module.numProp': 0 },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
@@ -519,8 +535,9 @@ const testUpdateTickets = () => {
 			});
 		});
 
-		await runTest(oldTickets, updateData, expectedCmd, changeSet);
+		await runTest(oldTickets, updateData, expectedCmd, changeSet, false);
 	});
+
 	describe('Composite types', () => {
 		test('Should retain other properties within the compsite type if the embedded field has been updated', async () => {
 			const oldTickets = [];
