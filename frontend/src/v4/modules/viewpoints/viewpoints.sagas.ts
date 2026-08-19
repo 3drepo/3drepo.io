@@ -18,7 +18,7 @@
 import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
-import { generatePath } from 'react-router-dom';
+import { generatePath } from 'react-router';
 
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';

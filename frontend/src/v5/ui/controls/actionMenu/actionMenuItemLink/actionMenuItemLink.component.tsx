@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ItemIcon, ItemText, LinkWrapper } from './actionMenuItemLink.styles';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 type ActionMenuItemLinkProps = {
 	className?: string;

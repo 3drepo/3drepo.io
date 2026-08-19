@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Outlet } from 'react-router';
 import { AuthActionsDispatchers, DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';

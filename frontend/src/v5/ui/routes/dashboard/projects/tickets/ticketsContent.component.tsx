@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { Routes, Route, useParams  } from 'react-router-dom';
+import { Routes, Route, useParams  } from 'react-router';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';

@@ -21,7 +21,7 @@ import { useSearchParam } from '../../useSearchParam';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerParams } from '../../routes.constants';
 
 export const OpenTicketFromUrl = () => {

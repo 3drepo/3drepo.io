@@ -23,7 +23,7 @@ import {
 	useLocation,
 	useNavigate,
 	useParams,
-} from 'react-router-dom';
+} from 'react-router';
 import { Header, Title } from '../projects/projectsList.styles';
 import { TeamspaceParams } from '../../../routes.constants';
 

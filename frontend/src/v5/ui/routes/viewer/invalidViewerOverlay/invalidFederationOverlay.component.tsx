@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNavigate, useParams, generatePath } from 'react-router-dom';
+import { useNavigate, useParams, generatePath } from 'react-router';
 import { formatMessage } from '@/v5/services/intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';

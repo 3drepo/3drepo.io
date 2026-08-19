@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';

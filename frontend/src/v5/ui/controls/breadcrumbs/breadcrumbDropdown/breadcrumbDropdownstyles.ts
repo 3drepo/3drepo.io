@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Menu as MenuComponent, MenuItem as MenuItemComponent } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 export const MenuList = styled(MenuComponent)`
 	&& {

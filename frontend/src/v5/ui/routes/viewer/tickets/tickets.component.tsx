@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';

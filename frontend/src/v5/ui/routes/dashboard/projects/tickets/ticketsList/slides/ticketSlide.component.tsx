@@ -33,7 +33,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, isEqual, set } from 'lodash';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 type TicketSlideProps = {
 	ticketId: string,

@@ -21,7 +21,7 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelec
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Board as V4Board } from '@/v4/routes/board';
 import { selectBoardDomain } from '@/v4/modules/board';
-import { useNavigate, useLocation, useMatch, useParams, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, useMatch, useParams, Navigate } from 'react-router';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 import { Container } from './board.styles';
 import { NOT_FOUND_ROUTE_PATH } from '../../../routes.constants';

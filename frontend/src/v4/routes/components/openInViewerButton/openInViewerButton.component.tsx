@@ -16,7 +16,7 @@
  */
 
 import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath, useLocation } from 'react-router-dom';
+import { generatePath, useLocation } from 'react-router';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import { memo } from 'react';
 

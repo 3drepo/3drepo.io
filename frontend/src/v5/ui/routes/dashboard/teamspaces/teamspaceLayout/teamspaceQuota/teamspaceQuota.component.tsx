@@ -17,7 +17,7 @@
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { isQuotaExpired, isQuotaUnitCapped } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { FormattedMessage } from 'react-intl';
 import { TeamspaceParams } from '../../../../routes.constants';

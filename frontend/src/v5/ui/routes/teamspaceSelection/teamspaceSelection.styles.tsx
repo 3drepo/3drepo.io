@@ -17,7 +17,7 @@
 
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
 const WELCOME_TEXT_MARGIN = 50;

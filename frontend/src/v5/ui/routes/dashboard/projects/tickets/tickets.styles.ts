@@ -18,7 +18,7 @@ import { Button } from '@controls/button';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 import { Drawer } from '@mui/material';
-import { Link as LinkBase } from 'react-router-dom';
+import { Link as LinkBase } from 'react-router';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
 export const Link = styled(LinkBase)<{ disabled?: boolean }>`

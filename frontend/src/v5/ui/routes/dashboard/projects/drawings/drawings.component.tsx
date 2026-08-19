@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';

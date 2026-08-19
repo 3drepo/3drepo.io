@@ -16,7 +16,7 @@
  */
 
 import * as queryString from 'query-string';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 

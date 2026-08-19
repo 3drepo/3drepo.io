@@ -25,7 +25,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { useParams, generatePath } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router';
 import { isEmpty, merge, set } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Navigate, Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router';
 import { formatMessage } from '@/v5/services/intl';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';

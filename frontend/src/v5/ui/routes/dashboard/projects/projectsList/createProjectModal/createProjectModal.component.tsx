@@ -30,7 +30,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { Gap } from '@controls/gap';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { projectTabRoute } from '@/v5/services/routing/routing';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { ProjectImageInput } from '../../projectSettings/projectImageInput/projectImageInput.component';
 
 interface CreateProjectModalProps {

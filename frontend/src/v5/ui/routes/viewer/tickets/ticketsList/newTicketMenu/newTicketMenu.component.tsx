@@ -17,7 +17,7 @@
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { sortByName } from '@/v5/store/store.helpers';
 import { ActionMenu, MenuItem } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';

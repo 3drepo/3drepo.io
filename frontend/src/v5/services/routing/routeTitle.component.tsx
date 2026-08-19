@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 import { selectCurrentRevision } from '@/v4/modules/model/model.selectors';
 import { ProjectsHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '../intl';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 export type RouteProps = {
 	computedMatch?: any;

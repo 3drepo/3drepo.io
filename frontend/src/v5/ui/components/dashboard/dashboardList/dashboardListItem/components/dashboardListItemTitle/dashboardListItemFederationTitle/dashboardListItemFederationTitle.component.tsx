@@ -24,8 +24,7 @@ import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { RevisionStatus } from '@components/shared/latestRevision/revisionStatus/revisionStatus.component';
 

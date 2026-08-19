@@ -24,7 +24,7 @@ import { ClickAwayListener } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { INITIAL_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED } from '@/v4/constants/viewer';

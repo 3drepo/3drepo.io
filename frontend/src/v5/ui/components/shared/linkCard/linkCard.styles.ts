@@ -16,7 +16,7 @@
  */
 
 import { Typography } from '@controls/typography';
-import { Link as DecoratedLink } from 'react-router-dom';
+import { Link as DecoratedLink } from 'react-router';
 import { Card as CardBase, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { CoverImage } from '@controls/coverImage/coverImage.component';

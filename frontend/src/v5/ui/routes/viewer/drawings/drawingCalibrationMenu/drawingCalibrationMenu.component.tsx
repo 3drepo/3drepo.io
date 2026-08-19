@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsCalibrationButton } from './drawingCalibrationMenu.styles';
 import { DashboardListItemButtonProps } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemButton/dashboardListItemButton.component';
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { MenuList } from '@mui/material';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';

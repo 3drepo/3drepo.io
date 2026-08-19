@@ -17,7 +17,7 @@
 
 import { SyntheticEvent } from 'react';
 import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath, useParams, useNavigate } from 'react-router-dom';
+import { generatePath, useParams, useNavigate } from 'react-router';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormProvider, useForm } from 'react-hook-form';

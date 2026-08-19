@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { AuthHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AUTH_PATH, DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
