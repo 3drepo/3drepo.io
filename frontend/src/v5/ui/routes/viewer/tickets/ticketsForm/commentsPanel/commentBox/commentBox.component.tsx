@@ -175,6 +175,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		if (viewpoint) {
 			newComment.view = viewpoint;
 		}
+		TicketCommentsActionsDispatchers.setUnsavedComment();
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
 			project,
