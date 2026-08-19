@@ -20,6 +20,7 @@ import { CommentsList } from '../commentsList/commentsList.component';
 import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { AccordionSummary } from '@mui/material';
 import { ExpandedContainer } from './commentsExpanded.styles';
+import { FormattedMessage } from 'react-intl';
 export const CommentsExpanded = () => {
 
 	return (
@@ -28,7 +29,9 @@ export const CommentsExpanded = () => {
 				<IconContainer>
 					<CommentIcon />
 				</IconContainer>
-				<TitleContainer>Comments</TitleContainer>
+				<TitleContainer>
+					<FormattedMessage id="commentsExpanded.title" defaultMessage="Comments" />
+				</TitleContainer>
 			</AccordionSummary>
 			<CommentsList />
 		</ExpandedContainer>
