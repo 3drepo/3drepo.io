@@ -270,7 +270,7 @@ const getTagValueInstruction = (valuesAtCreation = []) => {
 
 	// if the tags field only contains static values, we return undefined as
 	// pure static values is already constructed by the base ticket. (same as any other property)
-	return metadataFields.length ? { staticValues, fields: metadataFields } : undefined;
+	return metadataFields.length ? { staticValues, metadataFields } : undefined;
 };
 
 const getClashMetadata = async (teamspace, project, clashContext, clash, fields) => {
