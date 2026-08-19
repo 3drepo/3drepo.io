@@ -2359,7 +2359,7 @@ describe("Risks", function () {
 						altUserAgent.get("/notifications")
 							.expect(200, function (err, res) {
 								const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
-								assert(notification);
+								expect(notification).toBeTruthy();
 								expect(notification.modelId).toBe(model);
 								expect(notification.teamSpace).toBe(teamspace);
 								expect(notification.referrer).toBe(teamspace);

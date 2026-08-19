@@ -257,9 +257,11 @@ describe('Issues', () => {
 		const generateRandomString = (length = 20) => require('crypto').randomBytes(Math.ceil(length / 2.0)).toString('hex');
 
 		it('with long desc should fail', (done) => {
-			const issue = { name: 'Issue test',
+			const issue = {
+				name: 'Issue test',
 				...baseIssue,
-				desc: generateRandomString(1201) };
+				desc: generateRandomString(1201)
+			};
 
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
@@ -276,6 +278,7 @@ describe('Issues', () => {
 			let res = await agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(200);
+
 
 			const issueId = res.body._id;
 
@@ -314,7 +317,6 @@ describe('Issues', () => {
 			const groupId = (await teamspace1Agent.post(`/${username3}/${model2}/revision/master/head/groups/`)
 				.send(groupData)
 				.expect(200)).body._id;
-
 			issue.viewpoint = { ...issue.viewpoint, highlighted_group_id: groupId };
 
 			const issueId = (await teamspace1Agent.post(`/${username3}/${model2}/issues`)
@@ -386,10 +388,12 @@ describe('Issues', () => {
 		it('with sequence start/end date should succeed', (done) => {
 			const startDate = 1476107839000;
 			const endDate = 1476107839800;
-			const issue = { name: 'Issue test',
+			const issue = {
+				name: 'Issue test',
 				sequence_start: startDate,
 				sequence_end: endDate,
-				...baseIssue };
+				...baseIssue
+			};
 			let issueId;
 
 			async.series([
@@ -418,10 +422,12 @@ describe('Issues', () => {
 		it('with sequence end date before start should fail', (done) => {
 			const startDate = 1476107839800;
 			const endDate = 1476107839000;
-			const issue = { name: 'Issue test',
+			const issue = {
+				name: 'Issue test',
 				sequence_start: startDate,
 				sequence_end: endDate,
-				...baseIssue };
+				...baseIssue
+			};
 			let issueId;
 
 			agent.post(`/${username}/${model}/issues`)
@@ -433,10 +439,12 @@ describe('Issues', () => {
 		});
 
 		it('with invalid sequence start/end date should fail', (done) => {
-			const issue = { name: 'Issue test',
+			const issue = {
+				name: 'Issue test',
 				sequence_start: 'invalid data',
 				sequence_end: false,
-				...baseIssue };
+				...baseIssue
+			};
 			let issueId;
 
 			agent.post(`/${username}/${model}/issues`)
@@ -674,10 +682,12 @@ describe('Issues', () => {
 		});
 
 		it('with pin should succeed and pin info is saved', (done) => {
-			const issue = { name: 'Issue test',
+			const issue = {
+				name: 'Issue test',
 				norm: [0.9999999319099296, 0.00006146719401852714, -0.000363870746590937],
 				position: [33.167440465643935, 12.46054749529149, -46.997271893235435],
-				...baseIssue };
+				...baseIssue
+			};
 
 			let issueId;
 
@@ -1875,10 +1885,12 @@ describe('Issues', () => {
 		});
 
 		it('change status to for approval will change to roles back to creator role', (done) => {
-			const issue = { ...baseIssue,
+			const issue = {
+				...baseIssue,
 				name: 'Issue test',
 				assigned_roles: ['jobB'],
-				creator_role: 'jobA' };
+				creator_role: 'jobA'
+			};
 
 			let issueId;
 			const updateData = {
@@ -1913,10 +1925,12 @@ describe('Issues', () => {
 		});
 
 		it('change assigned_roles during status=for approval will change the status back to in progress', (done) => {
-			const issue = { ...baseIssue,
+			const issue = {
+				...baseIssue,
 				name: 'Issue test',
 				status: 'for approval',
-				assigned_roles: ['jobB'] };
+				assigned_roles: ['jobB']
+			};
 
 			let issueId;
 			const updateData = {
@@ -2412,46 +2426,6 @@ describe('Issues', () => {
 			});
 		});
 
-		describe('and then sealing a comment', () => {
-			let issueId;
-
-			beforeAll((done) => {
-				const issue = { name: 'Issue test', ...baseIssue };
-
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/issues`)
-							.send(issue)
-							.expect(200, (err, res) => {
-								issueId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						const comment = {
-							comment: 'hello world',
-							viewpoint: {
-								up: [0, 1, 0],
-								position: [38, 38, 125.08011914810137],
-								look_at: [0, 0, -163.08011914810137],
-								view_dir: [0, 0, -1],
-								right: [1, 0, 0],
-								'unityHeight ': 3.537606904422707,
-								fov: 2.1124830653010416,
-								aspect_ratio: 0.8750189337327384,
-								far: 276.75612077194506,
-								near: 76.42411012233212,
-							},
-						};
-
-						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
-							.send(comment)
-							.expect(200, done);
-					},
-				], done);
-			});
-		});
-
 		describe('and then commenting', () => {
 			let issueId;
 			let commentId = null;
@@ -2665,14 +2639,14 @@ describe('Issues', () => {
 					commenterAgent.get('/notifications')
 						.expect(200, (err, res) => {
 							const notification = res.body.find((item) => item.type === 'USER_REFERENCED' && item.issueId === issueId);
-							assert(notification);
+							expect(notification).toBeTruthy();
 							expect(notification.modelId).toBe(model);
 							expect(notification.teamSpace).toBe(teamspace);
 							expect(notification.referrer).toBe(teamspace);
 							done(err);
 						});
 				}],
-			done);
+				done);
 		});
 
 		it("should create comment successful if the user tagged a user that doesn't not exist", (done) => {
@@ -2698,7 +2672,7 @@ describe('Issues', () => {
 							done(err);
 						});
 				}],
-			done);
+				done);
 		});
 
 		it('should NOT create a notification if the user is tagged in a quote', (done) => {
@@ -2720,7 +2694,7 @@ describe('Issues', () => {
 					next();
 				},
 			],
-			done);
+				done);
 		});
 	});
 
