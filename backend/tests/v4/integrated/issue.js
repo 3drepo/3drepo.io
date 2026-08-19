@@ -2756,16 +2756,13 @@ describe('Issues', () => {
 		it('should create a system message when the issue has been referenced', (done) => {
 			const comment = { comment: `look at issue  #${issues[0].number} and #${issues[1].number} ` };
 
-			console.log('hi?!');
 			async.series([
 				function (done) {
-					console.log('posting');
 					teamspace1Agent.post(`/${teamspace}/${model}/issues/${issues[2]._id}/comments`)
 						.send(comment)
 						.expect(200, done);
 				},
 				function (done) {
-					console.log('test for reference');
 					testForReference(issues[0]._id, issues[2].number, done);
 				},
 				function (done) {
