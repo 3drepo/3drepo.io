@@ -21,7 +21,7 @@ import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
@@ -63,7 +63,7 @@ import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 type ImageToUpload = {
@@ -90,6 +90,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedComment();
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -112,6 +113,12 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const inputRef = useRef<any>(null);
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
+	const unsavedCommentRef = useRef<Partial<ITicketComment> | null>(null);
+	unsavedCommentRef.current = {
+		message: newMessage || '',
+		images: imagesToUpload.map(({ src }) => src),
+		view: viewpoint,
+	};
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
 	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
@@ -253,6 +260,21 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 			inputRef.current.focus();
 		}
 	}, [commentReply?._id]);
+
+	useEffect(() => {
+		if (isEditMode) return;
+		const draftImages = unsavedComment?.images || images;
+		reset({
+			message: desanitiseMessage(unsavedComment?.message || message),
+			images: draftImages,
+		});
+		setViewpoint(unsavedComment?.view || existingView);
+		setImagesToUpload(draftImages.map((src) => ({ src, id: uuid() })));
+	}, [unsavedComment, isEditMode]);
+
+	useEffect(() => () => {
+		if (!isEditMode) TicketCommentsActionsDispatchers.setUnsavedComment(cloneDeep(unsavedCommentRef.current || {}));
+	}, [isEditMode]);
 
 	return (
 		<Container
