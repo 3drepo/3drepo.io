@@ -16,8 +16,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
@@ -28,7 +26,7 @@ const orderBy = require("lodash").orderBy;
 
 
 describe("Resources ", function () {
-	this.timeout(60000);
+	jest.setTimeout(60000);
 	const usernames = [ "adminTeamspace1JobA",
 		"viewerTeamspace1Model1JobC",
 		"collaboratorTeamspace1Model1JobC",
@@ -47,13 +45,13 @@ describe("Resources ", function () {
 	const detachResource = IssueHelper.detachResourceFromIssue(account, model);
 
 	let server;
-	before(async function() {
+	beforeAll(async function() {
 		agents = await loginUsers(usernames, password);
 		server = agents.server
 
 	});
 
-	after(async function() {
+	afterAll(async function() {
 		await agents.done()
 	});
 
@@ -62,10 +60,11 @@ describe("Resources ", function () {
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['firstdocument', 'seconddocument'], ['test_doc.docx', 'dummy.pdf']),
 			(refs, next) => {
-				expect(refs).to.be.an("array").and.to.have.length(2);
+				expect(Array.isArray(refs)).toBe(true);
+				expect(refs).toHaveLength(2);
 				refs = orderBy(refs, "name");
-				expect(refs[0]).to.contain({name:'firstdocument.docx'});
-				expect(refs[1]).to.contain({name:'seconddocument.pdf'});
+				expect(refs[0]).toContain({name:'firstdocument.docx'});
+				expect(refs[1]).toContain({name:'seconddocument.pdf'});
 				next();
 			}
 		], done);
@@ -76,10 +75,11 @@ describe("Resources ", function () {
 			createIssue(agents.adminTeamspace1JobA),
 			attachUrl(agents.adminTeamspace1JobA, ['homepage', 'blog'], ['http://www.3drepo.com', 'https://3drepo.com/blog/']),
 			(refs, next) => {
-				expect(refs).to.be.an("array").and.to.have.length(2);
+				expect(Array.isArray(refs)).toBe(true);
+				expect(refs).toHaveLength(2);
 				refs = orderBy(refs, "name");
-				expect(refs[1]).to.contain({name:'homepage', link:'http://www.3drepo.com'});
-				expect(refs[0]).to.contain({name:'blog', link:'https://3drepo.com/blog/'});
+				expect(refs[1]).toContain({name:'homepage', link:'http://www.3drepo.com'});
+				expect(refs[0]).toContain({name:'blog', link:'https://3drepo.com/blog/'});
 				next();
 			}
 		], done);
@@ -100,12 +100,13 @@ describe("Resources ", function () {
 			},
 			getIssue(agents.adminTeamspace1JobA),
 			(issue, next) => {
-				expect(issue.resources).to.be.an("array").and.to.have.length(4);
+				expect(Array.isArray(issue.resources)).toBe(true);
+				expect(issue.resources).toHaveLength(4);
 				const resources = orderBy(issue.resources, "name");
-				expect(resources[0]).to.contain({name:'anotherDoc.docx'});
-				expect(resources[1]).to.contain({name:'anotherPdf.pdf'});
-				expect(resources[2]).to.contain({name:'blog', link:'https://3drepo.com/blog/'});
-				expect(resources[3]).to.contain({name:'homepage', link:'http://www.3drepo.com'});
+				expect(resources[0]).toContain({name:'anotherDoc.docx'});
+				expect(resources[1]).toContain({name:'anotherPdf.pdf'});
+				expect(resources[2]).toContain({name:'blog', link:'https://3drepo.com/blog/'});
+				expect(resources[3]).toContain({name:'homepage', link:'http://www.3drepo.com'});
 				next();
 			}
 		], done);
@@ -126,7 +127,8 @@ describe("Resources ", function () {
 			},
 			getIssue(agents.adminTeamspace1JobA),
 			(issue, next) => {
-				expect(issue.resources).to.be.an("array").and.to.have.length(0);
+				expect(Array.isArray(issue.resources)).toBe(true);
+				expect(issue.resources).toHaveLength(0);
 				next();
 			}
 			], done);

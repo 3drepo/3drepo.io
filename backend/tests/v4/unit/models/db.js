@@ -15,8 +15,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const proxyquire = require("proxyquire").noCallThru();
 const checkPermission = proxyquire("../../../../src/v4/middlewares/checkPermissions", {
 	"./getPermissionsAdapter": {},
@@ -93,7 +91,7 @@ describe("Check DB handler", function () {
 				await db.authenticate(account.toUpperCase(), password);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.be.not.empty;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -102,7 +100,7 @@ describe("Check DB handler", function () {
 				await db.authenticate(account, "badPassword");
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.be.not.empty;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -110,47 +108,47 @@ describe("Check DB handler", function () {
 	describe("getDB", function () {
 		it("get DB should succeed", async function () {
 			const database = await db.getDB(account);
-			expect(database).to.exist;
+			expect(database).toBeTruthy();
 		});
 	});
 
 	describe("getAuthDB", function () {
 		it("get auth DB should succeed", async function () {
 			const database = await db.getAuthDB();
-			expect(database).to.exist;
+			expect(database).toBeTruthy();
 			const coll = await database.collection("system.users");
-			expect(coll).to.exist;
+			expect(coll).toBeTruthy();
 			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.have.lengthOf(61)
+			expect(findResults).toHaveLength(61)
 		});
 	});
 
 	describe("getCollection", function () {
 		it("get collection should succeed", async function () {
 			const coll = await db.getCollection(account, "jobs");
-			expect(coll).to.exist;
+			expect(coll).toBeTruthy();
 			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.deep.equal(goldenJobs);
+			expect(findResults).toEqual(goldenJobs);
 		});
 
 		it("get collection with incorrect username should be empty", async function () {
 			const coll = await db.getCollection("wrong", "jobs");
-			expect(coll).to.exist;
+			expect(coll).toBeTruthy();
 			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.be.empty;
+			expect(findResults).toHaveLength(0);
 		});
 	});
 
 	describe("getCollectionStats", function () {
 		it("get collection stats should succeed", async function () {
 			const stats = await db.getCollectionStats(account, "jobs");
-			expect(stats).to.exist;
+			expect(stats).toBeTruthy();
 		});
 
 		it("get collection stats with incorrect username should be size 0", async function () {
 			const stats = await db.getCollectionStats("notexist", "jobs");
-			expect(stats).to.exist;
-			expect(stats.size).to.equal(0);
+			expect(stats).toBeTruthy();
+			expect(stats.size).toBe(0);
 		});
 	});
 
@@ -158,103 +156,103 @@ describe("Check DB handler", function () {
 		it("list collection with valid username should succeed", async function () {
 			const colls = await db.listCollections(account);
 			const listOrder = (a, b) => a.name < b.name ? -1 : 1;
-			expect(colls.sort(listOrder)).to.deep.equal(goldenColls.sort(listOrder));
+			expect(colls.sort(listOrder)).toEqual(goldenColls.sort(listOrder));
 		});
 
 		it("list collection with incorrect username should be empty", async function () {
 			const colls = await db.listCollections("wrong");
-			expect(colls).to.be.empty;
+			expect(colls).toHaveLength(0);
 		});
 	});
 
 	describe("find", function () {
 		it("find jobs should succeed", async function () {
 			const jobs = await db.find(account, "jobs", {});
-			expect(jobs.sort()).to.deep.equal(goldenJobs.sort());
+			expect(jobs.sort()).toEqual(goldenJobs.sort());
 		});
 
 		it("find Architect job should succeed", async function () {
 			const jobs = await db.find(account, "jobs", { _id: "Architect" });
-			expect(jobs[0]).to.deep.equal(goldenJobs[0]);
+			expect(jobs[0]).toEqual(goldenJobs[0]);
 		});
 
 		it("find project that doesn't exist should succeed", async function () {
 			const projectNames = await db.find(account, "projects", { name: "doesn't exist" }, { _id: 0, name: 1 });
-			expect(projectNames).to.be.empty;
+			expect(projectNames).toHaveLength(0);
 		});
 
 		it("find issues with multiple conditions should succeed", async function () {
 			const query = { creator_role: "Architect", priority: "high" };
 			const issues = await db.find(account, `${model}.issues`, query);
-			expect(issues).to.have.lengthOf(1);
-			expect(issues[0].creator_role).to.equal(query.creator_role);
-			expect(issues[0].priority).to.equal(query.priority);
+			expect(issues).toHaveLength(1);
+			expect(issues[0].creator_role).toBe(query.creator_role);
+			expect(issues[0].priority).toBe(query.priority);
 		});
 
 		it("find projects with projection should succeed", async function () {
 			const projectNames = await db.find(account, "projects", {}, { _id: 0, name: 1 });
-			expect(projectNames).to.deep.equal(goldenProjectNames);
+			expect(projectNames).toEqual(goldenProjectNames);
 		});
 
 		it("find settings with sort should succeed", async function () {
 			const settings = await db.find(account, "settings", {}, {}, { timestamp: -1 });
-			expect(settings[0].name).to.equal("Sample_Federation");
-			expect(settings[1].name).to.equal("Sample_House");
-			expect(settings[2].name).to.equal("Sample_Tree");
+			expect(settings[0].name).toBe("Sample_Federation");
+			expect(settings[1].name).toBe("Sample_House");
+			expect(settings[2].name).toBe("Sample_Tree");
 		});
 
 		it("find with incorrect username should be empty", async function () {
 			const settings = await db.find("wrong", "settings", {});
-			expect(settings).to.be.empty;
+			expect(settings).toHaveLength(0);
 		});
 
 		it("find with incorrect collection should be empty", async function () {
 			const settings = await db.find(account, "wrongOne", {});
-			expect(settings).to.be.empty;
+			expect(settings).toHaveLength(0);
 		});
 	});
 
 	describe("findOne", function () {
 		it("find one job should succeed", async function () {
 			const job = await db.findOne(account, "jobs", { _id: "Architect" });
-			expect(job).to.deep.equal(goldenJobs[0]);
+			expect(job).toEqual(goldenJobs[0]);
 		});
 
 		it("find one unspecified job should return first one and succeed", async function () {
 			const job = await db.findOne(account, "jobs", {});
-			expect(job).to.deep.equal(goldenJobs[0]);
+			expect(job).toEqual(goldenJobs[0]);
 		});
 
 		it("find one project that doesn't exist should succeed", async function () {
 			const projectName = await db.findOne(account, "projects", { name: "doesn't exist" }, { _id: 0, name: 1 });
-			expect(projectName).to.be.null;
+			expect(projectName).toBeNull();
 		});
 
 		it("find one issue with multiple conditions should succeed", async function () {
 			const query = { creator_role: "Architect", priority: "high" };
 			const issue = await db.findOne(account, `${model}.issues`, query);
-			expect(issue.creator_role).to.equal(query.creator_role);
-			expect(issue.priority).to.equal(query.priority);
+			expect(issue.creator_role).toBe(query.creator_role);
+			expect(issue.priority).toBe(query.priority);
 		});
 
 		it("find one project with projection should succeed", async function () {
 			const projectName = await db.findOne(account, "projects", {}, { _id: 0, name: 1 });
-			expect(projectName).to.deep.equal(goldenProjectNames[0]);
+			expect(projectName).toEqual(goldenProjectNames[0]);
 		});
 
 		it("find one setting with sort should succeed", async function () {
 			const setting = await db.findOne(account, "settings", {}, {}, { timestamp: -1 });
-			expect(setting.name).to.equal("Sample_Federation");
+			expect(setting.name).toBe("Sample_Federation");
 		});
 
 		it("find one with incorrect username should be null", async function () {
 			const setting = await db.findOne("wrong", "settings", {});
-			expect(setting).to.be.null;
+			expect(setting).toBeNull();
 		});
 
 		it("find one with incorrect collection should be null", async function () {
 			const setting = await db.findOne(account, "wrongOne", {});
-			expect(setting).to.be.null;
+			expect(setting).toBeNull();
 		});
 	});
 
@@ -291,7 +289,7 @@ describe("Check DB handler", function () {
 
 		it("create role command should succeed", async function () {
 			const result = await db.runCommand(account, createRoleCmd);
-			expect(result.ok).to.equal(1);
+			expect(result.ok).toBe(1);
 		});
 
 		it("create duplicate role command should fail", async function () {
@@ -299,44 +297,44 @@ describe("Check DB handler", function () {
 				await db.runCommand(account, createRoleCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(51002);
+				expect(err.code).toBe(51002);
 			}
 		});
 
 		it("grant role command should succeed", async function () {
 			const result = await db.runCommand("admin", grantRoleCmd);
-			expect(result.ok).to.equal(1);
+			expect(result.ok).toBe(1);
 		});
 
 		it("grant role command to user DB should fail", async function () {
 			try {
 				await db.runCommand(account, grantRoleCmd);
 			} catch (err) {
-				expect(err.code).to.equal(11);
+				expect(err.code).toBe(11);
 			}
 		});
 
 		it("revoke role command should succeed", async function () {
 			const result = await db.runCommand("admin", revokeRoleCmd);
-			expect(result.ok).to.equal(1);
+			expect(result.ok).toBe(1);
 		});
 
 		it("revoke role command on user DB should fail", async function () {
 			try {
 				await db.runCommand(account, revokeRoleCmd);
 			} catch (err) {
-				expect(err.code).to.equal(11);
+				expect(err.code).toBe(11);
 			}
 		});
 
 		it("update user password command on admin should succeed", async function () {
 			const result = await db.runCommand("admin", newPasswordUserCmd);
-			expect(result.ok).to.equal(1);
+			expect(result.ok).toBe(1);
 		});
 
 		it("update user password command on admin should succeed", async function () {
 			const result = await db.runCommand("admin", revertPasswordUserCmd);
-			expect(result.ok).to.equal(1);
+			expect(result.ok).toBe(1);
 		});
 
 		it("update user command on user DB should fail", async function () {
@@ -344,7 +342,7 @@ describe("Check DB handler", function () {
 				await db.runCommand(account, revertPasswordUserCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11);
+				expect(err.code).toBe(11);
 			}
 		});
 
@@ -353,40 +351,40 @@ describe("Check DB handler", function () {
 				await db.runCommand("badDB", revertPasswordUserCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11);
+				expect(err.code).toBe(11);
 			}
 		});
 	});
 	describe("count", function () {
 		it("count jobs should succeed", async function () {
 			const jobs = await db.count(account, "jobs", {});
-			expect(jobs).to.equal(goldenJobs.length);
+			expect(jobs).toBe(goldenJobs.length);
 		});
 
 		it("count Architect job should succeed", async function () {
 			const jobs = await db.count(account, "jobs", { _id: "Architect" });
-			expect(jobs).to.equal(1);
+			expect(jobs).toBe(1);
 		});
 
 		it("count project that doesn't exist should succeed", async function () {
 			const projectNames = await db.count(account, "projects", { name: "doesn't exist" }, { _id: 0, name: 1 });
-			expect(projectNames).to.equal(0);
+			expect(projectNames).toBe(0);
 		});
 
 		it("count issues with multiple conditions should succeed", async function () {
 			const query = { creator_role: "Architect", priority: "high" };
 			const issues = await db.count(account, `${model}.issues`, query);
-			expect(issues).to.equal(1);
+			expect(issues).toBe(1);
 		});
 
 		it("count with incorrect username should succeed", async function () {
 			const settings = await db.count("wrong", "settings", {});
-			expect(settings).to.equal(0);
+			expect(settings).toBe(0);
 		});
 
 		it("count with incorrect collection should succeed", async function () {
 			const settings = await db.count(account, "wrongOne", {});
-			expect(settings).to.equal(0);
+			expect(settings).toBe(0);
 		});
 	});
 
@@ -398,8 +396,8 @@ describe("Check DB handler", function () {
 
 		it("insert should succeed", async function () {
 			const result = await db.insertOne(account, "jobs", newJob);
-			expect(result.acknowledged).to.be.true;
-			expect(result.insertedId).to.exist;
+			expect(result.acknowledged).toBe(true);
+			expect(result.insertedId).toBeTruthy();
 			newJobIds.push(result.insertedId);
 		});
 
@@ -408,20 +406,20 @@ describe("Check DB handler", function () {
 				await db.insertOne(account, "jobs", newJob);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11000);
+				expect(err.code).toBe(11000);
 			}
 		});
 
 		it("incorrect username should succeed", async function () {
 			const result = await db.insertOne("wrong", "jobs", newJob);
-			expect(result.acknowledged).to.be.true;
-			expect(result.insertedId).to.exist;
+			expect(result.acknowledged).toBe(true);
+			expect(result.insertedId).toBeTruthy();
 		});
 
 		it("insert without _id should succeed", async function () {
 			const result = await db.insertOne(account, "jobs", { users: ["no ID"] });
-			expect(result.acknowledged).to.be.true;
-			expect(result.insertedId).to.exist;
+			expect(result.acknowledged).toBe(true);
+			expect(result.insertedId).toBeTruthy();
 			newJobIds.push(result.insertedId);
 		});
 	});
@@ -440,8 +438,8 @@ describe("Check DB handler", function () {
 
 		it("insert many should succeed", async function () {
 			const result = await db.insertMany(account, "jobs", newJobs);
-			expect(result.acknowledged).to.be.true;
-			expect(Object.keys(result.insertedIds)).to.have.lengthOf(newJobs.length);
+			expect(result.acknowledged).toBe(true);
+			expect(Object.keys(result.insertedIds)).toHaveLength(newJobs.length);
 			Object.values(result.insertedIds).forEach((id) => {
 				newJobIds.push(id);
 			});
@@ -452,14 +450,14 @@ describe("Check DB handler", function () {
 				await db.insertMany(account, "jobs", newJobs);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11000);
+				expect(err.code).toBe(11000);
 			}
 		});
 
 		it("incorrect username should succeed", async function () {
 			const result = await db.insertMany("wrong", "jobs", newJobs);
-			expect(result.acknowledged).to.be.true;
-			expect(Object.keys(result.insertedIds)).to.have.lengthOf(newJobs.length);
+			expect(result.acknowledged).toBe(true);
+			expect(Object.keys(result.insertedIds)).toHaveLength(newJobs.length);
 		});
 
 		it("insert without _id should succeed", async function () {
@@ -468,8 +466,8 @@ describe("Check DB handler", function () {
 				{ users: ["no ID 2"] },
 				{ users: ["no ID 3"] }
 			]);
-			expect(result.acknowledged).to.be.true;
-			expect(Object.keys(result.insertedIds)).to.have.lengthOf(3);
+			expect(result.acknowledged).toBe(true);
+			expect(Object.keys(result.insertedIds)).toHaveLength(3);
 			Object.values(result.insertedIds).forEach((id) => {
 				newJobIds.push(id);
 			});
@@ -481,28 +479,28 @@ describe("Check DB handler", function () {
 			const query = { _id: "Test Job" };
 			const newData = { $set: { users: ["updateOne"] } };
 			const result = await db.updateOne(account, "jobs", query, newData);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 
 		it("upsert on existing record should succeed", async function () {
 			const query = { _id: "Test Job" };
 			const newData = { $set: { users: ["updateOne", "updateTwo"] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 
 		it("upsert should succeed", async function () {
 			const query = { _id: "updateOne upsert" };
 			const newData = { $set: { users: ["updateOne", "updateTwo", "updateThree"] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(0);
-			expect(result.modifiedCount).to.equal(0);
-			expect(result.upsertedId).to.exist;
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(0);
+			expect(result.modifiedCount).toBe(0);
+			expect(result.upsertedId).toBeTruthy();
 			newJobIds.push(result.upsertedId);
 		});
 
@@ -510,9 +508,9 @@ describe("Check DB handler", function () {
 			const query = { _id: "updateOne upsert" };
 			const newData = { $set: { users: ["uOne", "uTwo", "uThree", "uFour"] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 	});
 
@@ -521,28 +519,28 @@ describe("Check DB handler", function () {
 			const query = { _id: "Test Job 4" };
 			const newData = { $set: { users: ["update1"] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 
 		it("upsert on existing record should succeed", async function () {
 			const query = { _id: "Test Job 4" };
 			const newData = { $set: { users: ["update1", "update2"] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 
 		it("upsert should succeed", async function () {
 			const query = { _id: "updateMany upsert" };
 			const newData = { $set: { users: ["update1", "update2", "update3"] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(0);
-			expect(result.modifiedCount).to.equal(0);
-			expect(result.upsertedId).to.exist;
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(0);
+			expect(result.modifiedCount).toBe(0);
+			expect(result.upsertedId).toBeTruthy();
 			newJobIds.push(result.upsertedId);
 		});
 
@@ -550,18 +548,18 @@ describe("Check DB handler", function () {
 			const query = { _id: "updateMany upsert" };
 			const newData = { $set: { users: ["u1", "u2", "u3", "u4"] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(1);
-			expect(result.modifiedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(1);
+			expect(result.modifiedCount).toBe(1);
 		});
 
 		it("update records should succeed", async function () {
 			const query = {};
 			const newData = { $set: { users: [] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			expect(result.acknowledged).to.be.true;
-			expect(result.matchedCount).to.equal(25);
-			expect(result.modifiedCount).to.equal(9);
+			expect(result.acknowledged).toBe(true);
+			expect(result.matchedCount).toBe(25);
+			expect(result.modifiedCount).toBe(9);
 		});
 	});
 
@@ -569,22 +567,22 @@ describe("Check DB handler", function () {
 		it("deleteOne should succeed", async function () {
 			const query = { _id: newJobIds.pop() };
 			const result = await db.deleteOne(account, "jobs", query);
-			expect(result.acknowledged).to.be.true;
-			expect(result.deletedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.deletedCount).toBe(1);
 		});
 
 		it("deleteOne non-existent record should succeed", async function () {
 			const query = { _id: "notexist" };
 			const result = await db.deleteOne(account, "jobs", query);
-			expect(result.acknowledged).to.be.true;
-			expect(result.deletedCount).to.equal(0);
+			expect(result.acknowledged).toBe(true);
+			expect(result.deletedCount).toBe(0);
 		});
 
 		it("deleteOne with incorrect username should succeed", async function () {
 			const query = { _id: "Test Job" };
 			const result = await db.deleteOne("wrong", "jobs", query);
-			expect(result.acknowledged).to.be.true;
-			expect(result.deletedCount).to.equal(1);
+			expect(result.acknowledged).toBe(true);
+			expect(result.deletedCount).toBe(1);
 		});
 	});
 
@@ -592,36 +590,36 @@ describe("Check DB handler", function () {
 		it("find one and delete should succeed", async function () {
 			const query = { _id: newJobIds.pop() };
 			const result = await db.findOneAndDelete(account, "jobs", query);
-			expect(result).to.exist;
-			expect(result._id).to.deep.equal(query._id);
-			expect(result.users).to.exist;
+			expect(result).toBeTruthy();
+			expect(result._id).toEqual(query._id);
+			expect(result.users).toBeTruthy();
 		});
 
 		it("with projection should succeed", async function () {
 			const query = { _id: newJobIds.pop() };
 			const projection = { _id: 1, users: 0 };
 			const result = await db.findOneAndDelete(account, "jobs", query, projection);
-			expect(result).to.exist;
-			expect(result._id).to.deep.equal(query._id);
+			expect(result).toBeTruthy();
+			expect(result._id).toEqual(query._id);
 		});
 
 		it("projecting without ID should succeed", async function () {
 			const query = { _id: newJobIds.pop() };
 			const projection = { _id: 0, users: 0 };
 			const result = await db.findOneAndDelete(account, "jobs", query, projection);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("non-existent record should return null", async function () {
 			const query = { _id: "notexist" };
 			const result = await db.findOneAndDelete(account, "jobs", query);
-			expect(result).to.be.null;
+			expect(result).toBeNull();
 		});
 
 		it("non-existent DB should return null", async function () {
 			const query = { _id: "Test Job" };
 			const result = await db.findOneAndDelete("badDB", "jobs", query);
-			expect(result).to.be.null;
+			expect(result).toBeNull();
 		});
 	});
 
@@ -659,12 +657,12 @@ describe("Check DB handler", function () {
 		it("should succeed", async function () {
 			try {
 				const database = await db.getDB(account);
-				expect(database).to.exist;
+				expect(database).toBeTruthy();
 				await db.disconnect();
 				await database.collection("jobs");
 			} catch (err) {
 				// Error [MongoError]: Topology was destroyed
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 

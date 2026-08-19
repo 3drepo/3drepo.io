@@ -19,7 +19,6 @@
 
 const request = require('supertest');
 const SessionTracker = require('../helpers/sessionTracker');
-const { Assertion, assert, expect, should } = require('chai');
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require('../../../src/v4/response_codes.js');
 const { templates: responseCodesV5 } = require('../../../src/v5/utils/responseCodes');
@@ -84,7 +83,7 @@ describe('Issues', () => {
 		issue2: '8d46d1b0-8ef1-11e6-8d05-9717c0574272',
 	};
 
-	before(async () => {
+	beforeAll(async () => {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -109,7 +108,7 @@ describe('Issues', () => {
 		await commenterAgent.login(commenterUser, password);
 	});
 
-	after((done) => {
+	afterAll((done) => {
 		server.close(() => {
 			console.log('API test server is closed');
 			done();
@@ -125,43 +124,43 @@ describe('Issues', () => {
 
 			const issueId = res.body._id;
 
-			expect(res.body.name).to.equal(issue.name);
-			expect(res.body.scale).to.equal(issue.scale);
-			expect(res.body.status).to.equal(issue.status);
-			expect(res.body.topic_type).to.equal(issue.topic_type);
-			expect(res.body.priority).to.equal(issue.priority);
-			expect(res.body.creator_role).to.equal(issue.creator_role);
-			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+			expect(res.body.name).toBe(issue.name);
+			expect(res.body.scale).toBe(issue.scale);
+			expect(res.body.status).toBe(issue.status);
+			expect(res.body.topic_type).toBe(issue.topic_type);
+			expect(res.body.priority).toBe(issue.priority);
+			expect(res.body.creator_role).toBe(issue.creator_role);
+			expect(res.body.assigned_roles).toEqual(issue.assigned_roles);
+			expect(res.body.viewpoint.up).toEqual(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).toEqual(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).toEqual(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).toEqual(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).toEqual(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).toBe(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).toBe(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).toBe(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).toBe(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).toBe(issue.viewpoint.near);
 
 			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			expect(res.body.name).to.equal(issue.name);
-			expect(res.body.scale).to.equal(issue.scale);
-			expect(res.body.status).to.equal(issue.status);
-			expect(res.body.topic_type).to.equal(issue.topic_type);
-			expect(res.body.priority).to.equal(issue.priority);
-			expect(res.body.creator_role).to.equal(issue.creator_role);
-			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+			expect(res.body.name).toBe(issue.name);
+			expect(res.body.scale).toBe(issue.scale);
+			expect(res.body.status).toBe(issue.status);
+			expect(res.body.topic_type).toBe(issue.topic_type);
+			expect(res.body.priority).toBe(issue.priority);
+			expect(res.body.creator_role).toBe(issue.creator_role);
+			expect(res.body.assigned_roles).toEqual(issue.assigned_roles);
+			expect(res.body.viewpoint.up).toEqual(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).toEqual(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).toEqual(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).toEqual(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).toEqual(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).toBe(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).toBe(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).toBe(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).toBe(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).toBe(issue.viewpoint.near);
 		});
 
 		it(' with data produced by plugins should succeed', async () => {
@@ -218,41 +217,41 @@ describe('Issues', () => {
 
 			const issueId = res.body._id;
 
-			expect(res.body.name).to.equal(issue.name);
-			expect(res.body.scale).to.equal(issue.scale);
-			expect(res.body.status).to.equal(issue.status);
-			expect(res.body.topic_type).to.equal(issue.topic_type);
-			expect(res.body.priority).to.equal(issue.priority);
-			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+			expect(res.body.name).toBe(issue.name);
+			expect(res.body.scale).toBe(issue.scale);
+			expect(res.body.status).toBe(issue.status);
+			expect(res.body.topic_type).toBe(issue.topic_type);
+			expect(res.body.priority).toBe(issue.priority);
+			expect(res.body.assigned_roles).toEqual(issue.assigned_roles);
+			expect(res.body.viewpoint.up).toEqual(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).toEqual(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).toEqual(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).toEqual(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).toEqual(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).toBe(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).toBe(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).toBe(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).toBe(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).toBe(issue.viewpoint.near);
 
 			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			expect(res.body.name).to.equal(issue.name);
-			expect(res.body.scale).to.equal(issue.scale);
-			expect(res.body.status).to.equal(issue.status);
-			expect(res.body.topic_type).to.equal(issue.topic_type);
-			expect(res.body.priority).to.equal(issue.priority);
-			expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
-			expect(res.body.viewpoint.up).to.deep.equal(issue.viewpoint.up);
-			expect(res.body.viewpoint.position).to.deep.equal(issue.viewpoint.position);
-			expect(res.body.viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-			expect(res.body.viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-			expect(res.body.viewpoint.right).to.deep.equal(issue.viewpoint.right);
-			expect(res.body.viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-			expect(res.body.viewpoint.fov).to.equal(issue.viewpoint.fov);
-			expect(res.body.viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
-			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
+			expect(res.body.name).toBe(issue.name);
+			expect(res.body.scale).toBe(issue.scale);
+			expect(res.body.status).toBe(issue.status);
+			expect(res.body.topic_type).toBe(issue.topic_type);
+			expect(res.body.priority).toBe(issue.priority);
+			expect(res.body.assigned_roles).toEqual(issue.assigned_roles);
+			expect(res.body.viewpoint.up).toEqual(issue.viewpoint.up);
+			expect(res.body.viewpoint.position).toEqual(issue.viewpoint.position);
+			expect(res.body.viewpoint.look_at).toEqual(issue.viewpoint.look_at);
+			expect(res.body.viewpoint.view_dir).toEqual(issue.viewpoint.view_dir);
+			expect(res.body.viewpoint.right).toEqual(issue.viewpoint.right);
+			expect(res.body.viewpoint.unityHeight).toBe(issue.viewpoint.unityHeight);
+			expect(res.body.viewpoint.fov).toBe(issue.viewpoint.fov);
+			expect(res.body.viewpoint.aspect_ratio).toBe(issue.viewpoint.aspect_ratio);
+			expect(res.body.viewpoint.far).toBe(issue.viewpoint.far);
+			expect(res.body.viewpoint.near).toBe(issue.viewpoint.near);
 		});
 
 		const generateRandomString = (length = 20) => require('crypto').randomBytes(Math.ceil(length / 2.0)).toString('hex');
@@ -265,13 +264,12 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
 		it('with screenshot should succeed', async function () {
-			this.timeout(timeout);
 			const issue = { name: 'Issue test', ...cloneDeep(baseIssue) };
 			issue.viewpoint.screenshot = pngBase64;
 
@@ -283,7 +281,7 @@ describe('Issues', () => {
 
 			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+			expect(res.body.viewpoint.screenshot).toBe(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 		});
 
 		it('with screenshot using the wrong file format should fail', async () => {
@@ -294,7 +292,7 @@ describe('Issues', () => {
 				.send(issue)
 				.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 
-			expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+			expect(res.body.value).toBe(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 		});
 
 		it('with an existing group associated should succeed', async () => {
@@ -324,7 +322,7 @@ describe('Issues', () => {
 				.expect(200)).body._id;
 
 			const res = await teamspace1Agent.get(`/${username3}/${model2}/issues/${issueId}`).expect(200);
-			expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+			expect(res.body.viewpoint.highlighted_group_id).toBe(groupId);
 		});
 
 		it('with a embeded group should succeed', (done) => {
@@ -370,15 +368,15 @@ describe('Issues', () => {
 				function (done) {
 					teamspace1Agent.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
 						.expect(200, (err, res) => {
-							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
-							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							expect(res.body.objects).toEqual(highlighted_group.objects);
+							expect(res.body.color).toEqual(highlighted_group.color);
 							done(err);
 						});
 				},
 				function (done) {
 					teamspace1Agent.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
 						.expect(200, (err, res) => {
-							expect(res.body.objects).to.deep.equal(hidden_group.objects);
+							expect(res.body.objects).toEqual(hidden_group.objects);
 							done(err);
 						});
 				},
@@ -400,16 +398,16 @@ describe('Issues', () => {
 						.send(issue)
 						.expect(200, (err, res) => {
 							issueId = res.body._id;
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-						expect(res.body.sequence_start).to.equal(startDate);
-						expect(res.body.sequence_end).to.equal(endDate);
+						expect(res.body.sequence_start).toBe(startDate);
+						expect(res.body.sequence_end).toBe(endDate);
 
 						return done(err);
 					});
@@ -429,7 +427,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 					done(err);
 				});
 		});
@@ -444,7 +442,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -460,14 +458,14 @@ describe('Issues', () => {
 						.send(issue)
 						.expect(200, (err, res) => {
 							issueId = res.body._id;
-							expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
+							expect(res.body.viewpoint.transformation_group_ids).toEqual(issue.viewpoint.transformation_group_ids);
 
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(issue.viewpoint.transformation_group_ids);
+						expect(res.body.viewpoint.transformation_group_ids).toEqual(issue.viewpoint.transformation_group_ids);
 
 						return done(err);
 					});
@@ -514,7 +512,7 @@ describe('Issues', () => {
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(transformation_group_ids);
+						expect(res.body.viewpoint.transformation_group_ids).toEqual(transformation_group_ids);
 
 						return done(err);
 					});
@@ -548,7 +546,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -579,7 +577,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -609,7 +607,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -635,7 +633,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -646,7 +644,7 @@ describe('Issues', () => {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -658,7 +656,7 @@ describe('Issues', () => {
 				.send(issue)
 				.expect(200, (err, res) => {
 					// Invalid priority is now allowed to accommodate for BCF import
-					// expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_PRIORITY.value);
+					// expect(res.body.value).toBe(responseCodes.ISSUE_INVALID_PRIORITY.value);
 					done(err);
 				});
 		});
@@ -670,7 +668,7 @@ describe('Issues', () => {
 				.send(issue)
 				.expect(200, (err, res) => {
 					// Invalid status is now allowed to accommodate for BCF import
-					// expect(res.body.value).to.equal(responseCodes.ISSUE_INVALID_STATUS.value);
+					// expect(res.body.value).toBe(responseCodes.ISSUE_INVALID_STATUS.value);
 					done(err);
 				});
 		});
@@ -689,13 +687,13 @@ describe('Issues', () => {
 						.send(issue)
 						.expect(200, (err, res) => {
 							issueId = res.body._id;
-							expect(res.body.position).to.deep.equal(issue.position);
+							expect(res.body.position).toEqual(issue.position);
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-						expect(res.body.position).to.deep.equal(issue.position);
+						expect(res.body.position).toEqual(issue.position);
 						done(err);
 					});
 				},
@@ -857,7 +855,7 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.position).to.deep.equal(position.position);
+							expect(res.body.position).toEqual(position.position);
 							done(err);
 						});
 				},
@@ -891,8 +889,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 							done(err);
 						});
 				},
@@ -922,7 +920,7 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(sequenceData)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 							done(err);
 						});
 				},
@@ -956,8 +954,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 							done(err);
 						});
 				},
@@ -985,7 +983,7 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(sequenceData)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 							done(err);
 						});
 				},
@@ -1017,8 +1015,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.sequence_start).to.not.exist;
-							expect(res.body.sequence_end).to.not.exist;
+							expect(res.body.sequence_start).toBeFalsy();
+							expect(res.body.sequence_end).toBeFalsy();
 							done(err);
 						});
 				},
@@ -1046,7 +1044,7 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(sequenceData)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
@@ -1074,7 +1072,7 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(sequenceData)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
@@ -1103,12 +1101,12 @@ describe('Issues', () => {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
 							expect(res.body.status === status.status);
-							expect(res.body.comments[0].action).to.deep.equal({
+							expect(res.body.comments[0].action).toEqual({
 								property: 'status',
 								from: 'open',
 								to: 'in progress',
 							});
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1137,12 +1135,12 @@ describe('Issues', () => {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
 							expect(res.body.topic_type === data.topic_type);
-							expect(res.body.comments[0].action).to.deep.equal({
+							expect(res.body.comments[0].action).toEqual({
 								property: 'topic_type',
 								from: 'ru123',
 								to: 'abc123',
 							});
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1170,13 +1168,13 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.assigned_roles).to.deep.equal(data.assigned_roles);
-							expect(res.body.comments[0].action).to.deep.equal({
+							expect(res.body.assigned_roles).toEqual(data.assigned_roles);
+							expect(res.body.comments[0].action).toEqual({
 								property: 'assigned_roles',
 								from: 'jobA',
 								to: 'jobB',
 							});
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1213,8 +1211,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.comments[0].action.property).to.equal('screenshot');
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe('screenshot');
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1261,19 +1259,19 @@ describe('Issues', () => {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
 
-							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
-							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
-							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
-							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
-							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.comments[0].action.property).to.equal('viewpoint');
-							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.viewpoint.up).toEqual(data.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).toEqual(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).toBe(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).toBe(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).toBe(data.viewpoint.far);
+							expect(res.body.viewpoint.near).toBe(data.viewpoint.near);
+							expect(res.body.comments[0].action.property).toBe('viewpoint');
+							expect(res.body.comments[0].action.from).toBe(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).toBe(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1324,24 +1322,24 @@ describe('Issues', () => {
 							newViewpoint.guid = res.body.viewpoint.guid;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.comments[0].action.property).to.equal('screenshot');
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe('screenshot');
+							expect(res.body.comments[0].owner).toBe(username);
 
-							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
-							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
-							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
-							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
-							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.comments[1].action.property).to.equal('viewpoint');
-							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.viewpoint.up).toEqual(data.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).toEqual(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).toBe(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).toBe(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).toBe(data.viewpoint.far);
+							expect(res.body.viewpoint.near).toBe(data.viewpoint.near);
+							expect(res.body.comments[1].action.property).toBe('viewpoint');
+							expect(res.body.comments[1].action.from).toBe(JSON.stringify(oldViewpoint));
 							const vp = JSON.parse(res.body.comments[1].action.to);
 							delete vp.screenshot_ref;
-							expect(vp).to.deep.equal(newViewpoint);
-							expect(res.body.comments[1].owner).to.equal(username);
+							expect(vp).toEqual(newViewpoint);
+							expect(res.body.comments[1].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1389,16 +1387,16 @@ describe('Issues', () => {
 							data.viewpoint.guid = res.body.viewpoint.guid;
 							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
 							const { screenshotSmall, screenshot, ...viewpoint } = res.body.viewpoint;
-							expect(viewpoint).to.deep.equal(data.viewpoint);
+							expect(viewpoint).toEqual(data.viewpoint);
 
 							delete oldViewpoint.screenshotSmall;
 							delete oldViewpoint.screenshot;
 							delete newViewpoint.screenshotSmall;
 							delete newViewpoint.screenshot;
-							expect(res.body.comments[0].action.property).to.equal('viewpoint');
-							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
-							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe('viewpoint');
+							expect(JSON.parse(res.body.comments[0].action.from)).toEqual(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).toEqual(newViewpoint);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1479,16 +1477,16 @@ describe('Issues', () => {
 							data.viewpoint.transformation_group_ids = transformation_group_ids;
 
 							const { screenshotSmall, screenshot, ...viewpoint } = res.body.viewpoint;
-							expect(viewpoint).to.deep.equal(data.viewpoint);
+							expect(viewpoint).toEqual(data.viewpoint);
 
 							delete oldViewpoint.screenshotSmall;
 							delete oldViewpoint.screenshot;
 							delete newViewpoint.screenshotSmall;
 							delete newViewpoint.screenshot;
-							expect(res.body.comments[0].action.property).to.equal('viewpoint');
-							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
-							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe('viewpoint');
+							expect(JSON.parse(res.body.comments[0].action.from)).toEqual(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).toEqual(newViewpoint);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				},
@@ -1548,14 +1546,14 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				},
@@ -1591,8 +1589,8 @@ describe('Issues', () => {
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-						expect(res.body.viewpoint.type).to.equal(issue.viewpoint.type);
-						expect(res.body.viewpoint.orthographicSize).to.equal(issue.viewpoint.orthographicSize);
+						expect(res.body.viewpoint.type).toBe(issue.viewpoint.type);
+						expect(res.body.viewpoint.orthographicSize).toBe(issue.viewpoint.orthographicSize);
 						return done(err);
 					});
 				},
@@ -1651,14 +1649,14 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				},
@@ -1713,14 +1711,14 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(data)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				},
@@ -1756,8 +1754,9 @@ describe('Issues', () => {
 			// Commenting the issue
 			commentData = (await agent.post(`/${username}/${model}/issues/${issueId}/comments`).send(commentData).expect(200)).body;
 
-			expect(commentData.viewpoint.screenshot).to.exist.and.to.be.not.equal(pngBase64);
-			expect(commentData.viewpoint.screenshotSmall).to.exist;
+			expect(commentData.viewpoint.screenshot).toBeTruthy();
+			expect(commentData.viewpoint.screenshot).not.toBe(pngBase64);
+			expect(commentData.viewpoint.screenshotSmall).toBeTruthy();
 			const commentId = commentData.guid;
 
 			// patch stuff
@@ -1766,9 +1765,9 @@ describe('Issues', () => {
 				.expect(200);
 
 			const comment = res.body.comments.filter((c) => c.guid == commentId)[0];
-			expect(commentData.viewpoint.screenshot).to.exist
-				.and.to.be.not.equal(pngBase64);
-			expect(commentData.viewpoint.screenshotSmall).to.exist;
+			expect(commentData.viewpoint.screenshot).toBeTruthy();
+			expect(commentData.viewpoint.screenshot).not.toBe(pngBase64);
+			expect(commentData.viewpoint.screenshotSmall).toBeTruthy();
 		});
 
 		it('bad screenshot format within comments should fail', async () => {
@@ -1801,7 +1800,7 @@ describe('Issues', () => {
 				.send(commentData)
 				.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 
-			expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+			expect(res.body.value).toBe(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 		});
 
 		it('seal last non system comment when adding system comment', (done) => {
@@ -1830,7 +1829,7 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.comments[0].sealed).to.equal(true);
+							expect(res.body.comments[0].sealed).toBe(true);
 							done(err);
 						});
 				},
@@ -1865,10 +1864,10 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.topic_type).to.equal(updateData.topic_type);
-							expect(res.body.status).to.equal(updateData.status);
-							expect(res.body.priority).to.equal(updateData.priority);
-							expect(res.body.assigned_roles).to.deep.equal(updateData.assigned_roles);
+							expect(res.body.topic_type).toBe(updateData.topic_type);
+							expect(res.body.status).toBe(updateData.status);
+							expect(res.body.priority).toBe(updateData.priority);
+							expect(res.body.assigned_roles).toEqual(updateData.assigned_roles);
 							done(err);
 						});
 				},
@@ -1893,7 +1892,7 @@ describe('Issues', () => {
 						.send(issue)
 						.expect(200, (err, res) => {
 							issueId = res.body._id;
-							expect(res.body.assigned_roles).to.deep.equal(issue.assigned_roles);
+							expect(res.body.assigned_roles).toEqual(issue.assigned_roles);
 							return done(err);
 						});
 				},
@@ -1905,8 +1904,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.status).to.equal(updateData.status);
-							expect(res.body.assigned_roles).to.deep.equal([issue.creator_role]);
+							expect(res.body.status).toBe(updateData.status);
+							expect(res.body.assigned_roles).toEqual([issue.creator_role]);
 							done(err);
 						});
 				},
@@ -1942,8 +1941,8 @@ describe('Issues', () => {
 				function (done) {
 					agent.get(`/${username}/${model}/issues/${issueId}`)
 						.expect(200, (err, res) => {
-							expect(res.body.status).to.equal('in progress');
-							expect(res.body.assigned_roles).to.deep.equal(updateData.assigned_roles);
+							expect(res.body.status).toBe('in progress');
+							expect(res.body.assigned_roles).toEqual(updateData.assigned_roles);
 							done(err);
 						});
 				},
@@ -1999,7 +1998,7 @@ describe('Issues', () => {
 					agent.patch(`/${username}/${model}/issues/${issueId}`)
 						.send(desc)
 						.expect(400, (err, res) => {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
@@ -2010,7 +2009,7 @@ describe('Issues', () => {
 			const issue = { name: 'Issue test', ...baseIssue };
 			let issueId;
 
-			before((done) => {
+			beforeAll((done) => {
 				agent.post(`/${username}/${model}/issues`)
 					.send(issue)
 					.expect(200, (err, res) => {
@@ -2061,15 +2060,15 @@ describe('Issues', () => {
 				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, (err, res) => {
-						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(updateData.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(updateData.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(updateData.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(updateData.viewpoint.right);
-						expect(res.body.viewpoint.fov).to.equal(updateData.viewpoint.fov);
-						expect(res.body.viewpoint.aspect_ratio).to.equal(updateData.viewpoint.aspect_ratio);
-						expect(res.body.viewpoint.far).to.equal(updateData.viewpoint.far);
-						expect(res.body.viewpoint.near).to.equal(updateData.viewpoint.near);
+						expect(res.body.viewpoint.up).toEqual(updateData.viewpoint.up);
+						expect(res.body.viewpoint.position).toEqual(updateData.viewpoint.position);
+						expect(res.body.viewpoint.look_at).toEqual(updateData.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).toEqual(updateData.viewpoint.view_dir);
+						expect(res.body.viewpoint.right).toEqual(updateData.viewpoint.right);
+						expect(res.body.viewpoint.fov).toBe(updateData.viewpoint.fov);
+						expect(res.body.viewpoint.aspect_ratio).toBe(updateData.viewpoint.aspect_ratio);
+						expect(res.body.viewpoint.far).toBe(updateData.viewpoint.far);
+						expect(res.body.viewpoint.near).toBe(updateData.viewpoint.near);
 						done(err);
 					});
 			});
@@ -2079,7 +2078,7 @@ describe('Issues', () => {
 				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, (err, res) => {
-						expect(res.body.position).to.deep.equal(updateData.position);
+						expect(res.body.position).toEqual(updateData.position);
 						done(err);
 					});
 			});
@@ -2142,7 +2141,7 @@ describe('Issues', () => {
 		describe('user who is collaborator/commentor but not assigned to issue job can', () => {
 			let issueId;
 
-			before((done) => {
+			beforeAll((done) => {
 				const issue = Object.assign(baseIssue, { name: 'Issue test', assigned_roles: ['jobC'] });
 
 				agent.post(`/${username}/${model}/issues`)
@@ -2229,15 +2228,15 @@ describe('Issues', () => {
 				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, (err, res) => {
-						expect(res.body.viewpoint.up).to.deep.equal(updateData.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(updateData.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(updateData.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(updateData.viewpoint.view_dir);
-						expect(res.body.viewpoint.right).to.deep.equal(updateData.viewpoint.right);
-						expect(res.body.viewpoint.fov).to.equal(updateData.viewpoint.fov);
-						expect(res.body.viewpoint.aspect_ratio).to.equal(updateData.viewpoint.aspect_ratio);
-						expect(res.body.viewpoint.far).to.equal(updateData.viewpoint.far);
-						expect(res.body.viewpoint.near).to.equal(updateData.viewpoint.near);
+						expect(res.body.viewpoint.up).toEqual(updateData.viewpoint.up);
+						expect(res.body.viewpoint.position).toEqual(updateData.viewpoint.position);
+						expect(res.body.viewpoint.look_at).toEqual(updateData.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).toEqual(updateData.viewpoint.view_dir);
+						expect(res.body.viewpoint.right).toEqual(updateData.viewpoint.right);
+						expect(res.body.viewpoint.fov).toBe(updateData.viewpoint.fov);
+						expect(res.body.viewpoint.aspect_ratio).toBe(updateData.viewpoint.aspect_ratio);
+						expect(res.body.viewpoint.far).toBe(updateData.viewpoint.far);
+						expect(res.body.viewpoint.near).toBe(updateData.viewpoint.near);
 						done(err);
 					});
 			});
@@ -2247,7 +2246,7 @@ describe('Issues', () => {
 				collabAgent.patch(`/${username}/${model}/issues/${issueId}`)
 					.send(updateData)
 					.expect(200, (err, res) => {
-						expect(res.body.position).to.deep.equal(updateData.position);
+						expect(res.body.position).toEqual(updateData.position);
 						done(err);
 					});
 			});
@@ -2278,7 +2277,7 @@ describe('Issues', () => {
 			const voidStatus = { status: 'void' };
 			const close = { status: 'closed' };
 
-			before((done) => {
+			beforeAll((done) => {
 				collabAgent.post(`/${username}/${model}/issues`)
 					.send(issue)
 					.expect(200, (err, res) => {
@@ -2315,7 +2314,7 @@ describe('Issues', () => {
 			const voidStatus = { status: 'void' };
 			const close = { status: 'closed' };
 
-			before((done) => {
+			beforeAll((done) => {
 				async.series([
 
 					function (done) {
@@ -2365,7 +2364,7 @@ describe('Issues', () => {
 			const voidStatus = { status: 'void' };
 			const close = { status: 'closed' };
 
-			before((done) => {
+			beforeAll((done) => {
 				async.series([
 					function (done) {
 						agent.post(`/${username}/${model}/issues`)
@@ -2416,7 +2415,7 @@ describe('Issues', () => {
 		describe('and then sealing a comment', () => {
 			let issueId;
 
-			before((done) => {
+			beforeAll((done) => {
 				const issue = { name: 'Issue test', ...baseIssue };
 
 				async.series([
@@ -2457,7 +2456,7 @@ describe('Issues', () => {
 			let issueId;
 			let commentId = null;
 
-			before((done) => {
+			beforeAll((done) => {
 				const issue = { name: 'Issue test', ...baseIssue };
 
 				agent.post(`/${username}/${model}/issues`)
@@ -2491,25 +2490,25 @@ describe('Issues', () => {
 							.send(comment)
 							.expect(200, (err, res) => {
 								const commentRes = res.body;
-								expect(commentRes.comment).to.equal(comment.comment);
+								expect(commentRes.comment).toBe(comment.comment);
 								done(err);
 							});
 					},
 					function (done) {
 						agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, (err, res) => {
-							expect(res.body.comments.length).to.equal(1);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-							expect(res.body.comments[0].viewpoint.up).to.deep.equal(comment.viewpoint.up);
-							expect(res.body.comments[0].viewpoint.position).to.deep.equal(comment.viewpoint.position);
-							expect(res.body.comments[0].viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
-							expect(res.body.comments[0].viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
-							expect(res.body.comments[0].viewpoint.right).to.deep.equal(comment.viewpoint.right);
-							expect(res.body.comments[0].viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
-							expect(res.body.comments[0].viewpoint.fov).to.equal(comment.viewpoint.fov);
-							expect(res.body.comments[0].viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
-							expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
-							expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
+							expect(res.body.comments.length).toBe(1);
+							expect(res.body.comments[0].comment).toBe(comment.comment);
+							expect(res.body.comments[0].owner).toBe(username);
+							expect(res.body.comments[0].viewpoint.up).toEqual(comment.viewpoint.up);
+							expect(res.body.comments[0].viewpoint.position).toEqual(comment.viewpoint.position);
+							expect(res.body.comments[0].viewpoint.look_at).toEqual(comment.viewpoint.look_at);
+							expect(res.body.comments[0].viewpoint.view_dir).toEqual(comment.viewpoint.view_dir);
+							expect(res.body.comments[0].viewpoint.right).toEqual(comment.viewpoint.right);
+							expect(res.body.comments[0].viewpoint.unityHeight).toBe(comment.viewpoint.unityHeight);
+							expect(res.body.comments[0].viewpoint.fov).toBe(comment.viewpoint.fov);
+							expect(res.body.comments[0].viewpoint.aspect_ratio).toBe(comment.viewpoint.aspect_ratio);
+							expect(res.body.comments[0].viewpoint.far).toBe(comment.viewpoint.far);
+							expect(res.body.comments[0].viewpoint.near).toBe(comment.viewpoint.near);
 							commentId = res.body.comments[0].guid;
 
 							done(err);
@@ -2524,7 +2523,7 @@ describe('Issues', () => {
 				agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 					.send(comment)
 					.expect(400, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
+						expect(res.body.value).toBe(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
 						done(err);
 					});
 			});
@@ -2550,7 +2549,7 @@ describe('Issues', () => {
 		describe('and then voidng it', () => {
 			let issueId;
 
-			before((done) => {
+			beforeAll((done) => {
 				const issue = { name: 'Issue test', ...baseIssue };
 
 				agent.post(`/${username}/${model}/issues`)
@@ -2600,7 +2599,7 @@ describe('Issues', () => {
 		describe('and then closing it', () => {
 			let issueId;
 
-			before((done) => {
+			beforeAll((done) => {
 				const issue = { name: 'Issue test', ...baseIssue };
 
 				agent.post(`/${username}/${model}/issues`)
@@ -2667,9 +2666,9 @@ describe('Issues', () => {
 						.expect(200, (err, res) => {
 							const notification = res.body.find((item) => item.type === 'USER_REFERENCED' && item.issueId === issueId);
 							assert(notification);
-							expect(notification.modelId).to.equal(model);
-							expect(notification.teamSpace).to.equal(teamspace);
-							expect(notification.referrer).to.equal(teamspace);
+							expect(notification.modelId).toBe(model);
+							expect(notification.teamSpace).toBe(teamspace);
+							expect(notification.referrer).toBe(teamspace);
 							done(err);
 						});
 				}],
@@ -2695,7 +2694,7 @@ describe('Issues', () => {
 					agent.get('/notifications')
 						.expect(200, (err, res) => {
 							const notification = res.body.find((item) => item.type === 'USER_REFERENCED' && item.issueId === issueId);
-							expect(notification).to.equal(undefined);
+							expect(notification).toBe(undefined);
 							done(err);
 						});
 				}],
@@ -2716,7 +2715,8 @@ describe('Issues', () => {
 				},
 				fetchNotification(commenterAgent),
 				(notifications, next) => {
-					expect(notifications, 'There should not be any notifications').to.be.an('array').and.to.have.length(0);
+					expect(Array.isArray(notifications)).toBe(true);
+					expect(notifications).toHaveLength(0);
 					next();
 				},
 			],
@@ -2742,7 +2742,7 @@ describe('Issues', () => {
 				}], done);
 		};
 
-		before((done) => {
+		beforeAll((done) => {
 			async.series([
 				createAndPushIssue,
 				createAndPushIssue,
@@ -2758,7 +2758,8 @@ describe('Issues', () => {
 		const testForNoComment = (id, done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, (err, res) => {
 				const { comments } = res.body;
-				expect(comments, 'There should not be a comment').to.be.an('array').and.to.have.length(0);
+				expect(Array.isArray(comments)).toBe(true);
+				expect(comments).toHaveLength(0);
 				return done(err);
 			});
 		};
@@ -2767,12 +2768,13 @@ describe('Issues', () => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, (err, res) => {
 				const { comments } = res.body;
 
-				expect(comments, 'There should be one system comment').to.be.an('array').and.to.have.length(1);
+				expect(Array.isArray(comments)).toBe(true);
+				expect(comments).toHaveLength(1);
 
 				const commentAction = comments[0].action;
 
-				expect(commentAction.property).to.equal('issue_referenced');
-				expect(commentAction.to).to.equal(otherIssueNumber.toString());
+				expect(commentAction.property).toBe('issue_referenced');
+				expect(commentAction.to).toBe(otherIssueNumber.toString());
 				return done(err);
 			});
 		};
@@ -2821,18 +2823,19 @@ describe('Issues', () => {
 						const [otherIssueNumber1, otherIssueNumber2] = [issues[2].number.toString(), issues[1].number.toString()]
 							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
-						expect(comments, 'There should be two system comments').to.be.an('array').and.to.have.length(2);
+						expect(Array.isArray(comments)).toBe(true);
+						expect(comments).toHaveLength(2);
 
 						comments = comments
 							.sort((commentA, commentB) => parseInt(commentA.action.to, 10) - parseInt(commentB.action.to, 10));
 
 						const commentAction1 = comments[0].action;
-						expect(commentAction1.property).to.equal('issue_referenced');
-						expect(commentAction1.to).to.equal(otherIssueNumber1);
+						expect(commentAction1.property).toBe('issue_referenced');
+						expect(commentAction1.to).toBe(otherIssueNumber1);
 
 						const commentAction2 = comments[1].action;
-						expect(commentAction2.property).to.equal('issue_referenced');
-						expect(commentAction2.to).to.equal(otherIssueNumber2);
+						expect(commentAction2.property).toBe('issue_referenced');
+						expect(commentAction2.to).toBe(otherIssueNumber2);
 
 						return done(err);
 					});
@@ -2966,7 +2969,7 @@ describe('Issues', () => {
 
 		let bcfAgent;
 
-		before(async () => {
+		beforeAll(async () => {
 			bcfAgent = SessionTracker(request(server));
 			await bcfAgent.login(bcfusername, bcfpassword);
 		});
@@ -2985,8 +2988,8 @@ describe('Issues', () => {
 								const issue1 = res.body.find((issue) => issue._id === bcf.issue1);
 								const issue2 = res.body.find((issue) => issue._id === bcf.issue2);
 
-								expect(issue1).to.exist;
-								expect(issue2).to.exist;
+								expect(issue1).toBeTruthy();
+								expect(issue2).toBeTruthy();
 								done(err);
 							});
 					},
@@ -2995,29 +2998,29 @@ describe('Issues', () => {
 							.expect(200, (err, res) => {
 								const issue1 = res.body;
 
-								expect(issue1.thumbnail).to.exist;
-								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
-								expect(issue1.viewpoint).to.exist;
-								expect(issue1.viewpoint.screenshot).to.exist;
+								expect(issue1.thumbnail).toBeTruthy();
+								expect(issue1.comments.length).toBe(goldenBCF1.comments.length);
+								expect(issue1.viewpoint).toBeTruthy();
+								expect(issue1.viewpoint.screenshot).toBeTruthy();
 
 								keys.forEach((key) => {
-									expect(issue1[key]).to.equal(goldenBCF1[key]);
+									expect(issue1[key]).toBe(goldenBCF1[key]);
 								});
 
 								commentKeys.forEach((key) => {
-									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 								});
 
 								viewpointKeys.forEach((key) => {
 									if (Array.isArray(goldenBCF1.viewpoint[key])) {
-										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toEqual(goldenBCF1.viewpoint[key]);
 									} else {
-										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toBe(goldenBCF1.viewpoint[key]);
 									}
 									if (Array.isArray(goldenBCF1.comments[0][key])) {
-										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toEqual(goldenBCF1.comments[0][key]);
 									} else {
-										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 									}
 								});
 
@@ -3037,7 +3040,7 @@ describe('Issues', () => {
 					function (done) {
 						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, (err, res) => {
-								expect(res.body).to.have.lengthOf(9);
+								expect(res.body).toHaveLength(9);
 								done(err);
 							});
 					},
@@ -3063,8 +3066,8 @@ describe('Issues', () => {
 								const issue1 = res.body.find((issue) => issue._id === bcf.issue1);
 								const issue2 = res.body.find((issue) => issue._id === bcf.issue2);
 
-								expect(issue1).to.exist;
-								expect(issue2).to.exist;
+								expect(issue1).toBeTruthy();
+								expect(issue2).toBeTruthy();
 								done(err);
 							});
 					},
@@ -3073,29 +3076,29 @@ describe('Issues', () => {
 							.expect(200, (err, res) => {
 								const issue1 = res.body;
 
-								expect(issue1.thumbnail).to.exist;
-								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
-								expect(issue1.viewpoint).to.exist;
-								expect(issue1.viewpoint.screenshot).to.exist;
+								expect(issue1.thumbnail).toBeTruthy();
+								expect(issue1.comments.length).toBe(goldenBCF1.comments.length);
+								expect(issue1.viewpoint).toBeTruthy();
+								expect(issue1.viewpoint.screenshot).toBeTruthy();
 
 								keys.forEach((key) => {
-									expect(issue1[key]).to.equal(goldenBCF1[key]);
+									expect(issue1[key]).toBe(goldenBCF1[key]);
 								});
 
 								commentKeys.forEach((key) => {
-									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 								});
 
 								viewpointKeys.forEach((key) => {
 									if (Array.isArray(goldenBCF1.viewpoint[key])) {
-										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toEqual(goldenBCF1.viewpoint[key]);
 									} else {
-										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toBe(goldenBCF1.viewpoint[key]);
 									}
 									if (Array.isArray(goldenBCF1.comments[0][key])) {
-										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toEqual(goldenBCF1.comments[0][key]);
 									} else {
-										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 									}
 								});
 
@@ -3118,8 +3121,8 @@ describe('Issues', () => {
 								const issue1 = res.body.find((issue) => issue._id === bcf.issue1);
 								const issue2 = res.body.find((issue) => issue._id === bcf.issue2);
 
-								expect(issue1).to.exist;
-								expect(issue2).to.exist;
+								expect(issue1).toBeTruthy();
+								expect(issue2).toBeTruthy();
 								done(err);
 							});
 					},
@@ -3128,29 +3131,29 @@ describe('Issues', () => {
 							.expect(200, (err, res) => {
 								const issue1 = res.body;
 
-								expect(issue1.thumbnail).to.exist;
-								expect(issue1.comments.length).to.equal(goldenBCF1.comments.length);
-								expect(issue1.viewpoint).to.exist;
-								expect(issue1.viewpoint.screenshot).to.exist;
+								expect(issue1.thumbnail).toBeTruthy();
+								expect(issue1.comments.length).toBe(goldenBCF1.comments.length);
+								expect(issue1.viewpoint).toBeTruthy();
+								expect(issue1.viewpoint.screenshot).toBeTruthy();
 
 								keys.forEach((key) => {
-									expect(issue1[key]).to.equal(goldenBCF1[key]);
+									expect(issue1[key]).toBe(goldenBCF1[key]);
 								});
 
 								commentKeys.forEach((key) => {
-									expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+									expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 								});
 
 								viewpointKeys.forEach((key) => {
 									if (Array.isArray(goldenBCF1.viewpoint[key])) {
-										expect(issue1.viewpoint[key]).to.deep.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toEqual(goldenBCF1.viewpoint[key]);
 									} else {
-										expect(issue1.viewpoint[key]).to.equal(goldenBCF1.viewpoint[key]);
+										expect(issue1.viewpoint[key]).toBe(goldenBCF1.viewpoint[key]);
 									}
 									if (Array.isArray(goldenBCF1.comments[0][key])) {
-										expect(issue1.comments[0][key]).to.deep.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toEqual(goldenBCF1.comments[0][key]);
 									} else {
-										expect(issue1.comments[0][key]).to.equal(goldenBCF1.comments[0][key]);
+										expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
 									}
 								});
 
@@ -3164,7 +3167,7 @@ describe('Issues', () => {
 				bcfAgent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach('file', __dirname + bcf.path)
 					.expect(401, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+						expect(res.body.value).toBe(responseCodes.NOT_AUTHORIZED.value);
 						done(err);
 					});
 			});
@@ -3175,7 +3178,7 @@ describe('Issues', () => {
 						.attach('file', __dirname + bcf.path)
 						.expect(404);
 
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 				} catch (err) {
 					// throw if error is not EPIPE
 					if (err.code !== 'EPIPE') {
@@ -3188,14 +3191,14 @@ describe('Issues', () => {
 				const res = await bcfAgent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404);
 
-				expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+				expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 			});
 
 			it('if file is not BCF file should fail', (done) => {
 				bcfAgent.post(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach('file', __dirname + bcf.invalidFile)
 					.expect(401, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+						expect(res.body.value).toBe(responseCodes.NOT_AUTHORIZED.value);
 						done(err);
 					});
 			});
@@ -3210,7 +3213,7 @@ describe('Issues', () => {
 				bcfAgent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.attach('file', __dirname + bcf.sizeZero)
 					.expect(400, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
 					});
 			});
@@ -3220,7 +3223,7 @@ describe('Issues', () => {
 			it('should succeed', (done) => {
 				bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
 					.expect(200, (err, res) => {
-						expect(res.text.length).to.be.above(7000);
+						expect(res.text.length).toBeGreaterThan(7000);
 						done(err);
 					});
 			});
@@ -3228,7 +3231,7 @@ describe('Issues', () => {
 			it('for specific issue numbers should succeed', (done) => {
 				bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip?numbers=8,9`)
 					.expect(200, (err, res) => {
-						expect(res.text.length).to.be.above(4000);
+						expect(res.text.length).toBeGreaterThan(4000);
 						done(err);
 					});
 			});
@@ -3236,7 +3239,7 @@ describe('Issues', () => {
 			it('if user is collaborator should succeed', (done) => {
 				bcfAgent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
 					.expect(200, (err, res) => {
-						expect(res.text.length).to.be.above(7000);
+						expect(res.text.length).toBeGreaterThan(7000);
 						done(err);
 					});
 			});
@@ -3244,7 +3247,7 @@ describe('Issues', () => {
 			it('if user is commenter should succeed', (done) => {
 				bcfAgent.get(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
 					.expect(200, (err, res) => {
-						expect(res.text.length).to.be.above(9000);
+						expect(res.text.length).toBeGreaterThan(9000);
 						done(err);
 					});
 			});
@@ -3252,7 +3255,7 @@ describe('Issues', () => {
 			it('if user is viewer should succeed', (done) => {
 				bcfAgent.get(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(200, (err, res) => {
-						expect(res.text.length).to.be.above(3000);
+						expect(res.text.length).toBeGreaterThan(3000);
 						done(err);
 					});
 			});
@@ -3260,7 +3263,7 @@ describe('Issues', () => {
 			it('if model does not exist should fail', (done) => {
 				bcfAgent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+						expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
@@ -3268,7 +3271,7 @@ describe('Issues', () => {
 			it('if teamspace does not exist should fail', (done) => {
 				bcfAgent.get(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.expect(404, (err, res) => {
-						expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+						expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 						done(err);
 					});
 			});
@@ -3283,7 +3286,7 @@ describe('Issues', () => {
 
 		let adminAgent;
 
-		before((done) => {
+		beforeAll((done) => {
 			adminAgent = SessionTracker(request(server));
 			adminAgent.login('adminTeamspace1JobA', password).then(() => {
 				async.series([
@@ -3317,7 +3320,7 @@ describe('Issues', () => {
 
 					teamspace1Agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(',')}`)
 						.expect(200, (err, res) => {
-							expect(res.body.map(((issue) => issue._id)).sort()).to.eql(ids);
+							expect(res.body.map(((issue) => issue._id)).sort()).toEqual(ids);
 							done(err);
 						});
 				});
@@ -3326,7 +3329,7 @@ describe('Issues', () => {
 		it(' by topic', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.topic_type)).sort()).to.eql(['information', 'structure', 'information'].sort());
+					expect(res.body.map(((issue) => issue.topic_type)).sort()).toEqual(['information', 'structure', 'information'].sort());
 					done(err);
 				});
 		});
@@ -3334,7 +3337,7 @@ describe('Issues', () => {
 		it(' by status', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.status)).sort()).to.eql(['closed', 'in progress'].sort());
+					expect(res.body.map(((issue) => issue.status)).sort()).toEqual(['closed', 'in progress'].sort());
 					done(err);
 				});
 		});
@@ -3342,7 +3345,7 @@ describe('Issues', () => {
 		it(' by priority', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.priority)).sort()).to.eql(['medium', 'high'].sort());
+					expect(res.body.map(((issue) => issue.priority)).sort()).toEqual(['medium', 'high'].sort());
 					done(err);
 				});
 		});
@@ -3350,7 +3353,7 @@ describe('Issues', () => {
 		it(' by number', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.number)).sort()).to.eql([1, 3, 4].sort());
+					expect(res.body.map(((issue) => issue.number)).sort()).toEqual([1, 3, 4].sort());
 					done(err);
 				});
 		});
@@ -3358,7 +3361,7 @@ describe('Issues', () => {
 		it(' by assigned role', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.assigned_roles[0])).sort()).to.eql(['Client', 'Client'].sort());
+					expect(res.body.map(((issue) => issue.assigned_roles[0])).sort()).toEqual(['Client', 'Client'].sort());
 					done(err);
 				});
 		});
@@ -3366,7 +3369,7 @@ describe('Issues', () => {
 		it(' by unassigned role', (done) => {
 			teamspace1Agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
 				.expect(200, (err, res) => {
-					expect(res.body.map(((issue) => issue.assigned_roles.length)).sort()).to.eql([0, 0, 0].sort());
+					expect(res.body.map(((issue) => issue.assigned_roles.length)).sort()).toEqual([0, 0, 0].sort());
 					done(err);
 				});
 		});

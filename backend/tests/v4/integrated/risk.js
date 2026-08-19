@@ -18,7 +18,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const { should, assert, expect, Assertion } = require("chai");
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
@@ -80,7 +79,7 @@ describe("Risks", function () {
 		return `${username}::${model}::${riskId}`;
 	}
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -101,7 +100,7 @@ describe("Risks", function () {
 
 	});
 
-	after(function (done) {
+	afterAll(function (done) {
 		server.close(function () {
 			console.log("API test server is closed");
 			done();
@@ -122,28 +121,28 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							riskId = res.body._id;
 
-							expect(res.body.name).to.equal(risk.name);
-							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
-							expect(res.body.associated_activity).to.equal(risk.associated_activity);
-							expect(res.body.desc).to.equal(risk.desc);
-							expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
-							expect(res.body.category).to.equal(risk.category);
-							expect(res.body.likelihood).to.equal(risk.likelihood);
-							expect(res.body.consequence).to.equal(risk.consequence);
-							expect(res.body.level_of_risk).to.equal(levelOfRisk);
-							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
-							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
-							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
-							expect(res.body.element).to.equal(risk.element);
-							expect(res.body.risk_factor).to.equal(risk.risk_factor);
-							expect(res.body.scope).to.equal(risk.scope);
-							expect(res.body.location_desc).to.equal(risk.location_desc);
+							expect(res.body.name).toBe(risk.name);
+							expect(res.body.safetibase_id).toBe(risk.safetibase_id);
+							expect(res.body.associated_activity).toBe(risk.associated_activity);
+							expect(res.body.desc).toBe(risk.desc);
+							expect(res.body.viewpoint.up).toEqual(risk.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(risk.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(risk.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(risk.viewpoint.view_dir);
+							expect(res.body.assigned_roles).toEqual(risk.assigned_roles);
+							expect(res.body.category).toBe(risk.category);
+							expect(res.body.likelihood).toBe(risk.likelihood);
+							expect(res.body.consequence).toBe(risk.consequence);
+							expect(res.body.level_of_risk).toBe(levelOfRisk);
+							expect(res.body.mitigation_status).toBe(risk.mitigation_status);
+							expect(res.body.mitigation_desc).toBe(risk.mitigation_desc);
+							expect(res.body.mitigation_detail).toBe(risk.mitigation_detail);
+							expect(res.body.mitigation_stage).toBe(risk.mitigation_stage);
+							expect(res.body.mitigation_type).toBe(risk.mitigation_type);
+							expect(res.body.element).toBe(risk.element);
+							expect(res.body.risk_factor).toBe(risk.risk_factor);
+							expect(res.body.scope).toBe(risk.scope);
+							expect(res.body.location_desc).toBe(risk.location_desc);
 
 							return done(err);
 						});
@@ -151,28 +150,28 @@ describe("Risks", function () {
 
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.name).to.equal(risk.name);
-						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
-						expect(res.body.associated_activity).to.equal(risk.associated_activity);
-						expect(res.body.desc).to.equal(risk.desc);
-						expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
-						expect(res.body.category).to.equal(risk.category);
-						expect(res.body.likelihood).to.equal(risk.likelihood);
-						expect(res.body.consequence).to.equal(risk.consequence);
-						expect(res.body.level_of_risk).to.equal(levelOfRisk);
-						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
-						expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-						expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
-						expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
-						expect(res.body.element).to.equal(risk.element);
-						expect(res.body.risk_factor).to.equal(risk.risk_factor);
-						expect(res.body.scope).to.equal(risk.scope);
-						expect(res.body.location_desc).to.equal(risk.location_desc);
+						expect(res.body.name).toBe(risk.name);
+						expect(res.body.safetibase_id).toBe(risk.safetibase_id);
+						expect(res.body.associated_activity).toBe(risk.associated_activity);
+						expect(res.body.desc).toBe(risk.desc);
+						expect(res.body.viewpoint.up).toEqual(risk.viewpoint.up);
+						expect(res.body.viewpoint.position).toEqual(risk.viewpoint.position);
+						expect(res.body.viewpoint.look_at).toEqual(risk.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).toEqual(risk.viewpoint.view_dir);
+						expect(res.body.assigned_roles).toEqual(risk.assigned_roles);
+						expect(res.body.category).toBe(risk.category);
+						expect(res.body.likelihood).toBe(risk.likelihood);
+						expect(res.body.consequence).toBe(risk.consequence);
+						expect(res.body.level_of_risk).toBe(levelOfRisk);
+						expect(res.body.mitigation_status).toBe(risk.mitigation_status);
+						expect(res.body.mitigation_desc).toBe(risk.mitigation_desc);
+						expect(res.body.mitigation_detail).toBe(risk.mitigation_detail);
+						expect(res.body.mitigation_stage).toBe(risk.mitigation_stage);
+						expect(res.body.mitigation_type).toBe(risk.mitigation_type);
+						expect(res.body.element).toBe(risk.element);
+						expect(res.body.risk_factor).toBe(risk.risk_factor);
+						expect(res.body.scope).toBe(risk.scope);
+						expect(res.body.location_desc).toBe(risk.location_desc);
 
 						return done(err);
 					});
@@ -192,27 +191,27 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							riskId = res.body._id;
 
-							expect(res.body.name).to.equal(risk.name);
-							expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
-							expect(res.body.associated_activity).to.equal(risk.associated_activity);
-							expect(res.body.desc).to.equal(risk.desc);
-							expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-							expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
-							expect(res.body.likelihood).to.equal(risk.likelihood);
-							expect(res.body.consequence).to.equal(risk.consequence);
-							expect(res.body.level_of_risk).to.equal(levelOfRisk);
-							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
-							expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-							expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
-							expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
-							expect(res.body.element).to.equal(risk.element);
-							expect(res.body.risk_factor).to.equal(risk.risk_factor);
-							expect(res.body.scope).to.equal(risk.scope);
-							expect(res.body.location_desc).to.equal(risk.location_desc);
+							expect(res.body.name).toBe(risk.name);
+							expect(res.body.safetibase_id).toBe(risk.safetibase_id);
+							expect(res.body.associated_activity).toBe(risk.associated_activity);
+							expect(res.body.desc).toBe(risk.desc);
+							expect(res.body.viewpoint.up).toEqual(risk.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(risk.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(risk.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(risk.viewpoint.view_dir);
+							expect(res.body.assigned_roles).toEqual(risk.assigned_roles);
+							expect(res.body.likelihood).toBe(risk.likelihood);
+							expect(res.body.consequence).toBe(risk.consequence);
+							expect(res.body.level_of_risk).toBe(levelOfRisk);
+							expect(res.body.mitigation_status).toBe(risk.mitigation_status);
+							expect(res.body.mitigation_desc).toBe(risk.mitigation_desc);
+							expect(res.body.mitigation_detail).toBe(risk.mitigation_detail);
+							expect(res.body.mitigation_stage).toBe(risk.mitigation_stage);
+							expect(res.body.mitigation_type).toBe(risk.mitigation_type);
+							expect(res.body.element).toBe(risk.element);
+							expect(res.body.risk_factor).toBe(risk.risk_factor);
+							expect(res.body.scope).toBe(risk.scope);
+							expect(res.body.location_desc).toBe(risk.location_desc);
 
 							return done(err);
 						});
@@ -220,27 +219,27 @@ describe("Risks", function () {
 
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.name).to.equal(risk.name);
-						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
-						expect(res.body.associated_activity).to.equal(risk.associated_activity);
-						expect(res.body.desc).to.equal(risk.desc);
-						expect(res.body.viewpoint.up).to.deep.equal(risk.viewpoint.up);
-						expect(res.body.viewpoint.position).to.deep.equal(risk.viewpoint.position);
-						expect(res.body.viewpoint.look_at).to.deep.equal(risk.viewpoint.look_at);
-						expect(res.body.viewpoint.view_dir).to.deep.equal(risk.viewpoint.view_dir);
-						expect(res.body.assigned_roles).to.deep.equal(risk.assigned_roles);
-						expect(res.body.likelihood).to.equal(risk.likelihood);
-						expect(res.body.consequence).to.equal(risk.consequence);
-						expect(res.body.level_of_risk).to.equal(levelOfRisk);
-						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
-						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
-						expect(res.body.mitigation_detail).to.equal(risk.mitigation_detail);
-						expect(res.body.mitigation_stage).to.equal(risk.mitigation_stage);
-						expect(res.body.mitigation_type).to.equal(risk.mitigation_type);
-						expect(res.body.element).to.equal(risk.element);
-						expect(res.body.risk_factor).to.equal(risk.risk_factor);
-						expect(res.body.scope).to.equal(risk.scope);
-						expect(res.body.location_desc).to.equal(risk.location_desc);
+						expect(res.body.name).toBe(risk.name);
+						expect(res.body.safetibase_id).toBe(risk.safetibase_id);
+						expect(res.body.associated_activity).toBe(risk.associated_activity);
+						expect(res.body.desc).toBe(risk.desc);
+						expect(res.body.viewpoint.up).toEqual(risk.viewpoint.up);
+						expect(res.body.viewpoint.position).toEqual(risk.viewpoint.position);
+						expect(res.body.viewpoint.look_at).toEqual(risk.viewpoint.look_at);
+						expect(res.body.viewpoint.view_dir).toEqual(risk.viewpoint.view_dir);
+						expect(res.body.assigned_roles).toEqual(risk.assigned_roles);
+						expect(res.body.likelihood).toBe(risk.likelihood);
+						expect(res.body.consequence).toBe(risk.consequence);
+						expect(res.body.level_of_risk).toBe(levelOfRisk);
+						expect(res.body.mitigation_status).toBe(risk.mitigation_status);
+						expect(res.body.mitigation_desc).toBe(risk.mitigation_desc);
+						expect(res.body.mitigation_detail).toBe(risk.mitigation_detail);
+						expect(res.body.mitigation_stage).toBe(risk.mitigation_stage);
+						expect(res.body.mitigation_type).toBe(risk.mitigation_type);
+						expect(res.body.element).toBe(risk.element);
+						expect(res.body.risk_factor).toBe(risk.risk_factor);
+						expect(res.body.scope).toBe(risk.scope);
+						expect(res.body.location_desc).toBe(risk.location_desc);
 
 						return done(err);
 					});
@@ -259,7 +258,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -273,7 +272,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -287,7 +286,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -309,7 +308,7 @@ describe("Risks", function () {
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+						expect(res.body.viewpoint.screenshot).toBe(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 						return done(err);
 					});
 				}
@@ -357,7 +356,7 @@ describe("Risks", function () {
 				},
 				function (done) {
 					agent2.get(`/${username3}/${model2}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+						expect(res.body.viewpoint.highlighted_group_id).toBe(groupId);
 						return done(err);
 					});
 				}
@@ -408,15 +407,15 @@ describe("Risks", function () {
 				function (done) {
 					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${highlighted_group_id}`)
 						.expect(200, function (err, res) {
-							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
-							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							expect(res.body.objects).toEqual(highlighted_group.objects);
+							expect(res.body.color).toEqual(highlighted_group.color);
 							done(err);
 						});
 				},
 				function (done) {
 					agent2.get(`/${username3}/${model2}/revision/master/head/groups/${hidden_group_id}`)
 						.expect(200, function (err, res) {
-							expect(res.body.objects).to.deep.equal(hidden_group.objects);
+							expect(res.body.objects).toEqual(hidden_group.objects);
 							done(err);
 						});
 				}
@@ -440,16 +439,16 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200, function (err, res) {
 							riskId = res.body._id;
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.sequence_start).to.equal(startDate);
-						expect(res.body.sequence_end).to.equal(endDate);
+						expect(res.body.sequence_start).toBe(startDate);
+						expect(res.body.sequence_end).toBe(endDate);
 
 						return done(err);
 					});
@@ -470,7 +469,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 					done(err);
 				});
 		});
@@ -486,7 +485,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -504,14 +503,14 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200, function (err, res) {
 							riskId = res.body._id;
-							expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(risk.viewpoint.transformation_group_ids);
+							expect(res.body.viewpoint.transformation_group_ids).toEqual(risk.viewpoint.transformation_group_ids);
 
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(risk.viewpoint.transformation_group_ids);
+						expect(res.body.viewpoint.transformation_group_ids).toEqual(risk.viewpoint.transformation_group_ids);
 
 						return done(err);
 					});
@@ -557,7 +556,7 @@ describe("Risks", function () {
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.viewpoint.transformation_group_ids).to.deep.equal(transformation_group_ids);
+						expect(res.body.viewpoint.transformation_group_ids).toEqual(transformation_group_ids);
 
 						return done(err);
 					});
@@ -594,8 +593,8 @@ describe("Risks", function () {
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.viewpoint.type).to.equal(risk.viewpoint.type);
-						expect(res.body.viewpoint.orthographicSize).to.equal(risk.viewpoint.orthographicSize);
+						expect(res.body.viewpoint.type).toBe(risk.viewpoint.type);
+						expect(res.body.viewpoint.orthographicSize).toBe(risk.viewpoint.orthographicSize);
 						return done(err);
 					});
 				}
@@ -628,7 +627,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -659,7 +658,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -689,7 +688,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -715,7 +714,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -726,7 +725,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -737,7 +736,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -748,7 +747,7 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function (err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -775,15 +774,15 @@ describe("Risks", function () {
 						.send(risk)
 						.expect(200, function (err, res) {
 							riskId = res.body._id;
-							expect(res.body.norm).to.deep.equal(risk.norm);
-							expect(res.body.position).to.deep.equal(risk.position);
+							expect(res.body.norm).toEqual(risk.norm);
+							expect(res.body.position).toEqual(risk.position);
 							return done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
-						expect(res.body.norm).to.deep.equal(risk.norm);
-						expect(res.body.position).to.deep.equal(risk.position);
+						expect(res.body.norm).toEqual(risk.norm);
+						expect(res.body.position).toEqual(risk.position);
 						done(err);
 					});
 				}
@@ -899,14 +898,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(description)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.desc).to.equal(risk.desc);
+							expect(res.body.desc).toBe(risk.desc);
 							done(err);
 						});
 				}
@@ -936,7 +935,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.assigned_roles).to.deep.equal(assignedRoles.assigned_roles);
+							expect(res.body.assigned_roles).toEqual(assignedRoles.assigned_roles);
 							done(err);
 						});
 				}
@@ -970,8 +969,8 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 							done(err);
 						});
 				}
@@ -1001,7 +1000,7 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(sequenceData)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 							done(err);
 						});
 				}
@@ -1035,8 +1034,8 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.sequence_start).to.equal(startDate);
-							expect(res.body.sequence_end).to.equal(endDate);
+							expect(res.body.sequence_start).toBe(startDate);
+							expect(res.body.sequence_end).toBe(endDate);
 							done(err);
 						});
 				}
@@ -1064,7 +1063,7 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(sequenceData)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_DATE_ORDER.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_DATE_ORDER.value);
 							done(err);
 						});
 				}
@@ -1096,8 +1095,8 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.sequence_start).to.not.exist;
-							expect(res.body.sequence_end).to.not.exist;
+							expect(res.body.sequence_start).toBeFalsy();
+							expect(res.body.sequence_end).toBeFalsy();
 							done(err);
 						});
 				}
@@ -1125,7 +1124,7 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(sequenceData)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}
@@ -1153,7 +1152,7 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(sequenceData)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				}
@@ -1184,12 +1183,12 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
 							expect(res.body.category = category.category);
-							expect(res.body.comments[0].action).to.deep.equal({
+							expect(res.body.comments[0].action).toEqual({
 								property: "category",
 								from: baseRisk.category,
 								to: category.category
 							});
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1222,7 +1221,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.comments[0].sealed).to.equal(true);
+							expect(res.body.comments[0].sealed).toBe(true);
 							done(err);
 						});
 				}
@@ -1252,7 +1251,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.likelihood).to.equal(likelihood.likelihood);
+							expect(res.body.likelihood).toBe(likelihood.likelihood);
 							done(err);
 						});
 				}
@@ -1282,7 +1281,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.consequence).to.equal(consequence.consequence);
+							expect(res.body.consequence).toBe(consequence.consequence);
 							done(err);
 						});
 				}
@@ -1312,7 +1311,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.position).to.deep.equal(pin.position);
+							expect(res.body.position).toEqual(pin.position);
 							done(err);
 						});
 				}
@@ -1342,7 +1341,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.mitigation_status).to.equal(mitigationStatus.mitigation_status);
+							expect(res.body.mitigation_status).toBe(mitigationStatus.mitigation_status);
 							done(err);
 						});
 				}
@@ -1372,7 +1371,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.mitigation_status).to.equal(mitigationStatus.mitigation_status);
+							expect(res.body.mitigation_status).toBe(mitigationStatus.mitigation_status);
 							done(err);
 						});
 				}
@@ -1402,7 +1401,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.mitigation_desc).to.equal(mitigation.mitigation_desc);
+							expect(res.body.mitigation_desc).toBe(mitigation.mitigation_desc);
 							done(err);
 						});
 				}
@@ -1428,14 +1427,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(mitigation)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+							expect(res.body.mitigation_desc).toBe(risk.mitigation_desc);
 							done(err);
 						});
 				}
@@ -1465,7 +1464,7 @@ describe("Risks", function () {
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.residual_risk).to.equal(residualRisk.residual_risk);
+							expect(res.body.residual_risk).toBe(residualRisk.residual_risk);
 							done(err);
 						});
 				}
@@ -1491,14 +1490,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(residualRisk)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.residual_risk).to.equal(risk.residual_risk);
+							expect(res.body.residual_risk).toBe(risk.residual_risk);
 							done(err);
 						});
 				}
@@ -1538,8 +1537,8 @@ describe("Risks", function () {
 							const newViewpoint = { ...oldViewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
 
-							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe("screenshot");
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1587,19 +1586,19 @@ describe("Risks", function () {
 							const newViewpoint = { ...oldViewpoint, ...data.viewpoint };
 							newViewpoint.guid = res.body.viewpoint.guid;
 
-							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
-							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
-							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
-							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
-							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.comments[0].action.property).to.equal("viewpoint");
-							expect(res.body.comments[0].action.from).to.equal(JSON.stringify(oldViewpoint));
-							expect(res.body.comments[0].action.to).to.equal(JSON.stringify(newViewpoint));
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.viewpoint.up).toEqual(data.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).toEqual(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).toBe(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).toBe(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).toBe(data.viewpoint.far);
+							expect(res.body.viewpoint.near).toBe(data.viewpoint.near);
+							expect(res.body.comments[0].action.property).toBe("viewpoint");
+							expect(res.body.comments[0].action.from).toBe(JSON.stringify(oldViewpoint));
+							expect(res.body.comments[0].action.to).toBe(JSON.stringify(newViewpoint));
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1650,24 +1649,24 @@ describe("Risks", function () {
 							newViewpoint.guid = res.body.viewpoint.guid;
 							delete newViewpoint.screenshot;
 
-							expect(res.body.comments[0].action.property).to.equal("screenshot");
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe("screenshot");
+							expect(res.body.comments[0].owner).toBe(username);
 
-							expect(res.body.viewpoint.up).to.deep.equal(data.viewpoint.up);
-							expect(res.body.viewpoint.position).to.deep.equal(data.viewpoint.position);
-							expect(res.body.viewpoint.look_at).to.deep.equal(data.viewpoint.look_at);
-							expect(res.body.viewpoint.view_dir).to.deep.equal(data.viewpoint.view_dir);
-							expect(res.body.viewpoint.right).to.deep.equal(data.viewpoint.right);
-							expect(res.body.viewpoint.fov).to.equal(data.viewpoint.fov);
-							expect(res.body.viewpoint.aspect_ratio).to.equal(data.viewpoint.aspect_ratio);
-							expect(res.body.viewpoint.far).to.equal(data.viewpoint.far);
-							expect(res.body.viewpoint.near).to.equal(data.viewpoint.near);
-							expect(res.body.comments[1].action.property).to.equal("viewpoint");
-							expect(res.body.comments[1].action.from).to.equal(JSON.stringify(oldViewpoint));
+							expect(res.body.viewpoint.up).toEqual(data.viewpoint.up);
+							expect(res.body.viewpoint.position).toEqual(data.viewpoint.position);
+							expect(res.body.viewpoint.look_at).toEqual(data.viewpoint.look_at);
+							expect(res.body.viewpoint.view_dir).toEqual(data.viewpoint.view_dir);
+							expect(res.body.viewpoint.right).toEqual(data.viewpoint.right);
+							expect(res.body.viewpoint.fov).toBe(data.viewpoint.fov);
+							expect(res.body.viewpoint.aspect_ratio).toBe(data.viewpoint.aspect_ratio);
+							expect(res.body.viewpoint.far).toBe(data.viewpoint.far);
+							expect(res.body.viewpoint.near).toBe(data.viewpoint.near);
+							expect(res.body.comments[1].action.property).toBe("viewpoint");
+							expect(res.body.comments[1].action.from).toBe(JSON.stringify(oldViewpoint));
 							const vp = JSON.parse(res.body.comments[1].action.to);
 							delete vp.screenshot_ref;
-							expect(vp).to.deep.equal(newViewpoint);
-							expect(res.body.comments[1].owner).to.equal(username);
+							expect(vp).toEqual(newViewpoint);
+							expect(res.body.comments[1].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1718,16 +1717,16 @@ describe("Risks", function () {
 							data.viewpoint.thumbnail = res.body.viewpoint.thumbnail;
 
 							const { screenshotSmall, screenshot, ...viewpoint } = res.body.viewpoint;
-							expect(viewpoint).to.deep.equal(data.viewpoint);
+							expect(viewpoint).toEqual(data.viewpoint);
 
 							delete oldViewpoint.screenshotSmall;
 							delete oldViewpoint.screenshot;
 							delete newViewpoint.screenshotSmall;
 							delete newViewpoint.screenshot;
-							expect(res.body.comments[0].action.property).to.equal("viewpoint");
-							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
-							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).toEqual(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).toEqual(newViewpoint);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1808,16 +1807,16 @@ describe("Risks", function () {
 							data.viewpoint.transformation_group_ids = transformation_group_ids;
 
 							const { screenshotSmall, screenshot, ...viewpoint } = res.body.viewpoint;
-							expect(viewpoint).to.deep.equal(data.viewpoint);
+							expect(viewpoint).toEqual(data.viewpoint);
 
 							delete oldViewpoint.screenshotSmall;
 							delete oldViewpoint.screenshot;
 							delete newViewpoint.screenshotSmall;
 							delete newViewpoint.screenshot;
-							expect(res.body.comments[0].action.property).to.equal("viewpoint");
-							expect(JSON.parse(res.body.comments[0].action.from)).to.deep.equal(oldViewpoint);
-							expect(JSON.parse(res.body.comments[0].action.to)).to.deep.equal(newViewpoint);
-							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].action.property).toBe("viewpoint");
+							expect(JSON.parse(res.body.comments[0].action.from)).toEqual(oldViewpoint);
+							expect(JSON.parse(res.body.comments[0].action.to)).toEqual(newViewpoint);
+							expect(res.body.comments[0].owner).toBe(username);
 							done(err);
 						});
 				}
@@ -1877,14 +1876,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(data)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				}
@@ -1943,14 +1942,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(data)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				}
@@ -2005,14 +2004,14 @@ describe("Risks", function () {
 					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(data)
 						.expect(400, function (err, res) {
-							expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+							expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 							done(err);
 						});
 				},
 				function (done) {
 					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function (err, res) {
-							expect(res.body.viewpoint).to.deep.equal(oldViewpoint);
+							expect(res.body.viewpoint).toEqual(oldViewpoint);
 							done(err);
 						});
 				}
@@ -2033,7 +2032,7 @@ describe("Risks", function () {
 					agent.post(`/${username}/mitigations`)
 					.expect(200, function (err, res) {
 						const mitigation = res.body.find((m) => m.mitigation_desc === "1");
-						expect(!!mitigation).to.equal(true);
+						expect(!!mitigation).toBe(true);
 						done(err);
 					});
 				}
@@ -2057,7 +2056,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "1");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(true);
+							expect(!!reference).toBe(true);
 							done(err);
 						});
 				}
@@ -2088,7 +2087,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(true);
+							expect(!!reference).toBe(true);
 							done(err);
 						});
 				}
@@ -2117,7 +2116,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(true);
+							expect(!!reference).toBe(true);
 							done(err);
 						});
 				}
@@ -2146,7 +2145,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(false);
+							expect(!!reference).toBe(false);
 							done(err);
 						});
 				},
@@ -2155,7 +2154,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "3");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(true);
+							expect(!!reference).toBe(true);
 							done(err);
 						});
 				}
@@ -2184,7 +2183,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(false);
+							expect(!!reference).toBe(false);
 							done(err);
 						});
 				},
@@ -2193,7 +2192,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "3");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(true);
+							expect(!!reference).toBe(true);
 							done(err);
 						});
 				}
@@ -2222,7 +2221,7 @@ describe("Risks", function () {
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-							expect(!!reference).to.equal(false);
+							expect(!!reference).toBe(false);
 							done(err);
 						});
 				}
@@ -2250,7 +2249,7 @@ describe("Risks", function () {
 					agent.post(`/${username}/mitigations`)
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "4");
-							expect(!!mitigation).to.equal(false);
+							expect(!!mitigation).toBe(false);
 							done(err);
 						});
 				}
@@ -2261,7 +2260,7 @@ describe("Risks", function () {
 			let riskId;
 			let commentId = null
 
-			before(function (done) {
+			beforeAll(function (done) {
 				const risk = Object.assign({ "name": "Risk test" }, baseRisk);
 
 				agent.post(`/${username}/${model}/risks`)
@@ -2295,7 +2294,7 @@ describe("Risks", function () {
 							.send(comment)
 							.expect(200, function (err, res) {
 								const commentRes = res.body;
-								expect(commentRes.comment).to.equal(comment.comment);
+								expect(commentRes.comment).toBe(comment.comment);
 								done(err);
 							});
 					},
@@ -2303,10 +2302,10 @@ describe("Risks", function () {
 						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function (err, res) {
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
 
-							expect(res.body.comments.length).to.equal(1);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
+							expect(res.body.comments.length).toBe(1);
+							expect(res.body.comments[0].comment).toBe(comment.comment);
+							expect(res.body.comments[0].owner).toBe(username);
+							expect(res.body.comments[0].viewpoint).toEqual(comment.viewpoint);
 							commentId = res.body.comments[0].guid;
 
 							done(err);
@@ -2321,7 +2320,7 @@ describe("Risks", function () {
 				agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 					.send(comment)
 					.expect(400, function (err, res) {
-						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
+						expect(res.body.value).toBe(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
 						done(err);
 					});
 			});
@@ -2361,9 +2360,9 @@ describe("Risks", function () {
 							.expect(200, function (err, res) {
 								const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
 								assert(notification);
-								expect(notification.modelId).to.equal(model);
-								expect(notification.teamSpace).to.equal(teamspace);
-								expect(notification.referrer).to.equal(teamspace);
+								expect(notification.modelId).toBe(model);
+								expect(notification.teamSpace).toBe(teamspace);
+								expect(notification.referrer).toBe(teamspace);
 								done(err);
 							});
 					}],
@@ -2390,7 +2389,7 @@ describe("Risks", function () {
 						agent.get("/notifications")
 							.expect(200, function (err, res) {
 								const notification = res.body.find(item => item.type === "USER_REFERENCED" && item.riskId === riskId);
-								expect(notification).to.equal(undefined);
+								expect(notification).toBe(undefined);
 								done(err);
 							});
 					}],
@@ -2411,7 +2410,8 @@ describe("Risks", function () {
 					},
 					fetchNotification(altUserAgent),
 					(notifications, next) => {
-						expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
+						expect(Array.isArray(notifications)).toBe(true);
+						expect(notifications).toHaveLength(0);
 						next();
 					},
 				],
@@ -2426,7 +2426,7 @@ describe("Risks", function () {
 			const project = '5BF7DF65-F3A8-4337-8016-A63F00000000'
 			let model = "";
 
-			before(function (done) {
+			beforeAll(function (done) {
 				async.series([
 					(next) => {
 						createModel(agent2, teamspace, project, 'Query risks').then((res) => {
@@ -2454,7 +2454,7 @@ describe("Risks", function () {
 
 						agent2.get(`/${teamspace}/${model}/risks?ids=${ids.join(',')}`)
 							.expect(200, function (err, res) {
-								expect(res.body.map((risk => risk._id)).sort()).to.eql(ids)
+								expect(res.body.map((risk => risk._id)).sort()).toEqual(ids)
 								done(err);
 							});
 
@@ -2465,7 +2465,7 @@ describe("Risks", function () {
 			it(" by likelihood", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?likelihoods=0,2`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.likelihood)).sort()).to.eql([0, 2].sort())
+						expect(res.body.map((risk => risk.likelihood)).sort()).toEqual([0, 2].sort())
 						done(err);
 					});
 			});
@@ -2473,7 +2473,7 @@ describe("Risks", function () {
 			it(" by consequence", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?consequences=3,2`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.consequence)).sort()).to.eql([2, 2].sort())
+						expect(res.body.map((risk => risk.consequence)).sort()).toEqual([2, 2].sort())
 						done(err);
 					});
 			});
@@ -2481,7 +2481,7 @@ describe("Risks", function () {
 			it(" by level of risk", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?levelOfRisks=1,-1`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.level_of_risk)).sort()).to.eql([1, 1, -1].sort())
+						expect(res.body.map((risk => risk.level_of_risk)).sort()).toEqual([1, 1, -1].sort())
 						done(err);
 					});
 			});
@@ -2489,7 +2489,7 @@ describe("Risks", function () {
 			it(" by residual likelihood", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?residualLikelihoods=1,2`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.residual_likelihood)).sort()).to.eql([1, 2, 2].sort())
+						expect(res.body.map((risk => risk.residual_likelihood)).sort()).toEqual([1, 2, 2].sort())
 						done(err);
 					});
 			});
@@ -2497,7 +2497,7 @@ describe("Risks", function () {
 			it(" by residual consequence", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?residualConsequences=3`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.residual_consequence)).sort()).to.eql([3].sort())
+						expect(res.body.map((risk => risk.residual_consequence)).sort()).toEqual([3].sort())
 						done(err);
 					});
 			});
@@ -2505,7 +2505,7 @@ describe("Risks", function () {
 			it(" by residual level of risk", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?residualLevelOfRisks=2,4`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.residual_level_of_risk)).sort()).to.eql([2, 2, 2, 4].sort())
+						expect(res.body.map((risk => risk.residual_level_of_risk)).sort()).toEqual([2, 2, 2, 4].sort())
 						done(err);
 					});
 			});
@@ -2513,7 +2513,7 @@ describe("Risks", function () {
 			it(" by category", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?categories=Environmental%20Issue,Social%20Issue`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.category)).sort()).to.eql(["Environmental Issue", "Social Issue"].sort())
+						expect(res.body.map((risk => risk.category)).sort()).toEqual(["Environmental Issue", "Social Issue"].sort())
 						done(err);
 					});
 			});
@@ -2521,7 +2521,7 @@ describe("Risks", function () {
 			it(" by number", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?numbers=1,2`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.number)).sort()).to.eql([1, 2].sort())
+						expect(res.body.map((risk => risk.number)).sort()).toEqual([1, 2].sort())
 						done(err);
 					});
 			});
@@ -2529,7 +2529,7 @@ describe("Risks", function () {
 			it(" by mitigation status", function (done) {
 				agent2.get(`/${teamspace}/${model}/risks?mitigationStatus=rejected,proposed`)
 					.expect(200, function (err, res) {
-						expect(res.body.map((risk => risk.mitigation_status)).sort()).to.eql(["rejected", "proposed"].sort())
+						expect(res.body.map((risk => risk.mitigation_status)).sort()).toEqual(["rejected", "proposed"].sort())
 						done(err);
 					});
 			});

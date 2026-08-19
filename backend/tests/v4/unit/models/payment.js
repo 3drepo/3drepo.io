@@ -1,6 +1,4 @@
 "use strict";
-
-const expect = require("chai").expect;
 const moment = require("moment");
 const proxyquire = require("proxyquire").noCallThru();
 
@@ -23,43 +21,43 @@ describe("UserBilling", function() {
 	describe(".getNextPaymentDate", function() {
 
 		it("should = 2016-02-01 if payment date is 2016-01-01", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-01")).toISOString()).to.equal("2016-02-01T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-01")).toISOString()).toBe("2016-02-01T00:00:00.000Z");
 		});
 
 		it("should = 2016-03-01 if payment date is 2016-01-30", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-30")).toISOString()).to.equal("2016-03-01T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-30")).toISOString()).toBe("2016-03-01T00:00:00.000Z");
 		});
 
 		it("should = 2016-03-01 if payment date is 2016-01-31", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-31")).toISOString()).to.equal("2016-03-01T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-31")).toISOString()).toBe("2016-03-01T00:00:00.000Z");
 		});
 
 		it("should = 2016-02-29 if payment date is 2016-01-29", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-29")).toISOString()).to.equal("2016-02-29T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-29")).toISOString()).toBe("2016-02-29T00:00:00.000Z");
 		});
 
 		it("should = 2016-02-28 if payment date is 2016-02-28", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-28")).toISOString()).to.equal("2016-02-28T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-01-28")).toISOString()).toBe("2016-02-28T00:00:00.000Z");
 		});
 
 		it("should = 2015-03-01 if payment date is 2015-01-29", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2015-01-29")).toISOString()).to.equal("2015-03-01T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2015-01-29")).toISOString()).toBe("2015-03-01T00:00:00.000Z");
 		});
 
 		it("should = 2015-02-28 if payment date is 2015-01-28", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2015-01-28")).toISOString()).to.equal("2015-02-28T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2015-01-28")).toISOString()).toBe("2015-02-28T00:00:00.000Z");
 		});
 
 		it("should = 2016-05-01 if payment date is 2016-03-31", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-03-31")).toISOString()).to.equal("2016-05-01T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-03-31")).toISOString()).toBe("2016-05-01T00:00:00.000Z");
 		});
 
 		it("should = 2016-08-31 if payment date is 2016-07-31", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-07-31")).toISOString()).to.equal("2016-08-31T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-07-31")).toISOString()).toBe("2016-08-31T00:00:00.000Z");
 		});
 
 		it("should = 2016-09-30 if payment date is 2016-08-30", function() {
-			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-08-30")).toISOString()).to.equal("2016-09-30T00:00:00.000Z");
+			expect(UserBilling.statics.getNextPaymentDate(new Date("2016-08-30")).toISOString()).toBe("2016-09-30T00:00:00.000Z");
 		});
 
 	});
@@ -112,16 +110,16 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
-				expect(result.regularPayment.gross).to.equal(120);
-				expect(result.regularPayment.net).to.closeTo(100, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(20, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
-				expect(result.proRataPayment).to.not.exist;
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.regularPayment.gross).toBe(120);
+				expect(Math.abs((result.regularPayment.net) - (100))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (20))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
+				expect(result.proRataPayment).toBeFalsy();
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -139,16 +137,16 @@ describe("UserBilling", function() {
 			const isBusiness = true;
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
-				expect(result.regularPayment.gross).to.equal(360);
-				expect(result.regularPayment.net).to.closeTo(300, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(60, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
-				expect(result.proRataPayment).to.not.exist;
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.regularPayment.gross).toBe(360);
+				expect(Math.abs((result.regularPayment.net) - (300))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (60))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
+				expect(result.proRataPayment).toBeFalsy();
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -167,16 +165,16 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
-				expect(result.regularPayment.gross).to.equal(200);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(0, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
-				expect(result.proRataPayment).to.not.exist;
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.regularPayment.gross).toBe(200);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (0))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
+				expect(result.proRataPayment).toBeFalsy();
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -195,16 +193,16 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
-				expect(result.regularPayment.gross).to.equal(120);
-				expect(result.regularPayment.net).to.closeTo(100, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(20, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
-				expect(result.proRataPayment).to.not.exist;
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.regularPayment.gross).toBe(120);
+				expect(Math.abs((result.regularPayment.net) - (100))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (20))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
+				expect(result.proRataPayment).toBeFalsy();
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -223,16 +221,16 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness }).then(result => {
 
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
-				expect(result.regularPayment.gross).to.equal(238);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(38, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
-				expect(result.proRataPayment).to.not.exist;
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.regularPayment.gross).toBe(238);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (38))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
+				expect(result.proRataPayment).toBeFalsy();
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -261,21 +259,21 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.cancelledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).toBe(false);
 
-				expect(result.regularPayment.gross).to.equal(480);
-				expect(result.regularPayment.net).to.closeTo(400, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(80, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
+				expect(result.regularPayment.gross).toBe(480);
+				expect(Math.abs((result.regularPayment.net) - (400))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (80))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
 
-				expect(result.proRataPayment.gross).to.closeTo(7.74, Number.EPSILON);
-				expect(result.proRataPayment.net).to.closeTo(6.45, Number.EPSILON);
-				expect(result.proRataPayment.tax).to.closeTo(1.29, Number.EPSILON);
-				expect(result.proRataPayment.length.value).to.equal(1);
-				expect(result.proRataPayment.length.unit).to.equal("DAY");
+				expect(Math.abs((result.proRataPayment.gross) - (7.74))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.net) - (6.45))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.tax) - (1.29))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.proRataPayment.length.value).toBe(1);
+				expect(result.proRataPayment.length.unit).toBe("DAY");
 
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -302,21 +300,21 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.cancelledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).toBe(false);
 
-				expect(result.regularPayment.gross).to.equal(240);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(40, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
+				expect(result.regularPayment.gross).toBe(240);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (40))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
 
-				expect(result.proRataPayment.gross).to.closeTo(99.31, Number.EPSILON);
-				expect(result.proRataPayment.net).to.closeTo(82.76, Number.EPSILON);
-				expect(result.proRataPayment.tax).to.closeTo(16.55, Number.EPSILON);
-				expect(result.proRataPayment.length.value).to.equal(24);
-				expect(result.proRataPayment.length.unit).to.equal("DAY");
+				expect(Math.abs((result.proRataPayment.gross) - (99.31))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.net) - (82.76))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.tax) - (16.55))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.proRataPayment.length.value).toBe(24);
+				expect(result.proRataPayment.length.unit).toBe("DAY");
 
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -343,21 +341,21 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.cancelledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).toBe(false);
 
-				expect(result.regularPayment.gross).to.equal(240);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(40, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
+				expect(result.regularPayment.gross).toBe(240);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (40))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
 
-				expect(result.proRataPayment.gross).to.closeTo(120, Number.EPSILON);
-				expect(result.proRataPayment.net).to.closeTo(100, Number.EPSILON);
-				expect(result.proRataPayment.tax).to.closeTo(20, Number.EPSILON);
-				expect(result.proRataPayment.length.value).to.equal(31);
-				expect(result.proRataPayment.length.unit).to.equal("DAY");
+				expect(Math.abs((result.proRataPayment.gross) - (120))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.net) - (100))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.tax) - (20))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.proRataPayment.length.value).toBe(31);
+				expect(result.proRataPayment.length.unit).toBe("DAY");
 
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -383,21 +381,21 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes.cancelledAllPlans).to.be.false;
+				expect(result.changes.cancelledAllPlans).toBe(false);
 
-				expect(result.regularPayment.gross).to.equal(200);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(0, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
+				expect(result.regularPayment.gross).toBe(200);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (0))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
 
-				expect(result.proRataPayment.gross).to.closeTo(82.76, Number.EPSILON);
-				expect(result.proRataPayment.net).to.closeTo(82.76, Number.EPSILON);
-				expect(result.proRataPayment.tax).to.closeTo(0, Number.EPSILON);
-				expect(result.proRataPayment.length.value).to.equal(24);
-				expect(result.proRataPayment.length.unit).to.equal("DAY");
+				expect(Math.abs((result.proRataPayment.gross) - (82.76))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.net) - (82.76))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.proRataPayment.tax) - (0))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.proRataPayment.length.value).toBe(24);
+				expect(result.proRataPayment.length.unit).toBe("DAY");
 
-				expect(result.paymentDate.toISOString()).to.equal(paymentDate.toISOString());
+				expect(result.paymentDate.toISOString()).toBe(paymentDate.toISOString());
 			});
 		});
 
@@ -424,19 +422,19 @@ describe("UserBilling", function() {
 
 			return createPaymentTest({currentSubscriptions, newLicences, paymentDate, country, isBusiness, lastAnniversaryDate, nextPaymentDate }).then(result => {
 
-				expect(result.changes).to.deep.equal({
+				expect(result.changes).toEqual({
 					cancelledAllPlans: false
 				});
 
-				expect(result.regularPayment.gross).to.equal(240);
-				expect(result.regularPayment.net).to.closeTo(200, Number.EPSILON);
-				expect(result.regularPayment.tax).to.closeTo(40, Number.EPSILON);
-				expect(result.regularPayment.length.value).to.equal(1);
-				expect(result.regularPayment.length.unit).to.equal("MONTH");
+				expect(result.regularPayment.gross).toBe(240);
+				expect(Math.abs((result.regularPayment.net) - (200))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(Math.abs((result.regularPayment.tax) - (40))).toBeLessThanOrEqual(Number.EPSILON);
+				expect(result.regularPayment.length.value).toBe(1);
+				expect(result.regularPayment.length.unit).toBe("MONTH");
 
-				expect(result.proRataPayment).to.not.exist;
+				expect(result.proRataPayment).toBeFalsy();
 
-				expect(result.paymentDate.toISOString()).to.equal(nextPaymentDate.toISOString());
+				expect(result.paymentDate.toISOString()).toBe(nextPaymentDate.toISOString());
 			});
 
 		});

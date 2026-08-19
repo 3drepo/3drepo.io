@@ -16,50 +16,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const vat = require("../../../src/v4/models/vat");
 const config = require("../../../src/v4/config");
 
-describe("VAT from http://ec.europa.eu ", function () {
+const skipVatTests = config && config.vat && config.vat.debug
+				&& config.vat.debug.skipChecking;
+
+(skipVatTests ? describe.skip : describe)("VAT from http://ec.europa.eu ", function () {
 
 	let server;
-	const skip = config && config.vat && config.vat.debug
-					&& config.vat.debug.skipChecking;
 
-	before(async function(done) {
-
-		if (skip) {
-			this.skip();
+	beforeAll(async function(done) {
+		const app = await createAppAsync();
+		server = app.listen(8080, function () {
+			console.log("API test server is listening on port 8080!");
 			done();
-		} else {
-			const app = await createAppAsync();
-			server = app.listen(8080, function () {
-				console.log("API test server is listening on port 8080!");
-				done();
-			});
-		}
-
+		});
 	});
 
-	after(function(done) {
-		if (!skip) {
-			server.close(function() {
-				console.log("API test server is closed");
-				done();
-			});
-		} else {
+	afterAll(function(done) {
+		server.close(function() {
+			console.log("API test server is closed");
 			done();
-		}
+		});
 	});
 
 	it("checkVAT works correctly with valid code and VAT number", function(done) {
 
 		vat.checkVAT("GB", "206909015").then(function(vatRes) {
-			expect(vatRes).to.be.defined;
-			expect(vatRes).to.have.property("valid");
-			expect(vatRes.valid).to.equal(true);
+			expect(vatRes).toBeDefined();
+			expect(vatRes).toHaveProperty("valid");
+			expect(vatRes.valid).toBe(true);
 			done();
 		})
 			.catch(function(err) {
@@ -73,13 +61,13 @@ describe("VAT from http://ec.europa.eu ", function () {
 		// Mexico
 		vat.checkVAT("MX", "P&G851223B24")
 			.then(function(vatRes) {
-				expect(vatRes).to.be.defined;
-				expect(vatRes).to.have.property("valid");
-				expect(vatRes.valid).to.equal(true);
+				expect(vatRes).toBeDefined();
+				expect(vatRes).toHaveProperty("valid");
+				expect(vatRes.valid).toBe(true);
 				done();
 			})
 			.catch(function(err) {
-				expect(err).to.be.undefined;
+				expect(err).toBeUndefined();
 				done(err);
 			});
 
@@ -89,14 +77,14 @@ describe("VAT from http://ec.europa.eu ", function () {
 
 		vat.checkVAT("GB", "XXX")
 			.then(function(vatRes) {
-				expect(vatRes).to.be.defined;
-				expect(vatRes).to.have.property("valid");
-				expect(vatRes.valid).to.equal(false);
+				expect(vatRes).toBeDefined();
+				expect(vatRes).toHaveProperty("valid");
+				expect(vatRes.valid).toBe(false);
 				done();
 			})
 			.catch(function(err) {
 				console.log(err);
-				expect(err).to.be.undefined;
+				expect(err).toBeUndefined();
 				done(err);
 			});
 
@@ -106,11 +94,11 @@ describe("VAT from http://ec.europa.eu ", function () {
 
 		vat.checkVAT("XXX", "XXX")
 			.then(function(vatRes) {
-				expect(vatRes).to.be.undefined;
+				expect(vatRes).toBeUndefined();
 				done();
 			})
 			.catch(function(err) {
-				expect(err).to.be.defined;
+				expect(err).toBeDefined();
 				done();
 			});
 
