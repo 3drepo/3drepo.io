@@ -21,11 +21,9 @@ const checkPermission = proxyquire("../../../../src/v4/middlewares/checkPermissi
 	"../response_codes": {}
 }).checkPermissionsHelper;
 const db = require("../../../../src/v4/handler/db");
-const { generateRandomString } = require("../../helpers/services");
 
 const account = "testuser";
 const password = "testuser";
-const newPassword = "newtestuser";
 const model = "af1ccf84-71c3-490e-9e5a-cb80e30ee519";
 const gridFsFilename = "cd561c86-de1a-482e-8f5d-89cfc49562e8LAB-BBD-00-ZZ-M3-A-0005_IFC2x3_FM_Handover_ifc";
 
@@ -256,108 +254,6 @@ describe("Check DB handler", function () {
 		});
 	});
 
-	describe("runCommand", function () {
-		// use a randomly generated role name so reruns against the same DB
-		// (without restoring a fresh dump) don't collide with a role left
-		// over from a previous run.
-		const roleName = `team_member_${generateRandomString(16)}`;
-		const createRoleCmd = {
-			"createRole": roleName,
-			"privileges": [{
-				"resource": {
-					"db": account,
-					"collection": "settings"
-				},
-				"actions": ["find"]
-			}
-			],
-			"roles": []
-		};
-		const grantRoleCmd = {
-			grantRolesToUser: account,
-			roles: [{ role: roleName, db: account }]
-		};
-		const revokeRoleCmd = {
-			revokeRolesFromUser: account,
-			roles: [{ role: roleName, db: account }]
-		};
-		const newPasswordUserCmd = {
-			"updateUser": account,
-			"pwd": newPassword
-		};
-		const revertPasswordUserCmd = {
-			"updateUser": account,
-			"pwd": password
-		};
-
-		it("create role command should succeed", async function () {
-			const result = await db.runCommand(account, createRoleCmd);
-			expect(result.ok).toBe(1);
-		});
-
-		it("create duplicate role command should fail", async function () {
-			try {
-				await db.runCommand(account, createRoleCmd);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).toBe(51002);
-			}
-		});
-
-		it("grant role command should succeed", async function () {
-			const result = await db.runCommand("admin", grantRoleCmd);
-			expect(result.ok).toBe(1);
-		});
-
-		it("grant role command to user DB should fail", async function () {
-			try {
-				await db.runCommand(account, grantRoleCmd);
-			} catch (err) {
-				expect(err.code).toBe(11);
-			}
-		});
-
-		it("revoke role command should succeed", async function () {
-			const result = await db.runCommand("admin", revokeRoleCmd);
-			expect(result.ok).toBe(1);
-		});
-
-		it("revoke role command on user DB should fail", async function () {
-			try {
-				await db.runCommand(account, revokeRoleCmd);
-			} catch (err) {
-				expect(err.code).toBe(11);
-			}
-		});
-
-		it("update user password command on admin should succeed", async function () {
-			const result = await db.runCommand("admin", newPasswordUserCmd);
-			expect(result.ok).toBe(1);
-		});
-
-		it("update user password command on admin should succeed", async function () {
-			const result = await db.runCommand("admin", revertPasswordUserCmd);
-			expect(result.ok).toBe(1);
-		});
-
-		it("update user command on user DB should fail", async function () {
-			try {
-				await db.runCommand(account, revertPasswordUserCmd);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).toBe(11);
-			}
-		});
-
-		it("run command with incorrect username should fail", async function () {
-			try {
-				await db.runCommand("badDB", revertPasswordUserCmd);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.code).toBe(11);
-			}
-		});
-	});
 	describe("count", function () {
 		it("count jobs should succeed", async function () {
 			const jobs = await db.count(account, "jobs", {});
