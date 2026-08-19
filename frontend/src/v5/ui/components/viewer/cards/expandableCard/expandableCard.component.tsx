@@ -32,7 +32,8 @@ export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false
 		if (isExpanded) {
 			setShouldRenderExpanded(true);
 		} else {
-			const timer = setTimeout(() => setShouldRenderExpanded(false), TRANSITION_DURATION); // Match transition duration
+			// Wait for the transition to finish before unmounting the expanded component
+			const timer = setTimeout(() => setShouldRenderExpanded(false), TRANSITION_DURATION);
 			return () => clearTimeout(timer);
 		}
 	}, [isExpanded]);
