@@ -16,13 +16,20 @@
  */
 
 // Jest config for legacy v4 unit tests (previously run via mocha).
-// Deliberately NOT extending jest.config.js: v4 tests do not use the
-// @shelf/jest-mongodb in-memory preset (they don't touch the DB at all in
-// the unit suite) and are not measured against the v5 coverage thresholds.
+// Deliberately NOT extending jest.config.v5.js: some v4 unit tests (db.js,
+// checkPermissions.js) hit a real, pre-seeded MongoDB test DB dump rather
+// than the @shelf/jest-mongodb in-memory instance used by v5, and are not
+// measured against the v5 coverage thresholds.
+//
+// maxWorkers is pinned to 1: mocha used to run every unit file serially in a
+// single process. Several files share state in the same real Mongo DB (e.g.
+// role creation/grant/revoke in db.js), so running files concurrently across
+// workers can race against each other and produce spurious connection
+// errors.
 module.exports = {
 	clearMocks: true,
 	collectCoverage: false,
-	maxWorkers: '50%',
+	maxWorkers: 1,
 	testEnvironment: 'node',
 	testMatch: ['**/tests/v4/unit/**/*.js'],
 	testPathIgnorePatterns: [
