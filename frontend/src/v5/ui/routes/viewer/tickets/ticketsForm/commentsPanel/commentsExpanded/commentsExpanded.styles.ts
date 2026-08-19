@@ -15,22 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconContainer, TitleContainer } from '@controls/accordion/accordion.styles';
-import { CommentsList } from '../commentsList/commentsList.component';
-import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
-import { AccordionSummary } from '@mui/material';
-import { ExpandedContainer } from './commentsExpanded.styles';
-export const CommentsExpanded = () => {
+import styled from 'styled-components';
 
-	return (
-		<ExpandedContainer>
-			<AccordionSummary expandIcon={null}>
-				<IconContainer>
-					<CommentIcon />
-				</IconContainer>
-				<TitleContainer>Comments</TitleContainer>
-			</AccordionSummary>
-			<CommentsList />
-		</ExpandedContainer>
-	);
-};
+export const ExpandedContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
