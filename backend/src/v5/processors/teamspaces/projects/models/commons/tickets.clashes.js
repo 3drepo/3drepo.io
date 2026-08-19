@@ -258,11 +258,11 @@ const getTagValueInstruction = (valuesAtCreation = []) => {
 	if (!tagInstruction) return undefined;
 
 	const staticValues = [];
-	const fields = [];
+	const metadataFields = [];
 	tagInstruction.value.forEach((value) => {
 		const field = value.match(META_PLACEHOLDER_REGEX)?.[1];
 		if (field) {
-			fields.push(field);
+			metadataFields.push(field);
 		} else {
 			staticValues.push(value);
 		}
@@ -270,7 +270,7 @@ const getTagValueInstruction = (valuesAtCreation = []) => {
 
 	// if the tags field only contains static values, we return undefined as
 	// pure static values is already constructed by the base ticket. (same as any other property)
-	return fields.length ? { staticValues, fields } : undefined;
+	return metadataFields.length ? { staticValues, fields: metadataFields } : undefined;
 };
 
 const getClashMetadata = async (teamspace, project, clashContext, clash, fields) => {
@@ -330,7 +330,7 @@ const getClashMetadata = async (teamspace, project, clashContext, clash, fields)
 const populateTagPlaceholders = async (teamspace, project, ticket, clashContext, clash, tagInstruction) => {
 	if (!tagInstruction) return;
 
-	const metadata = await getClashMetadata(teamspace, project, clashContext, clash, tagInstruction.fields);
+	const metadata = await getClashMetadata(teamspace, project, clashContext, clash, tagInstruction.metadataFields);
 	const tagValues = uniqueElements([...tagInstruction.staticValues, ...metadata]);
 
 	if (tagValues.length) {
