@@ -20,8 +20,8 @@ const checkPermission = proxyquire("../../../../src/v4/middlewares/checkPermissi
 	"./getPermissionsAdapter": {},
 	"../response_codes": {}
 }).checkPermissionsHelper;
-const C = require("../../../../src/v4/constants");
 const db = require("../../../../src/v4/handler/db");
+const { generateRandomString } = require("../../helpers/services");
 
 const account = "testuser";
 const password = "testuser";
@@ -257,7 +257,10 @@ describe("Check DB handler", function () {
 	});
 
 	describe("runCommand", function () {
-		const roleName = C.DEFAULT_MEMBER_ROLE;
+		// use a randomly generated role name so reruns against the same DB
+		// (without restoring a fresh dump) don't collide with a role left
+		// over from a previous run.
+		const roleName = `team_member_${generateRandomString(16)}`;
 		const createRoleCmd = {
 			"createRole": roleName,
 			"privileges": [{
@@ -272,11 +275,11 @@ describe("Check DB handler", function () {
 		};
 		const grantRoleCmd = {
 			grantRolesToUser: account,
-			roles: [{ role: C.DEFAULT_MEMBER_ROLE, db: account }]
+			roles: [{ role: roleName, db: account }]
 		};
 		const revokeRoleCmd = {
 			revokeRolesFromUser: account,
-			roles: [{ role: C.DEFAULT_MEMBER_ROLE, db: account }]
+			roles: [{ role: roleName, db: account }]
 		};
 		const newPasswordUserCmd = {
 			"updateUser": account,

@@ -29,6 +29,11 @@
 module.exports = {
 	clearMocks: true,
 	collectCoverage: false,
+	// mocha's scripts ran with `--exit`, which force-kills the process
+	// regardless of lingering open handles (e.g. MongoDB client sockets not
+	// fully awaited on close, like in Handler.authenticate). Without an
+	// equivalent, jest just hangs waiting for the event loop to drain.
+	forceExit: true,
 	maxWorkers: 1,
 	testEnvironment: 'node',
 	testMatch: ['**/tests/v4/unit/**/*.js'],
