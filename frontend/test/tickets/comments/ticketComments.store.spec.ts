@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
-import { selectComments, selectCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
+import { selectComments, selectCommentById, selectUnsavedComment } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { createTestStore } from '../../test.helpers';
 import { commentMockFactory } from './ticketComments.fixture';
 
-describe('Tickets: store', () => {
+describe('Ticket Comments: store', () => {
 	let dispatch, getState;
 	const ticketId = 'ticketId';
 	const comment = commentMockFactory();
@@ -63,6 +63,26 @@ describe('Tickets: store', () => {
 			const commentFromStore = selectCommentById(getState(), ticketId, commentId);
 	
 			expect(commentFromStore.deleted).toEqual(true);
+		});
+	});
+
+	describe('unsaved comment', () => {
+		it('should save and select an unsaved comment', () => {
+			const unsavedComment = {
+				message: 'Unsaved comment',
+				images: ['image-id'],
+			};
+
+			dispatch(TicketCommentsActions.setUnsavedComment(unsavedComment));
+
+			expect(selectUnsavedComment(getState())).toEqual(unsavedComment);
+		});
+
+		it('should clear an unsaved comment', () => {
+			dispatch(TicketCommentsActions.setUnsavedComment({ message: 'Unsaved comment' }));
+			dispatch(TicketCommentsActions.setUnsavedComment());
+
+			expect(selectUnsavedComment(getState())).toBeUndefined();
 		});
 	});
 });

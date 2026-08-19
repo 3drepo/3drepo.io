@@ -35,10 +35,12 @@ export const { Types: TicketCommentsTypes, Creators: TicketCommentsActions } = c
 	deleteComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
 	upsertCommentSuccess: ['ticketId', 'comment'],
 	goToCommentViewpoint: ['teamspace', 'projectId', 'modelId', 'ticketId', 'commentId'],
+	setUnsavedComment: ['comment'],
 }, { prefix: 'TICKET_COMMENTS/' }) as { Types: Constants<ITicketCommentsActionCreators>; Creators: ITicketCommentsActionCreators };
 
 export const INITIAL_STATE: ITicketCommentsState = {
 	commentsByTicketId: {},
+	unsavedComment: {},
 };
 
 export const fetchCommentsSuccess = (state: ITicketCommentsState, {
@@ -64,13 +66,21 @@ export const upsertCommentSuccess = (state: ITicketCommentsState, {
 	}
 };
 
+export const setUnsavedComment = (state: ITicketCommentsState, {
+	comment,
+}: SetUnsavedCommentAction) => {
+	state.unsavedComment = comment;
+};
+
 export const ticketCommentsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketCommentsTypes.FETCH_COMMENTS_SUCCESS]: fetchCommentsSuccess,
 	[TicketCommentsTypes.UPSERT_COMMENT_SUCCESS]: upsertCommentSuccess,
+	[TicketCommentsTypes.SET_UNSAVED_COMMENT]: setUnsavedComment,
 }));
 
 export interface ITicketCommentsState {
 	commentsByTicketId: Record<string, ITicketComment[]>,
+	unsavedComment: Partial<ITicketComment>,
 }
 
 export type FetchCommentsAction = Action<'FETCH_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
@@ -80,6 +90,7 @@ export type UpdateCommentAction = Action<'UPDATE_COMMENT'> & TeamspaceAndProject
 export type DeleteCommentAction = Action<'DELETE_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string };
 export type UpsertCommentSuccessAction = Action<'UPSERT_COMMENT_SUCCESS'> & { ticketId: string, comment: Partial<ITicketComment> };
 export type GoToCommentViewpointAction = Action<'GO_TO_COMMENT_VIEWPOINT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, commentId: string };
+export type SetUnsavedCommentAction = Action<'SET_UNSAVED_COMMENT'> & { comment: Partial<ITicketComment> };
 
 export interface ITicketCommentsActionCreators {
 	fetchComments: (
@@ -131,4 +142,7 @@ export interface ITicketCommentsActionCreators {
 		ticketId: string,
 		commentId: string,
 	) => GoToCommentViewpointAction;
+	setUnsavedComment: (
+		comment?: Partial<ITicketComment>,
+	) => SetUnsavedCommentAction;
 }
