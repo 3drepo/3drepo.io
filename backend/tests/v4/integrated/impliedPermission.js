@@ -16,7 +16,6 @@ describe("Implied permission::", function () {
 	const sharedTeamspace = "imsharedTeamspace";
 	const C = require("../../../src/v4/constants");
 	const request = require("supertest");
-	const expect = require("chai").expect;
 	const model = {
 		"desc": "this is a model",
 		"type": "Structural",
@@ -56,7 +55,7 @@ describe("Implied permission::", function () {
 		}
 	};
 
-	before(async () => {
+	beforeAll(async () => {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, function () {
@@ -66,7 +65,7 @@ describe("Implied permission::", function () {
 		});
 	});
 
-	after(function (done) {
+	afterAll(function (done) {
 		server.close(function () {
 			console.log("API test server is closed");
 			done();
@@ -88,31 +87,31 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "22328320-e2da-11ea-bcdf-cfbbc3211111";
 
-		before(async function () {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
-		after(purgeQueues);
+		afterAll(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions (1)", function (done) {
 			agent
 				.get(`/${username}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
+					expect(err).toBeFalsy();
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
-					expect(teamspace).to.exist;
-					expect(teamspace.permissions).to.deep.equal(C.ACCOUNT_PERM_LIST);
+					expect(teamspace).toBeTruthy();
+					expect(teamspace.permissions).toEqual(C.ACCOUNT_PERM_LIST);
 
 					const project = teamspace.projects.find(p => p.name === project2);
-					expect(project).to.exist;
-					expect(project.permissions).to.deep.equal(C.PROJECT_PERM_LIST);
+					expect(project).toBeTruthy();
+					expect(project.permissions).toEqual(C.PROJECT_PERM_LIST);
 
 					const model = project.models.find(m => m.model === modelId);
-					expect(model).to.exist;
-					expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(model).toBeTruthy();
+					expect(model.permissions).toEqual(C.MODEL_PERM_LIST);
 
 					done();
 
@@ -123,8 +122,8 @@ describe("Implied permission::", function () {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
-					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(err).toBeFalsy();
+					expect(res.body.permissions).toEqual(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
@@ -163,7 +162,7 @@ describe("Implied permission::", function () {
 					"project": "Sample_Project"
 				}, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -182,7 +181,7 @@ describe("Implied permission::", function () {
 					}]
 				}, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -205,7 +204,7 @@ describe("Implied permission::", function () {
 				.field("tag", "teamspace_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done()
 				})
 		});
@@ -315,30 +314,30 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae8";
 		const viewToDelete = "33328320-e2da-11ea-bcdf-cfbbc3222222";
 
-		before(async function () {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
-		after(purgeQueues);
+		afterAll(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions(2)", function (done) {
 			agent
 				.get(`/${username}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
+					expect(err).toBeFalsy();
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
-					expect(teamspace).to.exist;
-					expect(teamspace.permissions).to.deep.equal([]);
+					expect(teamspace).toBeTruthy();
+					expect(teamspace.permissions).toEqual([]);
 
 					const project = teamspace.projects.find(p => p.name === project2);
-					expect(project).to.exist;
-					expect(project.permissions).to.deep.equal(C.PROJECT_PERM_LIST);
+					expect(project).toBeTruthy();
+					expect(project.permissions).toEqual(C.PROJECT_PERM_LIST);
 
 					const model = project.models.find(m => m.model === modelId);
-					expect(model).to.exist;
-					expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(model).toBeTruthy();
+					expect(model.permissions).toEqual(C.MODEL_PERM_LIST);
 
 					done();
 
@@ -349,8 +348,8 @@ describe("Implied permission::", function () {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
-					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(err).toBeFalsy();
+					expect(res.body.permissions).toEqual(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
@@ -401,7 +400,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({ modelName: modelName, project: "Sample_Project" }, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -435,7 +434,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_admin_upload")
 				.expect(410, (err, res) => {
-					expect(res?.body?.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res?.body?.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -630,31 +629,31 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "44448320-e2da-11ea-bcdf-cfbbc3333333";
 
-		before(async function () {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
-		after(purgeQueues);
+		afterAll(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions (3)", function (done) {
 			agent
 				.get(`/${username}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
+					expect(err).toBeFalsy();
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
-					expect(teamspace).to.exist;
-					expect(teamspace.permissions).to.deep.equal([]);
+					expect(teamspace).toBeTruthy();
+					expect(teamspace.permissions).toEqual([]);
 
 					const project = teamspace.projects.find(p => p.name === projectNoAccess);
-					expect(project).to.exist;
-					expect(project.permissions).to.deep.equal([]);
+					expect(project).toBeTruthy();
+					expect(project.permissions).toEqual([]);
 
 					const model = project.models.find(m => m.model === modelId);
-					expect(model).to.exist;
-					expect(model.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(model).toBeTruthy();
+					expect(model.permissions).toEqual(C.MODEL_PERM_LIST);
 
 					done();
 
@@ -665,8 +664,8 @@ describe("Implied permission::", function () {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
-					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
+					expect(err).toBeFalsy();
+					expect(res.body.permissions).toEqual(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
@@ -703,7 +702,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -738,7 +737,7 @@ describe("Implied permission::", function () {
 				.field("tag", "model_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -931,30 +930,30 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "55548320-e2da-11ea-bcdf-cfbbc3334444";
 
-		before(async function () {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
-		after(purgeQueues);
+		afterAll(purgeQueues);
 
 		it("list teamspaces api show correct inherited and implied permissions (4)", function (done) {
 			agent
 				.get(`/${username}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
+					expect(err).toBeFalsy();
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
-					expect(teamspace).to.exist;
-					expect(teamspace.permissions).to.deep.equal([]);
+					expect(teamspace).toBeTruthy();
+					expect(teamspace.permissions).toEqual([]);
 
 					const project = teamspace.projects.find(p => p.name === projectSomeAccess);
-					expect(project).to.exist;
-					expect(project.permissions).to.deep.equal([C.PERM_VIEW_MODEL_ALL_MODELS]);
+					expect(project).toBeTruthy();
+					expect(project.permissions).toEqual([C.PERM_VIEW_MODEL_ALL_MODELS]);
 
 					const model = project.models.find(m => m.model === modelId);
-					expect(model).to.exist;
-					expect(model.permissions).to.deep.equal([C.PERM_VIEW_MODEL]);
+					expect(model).toBeTruthy();
+					expect(model.permissions).toEqual([C.PERM_VIEW_MODEL]);
 
 					done();
 
@@ -965,8 +964,8 @@ describe("Implied permission::", function () {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
-					expect(res.body.permissions).to.deep.equal([C.PERM_VIEW_MODEL]);
+					expect(err).toBeFalsy();
+					expect(res.body.permissions).toEqual([C.PERM_VIEW_MODEL]);
 					done();
 				});
 		});
@@ -1002,7 +1001,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -1035,7 +1034,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -1224,30 +1223,30 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "66668320-e2da-11ea-bcdf-cfbbc3355555";
 
-		before(async function () {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
-		after(purgeQueues);
+		afterAll(purgeQueues);
 
 		it("list teamspaces api show correct inherited and implied permissions (5)", function (done) {
 			agent
 				.get(`/${username}.json`)
 				.expect(200, function (err, res) {
-					expect(err).to.not.exist;
+					expect(err).toBeFalsy();
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
-					expect(teamspace).to.exist;
-					expect(teamspace.permissions).to.deep.equal([]);
+					expect(teamspace).toBeTruthy();
+					expect(teamspace.permissions).toEqual([]);
 
 					const project = teamspace.projects.find(p => p.name === projectSomeAccess);
-					expect(project).to.exist;
-					expect(project.permissions).to.deep.equal([C.PERM_UPLOAD_FILES_ALL_MODELS]);
+					expect(project).toBeTruthy();
+					expect(project.permissions).toEqual([C.PERM_UPLOAD_FILES_ALL_MODELS]);
 
 					const model = project.models.find(m => m.model === modelId);
-					expect(model).to.exist;
-					expect(model.permissions).to.deep.equal([C.PERM_UPLOAD_FILES]);
+					expect(model).toBeTruthy();
+					expect(model.permissions).toEqual([C.PERM_UPLOAD_FILES]);
 
 					done();
 
@@ -1285,7 +1284,7 @@ describe("Implied permission::", function () {
 				.post(`/${sharedTeamspace}/model`)
 				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
@@ -1320,7 +1319,7 @@ describe("Implied permission::", function () {
 				.field("tag", "project_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
