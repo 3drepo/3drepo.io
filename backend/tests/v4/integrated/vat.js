@@ -27,11 +27,13 @@ const skipVatTests = config && config.vat && config.vat.debug
 
 	let server;
 
-	beforeAll(async function(done) {
+	beforeAll(async function() {
 		const app = await createAppAsync();
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-			done();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 
