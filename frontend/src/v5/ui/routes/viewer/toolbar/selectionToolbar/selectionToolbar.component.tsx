@@ -97,7 +97,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={CancelIcon}
 					hidden={!clippingSectionOpen}
-					onClick={() => ViewerGuiActionsDispatchers.setClippingMode(null)}
+					onClick={() => ViewerGuiActionsDispatchers.resetClipping()}
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>
