@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const config = require('./jest.config.v5');
 
-config.coveragePathIgnorePatterns = [
-	...config.coveragePathIgnorePatterns,
-	'^((?!handler).)*$',
-];
+config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
+config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
+config.setupFiles = ['./tests/v5/scripts/setup.js'];
 
-config.testMatch = ['**/tests/**/drivers/**/*.test.[jt]s?(x)'];
-config.testSequencer = './jest.sequencer.drivers.js';
+config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
 
 module.exports = config;

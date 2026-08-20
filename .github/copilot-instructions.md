@@ -43,11 +43,12 @@ yarn test:v5-drivers        # driver tests — requires RabbitMQ
 
 # Run a single test file (v5):
 cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config dotenvx run -f ../config/testV5/.env -- \
-  yarn jest -c ./jest.config.unit.js path/to/your.test.js
+  yarn test:v5-unit path/to/your.test.js
 
 # Legacy v4 tests (only if task explicitly targets v4):
-yarn test          # runs test:unit + test:int (requires MongoDB + test DB dump)
-yarn test:one tests/v4/path/to/file.js
+yarn test          # runs test:v4-unit + test:v4-int (requires MongoDB + test DB dump)
+yarn test:v4-unit tests/v4/unit/path/to/file.js   # single unit file
+yarn test:v4-int tests/v4/integrated/path/to/file.js   # single integrated file
 ```
 
 **RabbitMQ** is required for `test:v5-e2e` and `test:v5-drivers`. CI uses `rabbitmq:3.10.5-management` on ports 5672/15672 with credentials `guest`/`guest`. If queue tests fail with `QUEUE_CONNECTION_ERROR`, start RabbitMQ before rerunning — do not change the code.

@@ -18,7 +18,6 @@
  */
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
@@ -55,7 +54,7 @@ describe("Groups", function () {
 	};
 
 
-	before(async() => {
+	beforeAll(async() => {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -69,7 +68,7 @@ describe("Groups", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -80,7 +79,7 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/`)
 				.expect(200 , function(err, res) {
-					expect(res.body.length).to.equal(4);
+					expect(res.body.length).toBe(4);
 					done(err);
 				});
 		});
@@ -88,7 +87,7 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/`)
 				.expect(200 , function(err, res) {
-					expect(res.body.length).to.equal(4);
+					expect(res.body.length).toBe(4);
 					done(err);
 				});
 		});
@@ -99,7 +98,7 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 				.expect(200 , function(err, res) {
-					expect(res.body.length).to.equal(2);
+					expect(res.body.length).toBe(2);
 					done(err);
 				});
 		});
@@ -107,7 +106,7 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/?noIssues=true`)
 				.expect(200 , function(err, res) {
-					expect(res.body.length).to.equal(2);
+					expect(res.body.length).toBe(2);
 					done(err);
 				});
 		});
@@ -119,7 +118,7 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 		});
@@ -127,7 +126,7 @@ describe("Groups", function () {
 		it("with invalid ID should fail", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/invalidSomething`)
 				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.GROUP_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -135,7 +134,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -143,7 +142,7 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 		});
@@ -174,7 +173,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -206,7 +205,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -238,7 +237,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -270,7 +269,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -302,7 +301,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -334,7 +333,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -366,7 +365,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -398,7 +397,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -435,7 +434,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -461,7 +460,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -477,7 +476,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 		});
@@ -489,7 +488,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -505,7 +504,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -521,7 +520,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -538,7 +537,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -555,7 +554,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -572,7 +571,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -589,7 +588,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
 		});
@@ -601,7 +600,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -623,7 +622,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
+							expect(res.body.author).toBe(username);
 							done(err);
 						});
 				}
@@ -638,7 +637,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -649,7 +648,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -671,7 +670,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -689,7 +688,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -707,7 +706,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -725,7 +724,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -743,7 +742,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -761,7 +760,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -779,7 +778,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -797,7 +796,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -815,7 +814,7 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -843,8 +842,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects).to.deep.equal([]);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects).toEqual([]);
 							done(err);
 						});
 				}
@@ -874,8 +873,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${federation}/revision/master/head/groups/${groupId}`)
 						.expect(200, function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(74);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(74);
 							done(err);
 						});
 				}
@@ -905,8 +904,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(74);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(74);
 							done(err);
 						});
 				}
@@ -936,8 +935,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(66);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(66);
 							done(err);
 						});
 				}
@@ -967,8 +966,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -999,8 +998,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -1030,8 +1029,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(24);
 							done(err);
 						});
 				}
@@ -1061,8 +1060,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(117);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(117);
 							done(err);
 						});
 				}
@@ -1092,8 +1091,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(957);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(957);
 							done(err);
 						});
 				}
@@ -1123,8 +1122,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(828);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(828);
 							done(err);
 						});
 				}
@@ -1164,8 +1163,8 @@ describe("Groups", function () {
 								'6848f76d-dbc9-4f5a-99f7-5c097b72ee02',
 								'0eae5b17-ff9b-4834-a919-554ada7e18f4'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1195,8 +1194,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(116);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(116);
 							done(err);
 						});
 				}
@@ -1226,8 +1225,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1102);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1102);
 							done(err);
 						});
 				}
@@ -1257,8 +1256,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(454);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(454);
 							done(err);
 						});
 				}
@@ -1304,8 +1303,8 @@ describe("Groups", function () {
 								'67a1f99f-0a41-4e4a-adc4-82a027635454',
 								'a667d2e8-dbe5-42cd-baf9-b570921dcd78'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1336,8 +1335,8 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							const expectedSharedIds = [ 'a667d2e8-dbe5-42cd-baf9-b570921dcd78' ];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1372,8 +1371,8 @@ describe("Groups", function () {
 								'41d4cfe3-717b-463b-9f49-f89d7315cc11',
 								'a667d2e8-dbe5-42cd-baf9-b570921dcd78'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1403,8 +1402,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(178);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(178);
 							done(err);
 						});
 				}
@@ -1434,8 +1433,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(29);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(29);
 							done(err);
 						});
 				}
@@ -1476,8 +1475,8 @@ describe("Groups", function () {
 								'120fb04f-b051-4e0d-8252-00833df5cc43',
 								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1518,8 +1517,8 @@ describe("Groups", function () {
 								'120fb04f-b051-4e0d-8252-00833df5cc43',
 								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1565,8 +1564,8 @@ describe("Groups", function () {
 								'600ae205-3d28-4246-b958-c59b9738ca20',
 								'7609aaaa-7c39-4685-bc13-3e4a7fbcdf3e'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1612,8 +1611,8 @@ describe("Groups", function () {
 								'600ae205-3d28-4246-b958-c59b9738ca20',
 								'7609aaaa-7c39-4685-bc13-3e4a7fbcdf3e'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1643,8 +1642,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(99);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(99);
 							done(err);
 						});
 				}
@@ -1674,8 +1673,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(31);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(31);
 							done(err);
 						});
 				}
@@ -1715,8 +1714,8 @@ describe("Groups", function () {
 								'120fb04f-b051-4e0d-8252-00833df5cc43',
 								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(99);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(99);
 							done(err);
 						});
 				}
@@ -1756,8 +1755,8 @@ describe("Groups", function () {
 								'120fb04f-b051-4e0d-8252-00833df5cc43',
 								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(99);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(99);
 							done(err);
 						});
 				}
@@ -1787,8 +1786,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(33);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(33);
 							done(err);
 						});
 				}
@@ -1818,8 +1817,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(175);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(175);
 							done(err);
 						});
 				}
@@ -1856,8 +1855,8 @@ describe("Groups", function () {
 								'03d0e634-d37e-4765-a06c-d0636136e1db',
 								'120fb04f-b051-4e0d-8252-00833df5cc43'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1892,8 +1891,8 @@ describe("Groups", function () {
 								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
 								'120fb04f-b051-4e0d-8252-00833df5cc43'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1931,8 +1930,8 @@ describe("Groups", function () {
 							const expectedSharedIds = [
 								'13d63580-4dd8-4a10-b841-1c588e5faa9f'
 							];
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids).toEqual(expectedSharedIds);
 							done(err);
 						});
 				}
@@ -1976,8 +1975,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(200);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(200);
 							done(err);
 						});
 				}
@@ -2007,8 +2006,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2038,8 +2037,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2069,8 +2068,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2100,8 +2099,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2131,8 +2130,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2162,8 +2161,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2193,8 +2192,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2224,8 +2223,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2255,8 +2254,8 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							expect(res.body.author).toBe(username);
+							expect(res.body.objects[0].shared_ids.length).toBe(1106);
 							done(err);
 						});
 				}
@@ -2281,7 +2280,7 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newObjects);
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2312,7 +2311,7 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newRules);
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2348,7 +2347,7 @@ describe("Groups", function () {
 								values: [1]
 							}];
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2378,7 +2377,7 @@ describe("Groups", function () {
 								values: [1]
 							}];
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2408,7 +2407,7 @@ describe("Groups", function () {
 								values: [1]
 							}];
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2438,7 +2437,7 @@ describe("Groups", function () {
 								values: [1]
 							}];
 							goldenData.updatedAt = res.body.updatedAt;
-							expect(res.body).to.deep.equal(goldenData);
+							expect(res.body).toEqual(goldenData);
 							done(err);
 						});
 				}
@@ -2466,7 +2465,7 @@ describe("Groups", function () {
 			agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 				.send(badUpdate)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -2475,7 +2474,7 @@ describe("Groups", function () {
 			agent.put(`/${username}/${model}/revision/master/head/groups/invalidID`)
 				.send({objects: []})
 				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.GROUP_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -2493,7 +2492,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(404 , function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
+							expect(res.body.value).toBe(responseCodes.GROUP_NOT_FOUND.value);
 							done(err);
 						});
 				}
@@ -2527,7 +2526,6 @@ describe("Groups", function () {
 		});
 
 		it("delete groups with valid IDs should succeed", function(done){
-			this.timeout(5000); 
 			let idsString = null;
 			async.series([
 				function(done) {
@@ -2547,7 +2545,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(0);
+							expect(res.body.length).toBe(0);
 							done(err);
 						});
 				}
