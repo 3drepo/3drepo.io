@@ -48,7 +48,7 @@ describe('Sharing/Unsharing a model', () => {
 
 	beforeAll(async () => {
 		const app = await createAppAsync();
-		await new Promise((resolve) => {			
+		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log('API test server is listening on port 8080!');
 				resolve();
@@ -97,7 +97,9 @@ describe('Sharing/Unsharing a model', () => {
 				function checkSharedModelInList(done) {
 					viewerAgent.get(`/${username_viewer}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body).toHaveProperty('accounts').that.is.an('array');
+							expect(res.body).toEqual(
+								expect.objectContaining({ accounts: expect.any(Array) }),
+							);
 							const account = res.body.accounts.find((a) => a.account === username);
 							const modelObj = account.projects[0].models.find((_model) => _model.model === model);
 							expect(modelObj).toHaveProperty('model', model);
@@ -130,7 +132,7 @@ describe('Sharing/Unsharing a model', () => {
 			viewerAgent.get(`/${username}/${model}/download/latest`).expect(401, done);
 		});
 
-		it("and the viewer should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
+		it("and the viewer should not be able to upload model on the V4 endpoint - endpoint decommissioned", function (done) {
 			viewerAgent.post(`/${username}/${model}/upload`)
 				.expect(410, done);
 		});
@@ -177,7 +179,9 @@ describe('Sharing/Unsharing a model', () => {
 					function checkSharedModelInList(done) {
 						viewerAgent.get(`/${username_viewer}.json`)
 							.expect(200, (err, res) => {
-								expect(res.body).toHaveProperty('accounts').that.is.an('array');
+								expect(res.body).toEqual(
+									expect.objectContaining({ accounts: expect.any(Array) }),
+								);
 								const account = res.body.accounts.find((a) => a.account === username);
 								expect(account).toBeUndefined();
 
@@ -216,7 +220,9 @@ describe('Sharing/Unsharing a model', () => {
 				function checkSharedModelInList(done) {
 					commenterAgent.get(`/${username_commenter}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body).toHaveProperty('accounts').that.is.an('array');
+							expect(res.body).toEqual(
+								expect.objectContaining({ accounts: expect.any(Array) }),
+							);
 							const account = res.body.accounts.find((a) => a.account === username);
 							const modelObj = account.projects[0].models.find((_model) => _model.model === model);
 							expect(modelObj).toHaveProperty('model', model);
@@ -277,7 +283,7 @@ describe('Sharing/Unsharing a model', () => {
 				.expect(200, done);
 		});
 
-		it("and the commenter should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
+		it("and the commenter should not be able to upload model on the V4 endpoint - endpoint decommissioned", function (done) {
 			commenterAgent.post(`/${username}/${model}/upload`)
 				.expect(410, done);
 		});
@@ -319,7 +325,9 @@ describe('Sharing/Unsharing a model', () => {
 					function checkSharedModelInList(done) {
 						commenterAgent.get(`/${username_commenter}.json`)
 							.expect(200, (err, res) => {
-								expect(res.body).toHaveProperty('accounts').that.is.an('array');
+								expect(res.body).toEqual(
+									expect.objectContaining({ accounts: expect.any(Array) }),
+								);
 								const account = res.body.accounts.find((a) => a.account === username);
 								expect(account).toBeUndefined();
 
@@ -337,7 +345,7 @@ describe('Sharing/Unsharing a model', () => {
 
 			it('and the commenter should NOT be able to see raise issue', (done) => {
 				commenterAgent.post(`/${username}/${model}/issues`)
-					.send({ })
+					.send({})
 					.expect(401, done);
 			});
 		});
@@ -358,7 +366,9 @@ describe('Sharing/Unsharing a model', () => {
 				function checkSharedModelInList(done) {
 					collaboratorAgent.get(`/${username_editor}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body).toHaveProperty('accounts').that.is.an('array');
+							expect(res.body).toEqual(
+								expect.objectContaining({ accounts: expect.any(Array) }),
+							);
 							const account = res.body.accounts.find((a) => a.account === username);
 							const modelObj = account.projects[0].models.find((_model) => _model.model === model);
 							expect(modelObj).toHaveProperty('model', model);
@@ -412,10 +422,10 @@ describe('Sharing/Unsharing a model', () => {
 
 			collaboratorAgent.post(`/${username}/${model}/issues`)
 				.send(issue)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
-		it("and the collaborator should not be able to upload model on the V4 endpoint - endpoint decommissioned", function(done) {
+		it("and the collaborator should not be able to upload model on the V4 endpoint - endpoint decommissioned", function (done) {
 			collaboratorAgent.post(`/${username}/${model}/upload`)
 				.field("tag", "collab_upload")
 				.expect(410, done);
@@ -462,7 +472,9 @@ describe('Sharing/Unsharing a model', () => {
 					function checkSharedModelInList(done) {
 						collaboratorAgent.get(`/${username_editor}.json`)
 							.expect(200, (err, res) => {
-								expect(res.body).toHaveProperty('accounts').that.is.an('array');
+								expect(res.body).toEqual(
+									expect.objectContaining({ accounts: expect.any(Array) }),
+								);
 								const account = res.body.accounts.find((a) => a.account === username);
 								expect(account).toBeUndefined();
 
