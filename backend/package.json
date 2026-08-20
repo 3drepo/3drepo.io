@@ -43,7 +43,7 @@
     "countries-and-timezones": "3.6.0",
     "crypto-js": "4.2.0",
     "csv-parse": "4.16.3",
-    "dayjs": "1.11.11",
+    "dayjs": "1.11.21",
     "ejs": "5.0.1",
     "elastic-apm-node": "4.8.0",
     "express": "4.22.0",
