@@ -14,19 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const mockRequire = require('mock-require');
 const FronteggMock = require('../v5/helper/fronteggMock');
 const FrontEggAccountsMock = require('../v5/helper/fronteggMock/components/accounts')
 
+jest.setMock('../../src/v5/services/sso/frontegg', FronteggMock);
+jest.setMock('../../src/v5/services/sso/frontegg/components/accounts', FrontEggAccountsMock);
 
-mockRequire('../../src/v5/services/sso/frontegg', FronteggMock);
-mockRequire('../../src/v5/services/sso/frontegg/components/accounts', FrontEggAccountsMock);
-
-exports.mochaHooks = {
-  async beforeAll() {
-    await FronteggMock.v4Setup();
-  }
-
-}
-
+beforeAll(async () => {
+	await FronteggMock.v4Setup();
+});
 

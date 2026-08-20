@@ -329,8 +329,8 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
-	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
+db.createMetadata = (teamspace, modelId, metadataId, metadata, revId) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata, rev_id: stringToUUID(revId) });
 
 const createImage = async (dbName, colName, type, imageId, imageData) => {
 	const { defaultStorage } = config;
@@ -742,6 +742,8 @@ const generateProperties = (propTemplate, internalType, container) => {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {
 			properties[name] = values;
+		} else if (type === propTypes.TAGS) {
+			properties[name] = times(3, () => ServiceHelper.generateRandomString());
 		} else if (type === propTypes.COORDS) {
 			properties[name] = [0, 0, 0];
 		} else if (type === propTypes.VIEW) {
