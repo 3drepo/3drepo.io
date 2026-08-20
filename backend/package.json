@@ -23,7 +23,7 @@
     "run-scheduled-tasks": "cross-env NODE_CONFIG_DIR=../config dotenvx run -f ../config/$NODE_ENV/.env -- node ./src/scripts/utility/scheduler"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "1.52.0",
+    "@dotenvx/dotenvx": "1.75.1",
     "@elastic/elasticsearch": "7.17.14",
     "@frontegg/client": "7.0.2",
     "@napi-rs/canvas": "0.1.100",
