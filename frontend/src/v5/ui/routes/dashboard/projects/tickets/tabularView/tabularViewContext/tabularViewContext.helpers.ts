@@ -42,6 +42,7 @@ const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { wid
 	'pastDate': { width: 147, minWidth },
 	'date': { width: 147, minWidth },
 	'manyOf': { width: 140, minWidth },
+	'tags': { width: 140, minWidth },
 	'oneOf': { width: 140, minWidth },
 };
 
