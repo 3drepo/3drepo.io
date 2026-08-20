@@ -153,7 +153,7 @@ describe("Shapes", () => {
 				.send(wrongShapeIssue)
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-			expect(res.body.value, responseCodes.INVALID_ARGUMENTS.value);
+			expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 		});
 
 		it("when created should succeed", async () => {

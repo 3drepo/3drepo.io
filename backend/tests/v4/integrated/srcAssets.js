@@ -144,7 +144,7 @@ describe("ModelAssets", function () {
 		it("of an invalid ID should fail", function(done) {
 			agent.get(`/${username}/${model}/invalidID.src.mpc`)
 				.expect(404, (err,res) => {
-					expect(res.body.code).eq(responseCodesV5.fileNotFound.code);
+					expect(res.body.code).toBe(responseCodesV5.fileNotFound.code);
 					done(err);
 				});
 
