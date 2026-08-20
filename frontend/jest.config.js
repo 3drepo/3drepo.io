@@ -9,6 +9,7 @@ module.exports = {
 		'^@/(.*)$': '<rootDir>/src/$1',
     	'@components/(.*)': '<rootDir>/src/v5/ui/components/$1',
 		'^axios$': require.resolve('axios'),
+		'^uuid$': require.resolve('uuid'),
 		'^react-children-utilities$': '<rootDir>/test/mocks/react-children-utilities.js',
 	},
 	transform: {
