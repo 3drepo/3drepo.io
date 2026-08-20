@@ -21,7 +21,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
-const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
+const { statusTypes, statuses, getDefaultPinIconsDetails } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1420,29 +1420,33 @@ const testValidate = () => {
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 
-	test('should accept every built-in pin icon in direct and conditional mappings', () => {
-		['DEFAULT', 'RISK', 'ISSUE', 'MARKER'].forEach((icon) => {
-			const directIconTemplate = generateBasicSchema({
-				properties: [{
-					name: generateRandomString(),
-					type: propTypes.COORDS,
-					icon,
-				}],
-			});
-			const conditionalIconTemplate = generateBasicSchema({
-				config: {
-					pin: {
-						icon: {
-							property: { name: 'reference' },
-							mapping: [{ default: icon }],
+	const defaultPinIconsNames = Object.keys(getDefaultPinIconsDetails());
+
+	describe('Test every built-in pin icon in direct and conditional mappings', () => {
+		defaultPinIconsNames.forEach((icon) => {
+			test(`should accept ${icon}`, () => {
+				const testIconTemplate = generateBasicSchema({
+					config: {
+						pin: {
+							icon: {
+								property: { name: 'reference' },
+								mapping: [{ default: icon }],
+							},
 						},
 					},
-				},
-				properties: [{ name: 'reference', type: propTypes.TEXT }],
-			});
+					properties: [
+						{
+							name: 'reference', type: propTypes.TEXT,
+						},
+						{
+							name: generateRandomString(),
+							type: propTypes.COORDS,
+							icon,
+						}],
+				});
 
-			expect(() => TemplateSchema.validate(directIconTemplate)).not.toThrow();
-			expect(() => TemplateSchema.validate(conditionalIconTemplate)).not.toThrow();
+				expect(() => TemplateSchema.validate(testIconTemplate)).not.toThrow();
+			});
 		});
 	});
 
@@ -1453,12 +1457,12 @@ const testValidate = () => {
 					icon: {
 						property: { name: 'reference' },
 						mapping: [{
-							default: 'RISK',
+							default: defaultPinIconsNames[0],
 							value: generateRandomString(),
-							icon: 'ISSUE',
+							icon: defaultPinIconsNames[1],
 						}, {
 							value: generateRandomString(),
-							icon: 'MARKER',
+							icon: defaultPinIconsNames[2],
 						}],
 					},
 				},
@@ -1469,8 +1473,8 @@ const testValidate = () => {
 		const output = TemplateSchema.validate(data);
 
 		expect(output.config.pin.icon.mapping).toEqual([
-			{ default: 'RISK' },
-			{ value: data.config.pin.icon.mapping[1].value, icon: 'MARKER' },
+			{ default: defaultPinIconsNames[0] },
+			{ value: data.config.pin.icon.mapping[1].value, icon: defaultPinIconsNames[2] },
 		]);
 	});
 };

@@ -14,13 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const fs = require('fs');
+const path = require('path');
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../helper/services');
 
+const { templates } = require(`${src}/utils/responseCodes`);
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
+const { resourcesPath } = require(`${src}/../interop`);
 
 const baseProps = TemplateConstants.basePropertyLabels;
 
@@ -36,9 +40,11 @@ const testGetApplicableDefaultProperties = () => {
 			{ name: baseProps.STATUS, type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' }];
 
 		const issueProp = [{ name: baseProps.PRIORITY, type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-			{ name: baseProps.ASSIGNEES,
+			{
+				name: baseProps.ASSIGNEES,
 				type: TemplateConstants.propTypes.MANY_OF,
-				values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
+				values: TemplateConstants.presetEnumValues.JOBS_AND_USERS,
+			},
 			{ name: baseProps.DUE_DATE, type: TemplateConstants.propTypes.DATE }];
 
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
@@ -79,6 +85,42 @@ const testGetApplicableDefaultProperties = () => {
 	});
 };
 
+const testGetDefaultPinIconsDetails = () => {
+	describe('Get default pin icons details', () => {
+		const ICONS_DIR = path.join(resourcesPath, 'tickets', 'pinIcons');
+		const toFsEntry = (name, isFile = true) => ({ name, isFile: jest.fn().mockReturnValue(isFile) });
+
+		const tests = [
+			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], true, { icon1: { normal: path.join(ICONS_DIR, 'icon1.normal.svg'), selected: path.join(ICONS_DIR, 'icon1.selected.svg') } }],
+			['throw if the icon is not a file', [toFsEntry('icon1.normal.svg', false), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
+			['throw if the icon filename extension does not match the expected pattern', [toFsEntry('icon1.normal.jpg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
+			['throw if the icon filename name does not match the expected pattern', [toFsEntry('icon1.supernatural.svg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
+		];
+
+		const runTest = (testName, mockReturnValue, shouldSucceed, expected) => {
+			test(`Should ${shouldSucceed ? 'return' : 'throw'} ${testName}`, () => {
+				// drop the cached module so the memoised pin-icon cache starts empty
+				jest.resetModules();
+				// eslint-disable-next-line global-require
+				const Constants = require(`${src}/schemas/tickets/templates.constants`);
+
+				jest.spyOn(fs, 'readdirSync').mockReturnValueOnce(mockReturnValue);
+				if (shouldSucceed) {
+					const result = Constants.getDefaultPinIconsDetails();
+					expect(result).toEqual(expected);
+				} else {
+					expect(() => Constants.getDefaultPinIconsDetails()).toThrow(expected);
+				}
+			});
+		};
+
+		tests.forEach((
+			[testName, mockReturnValue, shouldSucceed, expected],
+		) => runTest(testName, mockReturnValue, shouldSucceed, expected));
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetApplicableDefaultProperties();
+	testGetDefaultPinIconsDetails();
 });

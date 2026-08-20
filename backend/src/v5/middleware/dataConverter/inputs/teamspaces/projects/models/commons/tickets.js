@@ -20,6 +20,7 @@ const { codeExists, createResponseCode, templates } = require('../../../../../..
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
 const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
+const { getDefaultPinIconsDetails } = require('../../../../../../../schemas/tickets/templates.constants');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
@@ -191,5 +192,17 @@ TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	checkAllTicketsExist, validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
+
+TicketsMiddleware.checkPinIconExists = async (req, res, next) => {
+	const { pinIcon, variant } = req.params;
+	const pinIconsDetails = getDefaultPinIconsDetails();
+
+	if (!pinIconsDetails[pinIcon]?.[variant]) {
+		respond(req, res, createResponseCode(templates.invalidArguments, `Pin icon ${pinIcon} with variant ${variant} not found.`));
+		return;
+	}
+
+	await next();
+};
 
 module.exports = TicketsMiddleware;

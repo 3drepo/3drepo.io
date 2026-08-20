@@ -38,6 +38,12 @@ const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../../../src/v5/models/tickets');
 const TicketModelSchema = require(`${src}/models/tickets`);
 
+jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates.constants', () => {
+	const actual = jest.requireActual('../../../../../../../../../../src/v5/schemas/tickets/templates.constants');
+	return { ...actual, getDefaultPinIconsDetails: jest.fn(() => actual.getDefaultPinIconsDetails()) };
+});
+const TicketTemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
+
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
@@ -241,6 +247,7 @@ const testValidateImportTickets = () => {
 		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
+			jest.restoreAllMocks();
 			jest.clearAllMocks();
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
@@ -541,9 +548,54 @@ const testValidateUpdateMultipleTickets = () => {
 	});
 };
 
+const testCheckPinIconExists = () => {
+	describe('Check pin icon exists', () => {
+		afterEach(() => {
+			jest.clearAllMocks();
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the pin icon variant doesn't exist`, async () => {
+			const fn = jest.fn();
+			const pinIcon = generateRandomString();
+			const variant = generateRandomString();
+			const req = { params: { pinIcon, variant } };
+			const res = {};
+
+			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconsDetails').mockReturnValueOnce({
+				[pinIcon]: { [generateRandomString()]: true },
+			});
+
+			await Tickets.checkPinIconExists(req, res, fn);
+
+			expect(fn).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, `Pin icon ${pinIcon} with variant ${variant} not found.`));
+		});
+
+		test('Should call next if pin icon variant exists', async () => {
+			const fn = jest.fn();
+			const pinIcon = generateRandomString();
+			const variant = generateRandomString();
+			const req = { params: { pinIcon, variant } };
+			const res = {};
+
+			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconsDetails').mockReturnValueOnce({
+				[pinIcon]: { [variant]: true },
+			});
+
+			await Tickets.checkPinIconExists(req, res, fn);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testValidateNewTicket();
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();
+	testCheckPinIconExists();
 });

@@ -26,8 +26,10 @@ const Audit = require('../../processors/teamspaces/audits');
 const MimeTypes = require('../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
+const TicketSettings = require('../../processors/teamspaces/settings.tickets');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
+const { checkPinIconExists } = require('../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getUserFromSession } = require('../../utils/sessions');
 const { templates } = require('../../utils/responseCodes');
 const { validateGetAuditLogParams } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
@@ -37,7 +39,7 @@ const addTicketTemplate = async (req, res) => {
 		const { teamspace } = req.params;
 		const template = req.body;
 
-		const _id = UUIDToString(await TeamspaceSettings.addTicketTemplate(teamspace, template));
+		const _id = UUIDToString(await TicketSettings.addTicketTemplate(teamspace, template));
 		respond(req, res, templates.ok, { _id });
 	} catch (err) {
 		// istanbul ignore next
@@ -56,9 +58,9 @@ const getRiskCategories = async (req, res) => {
 	}
 };
 
-const getPinIconNames = (req, res) => {
+const getPinIconNames = async (req, res) => {
 	try {
-		const icons = TeamspaceSettings.getPinIconNames();
+		const icons = await TicketSettings.getPinIconNames();
 		respond(req, res, templates.ok, { icons });
 	} catch (err) {
 		// istanbul ignore next
@@ -66,10 +68,10 @@ const getPinIconNames = (req, res) => {
 	}
 };
 
-const getPinIcon = (req, res) => {
+const getPinIcon = async (req, res) => {
 	try {
 		const { pinIcon, variant } = req.params;
-		const icon = TeamspaceSettings.getPinIcon(pinIcon, variant);
+		const icon = await TicketSettings.getPinIcon(pinIcon, variant);
 		respond(req, res, templates.ok, icon, { mimeType: MimeTypes.SVG });
 	} catch (err) {
 		// istanbul ignore next
@@ -82,7 +84,7 @@ const updateTicketTemplate = async (req, res) => {
 		const { teamspace, template } = req.params;
 		const newData = req.body;
 
-		await TeamspaceSettings.updateTicketTemplate(teamspace, template, newData);
+		await TicketSettings.updateTicketTemplate(teamspace, template, newData);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -94,7 +96,7 @@ const getTemplateList = async (req, res) => {
 	const { teamspace } = req.params;
 
 	try {
-		const data = await TeamspaceSettings.getTemplateList(teamspace);
+		const data = await TicketSettings.getTemplateList(teamspace);
 
 		respond(req, res, templates.ok,
 			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
@@ -369,8 +371,10 @@ const establishRoutes = () => {
 	*               format: binary
 	*       404:
 	*         $ref: "#/components/responses/pinIconNotFound"
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
 	*/
-	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace, getPinIcon);
+	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace, checkPinIconExists, getPinIcon);
 
 	/**
 	 * @openapi
