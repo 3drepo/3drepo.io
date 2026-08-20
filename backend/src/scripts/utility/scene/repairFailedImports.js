@@ -55,14 +55,6 @@ const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
 const getUUIDFromKey = (key) => new Mongo.Binary(Buffer.from(key, 'latin1'), 3);
 
 const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
-	logger.logInfo('\t\tReading nodes...');
-
-	if (process.memoryUsage().rss > 1024 * 1024 * 1024 * 1) {
-		logger.logInfo(`\t\tForce garbage collection. Before: ${JSON.stringify(process.memoryUsage())}`);
-		global.gc();
-		logger.logInfo(`\t\tAfter: ${JSON.stringify(process.memoryUsage())}.`);
-	}
-
 	class GraphStore {
 		constructor(map, totalParents) {
 			this.map = map;
@@ -135,8 +127,6 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 
 	// Prime the contiguous arrays to hold the graph
 	{
-		logger.logInfo('\t\tPriming graph store...');
-
 		let totalNodes = 0;
 		let totalParents = 0;
 
@@ -155,14 +145,10 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		}
 
 		store = new GraphStore(map, totalParents);
-
-		logger.logInfo(`\t\tRead ${store.size()} nodes from database.`);
 	}
 
 	// Run the query again to dereference the parents
 	{
-		logger.logInfo('\t\tDereferencing parents...');
-
 		const cursor = await findCursor(
 			teamspace,
 			`${container}.scene`,
@@ -181,12 +167,8 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 		}
 	}
 
-	logger.logInfo('\t\tSetting initial conditions...');
-
 	const root = store.getIndex(getUUIDKey(rootSharedId));
 	store.setStatus(root, 1);
-
-	logger.logInfo('\t\tResolving...');
 
 	const stack = [];
 	const resolveNode = (node) => {
@@ -288,8 +270,6 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 	if (!rootSharedId) {
 		return;
 	}
-
-	logger.logInfo('\t\tFinding ids to delete...');
 
 	const { unreferencedNodes: idsToDelete } = await getUnreferencedIdsFromHierarchy(
 		teamspace,
