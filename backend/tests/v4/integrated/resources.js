@@ -18,16 +18,15 @@
  */
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const IssueHelper =  require("../helpers/issues.js");
-const { loginUsers } =  require("../helpers/users.js");
+const IssueHelper = require("../helpers/issues.js");
+const { loginUsers } = require("../helpers/users.js");
 const async = require("async");
 const orderBy = require("lodash").orderBy;
 
 
 
 describe("Resources ", function () {
-	jest.setTimeout(60000);
-	const usernames = [ "adminTeamspace1JobA",
+	const usernames = ["adminTeamspace1JobA",
 		"viewerTeamspace1Model1JobC",
 		"collaboratorTeamspace1Model1JobC",
 		"collaboratorTeamspace1Model1JobD",
@@ -45,17 +44,17 @@ describe("Resources ", function () {
 	const detachResource = IssueHelper.detachResourceFromIssue(account, model);
 
 	let server;
-	beforeAll(async function() {
+	beforeAll(async function () {
 		agents = await loginUsers(usernames, password);
 		server = agents.server
 
 	});
 
-	afterAll(async function() {
+	afterAll(async function () {
 		await agents.done()
 	});
 
-	it("of file type should be able to be attached to an issue", function(done) {
+	it("of file type should be able to be attached to an issue", function (done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['firstdocument', 'seconddocument'], ['test_doc.docx', 'dummy.pdf']),
@@ -63,14 +62,15 @@ describe("Resources ", function () {
 				expect(Array.isArray(refs)).toBe(true);
 				expect(refs).toHaveLength(2);
 				refs = orderBy(refs, "name");
-				expect(refs[0]).toContain({name:'firstdocument.docx'});
-				expect(refs[1]).toContain({name:'seconddocument.pdf'});
+				expect(refs[0]).toEqual(expect.objectContaining({ name: 'firstdocument.docx' }));
+				expect(refs[1]).toEqual(expect.objectContaining({ name: 'seconddocument.pdf' }));
+
 				next();
 			}
 		], done);
 	});
 
-	it ("of url type should be able to be attached to an issue", function(done) {
+	it("of url type should be able to be attached to an issue", function (done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachUrl(agents.adminTeamspace1JobA, ['homepage', 'blog'], ['http://www.3drepo.com', 'https://3drepo.com/blog/']),
@@ -78,20 +78,20 @@ describe("Resources ", function () {
 				expect(Array.isArray(refs)).toBe(true);
 				expect(refs).toHaveLength(2);
 				refs = orderBy(refs, "name");
-				expect(refs[1]).toContain({name:'homepage', link:'http://www.3drepo.com'});
-				expect(refs[0]).toContain({name:'blog', link:'https://3drepo.com/blog/'});
+				expect(refs[1]).toEqual(expect.objectContaining({ name: 'homepage', link: 'http://www.3drepo.com' }));
+				expect(refs[0]).toEqual(expect.objectContaining({ name: 'blog', link: 'https://3drepo.com/blog/' }));
 				next();
 			}
 		], done);
 	});
 
-	it("attached to an issue should appear in the issue after being retrieved", function(done) {
+	it("attached to an issue should appear in the issue after being retrieved", function (done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
 			(refs, next) => {
 				const issueId = refs[0].issueIds[0];
-				next(null, {_id: issueId});
+				next(null, { _id: issueId });
 			},
 			attachUrl(agents.adminTeamspace1JobA, ['homepage', 'blog'], ['http://www.3drepo.com', 'https://3drepo.com/blog/']),
 			(refs, next) => {
@@ -103,10 +103,10 @@ describe("Resources ", function () {
 				expect(Array.isArray(issue.resources)).toBe(true);
 				expect(issue.resources).toHaveLength(4);
 				const resources = orderBy(issue.resources, "name");
-				expect(resources[0]).toContain({name:'anotherDoc.docx'});
-				expect(resources[1]).toContain({name:'anotherPdf.pdf'});
-				expect(resources[2]).toContain({name:'blog', link:'https://3drepo.com/blog/'});
-				expect(resources[3]).toContain({name:'homepage', link:'http://www.3drepo.com'});
+				expect(resources[0]).toEqual(expect.objectContaining({ name: 'anotherDoc.docx' }));
+				expect(resources[1]).toEqual(expect.objectContaining({ name: 'anotherPdf.pdf' }));
+				expect(resources[2]).toEqual(expect.objectContaining({ name: 'blog', link: 'https://3drepo.com/blog/' }));
+				expect(resources[3]).toEqual(expect.objectContaining({ name: 'homepage', link: 'http://www.3drepo.com' }));
 				next();
 			}
 		], done);
@@ -115,15 +115,15 @@ describe("Resources ", function () {
 	it("attached resource to issue should be able to be deleted", done => {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
-			attachDocs(agents.adminTeamspace1JobA,  ['aPdfFile'], ['dummy.pdf']),
+			attachDocs(agents.adminTeamspace1JobA, ['aPdfFile'], ['dummy.pdf']),
 			(refs, next) => {
 				const ref = refs[0];
 				const issueId = ref.issueIds[0];
 				const resourceId = ref._id;
 
-				detachResource(agents.adminTeamspace1JobA,issueId, resourceId, (err, res) => {
+				detachResource(agents.adminTeamspace1JobA, issueId, resourceId, (err, res) => {
 					next(err, issueId);
-				}) ;
+				});
 			},
 			getIssue(agents.adminTeamspace1JobA),
 			(issue, next) => {
@@ -131,10 +131,10 @@ describe("Resources ", function () {
 				expect(issue.resources).toHaveLength(0);
 				next();
 			}
-			], done);
+		], done);
 	});
 
-	it("attached resource to issue should be able to be downloaded", function(done) {
+	it("attached resource to issue should be able to be downloaded", function (done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
@@ -144,7 +144,7 @@ describe("Resources ", function () {
 		], done);
 	});
 
-	it("attached resource to issue should not be able to be downloaded by unauthorised users", function(done) {
+	it("attached resource to issue should not be able to be downloaded by unauthorised users", function (done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
