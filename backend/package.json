@@ -80,7 +80,7 @@
     "uuid": "11.1.1",
     "uuid-parse": "1.1.0",
     "vhost": "3.0.2",
-    "winston": "3.13.0",
+    "winston": "3.19.0",
     "winston-daily-rotate-file": "3.10.0",
     "xml2js": "0.5.0",
     "xmlbuilder": "10.1.1",
