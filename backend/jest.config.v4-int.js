@@ -39,5 +39,5 @@ module.exports = {
 	testPathIgnorePatterns: [
 		'/node_modules/',
 	],
-	testTimeout: 30000,
+	testTimeout: 5000,
 };

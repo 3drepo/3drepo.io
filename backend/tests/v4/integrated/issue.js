@@ -2946,59 +2946,49 @@ describe('Issues', () => {
 		});
 
 		describe('Importing a bcf file', () => {
-			it('should succeed', (done) => {
-				async.series([
-					function (done) {
-						bcfAgent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
-							.attach('file', __dirname + bcf.path)
-							.expect(200, done);
-					},
-					function (done) {
-						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues`)
-							.expect(200, (err, res) => {
-								const issue1 = res.body.find((issue) => issue._id === bcf.issue1);
-								const issue2 = res.body.find((issue) => issue._id === bcf.issue2);
+			it('should succeed', async () => {
 
-								expect(issue1).toBeTruthy();
-								expect(issue2).toBeTruthy();
-								done(err);
-							});
-					},
-					function (done) {
-						bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
-							.expect(200, (err, res) => {
-								const issue1 = res.body;
+				await bcfAgent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+					.attach('file', __dirname + bcf.path)
+					.expect(200);
 
-								expect(issue1.thumbnail).toBeTruthy();
-								expect(issue1.comments.length).toBe(goldenBCF1.comments.length);
-								expect(issue1.viewpoint).toBeTruthy();
-								expect(issue1.viewpoint.screenshot).toBeTruthy();
+				const res = await bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues`)
+					.expect(200);
 
-								keys.forEach((key) => {
-									expect(issue1[key]).toBe(goldenBCF1[key]);
-								});
+				expect(res.body.find((issue) => issue._id === bcf.issue1)).toBeTruthy();
+				expect(res.body.find((issue) => issue._id === bcf.issue2)).toBeTruthy();
 
-								commentKeys.forEach((key) => {
-									expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
-								});
+				const { body: issue1 } = await bcfAgent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
+					.expect(200);
 
-								viewpointKeys.forEach((key) => {
-									if (Array.isArray(goldenBCF1.viewpoint[key])) {
-										expect(issue1.viewpoint[key]).toEqual(goldenBCF1.viewpoint[key]);
-									} else {
-										expect(issue1.viewpoint[key]).toBe(goldenBCF1.viewpoint[key]);
-									}
-									if (Array.isArray(goldenBCF1.comments[0][key])) {
-										expect(issue1.comments[0][key]).toEqual(goldenBCF1.comments[0][key]);
-									} else {
-										expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
-									}
-								});
 
-								done(err);
-							});
-					},
-				], done);
+				expect(issue1.thumbnail).toBeTruthy();
+				expect(issue1.comments.length).toBe(goldenBCF1.comments.length);
+				expect(issue1.viewpoint).toBeTruthy();
+				expect(issue1.viewpoint.screenshot).toBeTruthy();
+
+				keys.forEach((key) => {
+					expect(issue1[key]).toBe(goldenBCF1[key]);
+				});
+
+				commentKeys.forEach((key) => {
+					expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
+				});
+
+				viewpointKeys.forEach((key) => {
+					if (Array.isArray(goldenBCF1.viewpoint[key])) {
+						expect(issue1.viewpoint[key]).toEqual(goldenBCF1.viewpoint[key]);
+					} else {
+						expect(issue1.viewpoint[key]).toBe(goldenBCF1.viewpoint[key]);
+					}
+					if (Array.isArray(goldenBCF1.comments[0][key])) {
+						expect(issue1.comments[0][key]).toEqual(goldenBCF1.comments[0][key]);
+					} else {
+						expect(issue1.comments[0][key]).toBe(goldenBCF1.comments[0][key]);
+					}
+
+
+				});
 			});
 
 			it('with groups should succeed', (done) => {
