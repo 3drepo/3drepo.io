@@ -713,31 +713,11 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public showPin = async ({id, position, norm, colour, type, isSelected}: IPin) => {
+	public showPin = async ({ id, position,  colour, type }: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 
-		// This is for changing the pin icon of the same id
-		UnityUtil.removePin(id);
-
-		switch (type) {
-			case 'risk':
-				UnityUtil.dropRiskPin(id, position, norm, colour);
-				break;
-			case 'issue':
-				UnityUtil.dropIssuePin(id, position, norm, colour);
-				break
-			case 'ticket':
-				UnityUtil.dropTicketPin(id, position, norm, colour);
-				break
-			default:
-				UnityUtil.dropBookmarkPin(id, position, norm, colour);
-				break;
-		}
-
-		if (isSelected) {
-			UnityUtil.selectPin(id);
-		}
+		UnityUtil.dropPin(id, position, colour, type);
 	}
 
 	public setSelectionPin = async ({id, isSelected}) => {

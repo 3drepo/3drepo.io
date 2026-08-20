@@ -125,15 +125,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const refreshPin = () => {
 		if (!isViewer) return;
 
-		if (prevValue.current) {
+		if (prevValue.current && !hasPin) {
 			ViewerService.removePin(pinId);
 		}
 
 		if (hasPin) {
 			ViewerService.showPin(toPin(name, template, minimumPinTicket, false, value));
 		}
-
-		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	};
 
 	// Update pin when colour or icon changes
