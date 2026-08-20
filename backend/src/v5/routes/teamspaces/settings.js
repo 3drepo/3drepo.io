@@ -26,8 +26,10 @@ const Audit = require('../../processors/teamspaces/audits');
 const MimeTypes = require('../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
+const TicketSettings = require('../../processors/teamspaces/settings.tickets');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
+const { checkPinIconExists } = require('../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getUserFromSession } = require('../../utils/sessions');
 const { templates } = require('../../utils/responseCodes');
 const { validateGetAuditLogParams } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
@@ -37,7 +39,7 @@ const addTicketTemplate = async (req, res) => {
 		const { teamspace } = req.params;
 		const template = req.body;
 
-		const _id = UUIDToString(await TeamspaceSettings.addTicketTemplate(teamspace, template));
+		const _id = UUIDToString(await TicketSettings.addTicketTemplate(teamspace, template));
 		respond(req, res, templates.ok, { _id });
 	} catch (err) {
 		// istanbul ignore next
@@ -56,12 +58,33 @@ const getRiskCategories = async (req, res) => {
 	}
 };
 
+const getPinIconNames = async (req, res) => {
+	try {
+		const icons = await TicketSettings.getPinIconNames();
+		respond(req, res, templates.ok, { icons });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getPinIcon = async (req, res) => {
+	try {
+		const { pinIcon, variant } = req.params;
+		const icon = await TicketSettings.getPinIcon(pinIcon, variant);
+		respond(req, res, templates.ok, icon, { mimeType: MimeTypes.SVG });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const updateTicketTemplate = async (req, res) => {
 	try {
 		const { teamspace, template } = req.params;
 		const newData = req.body;
 
-		await TeamspaceSettings.updateTicketTemplate(teamspace, template, newData);
+		await TicketSettings.updateTicketTemplate(teamspace, template, newData);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -73,7 +96,7 @@ const getTemplateList = async (req, res) => {
 	const { teamspace } = req.params;
 
 	try {
-		const data = await TeamspaceSettings.getTemplateList(teamspace);
+		const data = await TicketSettings.getTemplateList(teamspace);
 
 		respond(req, res, templates.ok,
 			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
@@ -280,6 +303,78 @@ const establishRoutes = () => {
 	*                   example: ["Commerical Issue", "Environmental Issue", "Safety Issue - Struck"]
 	*/
 	router.get('/tickets/riskCategories', hasAccessToTeamspace, getRiskCategories);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/settings/tickets/pinIcons:
+	*   get:
+	*     description: Get the available ticket pin icons
+	*     tags: [v:external, Teamspaces]
+	*     operationId: getPinIconNames
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the available ticket pin icon names
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 icons:
+	*                   type: array
+	*                   items:
+	*                     type: string
+	*/
+	router.get('/tickets/pinIcons', hasAccessToTeamspace, getPinIconNames);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/settings/tickets/pinIcons/{pinIcon}/{variant}.svg:
+	*   get:
+	*     description: Get a ticket pin icon SVG asset
+	*     tags: [v:external, Teamspaces]
+	*     operationId: getPinIcon
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: pinIcon
+	*         description: case-sensitive pin icon name
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: variant
+	*         description: pin icon variant (normal or selected)
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     responses:
+	*       200:
+	*         description: returns the requested pin icon SVG
+	*         content:
+	*           image/svg+xml:
+	*             schema:
+	*               type: string
+	*               format: binary
+	*       404:
+	*         $ref: "#/components/responses/pinIconNotFound"
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*/
+	router.get('/tickets/pinIcons/:pinIcon/:variant', hasAccessToTeamspace, checkPinIconExists, getPinIcon);
 
 	/**
 	 * @openapi

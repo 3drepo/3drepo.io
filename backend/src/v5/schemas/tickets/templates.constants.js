@@ -17,8 +17,14 @@
 
 const { CLASH_TYPES } = require('../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
+const fs = require('fs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
+const path = require('path');
+const { resourcesPath } = require('../../../interop');
+const { templates } = require('../../utils/responseCodes');
 const { toConstantCase } = require('../../utils/helper/strings');
+
+const ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
 
 const createConstantMapping = (values) => {
 	const res = {};
@@ -248,6 +254,38 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
-TemplateConstants.pinIcons = createConstantMapping(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']);
+const defaultPinIconsDetails = {};
+const iconVariants = ['normal', 'selected'];
+
+const iconFilenameRegex = new RegExp(
+	`^(?<name>.+)\\.(?<variant>${iconVariants.join('|')})\\.svg$`,
+);
+
+TemplateConstants.iconVariants = createConstantMapping(iconVariants);
+
+const setDefaultPinIcons = () => {
+	const files = fs.readdirSync(ICONS_DIR, { withFileTypes: true });
+
+	files.forEach((entry) => {
+		// in the future update the svg check to check the file contents instead of just the extension
+		if (!entry.isFile() || !entry.name.endsWith('.svg')) throw templates.pinIconNotFound;
+
+		const match = entry.name.match(iconFilenameRegex);
+		if (!match) throw templates.pinIconNotFound;
+
+		const { name, variant } = match.groups;
+		if (!defaultPinIconsDetails[name]) {
+			defaultPinIconsDetails[name] = { [variant]: path.join(ICONS_DIR, entry.name) };
+			return;
+		}
+		defaultPinIconsDetails[name][variant] = path.join(ICONS_DIR, entry.name);
+	});
+};
+
+TemplateConstants.getDefaultPinIconsDetails = () => {
+	if (Object.keys(defaultPinIconsDetails).length === 0) setDefaultPinIcons();
+
+	return defaultPinIconsDetails;
+};
 
 module.exports = TemplateConstants;
