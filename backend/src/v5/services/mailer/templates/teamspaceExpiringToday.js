@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const Yup = require('yup');
+const { generateTemplateFn } = require('./common');
 
-config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
-config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
-config.setupFiles = ['./tests/v5/scripts/setup.js'];
+const dataSchema = Yup.object({
+	teamspace: Yup.string().required(),
+}).required(true);
 
-config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
+const TEMPLATE_PATH = `${__dirname}/html/teamspaceExpiringToday.html`;
 
-module.exports = config;
+const TeamspaceExpiringToday = {};
+
+TeamspaceExpiringToday.subject = ({ teamspace }) => `[${teamspace}] Your teamspace subscription has expired`;
+
+TeamspaceExpiringToday.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = TeamspaceExpiringToday;
