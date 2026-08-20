@@ -16,6 +16,9 @@
  */
 
 import styled, { css } from 'styled-components';
+import { ChipContainer as BaseChipContainer, selectedOrHoveredStyles } from '@controls/chip/baseChip/baseChip.styles';
+
+export { DeleteButton } from '@controls/chip/baseChip/baseChip.styles';
 
 export const TextWrapper = styled.div`
 	overflow: hidden;
@@ -53,62 +56,17 @@ export const DisplayValue = styled.span<{ $multiple?: boolean }>`
 	`}
 `;
 
-export const DeleteButton = styled.div`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	background-color: ${({ theme }) => theme.palette.base.main};
-	border-radius: 50%;
-	height: 16px;
-	aspect-ratio: 1;
-	display: grid;
-	place-content: center;
-
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.base.dark};
-	}
-
-	svg {
-		width: 8px;
-		height: 8px;
-	}
-`;
-
-const selectedOrHoveredStyles = css`
-	background-color: ${({ theme }) => theme.palette.base.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	border-color: ${({ theme }) => theme.palette.base.main};
+const filterChipSelectedOrHoveredStyles = css`
+	${selectedOrHoveredStyles}
 
 	${OperatorIconContainer} {
 		border-color: currentColor;
 	}
-
-	${DeleteButton} {
-		color: ${({ theme }) => theme.palette.base.main};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-
-		&:hover {
-			background-color: ${({ theme }) => theme.palette.base.light};
-		}
-	}
 `;
 
-export const ChipContainer = styled.div<{ selected: boolean }>`
-	box-sizing: border-box;
-	height: 24px;
-	border-radius: 12px;
-	border: solid 1px ${({ theme }) => theme.palette.base.light};
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding: 3px 3px 3px 6px;
-	display: inline-flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 4px;
-	cursor: pointer;
-	max-width: 100%;
-
-	${({ selected }) => selected && selectedOrHoveredStyles}
+export const ChipContainer = styled(BaseChipContainer)`
+	${({ selected }) => selected && filterChipSelectedOrHoveredStyles}
 	&:hover {
-		${selectedOrHoveredStyles}
+		${filterChipSelectedOrHoveredStyles}
 	}
 `;
