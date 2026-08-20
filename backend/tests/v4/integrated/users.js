@@ -44,7 +44,7 @@ describe('User ', () => {
 		await teamSpace1.login(username, password);
 
 	});
-	afterAll(done => server.close(done));
+	afterAll(done => { server.close(done); });
 
 
 	describe('using starred metadata', () => {
