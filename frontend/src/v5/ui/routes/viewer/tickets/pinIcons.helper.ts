@@ -18,6 +18,8 @@
 import DOMPurify from 'dompurify';
 import { getUrl } from '@/v5/services/api/default';
 import { downloadAuthUrl } from '@/v5/helpers/download.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectCurrentTeamspace } from '@/v5/store/teamspaces/teamspaces.selectors';
 
 // Cache resolved (sanitized) SVG text by URL so repeated lookups of the same
 // icon don't refetch it.
@@ -54,4 +56,43 @@ export const getEmbeddedPin = (teamspace: string, icon: string, selected: boolea
 		return embeddedPinCache[normalUrl];
 	});
 	return embeddedPinCache[selectedUrl];
+};
+
+const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+	const img = new Image();
+	img.onload = () => {
+		img.width = img.naturalWidth;
+		img.height = img.naturalHeight;
+		resolve(img);
+	};
+
+	img.onerror = reject;
+	img.src = src;
+	return img;
+});
+
+// Cache the [normal, selected] loaded HTMLImageElement pair per icon so
+// repeated calls (e.g. re-dropping the same pin) don't refetch/reload them.
+const pinImagesCache: Record<string, Promise<[HTMLImageElement, HTMLImageElement]>> = {};
+
+/**
+ * Returns a promise of the loaded [normal, selected] images for a custom pin
+ * icon uploaded to the backend, ready to be passed to UnityUtil.createPinIcon.
+ */
+export const getPinImages = (icon: string): Promise<[HTMLImageElement, HTMLImageElement]> => {
+	const teamspace = selectCurrentTeamspace(getState());
+
+	pinImagesCache[icon] ??= (async () => {
+		const normalUrl = getPinIconUrl(teamspace, icon, false);
+		const selectedUrl = getPinIconUrl(teamspace, icon, true);
+
+		const [normalSrc, selectedSrc] = await Promise.all([
+			downloadAuthUrl(normalUrl),
+			downloadAuthUrl(selectedUrl).catch(() => downloadAuthUrl(normalUrl)),
+		]);
+
+		return Promise.all([loadImage(normalSrc), loadImage(selectedSrc)]) as Promise<[HTMLImageElement, HTMLImageElement]>;
+	})();
+
+	return pinImagesCache[icon];
 };
