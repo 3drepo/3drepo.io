@@ -438,7 +438,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	};
 
 	useEffect(() => {
-		TicketCommentsActionsDispatchers.setUnsavedComment();
+		TicketCommentsActionsDispatchers.resetUnsavedComments();
 	}, [ticketId]);
 	
 	return (

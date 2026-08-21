@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
-import { selectComments, selectCommentById, selectUnsavedComment } from '@/v5/store/tickets/comments/ticketComments.selectors';
+import { selectComments, selectCommentById, selectUnsavedCommentById, selectUnsavedComments } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { createTestStore } from '../../test.helpers';
 import { commentMockFactory } from './ticketComments.fixture';
 
@@ -24,6 +24,8 @@ describe('Ticket Comments: store', () => {
 	const ticketId = 'ticketId';
 	const comment = commentMockFactory();
 	const commentId = comment._id;
+	const messageA = comment.message;
+	const messageB = 'Updated message';
 
 	beforeEach(() => {
 		({ dispatch, getState } = createTestStore());
@@ -40,7 +42,7 @@ describe('Ticket Comments: store', () => {
 		it('should update the comments', () => {
 			dispatch(TicketCommentsActions.fetchCommentsSuccess(ticketId, [comment]));
 	
-			const updatedComment = commentMockFactory({ ...comment, message: 'modified message' });	
+			const updatedComment = commentMockFactory({ ...comment, message: messageB });	
 			dispatch(TicketCommentsActions.upsertCommentSuccess(ticketId, updatedComment));
 			const commentFromStore = selectCommentById(getState(), ticketId, commentId);
 	
@@ -66,23 +68,47 @@ describe('Ticket Comments: store', () => {
 		});
 	});
 
-	describe('unsaved comment', () => {
+	describe('unsaved comments', () => {
 		it('should save and select an unsaved comment', () => {
-			const unsavedComment = {
-				message: 'Unsaved comment',
-				images: ['image-id'],
-			};
+			// const unsavedComment = {
+			// 	message: 'Unsaved comment',
+			// 	images: ['image-id'],
+			// };
 
-			dispatch(TicketCommentsActions.setUnsavedComment(unsavedComment));
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, comment));
 
-			expect(selectUnsavedComment(getState())).toEqual(unsavedComment);
+			expect(selectUnsavedCommentById(getState(), commentId)).toEqual({ ...comment, _id: null });
+		});
+
+		it('should keep unsaved comments of different comments separate', () => {
+			dispatch(TicketCommentsActions.setUnsavedComment(null, { message: messageA }));
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, { message: messageB }));
+
+			expect(selectUnsavedCommentById(getState(), null).message).toEqual(messageA);
+			expect(selectUnsavedCommentById(getState(), commentId).message).toEqual(messageB);
+		});
+
+		it('should override an existing unsaved comment', () => {
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, { message: messageA }));
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, { message: messageB }));
+
+			expect(selectUnsavedComments(getState()).length).toEqual(1);
+			expect(selectUnsavedCommentById(getState(), commentId).message).toEqual(messageB);
 		});
 
 		it('should clear an unsaved comment', () => {
-			dispatch(TicketCommentsActions.setUnsavedComment({ message: 'Unsaved comment' }));
-			dispatch(TicketCommentsActions.setUnsavedComment());
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, { message: messageA }));
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId));
 
-			expect(selectUnsavedComment(getState())).toBeUndefined();
+			expect(selectUnsavedCommentById(getState(), commentId)).toBeNull();
+		});
+
+		it('should clear all the unsaved comments', () => {
+			dispatch(TicketCommentsActions.setUnsavedComment(null, { message: messageA }));
+			dispatch(TicketCommentsActions.setUnsavedComment(commentId, { message: messageB }));
+			dispatch(TicketCommentsActions.resetUnsavedComments());
+
+			expect(selectUnsavedComments(getState())).toEqual([]);
 		});
 	});
 });

@@ -38,7 +38,13 @@ export const selectCommentById = createSelector(
 	(comments, commentId) => comments.find(({ _id }) => _id === commentId) || null,
 );
 
-export const selectUnsavedComment = createSelector(
+export const selectUnsavedComments = createSelector(
 	selectCommentsDomain,
-	(state) => state.unsavedComment,
+	(state) => state.unsavedComments || [],
+);
+
+export const selectUnsavedCommentById = createSelector(
+	selectUnsavedComments,
+	(_, commentId) => commentId ?? null,
+	(unsavedComments, commentId) => unsavedComments.find(({ _id }) => _id === commentId) || null,
 );

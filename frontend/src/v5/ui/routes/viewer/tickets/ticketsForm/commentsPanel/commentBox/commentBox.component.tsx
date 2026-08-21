@@ -63,7 +63,7 @@ import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, isUndefined } from 'lodash';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 type ImageToUpload = {
@@ -90,7 +90,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedComment();
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId || null);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -114,7 +114,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 	const unsavedCommentRef = useRef<Partial<ITicketComment> | null>(null);
+	const discardDraftRef = useRef(false);
 	unsavedCommentRef.current = {
+		_id: commentId || null,
 		message: newMessage || '',
 		images: imagesToUpload.map(({ src }) => src),
 		view: viewpoint,
@@ -140,6 +142,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		setViewpoint(null);
 	};
 
+	const cancelEdit = () => {
+		discardDraftRef.current = true;
+		onCancelEdit();
+	};
+
 	const updateMessage = async () => {
 		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
@@ -160,7 +167,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 			commentId,
 			newComment,
 		);
-		onCancelEdit();
+		cancelEdit();
 	};
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
@@ -175,7 +182,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		if (viewpoint) {
 			newComment.view = viewpoint;
 		}
-		TicketCommentsActionsDispatchers.setUnsavedComment();
+		TicketCommentsActionsDispatchers.setUnsavedComment(null);
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
 			project,
@@ -263,19 +270,22 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	}, [commentReply?._id]);
 
 	useEffect(() => {
-		if (isEditMode) return;
 		const draftImages = unsavedComment?.images || images;
 		reset({
 			message: desanitiseMessage(unsavedComment?.message || message),
 			images: draftImages,
 		});
-		setViewpoint(unsavedComment?.view || existingView);
+		const unsavedView = unsavedComment?.view;
+		if (!isUndefined(unsavedView)) {
+			setViewpoint(unsavedView);
+		}
 		setImagesToUpload(draftImages.map((src) => ({ src, id: uuid() })));
-	}, [unsavedComment, isEditMode]);
+	}, [unsavedComment]);
 
 	useEffect(() => () => {
-		if (!isEditMode) TicketCommentsActionsDispatchers.setUnsavedComment(cloneDeep(unsavedCommentRef.current || {}));
-	}, [isEditMode]);
+		const draft = discardDraftRef.current ? undefined : cloneDeep(unsavedCommentRef.current || {});
+		TicketCommentsActionsDispatchers.setUnsavedComment(commentId || null, draft);
+	}, []);
 
 	return (
 		<Container
@@ -361,7 +371,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>
-						<TicketButton variant="error" onClick={onCancelEdit}>
+						<TicketButton variant="error" onClick={cancelEdit}>
 							<CancelIcon />
 						</TicketButton>
 						<TicketButton variant="primary" onClick={updateMessage} disabled={disableSendMessage}>

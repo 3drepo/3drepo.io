@@ -171,7 +171,7 @@ export const TicketDetailsCard = () => {
 
 
 	useEffect(() => {
-		TicketCommentsActionsDispatchers.setUnsavedComment();
+		TicketCommentsActionsDispatchers.resetUnsavedComments();
 	}, [ticketId]);
 
 	useEffect(() => () => {
