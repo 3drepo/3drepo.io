@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
 import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
 import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
@@ -34,21 +34,20 @@ const PinPerType =
 export const Pin = ({ pinIcon, selected = false }: { pinIcon: PinIcon | string, selected?: boolean }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const BuiltInIcon = PinPerType[pinIcon];
-	const [svg, setSvg] = useState<string>(null);
+	const containerRef = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {
 		if (BuiltInIcon) return undefined;
 		let mounted = true;
-		setSvg(null);
 		(async () => {
 			const embeddedSvg = await getEmbeddedPin(teamspace, pinIcon, selected);
-			if (mounted) setSvg(embeddedSvg);
+			if (mounted && containerRef.current) {
+				containerRef.current.innerHTML = embeddedSvg;
+			}
 		})();
 		return () => { mounted = false; };
 	}, [teamspace, pinIcon, selected]);
 
 	if (BuiltInIcon) return (<BuiltInIcon />);
-	if (!svg) return null;
-	// eslint-disable-next-line react/no-danger
-	return (<span dangerouslySetInnerHTML={{ __html: svg }} />);
+	return (<span ref={containerRef} />);
 };
