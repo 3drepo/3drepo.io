@@ -31,6 +31,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setTeamspacesArePending: ['teamspacesArePending'],
 	fetchAddOnsSuccess: ['teamspace', 'addOns'],
 	fetchActivityLog: ['teamspace', 'startDate', 'endDate'],
+	fetchPinIconsSuccess: ['teamspace', 'pinIcons'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
 
 export const INITIAL_STATE: TeamspacesState = {
@@ -39,6 +40,7 @@ export const INITIAL_STATE: TeamspacesState = {
 	quota: {},
 	teamspacesArePending: false,
 	addOns: {},
+	pinIcons: {},
 };
 
 export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
@@ -65,6 +67,10 @@ export const fetchAddOnsSuccess = (state: TeamspacesState, { teamspace, addOns }
 	state.addOns[teamspace] = addOns;
 };
 
+export const fetchPinIconsSuccess = (state: TeamspacesState, { teamspace, pinIcons }: FetchPinIconsSuccessAction) => {
+	state.pinIcons[teamspace] = pinIcons;
+};
+
 export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.FETCH_QUOTA_SUCCESS]: fetchQuotaSuccess,
@@ -72,6 +78,7 @@ export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.SET_TEAMSPACES_ARE_PENDING]: setTeamspacesArePending,
 	[TeamspacesTypes.SET_USED_QUOTA_SEATS]: setUsedQuotaSeats,
 	[TeamspacesTypes.FETCH_ADD_ONS_SUCCESS]: fetchAddOnsSuccess,
+	[TeamspacesTypes.FETCH_PIN_ICONS_SUCCESS]: fetchPinIconsSuccess,
 }));
 
 /**
@@ -83,6 +90,7 @@ export interface TeamspacesState {
 	currentTeamspace: string;
 	teamspacesArePending: boolean;
 	addOns: Record<string, AddOns>;
+	pinIcons: Record<string, string[]>;
 }
 
 export type QuotaUnit = {
@@ -112,6 +120,7 @@ export type SetUsedQuotaSeatsAction = Action<'SET_USED_QUOTA_SEATS'> & { teamspa
 export type FetchAddOnsAction = Action<'FETCH_ADD_ONS'> & { teamspace: string };
 export type FetchAddOnsSuccessAction = Action<'FETCH_ADD_ONS_SUCCESS'> & { teamspace: string, addOns: AddOns };
 export type FetchActivityLogAction = Action<'FETCH_ACTIVITY_LOG'> & { teamspace: string, startDate?: Date, endDate?: Date };
+export type FetchPinIconsSuccessAction = Action<'FETCH_PIN_ICONS_SUCCESS'> & { teamspace: string, pinIcons: string[] };
 
 export interface ITeamspacesActionCreators {
 	fetch: () => FetchAction;
@@ -123,4 +132,5 @@ export interface ITeamspacesActionCreators {
 	setUsedQuotaSeats: (teamspace: string, seats: number) => SetUsedQuotaSeatsAction;
 	fetchAddOnsSuccess: (teamspace: string, addOns: AddOns) => FetchAddOnsSuccessAction;
 	fetchActivityLog: (teamspace: string, startDate?: Date, endDate?: Date) => FetchActivityLogAction;
+	fetchPinIconsSuccess: (teamspace: string, pinIcons: string[]) => FetchPinIconsSuccessAction;
 }

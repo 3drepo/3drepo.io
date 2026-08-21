@@ -29,6 +29,11 @@ export const fetchAddons = async (teamspace: string): Promise<AddOns> => {
 	return data;
 };
 
+export const fetchPinIcons = async (teamspace: string): Promise<string[]> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/pinIcons`);
+	return data.icons;
+};
+
 export const getActivityLogURL = (teamspace: string, from: Date, to: Date): string => {
 	const fromQuery = from && `from=${from}`;
 	const toQuery = to && `to=${to}`;
