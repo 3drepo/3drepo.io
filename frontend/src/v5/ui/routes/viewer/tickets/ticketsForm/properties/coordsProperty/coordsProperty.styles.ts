@@ -95,6 +95,7 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	border-radius: 5px;
 	margin-left: auto;
 	height: 44px;
+	width: 44px;
 	box-sizing: border-box;
 	padding: 12px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};

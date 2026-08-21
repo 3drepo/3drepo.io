@@ -15,31 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect, useRef } from 'react';
-import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
-import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
-import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
-import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
 import { PinIcon } from '@/v5/store/tickets/tickets.types';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getEmbeddedPin } from './pinIcons.helper';
-import { getTintFilter } from '@/v5/helpers/colors.helper';
-import { RgbArray } from '@/v5/helpers/colors.helper';
-
-const PinPerType = 
-{
-	// 'ISSUE': IssuePin,
-	// 'RISK': RiskPin,
-	// 'DEFAULT': TicketPin,
-	// 'MARKER': MarkerPin,
-};
+import { getTintFilter, RgbArray } from '@/v5/helpers/colors.helper';
 
 export const Pin = ({ pinIcon, selected = false, colour }: { pinIcon: PinIcon | string, selected?: boolean, colour?: RgbArray }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const BuiltInIcon = PinPerType[pinIcon];
 	const containerRef = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {
-		if (BuiltInIcon) return undefined;
 		let mounted = true;
 		(async () => {
 			const embeddedSvg = await getEmbeddedPin(teamspace, pinIcon, selected);
@@ -49,8 +34,6 @@ export const Pin = ({ pinIcon, selected = false, colour }: { pinIcon: PinIcon | 
 		})();
 		return () => { mounted = false; };
 	}, [teamspace, pinIcon, selected]);
-
-	if (BuiltInIcon) return (<BuiltInIcon />);
 
 	// Custom (backend) pin icons are tinted with a CSS filter instead of
 	// relying on internal SVG classes/ids, so they don't need to be
