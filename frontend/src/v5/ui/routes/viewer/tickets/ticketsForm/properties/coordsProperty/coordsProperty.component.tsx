@@ -220,7 +220,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
 						>
-							<Pin pinIcon={pinIcon}/>
+							<Pin pinIcon={pinIcon} selected={isSelected} />
 						</SelectPinButton>
 					</Tooltip>
 				)}
