@@ -268,6 +268,7 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 		selfIntersectionsCheck: plan.selfIntersectionsCheck,
 		selectionA: plan.selectionA,
 		selectionB: plan.selectionB,
+		notify: plan.notify,
 	});
 	const [runId, context] = await Promise.all([
 		createClashRun(teamspace, project, clashConfig, user),

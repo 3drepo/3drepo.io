@@ -21,7 +21,11 @@ const { src } = require('../../../../helper/path');
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 
-const { generateRandomString } = require('../../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../../helper/services');
+const { times } = require('lodash');
+
+jest.mock('../../../../../../src/v5/models/teamspaceSettings');
+const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../../../src/v5/models/projectSettings');
 const ProjectsModel = require(`${src}/models/projectSettings`);
@@ -43,6 +47,9 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 
 jest.mock('../../../../../../src/v5/processors/teamspaces/projects/clashes');
 const { deleteClashDataInProject } = require(`${src}/processors/teamspaces/projects/clashes`);
+
+jest.mock('../../../../../../src/v5/processors/teamspaces');
+const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
 
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -317,6 +324,48 @@ const testGetStatusCodes = () => {
 	});
 };
 
+const testGetUsersWithAccess = () => {
+	describe('Get users with access', () => {
+		test('should get users with access', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const tsMembers = times(10, () => ({ user: generateRandomString() }));
+			const tsAdmins = [tsMembers[0].user, generateRandomString()];
+			const projectAdmins = [tsMembers[1].user, generateRandomString()];
+			const models = [
+				{ permissions: [{ user: tsMembers[2].user }, { user: generateRandomString() }] },
+				generateRandomObject(),
+			];
+			const modelIds = times(3, () => generateRandomString());
+
+			TeamspacesProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(tsMembers);
+			TeamspacesModel.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
+			ProjectsModel.getProjectAdmins.mockResolvedValueOnce(projectAdmins);
+			ProjectsModel.getProjectById.mockResolvedValueOnce({ models: modelIds });
+			ModelSettingsModel.getMultipleModelsByIds.mockResolvedValueOnce(models);
+
+			await expect(Projects.getUsersWithAccess(teamspace, project))
+				.resolves.toEqual([tsMembers[0].user, tsMembers[1].user, tsMembers[2].user]);
+
+			expect(TeamspacesProcessor.getAllMembersInTeamspace).toHaveBeenCalledTimes(1);
+			expect(TeamspacesProcessor.getAllMembersInTeamspace).toHaveBeenCalledWith(teamspace);
+
+			expect(TeamspacesModel.getTeamspaceAdmins).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.getTeamspaceAdmins).toHaveBeenCalledWith(teamspace);
+
+			expect(ProjectsModel.getProjectAdmins).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectAdmins).toHaveBeenCalledWith(teamspace, project);
+
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledWith(teamspace, project, { models: 1 });
+
+			expect(ModelSettingsModel.getMultipleModelsByIds).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.getMultipleModelsByIds)
+				.toHaveBeenCalledWith(teamspace, modelIds, { permissions: 1 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetProjectList();
 	testDeleteProject();
@@ -328,4 +377,5 @@ describe(determineTestGroup(__filename), () => {
 	testDeleteImage();
 	testGetDrawingCategories();
 	testGetStatusCodes();
+	testGetUsersWithAccess();
 });

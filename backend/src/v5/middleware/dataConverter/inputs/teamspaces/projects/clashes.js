@@ -24,9 +24,11 @@ const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('.
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
 const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
+const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { getUsersWithAccess } = require('../../../../../processors/teamspaces/projects');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
@@ -59,6 +61,19 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		}
 		return required ? schema.required() : schema;
 	};
+
+	const jobsAndUsersArray = uniqueArray(Yup.array().of(Yup.string()).min(1)
+		.test('jobs-and-users-validation', 'All jobs and users must have access to the project', async (values) => {
+			if (!values?.length) {
+				return true;
+			}
+
+			const usersWithAccess = await getUsersWithAccess(teamspace, project);
+			const jobsWithAccess = await getJobsByUsers(teamspace, usersWithAccess);
+			const jobsAndUsers = new Set([...usersWithAccess, ...jobsWithAccess]);
+
+			return values.every((value) => jobsAndUsers.has(value));
+		}));
 
 	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
@@ -98,6 +113,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		selectionA: imposeCondition(selectionSchema, true, false),
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
+		notify: imposeCondition(jobsAndUsersArray, false, true),
 	}).noUnknown(true).required();
 };
 

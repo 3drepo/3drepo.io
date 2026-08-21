@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../utils/helper/uuids');
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const { generateTemplateFn } = require('./common');
@@ -30,14 +31,32 @@ const dataSchema = Yup.object({
 	teamspace: Yup.string().required(),
 	domain: Yup.string().default(() => config.getBaseURL()),
 	notifications: Yup.array().of(Yup.object({
-		project: Yup.string().required(),
-		model: Yup.string().required(),
-		tickets: Yup.object({
-			updated: ticketObjectSchema,
-			assigned: ticketObjectSchema,
-			closed: ticketObjectSchema,
-		}).required(),
-
+		project: Yup.string().required()
+			.transform((val, orgVal) => UUIDToString(orgVal)),
+		ticketData: Yup.array().of(Yup.object({
+			model: Yup.string().required(),
+			tickets: Yup.object({
+				updated: ticketObjectSchema,
+				assigned: ticketObjectSchema,
+				closed: ticketObjectSchema,
+			}).required(),
+		})).required(),
+		clashData: Yup.array().of(Yup.object({
+			planName: Yup.string().required(),
+			runs: Yup.array().of(Yup.object({
+				status: Yup.string().required(),
+				stats: Yup.object({
+					new: Yup.number().min(0),
+					active: Yup.number().min(0),
+					resolved: Yup.number().min(0),
+				}),
+				error: Yup.object({
+					reason: Yup.string(),
+				}),
+				triggeredAt: Yup.string().transform((_, originalValue) => new Date(originalValue)
+					.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })),
+			})).min(1).required(),
+		})).required(),
 	})).min(1).required(),
 }).required(true);
 

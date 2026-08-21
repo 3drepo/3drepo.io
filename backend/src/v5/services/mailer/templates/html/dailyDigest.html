@@ -1,57 +1,526 @@
-<p>Here is your daily digest based on your chosen notification preferences:</p>
-<p style="text-align: center"><span class="greeting"><%= teamspace %></span></p>
-<% for(const { project, model, tickets } of notifications) { %>
-	<div class="notifications">
-		<div class="notificationsTable">
-			<div class="notificationsHeader">
-				<div class="headerTitle">
-					<img src="<%= domain %>/assets/email-resources/notifications/tickets.png" style="margin-right:5px">
-					<p class="title"><%= project %>/<%= model %></p>
-				</div>
-			</div>
-			<div class="notificationsContent">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Email-safe CSS: literal values, no CSS variables, Grid, Flexbox, gap, min(), or place-items. */
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #e9eaec;
+      color: #172b4d;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
 
-				<% if(tickets.assigned) { %>
-				<div class="notificationsRow">
-					<div class="notificationIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/new.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank">
-							<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
-						</a>
-					</div>
-					<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-				<% if(tickets.updated) { %>
- 				 <div class="notificationsRow">
-					<div class="notificationIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/edit.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.updated.link %>" target="_blank">
-							<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
-						</a>
-					</div>
-					<a href="<%= domain %><%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-				<% if(tickets.closed) { %>
-				<div class="notificationsRow">
-					<div class="notificationIconBorder notificationDoneIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/done.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.closed.link %>" target="_blank">
-					   		<p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
-					   	</a>
-					</div>
-					<a href="<%= domain %><%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-			</div>
-		</div>
+    table { border-collapse: collapse; border-spacing: 0; }
+    td { vertical-align: top; }
+    img { display: block; border: 0; outline: none; text-decoration: none; }
+
+    a {
+      color: #172b4d;
+      text-decoration: underline;
+    }
+
+    .email-shell {
+      width: 100%;
+      padding: 44px 16px 64px;
+      background-color: #e9eaec;
+    }
+
+    .brand {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto 20px;
+      text-align: center;
+    }
+
+    .brand-wordmark {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 24px;
+      text-transform: uppercase;
+      color: #172b4d;
+    }
+
+    .brand-sub {
+      margin-top: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .email-card {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #d9dee7;
+      border-radius: 8px;
+    }
+
+    .card-body { padding: 40px 40px 32px; }
+    .card-body + .card-body { padding-top: 0; }
+
+    .greeting {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 31px;
+      color: #172b4d;
+    }
+
+    .subtext {
+      margin: 0 0 36px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .teamspace-eyebrow {
+      display: block;
+      margin-bottom: 6px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .teamspace-title {
+      margin: 0 0 24px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #172b4d;
+    }
+
+    .project-block {
+      margin-bottom: 16px;
+      border: 1px solid #d9dee7;
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+    .project-head {
+      padding: 14px 20px;
+      background-color: #e8eef8;
+      border-bottom: 1px solid #d9dee7;
+    }
+
+    .proj-icon {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 30px;
+      background-color: #1677ff;
+      color: #ffffff;
+      text-align: center;
+      line-height: 30px;
+      vertical-align: middle;
+    }
+
+    .project-name {
+      display: inline-block;
+      margin-left: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      vertical-align: middle;
+      color: #172b4d;
+    }
+
+    .section-label {
+      margin: 0;
+      padding: 14px 20px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .section-divider {
+      border: 0;
+      border-top: 1px solid #d9dee7;
+      margin: 0;
+    }
+
+    .run-list { padding: 0 16px 16px; }
+
+    .run-row {
+      display: table;
+      width: 100%;
+      margin-bottom: 8px;
+      border: 1px solid #d9dee7;
+      border-radius: 8px;
+      background-color: #ffffff;
+      table-layout: fixed;
+    }
+
+    .run-row > * {
+      display: table-cell;
+      padding: 12px 7px;
+      vertical-align: top;
+    }
+
+    .run-row > *:first-child { padding-left: 14px; width: 34%; }
+    .run-row > *:nth-child(2) { width: 22%; }
+    .run-row > *:nth-child(3) { width: 18%; }
+    .run-row > *:last-child { padding-right: 14px; width: 26%; }
+
+    .plan-group { display: block; }
+    .plan-group .run-row-grouped:first-child { margin-bottom: 0; border-bottom: 0; }
+    .plan-group .run-row-grouped:last-child { background-color: #f9fbff; }
+
+    .plan-name-repeat {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .cell-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 12px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .plan-name,
+    .date-value {
+      font-size: 13px;
+      line-height: 18px;
+      color: #6b7280;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 18px;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 5px;
+      border-radius: 6px;
+      vertical-align: middle;
+    }
+
+    .s-success { background-color: #dcfce7; color: #15803d; }
+    .s-success .status-dot { background-color: #16a34a; }
+    .s-failed { background-color: #fee2e2; color: #dc2626; }
+    .s-failed .status-dot { background-color: #dc2626; }
+    .s-aborted { background-color: #fef9c3; color: #b45309; }
+    .s-aborted .status-dot { background-color: #d97706; }
+
+    .result-pills { display: block; }
+
+    .pill {
+      display: inline-block;
+      margin: 0 5px 5px 0;
+      padding: 4px 8px;
+      border: 1px solid;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 15px;
+    }
+
+    .pill strong { font-size: 13px; font-weight: 700; line-height: 15px; }
+    .pill-new { background-color: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .pill-active { background-color: #fef9c3; border-color: #fde68a; color: #b45309; }
+    .pill-resolved { background-color: #dcfce7; border-color: #bbf7d0; color: #15803d; }
+
+    .error-note {
+      font-size: 12px;
+      line-height: 17px;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .ticket-list { display: block; }
+
+    .model-block {
+      display: table;
+      width: 100%;
+      margin-bottom: 8px;
+      border: 1px solid #d9dee7;
+      border-radius: 8px;
+      background-color: #ffffff;
+      table-layout: fixed;
+    }
+
+    .model-label-cell {
+      display: table-cell;
+      width: 160px;
+      padding: 14px 16px;
+      border-right: 1px solid #d9dee7;
+      background-color: #f7f8fa;
+      vertical-align: top;
+    }
+
+    .model-label-tag {
+      margin-bottom: 2px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 14px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    .model-label-name {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 18px;
+      color: #6b7280;
+    }
+
+    .model-ticket-list {
+      display: table-cell;
+      vertical-align: top;
+    }
+
+    .ticket-row {
+      display: table;
+      width: 100%;
+      border-top: 1px solid #d9dee7;
+      table-layout: fixed;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .model-ticket-list .ticket-row:first-child { border-top: 0; }
+    .ticket-row > * { display: table-cell; padding: 11px 5px; vertical-align: middle; }
+    .ticket-row > *:first-child { width: 32px; padding-left: 20px; }
+    .ticket-row > *:last-child { width: 70px; padding-right: 20px; text-align: right; }
+
+    .ticket-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+
+      border: 1px solid #d9dee7;
+      border-radius: 50%;
+
+      text-align: center;
+      line-height: 18px;
+
+      font-size: 11px;
+      font-weight: 700;
+      color: #6b7280;
+
+      vertical-align: middle;
+    }
+
+    .t-assign {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
+
+    .open-link {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 14px;
+      color: #6b7280;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .closing {
+      padding-top: 24px;
+      border-top: 1px solid #d9dee7;
+    }
+
+    .closing p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 13px;
+      line-height: 20px;
+    }
+
+    .closing-sig {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #6b7280;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .email-shell { padding: 24px 8px 40px !important; }
+      .card-body { padding: 28px 20px 24px !important; }
+
+      .run-row,
+      .run-row > *,
+      .model-block,
+      .model-label-cell,
+      .model-ticket-list {
+        display: block !important;
+        width: auto !important;
+      }
+
+      .run-row > * { padding: 6px 14px !important; }
+      .run-row > *:first-child { padding-top: 12px !important; }
+      .run-row > *:last-child { padding-bottom: 12px !important; }
+
+      .model-label-cell {
+        border-right: 0 !important;
+        border-bottom: 1px solid #d9dee7 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="email-shell" data-od-id="email-shell">
+    <article class="email-card" data-od-id="daily-digest-card">
+      <div class="card-body">
+
+      <p class="subtext">Here is your daily digest based on your chosen notification preferences.</p>
+
+      <span class="teamspace-eyebrow">Teamspace</span>
+      <h2 class="teamspace-title"><%= teamspace %></h2>
+
+	
+<% for(const { project, ticketData, clashData } of notifications) { %>
+<section class="project-block">
+	<div class="project-head">
+		<span class="project-name"><%= project %></span>
 	</div>
-<% } %>
 
+  <% if (clashData?.length > 0) { %>
+  <div>
+    <h3 class="section-label">Clash plans executed</h3>
+    <div class="run-list">
+      <% for(const { planName, runs} of clashData) { %>
+        <div class="plan-group">
+          <% runs.forEach(({ status, stats, error, triggeredAt }, index) => { %>
+            <div class="run-row run-row-grouped">          
+                <div>
+                  <span class="cell-label">
+                    <% if (index === 0) { %>
+                      PLAN
+                    <% } %>
+                  </span>
+                  <div class="plan-name">
+                    <% if (index === 0) { %>
+                      <%= planName %>
+                    <% } %>
+                  </div>
+                </div>
+
+              <div>
+                <span class="cell-label">RAN AT</span>
+                <div class="date-value"><%= triggeredAt %></div>
+              </div>
+              <div>
+                <span class="cell-label">STATUS</span>
+                <% if (status === "completed") { %>
+                <span class="status-badge s-success"><span class="status-dot"></span><%= status %></span>
+                <% } else if (status === "failed") { %>
+                <span class="status-badge s-failed"><span class="status-dot"></span><%= status %></span>
+                <% } else if (status === "aborted") { %>
+                <span class="status-badge s-aborted"><span class="status-dot"></span><%= status %></span>
+                <% } %>
+              </div>
+              <div>
+                <span class="cell-label">RESULTS</span>
+                  <% if (stats && Object.keys(stats).length > 0) { %>
+                    <div class="result-pills">
+                      <span class="pill pill-new"><strong><%= stats.new %></strong>&nbsp;new</span>
+                      <span class="pill pill-active"><strong><%= stats.active %></strong>&nbsp;active</span>
+                      <span class="pill pill-resolved"><strong><%= stats.resolved %></strong>&nbsp;resolved</span>
+                    </div>
+                  <% } else { %>
+                    <p class="error-note"><%= error.reason %></p>
+                  <% } %>          
+              </div>
+            </div>  
+          <% }) %>
+        </div>
+      <% } %>	
+    </div>
+  </div>
+  <% } %>
+
+  <% if (ticketData?.length > 0) { %>
+      <% if (clashData?.length > 0) { %>
+      <hr class="section-divider" />  
+      <% } %>
+    
+    <h3 class="section-label">Ticket activity</h3>
+    <div class="run-list">
+    <% for(const { model, tickets } of ticketData) { %>
+    <div class="model-block">
+      <div class="model-label-cell">
+        <div class="model-label-tag">Model</div>
+        <div class="model-label-name"><%= model %></div>
+      </div>
+      <div class="model-ticket-list">
+
+        <% if(tickets.assigned?.count) { %>
+        <div class="ticket-row">
+          <span class="ticket-icon t-assign" aria-label="Assigned">+</span>
+          <a href="#">		
+            <%= tickets.assigned?.count %><%= tickets.assigned?.count===1? "ticket was" : "tickets were" %> assigned to you.
+          </a>
+          <a href="<%= domain %><%= tickets?.assigned?.link %>" class="open-link">OPEN ↗</a>
+        </div>
+        <% } %>
+
+        <% if(tickets.updated?.count) { %>
+        <div class="ticket-row">
+          <span class="ticket-icon" aria-label="Updated">↻</span>
+          <a href="#">		
+            <%= tickets.updated?.count %>
+              <%= tickets.updated?.count===1? "ticket" : "tickets" %> you are
+                associated with <%= tickets.updated?.count===1? "was" : "were" %>
+                updated.
+          </a>
+          <a class="open-link" href="<%= domain %><%= tickets?.updated?.link %>" target="_blank">OPEN ↗</a>
+        </div>
+        <% } %>
+
+        <% if(tickets.closed?.count) { %>
+        <div class="ticket-row">
+          <span class="ticket-icon" aria-label="Closed">✔</span>
+          <a href="#">		
+            <%= tickets.closed?.count %>
+              <%= tickets.closed?.count===1? "ticket" : "tickets" %> you are
+                associated with <%= tickets.closed?.count===1? "was" : "were" %>
+                closed.
+          </a>
+          <a class="open-link" href="<%= domain %><%= tickets?.closed?.link %>" target="_blank">OPEN ↗</a>
+        </div>
+        <% } %>
+
+      </div>
+    </div>
+    <% } %>	
+    </div>
+  <% } %>
+
+</section>
+<% } %>
+  </article>
+  </main>
+</body>
