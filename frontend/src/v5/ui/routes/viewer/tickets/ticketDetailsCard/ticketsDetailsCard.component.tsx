@@ -19,7 +19,7 @@ import { ArrowBack, CardContainer } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers, TicketsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -31,13 +31,15 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { BreakableText, ChevronLeft, ChevronRight } from './ticketDetailsCard.styles';
+import { BreakableText, ChevronLeft, ChevronRight, ExpandIcon } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { ViewerParams } from '../../../routes.constants';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
+import { CommentsExpanded } from '../ticketsForm/commentsPanel/commentsExpanded/commentsExpanded.component';
+import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 
 enum IndexChange {
 	PREV = -1,
@@ -53,6 +55,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	
+	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && template?.config.comments;
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 	const ticketsIds = groups.flatMap((group) => group.tickets.map((tckt) => tckt._id));
 	const currentIndex = ticketsIds.indexOf(ticketId);
@@ -60,6 +63,7 @@ export const TicketDetailsCard = () => {
 	const listLength = ticketsIds.length;
 	const ticketWasRemoved = currentIndex === -1;
 	const disableCycleButtons = listLength < 2;
+	const disableExpandButton = !template.config.comments;
 	const templateValidationSchema = getValidators(template);
 	const [,setTicketIdState] = useSearchParam('ticketId');
 	
@@ -85,6 +89,10 @@ export const TicketDetailsCard = () => {
 
 	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
 	const cycleToNextTicket = () => changeTicketIndex(IndexChange.NEXT);
+
+	const onClickExpandTicketMode = () => {
+		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
+	};
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
@@ -161,6 +169,11 @@ export const TicketDetailsCard = () => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
 
+
+	useEffect(() => {
+		TicketCommentsActionsDispatchers.resetUnsavedComments();
+	}, [ticketId]);
+
 	useEffect(() => () => {
 		onBlurHandler();
 		setTicketId.current();
@@ -188,7 +201,6 @@ export const TicketDetailsCard = () => {
 					</>
 				)}
 				{detailsView === TicketDetailsView.Form && (
-
 					<>
 						<CardHeader
 							icon={<ArrowBack onClick={goBack} />}
@@ -196,9 +208,12 @@ export const TicketDetailsCard = () => {
 							actions={<>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
+								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}><ExpandIcon /></CircleButton>
 							</>}
 						/>
-						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
+							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+						</ExpandableCard>
 					</>
 				)}
 			</FormProvider>

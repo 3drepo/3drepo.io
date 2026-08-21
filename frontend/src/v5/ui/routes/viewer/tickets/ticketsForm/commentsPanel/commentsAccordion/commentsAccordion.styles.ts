@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,34 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import ExpandArrowsIcon from '@assets/icons/outlined/expand_arrows-outlined.svg';
 import styled from 'styled-components';
+import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
+import { Comments } from '../commentsList/commentsList.styles';
 
-const CommonChevronStyle = styled(ChevronIcon)`
+export const Accordion = styled(AccordionBase)`
 	&& {
-		height: 10px;
+		.MuiAccordionDetails-root {
+			padding: 0;
+			${Comments} {
+				min-height: 400px;
+			}
+
+			& > :not(:first-child) {
+				margin-top: 0;
+			}
+		}
 	}
-`;
-
-export const ChevronLeft = styled(CommonChevronStyle)`
-	transform: rotate(90deg);
-	margin-right: 2px;
-`;
-
-export const ChevronRight = styled(CommonChevronStyle)`
-	transform: rotate(-90deg);
-	margin-left: 2px;
-`;
-
-export const ExpandIcon = styled(ExpandArrowsIcon)`
-	transform: rotate(-45deg);
-	padding: 5px;
-`;
-
-export const BreakableText = styled.div`
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 `;

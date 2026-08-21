@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,34 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import ExpandArrowsIcon from '@assets/icons/outlined/expand_arrows-outlined.svg';
 import styled from 'styled-components';
+import { CARD_WIDTH } from '../card.styles';
 
-const CommonChevronStyle = styled(ChevronIcon)`
-	&& {
-		height: 10px;
+export const TRANSITION_DURATION = 400;
+export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+	transition: width ${TRANSITION_DURATION}ms ease-in-out;
+	width: ${({ $isExpanded }) => $isExpanded ? `${CARD_WIDTH * 2}px` : `${CARD_WIDTH}px`};
+
+	> * {
+		width: ${CARD_WIDTH}px;
+		flex-shrink: 0;
 	}
 `;
 
-export const ChevronLeft = styled(CommonChevronStyle)`
-	transform: rotate(90deg);
-	margin-right: 2px;
-`;
-
-export const ChevronRight = styled(CommonChevronStyle)`
-	transform: rotate(-90deg);
-	margin-left: 2px;
-`;
-
-export const ExpandIcon = styled(ExpandArrowsIcon)`
-	transform: rotate(-45deg);
-	padding: 5px;
-`;
-
-export const BreakableText = styled.div`
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+export const MainColumn = styled.div`
+	overflow-y: overlay;
 `;
