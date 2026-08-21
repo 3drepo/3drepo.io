@@ -304,7 +304,7 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 
 		for (const node of nodesToDeleteChunk) {
 			// eslint-disable-next-line no-underscore-dangle
-			blobRefNamesSet.add(node._blobRef.buffer.name);
+			if (node._blobRef) blobRefNamesSet.add(node._blobRef.buffer.name);
 		}
 
 		// eslint-disable-next-line no-await-in-loop
