@@ -140,10 +140,10 @@ export const getSubModelsRevisions = (teamspace, modelId, revision) => {
  * @param modelId
  */
 export const getModelMaps = (teamspace, projectId, modelId, isFederation) => {
-	const modelType = (isFederation) => (isFederation ? 'federations' : 'containers');
+	const modelType = isFederation ? 'federations' : 'containers';
 
 	return apiV5.get(
-		`teamspaces/${teamspace}/projects/${projectId}/${modelType(isFederation)}/${modelId}/maps`
+		`teamspaces/${teamspace}/projects/${projectId}/${modelType}/${modelId}/maps`
 	) as Promise<AxiosResponse<GetModelMapsResponse>>;
 };
 

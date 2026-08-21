@@ -2109,9 +2109,9 @@ export class UnityUtil {
 	 */
 	public static addMapSource(source: string, height?: number) {
 		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
-				source, 
-				height: (height ?? 0) * 0.001
-			})
+			source, 
+			height: (height ?? 0) * 0.001,
+		}),
 		);
 	}
 
