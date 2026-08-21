@@ -1249,7 +1249,7 @@ const testProcessClashResults = () => {
 						project: UUIDToString(project),
 						planId: currentRun.plan._id,
 						runId: corId,
-					});
+					}, undefined, true);
 			});
 		});
 	});

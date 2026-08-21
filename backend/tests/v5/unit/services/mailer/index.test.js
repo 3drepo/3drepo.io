@@ -217,6 +217,13 @@ const testSendSystemEmail = () => {
 				.rejects.toEqual(templates.unknown);
 		});
 
+		test('should suppress the error if sendSystemMail fails and suppressErrors is true', async () => {
+			sendMailMock.mockRejectedValueOnce(templates.unknown);
+
+			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments, true))
+				.resolves.not.toThrow();
+		});
+
 		test('should throw error if the template name is not recognised', async () => {
 			await expect(Mailer.sendSystemEmail(generateRandomString(), data, attachments))
 				.rejects.toEqual(templates.unknown);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import byteSize from 'byte-size';
-import { formatDate, formatMessage, formatRelativeTime } from '../services/intl';
+import { formatDate, formatMessage, formatRelativeTime, getIntl } from '../services/intl';
 
 type ByteSizeType = {
 	value: number,
@@ -57,6 +57,18 @@ export const formatSimpleDate = (date) => formatDate(date, { // DD/MM/YYYY
 	month: 'numeric',
 	year: 'numeric',
 });
+
+export const getLocaleDateFormat = (): string => {
+	const { locale } = getIntl();
+	const parts = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+		.formatToParts(new Date(2000, 0, 15));
+	return parts.map(({ type, value }) => {
+		if (type === 'day') return 'DD';
+		if (type === 'month') return 'MM';
+		if (type === 'year') return 'YYYY';
+		return value;
+	}).join('');
+};
 
 export const formatDateTime = (date) => formatDate(date, { // DD/MM/YYYY hh:mm
 	hour: 'numeric',

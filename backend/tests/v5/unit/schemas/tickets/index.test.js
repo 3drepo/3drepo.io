@@ -650,6 +650,10 @@ const testAllProperties = () => {
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
 			['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
+			['Many Of min length', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], []],
+			['Tags', { type: propTypes.TAGS }, ['a', 'b']],
+			['Tags max length', { type: propTypes.TAGS }, [generateRandomString(120)], [generateRandomString(121)]],
+			['Tags min length', { type: propTypes.TAGS }, ['a'], []],
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
 			['Image List', { type: propTypes.IMAGE_LIST }, times(5, FS.readFileSync(image, { encoding: 'base64' })), generateRandomString()],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
@@ -688,6 +692,7 @@ const testAllProperties = () => {
 			['Coordinates (unset)', { type: propTypes.COORDS }, null],
 			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
 			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
+			['Tags (unset)', { type: propTypes.TAGS }, null],
 			['Image (unset)', { type: propTypes.IMAGE }, null],
 			['Image List (unset)', { type: propTypes.IMAGE_LIST }, null],
 		];
@@ -1211,7 +1216,7 @@ const testValidateTicket = () => {
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
-		test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+		test(`[New ticket] Should reject the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
 			const propName = generateRandomString();
 			const template = {
 				_id: generateUUID(),
@@ -1232,10 +1237,10 @@ const testValidateTicket = () => {
 				modules: {},
 			};
 			await expect(validateTicket(teamspace, project, model, template, input))
-				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+				.rejects.not.toBeUndefined();
 		});
 
-		test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+		test(`[Update ticket] Should reject the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
 			const propName = generateRandomString();
 			const template = {
 				_id: generateUUID(),
@@ -1263,14 +1268,55 @@ const testValidateTicket = () => {
 				},
 			};
 
-			const expected = {
+			await expect(validateTicket(teamspace, project, model, template, input, old))
+				.rejects.not.toBeUndefined();
+		});
+
+		test(`Should strip duplicated values from a ${propTypes.MANY_OF} property`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: ['a', 'b'],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
 				properties: {
-					[propName]: null,
+					[propName]: ['a', 'b', 'a'],
 				},
 				modules: {},
 			};
-			await expect(validateTicket(teamspace, project, model, template, input, old))
-				.resolves.toEqual(expected);
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: { [propName]: ['a', 'b'] }, modules: {} });
+		});
+
+		test(`Should strip duplicated values from a ${propTypes.TAGS} property`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.TAGS,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: ['a', 'b', 'a'],
+				},
+				modules: {},
+			};
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: { [propName]: ['a', 'b'] }, modules: {} });
 		});
 	});
 };

@@ -16,8 +16,8 @@
  */
 
 import { uniqBy, values } from 'lodash';
-import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api/default';
+import linkify from './linkify';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 import { getUserFullName } from './user.helpers';
