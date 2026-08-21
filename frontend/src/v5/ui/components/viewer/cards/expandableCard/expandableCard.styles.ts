@@ -19,10 +19,10 @@ import styled from 'styled-components';
 import { CARD_WIDTH } from '../card.styles';
 
 export const TRANSITION_DURATION = 400;
-export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean, $reverse: boolean }>`
+export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
 	height: 100%;
 	display: flex;
-	flex-direction: ${({ $reverse }) => $reverse ? 'row-reverse' : 'row'};
+	flex-direction: row;
 	overflow: hidden;
 	transition: width ${TRANSITION_DURATION}ms ease-in-out;
 	width: ${({ $isExpanded }) => $isExpanded ? `${CARD_WIDTH * 2}px` : `${CARD_WIDTH}px`};

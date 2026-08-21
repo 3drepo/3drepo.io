@@ -21,11 +21,10 @@ import { useEffect, useState } from 'react';
 type IExpandableCard = React.HTMLAttributes<HTMLDivElement> & {
 	ExpandedComponent: React.ReactNode;
 	isExpanded?: boolean;
-	direction?: 'left' | 'right';
 	children: React.ReactNode;
 };
 
-export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false, direction = 'right', ...rest }: IExpandableCard) => {
+export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false, ...rest }: IExpandableCard) => {
 	const [shouldRenderExpanded, setShouldRenderExpanded] = useState(isExpanded);
 
 	useEffect(() => {
@@ -39,7 +38,7 @@ export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false
 	}, [isExpanded]);
 
 	return (
-		<ExpandableCardContainer $reverse={direction === 'left'} $isExpanded={isExpanded} {...rest}>
+		<ExpandableCardContainer $isExpanded={isExpanded} {...rest}>
 			<MainColumn> {children} </MainColumn>
 			{shouldRenderExpanded && ExpandedComponent}
 		</ExpandableCardContainer>

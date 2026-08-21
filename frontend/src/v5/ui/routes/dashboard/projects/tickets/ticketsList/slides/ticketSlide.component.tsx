@@ -124,7 +124,7 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
 
 	return (
-		<ExpandableCard isExpanded={isExpanded} direction="left" ExpandedComponent={<CommentsExpanded />}>
+		<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
 			<FormProvider {...formData}>
 				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 			</FormProvider>
