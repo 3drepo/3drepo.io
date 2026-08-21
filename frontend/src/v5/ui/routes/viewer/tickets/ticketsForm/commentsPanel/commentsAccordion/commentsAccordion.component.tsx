@@ -18,17 +18,19 @@ import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { Accordion } from './commentsAccordion.styles';
 import { CommentsList } from '../commentsList/commentsList.component';
+import { TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type CommentsAccordionProps = {
 	scrollPanelIntoView?: (event, isExpanding) => void,
 };
 export const CommentsAccordion = ({ scrollPanelIntoView }: CommentsAccordionProps) => {
-
+	const hasUnsavedComments = TicketCommentsHooksSelectors.selectUnsavedComments().length > 0;
 	return (
 		<Accordion
 			title={formatMessage({ id: 'customTicket.comments.title', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
 			onChange={scrollPanelIntoView}
+			defaultExpanded={hasUnsavedComments}
 		>
 			<CommentsList />
 		</Accordion>
