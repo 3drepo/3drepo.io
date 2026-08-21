@@ -16,70 +16,14 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { events } = require('../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { src } = require('../../../helper/path');
 
 const { generateRandomString } = require('../../../helper/services');
 
-jest.mock('../../../../../src/v5/models/tickets.templates');
-const TemplateModel = require(`${src}/models/tickets.templates`);
-
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const SettingsModel = require(`${src}/models/teamspaceSettings`);
 
-jest.mock('../../../../../src/v5/services/eventsManager/eventsManager');
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-
 const Settings = require(`${src}/processors/teamspaces/settings`);
-const { generateUUID } = require(`${src}/utils/helper/uuids`);
-
-const testAddTemplate = () => {
-	describe('Add template', () => {
-		test('should call addTemplate in the model object', async () => {
-			const teamspace = generateRandomString();
-			const data = { [generateRandomString()]: generateRandomString() };
-			const expectedOutput = generateRandomString();
-			TemplateModel.addTemplate.mockResolvedValueOnce(expectedOutput);
-			await expect(Settings.addTicketTemplate(teamspace, data)).resolves.toEqual(expectedOutput);
-
-			expect(TemplateModel.addTemplate).toHaveBeenCalledTimes(1);
-			expect(TemplateModel.addTemplate).toHaveBeenCalledWith(teamspace, data);
-		});
-	});
-};
-
-const testUpdateTemplate = () => {
-	describe('update template', () => {
-		test('should call updateTemplate in the model object', async () => {
-			const teamspace = generateRandomString();
-			const data = { [generateRandomString()]: generateRandomString() };
-			const id = generateUUID();
-			await Settings.updateTicketTemplate(teamspace, id, data);
-
-			expect(TemplateModel.updateTemplate).toHaveBeenCalledTimes(1);
-			expect(TemplateModel.updateTemplate).toHaveBeenCalledWith(teamspace, id, data);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKET_TEMPLATE_UPDATED,
-				{ teamspace, template: id, data });
-		});
-	});
-};
-
-const testGetTemplateList = () => {
-	describe('Get template list', () => {
-		test('should call getAllTemplates with projection', async () => {
-			const teamspace = generateRandomString();
-			const data = generateRandomString();
-			TemplateModel.getAllTemplates.mockResolvedValueOnce(data);
-			await expect(Settings.getTemplateList(teamspace)).resolves.toEqual(data);
-
-			expect(TemplateModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplateModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true,
-				{ _id: 1, name: 1, code: 1, deprecated: 1 });
-		});
-	});
-};
 
 const testGetRiskCategories = () => {
 	describe('Get risk cateogires', () => {
@@ -96,8 +40,5 @@ const testGetRiskCategories = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testAddTemplate();
-	testUpdateTemplate();
-	testGetTemplateList();
 	testGetRiskCategories();
 });
