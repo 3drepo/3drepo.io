@@ -21,19 +21,16 @@ import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { AccordionSummary } from '@mui/material';
 import { ExpandedContainer } from './commentsExpanded.styles';
 import { FormattedMessage } from 'react-intl';
-export const CommentsExpanded = () => {
-
-	return (
-		<ExpandedContainer>
-			<AccordionSummary expandIcon={null}>
-				<IconContainer>
-					<CommentIcon />
-				</IconContainer>
-				<TitleContainer>
-					<FormattedMessage id="commentsExpanded.title" defaultMessage="Comments" />
-				</TitleContainer>
-			</AccordionSummary>
-			<CommentsList />
-		</ExpandedContainer>
-	);
-};
+export const CommentsExpanded = () => (
+	<ExpandedContainer>
+		<AccordionSummary expandIcon={null}>
+			<IconContainer>
+				<CommentIcon />
+			</IconContainer>
+			<TitleContainer>
+				<FormattedMessage id="commentsExpanded.title" defaultMessage="Comments" />
+			</TitleContainer>
+		</AccordionSummary>
+		<CommentsList />
+	</ExpandedContainer>
+);

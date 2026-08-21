@@ -20,7 +20,7 @@ import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } fr
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
-import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, normalizeTicketAssignees, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { selectTicketById } from '@/v5/store/tickets/tickets.selectors';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -28,7 +28,9 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { CommentsExpanded } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentsExpanded/commentsExpanded.component';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
+import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, isEqual, set } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -49,6 +51,7 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	const templateValidationSchema = getValidators(template);
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const ticketData = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
+	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && template?.config?.comments;
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
@@ -121,8 +124,10 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
 
 	return (
-		<FormProvider {...formData}>
-			<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
-		</FormProvider>
+		<ExpandableCard isExpanded={isExpanded} direction="left" ExpandedComponent={<CommentsExpanded />}>
+			<FormProvider {...formData}>
+				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+			</FormProvider>
+		</ExpandableCard>
 	);
 };

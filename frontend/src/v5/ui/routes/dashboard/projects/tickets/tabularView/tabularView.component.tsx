@@ -61,9 +61,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { SortedTableComponent } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../../../../components/tickets/ticketsGroupBy.helper';
-import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
-import { CommentsExpanded } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentsExpanded/commentsExpanded.component';
 import { ExpandIcon } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketDetailsCard.styles';
+import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -432,7 +431,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
 	const isSidebarOpen = !!ticketId && haveValidContainerOrFederation;
 	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && isSidebarOpen && selectedTemplate?.config?.comments;
-	const disableExpandButton = !selectedTemplate?.config?.comments;
+	const disableExpandButton = !selectedTemplate?.config?.comments || isNewTicket;
 
 	const onClickExpandTicketMode = () => {
 		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
@@ -463,9 +462,9 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 				</FlexContainer>
 			</SlidePanelHeader>
 			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-				<ExpandableCard isExpanded={isExpanded} direction="left" ExpandedComponent={<CommentsExpanded />}>
-					{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
-					{isNewTicket && (
+				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
+				{isNewTicket && (
+					<ExpandableCard ExpandedComponent={null}>
 						<NewTicketSlide
 							presetValue={presetValue}
 							template={selectedTemplate}
@@ -473,8 +472,8 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 							onSave={onSaveTicket}
 							onDirtyStateChange={setIsNewTicketDirty}
 						/>
-					)}
-				</ExpandableCard>
+					</ExpandableCard>
+				)}
 			</TicketContextComponent>
 		</SidePanel>
 	);
