@@ -20,7 +20,6 @@
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 
 describe("JSON Assets", function () {
@@ -34,7 +33,7 @@ describe("JSON Assets", function () {
 		const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 		const revId = "b74ba13b-71db-4fcc-9ff8-7f640aa3dec2";
 
-		before(async function() {
+		beforeAll(async function() {
 			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
@@ -48,7 +47,7 @@ describe("JSON Assets", function () {
 
 		});
 
-		after(function(done) {
+		afterAll(function(done) {
 			purgeQueues().then(() => {
 				server.close(function() {
 					console.log("API test server is closed");
@@ -62,9 +61,9 @@ describe("JSON Assets", function () {
 		it("get ID map should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/master/head/idMap.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(res.body.mainTree.idMap).to.exist;
-					expect(Object.keys(res.body.mainTree.idMap)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(res.body.mainTree.idMap).toBeTruthy();
+					expect(Object.keys(res.body.mainTree.idMap)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -72,9 +71,9 @@ describe("JSON Assets", function () {
 		it("get ID map with revision should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/${revId}/idMap.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(res.body.mainTree.idMap).to.exist;
-					expect(Object.keys(res.body.mainTree.idMap)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(res.body.mainTree.idMap).toBeTruthy();
+					expect(Object.keys(res.body.mainTree.idMap)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -82,8 +81,8 @@ describe("JSON Assets", function () {
 		it("get ID to meshes should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/master/head/idToMeshes.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(Object.keys(res.body.mainTree)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(Object.keys(res.body.mainTree)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -91,8 +90,8 @@ describe("JSON Assets", function () {
 		it("get ID to meshes with revision should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/${revId}/idToMeshes.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(Object.keys(res.body.mainTree)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(Object.keys(res.body.mainTree)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -100,9 +99,9 @@ describe("JSON Assets", function () {
 		it("get tree paths should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/master/head/tree_path.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(res.body.mainTree.idToPath).to.exist;
-					expect(Object.keys(res.body.mainTree.idToPath)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(res.body.mainTree.idToPath).toBeTruthy();
+					expect(Object.keys(res.body.mainTree.idToPath)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -110,9 +109,9 @@ describe("JSON Assets", function () {
 		it("get tree paths with revision should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/${revId}/tree_path.json`)
 				.expect(200, function(err, res) {
-					expect(res.body.mainTree).to.exist;
-					expect(res.body.mainTree.idToPath).to.exist;
-					expect(Object.keys(res.body.mainTree.idToPath)).to.have.lengthOf(idLength);
+					expect(res.body.mainTree).toBeTruthy();
+					expect(res.body.mainTree.idToPath).toBeTruthy();
+					expect(Object.keys(res.body.mainTree.idToPath)).toHaveLength(idLength);
 					done(err);
 				});
 		});
@@ -125,7 +124,7 @@ describe("JSON Assets", function () {
 		const revId = "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9";
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
-		before(async function() {
+		beforeAll(async function() {
 			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
@@ -140,7 +139,7 @@ describe("JSON Assets", function () {
 		});
 
 
-		after(function(done) {
+		afterAll(function(done) {
 			purgeQueues().then(() => {
 				server.close(function() {
 					console.log("API test server is closed");
@@ -218,7 +217,7 @@ describe("JSON Assets", function () {
 		it("get tree should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/master/head/fulltree.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenFullTree);
+					expect(res.body).toEqual(goldenFullTree);
 					done(err);
 				});
 		});
@@ -226,7 +225,7 @@ describe("JSON Assets", function () {
 		it("get tree with revision should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/${revId}/fulltree.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenFullTree);
+					expect(res.body).toEqual(goldenFullTree);
 					done(err);
 				});
 		});
@@ -291,7 +290,7 @@ describe("JSON Assets", function () {
 		it("get tree from federation should succeed", function(done) {
 			agent.get(`/${username}/${existingFed}/revision/master/head/fulltree.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenFedTree);
+					expect(res.body).toEqual(goldenFedTree);
 					done(err);
 				});
 		});
@@ -304,7 +303,7 @@ describe("JSON Assets", function () {
 		const revId = "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9";
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
-		before(async function() {
+		beforeAll(async function() {
 			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
@@ -318,7 +317,7 @@ describe("JSON Assets", function () {
 
 		});
 
-		after(function(done) {
+		afterAll(function(done) {
 			purgeQueues().then(() => {
 				server.close(function() {
 					console.log("API test server is closed");
@@ -332,7 +331,7 @@ describe("JSON Assets", function () {
 		it("get model properties should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/master/head/modelProperties.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenModelProps);
+					expect(res.body).toEqual(goldenModelProps);
 					done(err);
 				});
 		});
@@ -340,7 +339,7 @@ describe("JSON Assets", function () {
 		it("get model properties with revision should succeed", function(done) {
 			agent.get(`/${username}/${existingModel}/revision/${revId}/modelProperties.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenModelProps);
+					expect(res.body).toEqual(goldenModelProps);
 					done(err);
 				});
 		});
@@ -370,7 +369,7 @@ describe("JSON Assets", function () {
 		it("get model properties of federation should succeed", function(done) {
 			agent.get(`/${username}/${existingFed}/revision/master/head/modelProperties.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenFedProps);
+					expect(res.body).toEqual(goldenFedProps);
 					done(err);
 				});
 		});
@@ -381,7 +380,7 @@ describe("JSON Assets", function () {
 		const password = "project_username";
 		const existingModel = "58de3562-6755-44cf-90f4-860b20bb73b5";
 
-		before(async function() {
+		beforeAll(async function() {
 			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
@@ -395,7 +394,7 @@ describe("JSON Assets", function () {
 
 		});
 
-		after(function(done) {
+		afterAll(function(done) {
 			purgeQueues().then(() => {
 				server.close(function() {
 					console.log("API test server is closed");
@@ -408,9 +407,9 @@ describe("JSON Assets", function () {
 
 			agent.get(`/${username}/${existingModel}/${mpcId}.json.mpc`)
 				.expect(200, function(err, res) {
-					expect(res.body.numberOfIDs).to.equal(1);
-					expect(res.body.maxGeoCount).to.equal(1);
-					expect(res.body.mapping).to.exist;
+					expect(res.body.numberOfIDs).toBe(1);
+					expect(res.body.maxGeoCount).toBe(1);
+					expect(res.body.mapping).toBeTruthy();
 					done(err);
 				});
 		});

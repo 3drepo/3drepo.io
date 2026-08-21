@@ -19,7 +19,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const { cloneDeep, pick } = require("lodash");
@@ -37,7 +36,7 @@ describe("Sequences", function () {
 	// This user is still member of metaTest but has no access to the model
 	const noPermissionApiKey = "c434c0d7cce73ef5bc84168147632662";
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -52,7 +51,7 @@ describe("Sequences", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -169,14 +168,14 @@ describe("Sequences", function () {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
-			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+			expect(sortById(res.body.activities)).toEqual(sortById(activities.activities))
 		});
 
 		it("should suceed as a viewer", async() => {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities?key=${viewerApiKey}`)
 				.expect(200);
 
-			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+			expect(sortById(res.body.activities)).toEqual(sortById(activities.activities))
 		});
 
 		it("should fail as a member without access to the model ", async() => {
@@ -191,14 +190,14 @@ describe("Sequences", function () {
 			const res = await agent.get(`/${username}/${model}/sequences/invalidSequenceId/activities/${activityId}`)
 				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
-			expect(res.body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+			expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 		});
 
 		it("using invalid activity ID should fail", async function() {
 			const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities/invalidActivityId`)
 				.expect(responseCodes.ACTIVITY_NOT_FOUND.status)
 
-			expect(res.body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+			expect(res.body.value).toBe(responseCodes.ACTIVITY_NOT_FOUND.value);
 		});
 
 		it("should succeed", async function() {
@@ -217,7 +216,7 @@ describe("Sequences", function () {
 				"data" : [{"value":"Testing","key":"Name"},{"value":"PLANNED","key":"Status"},{"value":"No","key":"Is Compound Task"},{"value":"ST003560","key":"Code"},{"value":"Fri May 29 2020 10:00:00 GMT+0100 (British Summer Time)","key":"Planned Start"},{"value":"WORK","key":"Type"},{"value":"No Constraint","key":"Constraint"},{"value":"Mon Jun 01 2020 17:00:00 GMT+0100 (British Summer Time)","key":"Planned Finish"},{"value":0,"key":"Percentage Complete"},{"value":"Unknown","key":"Physical Volume Unity"},{"value":0,"key":"Estimated Rate"},{"value":0,"key":"Planned Physical Volume"},{"value":0,"key":"Actual Physical Volume"},{"value":0,"key":"Remaining Physical Volume"},{"value":0,"key":"Budgeted Cost"},{"value":0,"key":"Actual Cost"}]
 			};
 
-			expect(res.body).to.be.deep.equal(existingActivity);
+			expect(res.body).toEqual(existingActivity);
 		});
 
 		it("should succeed as a viewer", async function() {
@@ -243,7 +242,7 @@ describe("Sequences", function () {
 				.send(createPayload(activity))
 				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
-			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+			expect(body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 		});
 
 		it("should fail with wrong activity schema", async() => {
@@ -254,7 +253,7 @@ describe("Sequences", function () {
 				.send(createPayload(wrongActivity))
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+			expect(body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 		});
 
 		it("should fail as viewer", async() => {
@@ -276,7 +275,7 @@ describe("Sequences", function () {
 				.send(createPayload(activityWithInvalidStart))
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+			expect(body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 		});
 
 		it("should fail if endDate in seconds", async() => {
@@ -286,7 +285,7 @@ describe("Sequences", function () {
 				.send(createPayload(activityWithInvalidEnd))
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-			expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+			expect(body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 		});
 
 		it("should be created succesfully", async() => {
@@ -308,7 +307,7 @@ describe("Sequences", function () {
 			activityId = newActivityReturned.id;
 
 			const newActivity =  {...pick(activity, "endDate", "startDate", "name"), id: activityId};
-			expect(newActivityReturned).to.be.deep.equal(newActivity);
+			expect(newActivityReturned).toEqual(newActivity);
 		});
 
 		it("should be reflected when fetching the detail of the activity", async() => {
@@ -317,7 +316,7 @@ describe("Sequences", function () {
 
 			const newActivity = {...cloneDeep(activity), sequenceId, _id: activityId};
 
-			expect(res.body).to.be.deep.equal(newActivity);
+			expect(res.body).toEqual(newActivity);
 		})
 
 	});
@@ -329,7 +328,7 @@ describe("Sequences", function () {
 					.send(activity)
 					.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
-				expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+				expect(body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 			});
 
 			it("should fail with made up activity id", async() => {
@@ -337,7 +336,7 @@ describe("Sequences", function () {
 					.send(activity)
 					.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
 
-				expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+				expect(body.value).toBe(responseCodes.ACTIVITY_NOT_FOUND.value);
 			});
 
 			it("should fail with wrong activity schema", async() => {
@@ -347,7 +346,7 @@ describe("Sequences", function () {
 					.send(wrongActivity)
 					.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-				expect(body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 			});
 
 			it("should fail if its done by a viewer", async() => {
@@ -381,7 +380,7 @@ describe("Sequences", function () {
 
 				const newActivity = {...cloneDeep(activity), sequenceId, _id: activityId, name: "updated name"};
 
-				expect(res.body).to.be.deep.equal(newActivity);
+				expect(res.body).toEqual(newActivity);
 			})
 
 			it("should be reflected when fetching the activity list", async() => {
@@ -393,7 +392,7 @@ describe("Sequences", function () {
 				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 					.expect(200);
 
-				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
+				expect(sortById(res.body.activities)).toEqual(sortById(newActivitiesList.activities))
 			});
 		});
 
@@ -406,7 +405,7 @@ describe("Sequences", function () {
 					.send(activityChanges)
 					.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-				expect(res.body.value).to.be.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 			});
 
 
@@ -429,7 +428,7 @@ describe("Sequences", function () {
 				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 					.expect(200);
 
-				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
+				expect(sortById(res.body.activities)).toEqual(sortById(newActivitiesList.activities))
 			});
 		})
 	});
@@ -440,14 +439,14 @@ describe("Sequences", function () {
 				.send(activity)
 				.expect(responseCodes.SEQUENCE_NOT_FOUND.status);
 
-			expect(body.value).to.be.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+			expect(body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 		});
 
 		it("should fail with made up activity id", async() => {
 			const { body } = await agent.delete(`/${username}/${model}/sequences/${sequenceId}/activities/non_existent_actity`)
 				.expect(responseCodes.ACTIVITY_NOT_FOUND.status);
 
-			expect(body.value).to.be.equal(responseCodes.ACTIVITY_NOT_FOUND.value);
+			expect(body.value).toBe(responseCodes.ACTIVITY_NOT_FOUND.value);
 		});
 
 		it("should fail as a viewer", async() => {
@@ -469,7 +468,7 @@ describe("Sequences", function () {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
-			expect(sortById(res.body.activities)).to.deep.equal(sortById(activities.activities))
+			expect(sortById(res.body.activities)).toEqual(sortById(activities.activities))
 		});
 
 		it("which has descendants should succeed",  async() => {
@@ -484,7 +483,7 @@ describe("Sequences", function () {
 			let choppedActivities = cloneDeep(activities);
 			choppedActivities.activities[0].subActivities.splice(1,1);
 
-			expect(sortById(res.body.activities)).to.deep.equal(sortById(choppedActivities.activities))
+			expect(sortById(res.body.activities)).toEqual(sortById(choppedActivities.activities))
 		})
 
 		it("which has descendants should fail when getting the details of its descendants", async() => {
@@ -515,7 +514,7 @@ describe("Sequences", function () {
 			let	res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 				.expect(200);
 
-			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(bulkActivities.activities)))
+			expect(sortByName(pruneActivities(res.body.activities))).toEqual(sortByName(pruneActivities(bulkActivities.activities)))
 		});
 
 		it("to add to the current activities array should work", async() => {
@@ -529,7 +528,7 @@ describe("Sequences", function () {
 				.expect(200);
 
 			const allActivities = bulkActivities.activities.concat(addedActivities.activities);
-			expect(sortByName(pruneActivities(res.body.activities))).to.deep.equal(sortByName(pruneActivities(allActivities)))
+			expect(sortByName(pruneActivities(res.body.activities))).toEqual(sortByName(pruneActivities(allActivities)))
 		});
 	})
 });
