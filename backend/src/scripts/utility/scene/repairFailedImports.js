@@ -51,6 +51,8 @@ const { deleteMany, findCursor } = require(`${v5Path}/handler/db`);
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
+const BATCH_DELETE_SIZE = 100000;
+
 const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
 const getUUIDFromKey = (key) => new Mongo.Binary(Buffer.from(key, 'latin1'), 3);
 
@@ -285,22 +287,36 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 
 	logger.logInfo(`\t\tRemoving ${idsToDelete.length} orphaned nodes from ${container}/${UUIDToString(revision)}`);
 
-	// Get the nodes to delete with their blob references
-	const nodesToDelete = await getNodesBySharedIds(
-		teamspace,
-		project,
-		container,
-		revision,
-		idsToDelete,
-		{ _blobRef: 1 },
-	);
-	// eslint-disable-next-line no-underscore-dangle
-	const blobRefNames = [...new Set(nodesToDelete.filter((n) => n._blobRef).map((n) => n._blobRef.buffer.name))];
+	const blobRefNamesSet = new Set();
 
-	await Promise.all([
-		deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsToDelete } }),
-		removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefNames } }),
-	]);
+	for (let start = 0; start < idsToDelete.length; start += BATCH_DELETE_SIZE) {
+		const idsChunk = idsToDelete.slice(start, start + BATCH_DELETE_SIZE);
+
+		// eslint-disable-next-line no-await-in-loop
+		const nodesToDeleteChunk = await getNodesBySharedIds(
+			teamspace,
+			project,
+			container,
+			revision,
+			idsChunk,
+			{ _blobRef: 1 },
+		);
+
+		for (const node of nodesToDeleteChunk) {
+			// eslint-disable-next-line no-underscore-dangle
+			blobRefNamesSet.add(node._blobRef.buffer.name);
+		}
+
+		// eslint-disable-next-line no-await-in-loop
+		await deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsChunk } });
+	}
+
+	const blobRefNames = [...blobRefNamesSet];
+	for (let start = 0; start < blobRefNames.length; start += BATCH_DELETE_SIZE) {
+		const blobRefChunk = blobRefNames.slice(start, start + BATCH_DELETE_SIZE);
+		// eslint-disable-next-line no-await-in-loop
+		await removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefChunk } });
+	}
 };
 
 const processRevision = async (teamspace, project, container, revision) => {
