@@ -44,7 +44,7 @@ export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DPr
 			selected={isSelected}
 			style={{ transform: `translate(${position[0]}px, ${position[1]}px) scale(${0.333 / scale})` }}
 		>
-			<Pin pinIcon={pinTypeToPinIcon(type)} selected={isSelected} />
+			<Pin pinIcon={pinTypeToPinIcon(type)} selected={isSelected} colour={colour.map((v) => v * 255) as any} />
 		</PinContainer>
 	);
 };

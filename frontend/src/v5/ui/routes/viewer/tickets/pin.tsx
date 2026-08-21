@@ -22,6 +22,8 @@ import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
 import { PinIcon } from '@/v5/store/tickets/tickets.types';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getEmbeddedPin } from './pinIcons.helper';
+import { getTintFilter } from '@/v5/helpers/colors.helper';
+import { RgbArray } from '@/v5/helpers/colors.helper';
 
 const PinPerType = 
 {
@@ -31,7 +33,7 @@ const PinPerType =
 	// 'MARKER': MarkerPin,
 };
 
-export const Pin = ({ pinIcon, selected = false }: { pinIcon: PinIcon | string, selected?: boolean }) => {
+export const Pin = ({ pinIcon, selected = false, colour }: { pinIcon: PinIcon | string, selected?: boolean, colour?: RgbArray }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const BuiltInIcon = PinPerType[pinIcon];
 	const containerRef = useRef<HTMLSpanElement>(null);
@@ -49,5 +51,10 @@ export const Pin = ({ pinIcon, selected = false }: { pinIcon: PinIcon | string, 
 	}, [teamspace, pinIcon, selected]);
 
 	if (BuiltInIcon) return (<BuiltInIcon />);
-	return (<span ref={containerRef} />);
+
+	// Custom (backend) pin icons are tinted with a CSS filter instead of
+	// relying on internal SVG classes/ids, so they don't need to be
+	// hand-authored with specific colourable parts.
+	const style = colour ? { filter: getTintFilter(colour) } : undefined;
+	return (<span ref={containerRef} style={style} />);
 };
