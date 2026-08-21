@@ -17,7 +17,7 @@
 
 import { useContext, useEffect } from 'react';
 import { CompareActionsDispatchers, ContainersActionsDispatchers, DrawingsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ContainersHooksSelectors, DrawingsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UnityUtil } from '@/globals/unity-util';
 import { Calibration3DHandler } from './calibrationStep/calibration3DHandler/calibration3DHandler.component';

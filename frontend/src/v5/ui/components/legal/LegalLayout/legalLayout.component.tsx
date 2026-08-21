@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router';
 
 import { LegalContent, Container } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';

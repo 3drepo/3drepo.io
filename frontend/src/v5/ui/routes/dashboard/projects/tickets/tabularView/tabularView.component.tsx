@@ -19,7 +19,7 @@ import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsAct
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams, generatePath, useNavigate } from 'react-router-dom';
+import { useParams, generatePath, useNavigate } from 'react-router';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { CircleButton } from '@controls/circleButton';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DrawingsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Pin2D } from './pin2D/pin2D.component';
 import { compact } from 'lodash';

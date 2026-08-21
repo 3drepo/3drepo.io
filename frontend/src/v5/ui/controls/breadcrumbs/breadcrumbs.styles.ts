@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Button, Breadcrumbs } from '@mui/material';
-import { Link, LinkProps } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router';
 import { TextOverflow } from '@controls/textOverflow';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 

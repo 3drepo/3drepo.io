@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, TERMS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 

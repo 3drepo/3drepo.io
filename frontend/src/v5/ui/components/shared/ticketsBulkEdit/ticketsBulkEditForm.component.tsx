@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { Button, ButtonsContainer, Container, TitleContainer } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FormProvider, useForm } from 'react-hook-form';

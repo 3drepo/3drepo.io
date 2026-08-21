@@ -18,7 +18,7 @@
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 
 import {
 	DashboardListItemButton,

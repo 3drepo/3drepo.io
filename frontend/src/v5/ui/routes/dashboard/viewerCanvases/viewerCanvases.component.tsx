@@ -17,7 +17,7 @@
 
 import { Viewer3D } from '@/v4/routes/viewer3D';
 import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';

@@ -17,7 +17,7 @@
 
 import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.component';
 import { omit } from 'lodash';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';

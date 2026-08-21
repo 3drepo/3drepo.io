@@ -20,7 +20,7 @@ import { isEmpty, isEqual, map, omit} from 'lodash';
 import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
-import { generatePath } from 'react-router-dom';
+import { generatePath } from 'react-router';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';

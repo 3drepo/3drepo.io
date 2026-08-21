@@ -21,7 +21,7 @@ import { AppBar } from '@components/shared/appBar';
 import { OuterContainer, InnerContainer } from './dashboardProjectLayout.styles';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router';
 import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { DashboardFooter } from '@components/shared/dashboardFooter/dashboardFooter.component';
 

@@ -21,7 +21,7 @@ import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/tickets
 import { TicketsTableHeader } from './ticketsTableHeader.component';
 import { TabularViewContext } from '../../../tabularViewContext/tabularViewContext';
 import { useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';

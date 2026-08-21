@@ -16,7 +16,7 @@
  */
 
 import NotFoundIcon from '@assets/icons/filled/404-filled.svg';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { AppBar } from '@components/shared/appBar';

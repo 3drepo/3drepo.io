@@ -20,7 +20,7 @@ import { PureComponent } from 'react';
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 

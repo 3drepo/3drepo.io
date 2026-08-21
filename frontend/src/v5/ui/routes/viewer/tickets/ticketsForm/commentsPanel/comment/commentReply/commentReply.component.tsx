@@ -18,7 +18,7 @@
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';

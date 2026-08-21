@@ -17,7 +17,7 @@
 
 import { RouterActions } from '@/v4/modules/router/router.redux';
 import { useDispatch } from 'react-redux';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { RouterHooksSelectors } from './selectorsHooks';
 import { useEffect } from 'react';
 

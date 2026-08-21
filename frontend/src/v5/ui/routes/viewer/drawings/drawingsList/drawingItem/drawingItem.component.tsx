@@ -34,7 +34,7 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';

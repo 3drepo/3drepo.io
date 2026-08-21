@@ -17,7 +17,7 @@
 
 import { SubmitButton } from '@controls/submitButton';
 import styled from 'styled-components';
-import { Link as LinkBase } from 'react-router-dom';
+import { Link as LinkBase } from 'react-router';
 
 export const SaveButton = styled(SubmitButton)`
 	margin: 9px 15px;

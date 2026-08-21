@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { projectRoute, projectTabRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
