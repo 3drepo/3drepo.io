@@ -1,8 +1,8 @@
 tests/v4
 eslint-rules
-jest.config.js
-jest.config.e2e.js
-jest.config.unit.js
+jest.config.v5.js
+jest.config.v5-e2e.js
+jest.config.v5-unit.js
 jest.sequencer.e2e.js
 jest.sequencer.drivers.js
 jest-mongodb-config.js

@@ -19,7 +19,6 @@
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const expect = require("chai").expect;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 
@@ -32,7 +31,7 @@ describe("Meshes", function () {
 	const password = "password";
 	const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -47,7 +46,7 @@ describe("Meshes", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		purgeQueues().then(() => {
 			server.close(function() {
 				console.log("API test server is closed");
@@ -92,7 +91,7 @@ describe("Meshes", function () {
 	it("get mesh should succeed", function(done) {
 		agent.get(`/${username}/${existingModel}/meshes/${meshId}`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenMesh);
+				expect(res.body).toEqual(goldenMesh);
 				done(err);
 			});
 	});
@@ -100,7 +99,7 @@ describe("Meshes", function () {
 	it("get mesh with invalid ID should fail", function(done) {
 		agent.get(`/${username}/${existingModel}/meshes/invalidId`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.RESOURCE_NOT_FOUND.value);
 				done(err);
 			});
 	});
