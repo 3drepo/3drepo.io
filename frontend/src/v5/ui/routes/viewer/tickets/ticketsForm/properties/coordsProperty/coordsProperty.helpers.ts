@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { compact, get, isArray, isEmpty, isObject } from 'lodash';
-import { IPinColorMapping, PinConfig, ITemplate, ITicket, PinIcon } from '@/v5/store/tickets/tickets.types';
+import { PinColorMapping, PinIconMapping, PinConfig, ITemplate, ITicket, PinIcon } from '@/v5/store/tickets/tickets.types';
 import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin, PinType } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
@@ -40,16 +40,25 @@ const getPinConfig = (pinPath: string, template: ITemplate): PinConfig | boolean
 	return findByName(module.properties, path[2]);
 };
 
-export const getColorTriggerPropName = (pinPropName, template): string => {
-	const pinConfig = getPinConfig(pinPropName, template);
-	const property = get(pinConfig, 'color.property');
+const getTriggerPropName = (pinConfig: PinConfig | boolean, configKey: 'color' | 'icon'): string => {
+	const property = get(pinConfig, `${configKey}.property`);
 	if (!property) return '';
 	const module = property.module ? `${TicketBaseKeys.MODULES}.${property.module}` : TicketBaseKeys.PROPERTIES;
 	const triggerPropertyName = property.name;
 	return `${module}.${triggerPropertyName}`;
 };
 
-const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
+export const getColorTriggerPropName = (pinPropName, template): string => {
+	const pinConfig = getPinConfig(pinPropName, template);
+	return getTriggerPropName(pinConfig, 'color');
+};
+
+export const getIconTriggerPropName = (pinPropName, template): string => {
+	const pinConfig = getPinConfig(pinPropName, template);
+	return getTriggerPropName(pinConfig, 'icon');
+};
+
+const getColorFromMapping = (ticket: ITicket, pinMapping: PinColorMapping) => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
 	const defaultColorHex = rgbToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
@@ -61,6 +70,18 @@ const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
 };
 
+const getIconFromMapping = (ticket: ITicket, pinMapping: PinIconMapping): PinIcon => {
+	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
+	// @ts-ignore
+	const defaultIcon = mapping.find((option) => option.default)?.default || 'DEFAULT';
+	if (!ticket) return defaultIcon;
+	const linkedValue = module === TicketBaseKeys.PROPERTIES ?
+		get(ticket, [TicketBaseKeys.PROPERTIES, name]) : get(ticket, [TicketBaseKeys.MODULES, module, name]);
+	// @ts-ignore
+	const icon = mapping.find(({ value }) => value === linkedValue)?.icon;
+	return icon || defaultIcon;
+};
+
 export const getPinColorHexForProperty = (propertyName: string, template: ITemplate, ticket: ITicket) => {
 	const pinConfig = getPinConfig(propertyName, template);
 	if (typeof pinConfig === 'boolean') return DEFAULT_COLOR; // if default pin with no colouring set
@@ -69,10 +90,11 @@ export const getPinColorHexForProperty = (propertyName: string, template: ITempl
 	return DEFAULT_COLOR; // if custom pin with no colouring set
 };
 
-export const getPinIconForProperty =  (propertyName: string, template: ITemplate): PinIcon => {
+export const getPinIconForProperty = (propertyName: string, template: ITemplate, ticket?: ITicket): PinIcon => {
 	const pinConfig = getPinConfig(propertyName, template);
-	if (isObject(pinConfig) && pinConfig.icon) return pinConfig.icon;
-	return 'DEFAULT';
+	if (typeof pinConfig === 'boolean' || !pinConfig?.icon) return 'DEFAULT'; // if default pin, or custom pin with no icon set
+	if (isObject(pinConfig.icon)) return getIconFromMapping(ticket, pinConfig.icon); // a custom icon is set with mapping
+	return pinConfig.icon; // a custom icon is set, no mapping
 };
 
 export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
@@ -90,7 +112,7 @@ const pinIconToType = {
 
 export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
 	const colour = hexToGLColor(getPinColorHexForProperty(propName, template, ticket));
-	const icon = getPinIconForProperty(propName, template);
+	const icon = getPinIconForProperty(propName, template, ticket);
 	const id = getPinId(propName, ticket);
 	return {
 		id, 

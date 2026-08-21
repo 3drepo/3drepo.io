@@ -742,6 +742,8 @@ const generateProperties = (propTemplate, internalType, container) => {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {
 			properties[name] = values;
+		} else if (type === propTypes.TAGS) {
+			properties[name] = times(3, () => ServiceHelper.generateRandomString());
 		} else if (type === propTypes.COORDS) {
 			properties[name] = [0, 0, 0];
 		} else if (type === propTypes.VIEW) {

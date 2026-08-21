@@ -713,9 +713,13 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public showPin = async ({id, position, norm, colour, type}: IPin) => {
+	public showPin = async ({id, position, norm, colour, type, isSelected}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
+
+		// This is for changing the pin icon of the same id
+		UnityUtil.removePin(id);
+
 		switch (type) {
 			case 'risk':
 				UnityUtil.dropRiskPin(id, position, norm, colour);
@@ -729,6 +733,10 @@ export class ViewerService {
 			default:
 				UnityUtil.dropBookmarkPin(id, position, norm, colour);
 				break;
+		}
+
+		if (isSelected) {
+			UnityUtil.selectPin(id);
 		}
 	}
 
@@ -1218,8 +1226,8 @@ export class ViewerService {
 		}
 	}
 
-	public switchObjectVisibility(account, model, ids, visibility) {
-		UnityUtil.toggleVisibility(account, model, ids, visibility);
+	public switchObjectVisibility(account, model, ids, visibility, excludeIds = false) {
+		UnityUtil.toggleVisibility(account, model, ids, visibility, excludeIds);
 	}
 
 	public setShadows = (type: string) => {

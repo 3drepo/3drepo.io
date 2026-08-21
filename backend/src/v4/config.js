@@ -265,7 +265,7 @@ config.auth = coalesce(config.auth, {});
 config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
 
-config.cn_queue = { maxRetries: 3, ...config.cn_queue};
+config.cn_queue = { maxRetries: 3, heartbeat: 60, exchangeQueueTtl: 300000, ...config.cn_queue};
 
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
