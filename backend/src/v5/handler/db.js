@@ -215,6 +215,13 @@ DBHandler.find = async (database, colName, query, projection, sort, limit, skip 
 	return limit ? cmd.limit(limit).toArray() : cmd.toArray();
 };
 
+DBHandler.findCursor = async (database, colName, query, projection, sort, limit, skip = 0) => {
+	const collection = await getCollection(database, colName);
+	const options = deleteIfUndefined({ projection, sort });
+	const cmd = skip ? collection.find(query, options).skip(skip) : collection.find(query, options);
+	return limit ? cmd.limit(limit) : cmd;
+};
+
 DBHandler.distinct = async (database, colName, field, query) => {
 	const collection = await getCollection(database, colName);
 	return collection.distinct(field, query);

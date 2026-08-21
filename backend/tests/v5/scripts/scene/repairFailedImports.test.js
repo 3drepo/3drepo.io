@@ -27,20 +27,28 @@ const Scenes = require(`${src}/models/scenes`);
 const FilesManager = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
-const { disconnect, find } = require(`${src}/handler/db`);
+const { disconnect, find, findCursor } = require(`${src}/handler/db`);
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 // Randomise the order of the returned nodes to fully exercise robustness
 // to this, since Mongo does not guarantee nodes are returned in the order
 // they are inserted, even though this can often happen.
-const originalGetNodesByQuery = Scenes.getNodesByQuery;
-Scenes.getNodesByQuery = async (...args) => {
-	const nodes = await originalGetNodesByQuery(...args);
-	if (!Array.isArray(nodes) || nodes.length < 2) {
-		return nodes;
+const originalFindCursor = findCursor;
+jest.spyOn(require(`${src}/handler/db`), 'findCursor').mockImplementation(async (...args) => {
+	const cursor = await originalFindCursor(...args);
+	const nodes = [];
+	for await (const node of cursor) {
+		nodes.push(node);
 	}
-	return [...nodes].sort(() => Math.random() - 0.5);
-};
+	const shuffled = [...nodes].sort(() => Math.random() - 0.5);
+	return {
+		async* [Symbol.asyncIterator]() {
+			for (const node of shuffled) {
+				yield node;
+			}
+		},
+	};
+});
 
 const { getNodesByQuery } = Scenes;
 const RepairFailedImports = require(`${utilScripts}/scene/repairFailedImports`);
