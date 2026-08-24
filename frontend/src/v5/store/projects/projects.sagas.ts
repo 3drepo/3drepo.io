@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, select } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -28,12 +28,8 @@ import { TeamspacesActions } from '../teamspaces/teamspaces.redux';
 
 export function* fetch({ teamspace }: FetchProjectsAction) {
 	try {
-		const [addOns, pinIcons] = yield all([
-			API.Teamspaces.fetchAddons(teamspace),
-			API.Teamspaces.fetchPinIcons(teamspace),
-		]);
+		const addOns = yield API.Teamspaces.fetchAddons(teamspace);
 		yield put(TeamspacesActions.fetchAddOnsSuccess(teamspace, addOns));
-		yield put(TeamspacesActions.fetchPinIconsSuccess(teamspace, pinIcons));
 		const { data: { projects } } = yield API.Projects.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (error) {

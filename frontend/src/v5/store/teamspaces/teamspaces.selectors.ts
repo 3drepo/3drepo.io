@@ -57,10 +57,6 @@ export const selectIsFetchingAddons = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => !state.addOns[teamspace],
 );
 
-export const selectPinIcons = createSelector(
-	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.pinIcons[teamspace] || [],
-);
-
 const selectAddons = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => (
 		state.addOns[teamspace] || {} as AddOns
