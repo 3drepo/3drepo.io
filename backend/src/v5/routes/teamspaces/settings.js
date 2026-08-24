@@ -337,9 +337,9 @@ const establishRoutes = () => {
 
 	/**
 	* @openapi
-	* /teamspaces/{teamspace}/settings/tickets/pinIcons/{pinIcon}/{variant}.svg:
+	* /teamspaces/{teamspace}/settings/tickets/pinIcons/{pinIcon}/{variant}:
 	*   get:
-	*     description: Get a ticket pin icon SVG asset
+	*     description: Get a ticket pin icon SVG asset, the pinIcon name is case-sensitive and expected to be in as defined in the list of available pin icons, the variant can be either "normal" or "selected".
 	*     tags: [v:external, Teamspaces]
 	*     operationId: getPinIcon
 	*     parameters:
