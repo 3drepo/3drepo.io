@@ -85,5 +85,5 @@ export const selectUrlParams =  createSelector(
 );
 
 export const selectQueryParams = createSelector(
-	selectLocation, (location) => queryString.parse(location.search)
+	selectLocation, (location) => queryString.parse(location.search) as any
 );
