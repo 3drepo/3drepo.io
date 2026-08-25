@@ -70,14 +70,10 @@ describe('Ticket Comments: store', () => {
 
 	describe('unsaved comments', () => {
 		it('should save and select an unsaved comment', () => {
-			// const unsavedComment = {
-			// 	message: 'Unsaved comment',
-			// 	images: ['image-id'],
-			// };
 
 			dispatch(TicketCommentsActions.setUnsavedComment(commentId, comment));
 
-			expect(selectUnsavedCommentById(getState(), commentId)).toEqual({ ...comment, _id: null });
+			expect(selectUnsavedCommentById(getState(), commentId)).toEqual(comment);
 		});
 
 		it('should keep unsaved comments of different comments separate', () => {
