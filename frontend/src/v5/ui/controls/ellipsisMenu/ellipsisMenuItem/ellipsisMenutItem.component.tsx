@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, SyntheticEvent, useContext } from 'react';
-import { Link, LinkProps } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { MenuItem } from './ellipsisMenuItem.styles';
 

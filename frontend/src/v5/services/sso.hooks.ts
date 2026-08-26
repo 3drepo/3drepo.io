@@ -16,7 +16,7 @@
  */
 
 import { isNull, omitBy, values } from 'lodash';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { getParams } from '../helpers/url.helper';
 import { errorMessages, postActions, ssoLogin } from './api/sso';
 import { formatMessage } from './intl';

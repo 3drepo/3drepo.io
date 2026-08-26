@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';

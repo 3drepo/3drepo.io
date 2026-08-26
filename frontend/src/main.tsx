@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import { createRoot } from 'react-dom/client';

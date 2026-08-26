@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 
 export const Container = styled.nav`
 	display: flex;

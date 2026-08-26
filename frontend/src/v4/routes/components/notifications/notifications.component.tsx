@@ -25,7 +25,7 @@ import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { BarIconButton } from '../components.styles';

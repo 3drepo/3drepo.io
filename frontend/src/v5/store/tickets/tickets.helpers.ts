@@ -26,7 +26,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import OutlinedCircleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import FilledCircleIcon from '@assets/icons/filled/circle-filled.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties, SEQUENCING_START_TIME, SEQUENCING_END_TIME } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition, TemplateModule } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';

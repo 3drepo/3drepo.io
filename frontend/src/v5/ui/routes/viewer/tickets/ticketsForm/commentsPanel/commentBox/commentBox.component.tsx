@@ -20,7 +20,7 @@ import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';

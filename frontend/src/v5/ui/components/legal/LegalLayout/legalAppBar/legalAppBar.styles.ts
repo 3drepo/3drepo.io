@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Items as ItemsBase } from '@components/shared/appBar/appBar.styles';
 
 export const NavLinks = styled.div`

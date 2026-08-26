@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';

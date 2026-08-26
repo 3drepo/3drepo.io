@@ -30,7 +30,7 @@ import { PinsLayer } from '../pinsLayer/pinsLayer.component';
 import { CameraOffSight } from './camera/cameraOffSight.component';
 import { Camera } from './camera/camera.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';

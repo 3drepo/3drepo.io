@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { Link as LinkBase } from 'react-router-dom';
+import { Link as LinkBase } from 'react-router';
 
 export const Form = styled.form`
 	border-radius: 20px;

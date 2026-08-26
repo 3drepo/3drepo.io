@@ -16,7 +16,7 @@
  */
 
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
-import { Link as LinkBase } from 'react-router-dom';
+import { Link as LinkBase } from 'react-router';
 import styled from 'styled-components';
 
 export const Overlay = styled.div`

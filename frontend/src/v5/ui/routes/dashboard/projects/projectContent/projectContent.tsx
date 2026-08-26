@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { useLocation, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { useLocation, Routes, Route, Navigate, useParams } from 'react-router';
 
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';

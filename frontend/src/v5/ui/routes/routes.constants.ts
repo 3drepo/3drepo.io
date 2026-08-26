@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router';
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
 export const AUTH_PATH = '/v5/auth';

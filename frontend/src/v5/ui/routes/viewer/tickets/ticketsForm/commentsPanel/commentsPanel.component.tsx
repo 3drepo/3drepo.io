@@ -16,7 +16,7 @@
  */
 import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';

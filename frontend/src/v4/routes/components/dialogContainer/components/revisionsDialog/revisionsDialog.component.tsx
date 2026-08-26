@@ -18,7 +18,7 @@ import { PureComponent } from 'react';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { Loader } from '../../../loader/loader.component';

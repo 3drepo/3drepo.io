@@ -17,7 +17,7 @@
 
 import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';

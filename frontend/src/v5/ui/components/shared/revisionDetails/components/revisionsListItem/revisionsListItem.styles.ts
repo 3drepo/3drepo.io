@@ -19,7 +19,7 @@ import DownloadIconBase from '@assets/icons/outlined/download_arrow-outlined.svg
 import { IconButton } from '@mui/material';
 import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
-import { Link, LinkProps } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
 type IRevisionsListItemContainer = LinkProps & {

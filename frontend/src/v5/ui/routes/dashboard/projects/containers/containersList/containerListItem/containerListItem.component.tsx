@@ -17,7 +17,7 @@
 
 import { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,

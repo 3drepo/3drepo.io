@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import { FormChipSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';

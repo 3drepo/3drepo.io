@@ -23,7 +23,7 @@ import Add from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
-import { useParams, generatePath } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router';
 import { BOARD_ROUTE, BOARD_ROUTE_WITH_MODEL, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 

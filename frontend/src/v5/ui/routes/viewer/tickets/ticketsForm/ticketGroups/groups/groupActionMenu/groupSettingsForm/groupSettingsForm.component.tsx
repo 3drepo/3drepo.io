@@ -37,7 +37,7 @@ import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicke
 import { Gap } from '@controls/gap';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm/groupsCollectionSelect/groupsCollectionSelect.component';
 import {
 	Buttons,

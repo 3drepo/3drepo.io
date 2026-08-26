@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getErrorCode, isProjectNotFound, isModelNotFound, isNotAuthed } from '@/v5/validation/errors.helpers';
-import { generatePath, useNavigate } from 'react-router-dom';
+import { generatePath, useNavigate } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { AuthHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';

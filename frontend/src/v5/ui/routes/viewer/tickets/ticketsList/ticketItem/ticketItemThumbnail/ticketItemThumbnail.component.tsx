@@ -18,7 +18,7 @@
 import { ViewpointOverlay, ThumbnailContainer, ViewpointIcon } from './ticketItemThumbnail.styles';
 import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { AdditionalProperties } from '../../../tickets.constants';
 import { ITicket } from '@/v5/store/tickets/tickets.types';

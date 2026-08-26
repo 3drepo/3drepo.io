@@ -22,7 +22,7 @@ import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
 import { formatMessage } from '@/v5/services/intl';

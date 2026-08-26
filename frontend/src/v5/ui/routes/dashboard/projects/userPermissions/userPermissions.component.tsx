@@ -22,7 +22,7 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
 import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 export const UserPermissions = () => {
 	const location = useLocation();

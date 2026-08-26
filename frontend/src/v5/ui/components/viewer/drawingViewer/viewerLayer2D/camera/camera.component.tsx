@@ -17,7 +17,7 @@
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { Vector2, Vector3 } from 'three';
 import { useModelLoading, useViewpointSubscription } from './viewer.hooks';
 import { CameraIcon } from './camera.styles';

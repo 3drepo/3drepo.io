@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import LogoIcon from '@assets/icons/filled/logo-filled.svg';
 import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';

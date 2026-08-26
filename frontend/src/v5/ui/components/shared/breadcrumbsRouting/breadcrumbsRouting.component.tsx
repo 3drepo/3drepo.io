@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams, generatePath, matchPath, useLocation } from 'react-router-dom';
+import { useParams, generatePath, matchPath, useLocation } from 'react-router';
 import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IProject } from '@/v5/store/projects/projects.types';

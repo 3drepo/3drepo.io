@@ -21,7 +21,7 @@ import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemCon
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';

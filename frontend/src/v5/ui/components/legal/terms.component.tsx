@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { COOKIES_ROUTE, PRIVACY_ROUTE } from '../../routes/routes.constants';
 import { Indent, Clause, ClauseNo, PaperTitle, SupportEmail, TermsForm } from './LegalLayout/legalLayout.styles';
 

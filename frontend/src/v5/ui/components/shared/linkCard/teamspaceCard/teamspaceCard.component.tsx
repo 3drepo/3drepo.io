@@ -17,7 +17,7 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { uriCombine } from '@/v5/helpers/url.helper';
 import { LinkCard } from '../linkCard.component';
