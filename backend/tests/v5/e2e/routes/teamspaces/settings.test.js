@@ -251,6 +251,7 @@ const testGetRiskCategories = () => {
 const testGetPinIconNames = () => {
 	describe('Pin icon names', () => {
 		const basicData = generateBasicData();
+		const iconNames = Object.keys(getDefaultPinIconsDetails());
 		const route = (key, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));
@@ -266,7 +267,7 @@ const testGetPinIconNames = () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {
-					expect(res.body.icons).toEqual(['DEFAULT', 'ISSUE', 'MARKER', 'RISK']);
+					expect(res.body.icons).toEqual(iconNames);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
