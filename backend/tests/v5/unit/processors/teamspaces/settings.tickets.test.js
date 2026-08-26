@@ -29,7 +29,7 @@ const TemplateModel = require(`${src}/models/tickets.templates`);
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates.constants', () => {
 	const actual = jest.requireActual('../../../../../src/v5/schemas/tickets/templates.constants');
-	return { ...actual, getDefaultPinIconsDetails: jest.fn(() => actual.getDefaultPinIconsDetails()) };
+	return { ...actual, getDefaultPinIconNames: jest.fn(() => actual.getDefaultPinIconNames()) };
 });
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -90,29 +90,29 @@ const testGetTemplateList = () => {
 
 const testGetPinIconNames = () => {
 	describe('Get pin icon names', () => {
-		test('should call getDefaultPinIconsDetails and return sorted keys', () => {
+		test('should call getDefaultPinIconNames and return sorted keys', () => {
 			const data = { [generateRandomString()]: generateRandomString() };
-			TemplateConstants.getDefaultPinIconsDetails.mockReturnValueOnce(data);
+			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce(data);
 			expect(TicketSettings.getPinIconNames()).toEqual(Object.keys(data).sort());
 
-			expect(TemplateConstants.getDefaultPinIconsDetails).toHaveBeenCalledTimes(1);
+			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
 		});
 	});
 };
 
 const testGetPinIcon = () => {
 	describe('Get pin icon', () => {
-		test('should call getDefaultPinIconsDetails and readFile with correct path', async () => {
+		test('should call getDefaultPinIconNames and readFile with correct path', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();
 			const iconPath = generateRandomString();
 			const data = Buffer.from(generateRandomString());
-			TemplateConstants.getDefaultPinIconsDetails.mockReturnValueOnce({ [iconName]: { [variant]: iconPath } });
+			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce({ [iconName]: { [variant]: iconPath } });
 			FsPromises.readFile.mockResolvedValueOnce(data);
 
 			await expect(TicketSettings.getPinIcon(iconName, variant)).resolves.toEqual(data);
 
-			expect(TemplateConstants.getDefaultPinIconsDetails).toHaveBeenCalledTimes(1);
+			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
 			expect(FsPromises.readFile).toHaveBeenCalledTimes(1);
 			expect(FsPromises.readFile).toHaveBeenCalledWith(iconPath);
 		});
@@ -120,11 +120,11 @@ const testGetPinIcon = () => {
 		test('should throw when the iconName or variant is not found', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();
-			TemplateConstants.getDefaultPinIconsDetails.mockReturnValueOnce({ [iconName]: { } });
+			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce({ [iconName]: { } });
 
 			await expect(() => TicketSettings.getPinIcon(iconName, variant)).toThrow(templates.pinIconNotFound);
 
-			expect(TemplateConstants.getDefaultPinIconsDetails).toHaveBeenCalledTimes(1);
+			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
 			expect(FsPromises.readFile).not.toHaveBeenCalled();
 		});
 	});

@@ -40,7 +40,7 @@ const TicketModelSchema = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates.constants', () => {
 	const actual = jest.requireActual('../../../../../../../../../../src/v5/schemas/tickets/templates.constants');
-	return { ...actual, getDefaultPinIconsDetails: jest.fn(() => actual.getDefaultPinIconsDetails()) };
+	return { ...actual, getDefaultPinIconNames: jest.fn(() => actual.getDefaultPinIconNames) };
 });
 const TicketTemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -562,7 +562,7 @@ const testCheckPinIconExists = () => {
 			const req = { params: { pinIcon, variant } };
 			const res = {};
 
-			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconsDetails').mockReturnValueOnce({
+			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconNames').mockReturnValueOnce({
 				[pinIcon]: { [generateRandomString()]: true },
 			});
 
@@ -581,7 +581,7 @@ const testCheckPinIconExists = () => {
 			const req = { params: { pinIcon, variant } };
 			const res = {};
 
-			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconsDetails').mockReturnValueOnce({
+			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconNames').mockReturnValueOnce({
 				[pinIcon]: { [variant]: true },
 			});
 

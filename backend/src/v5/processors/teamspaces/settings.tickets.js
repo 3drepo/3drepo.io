@@ -16,8 +16,9 @@
  */
 
 const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
+const { getDefaultPinIconNames, iconsDir } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../../services/eventsManager/eventsManager.constants');
-const { getDefaultPinIconsDetails } = require('../../schemas/tickets/templates.constants');
+const path = require('path');
 const { publish } = require('../../services/eventsManager/eventsManager');
 const { readFile } = require('fs/promises');
 const { templates } = require('../../utils/responseCodes');
@@ -32,18 +33,17 @@ TicketSettings.updateTicketTemplate = async (teamspace, id, data) => {
 TicketSettings.getTemplateList = (teamspace) => getAllTemplates(
 	teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 },
 );
-TicketSettings.getPinIconNames = () => {
-	const iconDetails = getDefaultPinIconsDetails();
-	return Object.keys(iconDetails).sort();
-};
+TicketSettings.getPinIconNames = getDefaultPinIconNames;
 
-TicketSettings.getPinIcon = (iconName, variant) => {
-	const iconDetails = getDefaultPinIconsDetails();
-	const iconPath = iconDetails[iconName]?.[variant];
+TicketSettings.getPinIcon = async (iconName, variant) => {
+	const iconPath = path.join(iconsDir, `${iconName}.${variant}.svg`);
 
-	if (!iconPath) throw templates.pinIconNotFound;
-
-	return readFile(iconPath);
+	try {
+		return await readFile(iconPath);
+	} catch (error) {
+		if (error.code === 'ENOENT') throw templates.pinIconNotFound;
+		throw error;
+	}
 };
 
 module.exports = TicketSettings;

@@ -29,7 +29,7 @@ const TeamspaceSettings = require('../../processors/teamspaces/settings');
 const TicketSettings = require('../../processors/teamspaces/settings.tickets');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
-const { checkPinIconExists } = require('../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { checkPinIconExists } = require('../../middleware/dataConverter/inputs/teamspaces/settings.tickets');
 const { getUserFromSession } = require('../../utils/sessions');
 const { templates } = require('../../utils/responseCodes');
 const { validateGetAuditLogParams } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
@@ -60,7 +60,7 @@ const getRiskCategories = async (req, res) => {
 
 const getPinIconNames = async (req, res) => {
 	try {
-		const icons = await TicketSettings.getPinIconNames();
+		const icons = await TicketSettings.getPinIconNames;
 		respond(req, res, templates.ok, { icons });
 	} catch (err) {
 		// istanbul ignore next

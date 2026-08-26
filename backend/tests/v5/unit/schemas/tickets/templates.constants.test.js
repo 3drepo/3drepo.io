@@ -85,7 +85,7 @@ const testGetApplicableDefaultProperties = () => {
 	});
 };
 
-const testGetDefaultPinIconsDetails = () => {
+const testgetDefaultPinIconNames = () => {
 	describe('Get default pin icons details', () => {
 		const ICONS_DIR = path.join(resourcesPath, 'tickets', 'pinIcons');
 		const toFsEntry = (name, isFile = true) => ({ name, isFile: jest.fn().mockReturnValue(isFile) });
@@ -106,10 +106,10 @@ const testGetDefaultPinIconsDetails = () => {
 
 				jest.spyOn(fs, 'readdirSync').mockReturnValueOnce(mockReturnValue);
 				if (shouldSucceed) {
-					const result = Constants.getDefaultPinIconsDetails();
+					const result = Constants.getDefaultPinIconNames();
 					expect(result).toEqual(expected);
 				} else {
-					expect(() => Constants.getDefaultPinIconsDetails()).toThrow(expected);
+					expect(() => Constants.getDefaultPinIconNames()).toThrow(expected);
 				}
 			});
 		};
@@ -122,5 +122,5 @@ const testGetDefaultPinIconsDetails = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetApplicableDefaultProperties();
-	testGetDefaultPinIconsDetails();
+	testgetDefaultPinIconNames();
 });

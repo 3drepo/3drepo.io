@@ -25,7 +25,7 @@ const { generateRandomString } = require('../../../helper/services');
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
-const { propTypes, iconVariants, getDefaultPinIconsDetails } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, iconVariants, getDefaultPinIconNames } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -278,7 +278,7 @@ const testGetPinIconNames = () => {
 const testGetPinIcon = () => {
 	describe('Pin icon', () => {
 		const basicData = generateBasicData();
-		const iconNames = Object.keys(getDefaultPinIconsDetails());
+		const iconNames = Object.keys(getDefaultPinIconNames);
 		const route = (key, pinIcon = iconNames[0], variant = iconVariants.SELECTED, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons/${pinIcon}/${variant}${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));
