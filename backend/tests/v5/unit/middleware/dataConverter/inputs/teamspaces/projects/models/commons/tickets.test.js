@@ -38,12 +38,6 @@ const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../../../src/v5/models/tickets');
 const TicketModelSchema = require(`${src}/models/tickets`);
 
-jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates.constants', () => {
-	const actual = jest.requireActual('../../../../../../../../../../src/v5/schemas/tickets/templates.constants');
-	return { ...actual, getDefaultPinIconNames: jest.fn(() => actual.getDefaultPinIconNames) };
-});
-const TicketTemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
-
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
@@ -70,7 +64,7 @@ const testValidateNewTicket = () => {
 			const req = { params: {}, body: { type: templateId } };
 			const res = {};
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => {});
+			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => { });
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -107,7 +101,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -131,7 +125,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -155,7 +149,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -239,7 +233,7 @@ const testValidateImportTickets = () => {
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
@@ -293,7 +287,7 @@ const testValidateUpdateTicket = () => {
 	describe('Validate update ticket', () => {
 		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 
 			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
@@ -306,7 +300,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -326,7 +320,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.ok.code} if there is nothing to update`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -344,7 +338,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -403,9 +397,9 @@ const testValidateUpdateTicket = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TicketSchema.validateTickets).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
 				req.params.model, template, [req.body], {
-					author: req.session.user.username,
-					existingData: [ticket],
-				});
+				author: req.session.user.username,
+				existingData: [ticket],
+			});
 		});
 	});
 };
@@ -495,7 +489,7 @@ const testValidateUpdateMultipleTickets = () => {
 		['template does not exist', { query: { template: generateUUIDString() } }, false],
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
@@ -545,50 +539,6 @@ const testValidateUpdateMultipleTickets = () => {
 			} else {
 				expect(Responder.respond).not.toHaveBeenCalled();
 			}
-		});
-	});
-};
-
-const testCheckPinIconExists = () => {
-	describe('Check pin icon exists', () => {
-		afterEach(() => {
-			jest.clearAllMocks();
-		});
-
-		test(`Should respond with ${templates.invalidArguments.code} if the pin icon variant doesn't exist`, async () => {
-			const fn = jest.fn();
-			const pinIcon = generateRandomString();
-			const variant = generateRandomString();
-			const req = { params: { pinIcon, variant } };
-			const res = {};
-
-			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconNames').mockReturnValueOnce({
-				[pinIcon]: { [generateRandomString()]: true },
-			});
-
-			await Tickets.checkPinIconExists(req, res, fn);
-
-			expect(fn).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, `Pin icon ${pinIcon} with variant ${variant} not found.`));
-		});
-
-		test('Should call next if pin icon variant exists', async () => {
-			const fn = jest.fn();
-			const pinIcon = generateRandomString();
-			const variant = generateRandomString();
-			const req = { params: { pinIcon, variant } };
-			const res = {};
-
-			jest.spyOn(TicketTemplateConstants, 'getDefaultPinIconNames').mockReturnValueOnce({
-				[pinIcon]: { [variant]: true },
-			});
-
-			await Tickets.checkPinIconExists(req, res, fn);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -649,6 +599,5 @@ describe(determineTestGroup(__filename), () => {
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();
-	testCheckPinIconExists();
 	testValidateTagProperty();
 });

@@ -251,7 +251,7 @@ const testGetRiskCategories = () => {
 const testGetPinIconNames = () => {
 	describe('Pin icon names', () => {
 		const basicData = generateBasicData();
-		const iconNames = Object.keys(getDefaultPinIconsDetails());
+		const iconNames = getDefaultPinIconNames;
 		const route = (key, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));
@@ -279,7 +279,7 @@ const testGetPinIconNames = () => {
 const testGetPinIcon = () => {
 	describe('Pin icon', () => {
 		const basicData = generateBasicData();
-		const iconNames = Object.keys(getDefaultPinIconNames);
+		const iconNames = getDefaultPinIconNames;
 		const route = (key, pinIcon = iconNames[0], variant = iconVariants.SELECTED, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons/${pinIcon}/${variant}${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));

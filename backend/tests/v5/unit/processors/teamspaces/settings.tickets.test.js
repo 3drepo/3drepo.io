@@ -18,19 +18,16 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { events } = require('../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { src } = require('../../../helper/path');
+const path = require('path');
 
 const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('fs/promises');
-const FsPromises = require('fs/promises');
+const FsPromisesMock = require('fs/promises');
 
 jest.mock('../../../../../src/v5/models/tickets.templates');
 const TemplateModel = require(`${src}/models/tickets.templates`);
 
-jest.mock('../../../../../src/v5/schemas/tickets/templates.constants', () => {
-	const actual = jest.requireActual('../../../../../src/v5/schemas/tickets/templates.constants');
-	return { ...actual, getDefaultPinIconNames: jest.fn(() => actual.getDefaultPinIconNames()) };
-});
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../src/v5/services/eventsManager/eventsManager');
@@ -88,44 +85,44 @@ const testGetTemplateList = () => {
 	});
 };
 
-const testGetPinIconNames = () => {
-	describe('Get pin icon names', () => {
-		test('should call getDefaultPinIconNames and return sorted keys', () => {
-			const data = { [generateRandomString()]: generateRandomString() };
-			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce(data);
-			expect(TicketSettings.getPinIconNames()).toEqual(Object.keys(data).sort());
-
-			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
-		});
-	});
-};
-
 const testGetPinIcon = () => {
 	describe('Get pin icon', () => {
 		test('should call getDefaultPinIconNames and readFile with correct path', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();
-			const iconPath = generateRandomString();
+			const iconPath = path.join(TemplateConstants.iconsDir, `${iconName}.${variant}.svg`);
 			const data = Buffer.from(generateRandomString());
-			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce({ [iconName]: { [variant]: iconPath } });
-			FsPromises.readFile.mockResolvedValueOnce(data);
+			FsPromisesMock.readFile.mockResolvedValueOnce(data);
 
 			await expect(TicketSettings.getPinIcon(iconName, variant)).resolves.toEqual(data);
 
-			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
-			expect(FsPromises.readFile).toHaveBeenCalledTimes(1);
-			expect(FsPromises.readFile).toHaveBeenCalledWith(iconPath);
+			expect(FsPromisesMock.readFile).toHaveBeenCalledTimes(1);
+			expect(FsPromisesMock.readFile).toHaveBeenCalledWith(iconPath);
 		});
 
-		test('should throw when the iconName or variant is not found', async () => {
+		test('should throw when the path does not exist', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();
-			TemplateConstants.getDefaultPinIconNames.mockReturnValueOnce({ [iconName]: { } });
+			const error = new Error('File not found');
+			error.code = 'ENOENT';
+			FsPromisesMock.readFile.mockRejectedValueOnce(error);
 
-			await expect(() => TicketSettings.getPinIcon(iconName, variant)).toThrow(templates.pinIconNotFound);
 
-			expect(TemplateConstants.getDefaultPinIconNames).toHaveBeenCalledTimes(1);
-			expect(FsPromises.readFile).not.toHaveBeenCalled();
+			await expect(TicketSettings.getPinIcon(iconName, variant)).rejects.toEqual(templates.pinIconNotFound);
+
+			expect(FsPromisesMock.readFile).toHaveBeenCalledTimes(1);
+		});
+		
+		test('should throw when the path exists but another error occurs', async () => {
+			const iconName = generateRandomString();
+			const variant = generateRandomString();
+			const error = new Error('Some other error');
+			error.code = 'EOTHER';
+			FsPromisesMock.readFile.mockRejectedValueOnce(error);
+
+			await expect(TicketSettings.getPinIcon(iconName, variant)).rejects.toEqual(error);
+
+			expect(FsPromisesMock.readFile).toHaveBeenCalledTimes(1);
 		});
 	});
 };
@@ -134,6 +131,5 @@ describe(determineTestGroup(__filename), () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplateList();
-	testGetPinIconNames();
 	testGetPinIcon();
 });

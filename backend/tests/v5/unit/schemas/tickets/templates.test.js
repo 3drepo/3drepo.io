@@ -1475,7 +1475,7 @@ const testValidate = () => {
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 
-	const defaultPinIconsNames = Object.keys(getDefaultPinIconNames());
+	const defaultPinIconsNames = getDefaultPinIconNames;
 
 	describe('Test every built-in pin icon in direct and conditional mappings', () => {
 		defaultPinIconsNames.forEach((icon) => {

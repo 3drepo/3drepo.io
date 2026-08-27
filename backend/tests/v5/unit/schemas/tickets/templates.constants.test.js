@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const fs = require('fs');
-const path = require('path');
-
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
@@ -24,7 +21,6 @@ const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../h
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
-const { resourcesPath } = require(`${src}/../interop`);
 
 const baseProps = TemplateConstants.basePropertyLabels;
 
@@ -87,11 +83,10 @@ const testGetApplicableDefaultProperties = () => {
 
 const testgetDefaultPinIconNames = () => {
 	describe('Get default pin icons details', () => {
-		const ICONS_DIR = path.join(resourcesPath, 'tickets', 'pinIcons');
 		const toFsEntry = (name, isFile = true) => ({ name, isFile: jest.fn().mockReturnValue(isFile) });
 
 		const tests = [
-			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], true, { icon1: { normal: path.join(ICONS_DIR, 'icon1.normal.svg'), selected: path.join(ICONS_DIR, 'icon1.selected.svg') } }],
+			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], true, ['icon1']],
 			['throw if the icon is not a file', [toFsEntry('icon1.normal.svg', false), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
 			['throw if the icon filename extension does not match the expected pattern', [toFsEntry('icon1.normal.jpg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
 			['throw if the icon filename name does not match the expected pattern', [toFsEntry('icon1.supernatural.svg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
@@ -101,15 +96,29 @@ const testgetDefaultPinIconNames = () => {
 			test(`Should ${shouldSucceed ? 'return' : 'throw'} ${testName}`, () => {
 				// drop the cached module so the memoised pin-icon cache starts empty
 				jest.resetModules();
-				// eslint-disable-next-line global-require
-				const Constants = require(`${src}/schemas/tickets/templates.constants`);
 
-				jest.spyOn(fs, 'readdirSync').mockReturnValueOnce(mockReturnValue);
+				jest.doMock('fs', () => {
+					const actualFs = jest.requireActual('fs');
+					return {
+						...actualFs,
+						readdirSync: jest.fn((dirPath, options) => {
+							if (String(dirPath).endsWith('/tickets/pinIcons')) {
+								return mockReturnValue;
+							}
+							return actualFs.readdirSync(dirPath, options);
+						}),
+					};
+				});
+
 				if (shouldSucceed) {
-					const result = Constants.getDefaultPinIconNames();
-					expect(result).toEqual(expected);
+					// eslint-disable-next-line global-require
+					const Constants = require(`${src}/schemas/tickets/templates.constants`);
+					expect(Constants.getDefaultPinIconNames).toEqual(expected);
 				} else {
-					expect(() => Constants.getDefaultPinIconNames()).toThrow(expected);
+					expect(() => {
+						// eslint-disable-next-line global-require
+						require(`${src}/schemas/tickets/templates.constants`);
+					}).toThrow(expected);
 				}
 			});
 		};

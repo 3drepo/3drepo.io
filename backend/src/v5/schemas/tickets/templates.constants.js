@@ -255,6 +255,7 @@ const iconVariants = ['normal', 'selected'];
 // eslint-disable-next-line security/detect-non-literal-regexp
 const iconFilenameRegex = new RegExp(`^(?<name>.+)\\.(?<variant>${iconVariants.join('|')})\\.svg$`);
 const ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
+	
 
 const getDefaultPinIconNames = () => {
 	const files = fs.readdirSync(ICONS_DIR, { withFileTypes: true });
