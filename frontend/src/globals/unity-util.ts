@@ -2090,9 +2090,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Reset map sources. This removes all currently displayed maps
+	 * Reset map sources. This removes all currently displayed maps.
 	 * @category GIS
-	 * @param account - name of teamspace
 	 */
 	public static resetMapSources() {
 		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -2101,19 +2100,29 @@ export class UnityUtil {
 	/**
 	 * Add map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - The source in the form `provider/layer`. This should be
+	 * the `source` member of one of the layer objects returned by the get list
+	 * of maps ('/maps/') request.
+	 * @param height - The height in mm above the project origin at which to
+	 * place the map layer. If the layer already exists it will be moved to
+	 * the new height.
 	 */
-	public static addMapSource(mapSource: string) {
-		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static addMapSource(source: string, height?: number) {
+		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
+			source, 
+			height: (height ?? 0) * 0.001,
+		}),
+		);
 	}
 
 	/**
 	 * Remove map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - One of the source strings previously provided to
+	 * addMapSource. If the source does not exist this call does nothing.
 	 */
-	public static removeMapSource(mapSource: string) {
-		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static removeMapSource(source: string) {
+		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ source }));
 	}
 
 	/**
