@@ -107,12 +107,11 @@ const testGetPinIcon = () => {
 			error.code = 'ENOENT';
 			FsPromisesMock.readFile.mockRejectedValueOnce(error);
 
-
 			await expect(TicketSettings.getPinIcon(iconName, variant)).rejects.toEqual(templates.pinIconNotFound);
 
 			expect(FsPromisesMock.readFile).toHaveBeenCalledTimes(1);
 		});
-		
+
 		test('should throw when the path exists but another error occurs', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();

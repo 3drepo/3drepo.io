@@ -397,9 +397,9 @@ const testValidateUpdateTicket = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TicketSchema.validateTickets).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
 				req.params.model, template, [req.body], {
-				author: req.session.user.username,
-				existingData: [ticket],
-			});
+					author: req.session.user.username,
+					existingData: [ticket],
+				});
 		});
 	});
 };

@@ -18,6 +18,7 @@
 const { src } = require('../../../../../helper/path');
 
 const { determineTestGroup } = require('../../../../../helper/utils');
+
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const TicketsSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/settings.tickets`);
 const { generateRandomString } = require('../../../../../helper/services');
@@ -30,48 +31,48 @@ const TicketTemplateConstants = require(`${src}/schemas/tickets/templates.consta
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testCheckPinIconExists = () => {
-  const original = TicketTemplateConstants.getDefaultPinIconNames;
-  describe('Check pin icon exists', () => {
-    beforeEach(() => {
-      TicketTemplateConstants.getDefaultPinIconNames = original;
-    });
-    const testCases = [
-      ['the pin icon does not exist', false, { pinIcon: generateRandomString(), variant: 'normal' }, templates.invalidArguments],
-      ['the pin icon variant is not valid', false, { pinIcon: 'DEFAULT', variant: generateRandomString() }, templates.invalidArguments],
-      ['the pin icon and variant are valid', true, { pinIcon: 'DEFAULT', variant: 'normal' }, null],
-    ];
+	const original = TicketTemplateConstants.getDefaultPinIconNames;
+	describe('Check pin icon exists', () => {
+		beforeEach(() => {
+			TicketTemplateConstants.getDefaultPinIconNames = original;
+		});
+		const testCases = [
+			['the pin icon does not exist', false, { pinIcon: generateRandomString(), variant: 'normal' }, templates.invalidArguments],
+			['the pin icon variant is not valid', false, { pinIcon: 'DEFAULT', variant: generateRandomString() }, templates.invalidArguments],
+			['the pin icon and variant are valid', true, { pinIcon: 'DEFAULT', variant: 'normal' }, null],
+		];
 
-    const runTests = (description, succeed, data, output) => {
-    	test(`Should ${succeed ? 'call next' : `respond with ${output.code}`} if ${description}`, async () => {
-    		const fn = jest.fn();
-    		const req = { params: data };
-    		const res = {};
+		const runTests = (description, succeed, data, output) => {
+			test(`Should ${succeed ? 'call next' : `respond with ${output.code}`} if ${description}`, async () => {
+				const fn = jest.fn();
+				const req = { params: data };
+				const res = {};
 
-    		TicketTemplateConstants.getDefaultPinIconNames = jest.fn().mockReturnValueOnce([data.pinIcon]);
+				TicketTemplateConstants.getDefaultPinIconNames = jest.fn().mockReturnValueOnce([data.pinIcon]);
 
-    		await TicketsSettings.checkPinIconExists(req, res, fn);
+				await TicketsSettings.checkPinIconExists(req, res, fn);
 
-    		if (succeed) {
-    			expect(fn).toHaveBeenCalledTimes(1);
-    			expect(Responder.respond).not.toHaveBeenCalled();
-    		} else {
-    			expect(fn).not.toHaveBeenCalled();
-    			expect(Responder.respond).toHaveBeenCalledTimes(1);
-    			expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(output, `Pin icon "${data.pinIcon}" with variant "${data.variant}" not a valid combination.`));
-    		}
-    	});
-    };
+				if (succeed) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					expect(Responder.respond).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(output, `Pin icon "${data.pinIcon}" with variant "${data.variant}" not a valid combination.`));
+				}
+			});
+		};
 
-    describe.each(testCases)('', (description, succeed, data, output) => {
-    	runTests(description, succeed, data, output);
-    });
-  });
+		describe.each(testCases)('', (description, succeed, data, output) => {
+			runTests(description, succeed, data, output);
+		});
+	});
 };
 
 describe(determineTestGroup(__filename), () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
 
-  testCheckPinIconExists();
+	testCheckPinIconExists();
 });
