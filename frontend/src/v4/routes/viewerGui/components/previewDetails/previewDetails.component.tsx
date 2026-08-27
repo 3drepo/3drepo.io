@@ -19,6 +19,7 @@ import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
 import { JSX } from 'react/jsx-runtime';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -36,7 +37,6 @@ import {
 	StyledForm,
 	Summary,
 	TitleNumber,
-	TextField,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
@@ -75,7 +75,7 @@ interface IProps {
 }
 
 const ValidationSchema = Yup.object().shape({
-	name: schema.required
+	name: schema.required.max(120),
 });
 
 export class PreviewDetails extends PureComponent<IProps, any> {
@@ -107,30 +107,18 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 			onSubmit={() => {}}
 		>
 			<StyledForm>
-				<Field name="name" render={({field, form}) => {
-					const placeholder = this.props.isNew && field.value === '' ? this.props.name : 'Name';
-					return (
-						<TextField
-							{...field}
-							inputRef={this.textFieldRef}
-							fullWidth
-							placeholder={placeholder}
-							onChange={this.handleNameChange(field)}
-							error={Boolean(form.errors.name) && !this.props.name}
-							inputProps={{
-								maxLength: 120,
-								onFocus: () => this.handleFocusName(field, form),
-								onBlur: () => this.handleBlurName(field, form)
-							}}
-							mutable={!this.props.isNew}
-							requiredConfirm={!this.props.isNew}
-						/>
-					);
-				}} />
+				<Field name="name" render={({field, form}) => (
+					<TextField
+						{...field}
+						inputRef={this.textFieldRef}
+						fullWidth
+						onChange={this.handleNameChange(field)}
+						onBlur={this.handleBlurName(field, form)}
+						error={Boolean(form.errors.name) && !this.props.name}
+					/>
+				)} />
 			</StyledForm>
 		</Formik>
-
-
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
@@ -202,13 +190,6 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 				this.props.onExpandChange(event, this.state.expanded);
 			}
 		});
-	}
-
-	public handleFocusName = (field, form) => {
-		if (this.props.isNew && !this.props.clone) {
-			const nameChanged = form.initialValues.name !== field.value;
-			form.setFieldValue('name', nameChanged ? field.value : '');
-		}
 	}
 
 	public handleBlurName = (field, form) => {
