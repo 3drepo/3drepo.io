@@ -113,7 +113,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 					<Field name="desc" render={({ field, form }) => (
 						<Description
 							{...field}
-							onChange={this.handleFieldChange(field.onChange, form)}
+							onBlur={this.handleFieldChange(field.onChange, form)}
 							validationSchema={GroupSchema}
 							fullWidth
 							multiline

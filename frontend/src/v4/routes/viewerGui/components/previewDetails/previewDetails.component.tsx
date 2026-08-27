@@ -67,6 +67,7 @@ interface IProps {
 	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
+	onNameBlur?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element | JSX.Element[];
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
 	actionButton?: ReactNode;
@@ -192,11 +193,14 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 		});
 	}
 
-	public handleBlurName = (field, form) => {
+	public handleBlurName = (field, form) => (event) => {
 		if (this.props.isNew && !this.props.clone) {
 			const nameChanged = this.props.name !== field.value;
 
 			form.setFieldValue('name', nameChanged && field.value ? field.value : this.props.name);
+		}
+		if (this.props.onNameBlur) {
+			this.props.onNameBlur(event, field.value);
 		}
 	}
 

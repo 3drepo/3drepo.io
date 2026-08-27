@@ -178,7 +178,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 					key={`${this.riskData._id}${size(this.criteria)}`}
 					defaultExpanded={horizontal || expandDetails}
 					editable={this.canEditBasicProperty}
-					onNameChange={this.handleNameChange}
+					onNameBlur={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
 					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
