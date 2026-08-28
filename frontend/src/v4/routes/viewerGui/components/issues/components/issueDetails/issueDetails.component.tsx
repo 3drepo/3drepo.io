@@ -176,7 +176,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 					key={this.issueData._id}
 					defaultExpanded={horizontal || expandDetails}
 					editable={this.canEditBasicProperty}
-					onNameBlur={this.handleNameBlur}
+					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
 					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
@@ -281,7 +281,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 		this.props.setState({ expandDetails: expanded });
 	}
 
-	public handleNameBlur = (event, name) => {
+	public handleNameChange = (event, name) => {
 		const newIssue = { ...this.issueData, name };
 		this.props.setState({ newIssue });
 

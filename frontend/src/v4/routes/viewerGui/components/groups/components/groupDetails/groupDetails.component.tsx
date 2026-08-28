@@ -137,7 +137,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			roleColor={this.editingGroup.color}
 			created={this.editingGroup.createdAt}
 			editable={this.props.canUpdate}
-			onNameBlur={this.handleFieldChange}
+			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={() => this.renderRulesField(this.isSmartGroup)}
 			panelName={GROUP_PANEL_NAME}
