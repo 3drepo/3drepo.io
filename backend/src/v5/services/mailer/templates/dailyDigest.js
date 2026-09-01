@@ -45,16 +45,17 @@ const dataSchema = Yup.object({
 			planName: Yup.string().required(),
 			runs: Yup.array().of(Yup.object({
 				status: Yup.string().required(),
-				stats: Yup.object({
-					new: Yup.number().min(0),
-					active: Yup.number().min(0),
-					resolved: Yup.number().min(0),
-				}),
-				error: Yup.object({
-					reason: Yup.string(),
-				}),
-				triggeredAt: Yup.string().transform((_, originalValue) => new Date(originalValue)
-					.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })),
+				results: Yup.object({
+					stats: Yup.object({
+						new: Yup.number().min(0),
+						active: Yup.number().min(0),
+						resolved: Yup.number().min(0),
+					}),
+					error: Yup.object({
+						reason: Yup.string(),
+					}),
+				}).required(),
+				triggeredAt: Yup.string().required(),
 			})).min(1).required(),
 		})).required(),
 	})).min(1).required(),

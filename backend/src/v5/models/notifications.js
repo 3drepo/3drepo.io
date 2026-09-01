@@ -51,12 +51,36 @@ const generateNotification = (type, user, data) => ({
 	data,
 });
 
-Notifications.insertClashNotifications = async (teamspace, project, notificationData, recipients) => {
-	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_COMPLETED,
-		recipient, { ...notificationData, teamspace, project }));
+Notifications.insertClashSucceededNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.stats) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_SUCCEEDED,
+			recipient, { ...notificationData, teamspace, project }));
 
-	if (records.length) {
-		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
+	}
+};
+
+Notifications.insertClashFailedNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.error) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_FAILED,
+			recipient, { ...notificationData, teamspace, project }));
+
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
+	}
+};
+
+Notifications.insertClashAbortedNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.error) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_ABORTED,
+			recipient, { ...notificationData, teamspace, project }));
+
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
 	}
 };
 
@@ -154,10 +178,7 @@ const getGroupedNotificationsByQuery = (query) => {
 						},
 					},
 					{
-						$sort: {
-							'_id.project': 1,
-							'_id.model': 1,
-						},
+						$sort: { '_id.project': 1, '_id.model': 1 },
 					},
 					// Group models under each project.
 					{
@@ -177,17 +198,13 @@ const getGroupedNotificationsByQuery = (query) => {
 					},
 					// Normalize the shape before merging both facets.
 					{
-						$project: {
-							_id: 1,
-							ticketData: 1,
-							clashData: { $literal: [] },
-						},
+						$project: { _id: 1, ticketData: 1, clashData: { $literal: [] } },
 					},
 				],
 				clashNotifications: [
 					// Only process completed clash-run notifications.
 					{
-						$match: { type: 'CLASH_RUN_COMPLETED' },
+						$match: { 'data.plan': { $exists: true, $ne: null } },
 					},
 					// Group clash runs under each plan.
 					{
@@ -198,17 +215,7 @@ const getGroupedNotificationsByQuery = (query) => {
 								project: '$data.project',
 								plan: '$data.plan',
 							},
-							runs: {
-								$push: {
-									status: '$data.status',
-									stats: '$data.results.stats',
-									error: '$data.results.error',
-									triggeredAt: '$data.triggeredAt',
-								},
-							},
-							planName: {
-								$first: '$data.planName',
-							},
+							runs: { $push: { data: '$data', type: '$type' } },
 						},
 					},
 					// Group plans under each project.
@@ -219,12 +226,7 @@ const getGroupedNotificationsByQuery = (query) => {
 								teamspace: '$_id.teamspace',
 								project: '$_id.project',
 							},
-							clashData: {
-								$push: {
-									planName: '$planName',
-									runs: '$runs',
-								},
-							},
+							clashData: { $push: { plan: '$_id.plan', runs: '$runs' } },
 						},
 					},
 					// Normalize the shape before merging both facets.
@@ -264,18 +266,14 @@ const getGroupedNotificationsByQuery = (query) => {
 					$reduce: {
 						input: '$ticketDataArrays',
 						initialValue: [],
-						in: {
-							$concatArrays: ['$$value', '$$this'],
-						},
+						in: { $concatArrays: ['$$value', '$$this'] },
 					},
 				},
 				clashData: {
 					$reduce: {
 						input: '$clashDataArrays',
 						initialValue: [],
-						in: {
-							$concatArrays: ['$$value', '$$this'],
-						},
+						in: { $concatArrays: ['$$value', '$$this'] },
 					},
 				},
 			},
@@ -300,7 +298,6 @@ const getGroupedNotificationsByQuery = (query) => {
 				},
 			},
 		},
-
 	];
 
 	return db.aggregate(INTERNAL_DB, NOTIFICATIONS_COL, pipelines);

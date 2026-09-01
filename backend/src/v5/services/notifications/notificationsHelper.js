@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createConstantsObject } = require('../utils/helper/objects');
+const { uniqueElements } = require('../../utils/helper/arrays');
 
-const NotificationConstants = {};
+const NotificationsHelper = {};
 
-NotificationConstants.notificationTypes = createConstantsObject([
-	'TICKET_ASSIGNED', 'TICKET_UPDATED', 'TICKET_CLOSED', 'CLASH_RUN_SUCCEEDED', 'CLASH_RUN_FAILED', 'CLASH_RUN_ABORTED',
-]);
+const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
+	(entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry));
 
-module.exports = NotificationConstants;
+NotificationsHelper.getUsernamesToNotify = (jobList, toNotify) => {
+	const jobToUsers = {};
+	jobList.forEach(({ _id, users }) => {
+		jobToUsers[_id] = users;
+	});
+
+	const userList = getUserList(jobToUsers, toNotify);
+	return uniqueElements(userList);
+};
+
+module.exports = NotificationsHelper;

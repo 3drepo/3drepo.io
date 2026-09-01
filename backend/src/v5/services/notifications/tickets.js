@@ -27,15 +27,13 @@ const { getClosedStatuses } = require('../../schemas/tickets/templates');
 const { getJobsToUsers } = require('../../models/jobs');
 const { getTemplateById } = require('../../models/tickets.templates');
 const { getTicketById } = require('../../models/tickets');
+const { getUsernamesToNotify } = require('./notificationsHelper');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { subscribe } = require('../eventsManager/eventsManager');
 const chatLabel = require('../../utils/logger').labels.notifications;
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const TicketNotifications = {};
-
-const getUserList = (jobToUsers, toNotify) => toNotify.flatMap(
-	(entry) => (jobToUsers[entry] ? jobToUsers[entry] : entry));
 
 /*
  * notificationData is an array of { info, notifyFn }
@@ -48,15 +46,12 @@ const generateTicketNotifications = async (teamspace, project, model, actionedBy
 		getUsersWithPermissions(teamspace, project, model, false),
 	]);
 
-	const jobToUsers = {};
-	jobList.forEach(({ _id, users }) => {
-		jobToUsers[_id] = users;
-	});
-
 	await Promise.all(notificationData.map(async ({ info, notifyFn }) => {
 		const notifications = info.flatMap(({ toNotify, ...data }) => {
-			const users = getCommonElements(getUserList(jobToUsers, toNotify), usersWithAccess)
+			const usersToNotify = getUsernamesToNotify(jobList, toNotify);
+			const users = getCommonElements(usersToNotify, usersWithAccess)
 				.filter((user) => user !== actionedBy);
+
 			return users.length ? { ...data, users } : [];
 		});
 

@@ -413,7 +413,7 @@
     <div class="run-list">
       <% for(const { planName, runs} of clashData) { %>
         <div class="plan-group">
-          <% runs.forEach(({ status, stats, error, triggeredAt }, index) => { %>
+          <% runs.forEach(({ status, results: { stats, error }, triggeredAt }, index) => { %>
             <div class="run-row run-row-grouped">          
                 <div>
                   <span class="cell-label">

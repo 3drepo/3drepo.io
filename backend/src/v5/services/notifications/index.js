@@ -16,6 +16,7 @@
  */
 
 const { ensureIndicesExist } = require('../../models/notifications');
+const { subscribe: subscribeToClashes } = require('./clashes');
 const { subscribe: subscribeToTickets } = require('./tickets');
 
 const NotificationService = {};
@@ -23,6 +24,7 @@ const NotificationService = {};
 NotificationService.init = async () => {
 	await ensureIndicesExist();
 	subscribeToTickets();
+	subscribeToClashes();
 };
 
 module.exports = NotificationService;
