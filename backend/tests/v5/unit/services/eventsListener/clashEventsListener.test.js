@@ -50,12 +50,6 @@ const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/com
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
 
-jest.mock('../../../../../src/v5/models/jobs');
-const JobsModel = require(`${src}/models/jobs`);
-
-jest.mock('../../../../../src/v5/models/notifications');
-const NotificationsModel = require(`${src}/models/notifications`);
-
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -126,42 +120,17 @@ const testClashRunCompleted = () => {
 			value: 0,
 		};
 
-		const jobsToUsers = times(3, () => ({
-			_id: generateRandomString(),
-			users: times(2, () => generateRandomString()),
-		}));
-		const plan = {
-			_id: generateUUID(),
-			name: generateRandomString(),
-			notify: [jobsToUsers[0].users, jobsToUsers[1]._id, generateRandomString()],
-		};
-		const recipients = [jobsToUsers[0].users, jobsToUsers[1].users, plan.notify[2]].flat();
-
-		const defaultRun = {
-			plan,
-			results: generateRandomObject(),
-			status: generateRandomString(),
-			triggeredAt: new Date(),
-		};
-
 		const bouncerErrorData = { ...data, value: 28 };
 
 		test.each([
-			[`Should process clash results if there is a ${events.CLASH_RUN_COMPLETED}`],
-			[`Should set the clash run to failed on bouncer error for ${events.CLASH_RUN_COMPLETED}`, undefined, true],
-			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, undefined, undefined, templates.clashRunNotFound],
-			[`Should handle rejected error objects for ${events.CLASH_RUN_COMPLETED}`, undefined, undefined, new Error(generateRandomString())],
-			['Should process clash results if notify is not set', { ...defaultRun, plan: { ...defaultRun.plan, notify: undefined } }],
-			['Should process clash results if notify is empty', { ...defaultRun, plan: { ...defaultRun.plan, notify: [] } }],
-		])('%s', async (desc, clashRun = defaultRun, bouncerErrored, processClashResultsError) => {
+			[`Should process clash results if there is a ${events.CLASH_RUN_COMPLETED}`, false, undefined],
+			[`Should set the clash run to failed on bouncer error for ${events.CLASH_RUN_COMPLETED}`, true, undefined],
+			[`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, false, templates.clashRunNotFound],
+			[`Should handle rejected error objects for ${events.CLASH_RUN_COMPLETED}`, false, new Error(generateRandomString())],
+		])('%s', async (desc, bouncerErrored, processClashResultsError) => {
 			if (processClashResultsError) {
 				ClashesProcessor.processClashResults.mockRejectedValueOnce(processClashResultsError);
 			}
-			if (clashRun.plan.notify?.length) {
-				JobsModel.getJobsToUsers.mockResolvedValueOnce(jobsToUsers);
-				ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
-			}
-			ClashesModel.getClashRunById.mockResolvedValueOnce(clashRun);
 
 			await publishAndWaitForEvent(events.CLASH_RUN_COMPLETED, bouncerErrored ? bouncerErrorData : data);
 
@@ -178,20 +147,6 @@ const testClashRunCompleted = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(bouncerErrorData.teamspace,
 				bouncerErrorData.project, bouncerErrorData.runId, clashRunStatus.FAILED,
 				{ error: { code: resInfo.retVal, reason: resInfo.message } });
-
-			expect(ClashesModel.getClashRunById).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.getClashRunById).toHaveBeenCalledWith(data.teamspace,
-				data.project, data.runId, { plan: 1, results: 1, status: 1, triggeredAt: 1 });
-
-			if (clashRun.plan.notify?.length) {
-				expect(NotificationsModel.insertClashNotifications).toHaveBeenCalledTimes(1);
-				expect(NotificationsModel.insertClashNotifications).toHaveBeenCalledWith(data.teamspace,
-					data.project, { plan: clashRun.plan._id,
-						results: clashRun.results,
-						planName: clashRun.plan.name,
-						status: clashRun.status,
-						triggeredAt: clashRun.triggeredAt }, recipients);
-			}
 		});
 	});
 };

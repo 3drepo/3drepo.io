@@ -286,10 +286,8 @@ const testValidateNewPlanData = () => {
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
 
-			if (data?.notify?.length) {
-				ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
-				JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
-			}
+			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
+			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
 
 			const mockCB = jest.fn(() => {});
 			const req = {
@@ -321,7 +319,8 @@ const testValidateUpdatePlanData = () => {
 		operator: valueOperators.IS.name,
 		values: [generateRandomString()],
 	};
-
+	const users = times(3, () => generateRandomString());
+	const jobs = times(3, () => generateRandomString());
 	const recognisedContainer = times(3, () => generateUUIDString());
 	const containerNotInProject = recognisedContainer[2];
 
@@ -587,6 +586,9 @@ const testValidateUpdatePlanData = () => {
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
+
+			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
+			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
 
 			const mockCB = jest.fn(() => {});
 			const req = {

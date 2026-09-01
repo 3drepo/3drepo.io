@@ -179,9 +179,9 @@ const clashRunProcessed = async (payload) => {
 const ClashEventsListener = {};
 
 ClashEventsListener.init = () => {
-	subscribe(events.MODEL_IMPORT_FINISHED, onNewContainerRevision);
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
+	subscribe(events.MODEL_IMPORT_FINISHED, onNewContainerRevision);
 	subscribe(events.CLASH_RUN_RESULTS_PROCESSED, clashRunProcessed);
 };
 
