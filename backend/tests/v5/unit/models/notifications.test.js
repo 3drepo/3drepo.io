@@ -515,7 +515,7 @@ const testInsertClashSucceededNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { ...generateRandomObject(), results: { stats: generateRandomObject() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -572,7 +572,7 @@ const testInsertClashFailedNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -629,7 +629,7 @@ const testInsertClashAbortedNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
