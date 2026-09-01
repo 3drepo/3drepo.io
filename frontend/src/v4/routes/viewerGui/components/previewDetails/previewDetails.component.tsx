@@ -19,7 +19,6 @@ import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
 import { JSX } from 'react/jsx-runtime';
-import { TextField } from '@controls/inputs/textField/textField.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -35,6 +34,7 @@ import {
 	NotCollapsableContent,
 	ScrollableContainer,
 	StyledForm,
+	TextField,
 	Summary,
 	TitleNumber,
 	ToggleButton,
@@ -75,7 +75,7 @@ interface IProps {
 }
 
 const ValidationSchema = Yup.object().shape({
-	name: schema.required.max(120),
+	name: schema.required,
 });
 
 export class PreviewDetails extends PureComponent<IProps, any> {
@@ -112,9 +112,15 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 						{...field}
 						inputRef={this.textFieldRef}
 						fullWidth
+						placeholder="Name"
 						onChange={this.handleNameChange(field)}
-						onBlur={this.handleBlurName(field, form)}
 						error={Boolean(form.errors.name) && !this.props.name}
+						inputProps={{
+							maxLength: 120,
+							onBlur: () => this.handleBlurName(field, form)
+						}}
+						mutable={!this.props.isNew}
+						requiredConfirm={!this.props.isNew}
 					/>
 				)} />
 			</StyledForm>
