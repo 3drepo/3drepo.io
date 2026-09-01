@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const MapsConstants = {};
 
-config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
-config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
-config.setupFiles = ['./tests/v5/scripts/setup.js'];
+MapsConstants.mapProviders = {
+	OSM: 'osm',
+	HERE: 'here',
+};
 
-config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
-
-module.exports = config;
+module.exports = MapsConstants;

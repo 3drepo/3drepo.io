@@ -82,6 +82,7 @@ const uniqueTypeBlackList = [
 	propTypes.MEASUREMENTS,
 	propTypes.COORDS,
 	propTypes.MANY_OF,
+	propTypes.TAGS,
 ];
 
 const complexTypes = [

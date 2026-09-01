@@ -18,10 +18,33 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { generateRandomString, sleepMS } = require('../../helper/services');
+const http = require('http');
 
 const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const getRabbitMQQueues = () => new Promise((resolve, reject) => {
+	const { hostname } = new URL(config.cn_queue.host);
+	const options = {
+		hostname,
+		port: 15672,
+		path: '/api/queues',
+		headers: { Authorization: `Basic ${Buffer.from('guest:guest').toString('base64')}` },
+	};
+	http.get(options, (res) => {
+		let data = '';
+		res.on('data', (chunk) => { data += chunk; });
+		res.on('end', () => {
+			try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+		});
+	}).on('error', reject);
+});
+
+const countAnonQueues = async () => {
+	const queues = await getRabbitMQQueues();
+	return queues.filter((q) => q.name.startsWith('amq.gen-')).length;
+};
 
 const sendQueueMessage = async (queueName) => {
 	const message = generateRandomString();
@@ -163,8 +186,33 @@ const testConnection = () => {
 	});
 };
 
+const testExchangeQueueCleanup = () => {
+	describe('Exchange queue cleanup', () => {
+		afterEach(Queue.close);
+
+		test('Exchange listener should create a temporary queue that is removed on connection close', async () => {
+			const before = await countAnonQueues();
+
+			await Queue.listenToExchange(generateRandomString(), jest.fn());
+			expect(await countAnonQueues()).toBe(before + 1);
+
+			await Queue.close();
+
+			/* eslint-disable no-await-in-loop */
+			for (let i = 0; i < 3; i++) {
+				const count = await countAnonQueues();
+				if (count === before) return;
+				await sleepMS(100);
+			}
+			/* eslint-enable no-await-in-loop */
+			expect(await countAnonQueues()).toBe(before);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testQueueMessages();
 	testExchangeMessages();
+	testExchangeQueueCleanup();
 	testConnection();
 });

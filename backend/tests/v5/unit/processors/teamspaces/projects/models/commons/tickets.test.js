@@ -1163,6 +1163,41 @@ const testGetOpenTicketsCount = () => {
 	);
 };
 
+const testGetTagPropertyValues = () => {
+	describe('Get tag property values', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const templateId = generateUUID();
+
+		test('should get root tag property values', async () => {
+			const expectedOutput = times(3, generateRandomString);
+			const property = `properties.${generateRandomString()}`;
+			TicketsModel.getDistinctPropertyValues.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTagPropertyValues(teamspace, project, model, templateId, property))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledWith(
+				teamspace, project, model, templateId, property);
+		});
+
+		test('should get module tag property values', async () => {
+			const expectedOutput = times(3, generateRandomString);
+			const property = `modules.${generateRandomString()}.${generateRandomString()}`;
+			TicketsModel.getDistinctPropertyValues.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTagPropertyValues(teamspace, project, model, templateId, property))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledWith(
+				teamspace, project, model, templateId, property);
+		});
+	});
+};
+
 const testRemoveTicketsWithTemplates = () => {
 	describe('Remove tickets with templates', () => {
 		test('should remove all tickets with templates, the ticket comments, logs and any resources', async () => {
@@ -1542,6 +1577,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetTicketList();
 	testGetOpenTicketsCountForMultipleModels();
 	testGetOpenTicketsCount();
+	testGetTagPropertyValues();
 	testRemoveTicketsWithTemplates();
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
