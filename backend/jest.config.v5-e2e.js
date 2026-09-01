@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const config = require('./jest.config.v5');
 
 config.coveragePathIgnorePatterns = [
 	...config.coveragePathIgnorePatterns,
-	'^((?!handler).)*$',
+	// require code coverage on routes folder and services/chat folder
+	'^((?!routes|services\/chat).)*$'
 ];
 
-config.testMatch = ['**/tests/**/drivers/**/*.test.[jt]s?(x)'];
-config.testSequencer = './jest.sequencer.drivers.js';
+config.testMatch = ['**/tests/**/e2e/**/*.test.[jt]s?(x)'];
+config.testSequencer = './jest.sequencer.e2e.js'
+config.setupFiles = ["./tests/v5/e2e/setup.js"];
+config.testTimeout = 30000;
 
 module.exports = config;

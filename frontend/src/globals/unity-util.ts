@@ -1654,13 +1654,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropRiskPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropRiskPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'RISK');
 	}
 
 	/**
@@ -1672,13 +1666,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropIssuePin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'ISSUE');
 	}
 
 	/**
@@ -1690,13 +1678,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropBookmarkPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'BOOKMARK');
 	}
 
 	/**
@@ -1708,13 +1690,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'TICKET');
 	}
 
 	/**
@@ -2114,9 +2090,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Reset map sources. This removes all currently displayed maps
+	 * Reset map sources. This removes all currently displayed maps.
 	 * @category GIS
-	 * @param account - name of teamspace
 	 */
 	public static resetMapSources() {
 		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -2125,19 +2100,29 @@ export class UnityUtil {
 	/**
 	 * Add map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - The source in the form `provider/layer`. This should be
+	 * the `source` member of one of the layer objects returned by the get list
+	 * of maps ('/maps/') request.
+	 * @param height - The height in mm above the project origin at which to
+	 * place the map layer. If the layer already exists it will be moved to
+	 * the new height.
 	 */
-	public static addMapSource(mapSource: string) {
-		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static addMapSource(source: string, height?: number) {
+		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
+			source, 
+			height: (height ?? 0) * 0.001,
+		}),
+		);
 	}
 
 	/**
 	 * Remove map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - One of the source strings previously provided to
+	 * addMapSource. If the source does not exist this call does nothing.
 	 */
-	public static removeMapSource(mapSource: string) {
-		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static removeMapSource(source: string) {
+		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ source }));
 	}
 
 	/**
@@ -3274,5 +3259,62 @@ export class UnityUtil {
 	 */
 	public static setLabelScale(scale: number) {
 		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/**
+	 * Create or update a custom pin icon. Provide one or two images for the
+	 * normal and (optionally) selected states. If only one image is provided
+	 * it is reused for both states.
+	 *
+	 * @category Pins
+	 * @param images - Array of 1 or 2 DrawingImageSource entries.
+	 *   Index 0 is the normal/default state, index 1 (optional) is the selected state.
+	 * @param iconCode - A unique string code to identify this icon.
+	 *   Reserved codes (e.g. "RISK", "ISSUE", "BOOKMARK", "TICKET") map to
+	 *   built-in icons but may be overridden.
+	 */
+	public static createPinIcon(images: DrawingImageSource[], iconCode: string) {
+		const normalImage = images[0];
+		const selectedImage = images.length > 1 ? images[1] : null;
+
+		const normalDomId = this.domTextureReferenceCounter++;
+		this.domTextureReferences[normalDomId] = normalImage;
+		const normalDimensions = [normalImage.width, normalImage.height];
+
+		let selectedDomId = -1;
+		let selectedDimensions = [0, 0];
+		if (selectedImage) {
+			selectedDomId = this.domTextureReferenceCounter++;
+			this.domTextureReferences[selectedDomId] = selectedImage;
+			selectedDimensions = [selectedImage.width, selectedImage.height];
+		}
+
+		const params = {
+			iconCode: iconCode.toUpperCase(),
+			normalDomId,
+			normalDimensions,
+			selectedDomId,
+			selectedDimensions,
+		};
+
+		UnityUtil.toUnity('CreatePinIcon', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Add a Pin with a custom icon code.
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param color - RGB value for the colour of the pin
+	 * @param icon - the code for a custom or built-in icon (e.g. "RISK", "ISSUE", or a custom code)
+	 */
+	public static dropPin(id: string, position: number[], color: number[], icon: string) {
+		const params = {
+			id,
+			position,
+			color,
+			icon,
+		};
+		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 }

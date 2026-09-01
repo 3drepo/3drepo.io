@@ -16,7 +16,6 @@
  */
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes");
 const async = require("async");
@@ -30,7 +29,7 @@ describe('User ', () => {
 	const password = "password";
 
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -45,7 +44,7 @@ describe('User ', () => {
 		await teamSpace1.login(username, password);
 
 	});
-	after(done => server.close(done));
+	afterAll(done => { server.close(done); });
 
 
 	describe('using starred metadata', () => {
@@ -62,13 +61,14 @@ describe('User ', () => {
 										tags.map(deleteTag(agent))
 									,done);
 
-		before(done => deleteTags(teamSpace1)(done));
+		beforeAll(done => deleteTags(teamSpace1)(done));
 
 		it("should show an empty list when no tags have been starred", done => {
 			teamSpace1.get(FAVOURITE_URL)
 				.send({})
 				.expect(200, function(err, res) {
-					expect(res.body).to.be.an("array").and.to.have.length(0, 'Should have an empty array as favourites metadata tags');
+					expect(Array.isArray(res.body)).toBe(true);
+					expect(res.body).toHaveLength(0);
 					done(err);
 				});
 		});
@@ -84,8 +84,8 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.be.an("array");
-						expect(favourites.sort()).to.eql( tags.sort());
+						expect(Array.isArray(favourites)).toBe(true);
+						expect(favourites.sort()).toEqual( tags.sort());
 						next(err);
 					})
 			], done);
@@ -101,7 +101,8 @@ describe('User ', () => {
 					}),
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
-						expect(res.body).to.be.an("array").and.to.have.length(0, 'Should have an empty array as favourites metadata tags');
+						expect(Array.isArray(res.body)).toBe(true);
+						expect(res.body).toHaveLength(0);
 						next(err);
 					})
 			], done);
@@ -125,8 +126,9 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.be.an("array").and.to.have.length(1, 'Should have an array with one tag');
-						expect(favourites).to.eql([tags[0]]);
+						expect(Array.isArray(favourites)).toBe(true);
+						expect(favourites).toHaveLength(1);
+						expect(favourites).toEqual([tags[0]]);
 						next(err);
 					})
 			], done);
@@ -144,8 +146,9 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.be.an("array").and.to.have.length(tags.length, 'Should have an array with one tag');
-						expect(favourites.sort()).to.eql(tags.sort());
+						expect(Array.isArray(favourites)).toBe(true);
+						expect(favourites).toHaveLength(tags.length);
+						expect(favourites.sort()).toEqual(tags.sort());
 						next(err);
 					})
 			], done);
@@ -159,8 +162,9 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 							.expect(200, function(err, res) {
 								const favourites = res.body;
-								expect(favourites).to.be.an("array").and.to.have.length(tags.length-1, 'Should have an array with the rest of the tags');
-								expect(favourites.sort()).to.eql(tags.filter(t => t != tagToDelete).sort());
+								expect(Array.isArray(favourites)).toBe(true);
+								expect(favourites).toHaveLength(tags.length-1);
+								expect(favourites.sort()).toEqual(tags.filter(t => t != tagToDelete).sort());
 								next(err);
 							})
 				], done)
@@ -176,7 +180,7 @@ describe('User ', () => {
 			teamSpace1.get(FAVOURITE_URL)
 				.send({})
 				.expect(200, function(err, res) {
-					expect(res.body).to.eql({});
+					expect(res.body).toEqual({});
 					done(err);
 				});
 		});
@@ -195,7 +199,7 @@ describe('User ', () => {
 					}),
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal(data);
+						expect(res.body).toEqual(data);
 						next(err);
 					})
 			], done);
@@ -206,19 +210,19 @@ describe('User ', () => {
 				next => teamSpace1.put(FAVOURITE_URL)
 					.send([])
 					.expect(400, function(err, res) {
-						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						expect(res.body.code).toBe(responseCodes.INVALID_ARGUMENTS.code);
 						next(err);
 				}),
 				next => teamSpace1.put(FAVOURITE_URL)
 					.send({"a": 1})
 					.expect(400, function(err, res) {
-						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						expect(res.body.code).toBe(responseCodes.INVALID_ARGUMENTS.code);
 						next(err);
 				}),
 				next => teamSpace1.put(FAVOURITE_URL)
 					.send({"a": [1]})
 					.expect(400, function(err, res) {
-						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						expect(res.body.code).toBe(responseCodes.INVALID_ARGUMENTS.code);
 						next(err);
 				})
 
@@ -234,7 +238,7 @@ describe('User ', () => {
 					}),
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
-						expect(res.body).to.eql({});
+						expect(res.body).toEqual({});
 						next(err);
 					})
 			], done);
@@ -259,7 +263,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
@@ -284,7 +288,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
@@ -309,7 +313,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
@@ -335,7 +339,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
@@ -359,7 +363,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
@@ -383,7 +387,7 @@ describe('User ', () => {
 				next => teamSpace1.get(FAVOURITE_URL)
 					.expect(200, function(err, res) {
 						const favourites = res.body;
-						expect(favourites).to.deep.equal(expectedData);
+						expect(favourites).toEqual(expectedData);
 						next(err);
 					})
 			], done);
