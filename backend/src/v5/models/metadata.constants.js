@@ -21,11 +21,13 @@ const MetaConstants = {};
 MetaConstants.idTypes = {
 	IFC: 'ifc_guids',
 	REVIT: 'revit_ids',
+	DWG: 'dwg_ids',
 };
 
 MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
 	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
+	[MetaConstants.idTypes.DWG]: ['Entity Handle::Value', 'Element ID'],
 };
 
 MetaConstants.metaKeyToIdType = {};
