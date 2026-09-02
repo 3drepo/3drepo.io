@@ -132,12 +132,10 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 					switch (type) {
 					case notificationTypes.CLASH_RUN_SUCCEEDED:
 						return { ...data, triggeredAt, status: clashRunStatus.COMPLETED };
-					case notificationTypes.CLASH_RUN_FAILED:
-						return { ...data, triggeredAt, status: clashRunStatus.FAILED };
 					case notificationTypes.CLASH_RUN_ABORTED:
 						return { ...data, triggeredAt, status: clashRunStatus.ABORTED };
 					default:
-						return [];
+						return { ...data, triggeredAt, status: clashRunStatus.FAILED };
 					}
 				});
 

@@ -21,11 +21,12 @@ const { times } = require('lodash');
 const {
 	resetFileshare,
 	db: { reset: resetDB, createTeamspace, createUser,
-		createProject, createModel, createTemplates, createTicket },
+		createProject, createModel, createTemplates, createTicket, createClashPlans },
 	generateRandomString,
 	generateUserCredentials,
 	generateUUID, generateUUIDString,
 	generateTemplate, generateTicket,
+	generateClashPlan,
 } = require('../../helper/services');
 
 const { src, utilScripts } = require('../../helper/path');
@@ -56,7 +57,7 @@ const insertBogusNotification = (teamspace, project, model, users, ticket) => in
 	})),
 );
 
-const setupData = async ({ users, ...teamspaces }) => {
+const setupData = async ({ users, plans, ...teamspaces }) => {
 	await Promise.all([...users, ...Object.values(teamspaces)].map((entry) => createUser(entry)));
 
 	const usernameArr = users.map(({ user }) => user);
@@ -87,6 +88,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 				: createModel(ts.user, model, generateRandomString()),
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
+			createClashPlans(ts.user, project, plans),
 			insertTicketAssignedNotifications(ts.user, project, model, [{
 				users: recipients,
 				ticket: ticketId,
@@ -100,13 +102,13 @@ const setupData = async ({ users, ...teamspaces }) => {
 				ticket: ticketId,
 				author: usernameArr[0] }]),
 			insertClashSucceededNotifications(ts.user, project, {
-				planName: generateRandomString(), results: { stats: { new: 1, active: 2, resolved: 3 } },
+				plan: plans[0]._id, results: { stats: { new: 1, active: 2, resolved: 3 } }, triggeredAt: new Date(),
 			}, recipients),
 			insertClashAbortedNotifications(ts.user, project, {
-				planName: generateRandomString(), results: { error: generateRandomString() },
+				plan: plans[1]._id, results: { error: generateRandomString() }, triggeredAt: new Date(),
 			}, recipients),
 			insertClashFailedNotifications(ts.user, project, {
-				planName: generateRandomString(), results: { error: generateRandomString() },
+				plan: plans[2]._id, results: { error: generateRandomString() }, triggeredAt: new Date(),
 			}, recipients),
 			insertBogusNotification(ts.user, project, model, recipients, ticketId),
 		]);
@@ -122,6 +124,7 @@ const createData = () => ({
 	teamspaceProjNotFound: generateUserCredentials(),
 	teamspaceModelNotFound: generateUserCredentials(),
 	users: times(5, generateUserCredentials),
+	plans: times(3, () => generateClashPlan(generateRandomString(), generateRandomString())),
 });
 
 const runTest = () => {
