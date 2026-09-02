@@ -453,9 +453,11 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 					</OpenInViewerButton>
 				</Link>
 				<FlexContainer>
-					<CircleButton onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}>
-						<ExpandIcon />
-					</CircleButton>
+					{selectedTemplate.config?.comments && (
+						<CircleButton onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}>
+							<ExpandIcon />
+						</CircleButton>
+					)}
 					<CircleButton onClick={clearTicketId}>
 						<CloseTicketIcon />
 					</CircleButton>

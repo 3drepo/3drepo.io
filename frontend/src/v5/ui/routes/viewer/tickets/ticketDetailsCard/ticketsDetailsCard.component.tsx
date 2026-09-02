@@ -40,6 +40,8 @@ import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 import { CommentsExpanded } from '../ticketsForm/commentsPanel/commentsExpanded/commentsExpanded.component';
 import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
+import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
+import { formatMessage } from '@/v5/services/intl';
 
 enum IndexChange {
 	PREV = -1,
@@ -208,7 +210,11 @@ export const TicketDetailsCard = () => {
 							actions={<>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
-								<CircleButton variant="viewer" onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}><ExpandIcon /></CircleButton>
+								<Tooltip title={disableExpandButton ? formatMessage({ id: 'ticketsTable.button.expand.disabled', defaultMessage: 'Comments are disabled in this ticket' }) : ''}>
+									<div>
+										<CircleButton variant="viewer" onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}><ExpandIcon /></CircleButton>
+									</div>
+								</Tooltip>
 							</>}
 						/>
 						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
