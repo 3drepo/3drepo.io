@@ -31,7 +31,7 @@ const {
 const { src, utilScripts } = require('../../helper/path');
 
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
-const { insertClashNotifications, insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
+const { insertClashAbortedNotifications, insertClashFailedNotifications, insertClashSucceededNotifications, insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -77,7 +77,6 @@ const setupData = async ({ users, ...teamspaces }) => {
 		const template = generateTemplate();
 		const ticket = generateTicket(template, true);
 
-		const clashData = { planName: generateRandomString(), results: { stats: { new: 1, active: 2, resolved: 3 } } };
 		const recipients = ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr;
 		const ticketId = stringToUUID(ticket._id);
 
@@ -100,7 +99,15 @@ const setupData = async ({ users, ...teamspaces }) => {
 				users: recipients,
 				ticket: ticketId,
 				author: usernameArr[0] }]),
-			insertClashNotifications(ts.user, project, clashData, recipients),
+			insertClashSucceededNotifications(ts.user, project, {
+				planName: generateRandomString(), results: { stats: { new: 1, active: 2, resolved: 3 } },
+			}, recipients),
+			insertClashAbortedNotifications(ts.user, project, {
+				planName: generateRandomString(), results: { error: generateRandomString() },
+			}, recipients),
+			insertClashFailedNotifications(ts.user, project, {
+				planName: generateRandomString(), results: { error: generateRandomString() },
+			}, recipients),
 			insertBogusNotification(ts.user, project, model, recipients, ticketId),
 		]);
 	}));
