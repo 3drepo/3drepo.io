@@ -99,7 +99,7 @@ const getUserDetails = async (users) => {
 	const userLUT = {};
 
 	usersData.forEach(({ user, customData: { email, firstName,
-		billing: { billingInfo: { countryCode } = {} } = {} } }) => {
+		billing: { billingInfo: { countryCode } } } }) => {
 		userLUT[user] = { email, firstName, countryCode };
 	});
 
@@ -139,7 +139,7 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 					}
 				});
 
-				return formattedRuns.length ? { planName, runs: formattedRuns } : [];
+				return { planName, runs: formattedRuns };
 			});
 
 			const ticketData = notification.ticketData.flatMap(({ model: modelID, data }) => {

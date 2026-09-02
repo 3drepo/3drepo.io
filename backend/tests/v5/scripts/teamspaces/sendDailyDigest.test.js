@@ -104,6 +104,11 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 			insertClashSucceededNotifications(ts.user, project, {
 				plan: plans[0]._id, results: { stats: { new: 1, active: 2, resolved: 3 } }, triggeredAt: new Date(),
 			}, recipients),
+			insertClashSucceededNotifications(ts.user, project, {
+				plan: generateRandomString(),
+				results: { stats: { new: 1, active: 2, resolved: 3 } },
+				triggeredAt: new Date(),
+			}, recipients),
 			insertClashAbortedNotifications(ts.user, project, {
 				plan: plans[1]._id, results: { error: generateRandomString() }, triggeredAt: new Date(),
 			}, recipients),
@@ -123,7 +128,13 @@ const createData = () => ({
 	teamspaceUserNotFound: generateUserCredentials(),
 	teamspaceProjNotFound: generateUserCredentials(),
 	teamspaceModelNotFound: generateUserCredentials(),
-	users: times(5, generateUserCredentials),
+	users: [...times(4, generateUserCredentials), { ...generateUserCredentials(),
+		basicData: {
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			email: `${generateRandomString()}@${generateRandomString(6)}.com`,
+			billing: { billingInfo: { company: generateRandomString(), countryCode: generateRandomString() } },
+		} }],
 	plans: times(3, () => generateClashPlan(generateRandomString(), generateRandomString())),
 });
 
