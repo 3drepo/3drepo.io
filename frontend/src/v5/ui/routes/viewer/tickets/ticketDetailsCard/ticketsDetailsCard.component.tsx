@@ -26,7 +26,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, set } from 'lodash';
-import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
+import { diffObjects, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
@@ -111,7 +111,7 @@ export const TicketDetailsCard = () => {
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
-		mode: 'onChange',
+		mode: 'all',
 		defaultValues: ticket,
 	});
 
@@ -127,7 +127,11 @@ export const TicketDetailsCard = () => {
 		} catch (yupError) {
 			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
 		}
-		const values = dirtyValues(formValues, formData.formState.dirtyFields);
+		// formState.dirtyFields is unreliable here: react-hook-form computes it asynchronously
+		// alongside the yup resolver validation, so it can still report stale (clean) state right
+		// after a Controller-driven change (e.g. editing a ticket group). Diffing the live form
+		// values against the original ticket sidesteps that timing issue entirely.
+		const values = diffObjects(formValues, ticket);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);
