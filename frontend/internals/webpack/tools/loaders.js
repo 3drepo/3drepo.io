@@ -1,5 +1,16 @@
 const TSLoader = {
-	test: /\.(ts|tsx)$/,
+	test: /\.ts$/,
+	loader: 'esbuild-loader',
+	exclude: /node_modules/,
+	options: {
+		loader: 'ts',
+		target: 'es2015',
+		tsconfigRaw: require('../../../tsconfig.json')
+	}
+};
+
+const TSXLoader = {
+	test: /\.tsx$/,
 	loader: 'esbuild-loader',
 	exclude: /node_modules/,
 	options: {
@@ -69,6 +80,7 @@ const WorkerLoader = {
 
 module.exports = {
   TSLoader,
+  TSXLoader,
   CSSLoader,
   FontLoader,
   ImageLoader,

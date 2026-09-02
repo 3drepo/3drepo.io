@@ -27,6 +27,7 @@ module.exports = (options) => ({
 	module: {
 		rules: [
 			loaders.TSLoader,
+			loaders.TSXLoader,
 			loaders.CSSLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
