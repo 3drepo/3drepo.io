@@ -27,7 +27,7 @@ MetaConstants.idTypes = {
 MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
 	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
-	[MetaConstants.idTypes.DWG]: ['Entity Handle::Value','Element ID'],
+	[MetaConstants.idTypes.DWG]: ['Entity Handle::Value', 'Element ID'],
 };
 
 MetaConstants.metaKeyToIdType = {};
