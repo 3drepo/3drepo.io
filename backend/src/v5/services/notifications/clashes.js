@@ -24,7 +24,7 @@ const { clashRunStatus } = require('../../models/clashes.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClashRunById } = require('../../models/clashes.runs');
 const { getJobsToUsers } = require('../../models/jobs');
-const { getPlanById } = require('../../models/clashes.plans');
+const { getPlanById, getPlansByQuery } = require('../../models/clashes.plans');
 const { getUsernamesToNotify } = require('./notificationsHelper');
 const { subscribe } = require('../eventsManager/eventsManager');
 
@@ -38,7 +38,8 @@ const clashRunStatusUpdated = async (teamspace, project, runId, status, results)
 	const { plan: { _id: planId }, triggeredAt } = await getClashRunById(teamspace,
 		project, runId, { plan: 1, triggeredAt: 1 });
 
-	const { notify } = await getPlanById(teamspace, project, planId, { notify: 1 });
+	const { notify } = await getPlanById(teamspace, project, planId, { notify: 1 })
+		.catch(() => ({}));
 
 	if (notify?.length) {
 		const jobList = await getJobsToUsers(teamspace);
