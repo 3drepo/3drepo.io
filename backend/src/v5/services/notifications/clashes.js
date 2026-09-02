@@ -24,7 +24,7 @@ const { clashRunStatus } = require('../../models/clashes.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClashRunById } = require('../../models/clashes.runs');
 const { getJobsToUsers } = require('../../models/jobs');
-const { getPlanById, getPlansByQuery } = require('../../models/clashes.plans');
+const { getPlanById } = require('../../models/clashes.plans');
 const { getUsernamesToNotify } = require('./notificationsHelper');
 const { subscribe } = require('../eventsManager/eventsManager');
 

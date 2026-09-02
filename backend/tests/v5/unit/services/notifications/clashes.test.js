@@ -111,6 +111,27 @@ const testOnClashRunStatusUpdated = () => {
 			expect(NotificationsModel.insertClashAbortedNotifications).not.toHaveBeenCalled();
 		});
 
+		test('Should not insert a notification if getPlanById throws an error', async () => {
+			const planId = generateRandomString();
+			RunsModel.getClashRunById.mockResolvedValueOnce({ plan: { _id: planId } });
+			PlansModel.getPlanById.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			const eventData = { teamspace, project, runId, status, results };
+			await eventCallbacks[events.CLASH_RUN_STATUS_UPDATED](eventData);
+
+			expect(RunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+			expect(RunsModel.getClashRunById).toHaveBeenCalledWith(teamspace,
+				project, runId, { plan: 1, triggeredAt: 1 });
+			expect(PlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(PlansModel.getPlanById).toHaveBeenCalledWith(teamspace, project, planId, { notify: 1 });
+
+			expect(JobsModel.getJobsToUsers).not.toHaveBeenCalled();
+			expect(NotificationsHelper.getUsernamesToNotify).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashSucceededNotifications).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashFailedNotifications).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashAbortedNotifications).not.toHaveBeenCalled();
+		});
+
 		describe.each([
 			['Should call insertClashSucceededNotifications if status is succeeded', clashRunStatus.COMPLETED, NotificationsModel.insertClashSucceededNotifications],
 			['Should call insertClashFailedNotifications if status is failed', clashRunStatus.FAILED, NotificationsModel.insertClashFailedNotifications],
