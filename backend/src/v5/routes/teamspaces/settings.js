@@ -58,9 +58,9 @@ const getRiskCategories = async (req, res) => {
 	}
 };
 
-const getPinIconNames = async (req, res) => {
+const getPinIconNames = (req, res) => {
 	try {
-		const icons = await TicketSettings.getPinIconNames;
+		const icons = TicketSettings.getPinIconNames();
 		respond(req, res, templates.ok, { icons });
 	} catch (err) {
 		// istanbul ignore next

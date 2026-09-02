@@ -25,7 +25,7 @@ const { generateRandomString } = require('../../../helper/services');
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
-const { propTypes, iconVariants, getDefaultPinIconNames } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, PIN_ICON_VARIANTS, DEFAULT_PIN_ICONS } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -251,7 +251,7 @@ const testGetRiskCategories = () => {
 const testGetPinIconNames = () => {
 	describe('Pin icon names', () => {
 		const basicData = generateBasicData();
-		const iconNames = getDefaultPinIconNames;
+		const iconNames = DEFAULT_PIN_ICONS;
 		const route = (key, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));
@@ -279,8 +279,8 @@ const testGetPinIconNames = () => {
 const testGetPinIcon = () => {
 	describe('Pin icon', () => {
 		const basicData = generateBasicData();
-		const iconNames = getDefaultPinIconNames;
-		const route = (key, pinIcon = iconNames[0], variant = iconVariants.SELECTED, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons/${pinIcon}/${variant}${key ? `?key=${key}` : ''}`;
+		const iconNames = DEFAULT_PIN_ICONS;
+		const route = (key, pinIcon = iconNames[0], variant = PIN_ICON_VARIANTS[1], ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons/${pinIcon}/${variant}${key ? `?key=${key}` : ''}`;
 
 		beforeAll(() => setupTestData(basicData));
 
@@ -290,7 +290,7 @@ const testGetPinIcon = () => {
 			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name }],
 			['icon name is invalid', false, templates.invalidArguments, { key: basicData.normalUser.apiKey, pinIcon: generateRandomString() }],
 			['icon variant is invalid', false, templates.invalidArguments, { key: basicData.normalUser.apiKey, variant: generateRandomString() }],
-			['user is a member of teamspace and normal icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: iconVariants.NORMAL }],
+			['user is a member of teamspace and normal icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: PIN_ICON_VARIANTS[0] }],
 			['user is a member of teamspace and selected icon exists', true, undefined, { key: basicData.normalUser.apiKey }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {

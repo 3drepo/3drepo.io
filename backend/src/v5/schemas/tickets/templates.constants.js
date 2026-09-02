@@ -20,7 +20,6 @@ const { deleteIfUndefined } = require('../../utils/helper/objects');
 const fs = require('fs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
 const { resourcesPath } = require('../../../interop');
-const { templates } = require('../../utils/responseCodes');
 const { toConstantCase } = require('../../utils/helper/strings');
 
 const createConstantMapping = (values) => {
@@ -252,30 +251,32 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
-const iconVariants = ['normal', 'selected'];
-// eslint-disable-next-line security/detect-non-literal-regexp
-const iconFilenameRegex = new RegExp(`^(?<name>.+)\\.(?<variant>${iconVariants.join('|')})\\.svg$`);
-const ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
+TemplateConstants.PIN_ICON_VARIANTS = ['normal', 'selected'];
+TemplateConstants.PIN_ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
 
 const getDefaultPinIconNames = () => {
-	const files = fs.readdirSync(ICONS_DIR, { withFileTypes: true });
+	const icons = [];
 
-	return [...new Set(
-		files.map((entry) => {
-			// in the future update the svg check to check the file contents instead of just the extension
-			if (!entry.isFile() || !entry.name.endsWith('.svg')) throw templates.pinIconNotFound;
+	const files = fs.readdirSync(TemplateConstants.PIN_ICONS_DIR, { withFileTypes: true });
 
-			const match = entry.name.match(iconFilenameRegex);
-			if (!match) throw templates.pinIconNotFound;
+	const iconMap = {};
 
-			const { name } = match.groups;
-			return name;
-		}),
-	)].sort();
+	files.forEach((entry) => {
+		const [iconName, variant, ext] = entry.name.split('.');
+
+		if (!entry.isFile() || ext !== 'svg' || !TemplateConstants.PIN_ICON_VARIANTS.includes(variant)) return;
+		if (!iconMap[iconName]) {
+			iconMap[iconName] = new Set();
+		}
+		iconMap[iconName].add(variant);
+		if (iconMap[iconName].size === TemplateConstants.PIN_ICON_VARIANTS.length) {
+			icons.push(iconName);
+		}
+	});
+
+	return icons.sort();
 };
 
-TemplateConstants.iconVariants = createConstantMapping(iconVariants);
-TemplateConstants.iconsDir = ICONS_DIR;
-TemplateConstants.getDefaultPinIconNames = getDefaultPinIconNames();
+TemplateConstants.DEFAULT_PIN_ICONS = getDefaultPinIconNames();
 
 module.exports = TemplateConstants;

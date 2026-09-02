@@ -15,22 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { DEFAULT_PIN_ICONS, PIN_ICON_VARIANTS } = require('../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { getDefaultPinIconNames, iconVariants } = require('../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../utils/responder');
 
 const TicketsSettingsMiddleware = {};
 
 TicketsSettingsMiddleware.checkPinIconExists = async (req, res, next) => {
 	const { pinIcon, variant } = req.params;
-	const pinIconNames = getDefaultPinIconNames;
+	const pinIconNames = DEFAULT_PIN_ICONS;
 
-	if (!pinIconNames.includes(pinIcon) || !Object.values(iconVariants).includes(variant)) {
-		respond(req, res, createResponseCode(templates.invalidArguments, `Pin icon "${pinIcon}" with variant "${variant}" not a valid combination.`));
-		return;
+	try {
+		if (!pinIconNames.includes(pinIcon)) {
+			throw createResponseCode(templates.invalidArguments, `Pin icon "${pinIcon}" does not exist.`);
+		} else if (!PIN_ICON_VARIANTS.includes(variant)) {
+			throw createResponseCode(templates.invalidArguments, `Pin icon variant "${variant}" does not exist.`);
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
 	}
-
-	await next();
 };
 
 module.exports = TicketsSettingsMiddleware;

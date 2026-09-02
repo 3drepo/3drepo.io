@@ -19,7 +19,6 @@ const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../helper/services');
 
-const { templates } = require(`${src}/utils/responseCodes`);
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 const baseProps = TemplateConstants.basePropertyLabels;
@@ -86,14 +85,16 @@ const testgetDefaultPinIconNames = () => {
 		const toFsEntry = (name, isFile = true) => ({ name, isFile: jest.fn().mockReturnValue(isFile) });
 
 		const tests = [
-			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], true, ['icon1']],
-			['throw if the icon is not a file', [toFsEntry('icon1.normal.svg', false), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
-			['throw if the icon filename extension does not match the expected pattern', [toFsEntry('icon1.normal.jpg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
-			['throw if the icon filename name does not match the expected pattern', [toFsEntry('icon1.supernatural.svg'), toFsEntry('icon1.selected.svg')], false, templates.pinIconNotFound],
+			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], ['icon1']],
+			['exclude the icon if one of its variants is not a file', [toFsEntry('icon1.normal.svg', false), toFsEntry('icon1.selected.svg')], []],
+			['exclude the icon if one of its variants has the wrong extension', [toFsEntry('icon1.normal.jpg'), toFsEntry('icon1.selected.svg')], []],
+			['exclude the icon if one of its variants has an unrecognised variant name', [toFsEntry('icon1.supernatural.svg'), toFsEntry('icon1.selected.svg')], []],
+			['exclude an icon that is missing a variant entirely, while still returning icons with all variants present',
+				[toFsEntry('icon1.normal.svg'), toFsEntry('icon2.normal.svg'), toFsEntry('icon2.selected.svg')], ['icon2']],
 		];
 
-		const runTest = (testName, mockReturnValue, shouldSucceed, expected) => {
-			test(`Should ${shouldSucceed ? 'return' : 'throw'} ${testName}`, () => {
+		const runTest = (testName, mockReturnValue, expected) => {
+			test(`Should return the icon names and ${testName}`, () => {
 				// drop the cached module so the memoised pin-icon cache starts empty
 				jest.resetModules();
 
@@ -110,22 +111,15 @@ const testgetDefaultPinIconNames = () => {
 					};
 				});
 
-				if (shouldSucceed) {
-					// eslint-disable-next-line global-require
-					const Constants = require(`${src}/schemas/tickets/templates.constants`);
-					expect(Constants.getDefaultPinIconNames).toEqual(expected);
-				} else {
-					expect(() => {
-						// eslint-disable-next-line global-require
-						require(`${src}/schemas/tickets/templates.constants`);
-					}).toThrow(expected);
-				}
+				// eslint-disable-next-line global-require
+				const Constants = require(`${src}/schemas/tickets/templates.constants`);
+				expect(Constants.DEFAULT_PIN_ICONS).toEqual(expected);
 			});
 		};
 
 		tests.forEach((
-			[testName, mockReturnValue, shouldSucceed, expected],
-		) => runTest(testName, mockReturnValue, shouldSucceed, expected));
+			[testName, mockReturnValue, expected],
+		) => runTest(testName, mockReturnValue, expected));
 	});
 };
 

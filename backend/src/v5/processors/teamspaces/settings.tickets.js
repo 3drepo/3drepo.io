@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { DEFAULT_PIN_ICONS, PIN_ICONS_DIR } = require('../../schemas/tickets/templates.constants');
 const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
-const { getDefaultPinIconNames, iconsDir } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../../services/eventsManager/eventsManager.constants');
 const path = require('path');
 const { publish } = require('../../services/eventsManager/eventsManager');
@@ -33,12 +33,13 @@ TicketSettings.updateTicketTemplate = async (teamspace, id, data) => {
 TicketSettings.getTemplateList = (teamspace) => getAllTemplates(
 	teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 },
 );
-TicketSettings.getPinIconNames = getDefaultPinIconNames;
+TicketSettings.getPinIconNames = () => DEFAULT_PIN_ICONS;
 
 TicketSettings.getPinIcon = async (iconName, variant) => {
-	const iconPath = path.join(iconsDir, `${iconName}.${variant}.svg`);
+	const iconPath = path.join(PIN_ICONS_DIR, `${iconName}.${variant}.svg`);
 
 	try {
+		// await is required here so a rejection is caught below instead of propagating unhandled
 		return await readFile(iconPath);
 	} catch (error) {
 		if (error.code === 'ENOENT') throw templates.pinIconNotFound;

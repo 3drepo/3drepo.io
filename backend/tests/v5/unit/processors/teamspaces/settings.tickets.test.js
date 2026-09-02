@@ -85,12 +85,20 @@ const testGetTemplateList = () => {
 	});
 };
 
+const testGetPinIconNames = () => {
+	describe('Get pin icon names', () => {
+		test('should return DEFAULT_PIN_ICONS', () => {
+			expect(TicketSettings.getPinIconNames()).toEqual(TemplateConstants.DEFAULT_PIN_ICONS);
+		});
+	});
+};
+
 const testGetPinIcon = () => {
 	describe('Get pin icon', () => {
 		test('should call getDefaultPinIconNames and readFile with correct path', async () => {
 			const iconName = generateRandomString();
 			const variant = generateRandomString();
-			const iconPath = path.join(TemplateConstants.iconsDir, `${iconName}.${variant}.svg`);
+			const iconPath = path.join(TemplateConstants.PIN_ICONS_DIR, `${iconName}.${variant}.svg`);
 			const data = Buffer.from(generateRandomString());
 			FsPromisesMock.readFile.mockResolvedValueOnce(data);
 
@@ -130,5 +138,6 @@ describe(determineTestGroup(__filename), () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplateList();
+	testGetPinIconNames();
 	testGetPinIcon();
 });

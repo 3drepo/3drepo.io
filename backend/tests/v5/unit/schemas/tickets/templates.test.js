@@ -21,7 +21,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
-const { statusTypes, statuses, getDefaultPinIconNames } = require(`${src}/schemas/tickets/templates.constants`);
+const { statusTypes, statuses, DEFAULT_PIN_ICONS } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1475,7 +1475,7 @@ const testValidate = () => {
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 
-	const defaultPinIconsNames = getDefaultPinIconNames;
+	const defaultPinIconsNames = DEFAULT_PIN_ICONS;
 
 	describe('Test every built-in pin icon in direct and conditional mappings', () => {
 		defaultPinIconsNames.forEach((icon) => {
