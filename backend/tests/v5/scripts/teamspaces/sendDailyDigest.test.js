@@ -89,10 +89,10 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
 			createClashPlans(ts.user, project, plans),
-			insertTicketAssignedNotifications(ts.user, project, model, [{
+			insertTicketAssignedNotifications(ts.user, project, model, times(2, () => ({
 				users: recipients,
 				ticket: ticketId,
-				assignedBy: usernameArr[0] }]),
+				assignedBy: usernameArr[0] }))),
 			insertTicketUpdatedNotifications(ts.user, project, model, [{
 				users: recipients,
 				ticket: ticketId,
