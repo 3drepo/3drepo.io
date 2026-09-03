@@ -1,5 +1,5 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectCardFilters, selectIsEditingGroups, selectIsExpandedTicketView, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
 import { BaseFilter, TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
@@ -61,6 +61,13 @@ describe('Tickets: store', () => {
 			const showingPinsFromState = selectIsShowingPins(getState());
 		
 			expect(showingPinsFromState).toEqual(false);
+		});
+
+		it('should set if the ticket view is expanded', () => {
+			dispatch(TicketsCardActions.setIsExpandedTicketView(true));
+			const isExpandedTicketViewFromState = selectIsExpandedTicketView(getState());
+		
+			expect(isExpandedTicketViewFromState).toEqual(true);
 		});
 
 		it('filters should be set', () => {

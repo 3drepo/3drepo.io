@@ -20,7 +20,7 @@ import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
@@ -46,7 +46,8 @@ export const CurrentUserComment = ({
 	onReply,
 	...props
 }: CurrentUserCommentProps) => {
-	const [isEditMode, setIsEditMode] = useState(false);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
+	const [isEditMode, setIsEditMode] = useState(!!unsavedComment);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState(metadata);
 
