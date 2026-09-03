@@ -49,6 +49,14 @@ export const FlexContainer = styled.div`
 	flex-direction: row;
 `;
 
+export const CircleButtons = styled(FlexContainer)`
+	gap: 5px;
+
+	.MuiButtonBase-root {
+		margin: 8px 0;
+	}
+`;
+
 export const SelectorsContainer = styled(FlexContainer)`
 	gap: 5px;
 

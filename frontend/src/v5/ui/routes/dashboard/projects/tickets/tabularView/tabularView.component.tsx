@@ -34,7 +34,7 @@ import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWE
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
-import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout } from '../tickets.styles';
+import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout, CircleButtons } from '../tickets.styles';
 import { INITIAL_COLUMNS_NO_OVERRIDES, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
@@ -452,7 +452,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 						/>
 					</OpenInViewerButton>
 				</Link>
-				<FlexContainer>
+				<CircleButtons>
 					{selectedTemplate.config?.comments && (
 						<CircleButton onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}>
 							<ExpandIcon />
@@ -461,7 +461,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 					<CircleButton onClick={clearTicketId}>
 						<CloseTicketIcon />
 					</CircleButton>
-				</FlexContainer>
+				</CircleButtons>
 			</SlidePanelHeader>
 			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
 				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
