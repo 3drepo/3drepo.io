@@ -431,7 +431,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
 	const isSidebarOpen = !!ticketId && haveValidContainerOrFederation;
 	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && isSidebarOpen && selectedTemplate?.config?.comments;
-	const disableExpandButton = !selectedTemplate?.config?.comments || isNewTicket;
+	const hideExpandButton = !selectedTemplate?.config?.comments || isNewTicket;
 
 	const onClickExpandTicketMode = () => {
 		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
@@ -453,8 +453,8 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 					</OpenInViewerButton>
 				</Link>
 				<CircleButtons>
-					{selectedTemplate.config?.comments && (
-						<CircleButton onClick={onClickExpandTicketMode} disabled={disableExpandButton} selected={isExpanded}>
+					{!hideExpandButton && (
+						<CircleButton onClick={onClickExpandTicketMode} selected={isExpanded}>
 							<ExpandIcon />
 						</CircleButton>
 					)}
