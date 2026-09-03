@@ -29,8 +29,8 @@ export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
 
 	::-webkit-scrollbar-thumb {
 		background: ${({ theme }) => theme.palette.base.lightest};
-        background-clip: padding-box;
-    }
+		background-clip: padding-box;
+	}
 
 	> * {
 		width: ${CARD_WIDTH}px;
