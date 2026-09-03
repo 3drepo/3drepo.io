@@ -329,8 +329,8 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
-	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
+db.createMetadata = (teamspace, modelId, metadataId, metadata, revId) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
+	{ _id: stringToUUID(metadataId), type: 'meta', metadata, rev_id: stringToUUID(revId) });
 
 const createImage = async (dbName, colName, type, imageId, imageData) => {
 	const { defaultStorage } = config;
@@ -346,11 +346,18 @@ db.createProjectImage = (teamspace, project, type, imageData) => createImage(tea
 	type, project, imageData);
 
 db.createClashPlans = async (teamspace, project, plans) => {
-	const formattedPlans = plans.map((plan) => ({
-		...plan,
-		_id: stringToUUID(plan._id),
-		project: stringToUUID(project),
-	}));
+	const formattedPlans = plans.map((plan) => {
+		if (plan.tickets) {
+			// eslint-disable-next-line no-param-reassign
+			plan.tickets.template = stringToUUID(plan.tickets.template);
+		}
+
+		return ({
+			...plan,
+			_id: stringToUUID(plan._id),
+			project: stringToUUID(project),
+		});
+	});
 	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
@@ -742,6 +749,8 @@ const generateProperties = (propTemplate, internalType, container) => {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {
 			properties[name] = values;
+		} else if (type === propTypes.TAGS) {
+			properties[name] = times(3, () => ServiceHelper.generateRandomString());
 		} else if (type === propTypes.COORDS) {
 			properties[name] = [0, 0, 0];
 		} else if (type === propTypes.VIEW) {
@@ -947,9 +956,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	let tickets;
 	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
-		const { federation, template, creator } = ticketInfo;
+		const { federation, template, creator, valuesAtCreation: valuesAtCreationOverride } = ticketInfo;
 		const ticket = ServiceHelper.generateTicket(template, false, federation);
-		const valuesAtCreation = Object.keys(ticket.properties).map(
+		const valuesAtCreation = valuesAtCreationOverride ?? Object.keys(ticket.properties).map(
 			(key) => ({ property: key, value: ticket.properties[key] }));
 		tickets = {
 			federation: federation._id, template: template._id, valuesAtCreation, creator,

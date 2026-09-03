@@ -38,6 +38,7 @@ const propTypes = createConstantMapping([
 	'number',
 	'oneOf',
 	'manyOf',
+	'tags',
 	'image',
 	'imageList',
 	'view',
@@ -168,6 +169,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Object A ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object B ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object B ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Tags', propTypes.TAGS),
 	],
 
 };
@@ -246,5 +248,7 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 ]);
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
+
+TemplateConstants.pinIcons = createConstantMapping(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']);
 
 module.exports = TemplateConstants;

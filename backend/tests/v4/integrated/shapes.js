@@ -18,7 +18,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const {should, assert, expect, Assertion } = require("chai");
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const { cloneDeep, omit } = require("lodash");
@@ -109,7 +108,7 @@ describe("Shapes", () => {
 		"assigned_roles":["jobB"]
 	};
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -123,7 +122,7 @@ describe("Shapes", () => {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -144,7 +143,7 @@ describe("Shapes", () => {
 	describe("in issue", function() {
 		const testShapesIds = (shapes) => {
 			shapes.forEach(({_id}) => {
-				expect(_id).to.be.an('string');
+				expect(typeof _id).toBe('string');
 			})
 		}
 
@@ -154,7 +153,7 @@ describe("Shapes", () => {
 				.send(wrongShapeIssue)
 				.expect(responseCodes.INVALID_ARGUMENTS.status);
 
-			expect(res.body.value, responseCodes.INVALID_ARGUMENTS.value);
+			expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 		});
 
 		it("when created should succeed", async () => {
@@ -171,7 +170,7 @@ describe("Shapes", () => {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			testShapesIds(res.body.shapes);
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).toEqual(shapeIssue.shapes);
 		});
 
 		it ("should be reflected when fetching all the issues", async()=> {
@@ -179,7 +178,7 @@ describe("Shapes", () => {
 			const theIssue = res.body.find(({_id})=>_id === issueId);
 
 			testShapesIds(theIssue.shapes);
-			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(theIssue.shapes)).toEqual(shapeIssue.shapes);
 		});
 
 		it ("when updating other properties should keep the shapes", async()=> {
@@ -190,7 +189,7 @@ describe("Shapes", () => {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			testShapesIds(res.body.shapes);
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).toEqual(shapeIssue.shapes);
 		});
 
 		it ("when updating with wrong schema shape shouldnt affect the shapes", async()=> {
@@ -202,7 +201,7 @@ describe("Shapes", () => {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			testShapesIds(res.body.shapes);
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapeIssue.shapes);
+			expect(chopIds(res.body.shapes)).toEqual(shapeIssue.shapes);
 		});
 
 		it ("when updating shapes should succeed", async()=> {
@@ -215,7 +214,7 @@ describe("Shapes", () => {
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			testShapesIds(res.body.shapes);
-			expect(chopIds(res.body.shapes)).to.be.deep.equal(shapes);
+			expect(chopIds(res.body.shapes)).toEqual(shapes);
 		});
 
 		it ("when updating shapes to empty should succeed", async()=> {
@@ -227,7 +226,7 @@ describe("Shapes", () => {
 
 			const res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
-			expect(res.body.shapes).to.be.undefined;
+			expect(res.body.shapes).toBeUndefined();
 		});
 
 		it ("when updating a previously empty shape should succeed", async()=> {
@@ -246,7 +245,7 @@ describe("Shapes", () => {
 			const theIssue = res.body.find(({_id})=>_id === emptyIssueId);
 
 			testShapesIds(theIssue.shapes);
-			expect(chopIds(theIssue.shapes)).to.be.deep.equal(shapes);
+			expect(chopIds(theIssue.shapes)).toEqual(shapes);
 		});
 
 

@@ -726,6 +726,68 @@ const testGetTeamspaceInvites = () => {
 	});
 };
 
+const testIsAddOnEnabled = () => {
+	describe('Is addOn enabled', () => {
+		const teamspace = generateRandomString();
+
+		test('should return true if addOn is enabled', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { [ADD_ONS.VR]: true } });
+			const addOnName = ADD_ONS.VR;
+
+			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(true);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
+		});
+		test('should return false if addOn is not found', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { } });
+			const addOnName = ADD_ONS.VR;
+
+			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(false);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
+		});
+	});
+};
+
+const testGetTeamspaceSettingsByQuery = () => {
+	describe('Get teamspace settings by query', () => {
+		test('should call db.find with the given query and projection', async () => {
+			const teamspace = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query, projection);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				query,
+				projection,
+			);
+		});
+
+		test('should use default projection if none provided', async () => {
+			const teamspace = generateRandomString();
+			const query = generateRandomObject();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingsByQuery(teamspace, query);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				query,
+				{ refId: 0 },
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testGetSubscriptions();
@@ -748,4 +810,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
 	testGetTeamspaceInvites();
+	testIsAddOnEnabled();
+	testGetTeamspaceSettingsByQuery();
 });
