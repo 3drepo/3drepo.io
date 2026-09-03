@@ -174,74 +174,74 @@ const establishRoutes = (isInternal) => {
 		*               ]
 		*/
 		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata, formatMetadataArray);
-	} else {
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
-		 *   patch:
-		 *     description: Adds, removes or edits custom metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
-		 *     tags: [v:external, Metadata]
-		 *     operationId: updateCustomMetadata
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: container
-		 *         description: Container ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: metadata
-		 *         description: Metadata ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *     requestBody:
-		 *       content:
-		 *         application/json:
-		 *           schema:
-		 *             properties:
-		 *               metadata:
-		 *                 description: The metadata to be added, removed or updated
-		 *                 type: array
-		 *                 items:
-		 *                   type: object
-		 *                   properties:
-		 *                     key:
-		 *                       description: The key of the metadata
-		 *                       type: string
-		 *                       maxLength: 120
-		 *                       example: Length (mm)
-		 *                     value:
-		 *                       description: The value of the metadata
-		 *                       oneOf:
-		 *                         - type: string
-		 *                           maxLength: 120
-		 *                         - type: number
-		 *                         - type: boolean
-		 *                       example: 100
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       200:
-		 *         description: Adds, removes or edits metadata of an element of a 3D model
-		 */
-		router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateCustomMetadata, updateCustomMetadata);
 	}
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
+	 *   patch:
+	 *     description: Adds, removes or edits custom metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
+	 *     tags: [v:internal, v:external, Metadata]
+	 *     operationId: updateCustomMetadata
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: metadata
+	 *         description: Metadata ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             properties:
+	 *               metadata:
+	 *                 description: The metadata to be added, removed or updated
+	 *                 type: array
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     key:
+	 *                       description: The key of the metadata
+	 *                       type: string
+	 *                       maxLength: 120
+	 *                       example: Length (mm)
+	 *                     value:
+	 *                       description: The value of the metadata
+	 *                       oneOf:
+	 *                         - type: string
+	 *                           maxLength: 120
+	 *                         - type: number
+	 *                         - type: boolean
+	 *                       example: 100
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Adds, removes or edits metadata of an element of a 3D model
+	 */
+	router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateCustomMetadata, updateCustomMetadata);
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/fields:
