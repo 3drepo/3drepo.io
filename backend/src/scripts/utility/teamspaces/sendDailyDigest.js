@@ -119,61 +119,70 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 
 			if (!project) return [];
 
-			const clashData = notification.clashData.flatMap(({ plan, runs }) => {
-				const planName = project.plans[UUIDToString(plan)];
+			const clashData = notification.data.filter((d) => !!d.plan)
+				.flatMap(({ plan, notifications: runNotifications }) => {
+					const planName = project.plans[UUIDToString(plan)];
 
-				if (!planName) return [];
+					if (!planName) return [];
 
-				const formattedRuns = runs.flatMap(({ data, type }) => {
-					const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
-					// 'sv-SE' is used as it produces a date with ISO format
-					const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
+					const formattedRuns = runNotifications.flatMap(({ data, type }) => {
+						const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
+						// 'sv-SE' is used as it produces a date with ISO format
+						const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
 
-					switch (type) {
-					case notificationTypes.CLASH_RUN_SUCCEEDED:
-						return { ...data, triggeredAt, status: clashRunStatus.COMPLETED };
-					case notificationTypes.CLASH_RUN_ABORTED:
-						return { ...data, triggeredAt, status: clashRunStatus.ABORTED };
-					default:
-						return { ...data, triggeredAt, status: clashRunStatus.FAILED };
-					}
+						switch (type) {
+						case notificationTypes.CLASH_RUN_SUCCEEDED:
+							return { results: data.results, triggeredAt, status: clashRunStatus.COMPLETED };
+						case notificationTypes.CLASH_RUN_ABORTED:
+							return { results: data.results, triggeredAt, status: clashRunStatus.ABORTED };
+						default:
+							return { results: data.results, triggeredAt, status: clashRunStatus.FAILED };
+						}
+					});
+
+					return { planName, runs: formattedRuns };
 				});
 
-				return { planName, runs: formattedRuns };
-			});
+			const ticketData = notification.data.filter((d) => !!d.model)
+				.flatMap(({ model: modelID, notifications: ticketNotifications }) => {
+					const modelIDStr = UUIDToString(modelID);
+					const model = tsData.models[modelIDStr];
 
-			const ticketData = notification.ticketData.flatMap(({ model: modelID, data }) => {
-				const modelIDStr = UUIDToString(modelID);
-				const model = tsData.models[modelIDStr];
+					if (!model) return [];
 
-				if (!model) return [];
+					const groupedTickets = ticketNotifications.reduce((acc, { type, data }) => {
+						if (!acc[type]) acc[type] = new Set();
+						acc[type].add(UUIDToString(data.ticket));
+						return acc;
+					}, {});
 
-				const tickets = {};
-				const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+					const tickets = {};
+					const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
 
-				data.forEach(({ type, tickets: ticketsArr }) => {
-					const ticketCodes = ticketsArr.flatMap(
-						(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
-					if (!ticketCodes.length) return;
-					const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
-					switch (type) {
-					case notificationTypes.TICKET_UPDATED:
-						tickets.updated = tickData;
-						break;
-					case notificationTypes.TICKET_CLOSED:
-						tickets.closed = tickData;
-						tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
-						break;
-					case notificationTypes.TICKET_ASSIGNED:
-						tickets.assigned = tickData;
-						break;
-					default:
-						logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
-					}
+					Object.entries(groupedTickets).forEach(([type, ticketsArr]) => {
+						const ticketCodes = Array.from(ticketsArr).flatMap(
+							(ticketId) => tsData.tickets[ticketId] ?? []);
+
+						if (!ticketCodes.length) return;
+						const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+						switch (type) {
+						case notificationTypes.TICKET_UPDATED:
+							tickets.updated = tickData;
+							break;
+						case notificationTypes.TICKET_CLOSED:
+							tickets.closed = tickData;
+							tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
+							break;
+						case notificationTypes.TICKET_ASSIGNED:
+							tickets.assigned = tickData;
+							break;
+						default:
+							logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
+						}
+					});
+
+					return Object.keys(tickets).length ? { model, tickets } : [];
 				});
-
-				return Object.keys(tickets).length ? { model, tickets } : [];
-			});
 
 			return { ...notification, project: project.name, ticketData, clashData };
 		});
