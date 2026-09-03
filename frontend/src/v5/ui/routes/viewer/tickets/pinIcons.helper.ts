@@ -61,8 +61,14 @@ export const getEmbeddedPin = (teamspace: string, icon: string, selected: boolea
 const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
 	const img = new Image();
 	img.onload = () => {
-		img.width = img.naturalWidth;
-		img.height = img.naturalHeight;
+		const { naturalWidth, naturalHeight } = img;
+
+		// Unity viewer does not do AA on the pin, and it expects the image to be around 40x40.
+		const scale = 40 / Math.max(naturalWidth, naturalHeight);
+
+		img.width = Math.round(naturalWidth * scale);
+		img.height = Math.round(naturalHeight * scale);
+
 		resolve(img);
 	};
 
