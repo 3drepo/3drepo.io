@@ -52,6 +52,7 @@ export const PropertiesListContainer = styled.div`
 
 export const CardContent = styled(CardContentPadded)`
 	padding: 0;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;
 
 export const ModuleTitle = styled(FormLabel)`
