@@ -27,12 +27,13 @@ export const ExpandableCardContainer = styled.div<{ $isExpanded: boolean }>`
 	transition: width ${TRANSITION_DURATION}ms ease-in-out;
 	width: ${({ $isExpanded }) => $isExpanded ? `${CARD_WIDTH * 2}px` : `${CARD_WIDTH}px`};
 
+	::-webkit-scrollbar-thumb {
+		background: ${({ theme }) => theme.palette.base.lightest};
+        background-clip: padding-box;
+    }
+
 	> * {
 		width: ${CARD_WIDTH}px;
 		flex-shrink: 0;
 	}
-`;
-
-export const MainColumn = styled.div`
-	overflow-y: overlay;
 `;

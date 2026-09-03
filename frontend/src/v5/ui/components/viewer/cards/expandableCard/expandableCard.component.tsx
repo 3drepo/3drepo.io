@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ExpandableCardContainer, MainColumn, TRANSITION_DURATION } from './expandableCard.styles';
+import { ExpandableCardContainer, TRANSITION_DURATION } from './expandableCard.styles';
 import { useEffect, useState } from 'react';
 
 type IExpandableCard = React.HTMLAttributes<HTMLDivElement> & {
@@ -39,7 +39,7 @@ export const ExpandableCard = ({ children, ExpandedComponent, isExpanded = false
 
 	return (
 		<ExpandableCardContainer $isExpanded={isExpanded} {...rest}>
-			<MainColumn> {children} </MainColumn>
+			<div> {children} </div>
 			{shouldRenderExpanded && ExpandedComponent}
 		</ExpandableCardContainer>
 	);

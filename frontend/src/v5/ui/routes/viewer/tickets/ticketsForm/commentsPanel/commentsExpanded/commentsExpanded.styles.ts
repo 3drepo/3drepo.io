@@ -21,4 +21,5 @@ export const ExpandedContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	overflow-y: hidden;
 `;
