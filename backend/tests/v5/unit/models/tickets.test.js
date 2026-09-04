@@ -191,7 +191,7 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, undefined, 0);
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, undefined, 0);
 		});
 
 		test('Should impose query for updated since a certain date if it is provided', async () => {
@@ -208,7 +208,7 @@ const testGetAllTickets = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
-				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 }, limit, skip);
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 }, limit, skip);
 		});
 	});
 };
@@ -362,6 +362,25 @@ const testGetDistinctPropertyValues = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(
 				teamspace, ticketCol, property, { teamspace, project, model, type: template });
+		});
+	});
+};
+
+const testUpdateTicketsByQuery = () => {
+	describe('Update tickets by query', () => {
+		test('Should call updateMany with the correct parameters', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const query = { [generateRandomString()]: generateRandomString() };
+			const setUpdate = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'updateMany').mockResolvedValueOnce(undefined);
+
+			await expect(Ticket.updateTicketsByQuery(teamspace, project, query, setUpdate))
+				.resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { project, ...query }, { $set: setUpdate });
 		});
 	});
 };
@@ -521,6 +540,7 @@ const testUpdateTickets = () => {
 
 		await runTest(oldTickets, updateData, expectedCmd, changeSet);
 	});
+
 	describe('Composite types', () => {
 		test('Should retain other properties within the compsite type if the embedded field has been updated', async () => {
 			const oldTickets = [];
@@ -831,6 +851,7 @@ describe(determineTestGroup(__filename), () => {
 	testAddTicketsWithTemplate();
 	testRemoveAllTickets();
 	testGetTicketById();
+	testUpdateTicketsByQuery();
 	testUpdateTickets();
 	testGetAllTickets();
 	testGetTicketsByQuery();
