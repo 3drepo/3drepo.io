@@ -107,6 +107,45 @@ export const hexGroupColorToRgb = ({ opacity, color }: HexGroupColor): RgbGroupC
 });
 export const hexToGLColor = (hex) => hexToRgb(hex).map((v) =>  v / 255);
 export const hexToDecimal = (hex) => parseInt(hex, 16);
-
 // GL Converters
 export const GLToHexColor = (glColors) => '#' + glColors.map((c) => componentToHex( Math.round(c * 255))).join('');
+
+/**
+ * Builds an SVG `<filter>` definition (as a data: URI usable in CSS
+ * `filter: url(...)`) that tints a black/white/gray image with `colour`.
+ * White areas are fully tinted to `colour`, grays are tinted proportionally
+ * to their lightness, and black areas are left untouched (this is a duotone
+ * mapping: black -> black, white -> colour).
+ *
+ * Unlike the `hue-rotate`/`sepia` CSS filter trick, this reaches exact
+ * target colours (including fully saturated ones like pure red) because it
+ * uses `feComponentTransfer` to linearly interpolate each RGB channel
+ * between 0 (black) and the target colour's channel value, driven by the
+ * image's own luminance (via `feColorMatrix` grayscale).
+ *
+ * `colour` is an RGB(A) array in the 0-255 range.
+ */
+export const getTintFilter = memoize((colour: RgbArray): string => {
+	const [r, g, b] = colour.map((v) => Math.min(Math.max(v, 0), 255) / 255);
+	const id = `tint-filter-${[r, g, b].map((v) => Math.round(v * 255)).join('-')}`;
+
+	const svg = `
+		<svg xmlns="http://www.w3.org/2000/svg">
+			<filter id="${id}" color-interpolation-filters="sRGB">
+				<feColorMatrix type="matrix" values="
+					0.2126 0.7152 0.0722 0 0
+					0.2126 0.7152 0.0722 0 0
+					0.2126 0.7152 0.0722 0 0
+					0      0      0      1 0
+				"/>
+				<feComponentTransfer>
+					<feFuncR type="linear" slope="${r}" intercept="0"/>
+					<feFuncG type="linear" slope="${g}" intercept="0"/>
+					<feFuncB type="linear" slope="${b}" intercept="0"/>
+				</feComponentTransfer>
+			</filter>
+		</svg>
+	`.trim();
+
+	return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}#${id}")`;
+}, (colour) => colour.join());

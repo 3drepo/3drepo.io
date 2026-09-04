@@ -95,8 +95,9 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	border-radius: 5px;
 	margin-left: auto;
 	height: 44px;
+	width: 44px;
 	box-sizing: border-box;
-	padding: 12px;
+	padding: 9px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
 	${({ color, isSelected, theme }) => isLight(color, 230) && css`
@@ -107,10 +108,10 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 		}
 	`};
 
-	> svg {
+	> svg, > span svg {
 		color: ${({ color, theme }) => color || theme.palette.primary.main};
-		max-height: 20px;
-		max-width: 20px;
+		height: 26px;
+		width: 26px;
 		overflow: visible;
 	}
 `;

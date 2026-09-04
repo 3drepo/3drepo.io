@@ -64,7 +64,7 @@ const testValidateNewTicket = () => {
 			const req = { params: {}, body: { type: templateId } };
 			const res = {};
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => {});
+			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => { });
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -101,7 +101,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -125,7 +125,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -149,7 +149,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -233,7 +233,7 @@ const testValidateImportTickets = () => {
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
@@ -242,6 +242,7 @@ const testValidateImportTickets = () => {
 		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
+			jest.restoreAllMocks();
 			jest.clearAllMocks();
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
@@ -286,7 +287,7 @@ const testValidateUpdateTicket = () => {
 	describe('Validate update ticket', () => {
 		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 
 			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
@@ -299,7 +300,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -319,7 +320,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.ok.code} if there is nothing to update`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -337,7 +338,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -488,7 +489,7 @@ const testValidateUpdateMultipleTickets = () => {
 		['template does not exist', { query: { template: generateUUIDString() } }, false],
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
