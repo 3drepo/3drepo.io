@@ -50,13 +50,21 @@ const testHtml = () => {
 					planName: generateRandomString(),
 					runs: [{
 						status: generateRandomString(),
-						stats: {
-							new: 10,
-							active: 10,
-							resolved: 10,
+						results: {
+							stats: {
+								new: 10,
+								active: 10,
+								resolved: 10,
+							},
 						},
-						error: {
-							reason: generateRandomString(),
+						triggeredAt: new Date(),
+					},
+					{
+						status: generateRandomString(),
+						results: {
+							error: {
+								reason: generateRandomString(),
+							},
 						},
 						triggeredAt: new Date(),
 					}],

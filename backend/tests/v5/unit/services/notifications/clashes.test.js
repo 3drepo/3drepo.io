@@ -44,6 +44,9 @@ const NotificationsModel = require(`${src}/models/notifications`);
 jest.mock('../../../../../src/v5/services/notifications/notificationsHelper');
 const NotificationsHelper = require(`${src}/services/notifications/notificationsHelper`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects');
+const ProjectsProcessor = require(`${src}/processors/teamspaces/projects`);
+
 const ClashesNotifications = require(`${src}/services/notifications/clashes`);
 
 const eventCallbacks = {};
@@ -148,6 +151,7 @@ const testOnClashRunStatusUpdated = () => {
 				PlansModel.getPlanById.mockResolvedValueOnce({ notify });
 				JobsModel.getJobsToUsers.mockResolvedValueOnce([generateRandomString()]);
 				NotificationsHelper.getUsernamesToNotify.mockReturnValueOnce(recipients);
+				ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(recipients.slice(0, 2));
 
 				const eventData = { teamspace, project, runId, status: runStatus, results };
 				await eventCallbacks[events.CLASH_RUN_STATUS_UPDATED](eventData);
@@ -162,7 +166,7 @@ const testOnClashRunStatusUpdated = () => {
 				expect(NotificationsHelper.getUsernamesToNotify).toHaveBeenCalledTimes(1);
 
 				expect(insertFn).toHaveBeenCalledTimes(1);
-				expect(insertFn).toHaveBeenCalledWith(teamspace, project, notificationData, recipients);
+				expect(insertFn).toHaveBeenCalledWith(teamspace, project, notificationData, recipients.slice(0, 2));
 			});
 		});
 	});

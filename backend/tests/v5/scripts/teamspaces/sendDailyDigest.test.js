@@ -110,10 +110,10 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 				triggeredAt: new Date(),
 			}, recipients),
 			insertClashAbortedNotifications(ts.user, project, {
-				plan: plans[1]._id, results: { error: generateRandomString() }, triggeredAt: new Date(),
+				plan: plans[1]._id, results: { error: { reason: generateRandomString() } }, triggeredAt: new Date(),
 			}, recipients),
 			insertClashFailedNotifications(ts.user, project, {
-				plan: plans[2]._id, results: { error: generateRandomString() }, triggeredAt: new Date(),
+				plan: plans[2]._id, results: { error: { reason: generateRandomString() } }, triggeredAt: new Date(),
 			}, recipients),
 			insertBogusNotification(ts.user, project, model, recipients, ticketId),
 		]);
