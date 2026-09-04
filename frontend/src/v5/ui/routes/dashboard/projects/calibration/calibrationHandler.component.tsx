@@ -28,7 +28,8 @@ import { CalibrationContext } from './calibrationContext';
 import { VerticalSpatialBoundariesHandler } from './calibrationStep/verticalSpatialBoundariesHandler/verticalSpatialBoundariesHandler.component';
 import { ViewerParams } from '../../../routes.constants';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { isNull } from 'lodash';
+import { isEqual, isNull } from 'lodash';
+import { EMPTY_VECTOR } from './calibration.constants';
 
 export const CalibrationHandler = () => {
 	const { teamspace, project, revision, containerOrFederation } = useParams<ViewerParams>();
@@ -46,8 +47,8 @@ export const CalibrationHandler = () => {
 	}, [selectedModel, revision, drawingId]);
 
 	useEffect(() => {
-		setVector3D(horizontal.model);
-		setVector2D(horizontal.drawing);
+		setVector3D((vector3D) => isEqual(vector3D, EMPTY_VECTOR) ? horizontal.model : vector3D);
+		setVector2D((vector2D) => isEqual(vector2D, EMPTY_VECTOR) ? horizontal.drawing : vector2D);
 		setVerticalPlanes(verticalRange);
 	}, [horizontal, verticalRange, isCalibrating]);
 
