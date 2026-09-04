@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
+const { generateRandomString, generateUUID } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
 const DailyDigest = require(`${src}/services/mailer/templates/dailyDigest`);
@@ -28,25 +28,63 @@ const testHtml = () => {
 			username: generateRandomString(),
 			teamspace: generateRandomString(),
 			notifications: [{
-				project: generateRandomString(),
-				model: generateRandomString(),
-				tickets: {
-					updated: { count: 10, link: generateRandomString() },
-					assigned: { count: 10, link: generateRandomString() },
-					closed: { count: 10, link: generateRandomString() },
-				},
+				project: generateUUID(),
+				ticketData: [{
+					model: generateRandomString(),
+					tickets: {
+						updated: {
+							count: 10,
+							link: generateRandomString(),
+						},
+						assigned: {
+							count: 10,
+							link: generateRandomString(),
+						},
+						closed: {
+							count: 10,
+							link: generateRandomString(),
+						},
+					},
+				}],
+				clashData: [{
+					planName: generateRandomString(),
+					runs: [{
+						status: generateRandomString(),
+						results: {
+							stats: {
+								new: 10,
+								active: 10,
+								resolved: 10,
+							},
+						},
+						triggeredAt: new Date(),
+					},
+					{
+						status: generateRandomString(),
+						results: {
+							error: {
+								reason: generateRandomString(),
+							},
+						},
+						triggeredAt: new Date(),
+					}],
+				}],
 			}],
 		};
+
 		describe.each([
 			['data is undefined', undefined],
 			['username is undefined', { ...standardData, username: undefined }],
 			['notifications is empty', { ...standardData, notifications: [] }],
-		])(
-			'Error checking ', (desc, data) => {
-				test(`should throw an error if ${desc}`, async () => {
-					await expect(DailyDigest.html(data)).rejects.toThrow();
-				});
-			},
+			['ticketData model is undefined', { ...standardData, notifications: [{ ...standardData.notifications[0], ticketData: [{ ...standardData.notifications[0].ticketData[0], model: undefined }] }] }],
+			['clashData planName is undefined', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], planName: undefined }] }] }],
+			['clashData runs is undefined', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], runs: undefined }] }] }],
+			['clashData runs is empty', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], runs: [] }] }] }],
+		])('Error checking ', (desc, data) => {
+			test(`should throw an error if ${desc}`, async () => {
+				await expect(DailyDigest.html(data)).rejects.toThrow();
+			});
+		},
 		);
 
 		test('should get dailyDigest template html', async () => {

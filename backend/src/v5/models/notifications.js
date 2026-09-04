@@ -51,6 +51,39 @@ const generateNotification = (type, user, data) => ({
 	data,
 });
 
+Notifications.insertClashSucceededNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.stats) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_SUCCEEDED,
+			recipient, { ...notificationData, teamspace, project }));
+
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
+	}
+};
+
+Notifications.insertClashFailedNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.error) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_FAILED,
+			recipient, { ...notificationData, teamspace, project }));
+
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
+	}
+};
+
+Notifications.insertClashAbortedNotifications = async (teamspace, project, notificationData, recipients) => {
+	if (notificationData.results?.error) {
+		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_ABORTED,
+			recipient, { ...notificationData, teamspace, project }));
+
+		if (records.length) {
+			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
+		}
+	}
+};
+
 Notifications.insertTicketAssignedNotifications = async (teamspace, project, model, notifications) => {
 	const records = notifications.flatMap(({ users, ticket, assignedBy }) => {
 		if (users?.length && ticket && assignedBy) {
@@ -103,31 +136,18 @@ const getGroupedNotificationsByQuery = (query) => {
 	const pipelines = [
 		query,
 		{
-			// group by user/teamspace/project/model/type, count up the tickets
 			$group: {
 				_id: {
 					user: '$user',
 					teamspace: '$data.teamspace',
 					project: '$data.project',
 					model: '$data.model',
-					type: '$type',
+					plan: '$data.plan',
 				},
-				tickets: { $addToSet: '$data.ticket' },
-			},
-		},
-		{
-			// group the data by user/temaspace/project/model
-			$group: {
-				_id: {
-					user: '$_id.user',
-					teamspace: '$_id.teamspace',
-					project: '$_id.project',
-					model: '$_id.model',
-				},
-				notification: {
+				notifications: {
 					$push: {
-						type: '$_id.type',
-						tickets: '$tickets',
+						type: '$type',
+						data: '$data',
 					},
 				},
 			},
@@ -136,6 +156,7 @@ const getGroupedNotificationsByQuery = (query) => {
 			$sort: {
 				'_id.project': 1,
 				'_id.model': 1,
+				'_id.plan': 1,
 			},
 		},
 		{
@@ -143,14 +164,31 @@ const getGroupedNotificationsByQuery = (query) => {
 				_id: {
 					user: '$_id.user',
 					teamspace: '$_id.teamspace',
-
+					project: '$_id.project',
 				},
 				data: {
-					$push: { project: '$_id.project', model: '$_id.model', data: '$notification' },
+					$push: {
+						model: '$_id.model',
+						plan: '$_id.plan',
+						notifications: '$notifications',
+					},
 				},
 			},
 		},
-
+		{
+			$group: {
+				_id: {
+					user: '$_id.user',
+					teamspace: '$_id.teamspace',
+				},
+				data: {
+					$push: {
+						project: '$_id.project',
+						data: '$data',
+					},
+				},
+			},
+		},
 	];
 
 	return db.aggregate(INTERNAL_DB, NOTIFICATIONS_COL, pipelines);

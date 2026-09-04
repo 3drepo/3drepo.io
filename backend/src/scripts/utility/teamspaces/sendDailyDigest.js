@@ -19,6 +19,8 @@ const Path = require('path');
 const { getTeamspaceList } = require('../../utils');
 const { v5Path } = require('../../../interop');
 
+const { getPlansByQuery } = require(`${v5Path}/models/clashes.plans`);
+const { clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
 const { composeDailyDigests } = require(`${v5Path}/models/notifications`);
 const { notificationTypes } = require(`${v5Path}/models/notifications.constants`);
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
@@ -34,13 +36,14 @@ const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const { sendEmail } = require(`${v5Path}/services/mailer`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
+const tz = require('countries-and-timezones');
 
 // this processes the list of project/model/ticket ids into their names
 const getContextDataLookUp = async (contextData) => {
 	const dataLookUp = {};
 
 	await Promise.all(contextData.map(async ({ _id: teamspace, data }) => {
-		dataLookUp[teamspace] = { projects: {}, models: {}, tickets: {} };
+		dataLookUp[teamspace] = { projects: {}, models: {}, tickets: {}, plans: {} };
 
 		const [ticketTemplates, projectsData, modelsData] = await Promise.all([
 			getAllTemplates(teamspace, true, { code: 1, _id: 1 }),
@@ -55,10 +58,19 @@ const getContextDataLookUp = async (contextData) => {
 			templateIdToCode[idStr] = code;
 		});
 
-		projectsData.forEach(({ _id, name }) => {
-			const idStr = UUIDToString(_id);
-			dataLookUp[teamspace].projects[idStr] = name;
-		});
+		await Promise.all(
+			projectsData.map(async ({ _id, name }) => {
+				const idStr = UUIDToString(_id);
+				const plans = await getPlansByQuery(teamspace, _id, { }, { name: 1 });
+
+				dataLookUp[teamspace].projects[idStr] = {
+					name,
+					plans: Object.fromEntries(
+						plans.map(({ _id: planId, name: planName }) => [UUIDToString(planId), planName]),
+					),
+				};
+			}),
+		);
 
 		modelsData.forEach(({ _id, name }) => {
 			const idStr = UUIDToString(_id);
@@ -81,68 +93,105 @@ const getContextDataLookUp = async (contextData) => {
 };
 
 const getUserDetails = async (users) => {
-	const usersData = await getUsersByQuery({ user: { $in: users } }, { 'customData.email': 1, 'customData.firstName': 1, user: 1 });
+	const usersData = await getUsersByQuery({ user: { $in: users } },
+		{ 'customData.email': 1, 'customData.firstName': 1, 'customData.billing.billingInfo.countryCode': 1, user: 1 });
 
 	const userLUT = {};
 
-	usersData.forEach(({ user, customData: { email, firstName } }) => {
-		userLUT[user] = { email, firstName };
+	usersData.forEach(({ user, customData: { email, firstName,
+		billing: { billingInfo: { countryCode } } } }) => {
+		userLUT[user] = { email, firstName, countryCode };
 	});
 
 	return userLUT;
 };
 
-const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
-	data.map(async ({ _id: { teamspace, user }, data: modelList }) => {
+const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
+	emailData.map(async ({ _id: { teamspace, user }, data: notificationData }) => {
 		const userInfo = usersToUserInfo[user];
 		const tsData = dataRef[teamspace];
 
 		if (!userInfo || !tsData) return;
-		const notifications = modelList.flatMap(({ model: modelID, project: projectID, data: notifData }) => {
-			const modelIDStr = UUIDToString(modelID);
-			const projectIDStr = UUIDToString(projectID);
-			const model = tsData.models[modelIDStr];
+
+		const notifications = notificationData.flatMap((notification) => {
+			const projectIDStr = UUIDToString(notification.project);
 			const project = tsData.projects[projectIDStr];
 
-			if (!model || !project) return [];
+			if (!project) return [];
 
-			const tickets = {};
-			const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+			const clashData = notification.data.filter((d) => !!d.plan)
+				.flatMap(({ plan, notifications: runNotifications }) => {
+					const planName = project.plans[UUIDToString(plan)];
 
-			notifData.forEach(({ type, tickets: ticketsArr }) => {
-				const ticketCodes = ticketsArr.flatMap(
-					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
-				if (!ticketCodes.length) return;
-				const ticketData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
-				switch (type) {
-				case notificationTypes.TICKET_UPDATED:
-					tickets.updated = ticketData;
-					break;
-				case notificationTypes.TICKET_CLOSED:
-					tickets.closed = ticketData;
-					tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
-					break;
-				case notificationTypes.TICKET_ASSIGNED:
-					tickets.assigned = ticketData;
-					break;
-				default:
-					logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
-				}
-			});
+					if (!planName) return [];
 
-			return Object.keys(tickets).length ? { project, model, tickets } : [];
+					const formattedRuns = runNotifications.flatMap(({ data, type }) => {
+						const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
+						// 'sv-SE' is used as it produces a date with ISO format
+						const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
+
+						switch (type) {
+						case notificationTypes.CLASH_RUN_SUCCEEDED:
+							return { results: data.results, triggeredAt, status: clashRunStatus.COMPLETED };
+						case notificationTypes.CLASH_RUN_ABORTED:
+							return { results: data.results, triggeredAt, status: clashRunStatus.ABORTED };
+						default:
+							return { results: data.results, triggeredAt, status: clashRunStatus.FAILED };
+						}
+					});
+
+					return { planName, runs: formattedRuns };
+				});
+
+			const ticketData = notification.data.filter((d) => !!d.model)
+				.flatMap(({ model: modelID, notifications: ticketNotifications }) => {
+					const modelIDStr = UUIDToString(modelID);
+					const model = tsData.models[modelIDStr];
+
+					if (!model) return [];
+
+					const groupedTickets = ticketNotifications.reduce((acc, { type, data }) => {
+						if (!acc[type]) acc[type] = new Set();
+						acc[type].add(UUIDToString(data.ticket));
+						return acc;
+					}, {});
+
+					const tickets = {};
+					const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+
+					Object.entries(groupedTickets).forEach(([type, ticketsArr]) => {
+						const ticketCodes = Array.from(ticketsArr).flatMap(
+							(ticketId) => tsData.tickets[ticketId] ?? []);
+
+						if (!ticketCodes.length) return;
+						const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+						switch (type) {
+						case notificationTypes.TICKET_UPDATED:
+							tickets.updated = tickData;
+							break;
+						case notificationTypes.TICKET_CLOSED:
+							tickets.closed = tickData;
+							tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
+							break;
+						case notificationTypes.TICKET_ASSIGNED:
+							tickets.assigned = tickData;
+							break;
+						default:
+							logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
+						}
+					});
+
+					return Object.keys(tickets).length ? { model, tickets } : [];
+				});
+
+			return { ...notification, project: project.name, ticketData, clashData };
 		});
 
 		if (notifications.length) {
-			const emailData = {
-				username: user,
-				firstName: userInfo.firstName,
-				teamspace,
-				notifications,
-			};
-
 			logger.logInfo(`Sending email to ${user} for ${teamspace}`);
-			await sendEmail(templates.DAILY_DIGEST.name, userInfo.email, emailData);
+			await sendEmail(templates.DAILY_DIGEST.name, userInfo.email,
+				{ username: user, firstName: userInfo.firstName, teamspace, notifications },
+			);
 		}
 	}));
 

@@ -24,9 +24,11 @@ const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('.
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
 const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
+const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { getUsersWithAccess } = require('../../../../../processors/teamspaces/projects');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
@@ -41,7 +43,7 @@ const Clashes = {};
 
 const statusEvents = ['onNew', 'onResolved', 'onReopened'];
 
-const generatePlanSchema = (teamspace, project, user, isUpdate) => {
+const generatePlanSchema = async (teamspace, project, user, isUpdate) => {
 	const modelExistsTest = (isFederation) => async (id) => {
 		if (!id) {
 			return true;
@@ -59,6 +61,14 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		}
 		return required ? schema.required() : schema;
 	};
+
+	const getJobsAndUsers = async () => {
+		const usersWithAccess = await getUsersWithAccess(teamspace, project);
+		const jobsWithAccess = await getJobsByUsers(teamspace, usersWithAccess);
+		return [...usersWithAccess, ...jobsWithAccess];
+	};
+
+	const jobsAndUsers = await getJobsAndUsers();
 
 	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
@@ -98,6 +108,9 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		selectionA: imposeCondition(selectionSchema, true, false),
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
+		notify: imposeCondition(uniqueArray(Yup.array().of(
+			Yup.string().oneOf(jobsAndUsers, 'All notify entries must be valid jobs or users with access to the project'),
+		).min(1)), false, true),
 	}).noUnknown(true).required();
 };
 
@@ -219,8 +232,9 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 const validatePlanData = async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const schema = generatePlanSchema(teamspace, project,
-			getUserFromSession(req.session), !!req.planData);
+		const user = getUserFromSession(req.session);
+		const schema = await generatePlanSchema(teamspace, project, user, !!req.planData);
+
 		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
 			req.body.tickets = await validateTicketConfiguration(

@@ -119,6 +119,7 @@ const testClashRunCompleted = () => {
 			results: generateRandomString(),
 			value: 0,
 		};
+
 		const bouncerErrorData = { ...data, value: 28 };
 
 		test.each([
