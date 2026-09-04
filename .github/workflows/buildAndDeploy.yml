@@ -166,12 +166,40 @@ jobs:
           echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
             -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
+      - name: Set up Keeper Secrets Manager CLI
+        run: |
+          set -euo pipefail
+          # Install pipx if the runner lacks it, then install the pinned KSM CLI.
+          if ! command -v pipx >/dev/null 2>&1; then
+            python3 -m pip install --user --upgrade pipx
+            export PATH="$HOME/.local/bin:$PATH"
+          fi
+          pipx install --force "keeper-secrets-manager-cli==1.5.0"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Deploy with Helm
         env:
           RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
+
+          # Resolve keeper:// refs to a temp file within this step; the trap wipes both
+          # the ini and the resolved-values file on exit (success or failure).
+          values_file="$(mktemp)"
+          trap 'rm -f "$values_file" "$HOME/.keeper/keeper.ini"' EXIT
+
+          umask 077                                    # ini created 0600, no chmod race
+          mkdir -p "$HOME/.keeper"
+          printf '%s' "${{ secrets.KSM_KEEPER_INIT_FILE_B64 }}" | base64 -d > "$HOME/.keeper/keeper.ini"
+          if [[ ! -s "$HOME/.keeper/keeper.ini" ]]; then   # empty secret -> empty ini; fail clearly
+            echo "KSM_KEEPER_INIT_FILE_B64 secret is missing or empty" >&2
+            exit 1
+          fi
+
+          # Temp file (not process substitution) so a ksm failure aborts before helm runs.
+          ksm --ini-file "$HOME/.keeper/keeper.ini" interpolate --validate \
+            devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml > "$values_file"
 
           helm_set_args=(
             --set "image.tag=$COMMIT_SHA"
@@ -188,7 +216,7 @@ jobs:
             oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
             --version "$HELM_CHART_VERSION" \
             --namespace default \
-            -f devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml \
+            -f "$values_file" \
             "${helm_set_args[@]}"
 
       - name: Log out from registries
