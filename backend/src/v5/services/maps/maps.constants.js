@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
+const MapsConstants = {};
 
-export const { Types: {{ pascalCase name }}Types, Creators: {{ pascalCase name }}Actions } = createActions({
-	fetch: [] // TODO: remove this action
-}, { prefix: '{{ constantCase name }}/' });
+MapsConstants.mapProviders = {
+	OSM: 'osm',
+	HERE: 'here',
+};
 
-export interface I{{ pascalCase name }}State {}
-
-export const INITIAL_STATE: I{{ pascalCase name }}State = {};
-
-export const reducer = createReducer(INITIAL_STATE, {
-});
+module.exports = MapsConstants;

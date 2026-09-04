@@ -346,11 +346,18 @@ db.createProjectImage = (teamspace, project, type, imageData) => createImage(tea
 	type, project, imageData);
 
 db.createClashPlans = async (teamspace, project, plans) => {
-	const formattedPlans = plans.map((plan) => ({
-		...plan,
-		_id: stringToUUID(plan._id),
-		project: stringToUUID(project),
-	}));
+	const formattedPlans = plans.map((plan) => {
+		if (plan.tickets) {
+			// eslint-disable-next-line no-param-reassign
+			plan.tickets.template = stringToUUID(plan.tickets.template);
+		}
+
+		return ({
+			...plan,
+			_id: stringToUUID(plan._id),
+			project: stringToUUID(project),
+		});
+	});
 	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
@@ -949,9 +956,9 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	let tickets;
 	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
-		const { federation, template, creator } = ticketInfo;
+		const { federation, template, creator, valuesAtCreation: valuesAtCreationOverride } = ticketInfo;
 		const ticket = ServiceHelper.generateTicket(template, false, federation);
-		const valuesAtCreation = Object.keys(ticket.properties).map(
+		const valuesAtCreation = valuesAtCreationOverride ?? Object.keys(ticket.properties).map(
 			(key) => ({ property: key, value: ticket.properties[key] }));
 		tickets = {
 			federation: federation._id, template: template._id, valuesAtCreation, creator,

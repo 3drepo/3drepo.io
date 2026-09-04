@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	{{ pascalCase name }}Types,
-	{{ pascalCase name }}Actions
-} from './{{ camelCase name }}.redux';
+const config = require('./jest.config.v5');
 
-export * from './{{ camelCase name }}.selectors';
+config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
+config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
+config.setupFiles = ['./tests/v5/scripts/setup.js'];
+
+config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
+
+module.exports = config;

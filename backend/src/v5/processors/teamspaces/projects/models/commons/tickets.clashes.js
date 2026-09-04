@@ -32,7 +32,11 @@ const { importTickets, updateManyTickets } = require('./tickets');
 const { CameraType } = require('../../../../../schemas/tickets/validators');
 const { getFederationById } = require('../../../../../models/modelSettings');
 const { getMeshesWithParentIds } = require('./scenes');
+const { getMetadataByQuery } = require('../../../../../models/metadata');
+const { getNodesByQuery } = require('../../../../../models/scenes');
 const { getTicketsByQuery } = require('../../../../../models/tickets');
+const { idTypesToKeys } = require('../../../../../models/metadata.constants');
+const { uniqueElements } = require('../../../../../utils/helper/arrays');
 const { validateTickets } = require('../../../../../schemas/tickets');
 
 const TicketsClashes = {};
@@ -48,10 +52,12 @@ const {
 	OBJECT_A_ID_TYPE,
 	OBJECT_B_ID,
 	OBJECT_B_ID_TYPE,
+	TAGS,
 } = modulePropertyLabels[CLOUD_CLASH];
 const { DEFAULT_VIEW, PIN, STATUS } = basePropertyLabels;
 
 const CONTEXT_GROUP_CONFIGURATION = { color: [182, 188, 193], opacity: 0.02 };
+const META_PLACEHOLDER_REGEX = /^\{\$meta-(.+)\}$/;
 
 const getClashIdToTicket = async (teamspace, project, federation, template, planId) => {
 	const tickets = await getTicketsByQuery(teamspace, project, federation, {
@@ -245,6 +251,97 @@ const generateBaseNewTicket = async (teamspace, project, federation, template, d
 	return ticket;
 };
 
+const getTagValueInstruction = (valuesAtCreation = []) => {
+	const tagInstruction = valuesAtCreation.find(({ module, property }) => module === CLOUD_CLASH
+		&& property === TAGS);
+
+	if (!tagInstruction) return undefined;
+
+	const staticValues = [];
+	const metadataFields = [];
+	tagInstruction.value.forEach((value) => {
+		const field = value.match(META_PLACEHOLDER_REGEX)?.[1];
+		if (field) {
+			metadataFields.push(field);
+		} else {
+			staticValues.push(value);
+		}
+	});
+
+	// if the tags field only contains static values, we return undefined as
+	// pure static values is already constructed by the base ticket. (same as any other property)
+	return metadataFields.length ? { staticValues, metadataFields } : undefined;
+};
+
+const getClashMetadata = async (teamspace, project, clashContext, clash, fields) => {
+	const objectsByContainer = {};
+	[clash.a, clash.b].forEach(({ container, idType, id }) => {
+		const revision = clashContext.containerRevisions[container];
+		if (!revision) return;
+
+		objectsByContainer[container] = objectsByContainer[container] ?? {
+			container, revision, internalIds: [], externalIds: {},
+		};
+
+		if (idType === clashObjectIdTypes.INTERNAL) {
+			objectsByContainer[container].internalIds.push(stringToUUID(id));
+		} else if (idTypesToKeys[idType]) {
+			const { externalIds } = objectsByContainer[container];
+			externalIds[idType] = externalIds[idType] ?? [];
+			externalIds[idType].push(id);
+		}
+	});
+
+	const metadataEntries = await Promise.all(Object.values(objectsByContainer).map(
+		async ({ container, revision, internalIds, externalIds }) => {
+			const queriesOrCondition = [];
+
+			if (internalIds.length) {
+				const nodes = await getNodesByQuery(teamspace, project, container,
+					{ rev_id: revision, _id: { $in: internalIds } }, { shared_id: 1 });
+				if (nodes.length) {
+					const sharedIds = nodes.map(({ shared_id }) => shared_id);
+					queriesOrCondition.push({ parents: { $in: sharedIds } });
+				}
+			}
+
+			Object.entries(externalIds).forEach(([idType, ids]) => {
+				queriesOrCondition.push({ metadata: { $elemMatch: {
+					key: { $in: idTypesToKeys[idType] }, value: { $in: ids } } } });
+			});
+
+			if (!queriesOrCondition.length) return [];
+
+			return getMetadataByQuery(teamspace, container,
+				{ rev_id: revision, $or: queriesOrCondition }, { metadata: 1 });
+		},
+	));
+	return metadataEntries.flat().flatMap(({ metadata }) => {
+		const tagData = [];
+		for (const { key, value } of metadata) {
+			if (fields.includes(key)) {
+				tagData.push(value);
+			}
+		}
+		return tagData;
+	});
+};
+
+const populateTagPlaceholders = async (teamspace, project, ticket, clashContext, clash, tagInstruction) => {
+	if (!tagInstruction) return;
+
+	const metadata = await getClashMetadata(teamspace, project, clashContext, clash, tagInstruction.metadataFields);
+	const tagValues = uniqueElements([...tagInstruction.staticValues, ...metadata]);
+
+	if (tagValues.length) {
+		// eslint-disable-next-line no-param-reassign
+		ticket.modules[CLOUD_CLASH][TAGS] = tagValues;
+	} else {
+		// eslint-disable-next-line no-param-reassign
+		delete ticket.modules[CLOUD_CLASH][TAGS];
+	}
+};
+
 const processClashes = async (teamspace, project, federation, template, clashes, clashContext) => {
 	const ticketsToUpdate = [];
 	const ticketsToCreate = [];
@@ -261,6 +358,7 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 		[clashObjectIdTypes.REVIT]: idTypeLabels.REVIT,
 	};
 	const { clashIdToTicket } = clashContext;
+	const tagInstruction = getTagValueInstruction(clashContext.valuesAtCreation);
 
 	for (const clash of clashes) {
 		const clashId = clash.index;
@@ -298,9 +396,12 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID] = clash.a.id;
 			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID_TYPE] = objectBIdType;
 			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID] = clash.b.id;
-			updateClashPinAndDistance(newTicket, clashContext, clash);
 			// eslint-disable-next-line no-await-in-loop
-			await updateDefaultView(teamspace, project, newTicket, clashContext, clash);
+			await Promise.all([
+				populateTagPlaceholders(teamspace, project, newTicket, clashContext, clash, tagInstruction),
+				updateDefaultView(teamspace, project, newTicket, clashContext, clash),
+			]);
+			updateClashPinAndDistance(newTicket, clashContext, clash);
 
 			ticketsToCreate.push(newTicket);
 		}

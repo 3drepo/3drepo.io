@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const config = require('./jest.config.v5');
 
 config.coveragePathIgnorePatterns = [
 	...config.coveragePathIgnorePatterns,

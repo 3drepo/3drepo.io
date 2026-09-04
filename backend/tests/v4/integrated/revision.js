@@ -20,7 +20,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -54,7 +53,7 @@ describe("Revision", function () {
 		return allRevisions.find(({_id}) => _id === rev);
 	}
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -69,7 +68,7 @@ describe("Revision", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 
 		server.close(function() {
 			console.log("API test server is closed");
@@ -81,11 +80,11 @@ describe("Revision", function () {
 	it("list revisions should succeed", function(done) {
 		agent.get(`/${username}/${model}/revisions.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.length).to.equal(3);
-				expect(res.body[0]).to.have.property("_id");
-				expect(res.body[0]).to.have.property("timestamp");
-				expect(res.body[0]).to.have.property("author");
-				expect(Date.parse(res.body[0].timestamp)).to.be.above(Date.parse(res.body[2].timestamp));
+				expect(res.body.length).toBe(3);
+				expect(res.body[0]).toHaveProperty("_id");
+				expect(res.body[0]).toHaveProperty("timestamp");
+				expect(res.body[0]).toHaveProperty("author");
+				expect(Date.parse(res.body[0].timestamp)).toBeGreaterThan(Date.parse(res.body[2].timestamp));
 				done(err);
 			});
 	});
@@ -129,7 +128,7 @@ describe("Revision", function () {
 	it("get tree by revision tag should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/original/fulltree.json`)
 			.expect(200, function(err, res) {
-				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("suzanne-flat.obj");
+				expect(JSON.parse(res.text).mainTree.nodes.name).toBe("suzanne-flat.obj");
 				done(err);
 			});
 	});
@@ -137,7 +136,7 @@ describe("Revision", function () {
 	it("get tree by revision id should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/6c558faa-8236-4255-a48a-a4ce99465182/fulltree.json`)
 			.expect(200, function(err, res) {
-				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("suzanne-flat.obj");
+				expect(JSON.parse(res.text).mainTree.nodes.name).toBe("suzanne-flat.obj");
 				done(err);
 			});
 	});
@@ -145,7 +144,7 @@ describe("Revision", function () {
 	it("get tree by non existing revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/000/fulltree.json`)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -153,7 +152,7 @@ describe("Revision", function () {
 	it("get tree of head of master should succeed", function(done) {
 		agent.get(`/${username}/${model}/revision/master/head/fulltree.json`)
 			.expect(200, function(err, res) {
-				expect(JSON.parse(res.text).mainTree.nodes.name).to.equal("3DrepoBIM.obj");
+				expect(JSON.parse(res.text).mainTree.nodes.name).toBe("3DrepoBIM.obj");
 				done(err);
 			});
 	});
@@ -237,10 +236,10 @@ describe("Revision", function () {
 				.expect(200);
 
 		let revision = await getRevision(testRevId);
-		expect(revision).to.be.undefined;
+		expect(revision).toBeUndefined();
 
 		revision = await getRevision(testRevId, 'showVoid=1');
-		expect(revision.void).to.be.true;
+		expect(revision.void).toBe(true);
 
 
 
@@ -249,7 +248,7 @@ describe("Revision", function () {
 				.expect(200);
 
 		revision = await getRevision(testRevId);
-		expect(revision).not.to.be.undefined;
+		expect(revision).not.toBeUndefined();
 	});
 
 });
