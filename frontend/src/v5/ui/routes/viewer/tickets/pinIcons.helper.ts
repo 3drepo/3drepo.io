@@ -64,8 +64,8 @@ const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resol
 		const { naturalWidth, naturalHeight } = img;
 
 		// Unity viewer does not do AA on the pin, The size of the image needs to be appropriate for the size.
-		// approximately 48x48 is the target size for pin icon with 1.8 scale (which is the current default)
-		const scale = 48 / Math.max(naturalWidth, naturalHeight);
+		// The aim is 64 pixels tall with 1.8 scale (which is the current default)
+		const scale = 64 / naturalHeight;
 
 		img.width = Math.round(naturalWidth * scale);
 		img.height = Math.round(naturalHeight * scale);
