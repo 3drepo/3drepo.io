@@ -166,6 +166,16 @@ jobs:
           echo "${{ secrets.REGISTRY_TOKEN }}" | helm registry login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
             -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
+      - name: Set up Keeper Secrets Manager CLI
+        run: |
+          set -euo pipefail
+          # Pin the CLI so deploys stay reproducible; keep local installs in sync.
+          pipx install "keeper-secrets-manager-cli==1.5.0"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          mkdir -p "$HOME/.keeper"
+          printf '%s' "${{ secrets.KSM_KEEPER_INIT_FILE_B64 }}" | base64 -d > "$HOME/.keeper/keeper.ini"
+          chmod 600 "$HOME/.keeper/keeper.ini"
+
       - name: Deploy with Helm
         env:
           RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
@@ -188,7 +198,7 @@ jobs:
             oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
             --version "$HELM_CHART_VERSION" \
             --namespace default \
-            -f devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml \
+            -f <(ksm --ini-file "$HOME/.keeper/keeper.ini" interpolate --validate devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml) \
             "${helm_set_args[@]}"
 
       - name: Log out from registries
