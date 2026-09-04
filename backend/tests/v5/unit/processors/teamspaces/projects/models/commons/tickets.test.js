@@ -1523,33 +1523,16 @@ const testOnClashPlanNameUpdated = () => {
 	const planId = generateUUID();
 	const planName = generateRandomString();
 
-	test('should not call updateTickets if no tickets are found', async () => {
-		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+	test('should call updateTicketsByQuery with the correct query', async () => {
+		TicketsModel.updateTicketsByQuery.mockResolvedValueOnce(undefined);
 
 		await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId, planName))
 			.resolves.toBeUndefined();
 
-		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
-		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, undefined,
-			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) });
-
-		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
-	});
-
-	test('should call updateTickets if tickets are found', async () => {
-		const tickets = times(5, () => generateRandomObject());
-		TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
-
-		await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId, planName))
-			.resolves.toBeUndefined();
-
-		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
-		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, undefined,
-			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) });
-
-		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
-		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, undefined,
-			tickets, tickets.map(() => ({ modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } })), 'system');
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledWith(teamspace, project,
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) },
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_NAME}`]: planName });
 	});
 };
 

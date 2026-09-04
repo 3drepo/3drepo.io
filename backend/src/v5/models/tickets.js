@@ -61,6 +61,10 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 	return response;
 };
 
+Tickets.updateTicketsByQuery = async (teamspace, project, query, setUpdate) => {
+	await DbHandler.updateMany(teamspace, TICKETS_COL, { project, ...query }, { $set: setUpdate });
+};
+
 Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, author) => {
 	const changeSet = [];
 
@@ -119,7 +123,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 			});
 			return {
 				updateOne: {
-					filter: { _id: oldTicket._id, teamspace, project, ...(model ? { model } : {}) },
+					filter: { _id: oldTicket._id, teamspace, project, model },
 					update: actions,
 
 				},
@@ -177,7 +181,7 @@ Tickets.getTicketById = async (
 };
 
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
-	TICKETS_COL, { teamspace, project, ...(model ? { model } : {}), ...query }, projection);
+	TICKETS_COL, { teamspace, project, model, ...query }, projection);
 
 Tickets.getDistinctPropertyValues = (teamspace, project, model, template, property) => DbHandler.distinct(teamspace,
 	TICKETS_COL, property, { teamspace, project, model, type: template });

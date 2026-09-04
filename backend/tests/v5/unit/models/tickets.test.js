@@ -341,22 +341,6 @@ const testGetTicketsByQuery = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
 				{ teamspace, project, model, ...query }, projection);
 		});
-
-		test('Should return whatever the query returns (no model provided)', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const query = { [generateRandomString()]: generateRandomString() };
-			const projection = { [generateRandomString()]: generateRandomString() };
-			const expectedOutput = { [generateRandomString()]: generateRandomString() };
-
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
-
-			await expect(Ticket.getTicketsByQuery(teamspace, project, undefined, query, projection))
-				.resolves.toEqual(expectedOutput);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol, { teamspace, project, ...query }, projection);
-		});
 	});
 };
 
@@ -390,10 +374,10 @@ const testUpdateTickets = () => {
 	const propToUpdate = generateRandomString();
 	const ticketCount = 10;
 
-	const runTest = async (oldTickets, updateData, expectedCmd, changeSet, modelProvided = true) => {
+	const runTest = async (oldTickets, updateData, expectedCmd, changeSet) => {
 		const fn = jest.spyOn(db, 'bulkWrite').mockResolvedValueOnce(undefined);
 
-		await expect(Ticket.updateTickets(teamspace, project, modelProvided ? model : undefined,
+		await expect(Ticket.updateTickets(teamspace, project, model,
 			oldTickets, updateData, author)).resolves.toEqual(changeSet);
 
 		if (changeSet.length) {
@@ -517,7 +501,7 @@ const testUpdateTickets = () => {
 				modules: { module: { propToUnset: null, numProp: 0 } },
 			});
 
-			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project },
+			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
 				update: {
 					$set: { [`properties.${basePropertyLabels.UPDATED_AT}`]: date, 'properties.numProp': 0, [propToUpdate]: newPropValue, 'modules.module.numProp': 0 },
 					$unset: { 'modules.module.propToUnset': 1, 'properties.propToUnset': 1 },
@@ -535,7 +519,7 @@ const testUpdateTickets = () => {
 			});
 		});
 
-		await runTest(oldTickets, updateData, expectedCmd, changeSet, false);
+		await runTest(oldTickets, updateData, expectedCmd, changeSet);
 	});
 
 	describe('Composite types', () => {

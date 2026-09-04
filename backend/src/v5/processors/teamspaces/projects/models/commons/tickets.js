@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets, updateTicketsByQuery } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -509,14 +509,9 @@ const updatePropertiesWithPattern = async (teamspace, project, model, template, 
 };
 
 Tickets.onClashPlanNameUpdated = async (teamspace, project, planId, planName) => {
-	const tickets = await getTicketsByQuery(teamspace, project, undefined,
-		{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) });
-
-	if (tickets.length) {
-		const updateData = tickets.map(() => ({
-			modules: { [CLOUD_CLASH]: { [cloudClashProps.CLASH_PLAN_NAME]: planName } } }));
-		await updateTickets(teamspace, project, undefined, tickets, updateData, 'system');
-	}
+	const query = { [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) };
+	await updateTicketsByQuery(teamspace, project, query,
+		{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_NAME}`]: planName });
 };
 
 Tickets.onModelNameUpdated = async (teamspace, project, model) => {
@@ -537,8 +532,8 @@ Tickets.onTemplateUpdated = async (teamspace, template) => {
 Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {
 	const propertiesToUpdate = findPropertiesToUpdate(template);
 	if (propertiesToUpdate.length) {
-		const updatedTickets = await updatePropertiesWithAutomatedValue(teamspace,
-			tickets.map((ticket) => ({ project, model, ...ticket })), template, propertiesToUpdate);
+		const updatedTickets = await updatePropertiesWithAutomatedValue(
+			teamspace, tickets.map((ticket) => ({ project, model, ...ticket })), template, propertiesToUpdate);
 		return updatedTickets;
 	}
 
