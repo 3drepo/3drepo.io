@@ -7,34 +7,35 @@
 	--muted:   #6b7280;
 	--border:  #d9dee7;
 	/* Semantic status — justified extension for usability */
-	--c-success-bg:   #dcfce7;
-	--c-success-fg:   #15803d;
-	--c-success-dot:  #16a34a;
-	--c-failed-bg:    #fee2e2;
-	--c-failed-fg:    #dc2626;
-	--c-failed-dot:   #dc2626;
-	--c-aborted-bg:   #fef9c3;
-	--c-aborted-fg:   #b45309;
-	--c-aborted-dot:  #d97706;
+	--c-success-bg:  #dcfce7;
+	--c-success-fg:  #15803d;
+	--c-success-dot: #16a34a;
+	--c-failed-bg:   #fee2e2;
+	--c-failed-fg:   #dc2626;
+	--c-failed-dot:  #dc2626;
+	--c-aborted-bg:  #fef9c3;
+	--c-aborted-fg:  #b45309;
+	--c-aborted-dot: #d97706;
 	/* Result pill semantic */
-	--c-new-bg:       #eff6ff;
-	--c-new-border:   #bfdbfe;
-	--c-new-fg:       #1d4ed8;
-	--c-active-bg:    #fef9c3;
-	--c-active-border:#fde68a;
-	--c-active-fg:    #b45309;
-	--c-resolved-bg:  #dcfce7;
-	--c-resolved-border:#bbf7d0;
-	--c-resolved-fg:  #15803d;
+	--c-new-bg:          #eff6ff;
+	--c-new-border:      #bfdbfe;
+	--c-new-fg:          #1d4ed8;
+	--c-active-bg:       #fef9c3;
+	--c-active-border:   #fde68a;
+	--c-active-fg:       #b45309;
+	--c-resolved-bg:     #dcfce7;
+	--c-resolved-border: #bbf7d0;
+	--c-resolved-fg:     #15803d;
 
 	--font: Inter, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
+/* ── Notification container ─────────────────────── */
 div.notifications {
 	width: 100%;
 	padding: 10px 0;
 	align-items: center;
-	display: inline-flex
+	display: inline-flex;
 }
 
 div.notificationsTable {
@@ -54,7 +55,7 @@ div.notificationsHeader {
 	border-top-right-radius: 10px;
 	justify-content: space-between;
 	align-items: center;
-	display: inline-flex
+	display: inline-flex;
 }
 
 div.headerTitle {
@@ -62,153 +63,12 @@ div.headerTitle {
 	align-items: center;
 }
 
-.model-block {
-	display: grid;
-	grid-template-columns: 160px 1fr;
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	overflow: hidden;
-	margin-bottom: 8px;
-	margin-top: 8px;
-	background: #fff;
-	width: 100%
+div.notificationsContent {
+	padding: 5px 20px 5px 20px;
+	flex-direction: column;
+	align-items: flex-start;
+	display: flex;
 }
-
-    .model-label-cell {
-      padding: 14px 16px;
-      border-right: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2px;
-    }
-
-    .model-label-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-    }
-
-	.plan-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-	  border: 0;
-    }
-	.run-row {
-	padding: 12px 14px;
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	background: var(--bg);
-	display: grid;
-	grid-template-columns: minmax(148px, 1.4fr) minmax(100px, 0.75fr) minmax(82px, 0.5fr) 1fr;
-	gap: 12px;
-	align-items: start;
-	}
-
-	.only-child {
-		border-radius: 8px;	
-	}
-
-    .first-child {
-      border-radius: 8px 8px 0 0;
-      border-bottom: none;
-    }
-
-	.middle-child {      
-		border-radius:0;
-      border-bottom: none;
-    }
-	
-    .last-child {
-      border-radius: 0 0 8px 8px;
-    }
-
-	.even-rows {
-      background: #f9fbff;
-	}
-
-	    .cell-label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      line-height: 1;
-    }
-
-    .model-ticket-list {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .ticket-row {
-      display: grid;
-      grid-template-columns: 22px 1fr auto;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 20px;
-      border-top: 1px solid var(--border);
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .model-ticket-list .ticket-row:first-child {
-      border-top: none;
-    }
-	
-    .open-link {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      white-space: nowrap;
-    }
-	.ticket-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 1.5px solid var(--muted);
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--muted);
-      flex: 0 0 auto;
-    }
-	
-    .ticket-icon.t-assign {
-      border-color: var(--c-new-fg);
-      color: var(--c-new-fg);
-    }
-
-	    .ticket-icon.t-resolved {
-      border-color: var(--c-resolved-fg);
-      color: var(--c-resolved-fg);
-    }
-
-	    .cell-label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      line-height: 1;
-    }
-
-
 
 p.title {
 	font-size: 0.9rem;
@@ -218,131 +78,222 @@ p.title {
 	word-wrap: break-word;
 }
 
-p.notificationsText {
-	flex: 1 1 0;
-	margin: 10px 5px 10px 15px
-}
-
-
-div.notificationsContent {
-	padding: 5px 20px 5px 20px;
-	flex-direction: column;
-	align-items: flex-start;
-	display: flex
-}
-
-div.notificationsRow {
-	align-self: stretch;
-	justify-content: flex-start;
-	align-items: center;
-	padding: 0;
-	display: inline-flex
-}
-
-.notificationIconBorder {
-	padding: 3px;
-	border-radius: 18px;
+/* ── Model block & labels ────────────────────────── */
+.modelBlock {
+	display: grid;
+	grid-template-columns: 160px 1fr;
+	border: 1px solid var(--border);
+	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 0 1px 1px #016CA7;
-	justify-content: center;
+	margin-bottom: 8px;
+	margin-top: 8px;
+	background: #fff;
+	width: 100%;
+}
+
+.modelLabelCell {
+	padding: 14px 16px;
+	border-right: 1px solid var(--border);
+	background: var(--surface);
+}
+
+.sectionLabel {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-bottom: 2px;
+}
+
+.dataValue {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--muted);
+}
+
+/* ── Clash plan grouping & rows ──────────────────── */
+.planGroup {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	border: 0;
+}
+
+.runRow {
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: var(--bg);
+	display: grid;
+	grid-template-columns: minmax(148px, 1.4fr) minmax(100px, 0.75fr) minmax(82px, 0.5fr) 1fr;
+	gap: 12px;
+	align-items: start;
+}
+
+.onlyChild {
+	border-radius: 8px;
+}
+
+.firstChild {
+	border-radius: 8px 8px 0 0;
+	border-bottom: none;
+}
+
+.middleChild {
+	border-radius: 0;
+	border-bottom: none;
+}
+
+.lastChild {
+	border-radius: 0 0 8px 8px;
+}
+
+.evenRows {
+	background: #f9fbff;
+}
+
+.cellLabel {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--muted);
+	line-height: 1;
+}
+
+/* ── Ticket list ─────────────────────────────────── */
+.modelTicketList {
+	display: flex;
+	flex-direction: column;
+}
+
+.ticketRow {
+	display: grid;
+	grid-template-columns: 22px 1fr auto;
 	align-items: center;
-	display: flex
+	gap: 10px;
+	padding: 11px 20px;
+	border-top: 1px solid var(--border);
+	font-size: 13px;
+	color: var(--muted);
 }
 
-.notificationDoneIconBorder {
-	box-shadow: 0 0 1px 1px #555f70;
-	height: 11px;
-
+.modelTicketList .ticketRow:first-child {
+	border-top: none;
 }
 
-img.notificationType {
-	width: 11px
+.openLink {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--muted);
+	text-decoration: none;
+	white-space: nowrap;
 }
 
+.ticketIcon {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 1.5px solid var(--muted);
+	display: grid;
+	place-items: center;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--muted);
+	flex: 0 0 auto;
+}
 
- /* ── Status badge ───────────────────────────────── */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 8px 3px 6px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.5;
-    }
+.ticketIcon.tAssign {
+	border-color: var(--c-new-fg);
+	color: var(--c-new-fg);
+}
 
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      flex: 0 0 auto;
-    }
+.ticketIcon.tResolved {
+	border-color: var(--c-resolved-fg);
+	color: var(--c-resolved-fg);
+}
 
-    .s-success {
-      background: var(--c-success-bg);
-      color: var(--c-success-fg);
-    }
-    .s-success .status-dot { background: var(--c-success-dot); }
+/* ── Status badge ────────────────────────────────── */
+.statusBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 8px 3px 6px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	line-height: 1.5;
+}
 
-    .s-failed {
-      background: var(--c-failed-bg);
-      color: var(--c-failed-fg);
-    }
-    .s-failed .status-dot { background: var(--c-failed-dot); }
+.statusDot {
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	flex: 0 0 auto;
+}
 
-    .s-aborted {
-      background: var(--c-aborted-bg);
-      color: var(--c-aborted-fg);
-    }
-    .s-aborted .status-dot { background: var(--c-aborted-dot); }
+.sSuccess {
+	background: var(--c-success-bg);
+	color: var(--c-success-fg);
+}
+.sSuccess .statusDot { background: var(--c-success-dot); }
 
-/* ── Result pills ───────────────────────────────── */
-    .result-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
+.sFailed {
+	background: var(--c-failed-bg);
+	color: var(--c-failed-fg);
+}
+.sFailed .statusDot { background: var(--c-failed-dot); }
 
-    .pill {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 4px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      border: 1px solid;
-      font-size: 12px;
-      line-height: 1.2;
-    }
+.sAborted {
+	background: var(--c-aborted-bg);
+	color: var(--c-aborted-fg);
+}
+.sAborted .statusDot { background: var(--c-aborted-dot); }
 
-    .pill strong {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1;
-    }
+/* ── Result pills ────────────────────────────────── */
+.resultPills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
 
-    .pill-new {
-      background: var(--c-new-bg);
-      border-color: var(--c-new-border);
-      color: var(--c-new-fg);
-    }
+.pill {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 6px;
+	border: 1px solid;
+	font-size: 12px;
+	line-height: 1.2;
+}
 
-    .pill-active {
-      background: var(--c-active-bg);
-      border-color: var(--c-active-border);
-      color: var(--c-active-fg);
-    }
+.pill strong {
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1;
+}
 
-    .pill-resolved {
-      background: var(--c-resolved-bg);
-      border-color: var(--c-resolved-border);
-      color: var(--c-resolved-fg);
-    }
+.pillNew {
+	background: var(--c-new-bg);
+	border-color: var(--c-new-border);
+	color: var(--c-new-fg);
+}
 
-    .error-note {
-      font-size: 12px;
-      color: var(--muted);
-      font-style: italic;
-      line-height: 1.4;
-    }
+.pillActive {
+	background: var(--c-active-bg);
+	border-color: var(--c-active-border);
+	color: var(--c-active-fg);
+}
+
+.pillResolved {
+	background: var(--c-resolved-bg);
+	border-color: var(--c-resolved-border);
+	color: var(--c-resolved-fg);
+}

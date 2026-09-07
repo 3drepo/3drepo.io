@@ -15,60 +15,60 @@
 		</div>
 		<div class="notificationsContent">
 			<% if (clashData?.length> 0) { %>
-				<h3 class="section-label">Clash activities</h3>
+				<h3 class="sectionLabel">Clash activities</h3>
 				<% for(const { planName, runs} of clashData) { %>
-					<div class="model-block plan-group">
+					<div class="modelBlock planGroup">
 						<% runs.forEach(({ status, results: { stats, error }, triggeredAt }, index)=> { %>
 							<div
-								class="run-row run-row-grouped <%= runs.length === 1? 'only-child' : (index === 0 ? 'first-child' : index===runs.length-1 ? 'last-child' : 'middle-child') %> <%= index % 2 === 0 ? '' : 'even-rows' %>">
+								class="runRow run-row-grouped <%= runs.length === 1? 'onlyChild' : (index === 0 ? 'firstChild' : index===runs.length-1 ? 'lastChild' : 'middleChild') %> <%= index % 2 === 0 ? '' : 'evenRows' %>">
 								<div>
 									<% if(index===0) { %>
-										<span class=" cell-label">Plan</span>
-										<div class="model-label-name ">
+										<span class=" cellLabel">Plan</span>
+										<div class="dataValue ">
 											<%= planName %>
 										</div>
 										<% } %>
 								</div>
 								<div>
 									<% if(index===0) { %>
-										<span class="cell-label">Ran at</span>
+										<span class="cellLabel">Ran at</span>
 										<% } %>
-											<div class="model-label-name">
+											<div class="dataValue">
 												<%= triggeredAt %>
 											</div>
 								</div>
 								<div>
 									<% if(index===0) { %>
-										<span class="cell-label">Status</span>
+										<span class="cellLabel">Status</span>
 										<% } %>
 											<% if(status==='completed' ) { %>
-												<span class="status-badge s-success"><span
-														class="status-dot"></span>Success</span>
+												<span class="statusBadge sSuccess"><span
+														class="statusDot"></span>Success</span>
 												<% } else if(status==='failed' ) { %>
-													<span class="status-badge s-failed"><span
-															class="status-dot"></span>Failed</span>
+													<span class="statusBadge sFailed"><span
+															class="statusDot"></span>Failed</span>
 													<% } else if(status==='aborted' ) { %>
-														<span class="status-badge s-aborted"><span
-																class="status-dot"></span>Aborted</span>
+														<span class="statusBadge sAborted"><span
+																class="statusDot"></span>Aborted</span>
 														<% } %>
 								</div>
 								<div>
 									<% if(index===0) { %>
-										<span class="cell-label">Results</span>
+										<span class="cellLabel">Results</span>
 										<% } %>
 											<% if(status !=='completed' ) { %>
-												<div class="model-label-name">
+												<div class="dataValue">
 													<%= error.reason %>
 												</div>
 												<% } else { %>
-													<div class="result-pills">
-														<span class="pill pill-new"><strong>
+													<div class="resultPills">
+														<span class="pill pillNew"><strong>
 																<%= stats.new %>
 															</strong>&nbsp;new</span>
-														<span class="pill pill-active"><strong>
+														<span class="pill pillActive"><strong>
 																<%= stats.active %>
 															</strong>&nbsp;active</span>
-														<span class="pill pill-resolved"><strong>
+														<span class="pill pillResolved"><strong>
 																<%= stats.resolved %>
 															</strong>&nbsp;resolved</span>
 													</div>
@@ -81,20 +81,20 @@
 
 						<% } %>
 							<% if (ticketData?.length> 0) { %>
-								<h3 class="section-label">Ticket activities</h3>
+								<h3 class="sectionLabel">Ticket activities</h3>
 								<% for(const { model, tickets } of ticketData) { %>
-									<div class="model-block">
-										<div class="model-label-cell">
-											<div class="section-label">Model</div>
-											<div class="model-label-name">
+									<div class="modelBlock">
+										<div class="modelLabelCell">
+											<div class="sectionLabel">Model</div>
+											<div class="dataValue">
 												<%= model %>
 											</div>
 										</div>
 
-										<div class="model-ticket-list">
+										<div class="modelTicketList">
 											<% if(tickets.assigned) { %>
-												<div class="ticket-row">
-													<span class="ticket-icon t-assign" aria-label="Assigned">＋</span>
+												<div class="ticketRow">
+													<span class="ticketIcon tAssign" aria-label="Assigned">＋</span>
 													<a href="<%= tickets.assigned.link %>" target="_blank">
 														<%= tickets.assigned.count %>
 															<%= tickets.assigned.count===1? "ticket" : "tickets" %> were
@@ -102,14 +102,14 @@
 																you.
 													</a>
 													<a href="<%= tickets.assigned.link %>" target="_blank"
-														class="open-link">Open
+														class="openLink">Open
 														↗</a>
 
 												</div>
 												<% } %>
 													<% if(tickets.updated) { %>
-														<div class="ticket-row">
-															<span class="ticket-icon" aria-label="Updated">↻</span>
+														<div class="ticketRow">
+															<span class="ticketIcon" aria-label="Updated">↻</span>
 															<a href="<%= tickets.updated.link %>" target="_blank">
 																<%= tickets.updated.count %>
 																	<%= tickets.updated.count===1? "ticket" : "tickets"
@@ -118,13 +118,13 @@
 																		associated with were updated.
 															</a>
 															<a href="<%= tickets.updated.link %>" target="_blank"
-																class="open-link">Open
+																class="openLink">Open
 																↗</a>
 														</div>
 														<% } %>
 															<% if(tickets.closed) { %>
-																<div class="ticket-row">
-																	<span class="ticket-icon t-resolved"
+																<div class="ticketRow">
+																	<span class="ticketIcon tResolved"
 																		aria-label="Resolved">✔</span>
 																	<a href="<%= tickets.closed.link %>"
 																		target="_blank">
@@ -135,7 +135,7 @@
 																				resolved.
 																	</a>
 																	<a href="<%= tickets.closed.link %>" target="_blank"
-																		class="open-link">Open
+																		class="openLink">Open
 																		↗</a>
 																</div>
 																<% } %>
