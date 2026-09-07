@@ -28,39 +28,45 @@ const { getJobsToUsers } = require('../../models/jobs');
 const { getPlanById } = require('../../models/clashes.plans');
 const { getUsernamesToNotify } = require('./notificationsHelper');
 const { getUsersWithAccess } = require('../../processors/teamspaces/projects');
+const { logger } = require('../../utils/logger');
 const { subscribe } = require('../eventsManager/eventsManager');
 
 const ClashesNotifications = {};
 
 const clashRunStatusUpdated = async (teamspace, project, runId, status, results) => {
-	const isFinalStatus = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED].includes(status);
+	try {
+		const isFinalStatus = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED]
+			.includes(status);
 
-	if (!isFinalStatus) return;
+		if (!isFinalStatus) return;
 
-	const { plan: { _id: planId }, triggeredAt } = await getClashRunById(teamspace,
-		project, runId, { plan: 1, triggeredAt: 1 });
+		const { plan: { _id: planId }, triggeredAt } = await getClashRunById(teamspace,
+			project, runId, { plan: 1, triggeredAt: 1 });
 
-	const { notify } = await getPlanById(teamspace, project, planId, { notify: 1 })
-		.catch(() => ({}));
+		const { notify } = await getPlanById(teamspace, project, planId, { notify: 1 })
+			.catch(() => ({}));
 
-	if (notify?.length) {
-		const [jobList, usersWithAccess] = await Promise.all([
-			getJobsToUsers(teamspace),
-			getUsersWithAccess(teamspace, project),
-		]);
+		if (notify?.length) {
+			const [jobList, usersWithAccess] = await Promise.all([
+				getJobsToUsers(teamspace),
+				getUsersWithAccess(teamspace, project),
+			]);
 
-		const usersToNotify = getUsernamesToNotify(jobList, notify);
-		const usersWithAccessToNotify = getCommonElements(usersToNotify, usersWithAccess);
+			const usersToNotify = getUsernamesToNotify(jobList, notify);
+			const usersWithAccessToNotify = getCommonElements(usersToNotify, usersWithAccess);
 
-		const notificationData = { results, plan: planId, triggeredAt };
+			const notificationData = { results, plan: planId, triggeredAt };
 
-		if (status === clashRunStatus.COMPLETED) {
-			await insertClashSucceededNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
-		} else if (status === clashRunStatus.FAILED) {
-			await insertClashFailedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
-		} else {
-			await insertClashAbortedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			if (status === clashRunStatus.COMPLETED) {
+				await insertClashSucceededNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			} else if (status === clashRunStatus.FAILED) {
+				await insertClashFailedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			} else {
+				await insertClashAbortedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			}
 		}
+	} catch (err) {
+		logger.logError(`Failed to generate notifications for clash completion: ${err.message}`);
 	}
 };
 

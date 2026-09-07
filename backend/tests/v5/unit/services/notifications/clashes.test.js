@@ -72,6 +72,23 @@ const testOnClashRunStatusUpdated = () => {
 			expect(NotificationsModel.insertClashAbortedNotifications).not.toHaveBeenCalled();
 		});
 
+		test('Should not insert a notification if getClashRunById throws an error', async () => {
+			RunsModel.getClashRunById.mockRejectedValueOnce(new Error('Failed to get clash run'));
+
+			const eventData = { teamspace, project, runId, status, results };
+			await eventCallbacks[events.CLASH_RUN_STATUS_UPDATED](eventData);
+
+			expect(RunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+			expect(RunsModel.getClashRunById).toHaveBeenCalledWith(teamspace,
+				project, runId, { plan: 1, triggeredAt: 1 });
+			expect(PlansModel.getPlanById).not.toHaveBeenCalled();
+			expect(JobsModel.getJobsToUsers).not.toHaveBeenCalled();
+			expect(NotificationsHelper.getUsernamesToNotify).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashSucceededNotifications).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashFailedNotifications).not.toHaveBeenCalled();
+			expect(NotificationsModel.insertClashAbortedNotifications).not.toHaveBeenCalled();
+		});
+
 		test('Should not insert a notification if plan.notify is null', async () => {
 			const planId = generateRandomString();
 			RunsModel.getClashRunById.mockResolvedValueOnce({ plan: { _id: planId } });
