@@ -17,7 +17,9 @@
 
 const { CLASH_TYPES } = require('../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
+const fs = require('fs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
+const { resourcesPath } = require('../../../interop');
 const { toConstantCase } = require('../../utils/helper/strings');
 
 const createConstantMapping = (values) => {
@@ -249,6 +251,32 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
-TemplateConstants.pinIcons = createConstantMapping(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']);
+TemplateConstants.PIN_ICON_VARIANTS = ['normal', 'selected'];
+TemplateConstants.PIN_ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
+
+const getDefaultPinIconNames = () => {
+	const icons = [];
+
+	const files = fs.readdirSync(TemplateConstants.PIN_ICONS_DIR, { withFileTypes: true });
+
+	const iconMap = {};
+
+	files.forEach((entry) => {
+		const [iconName, variant, ext] = entry.name.split('.');
+
+		if (!entry.isFile() || ext !== 'svg' || !TemplateConstants.PIN_ICON_VARIANTS.includes(variant)) return;
+		if (!iconMap[iconName]) {
+			iconMap[iconName] = new Set();
+		}
+		iconMap[iconName].add(variant);
+		if (iconMap[iconName].size === TemplateConstants.PIN_ICON_VARIANTS.length) {
+			icons.push(iconName);
+		}
+	});
+
+	return icons.sort();
+};
+
+TemplateConstants.DEFAULT_PIN_ICONS = getDefaultPinIconNames();
 
 module.exports = TemplateConstants;

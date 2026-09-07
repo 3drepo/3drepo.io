@@ -25,7 +25,7 @@ const { disconnect } = require(`${src}/handler/db`);
 
 const RemoveTickets = require(`${utilScripts}/teamspaces/removeTickets`);
 
-const { getTemplateList } = require(`${src}/processors/teamspaces/settings`);
+const { getTemplateList } = require(`${src}/processors/teamspaces/settings.tickets`);
 const { getTicketList } = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 

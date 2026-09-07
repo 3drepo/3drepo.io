@@ -36,6 +36,7 @@ import { get, isEqual, set } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { Pin } from '../../../pin';
+import { hexToRgb } from '@/v5/helpers/colors.helper';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -125,15 +126,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const refreshPin = () => {
 		if (!isViewer) return;
 
-		if (prevValue.current) {
+		if (prevValue.current && !hasPin) {
 			ViewerService.removePin(pinId);
 		}
 
 		if (hasPin) {
 			ViewerService.showPin(toPin(name, template, minimumPinTicket, false, value));
 		}
-
-		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	};
 
 	// Update pin when colour or icon changes
@@ -222,7 +221,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
 						>
-							<Pin pinIcon={pinIcon}/>
+							<Pin pinIcon={pinIcon} selected={isSelected} colour={hexToRgb(colorHex) as any} />
 						</SelectPinButton>
 					</Tooltip>
 				)}
