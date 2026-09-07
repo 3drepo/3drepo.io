@@ -27,6 +27,6 @@ config.coveragePathIgnorePatterns = [
 ];
 
 config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
-config.maxWorkers = process.env.CI ? '50%' : undefined;
+config.maxWorkers = 2;
 
 module.exports = config;
