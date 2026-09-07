@@ -51,6 +51,7 @@ const dataSchema = Yup.object({
 		})).required(),
 		clashData: Yup.array().of(Yup.object({
 			planName: Yup.string().required(),
+			link: Yup.string(),
 			runs: Yup.array().of(Yup.object({
 				status: Yup.string().oneOf(notifiableClashRunStatuses).required(),
 				results: Yup.object({

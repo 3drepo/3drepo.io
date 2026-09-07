@@ -25,6 +25,8 @@
 	 */
 	const modelBlockStyle = 'border-collapse:separate;border-spacing:0;border:1px solid #d9dee7;border-radius:8px;margin-bottom:8px;margin-top:8px;background:#fff;width:100%;';
 	const dataValueStyle = 'font-size:13px;font-weight:500;color:#6b7280;';
+	// Links in the data are relative paths (e.g. /v5/dashboard/...) - domain must be prepended to make them absolute.
+	const toAbsoluteUrl = (relativeUrl) => `${domain}${relativeUrl}`;
 %>
 <p>Here is your daily digest based on your chosen notification preferences:</p>
 <p style="text-align: center"><span class="greeting">
@@ -42,7 +44,7 @@
 		<div class="notificationsContent">
 			<% if (clashData?.length > 0) { %>
 				<h3 class="sectionLabel">Clash activities</h3>
-				<% for(const { planName, runs } of clashData) { %>
+				<% for(const { planName, link, runs } of clashData) { %>
 					<table class="modelBlock planGroup" style="<%= modelBlockStyle %>" cellpadding="0" cellspacing="0" border="0">
 						<% runs.forEach(({ status, results: { stats, error }, triggeredAt }, index) => { %>
 							<tr class="<%= index === 0 ? '' : 'rowSeparator' %> <%= index % 2 === 0 ? '' : 'evenRows' %>">
@@ -94,6 +96,11 @@
 														</strong>&nbsp;resolved</span>
 													<% } %>
 								</td>
+								<td style="width: 60px; text-align: right;">
+									<% if (link) { %>
+										<a href="<%= toAbsoluteUrl(link) %>" target="_blank" class="openLink">Open ↗</a>
+										<% } %>
+								</td>
 							</tr>
 							<% }) %>
 					</table>
@@ -144,10 +151,10 @@
 																	aria-label="<%= label %>">
 																	<%= icon %>
 																</span></td>
-															<td><a href="<%= link %>" target="_blank">
+															<td><a href="<%= toAbsoluteUrl(link) %>" target="_blank">
 																	<%= text %>
 																</a></td>
-															<td style="width: 60px; text-align: right;"><a href="<%= link %>"
+															<td style="width: 60px; text-align: right;"><a href="<%= toAbsoluteUrl(link) %>"
 																	target="_blank" class="openLink">Open ↗</a></td>
 														</tr>
 														<% }) %>

@@ -65,12 +65,14 @@ const getContextDataLookUp = async (contextData) => {
 		await Promise.all(
 			projectsData.map(async ({ _id, name }) => {
 				const idStr = UUIDToString(_id);
-				const plans = await getPlansByQuery(teamspace, _id, { }, { name: 1 });
+				const plans = await getPlansByQuery(teamspace, _id, { },
+					{ name: 1, tickets: { template: 1, federation: 1 } });
 
 				dataLookUp[teamspace].projects[idStr] = {
+					_id,
 					name,
 					plans: Object.fromEntries(
-						plans.map(({ _id: planId, name: planName }) => [UUIDToString(planId), planName]),
+						plans.map(({ _id: planId, ...others }) => [UUIDToString(planId), others]),
 					),
 				};
 			}),
@@ -123,17 +125,16 @@ const formatDate = (date, timeZone) => {
 	return `${DayJS(date).tz(timeZone).format('YYYY-MM-DD HH:mm')} (${timeZoneAbbr})`;
 };
 
-const generateClashData = ({ plan, notifications: runNotifications }, project, userInfo) => {
-	const planName = project.plans[UUIDToString(plan)];
+const generateClashData = ({ plan, notifications: runNotifications }, teamspace, project, userInfo) => {
+	const planDetails = project.plans[UUIDToString(plan)];
 
-	if (!planName) return undefined;
+	if (!planDetails) return undefined;
 
 	const formattedRuns = runNotifications.flatMap(({ data, type }) => {
 		const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
 		const triggeredAt = formatDate(data.triggeredAt, timeZone);
 
 		const status = clashStatusMapping[type];
-
 
 		if (!status) {
 			logger.logInfo(`Unrecognised clash notification type ${type}, ignoring...`);
@@ -147,7 +148,13 @@ const generateClashData = ({ plan, notifications: runNotifications }, project, u
 		return { results, triggeredAt, status };
 	});
 
-	return { planName, runs: formattedRuns };
+	let link;
+	if (planDetails.tickets) {
+		link = `/v5/dashboard/${teamspace}/${UUIDToString(project._id)}/t/tickets/${UUIDToString(planDetails.tickets.template)}?models=${planDetails.tickets.federation}`;
+	}
+	console.log(link, project);
+
+	return { planName: planDetails.name, link, runs: formattedRuns };
 };
 
 const generateTicketData = ({ model: modelID, notifications: ticketNotifications },
@@ -208,7 +215,7 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 
 			notification.data.forEach((data) => {
 				if (data.plan) {
-					const clash = generateClashData(data, project, userInfo);
+					const clash = generateClashData(data, teamspace, project, userInfo);
 					if (clash) clashData.push(clash);
 				} else {
 					const ticket = generateTicketData(data, tsData, teamspace, projectIDStr);
