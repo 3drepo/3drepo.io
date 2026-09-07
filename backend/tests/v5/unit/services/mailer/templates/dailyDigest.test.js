@@ -19,6 +19,7 @@ const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
 const { generateRandomString, generateUUID } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
+const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 
 const DailyDigest = require(`${src}/services/mailer/templates/dailyDigest`);
 
@@ -49,7 +50,7 @@ const testHtml = () => {
 				clashData: [{
 					planName: generateRandomString(),
 					runs: [{
-						status: generateRandomString(),
+						status: clashRunStatus.COMPLETED,
 						results: {
 							stats: {
 								new: 10,
@@ -60,7 +61,7 @@ const testHtml = () => {
 						triggeredAt: new Date(),
 					},
 					{
-						status: generateRandomString(),
+						status: clashRunStatus.FAILED,
 						results: {
 							error: {
 								reason: generateRandomString(),
@@ -80,6 +81,7 @@ const testHtml = () => {
 			['clashData planName is undefined', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], planName: undefined }] }] }],
 			['clashData runs is undefined', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], runs: undefined }] }] }],
 			['clashData runs is empty', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], runs: [] }] }] }],
+			['clashData run status is not a recognised status', { ...standardData, notifications: [{ ...standardData.notifications[0], clashData: [{ ...standardData.notifications[0].clashData[0], runs: [{ ...standardData.notifications[0].clashData[0].runs[0], status: generateRandomString() }] }] }] }],
 		])('Error checking ', (desc, data) => {
 			test(`should throw an error if ${desc}`, async () => {
 				await expect(DailyDigest.html(data)).rejects.toThrow();

@@ -17,9 +17,17 @@
 
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const Yup = require('yup');
+
+const { clashRunStatus } = require('../../../models/clashes.constants');
 const config = require('../../../utils/config');
 const { generateTemplateFn } = require('./common');
 const { readFileSync } = require('fs');
+
+const notifiableClashRunStatuses = [
+	clashRunStatus.COMPLETED,
+	clashRunStatus.FAILED,
+	clashRunStatus.ABORTED,
+];
 
 const ticketObjectSchema = Yup.object({
 	count: Yup.number().min(1).required(),
@@ -44,7 +52,7 @@ const dataSchema = Yup.object({
 		clashData: Yup.array().of(Yup.object({
 			planName: Yup.string().required(),
 			runs: Yup.array().of(Yup.object({
-				status: Yup.string().required(),
+				status: Yup.string().oneOf(notifiableClashRunStatuses).required(),
 				results: Yup.object({
 					stats: Yup.object({
 						new: Yup.number().min(0),

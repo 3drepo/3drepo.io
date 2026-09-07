@@ -14,60 +14,135 @@
 			</div>
 		</div>
 		<div class="notificationsContent">
-			<% if (ticketData?.length> 0) { %>
-				<h3 class="section-label">Ticket activity</h3>
-				<% for(const { model, tickets } of ticketData) { %>
-					<div class="model-block">
-						<div class="model-label-cell">
-							<div class="section-label">Model</div>
-							<div class="model-label-name">
-								<%= model %>
-							</div>
-						</div>
-
-						<div class="model-ticket-list">
-							<% if(tickets.assigned) { %>
-								<div class="ticket-row">
-									<span class="ticket-icon t-assign" aria-label="Assigned">＋</span>
-									<a href="<%= tickets.assigned.link %>" target="_blank">
-										<%= tickets.assigned.count %>
-											<%= tickets.assigned.count===1? "ticket" : "tickets" %> were assigned to
-												you.
-									</a>
-									<a href="<%= tickets.assigned.link %>" target="_blank" class="open-link">Open
-										↗</a>
-
-								</div>
-								<% } %>
-									<% if(tickets.updated) { %>
-										<div class="ticket-row">
-											<span class="ticket-icon" aria-label="Updated">↻</span>
-											<a href="<%= tickets.updated.link %>" target="_blank">
-												<%= tickets.updated.count %>
-													<%= tickets.updated.count===1? "ticket" : "tickets" %> you are
-														associated with were updated.
-											</a>
-											<a href="<%= tickets.updated.link %>" target="_blank" class="open-link">Open
-												↗</a>
+			<% if (clashData?.length> 0) { %>
+				<h3 class="section-label">Clash activities</h3>
+				<% for(const { planName, runs} of clashData) { %>
+					<div class="model-block plan-group">
+						<% runs.forEach(({ status, results: { stats, error }, triggeredAt }, index)=> { %>
+							<div
+								class="run-row run-row-grouped <%= runs.length === 1? 'only-child' : (index === 0 ? 'first-child' : index===runs.length-1 ? 'last-child' : 'middle-child') %> <%= index % 2 === 0 ? '' : 'even-rows' %>">
+								<div>
+									<% if(index===0) { %>
+										<span class=" cell-label">Plan</span>
+										<div class="model-label-name ">
+											<%= planName %>
 										</div>
 										<% } %>
-											<% if(tickets.closed) { %>
-												<div class="ticket-row">
-													<span class="ticket-icon t-resolved" aria-label="Resolved">✔</span>
-													<a href="<%= tickets.closed.link %>" target="_blank">
-														<%= tickets.closed.count %>
-															<%= tickets.closed.count===1? "ticket" : "tickets" %>
-																you are associated with were resolved.
-													</a>
-													<a href="<%= tickets.closed.link %>" target="_blank"
-														class="open-link">Open
-														↗</a>
+								</div>
+								<div>
+									<% if(index===0) { %>
+										<span class="cell-label">Ran at</span>
+										<% } %>
+											<div class="model-label-name">
+												<%= triggeredAt %>
+											</div>
+								</div>
+								<div>
+									<% if(index===0) { %>
+										<span class="cell-label">Status</span>
+										<% } %>
+											<% if(status==='completed' ) { %>
+												<span class="status-badge s-success"><span
+														class="status-dot"></span>Success</span>
+												<% } else if(status==='failed' ) { %>
+													<span class="status-badge s-failed"><span
+															class="status-dot"></span>Failed</span>
+													<% } else if(status==='aborted' ) { %>
+														<span class="status-badge s-aborted"><span
+																class="status-dot"></span>Aborted</span>
+														<% } %>
+								</div>
+								<div>
+									<% if(index===0) { %>
+										<span class="cell-label">Results</span>
+										<% } %>
+											<% if(status !=='completed' ) { %>
+												<div class="model-label-name">
+													<%= error.reason %>
 												</div>
-												<% } %>
-						</div>
+												<% } else { %>
+													<div class="result-pills">
+														<span class="pill pill-new"><strong>
+																<%= stats.new %>
+															</strong>&nbsp;new</span>
+														<span class="pill pill-active"><strong>
+																<%= stats.active %>
+															</strong>&nbsp;active</span>
+														<span class="pill pill-resolved"><strong>
+																<%= stats.resolved %>
+															</strong>&nbsp;resolved</span>
+													</div>
+													<% } %>
+								</div>
+							</div>
+							<% }) %>
 					</div>
 					<% } %>
+
 						<% } %>
+							<% if (ticketData?.length> 0) { %>
+								<h3 class="section-label">Ticket activities</h3>
+								<% for(const { model, tickets } of ticketData) { %>
+									<div class="model-block">
+										<div class="model-label-cell">
+											<div class="section-label">Model</div>
+											<div class="model-label-name">
+												<%= model %>
+											</div>
+										</div>
+
+										<div class="model-ticket-list">
+											<% if(tickets.assigned) { %>
+												<div class="ticket-row">
+													<span class="ticket-icon t-assign" aria-label="Assigned">＋</span>
+													<a href="<%= tickets.assigned.link %>" target="_blank">
+														<%= tickets.assigned.count %>
+															<%= tickets.assigned.count===1? "ticket" : "tickets" %> were
+																assigned to
+																you.
+													</a>
+													<a href="<%= tickets.assigned.link %>" target="_blank"
+														class="open-link">Open
+														↗</a>
+
+												</div>
+												<% } %>
+													<% if(tickets.updated) { %>
+														<div class="ticket-row">
+															<span class="ticket-icon" aria-label="Updated">↻</span>
+															<a href="<%= tickets.updated.link %>" target="_blank">
+																<%= tickets.updated.count %>
+																	<%= tickets.updated.count===1? "ticket" : "tickets"
+																		%> you
+																		are
+																		associated with were updated.
+															</a>
+															<a href="<%= tickets.updated.link %>" target="_blank"
+																class="open-link">Open
+																↗</a>
+														</div>
+														<% } %>
+															<% if(tickets.closed) { %>
+																<div class="ticket-row">
+																	<span class="ticket-icon t-resolved"
+																		aria-label="Resolved">✔</span>
+																	<a href="<%= tickets.closed.link %>"
+																		target="_blank">
+																		<%= tickets.closed.count %>
+																			<%= tickets.closed.count===1? "ticket"
+																				: "tickets" %>
+																				you are associated with were
+																				resolved.
+																	</a>
+																	<a href="<%= tickets.closed.link %>" target="_blank"
+																		class="open-link">Open
+																		↗</a>
+																</div>
+																<% } %>
+										</div>
+									</div>
+									<% } %>
+										<% } %>
 
 
 		</div>
@@ -76,4 +151,3 @@
 
 
 	<% } %>
-		</div>

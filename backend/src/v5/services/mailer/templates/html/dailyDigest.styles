@@ -95,6 +95,56 @@ div.headerTitle {
       color: var(--muted);
     }
 
+	.plan-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+	  border: 0;
+    }
+	.run-row {
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: var(--bg);
+	display: grid;
+	grid-template-columns: minmax(148px, 1.4fr) minmax(100px, 0.75fr) minmax(82px, 0.5fr) 1fr;
+	gap: 12px;
+	align-items: start;
+	}
+
+	.only-child {
+		border-radius: 8px;	
+	}
+
+    .first-child {
+      border-radius: 8px 8px 0 0;
+      border-bottom: none;
+    }
+
+	.middle-child {      
+		border-radius:0;
+      border-bottom: none;
+    }
+	
+    .last-child {
+      border-radius: 0 0 8px 8px;
+    }
+
+	.even-rows {
+      background: #f9fbff;
+	}
+
+	    .cell-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1;
+    }
+
     .model-ticket-list {
       display: flex;
       flex-direction: column;
@@ -147,6 +197,18 @@ div.headerTitle {
       color: var(--c-resolved-fg);
     }
 
+	    .cell-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+
 
 p.title {
 	font-size: 0.9rem;
@@ -197,3 +259,90 @@ img.notificationType {
 	width: 11px
 }
 
+
+ /* ── Status badge ───────────────────────────────── */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 6px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .s-success {
+      background: var(--c-success-bg);
+      color: var(--c-success-fg);
+    }
+    .s-success .status-dot { background: var(--c-success-dot); }
+
+    .s-failed {
+      background: var(--c-failed-bg);
+      color: var(--c-failed-fg);
+    }
+    .s-failed .status-dot { background: var(--c-failed-dot); }
+
+    .s-aborted {
+      background: var(--c-aborted-bg);
+      color: var(--c-aborted-fg);
+    }
+    .s-aborted .status-dot { background: var(--c-aborted-dot); }
+
+/* ── Result pills ───────────────────────────────── */
+    .result-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .pill strong {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .pill-new {
+      background: var(--c-new-bg);
+      border-color: var(--c-new-border);
+      color: var(--c-new-fg);
+    }
+
+    .pill-active {
+      background: var(--c-active-bg);
+      border-color: var(--c-active-border);
+      color: var(--c-active-fg);
+    }
+
+    .pill-resolved {
+      background: var(--c-resolved-bg);
+      border-color: var(--c-resolved-border);
+      color: var(--c-resolved-fg);
+    }
+
+    .error-note {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.4;
+    }
