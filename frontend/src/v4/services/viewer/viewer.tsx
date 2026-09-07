@@ -21,6 +21,7 @@ import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
+import { getPinImages } from '@/v5/ui/routes/viewer/tickets/pinIcons.helper';
 import { SLOPE_UNITS } from '@/v4/constants/measure';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
@@ -39,7 +40,7 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | string | null;
 
 export interface IPin {
 	id: string;
@@ -49,6 +50,10 @@ export interface IPin {
 	colour: number[];
 	isSelected?: boolean;
 }
+
+// Tracks which custom pin icon codes have already been registered with Unity
+// via createPinIcon, so we don't recreate/refetch them on every pin drop.
+const createdPinIcons: Record<string, boolean> = {};
 
 export class ViewerService {
 	public element: HTMLElement;
@@ -713,31 +718,17 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public showPin = async ({id, position, norm, colour, type, isSelected}: IPin) => {
+	public showPin = async ({ id, position,  colour, type }: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 
-		// This is for changing the pin icon of the same id
-		UnityUtil.removePin(id);
-
-		switch (type) {
-			case 'risk':
-				UnityUtil.dropRiskPin(id, position, norm, colour);
-				break;
-			case 'issue':
-				UnityUtil.dropIssuePin(id, position, norm, colour);
-				break
-			case 'ticket':
-				UnityUtil.dropTicketPin(id, position, norm, colour);
-				break
-			default:
-				UnityUtil.dropBookmarkPin(id, position, norm, colour);
-				break;
+		if (type && !createdPinIcons[type]) {
+			const images = await getPinImages(type);
+			UnityUtil.createPinIcon(images, type);
+			createdPinIcons[type] = true;
 		}
 
-		if (isSelected) {
-			UnityUtil.selectPin(id);
-		}
+		UnityUtil.dropPin(id, position, colour, type);
 	}
 
 	public setSelectionPin = async ({id, isSelected}) => {

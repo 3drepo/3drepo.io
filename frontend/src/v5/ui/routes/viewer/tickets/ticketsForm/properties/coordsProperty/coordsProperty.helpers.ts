@@ -103,13 +103,6 @@ export const getPinId = (propPath, ticketOrId?: ITicket | string) => {
 };
 
 // PinIcon is the pin type that comes from the backend
-const pinIconToType = {
-	'DEFAULT' : 'ticket',
-	'ISSUE' : 'issue',
-	'RISK' : 'risk',
-	'MARKER' : 'bookmark',
-};
-
 export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
 	const colour = hexToGLColor(getPinColorHexForProperty(propName, template, ticket));
 	const icon = getPinIconForProperty(propName, template, ticket);
@@ -118,12 +111,11 @@ export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, i
 		id, 
 		position: (coordValue || get(ticket, propName) as number[]), 
 		isSelected,
-		type: pinIconToType[icon] as PinType,
+		type: icon as PinType,
 		colour,
 	};
 };
 
-export const pinTypeToPinIcon = (type: PinType) => (Object.keys(pinIconToType).find((key) => pinIconToType[key] === type) || 'DEFAULT') as PinIcon;
 
 export const getTicketPins = (templates, ticket, ticketPinId) => {
 	const pinArray = [];
