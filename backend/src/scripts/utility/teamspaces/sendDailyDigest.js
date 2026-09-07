@@ -152,7 +152,6 @@ const generateClashData = ({ plan, notifications: runNotifications }, teamspace,
 	if (planDetails.tickets) {
 		link = `/v5/dashboard/${teamspace}/${UUIDToString(project._id)}/t/tickets/${UUIDToString(planDetails.tickets.template)}?models=${planDetails.tickets.federation}`;
 	}
-	console.log(link, project);
 
 	return { planName: planDetails.name, link, runs: formattedRuns };
 };
