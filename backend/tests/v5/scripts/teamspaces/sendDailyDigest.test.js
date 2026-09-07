@@ -44,7 +44,7 @@ const mailer = require(`${src}/services/mailer`);
 const { disconnect, insertMany } = require(`${src}/handler/db`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 
-const insertBogusNotification = (teamspace, project, model, users, ticket) => insertMany(
+const insertBogusTicketNotification = (teamspace, project, model, users, ticket) => insertMany(
 	INTERNAL_DB, 'notifications',
 	users.map((user) => ({
 		_id: generateUUID(),
@@ -53,6 +53,23 @@ const insertBogusNotification = (teamspace, project, model, users, ticket) => in
 		timestamp: new Date(),
 		data: {
 			teamspace, project, model, ticket,
+		},
+	})),
+);
+
+const insertBogusClashNotification = (teamspace, project, plan, users) => insertMany(
+	INTERNAL_DB, 'notifications',
+	users.map((user) => ({
+		_id: generateUUID(),
+		user,
+		type: generateRandomString(),
+		timestamp: new Date(),
+		data: {
+			teamspace,
+			project,
+			plan,
+			results: { stats: { new: 1, active: 2, resolved: 3 } },
+			triggeredAt: new Date(),
 		},
 	})),
 );
@@ -102,20 +119,34 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 				ticket: ticketId,
 				author: usernameArr[0] }]),
 			insertClashSucceededNotifications(ts.user, project, {
-				plan: plans[0]._id, results: { stats: { new: 1, active: 2, resolved: 3 } }, triggeredAt: new Date(),
+				plan: plans[0]._id,
+				runId: generateUUID(),
+				results: { stats: { new: 1, active: 2, resolved: 3 } },
+				triggeredAt: new Date(),
 			}, recipients),
 			insertClashSucceededNotifications(ts.user, project, {
 				plan: generateRandomString(),
+				runId: generateUUID(),
 				results: { stats: { new: 1, active: 2, resolved: 3 } },
 				triggeredAt: new Date(),
 			}, recipients),
 			insertClashAbortedNotifications(ts.user, project, {
-				plan: plans[1]._id, results: { error: { reason: generateRandomString() } }, triggeredAt: new Date(),
+				plan: plans[1]._id,
+				runId: generateUUID(),
+				error: { reason: generateRandomString() },
+				triggeredAt: new Date(),
 			}, recipients),
 			insertClashFailedNotifications(ts.user, project, {
-				plan: plans[2]._id, results: { error: { reason: generateRandomString() } }, triggeredAt: new Date(),
+				plan: plans[2]._id,
+				runId: generateUUID(),
+				error: { reason: generateRandomString() },
+				triggeredAt: new Date(),
 			}, recipients),
-			insertBogusNotification(ts.user, project, model, recipients, ticketId),
+			insertClashSucceededNotifications(ts.user, project, {
+				plan: plans[0]._id, runId: generateUUID(), triggeredAt: new Date(),
+			}, recipients),
+			insertBogusTicketNotification(ts.user, project, model, recipients, ticketId),
+			insertBogusClashNotification(ts.user, project, plans[0]._id, recipients),
 		]);
 	}));
 };

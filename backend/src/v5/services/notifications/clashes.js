@@ -26,7 +26,7 @@ const { getClashRunById } = require('../../models/clashes.runs');
 const { getCommonElements } = require('../../utils/helper/arrays');
 const { getJobsToUsers } = require('../../models/jobs');
 const { getPlanById } = require('../../models/clashes.plans');
-const { getUsernamesToNotify } = require('./notificationsHelper');
+const { getUsernamesToNotify } = require('./utils');
 const { getUsersWithAccess } = require('../../processors/teamspaces/projects');
 const { subscribe } = require('../eventsManager/eventsManager');
 
@@ -52,14 +52,17 @@ const clashRunStatusUpdated = async (teamspace, project, runId, status, results)
 		const usersToNotify = getUsernamesToNotify(jobList, notify);
 		const usersWithAccessToNotify = getCommonElements(usersToNotify, usersWithAccess);
 
-		const notificationData = { results, plan: planId, triggeredAt };
+		const notificationData = { plan: planId, runId, triggeredAt };
 
 		if (status === clashRunStatus.COMPLETED) {
-			await insertClashSucceededNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			await insertClashSucceededNotifications(teamspace, project,
+				{ ...notificationData, results }, usersWithAccessToNotify);
 		} else if (status === clashRunStatus.FAILED) {
-			await insertClashFailedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			await insertClashFailedNotifications(teamspace, project,
+				{ ...notificationData, error: results?.error }, usersWithAccessToNotify);
 		} else {
-			await insertClashAbortedNotifications(teamspace, project, notificationData, usersWithAccessToNotify);
+			await insertClashAbortedNotifications(teamspace, project,
+				{ ...notificationData, error: results?.error }, usersWithAccessToNotify);
 		}
 	}
 };

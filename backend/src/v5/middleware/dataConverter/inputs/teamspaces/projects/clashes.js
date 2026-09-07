@@ -62,13 +62,9 @@ const generatePlanSchema = async (teamspace, project, user, isUpdate) => {
 		return required ? schema.required() : schema;
 	};
 
-	const getJobsAndUsers = async () => {
-		const usersWithAccess = await getUsersWithAccess(teamspace, project);
-		const jobsWithAccess = await getJobsByUsers(teamspace, usersWithAccess);
-		return [...usersWithAccess, ...jobsWithAccess];
-	};
-
-	const jobsAndUsers = await getJobsAndUsers();
+	const usersWithAccess = await getUsersWithAccess(teamspace, project);
+	const jobsWithAccess = await getJobsByUsers(teamspace, usersWithAccess);
+	const jobsAndUsers = [...usersWithAccess, ...jobsWithAccess];
 
 	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
@@ -109,7 +105,7 @@ const generatePlanSchema = async (teamspace, project, user, isUpdate) => {
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
 		notify: imposeCondition(uniqueArray(Yup.array().of(
-			Yup.string().oneOf(jobsAndUsers, 'All notify entries must be valid jobs or users with access to the project'),
+			Yup.string().oneOf(jobsAndUsers, 'You can only notify users/jobs with users who have access to this project.'),
 		).min(1)), false, true),
 	}).noUnknown(true).required();
 };

@@ -487,10 +487,14 @@ const testComposeDailyDigests = () => {
 
 const testInsertClashSucceededNotifications = () => {
 	describe('Insert clash succeeded notifications', () => {
-		test('Should insert clash notifications based on recipients', async () => {
+		test('Should insert clash notifications based on recipients, keeping only recognised fields', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { stats: generateRandomObject() } };
+			const plan = generateRandomString();
+			const runId = generateRandomString();
+			const triggeredAt = new Date();
+			const results = { stats: generateRandomObject() };
+			const notificationData = { plan, runId, triggeredAt, results, ...generateRandomObject() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -507,7 +511,10 @@ const testInsertClashSucceededNotifications = () => {
 				data: {
 					teamspace,
 					project,
-					...notificationData,
+					plan,
+					runId,
+					triggeredAt,
+					results,
 				},
 			})));
 		});
@@ -515,7 +522,10 @@ const testInsertClashSucceededNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { stats: generateRandomObject() } };
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date(),
+				results: { stats: generateRandomObject() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -526,10 +536,12 @@ const testInsertClashSucceededNotifications = () => {
 			expect(insertMany).not.toHaveBeenCalled();
 		});
 
-		test('Should not insert anything if stats are not populated', async () => {
+		test('Should insert notifications even if results are not populated', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -537,17 +549,35 @@ const testInsertClashSucceededNotifications = () => {
 
 			await Notifications.insertClashSucceededNotifications(teamspace, project, notificationData, recipients);
 
-			expect(insertMany).not.toHaveBeenCalled();
+			expect(insertMany).toHaveBeenCalledTimes(1);
+			expect(insertMany).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, recipients.map((user) => ({
+				_id: expect.anything(),
+				type: notificationTypes.CLASH_RUN_SUCCEEDED,
+				timestamp: expect.any(Date),
+				user,
+				data: {
+					teamspace,
+					project,
+					plan: notificationData.plan,
+					runId: notificationData.runId,
+					triggeredAt: notificationData.triggeredAt,
+					results: undefined,
+				},
+			})));
 		});
 	});
 };
 
 const testInsertClashFailedNotifications = () => {
 	describe('Insert clash failed notifications', () => {
-		test('Should insert clash notifications based on recipients', async () => {
+		test('Should insert clash notifications based on recipients, keeping only recognised fields', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
+			const plan = generateRandomString();
+			const runId = generateRandomString();
+			const triggeredAt = new Date();
+			const error = { reason: generateRandomString() };
+			const notificationData = { plan, runId, triggeredAt, error, ...generateRandomObject() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -564,7 +594,10 @@ const testInsertClashFailedNotifications = () => {
 				data: {
 					teamspace,
 					project,
-					...notificationData,
+					plan,
+					runId,
+					triggeredAt,
+					error,
 				},
 			})));
 		});
@@ -572,7 +605,10 @@ const testInsertClashFailedNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date(),
+				error: { reason: generateRandomString() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -583,10 +619,12 @@ const testInsertClashFailedNotifications = () => {
 			expect(insertMany).not.toHaveBeenCalled();
 		});
 
-		test('Should not insert anything if error is not populated', async () => {
+		test('Should insert notifications even if error is not populated', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -594,17 +632,35 @@ const testInsertClashFailedNotifications = () => {
 
 			await Notifications.insertClashFailedNotifications(teamspace, project, notificationData, recipients);
 
-			expect(insertMany).not.toHaveBeenCalled();
+			expect(insertMany).toHaveBeenCalledTimes(1);
+			expect(insertMany).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, recipients.map((user) => ({
+				_id: expect.anything(),
+				type: notificationTypes.CLASH_RUN_FAILED,
+				timestamp: expect.any(Date),
+				user,
+				data: {
+					teamspace,
+					project,
+					plan: notificationData.plan,
+					runId: notificationData.runId,
+					triggeredAt: notificationData.triggeredAt,
+					error: undefined,
+				},
+			})));
 		});
 	});
 };
 
 const testInsertClashAbortedNotifications = () => {
 	describe('Insert clash aborted notifications', () => {
-		test('Should insert clash notifications based on recipients', async () => {
+		test('Should insert clash notifications based on recipients, keeping only recognised fields', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
+			const plan = generateRandomString();
+			const runId = generateRandomString();
+			const triggeredAt = new Date();
+			const error = { reason: generateRandomString() };
+			const notificationData = { plan, runId, triggeredAt, error, ...generateRandomObject() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -621,7 +677,10 @@ const testInsertClashAbortedNotifications = () => {
 				data: {
 					teamspace,
 					project,
-					...notificationData,
+					plan,
+					runId,
+					triggeredAt,
+					error,
 				},
 			})));
 		});
@@ -629,7 +688,10 @@ const testInsertClashAbortedNotifications = () => {
 		test('Should not insert anything if there are no recipients', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = { ...generateRandomObject(), results: { error: generateRandomObject() } };
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date(),
+				error: { reason: generateRandomString() } };
 			const recipients = [];
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -640,10 +702,12 @@ const testInsertClashAbortedNotifications = () => {
 			expect(insertMany).not.toHaveBeenCalled();
 		});
 
-		test('Should not insert anything if error is not populated', async () => {
+		test('Should insert notifications even if error is not populated', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			const notificationData = generateRandomObject();
+			const notificationData = { plan: generateRandomString(),
+				runId: generateRandomString(),
+				triggeredAt: new Date() };
 			const recipients = times(10, () => generateRandomString());
 
 			const insertMany = jest.spyOn(db, 'insertMany');
@@ -651,7 +715,21 @@ const testInsertClashAbortedNotifications = () => {
 
 			await Notifications.insertClashAbortedNotifications(teamspace, project, notificationData, recipients);
 
-			expect(insertMany).not.toHaveBeenCalled();
+			expect(insertMany).toHaveBeenCalledTimes(1);
+			expect(insertMany).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COL, recipients.map((user) => ({
+				_id: expect.anything(),
+				type: notificationTypes.CLASH_RUN_ABORTED,
+				timestamp: expect.any(Date),
+				user,
+				data: {
+					teamspace,
+					project,
+					plan: notificationData.plan,
+					runId: notificationData.runId,
+					triggeredAt: notificationData.triggeredAt,
+					error: undefined,
+				},
+			})));
 		});
 	});
 };

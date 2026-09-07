@@ -21,7 +21,7 @@ const { generateRandomString } = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { times } = require('lodash');
 
-const NotificationsHelper = require(`${src}/services/notifications/notificationsHelper`);
+const NotificationsHelper = require(`${src}/services/notifications/utils`);
 
 const testGetUsernamesToNotify = () => {
 	describe('Get usernames to notify', () => {

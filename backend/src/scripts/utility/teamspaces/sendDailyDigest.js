@@ -106,6 +106,80 @@ const getUserDetails = async (users) => {
 	return userLUT;
 };
 
+const clashStatusMapping = {
+	[notificationTypes.CLASH_RUN_SUCCEEDED]: clashRunStatus.COMPLETED,
+	[notificationTypes.CLASH_RUN_ABORTED]: clashRunStatus.ABORTED,
+	[notificationTypes.CLASH_RUN_FAILED]: clashRunStatus.FAILED,
+};
+
+const generateClashData = ({ plan, notifications: runNotifications }, project, userInfo) => {
+	const planName = project.plans[UUIDToString(plan)];
+
+	if (!planName) return undefined;
+
+	const formattedRuns = runNotifications.flatMap(({ data, type }) => {
+		const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
+		// 'sv-SE' is used as it produces a date with ISO format
+		const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
+
+		const status = clashStatusMapping[type];
+
+		if (!status) {
+			logger.logInfo(`Unrecognised clash notification type ${type}, ignoring...`);
+			return [];
+		}
+
+		const results = status === clashRunStatus.COMPLETED
+			? { stats: data.results?.stats }
+			: { error: data.error };
+
+		return { results, triggeredAt, status };
+	});
+
+	return { planName, runs: formattedRuns };
+};
+
+const generateTicketData = ({ model: modelID, notifications: ticketNotifications },
+	tsData, teamspace, projectIDStr) => {
+	const modelIDStr = UUIDToString(modelID);
+	const model = tsData.models[modelIDStr];
+
+	if (!model) return undefined;
+
+	const groupedTickets = ticketNotifications.reduce((acc, { type, data }) => {
+		if (!acc[type]) acc[type] = new Set();
+		acc[type].add(UUIDToString(data.ticket));
+		return acc;
+	}, {});
+
+	const tickets = {};
+	const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
+
+	Object.entries(groupedTickets).forEach(([type, ticketsArr]) => {
+		const ticketCodes = Array.from(ticketsArr).flatMap(
+			(ticketId) => tsData.tickets[ticketId] ?? []);
+
+		if (!ticketCodes.length) return;
+		const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+		switch (type) {
+		case notificationTypes.TICKET_UPDATED:
+			tickets.updated = tickData;
+			break;
+		case notificationTypes.TICKET_CLOSED:
+			tickets.closed = tickData;
+			tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
+			break;
+		case notificationTypes.TICKET_ASSIGNED:
+			tickets.assigned = tickData;
+			break;
+		default:
+			logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
+		}
+	});
+
+	return Object.keys(tickets).length ? { model, tickets } : undefined;
+};
+
 const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 	emailData.map(async ({ _id: { teamspace, user }, data: notificationData }) => {
 		const userInfo = usersToUserInfo[user];
@@ -118,71 +192,18 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 			const project = tsData.projects[projectIDStr];
 
 			if (!project) return [];
+			const clashData = [];
+			const ticketData = [];
 
-			const clashData = notification.data.filter((d) => !!d.plan)
-				.flatMap(({ plan, notifications: runNotifications }) => {
-					const planName = project.plans[UUIDToString(plan)];
-
-					if (!planName) return [];
-
-					const formattedRuns = runNotifications.flatMap(({ data, type }) => {
-						const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
-						// 'sv-SE' is used as it produces a date with ISO format
-						const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
-
-						switch (type) {
-						case notificationTypes.CLASH_RUN_SUCCEEDED:
-							return { results: data.results, triggeredAt, status: clashRunStatus.COMPLETED };
-						case notificationTypes.CLASH_RUN_ABORTED:
-							return { results: data.results, triggeredAt, status: clashRunStatus.ABORTED };
-						default:
-							return { results: data.results, triggeredAt, status: clashRunStatus.FAILED };
-						}
-					});
-
-					return { planName, runs: formattedRuns };
-				});
-
-			const ticketData = notification.data.filter((d) => !!d.model)
-				.flatMap(({ model: modelID, notifications: ticketNotifications }) => {
-					const modelIDStr = UUIDToString(modelID);
-					const model = tsData.models[modelIDStr];
-
-					if (!model) return [];
-
-					const groupedTickets = ticketNotifications.reduce((acc, { type, data }) => {
-						if (!acc[type]) acc[type] = new Set();
-						acc[type].add(UUIDToString(data.ticket));
-						return acc;
-					}, {});
-
-					const tickets = {};
-					const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
-
-					Object.entries(groupedTickets).forEach(([type, ticketsArr]) => {
-						const ticketCodes = Array.from(ticketsArr).flatMap(
-							(ticketId) => tsData.tickets[ticketId] ?? []);
-
-						if (!ticketCodes.length) return;
-						const tickData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
-						switch (type) {
-						case notificationTypes.TICKET_UPDATED:
-							tickets.updated = tickData;
-							break;
-						case notificationTypes.TICKET_CLOSED:
-							tickets.closed = tickData;
-							tickets.closed.link = `${tickets.closed.link}&ticketCompleted=true`;
-							break;
-						case notificationTypes.TICKET_ASSIGNED:
-							tickets.assigned = tickData;
-							break;
-						default:
-							logger.logInfo(`Unrecognised notification type ${type}, ignoring...`);
-						}
-					});
-
-					return Object.keys(tickets).length ? { model, tickets } : [];
-				});
+			notification.data.forEach((data) => {
+				if (data.plan) {
+					const clash = generateClashData(data, project, userInfo);
+					if (clash) clashData.push(clash);
+				} else {
+					const ticket = generateTicketData(data, tsData, teamspace, projectIDStr);
+					if (ticket) ticketData.push(ticket);
+				}
+			});
 
 			return { ...notification, project: project.name, ticketData, clashData };
 		});

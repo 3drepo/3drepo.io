@@ -52,35 +52,32 @@ const generateNotification = (type, user, data) => ({
 });
 
 Notifications.insertClashSucceededNotifications = async (teamspace, project, notificationData, recipients) => {
-	if (notificationData.results?.stats) {
-		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_SUCCEEDED,
-			recipient, { ...notificationData, teamspace, project }));
+	const { plan, runId, triggeredAt, results } = notificationData;
+	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_SUCCEEDED,
+		recipient, { teamspace, project, plan, runId, triggeredAt, results }));
 
-		if (records.length) {
-			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
-		}
+	if (records.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
 	}
 };
 
 Notifications.insertClashFailedNotifications = async (teamspace, project, notificationData, recipients) => {
-	if (notificationData.results?.error) {
-		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_FAILED,
-			recipient, { ...notificationData, teamspace, project }));
+	const { plan, runId, triggeredAt, error } = notificationData;
+	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_FAILED,
+		recipient, { teamspace, project, plan, runId, triggeredAt, error }));
 
-		if (records.length) {
-			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
-		}
+	if (records.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
 	}
 };
 
 Notifications.insertClashAbortedNotifications = async (teamspace, project, notificationData, recipients) => {
-	if (notificationData.results?.error) {
-		const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_ABORTED,
-			recipient, { ...notificationData, teamspace, project }));
+	const { plan, runId, triggeredAt, error } = notificationData;
+	const records = recipients.map((recipient) => generateNotification(notificationTypes.CLASH_RUN_ABORTED,
+		recipient, { teamspace, project, plan, runId, triggeredAt, error }));
 
-		if (records.length) {
-			await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
-		}
+	if (records.length) {
+		await db.insertMany(INTERNAL_DB, NOTIFICATIONS_COL, records);
 	}
 };
 

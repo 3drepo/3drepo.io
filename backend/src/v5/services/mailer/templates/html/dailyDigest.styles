@@ -1,3 +1,35 @@
+:root {
+	/* Product design system tokens */
+	--bg:      #ffffff;
+	--fg:      rgb(23, 43, 77);
+	--accent:  #1677ff;
+	--surface: #f7f8fa;
+	--muted:   #6b7280;
+	--border:  #d9dee7;
+	/* Semantic status — justified extension for usability */
+	--c-success-bg:   #dcfce7;
+	--c-success-fg:   #15803d;
+	--c-success-dot:  #16a34a;
+	--c-failed-bg:    #fee2e2;
+	--c-failed-fg:    #dc2626;
+	--c-failed-dot:   #dc2626;
+	--c-aborted-bg:   #fef9c3;
+	--c-aborted-fg:   #b45309;
+	--c-aborted-dot:  #d97706;
+	/* Result pill semantic */
+	--c-new-bg:       #eff6ff;
+	--c-new-border:   #bfdbfe;
+	--c-new-fg:       #1d4ed8;
+	--c-active-bg:    #fef9c3;
+	--c-active-border:#fde68a;
+	--c-active-fg:    #b45309;
+	--c-resolved-bg:  #dcfce7;
+	--c-resolved-border:#bbf7d0;
+	--c-resolved-fg:  #15803d;
+
+	--font: Inter, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
 div.notifications {
 	width: 100%;
 	padding: 10px 0;
@@ -6,16 +38,17 @@ div.notifications {
 }
 
 div.notificationsTable {
-	flex: 1 1 0;
+	width: 100%;
 	border-radius: 10px;
 	border: 1px #E5EDF4 solid;
 	flex-direction: column;
-	display: inline-flex
+	display: inline-flex;
+	margin-top: 8px;
 }
 
 div.notificationsHeader {
 	align-self: stretch;
-	padding: 0px 10px;
+	padding: 0px 14px;
 	background: #E5EDF4;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
@@ -28,6 +61,92 @@ div.headerTitle {
 	display: flex;
 	align-items: center;
 }
+
+.model-block {
+	display: grid;
+	grid-template-columns: 160px 1fr;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	overflow: hidden;
+	margin-bottom: 8px;
+	margin-top: 8px;
+	background: #fff;
+	width: 100%
+}
+
+    .model-label-cell {
+      padding: 14px 16px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .model-label-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .model-ticket-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ticket-row {
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .model-ticket-list .ticket-row:first-child {
+      border-top: none;
+    }
+	
+    .open-link {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+	.ticket-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+      flex: 0 0 auto;
+    }
+	
+    .ticket-icon.t-assign {
+      border-color: var(--c-new-fg);
+      color: var(--c-new-fg);
+    }
+
+	    .ticket-icon.t-resolved {
+      border-color: var(--c-resolved-fg);
+      color: var(--c-resolved-fg);
+    }
+
 
 p.title {
 	font-size: 0.9rem;
@@ -44,7 +163,7 @@ p.notificationsText {
 
 
 div.notificationsContent {
-	padding: 5px 10px 5px 20px;
+	padding: 5px 20px 5px 20px;
 	flex-direction: column;
 	align-items: flex-start;
 	display: flex

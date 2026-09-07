@@ -41,8 +41,8 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/notifications');
 const NotificationsModel = require(`${src}/models/notifications`);
 
-jest.mock('../../../../../src/v5/services/notifications/notificationsHelper');
-const NotificationsHelper = require(`${src}/services/notifications/notificationsHelper`);
+jest.mock('../../../../../src/v5/services/notifications/utils');
+const NotificationsHelper = require(`${src}/services/notifications/utils`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects');
 const ProjectsProcessor = require(`${src}/processors/teamspaces/projects`);
@@ -145,7 +145,9 @@ const testOnClashRunStatusUpdated = () => {
 				const planId = generateRandomString();
 				const triggeredAt = new Date();
 				const recipients = times(5, () => generateRandomString());
-				const notificationData = { results, plan: planId, triggeredAt };
+				const notificationData = runStatus === clashRunStatus.COMPLETED
+					? { plan: planId, runId, triggeredAt, results }
+					: { plan: planId, runId, triggeredAt, error: results?.error };
 
 				RunsModel.getClashRunById.mockResolvedValueOnce({ plan: { _id: planId }, triggeredAt });
 				PlansModel.getPlanById.mockResolvedValueOnce({ notify });
