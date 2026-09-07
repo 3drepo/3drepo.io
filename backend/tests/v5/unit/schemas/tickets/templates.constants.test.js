@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
@@ -36,9 +35,11 @@ const testGetApplicableDefaultProperties = () => {
 			{ name: baseProps.STATUS, type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' }];
 
 		const issueProp = [{ name: baseProps.PRIORITY, type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-			{ name: baseProps.ASSIGNEES,
+			{
+				name: baseProps.ASSIGNEES,
 				type: TemplateConstants.propTypes.MANY_OF,
-				values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
+				values: TemplateConstants.presetEnumValues.JOBS_AND_USERS,
+			},
 			{ name: baseProps.DUE_DATE, type: TemplateConstants.propTypes.DATE }];
 
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
@@ -79,6 +80,50 @@ const testGetApplicableDefaultProperties = () => {
 	});
 };
 
+const testgetDefaultPinIconNames = () => {
+	describe('Get default pin icons details', () => {
+		const toFsEntry = (name, isFile = true) => ({ name, isFile: jest.fn().mockReturnValue(isFile) });
+
+		const tests = [
+			['the correct icon details', [toFsEntry('icon1.normal.svg'), toFsEntry('icon1.selected.svg')], ['icon1']],
+			['exclude the icon if one of its variants is not a file', [toFsEntry('icon1.normal.svg', false), toFsEntry('icon1.selected.svg')], []],
+			['exclude the icon if one of its variants has the wrong extension', [toFsEntry('icon1.normal.jpg'), toFsEntry('icon1.selected.svg')], []],
+			['exclude the icon if one of its variants has an unrecognised variant name', [toFsEntry('icon1.supernatural.svg'), toFsEntry('icon1.selected.svg')], []],
+			['exclude an icon that is missing a variant entirely, while still returning icons with all variants present',
+				[toFsEntry('icon1.normal.svg'), toFsEntry('icon2.normal.svg'), toFsEntry('icon2.selected.svg')], ['icon2']],
+		];
+
+		const runTest = (testName, mockReturnValue, expected) => {
+			test(`Should return the icon names and ${testName}`, () => {
+				// drop the cached module so the memoised pin-icon cache starts empty
+				jest.resetModules();
+
+				jest.doMock('fs', () => {
+					const actualFs = jest.requireActual('fs');
+					return {
+						...actualFs,
+						readdirSync: jest.fn((dirPath, options) => {
+							if (String(dirPath).endsWith('/tickets/pinIcons')) {
+								return mockReturnValue;
+							}
+							return actualFs.readdirSync(dirPath, options);
+						}),
+					};
+				});
+
+				// eslint-disable-next-line global-require
+				const Constants = require(`${src}/schemas/tickets/templates.constants`);
+				expect(Constants.DEFAULT_PIN_ICONS).toEqual(expected);
+			});
+		};
+
+		tests.forEach((
+			[testName, mockReturnValue, expected],
+		) => runTest(testName, mockReturnValue, expected));
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetApplicableDefaultProperties();
+	testgetDefaultPinIconNames();
 });
