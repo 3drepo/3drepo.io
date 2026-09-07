@@ -25,7 +25,7 @@ const { generateRandomString } = require('../../../helper/services');
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
-const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, PIN_ICON_VARIANTS, DEFAULT_PIN_ICONS } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
@@ -248,6 +248,67 @@ const testGetRiskCategories = () => {
 	});
 };
 
+const testGetPinIconNames = () => {
+	describe('Pin icon names', () => {
+		const basicData = generateBasicData();
+		const iconNames = DEFAULT_PIN_ICONS;
+		const route = (key, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons${key ? `?key=${key}` : ''}`;
+
+		beforeAll(() => setupTestData(basicData));
+
+		describe.each([
+			['user does not have a valid session', false, templates.notLoggedIn, {}],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString() }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name }],
+			['user is a member of teamspace', true, undefined, { key: basicData.normalUser.apiKey }],
+		])('', (desc, success, expectedRes, getTestData) => {
+			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const { key, ts } = getTestData;
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+				const res = await agent.get(route(key, ts)).expect(expectedStatus);
+				if (success) {
+					expect(res.body.icons).toEqual(iconNames);
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
+const testGetPinIcon = () => {
+	describe('Pin icon', () => {
+		const basicData = generateBasicData();
+		const iconNames = DEFAULT_PIN_ICONS;
+		const route = (key, pinIcon = iconNames[0], variant = PIN_ICON_VARIANTS[1], ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/pinIcons/${pinIcon}/${variant}${key ? `?key=${key}` : ''}`;
+
+		beforeAll(() => setupTestData(basicData));
+
+		describe.each([
+			['user does not have a valid session', false, templates.notLoggedIn, {}],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString() }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name }],
+			['icon name is invalid', false, templates.invalidArguments, { key: basicData.normalUser.apiKey, pinIcon: generateRandomString() }],
+			['icon variant is invalid', false, templates.invalidArguments, { key: basicData.normalUser.apiKey, variant: generateRandomString() }],
+			['user is a member of teamspace and normal icon exists', true, undefined, { key: basicData.normalUser.apiKey, variant: PIN_ICON_VARIANTS[0] }],
+			['user is a member of teamspace and selected icon exists', true, undefined, { key: basicData.normalUser.apiKey }],
+		])('', (desc, success, expectedRes, getTestData) => {
+			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+				const { key, pinIcon, variant, ts } = getTestData;
+				const expectedStatus = success ? templates.ok.status : expectedRes.status;
+				const res = await agent.get(route(key, pinIcon, variant, ts)).expect(expectedStatus);
+				if (success) {
+					expect(res.headers['content-type']).toEqual('image/svg+xml');
+					expect(Buffer.isBuffer(res.body)).toBeTruthy();
+					expect(res.body.toString()).toContain('<svg');
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 const testGetAuditLogArchive = () => {
 	describe('Get audit log archive', () => {
 		const basicData = generateBasicData();
@@ -302,5 +363,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetTemplate();
 	testGetTemplateList();
 	testGetRiskCategories();
+	testGetPinIconNames();
+	testGetPinIcon();
 	testGetAuditLogArchive();
 });
