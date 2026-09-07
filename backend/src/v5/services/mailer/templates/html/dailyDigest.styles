@@ -120,7 +120,7 @@ table.modelTicketList tr.rowSeparator td {
 
 .openLink {
 	font-size: 10px;
-	font-weight: 700;
+	font-weight: 400;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: #6b7280;
