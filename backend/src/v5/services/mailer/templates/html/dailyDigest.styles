@@ -1,90 +1,52 @@
-:root {
-	/* Product design system tokens */
-	--bg:      #ffffff;
-	--fg:      rgb(23, 43, 77);
-	--accent:  #1677ff;
-	--surface: #f7f8fa;
-	--muted:   #6b7280;
-	--border:  #d9dee7;
-	/* Semantic status — justified extension for usability */
-	--c-success-bg:  #dcfce7;
-	--c-success-fg:  #15803d;
-	--c-success-dot: #16a34a;
-	--c-failed-bg:   #fee2e2;
-	--c-failed-fg:   #dc2626;
-	--c-failed-dot:  #dc2626;
-	--c-aborted-bg:  #fef9c3;
-	--c-aborted-fg:  #b45309;
-	--c-aborted-dot: #d97706;
-	/* Result pill semantic */
-	--c-new-bg:          #eff6ff;
-	--c-new-border:      #bfdbfe;
-	--c-new-fg:          #1d4ed8;
-	--c-active-bg:       #fef9c3;
-	--c-active-border:   #fde68a;
-	--c-active-fg:       #b45309;
-	--c-resolved-bg:     #dcfce7;
-	--c-resolved-border: #bbf7d0;
-	--c-resolved-fg:     #15803d;
-
-	--font: Inter, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-}
+/*
+ * Outlook (desktop) uses the Word rendering engine, which does NOT support:
+ *   - CSS custom properties (var(--x))
+ *   - display: flex / inline-flex / grid, or the gap property
+ *   - :first-child / :nth-child selectors
+ * All colours below are therefore literal hex values, all multi-column
+ * layouts are handled via real <table> markup in dailyDigest.html, and any
+ * "first row" styling is applied via a class from the template's JS loop
+ * rather than a CSS pseudo-selector.
+ */
 
 /* ── Notification container ─────────────────────── */
 div.notifications {
 	width: 100%;
 	padding: 10px 0;
-	align-items: center;
-	display: inline-flex;
 }
 
 div.notificationsTable {
 	width: 100%;
 	border-radius: 10px;
 	border: 1px #E5EDF4 solid;
-	flex-direction: column;
-	display: inline-flex;
 	margin-top: 8px;
 }
 
 div.notificationsHeader {
-	align-self: stretch;
-	padding: 0px 14px;
+	padding: 14px;
 	background: #E5EDF4;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
-	justify-content: space-between;
-	align-items: center;
-	display: inline-flex;
-}
-
-div.headerTitle {
-	display: flex;
-	align-items: center;
 }
 
 div.notificationsContent {
 	padding: 5px 20px 5px 20px;
-	flex-direction: column;
-	align-items: flex-start;
-	display: flex;
 }
 
 p.title {
 	font-size: 0.9rem;
 	color: #172B4D;
 	font-weight: 500;
-	margin: 20px 0;
+	margin: 0;
 	word-wrap: break-word;
 }
 
 /* ── Model block & labels ────────────────────────── */
-.modelBlock {
-	display: grid;
-	grid-template-columns: 160px 1fr;
-	border: 1px solid var(--border);
+table.modelBlock {
+	border-collapse: separate;
+	border-spacing: 0;
+	border: 1px solid #d9dee7;
 	border-radius: 8px;
-	overflow: hidden;
 	margin-bottom: 8px;
 	margin-top: 8px;
 	background: #fff;
@@ -92,9 +54,11 @@ p.title {
 }
 
 .modelLabelCell {
+	width: 160px;
 	padding: 14px 16px;
-	border-right: 1px solid var(--border);
-	background: var(--surface);
+	border-right: 1px solid #d9dee7;
+	background: #f7f8fa;
+	vertical-align: top;
 }
 
 .sectionLabel {
@@ -102,54 +66,27 @@ p.title {
 	font-weight: 700;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--muted);
+	color: #6b7280;
 	margin-bottom: 2px;
 }
 
 .dataValue {
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--muted);
+	color: #6b7280;
 }
 
 /* ── Clash plan grouping & rows ──────────────────── */
-.planGroup {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	border: 0;
-}
-
-.runRow {
+table.planGroup td {
 	padding: 12px 14px;
-	border: 1px solid var(--border);
-	border-radius: 8px;
-	background: var(--bg);
-	display: grid;
-	grid-template-columns: minmax(148px, 1.4fr) minmax(100px, 0.75fr) minmax(82px, 0.5fr) 1fr;
-	gap: 12px;
-	align-items: start;
+	vertical-align: top;
 }
 
-.onlyChild {
-	border-radius: 8px;
+table.planGroup tr.rowSeparator td {
+	border-top: 1px solid #d9dee7;
 }
 
-.firstChild {
-	border-radius: 8px 8px 0 0;
-	border-bottom: none;
-}
-
-.middleChild {
-	border-radius: 0;
-	border-bottom: none;
-}
-
-.lastChild {
-	border-radius: 0 0 8px 8px;
-}
-
-.evenRows {
+table.planGroup tr.evenRows td {
 	background: #f9fbff;
 }
 
@@ -160,29 +97,25 @@ p.title {
 	font-weight: 700;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--muted);
+	color: #6b7280;
 	line-height: 1;
 }
 
 /* ── Ticket list ─────────────────────────────────── */
-.modelTicketList {
-	display: flex;
-	flex-direction: column;
+table.modelTicketList {
+	border-collapse: collapse;
+	width: 100%;
 }
 
-.ticketRow {
-	display: grid;
-	grid-template-columns: 22px 1fr auto;
-	align-items: center;
-	gap: 10px;
-	padding: 11px 20px;
-	border-top: 1px solid var(--border);
+table.modelTicketList td {
+	padding: 11px 0;
 	font-size: 13px;
-	color: var(--muted);
+	color: #6b7280;
+	vertical-align: middle;
 }
 
-.modelTicketList .ticketRow:first-child {
-	border-top: none;
+table.modelTicketList tr.rowSeparator td {
+	border-top: 1px solid #d9dee7;
 }
 
 .openLink {
@@ -190,7 +123,7 @@ p.title {
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	color: var(--muted);
+	color: #6b7280;
 	text-decoration: none;
 	white-space: nowrap;
 }
@@ -198,31 +131,30 @@ p.title {
 .ticketIcon {
 	width: 20px;
 	height: 20px;
+	line-height: 18px;
+	text-align: center;
 	border-radius: 50%;
-	border: 1.5px solid var(--muted);
-	display: grid;
-	place-items: center;
+	border: 1.5px solid #6b7280;
+	display: inline-block;
 	font-size: 12px;
 	font-weight: 400;
-	color: var(--muted);
-	flex: 0 0 auto;
+	color: #6b7280;
 }
 
 .ticketIcon.tAssign {
-	border-color: var(--c-new-fg);
-	color: var(--c-new-fg);
+	border-color: #1d4ed8;
+	color: #1d4ed8;
 }
 
 .ticketIcon.tResolved {
-	border-color: var(--c-resolved-fg);
-	color: var(--c-resolved-fg);
+	border-color: #15803d;
+	color: #15803d;
 }
 
 /* ── Status badge ────────────────────────────────── */
 .statusBadge {
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
+	display: inline-block;
+	vertical-align: middle;
 	padding: 3px 8px 3px 6px;
 	border-radius: 999px;
 	font-size: 12px;
@@ -231,42 +163,25 @@ p.title {
 	line-height: 1.5;
 }
 
-.statusDot {
-	width: 6px;
-	height: 6px;
-	border-radius: 999px;
-	flex: 0 0 auto;
-}
-
 .sSuccess {
-	background: var(--c-success-bg);
-	color: var(--c-success-fg);
+	background: #dcfce7;
+	color: #15803d;
 }
-.sSuccess .statusDot { background: var(--c-success-dot); }
 
 .sFailed {
-	background: var(--c-failed-bg);
-	color: var(--c-failed-fg);
+	background: #fee2e2;
+	color: #dc2626;
 }
-.sFailed .statusDot { background: var(--c-failed-dot); }
 
 .sAborted {
-	background: var(--c-aborted-bg);
-	color: var(--c-aborted-fg);
+	background: #fef9c3;
+	color: #b45309;
 }
-.sAborted .statusDot { background: var(--c-aborted-dot); }
 
 /* ── Result pills ────────────────────────────────── */
-.resultPills {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 5px;
-}
-
 .pill {
-	display: inline-flex;
-	align-items: baseline;
-	gap: 4px;
+	display: inline-block;
+	margin: 0 5px 5px 0;
 	padding: 4px 8px;
 	border-radius: 6px;
 	border: 1px solid;
@@ -281,19 +196,19 @@ p.title {
 }
 
 .pillNew {
-	background: var(--c-new-bg);
-	border-color: var(--c-new-border);
-	color: var(--c-new-fg);
+	background: #eff6ff;
+	border-color: #bfdbfe;
+	color: #1d4ed8;
 }
 
 .pillActive {
-	background: var(--c-active-bg);
-	border-color: var(--c-active-border);
-	color: var(--c-active-fg);
+	background: #fef9c3;
+	border-color: #fde68a;
+	color: #b45309;
 }
 
 .pillResolved {
-	background: var(--c-resolved-bg);
-	border-color: var(--c-resolved-border);
-	color: var(--c-resolved-fg);
+	background: #dcfce7;
+	border-color: #bbf7d0;
+	color: #15803d;
 }
