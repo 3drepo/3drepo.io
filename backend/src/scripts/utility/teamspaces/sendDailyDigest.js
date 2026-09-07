@@ -37,6 +37,10 @@ const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const { sendEmail } = require(`${v5Path}/services/mailer`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const tz = require('countries-and-timezones');
+const DayJS = require('dayjs');
+
+DayJS.extend(require('dayjs/plugin/utc'));
+DayJS.extend(require('dayjs/plugin/timezone'));
 
 // this processes the list of project/model/ticket ids into their names
 const getContextDataLookUp = async (contextData) => {
@@ -112,6 +116,13 @@ const clashStatusMapping = {
 	[notificationTypes.CLASH_RUN_FAILED]: clashRunStatus.FAILED,
 };
 
+const formatDate = (date, timeZone) => {
+	const timeZoneAbbr = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'short' })
+		.formatToParts(date).find(({ type }) => type === 'timeZoneName').value;
+
+	return `${DayJS(date).tz(timeZone).format('YYYY-MM-DD HH:mm')} (${timeZoneAbbr})`;
+};
+
 const generateClashData = ({ plan, notifications: runNotifications }, project, userInfo) => {
 	const planName = project.plans[UUIDToString(plan)];
 
@@ -119,10 +130,10 @@ const generateClashData = ({ plan, notifications: runNotifications }, project, u
 
 	const formattedRuns = runNotifications.flatMap(({ data, type }) => {
 		const timeZone = tz.getTimezonesForCountry(userInfo.countryCode)?.[0]?.name ?? 'UTC';
-		// 'sv-SE' is used as it produces a date with ISO format
-		const triggeredAt = `${data.triggeredAt.toLocaleString('sv-SE', { timeZone })} ${timeZone}`;
+		const triggeredAt = formatDate(data.triggeredAt, timeZone);
 
 		const status = clashStatusMapping[type];
+
 
 		if (!status) {
 			logger.logInfo(`Unrecognised clash notification type ${type}, ignoring...`);
