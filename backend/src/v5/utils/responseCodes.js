@@ -76,6 +76,7 @@ ResponseCodes.templates = {
 	templateNotFound: { message: 'Template not found.', status: 404 },
 	ticketNotFound: { message: 'Ticket not found.', status: 404 },
 	commentNotFound: { message: 'Comment not found.', status: 404 },
+	pinIconNotFound: { message: 'Pin icon not found.', status: 404 },
 
 	// File upload related error
 	unsupportedFileFormat: { message: 'The file format is not supported.', status: 400 },
