@@ -20,7 +20,11 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateUUID,
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 jest.mock('../../../../src/v5/models/metadata.rules');
 const RulesModel = require(`${src}/models/metadata.rules`);

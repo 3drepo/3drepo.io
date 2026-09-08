@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { Button } from '@mui/material';
 
-export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
+export const BaseCircleButton = styled(Button)<{ disabled?: boolean, selected?: boolean }>`
 	height: 38px;
 	min-width: 38px;
 	width: 38px;
@@ -42,6 +42,9 @@ export const PrimaryButton = styled(BaseCircleButton)`
 	&:hover, &.Mui-focusVisible {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
+	${({ selected }) => selected && css`
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	`}
 `;
 
 export const ErrorButton = styled(BaseCircleButton)`
@@ -62,7 +65,7 @@ export const SecondaryButton = styled(BaseCircleButton)`
 	}
 `;
 
-export const ViewerButton = styled(BaseCircleButton)<{ selected?: boolean }>`
+export const ViewerButton = styled(BaseCircleButton)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
@@ -72,10 +75,4 @@ export const ViewerButton = styled(BaseCircleButton)<{ selected?: boolean }>`
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
-	${({ selected }) => selected && css`
-		&, &:hover {
-			background-color: ${({ theme }) => theme.palette.secondary.main};
-			color: ${({ theme }) => theme.palette.secondary.contrastText};
-		}
-	`}
 `;

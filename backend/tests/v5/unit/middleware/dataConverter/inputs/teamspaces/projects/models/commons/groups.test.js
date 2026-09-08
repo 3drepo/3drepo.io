@@ -18,7 +18,13 @@
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
+const {
+	generateUUIDString,
+	generateRandomString,
+} = require('../../../../../../../../helper/dataGen');
+const {
+	generateLegacyGroup,
+} = require('../../../../../../../../helper/dataGen');
 
 const { convertLegacyRules } = require(`${src}/schemas/rules`);
 

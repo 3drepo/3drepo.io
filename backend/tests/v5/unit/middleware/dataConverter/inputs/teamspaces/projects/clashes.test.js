@@ -46,6 +46,12 @@ const TicketSchema = require(`${src}/schemas/tickets`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/clashes');
 const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
 
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects');
+const ProjectsProcessor = require(`${src}/processors/teamspaces/projects`);
+
+jest.mock('../../../../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
+
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -55,7 +61,7 @@ const {
 	generateRandomNumber,
 	generateRandomDate,
 	generateUUIDString,
-} = require('../../../../../../helper/services');
+} = require('../../../../../../helper/dataGen');
 const { stringToUUID, UUIDToString, generateUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
 
@@ -95,6 +101,9 @@ const testValidateNewPlanData = () => {
 		operator: valueOperators.IS.name,
 		values: [generateRandomString()],
 	};
+
+	const users = times(3, () => generateRandomString());
+	const jobs = times(3, () => generateRandomString());
 
 	const recognisedContainer = times(3, () => generateUUIDString());
 	const containerNotInProject = recognisedContainer[2];
@@ -214,6 +223,9 @@ const testValidateNewPlanData = () => {
 		['with template that does not contain cloud clash module', false, { ...planData, tickets: { ...ticketData, template: templateWithoutCloudClash } }],
 		['with template that has deprecated cloud clash module', false, { ...planData, tickets: { ...ticketData, template: templateWithDeprecatedCloudClash } }],
 		['with erroneous creation values', false, { ...planData, tickets: { ...ticketData, valuesAtCreation: generateRandomObject() } }],
+		['with unknown users in notify array', false, { ...planData, notify: [generateRandomString()] }],
+		['with empty notify array', false, { ...planData, notify: [] }],
+		['with valid job and user in notify array', true, { ...planData, notify: [users[0], jobs[0]] }],
 	];
 
 	describe.each(testCases)('Validate new plan data', (desc, success, data, expectedData) => {
@@ -273,6 +285,9 @@ const testValidateNewPlanData = () => {
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
 
+			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
+			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
+
 			const mockCB = jest.fn(() => {});
 			const req = {
 				params: { teamspace, project },
@@ -303,7 +318,8 @@ const testValidateUpdatePlanData = () => {
 		operator: valueOperators.IS.name,
 		values: [generateRandomString()],
 	};
-
+	const users = times(3, () => generateRandomString());
+	const jobs = times(3, () => generateRandomString());
 	const recognisedContainer = times(3, () => generateUUIDString());
 	const containerNotInProject = recognisedContainer[2];
 
@@ -569,6 +585,9 @@ const testValidateUpdatePlanData = () => {
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
+
+			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
+			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
 
 			const mockCB = jest.fn(() => {});
 			const req = {

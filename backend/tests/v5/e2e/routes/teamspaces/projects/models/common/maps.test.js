@@ -16,6 +16,13 @@
  */
 
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
@@ -42,20 +49,20 @@ let agent;
 
 const generateBasicData = () => ({
 	users: {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
-		projectAdmin: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		nobody: generateUserCredentials(),
+		projectAdmin: generateUserCredentials(),
 	},
-	teamspace: ServiceHelper.generateRandomString(),
-	teamspaceNoHere: ServiceHelper.generateRandomString(),
-	project: ServiceHelper.generateRandomProject(),
-	projectNoHere: ServiceHelper.generateRandomProject(),
-	container: ServiceHelper.generateRandomModel(),
-	containerNoHere: ServiceHelper.generateRandomModel(),
-	federation: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-	federationNoHere: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+	teamspace: generateRandomString(),
+	teamspaceNoHere: generateRandomString(),
+	project: generateRandomProject(),
+	projectNoHere: generateRandomProject(),
+	container: generateRandomModel(),
+	containerNoHere: generateRandomModel(),
+	federation: generateRandomModel({ modelType: modelTypes.FEDERATION }),
+	federationNoHere: generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
 const setupBasicData = async ({
@@ -129,8 +136,8 @@ const testGetListOfMaps = (isInternal = false) => {
 			];
 
 			const commonCases = [
-				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the project does not exist', genRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', genRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 				['the HERE add-on is not enabled', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, key: users.tsAdmin.apiKey }), true, osmOnly],
 				['the HERE addon is enabled', genRoute(), true, allMaps],
 			];
@@ -191,14 +198,14 @@ const testGetTiles = (isInternal = false) => {
 			];
 
 			const commonCases = [
-				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the project does not exist', genRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', genRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 				[`the model is not a ${modelType}`, genRoute({ modelId: wrongModelTypeModel._id }), false, templates.modelNotFound],
-				['map coordinates are invalid', genRoute({ query: { x: ServiceHelper.generateRandomNumber } }), false, templates.invalidArguments],
+				['map coordinates are invalid', genRoute({ query: { x: generateRandomNumber } }), false, templates.invalidArguments],
 				...Object.values(mapTypes).map((mapType) => [`test for here ${mapType} tiles - should succeed`, genRoute({ mapProvider: mapProviders.HERE, mapType }), true]),
-				['the HERE mapType is invalid', genRoute({ mapProvider: mapProviders.HERE, mapType: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
-				['the OSM mapType is invalid', genRoute({ mapProvider: mapProviders.OSM, mapType: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
-				['Unknown map provider is provided', genRoute({ mapProvider: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
+				['the HERE mapType is invalid', genRoute({ mapProvider: mapProviders.HERE, mapType: generateRandomString() }), false, templates.invalidArguments],
+				['the OSM mapType is invalid', genRoute({ mapProvider: mapProviders.OSM, mapType: generateRandomString() }), false, templates.invalidArguments],
+				['Unknown map provider is provided', genRoute({ mapProvider: generateRandomString() }), false, templates.invalidArguments],
 				['the HERE add-on is not enabled but the request is for OSM tiles', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id }), true],
 				['the HERE add-on is not enabled and the request is for HERE tiles', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, mapProvider: mapProviders.HERE }), false, templates.addOnUnavailable],
 			];
@@ -208,14 +215,14 @@ const testGetTiles = (isInternal = false) => {
 
 		const runTests = (desc, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				config[mapProviders.HERE] = { apiKey: ServiceHelper.generateRandomString() };
+				config[mapProviders.HERE] = { apiKey: generateRandomString() };
 				config[mapProviders.OSM] = {
-					domain: ServiceHelper.generateRandomString(),
-					prefix: ServiceHelper.generateRandomString(),
-					key: ServiceHelper.generateRandomString(),
+					domain: generateRandomString(),
+					prefix: generateRandomString(),
+					key: generateRandomString(),
 				};
 
-				const bufferData = Buffer.from(ServiceHelper.generateRandomString());
+				const bufferData = Buffer.from(generateRandomString());
 				if (success) getArrayBuffer.mockResolvedValueOnce({ data: bufferData });
 
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;

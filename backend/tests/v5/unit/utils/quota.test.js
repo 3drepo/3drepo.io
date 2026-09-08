@@ -25,7 +25,7 @@ jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
 
 const testGetQuotaInfo = () => {
 	const tsWithExpiredQuota = 'expiredQuota';

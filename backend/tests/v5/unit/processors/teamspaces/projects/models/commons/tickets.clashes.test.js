@@ -17,7 +17,11 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUID, generateUUIDString } = require('../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateUUIDString,
+} = require('../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);

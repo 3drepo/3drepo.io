@@ -21,7 +21,7 @@ const { determineTestGroup } = require('../../../../../helper/utils');
 
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 const TicketsSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/settings.tickets`);
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

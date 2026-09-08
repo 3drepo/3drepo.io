@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 const BaseTemplate = require('../../../../../src/v5/services/mailer/templates/baseTemplate');
 const SystemTemplate = require('../../../../../src/v5/services/mailer/templates/systemTemplate');
 

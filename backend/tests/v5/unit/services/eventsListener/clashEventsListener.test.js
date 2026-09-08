@@ -21,7 +21,7 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
-} = require('../../../helper/services');
+} = require('../../../helper/dataGen');
 const { src } = require('../../../helper/path');
 const { times } = require('lodash');
 
@@ -62,9 +62,14 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const ClashEventsListener = require(`${src}/services/eventsListener/components/clashEvents`);
 const { logger } = require(`${src}/utils/logger`);
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = () => setTimeout(() => {
+		unsubscribe();
+		resolve();
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const expectErrorNotification = () => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
@@ -122,6 +127,7 @@ const testClashRunCompleted = () => {
 			results: generateRandomString(),
 			value: 0,
 		};
+
 		const bouncerErrorData = { ...data, value: 28 };
 
 		test.each([
