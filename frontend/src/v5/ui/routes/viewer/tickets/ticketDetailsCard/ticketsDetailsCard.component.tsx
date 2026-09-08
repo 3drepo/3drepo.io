@@ -184,7 +184,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		if (!get(formData.formState.dirtyFields, viewProps?.name)) return;
-		// Trigger for TicketGroups onBlurHandler because with one react-hook-form update stoped working. 
+		// Manually trigger onBlurHandler for TicketGroups, since dirtyFields isn't updated in time for onChange to save the updated values.
 		onBlurHandler();
 	}, [JSON.stringify(formData.formState.dirtyFields)]);
 
