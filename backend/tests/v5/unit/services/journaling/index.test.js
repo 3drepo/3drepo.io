@@ -39,9 +39,14 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Journaling = require(`${src}/services/journaling`);
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = () => setTimeout(() => {
+		unsubscribe();
+		resolve();
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const testAuditEvents = () => {
 	describe('Audit Events', () => {

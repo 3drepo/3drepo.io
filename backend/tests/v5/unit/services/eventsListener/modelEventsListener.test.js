@@ -86,9 +86,14 @@ const ModelEventsListener = require(`${src}/services/eventsListener/components/m
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = () => setTimeout(() => {
+		unsubscribe();
+		resolve();
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const generateImportResult = (success, message = generateRandomString(), userErr, errorCode = 1) => {
 	if (success) {

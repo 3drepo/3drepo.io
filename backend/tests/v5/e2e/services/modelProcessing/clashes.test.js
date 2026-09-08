@@ -129,9 +129,14 @@ const setupBasicData = async ({
 	]);
 };
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, (eventData) => setTimeout(() => resolve(eventData), 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = (eventData) => setTimeout(() => {
+		unsubscribe();
+		resolve(eventData);
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const getResultsPath = (run) => path.join(SHARED_SPACE_TAG, `${run._id}`, 'results.json');
 
