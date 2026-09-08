@@ -94,6 +94,27 @@ const testHtml = () => {
 			const res = await DailyDigest.html(standardData);
 			expect(isHtml(res)).toEqual(true);
 		});
+
+		test('should use Unknown when clash error reason is missing', async () => {
+			const data = {
+				...standardData,
+				notifications: [{
+					...standardData.notifications[0],
+					clashData: [{
+						...standardData.notifications[0].clashData[0],
+						runs: [standardData.notifications[0].clashData[0].runs[1]],
+					}],
+				}],
+			};
+			data.notifications[0].clashData[0].runs[0] = {
+				...data.notifications[0].clashData[0].runs[0],
+				results: { error: {} },
+			};
+
+			const res = await DailyDigest.html(data);
+
+			expect(res).toContain('Unknown');
+		});
 	});
 };
 

@@ -61,7 +61,7 @@ const dataSchema = Yup.object({
 						resolved: Yup.number().min(0),
 					}),
 					error: Yup.object({
-						reason: Yup.string(),
+						reason: Yup.string().default('Unknown'),
 					}),
 				}).required(),
 				triggeredAt: Yup.string().required(),

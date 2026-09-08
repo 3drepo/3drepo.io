@@ -222,6 +222,8 @@ const generateEmails = (emailData, dataRef, usersToUserInfo) => Promise.all(
 				}
 			});
 
+			if (ticketData.length === 0 && clashData.length === 0) return [];
+
 			return { ...notification, project: project.name, ticketData, clashData };
 		});
 

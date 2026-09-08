@@ -47,7 +47,7 @@ jobs:
         run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
 
       - name: Run Backend test:v5
-        run: cd backend ; yarn test:v5
+        run: cd backend ; NODE_OPTIONS=--max-old-space-size=4096  yarn test:v5
   run-backend-tests-v4:
     name: Run Backend tests (V4)
     runs-on: ubuntu-24.04
