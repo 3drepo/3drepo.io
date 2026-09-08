@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../helper/utils');
+const { determineTestGroup, outOfOrderArrayEqual } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
@@ -26,7 +26,6 @@ const {
 	generateRandomNumber,
 } = require('../../helper/dataGen');
 const {
-	outOfOrderArrayEqual,
 	db: dbHelper,
 } = require('../../helper/services');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');

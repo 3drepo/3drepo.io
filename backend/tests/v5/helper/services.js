@@ -23,6 +23,7 @@ const DataGen = require('./dataGen');
 const DataGenClashes = require('./dataGen.clashes');
 const DataGenTickets = require('./dataGen.tickets');
 const SessionTracker = require('./sessionTracker');
+const Utils = require('./utils');
 
 const { image, src, srcV4 } = require('./path');
 
@@ -63,6 +64,7 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 Object.assign(ServiceHelper, DataGen);
 Object.assign(ServiceHelper, DataGenTickets, DataGenClashes);
+Object.assign(ServiceHelper, Utils);
 
 queue.purgeQueues = async () => {
 	const { host, model_queue, clash_queue, callback_queue } = config.cn_queue;
