@@ -20,7 +20,7 @@ const Scene = {};
 const { UUIDToString, stringToUUID, unique } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
 const { getNodeByQuery, getNodesByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
-const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const { idTypes, idTypesToKeys, metaKeyToIdType, typePriority } = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
@@ -218,8 +218,8 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	const targetCount = metadata.length;
 
 	if (targetCount) {
-		for (const idType of Object.keys(res)) {
-			if (res[idType].length === targetCount) {
+		for (const idType of typePriority) {
+			if (res[idType]?.length === targetCount) {
 				// convert to set to purge duplicates
 				return { key: idType, values: Array.from(new Set(res[idType])) };
 			}
