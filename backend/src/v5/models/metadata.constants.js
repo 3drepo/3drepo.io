@@ -24,6 +24,14 @@ MetaConstants.idTypes = {
 	DWG: 'dwg_ids',
 };
 
+// This array determines the priority of the ID types when processing metadata.
+MetaConstants.typePriority = [
+	MetaConstants.idTypes.IFC,
+	// Element ID is used for both DWG and Revit, if it doesn't have IFC GUID it's likely to be dwg
+	MetaConstants.idTypes.DWG,
+	MetaConstants.idTypes.REVIT,
+];
+
 MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
 	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
