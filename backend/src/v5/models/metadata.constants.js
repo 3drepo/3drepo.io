@@ -17,7 +17,6 @@
 
 const MetaConstants = {};
 
-// The order on this object determines the priority.
 MetaConstants.idTypes = {
 	IFC: 'ifc_guids',
 	REVIT: 'revit_ids',
