@@ -17,7 +17,10 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../helper/services');
+const { generateCustomStatusValues } = require('../../../helper/dataGen');
+const {
+	outOfOrderArrayEqual,
+} = require('../../../helper/utils');
 
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 

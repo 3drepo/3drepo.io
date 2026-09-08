@@ -20,7 +20,7 @@ const { events } = require('../../../../../src/v5/services/eventsManager/eventsM
 const { src } = require('../../../helper/path');
 const path = require('path');
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 jest.mock('fs/promises');
 const FsPromisesMock = require('fs/promises');

@@ -18,7 +18,13 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { times } = require('lodash');
-const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
+const {
+	generateGroup,
+} = require('../../helper/dataGen');
 
 const Groups = require(`${src}/models/tickets.groups`);
 

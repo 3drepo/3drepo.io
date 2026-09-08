@@ -19,7 +19,10 @@ const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
-const { generateRandomString, generateGroup } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
+const {
+	generateGroup,
+} = require('../../helper/dataGen');
 
 const Group = require(`${src}/models/groups`);
 const db = require(`${src}/handler/db`);

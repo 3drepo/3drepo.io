@@ -17,6 +17,14 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateBasicNode,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
@@ -32,21 +40,21 @@ let agent;
 
 const generateBasicData = () => {
 	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		commenter: ServiceHelper.generateUserCredentials(),
-		collaborator: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
-		projectAdmin: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		commenter: generateUserCredentials(),
+		collaborator: generateUserCredentials(),
+		nobody: generateUserCredentials(),
+		projectAdmin: generateUserCredentials(),
 	};
 
 	const metadata = {
-		_id: ServiceHelper.generateUUIDString(),
+		_id: generateUUIDString(),
 		metadata: [
-			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() },
-			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
-			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
+			{ key: generateRandomString(), value: generateRandomString() },
+			{ key: generateRandomString(), value: generateRandomString(), custom: true },
+			{ key: generateRandomString(), value: generateRandomString(), custom: true },
 		],
 	};
 
@@ -58,11 +66,11 @@ const generateBasicData = () => {
 
 	const data = {
 		users,
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel(perms),
-		fed: ServiceHelper.generateRandomModel({ ...perms, modelType: modelTypes.FEDERATION }),
-		conNoRev: ServiceHelper.generateRandomModel(perms),
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		con: generateRandomModel(perms),
+		fed: generateRandomModel({ ...perms, modelType: modelTypes.FEDERATION }),
+		conNoRev: generateRandomModel(perms),
 		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 		metadata,
 	};
@@ -117,10 +125,10 @@ const testUpdateCustomMetadata = (internalService) => {
 			{ [item.key]: item.value }), {});
 
 		const metadataToAdd = {
-			key: ServiceHelper.generateRandomString(),
-			value: ServiceHelper.generateRandomString(),
+			key: generateRandomString(),
+			value: generateRandomString(),
 		};
-		const metadataToUpdate = { key: customMetadata.key, value: ServiceHelper.generateRandomString() };
+		const metadataToUpdate = { key: customMetadata.key, value: generateRandomString() };
 
 		const externalTests = [
 			['the user does not have a valid session', createRoute({ key: null }), undefined, false, templates.notLoggedIn],
@@ -132,17 +140,17 @@ const testUpdateCustomMetadata = (internalService) => {
 		];
 
 		const generalTests = [
-			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), undefined, false, templates.projectNotFound],
-			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), undefined, false, templates.modelNotFound],
+			['the project does not exist', createRoute({ projectId: generateRandomString() }), undefined, false, templates.projectNotFound],
+			['the container does not exist', createRoute({ containerId: generateRandomString() }), undefined, false, templates.modelNotFound],
 			['the container is a federation', createRoute({ containerId: fed._id }), undefined, false, templates.modelNotFound],
-			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateRandomString() }), undefined, false, templates.metadataNotFound],
+			['the metadata does not exist', createRoute({ metadataId: generateRandomString() }), undefined, false, templates.metadataNotFound],
 			[
 				'the user is trying to update non custom metadata',
 				createRoute(),
 				{
 					metadata: [
-						{ key: nonCustomMetadata.key, value: ServiceHelper.generateRandomString() },
-						{ key: customMetadata.key, value: ServiceHelper.generateRandomString() },
+						{ key: nonCustomMetadata.key, value: generateRandomString() },
+						{ key: customMetadata.key, value: generateRandomString() },
 					],
 				},
 				false,
@@ -201,9 +209,9 @@ const testUpdateCustomMetadata = (internalService) => {
 };
 
 const getNodesForRev = (revId) => {
-	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
-	const metaNodes = times(5, () => ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: times(5, () => ({ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() })) }));
-	const meshNode = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const rootNode = generateBasicNode('transformation', revId);
+	const metaNodes = times(5, () => generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: times(5, () => ({ key: generateRandomString(), value: generateRandomString() })) }));
+	const meshNode = generateBasicNode('mesh', revId, [rootNode.shared_id]);
 	const meshIdStr = UUIDToString(meshNode._id);
 
 	const meshMap = {
@@ -217,7 +225,7 @@ const getNodesForRev = (revId) => {
 const testGetMetadata = (internalService) => {
 	describe('Get metadata', () => {
 		const { users, teamspace, project, con, fed, revisions, metadata } = generateBasicData();
-		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+		const conNoRev = generateRandomModel({ modelType: modelTypes.CONTAINER });
 
 		const rev1Nodes = getNodesForRev(revisions[0]._id);
 		const rev2Nodes = getNodesForRev(revisions[1]._id);
@@ -267,8 +275,8 @@ const testGetMetadata = (internalService) => {
 
 			if (internalService) {
 				return modelType === modelTypes.CONTAINER ? [
-					['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-					['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+					['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+					['the container does not exist', getRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 					['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 					['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
 					['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Nodes.metaNodes.map(castNode)],
@@ -326,11 +334,11 @@ const testGetMetadataById = (internalService) => {
 		];
 
 		const generalTests = [
-			['the teamspace does not exist', createRoute({ teamspaceId: ServiceHelper.generateRandomString() }), false, templates.teamspaceNotFound],
-			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+			['the teamspace does not exist', createRoute({ teamspaceId: generateRandomString() }), false, templates.teamspaceNotFound],
+			['the project does not exist', createRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+			['the container does not exist', createRoute({ containerId: generateRandomString() }), false, templates.modelNotFound],
 			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
-			['the metadata does not exist', createRoute({ metadataId: ServiceHelper.generateUUIDString() }), false, templates.metadataNotFound],
+			['the metadata does not exist', createRoute({ metadataId: generateUUIDString() }), false, templates.metadataNotFound],
 			['metadata exists', createRoute(), true, { _id: metadata._id, metadata: expectedMetadata }],
 		];
 
@@ -357,20 +365,20 @@ const testGetMetadataById = (internalService) => {
 const testGetMetadataFields = (internalService) => {
 	describe('Get metadata fields', () => {
 		const { users, teamspace, project, con, fed, metadata } = generateBasicData();
-		const conNoMetadata = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+		const conNoMetadata = generateRandomModel({ modelType: modelTypes.CONTAINER });
 
 		// add an additional metadata with key duplication to ensure the returned field list is unique
 		const extraMetadata = {
-			_id: ServiceHelper.generateUUIDString(),
+			_id: generateUUIDString(),
 			metadata: [
 				{
 					key: metadata.metadata[0].key,
-					value: ServiceHelper.generateRandomString(),
+					value: generateRandomString(),
 					custom: true,
 				},
 				{
-					key: ServiceHelper.generateRandomString(),
-					value: ServiceHelper.generateRandomString(),
+					key: generateRandomString(),
+					value: generateRandomString(),
 					custom: true,
 				},
 			],
@@ -398,8 +406,8 @@ const testGetMetadataFields = (internalService) => {
 		];
 
 		const generalTests = [
-			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+			['the project does not exist', createRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+			['the container does not exist', createRoute({ containerId: generateRandomString() }), false, templates.modelNotFound],
 			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
 			['the container does not have metadata', createRoute({ containerId: conNoMetadata._id }), true, { fields: [] }],
 			['metadata exists in one or more entries', createRoute(), true, { fields: expectedFields }],
