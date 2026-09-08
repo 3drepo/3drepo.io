@@ -21,7 +21,7 @@ import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
@@ -63,7 +63,7 @@ import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual, isUndefined } from 'lodash';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 type ImageToUpload = {
@@ -90,6 +90,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId || null);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -112,6 +113,14 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const inputRef = useRef<any>(null);
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
+	const unsavedCommentRef = useRef<Partial<ITicketComment> | null>(null);
+	const discardDraftRef = useRef(false);
+	unsavedCommentRef.current = {
+		_id: commentId || null,
+		message: newMessage || '',
+		images: imagesToUpload.map(({ src }) => src),
+		view: viewpoint,
+	};
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
 	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
@@ -131,6 +140,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		setIsSubmittingMessage(false);
 		setImagesToUpload([]);
 		setViewpoint(null);
+	};
+
+	const cancelEdit = () => {
+		discardDraftRef.current = true;
+		onCancelEdit();
 	};
 
 	const updateMessage = async () => {
@@ -153,7 +167,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 			commentId,
 			newComment,
 		);
-		onCancelEdit();
+		cancelEdit();
 	};
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
@@ -168,6 +182,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		if (viewpoint) {
 			newComment.view = viewpoint;
 		}
+		TicketCommentsActionsDispatchers.setUnsavedComment(null);
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
 			project,
@@ -254,6 +269,24 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		}
 	}, [commentReply?._id]);
 
+	useEffect(() => {
+		const draftImages = unsavedComment?.images || images;
+		reset({
+			message: desanitiseMessage(unsavedComment?.message || message),
+			images: draftImages,
+		});
+		const unsavedView = unsavedComment?.view;
+		if (!isUndefined(unsavedView)) {
+			setViewpoint(unsavedView);
+		}
+		setImagesToUpload(draftImages.map((src) => ({ src, id: uuid() })));
+	}, [unsavedComment]);
+
+	useEffect(() => () => {
+		const draft = discardDraftRef.current ? undefined : cloneDeep(unsavedCommentRef.current || {});
+		TicketCommentsActionsDispatchers.setUnsavedComment(commentId || null, draft);
+	}, []);
+
 	return (
 		<Container
 			onDragEnter={() => setIsDraggingFile(true)}
@@ -338,7 +371,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>
-						<TicketButton variant="error" onClick={onCancelEdit}>
+						<TicketButton variant="error" onClick={cancelEdit}>
 							<CancelIcon />
 						</TicketButton>
 						<TicketButton variant="primary" onClick={updateMessage} disabled={disableSendMessage}>

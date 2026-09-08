@@ -19,7 +19,11 @@ const { src } = require('../../../../../../helper/path');
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 
-const { generateRandomString, generateRandomNumber, generateRandomObject } = require('../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateRandomObject,
+} = require('../../../../../../helper/dataGen');
 const { times } = require('lodash');
 const { mapProviders } = require('../../../../../../../../src/v5/services/maps/maps.constants');
 const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');

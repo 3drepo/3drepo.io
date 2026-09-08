@@ -23,7 +23,8 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
-	generateRandomNumber } = require('../../../helper/services');
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
 const { idTypes } = require('../../../../../src/v5/models/metadata.constants');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);

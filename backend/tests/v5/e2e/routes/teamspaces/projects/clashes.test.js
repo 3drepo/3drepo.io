@@ -18,6 +18,17 @@
 const { isEmpty, times } = require('lodash');
 const { determineTestGroup } = require('../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomDate,
+	generateCustomStatusValues,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateTemplate,
+	generateBasicNode,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const { readFile } = require('fs/promises');
@@ -78,21 +89,21 @@ const setupBasicData = async ({
 
 const generateBasicData = () => {
 	const [tsAdmin, nonAdminUser, unlicencedUser, projectAdmin] = times(4,
-		() => ServiceHelper.generateUserCredentials());
+		() => generateUserCredentials());
 
-	const models = times(2, () => ServiceHelper.generateRandomModel());
-	const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-	const template = ServiceHelper.generateTemplate();
+	const models = times(2, () => generateRandomModel());
+	const federation = generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const template = generateTemplate();
 	template.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
 	const plan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
-	const project = ServiceHelper.generateRandomProject();
-	const project2 = ServiceHelper.generateRandomProject();
+	const project = generateRandomProject();
+	const project2 = generateRandomProject();
 	const project2Plan = ServiceHelper.generateClashPlan(models[1]._id, models[0]._id);
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin },
-		teamspace: ServiceHelper.generateRandomString(),
+		teamspace: generateRandomString(),
 		project,
 		project2,
 		models,
@@ -122,10 +133,10 @@ const testGetPlans = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
@@ -158,12 +169,12 @@ const testGetPlan = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: project2Plan._id }, false, templates.clashPlanNotFound],
 			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
@@ -213,18 +224,18 @@ const injectRevisionIntoPlan = ({ _id, type, tolerance, selfIntersectionsCheck, 
 	selfIntersectionsCheck,
 	selectionA: selectionA.map((selection) => ({
 		...selection,
-		revision: ServiceHelper.generateUUIDString(),
+		revision: generateUUIDString(),
 	})),
 	selectionB: selectionB.map((selection) => ({
 		...selection,
-		revision: ServiceHelper.generateUUIDString(),
+		revision: generateUUIDString(),
 	})),
 });
 
 const generateRunResults = () => ({
-	new: times(2, () => ServiceHelper.generateRandomString()),
-	active: times(3, () => ServiceHelper.generateRandomString()),
-	resolved: times(4, () => ServiceHelper.generateRandomString()),
+	new: times(2, () => generateRandomString()),
+	active: times(3, () => generateRandomString()),
+	resolved: times(4, () => generateRandomString()),
 });
 
 const testGetRuns = () => {
@@ -238,18 +249,18 @@ const testGetRuns = () => {
 		const completedRunResults = generateRunResults();
 		const plannedRun = ServiceHelper.generateClashRun(runPlan, undefined, {
 			status: clashRunStatus.PLANNED,
-			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
+			triggeredAt: generateRandomDate().getTime(),
 		});
 		const failedRun = ServiceHelper.generateClashRun(runPlan, undefined, {
 			status: clashRunStatus.FAILED,
-			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
+			triggeredAt: generateRandomDate().getTime(),
 			results: {
-				error: { reason: ServiceHelper.generateRandomString() },
+				error: { reason: generateRandomString() },
 			},
 		});
 		const completedRun = ServiceHelper.generateClashRun(runPlan, completedRunResults, {
-			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
-			updatedAt: ServiceHelper.generateRandomDate().getTime(),
+			triggeredAt: generateRandomDate().getTime(),
+			updatedAt: generateRandomDate().getTime(),
 		});
 		const plan2Run = ServiceHelper.generateClashRun(plan2RunPlan);
 
@@ -264,12 +275,12 @@ const testGetRuns = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: project2Plan._id }, false, templates.clashPlanNotFound],
 			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
@@ -301,8 +312,8 @@ const testGetRun = () => {
 		const plan2RunPlan = injectRevisionIntoPlan(plan2);
 		const completedRunResults = generateRunResults();
 		const completedRun = ServiceHelper.generateClashRun(runPlan, completedRunResults, {
-			triggeredAt: ServiceHelper.generateRandomDate().getTime(),
-			updatedAt: ServiceHelper.generateRandomDate().getTime(),
+			triggeredAt: generateRandomDate().getTime(),
+			updatedAt: generateRandomDate().getTime(),
 		});
 		const plan2Run = ServiceHelper.generateClashRun(plan2RunPlan);
 		const formatRunDetail = (run) => ({
@@ -320,14 +331,14 @@ const testGetRun = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: project2Plan._id }, false, templates.clashPlanNotFound],
-			['the run does not exist', { runId: ServiceHelper.generateRandomString() }, false, templates.clashRunNotFound],
+			['the run does not exist', { runId: generateRandomString() }, false, templates.clashRunNotFound],
 			['the run belongs to a different plan', { runId: plan2Run._id }, false, templates.clashRunNotFound],
 			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
@@ -356,11 +367,11 @@ const testCreatePlan = () => {
 	describe('Create clash test plan', () => {
 		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes${key ? `?key=${key}` : ''}`;
 		const basicData = generateBasicData();
-		const commenterOnFed = ServiceHelper.generateUserCredentials();
-		const viewerOnFed = ServiceHelper.generateUserCredentials();
-		const customStatusValues = ServiceHelper.generateCustomStatusValues();
+		const commenterOnFed = generateUserCredentials();
+		const viewerOnFed = generateUserCredentials();
+		const customStatusValues = generateCustomStatusValues();
 		const { teamspace, project, models, template, federation } = basicData;
-		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
+		const templateWithCustomStatuses = generateTemplate(false, false, {
 			status: { values: customStatusValues, default: customStatusValues[0].name },
 		});
 		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
@@ -415,19 +426,21 @@ const testCreatePlan = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { user: { apiKey: ServiceHelper.generateRandomString() } }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { user: { apiKey: generateRandomString() } }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['payload is invalid', { planData: { ...generatePlanData(), type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
+			['payload is invalid', { planData: { ...generatePlanData(), type: generateRandomString() } }, false, templates.invalidArguments],
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
 			['payload contains ticket object', { planData: generatePlanData(true) }, true],
 			['payload contains ticket object with built in default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: defaultStatuses.OPEN, onResolved: defaultStatuses.CLOSED, onReopened: defaultStatuses.IN_PROGRESS } }) }, true],
 			['payload contains ticket object with custom default statuses', { planData: generatePlanData(true, users.tsAdmin.user, templateWithCustomStatuses, { defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } }) }, true],
 			['payload contains ticket object with empty default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: {} }) }, true],
-			['payload contains ticket object with invalid default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: ServiceHelper.generateRandomString() } }) }, false, templates.invalidArguments],
+			['payload contains ticket object with invalid default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: generateRandomString() } }) }, false, templates.invalidArguments],
 			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
+			['payload contains notify with invalid user', { planData: { ...generatePlanData(true), notify: [generateRandomString()] } }, false, templates.invalidArguments],
+			['payload contains notify with valid user and job', { planData: { ...generatePlanData(true), notify: [users.tsAdmin.user] } }, true],
 			['creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
 			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
@@ -481,8 +494,8 @@ const testUpdatePlan = () => {
 		const basicData = generateBasicData();
 
 		const { users, teamspace, project, plan: existingPlan, federation, template, models } = basicData;
-		const customStatusValues = ServiceHelper.generateCustomStatusValues();
-		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
+		const customStatusValues = generateCustomStatusValues();
+		const templateWithCustomStatuses = generateTemplate(false, false, {
 			status: { values: customStatusValues, default: customStatusValues[0].name },
 		});
 		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
@@ -523,15 +536,15 @@ const testUpdatePlan = () => {
 			]);
 		});
 
-		const generateUpdateData = () => ({ name: ServiceHelper.generateRandomString() });
+		const generateUpdateData = () => ({ name: generateRandomString() });
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { user: { apiKey: ServiceHelper.generateRandomString() } }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { user: { apiKey: generateRandomString() } }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
-			['payload is invalid', { planData: { type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
+			['payload is invalid', { planData: { type: generateRandomString() } }, false, templates.invalidArguments],
 			['payload is invalid (no changes)', { planData: { name: existingPlan.name } }, false, templates.invalidArguments],
 			['cannot remove required fields', { planData: { name: null } }, false, templates.invalidArguments],
 			// note: order matters here, this must be done before "the no change test" as it uses the same payload
@@ -542,7 +555,7 @@ const testUpdatePlan = () => {
 			['can add ticket default statuses', { orgPlanData: clashPlanWithoutDefaultStatuses, planId: clashPlanWithoutDefaultStatuses._id, planData: { tickets: { defaultStatuses: ticketDefaultStatuses } } }, true, { tickets: { defaultStatuses: ticketDefaultStatuses } }],
 			['can update ticket default statuses', { orgPlanData: clashPlanForDefaultStatusUpdate, planId: clashPlanForDefaultStatusUpdate._id, planData: { tickets: { defaultStatuses: { onNew: defaultStatuses.IN_PROGRESS } } } }, true, { tickets: { defaultStatuses: { ...ticketDefaultStatuses, onNew: defaultStatuses.IN_PROGRESS } } }],
 			['can remove ticket default statuses when an update leaves an empty object', { orgPlanData: clashPlanWithDefaultStatuses, planId: clashPlanWithDefaultStatuses._id, planData: { tickets: { defaultStatuses: { onNew: null, onResolved: null, onReopened: null } } } }, true, { tickets: { defaultStatuses: undefined } }],
-			['ticket default statuses are invalid', { planId: clashPlanForInvalidDefaultStatus._id, planData: { tickets: { defaultStatuses: { onNew: ServiceHelper.generateRandomString() } } } }, false, templates.invalidArguments],
+			['ticket default statuses are invalid', { planId: clashPlanForInvalidDefaultStatus._id, planData: { tickets: { defaultStatuses: { onNew: generateRandomString() } } } }, false, templates.invalidArguments],
 			['template update invalidates stored ticket default statuses', { planId: clashPlanForTemplateUpdate._id, planData: { tickets: { template: templateWithCustomStatuses._id } } }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, orgPlanData = existingPlan, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -603,11 +616,11 @@ const testDeletePlan = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planId = existingPlan._id }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -645,31 +658,31 @@ const testCreateRun = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const modelWithNoRev = ServiceHelper.generateRandomModel();
-		const modelWithVoidRev = ServiceHelper.generateRandomModel();
-		const modelsWithoutScene = times(2, () => ServiceHelper.generateRandomModel());
+		const modelWithNoRev = generateRandomModel();
+		const modelWithVoidRev = generateRandomModel();
+		const modelsWithoutScene = times(2, () => generateRandomModel());
 		const createRunModels = [modelWithNoRev, modelWithVoidRev, ...modelsWithoutScene];
 		const { users, teamspace, project, models, plan: existingPlan, project2Plan } = basicData;
 		const revisions = models.map(() => ServiceHelper.generateRevisionEntry());
 		const revisionsWithoutScene = modelsWithoutScene.map(() => ServiceHelper.generateRevisionEntry());
 		const [
 			planWithMissingContainer, planWithNoRev, planWithVoidRev,
-		] = [ServiceHelper.generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
+		] = [generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
 			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
 		const planWithoutClashCandidates = ServiceHelper.generateClashPlan(
 			modelsWithoutScene[0]._id, modelsWithoutScene[1]._id);
 		const allowedMeshesPerScene = 2;
 		const createScene = (model, revision) => {
-			const parent = ServiceHelper.generateUUIDString();
+			const parent = generateUUIDString();
 			const parentIds = [stringToUUID(parent)];
 			const boundingBox = { bounding_box: [[0, 0, 0], [1, 1, 1]] };
-			const parentNode = ServiceHelper.generateBasicNode(nodeTypes.TRANSFORMATION, revision._id, [],
+			const parentNode = generateBasicNode(nodeTypes.TRANSFORMATION, revision._id, [],
 				{ shared_id: stringToUUID(parent) });
-			const meshWithoutPrimitive = ServiceHelper.generateBasicNode(
+			const meshWithoutPrimitive = generateBasicNode(
 				nodeTypes.MESH, revision._id, parentIds, boundingBox);
-			const polygonMesh = ServiceHelper.generateBasicNode(
+			const polygonMesh = generateBasicNode(
 				nodeTypes.MESH, revision._id, parentIds, { ...boundingBox, primitive: meshPrimitiveTypes.POLYGON });
-			const lineMesh = ServiceHelper.generateBasicNode(
+			const lineMesh = generateBasicNode(
 				nodeTypes.MESH, revision._id, parentIds, { ...boundingBox, primitive: meshPrimitiveTypes.LINE });
 			return ServiceHelper.db.createScene(teamspace, project.id, model._id, revision,
 				[parentNode, meshWithoutPrimitive, polygonMesh, lineMesh]);
@@ -703,12 +716,12 @@ const testCreateRun = () => {
 		});
 
 		describe.each([
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
 			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: project2Plan._id }, false, templates.clashPlanNotFound],
 			['the plan has a container that does not exist', { planId: planWithMissingContainer._id }, false, templates.containerNotFound],
 			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.revisionNotFound],

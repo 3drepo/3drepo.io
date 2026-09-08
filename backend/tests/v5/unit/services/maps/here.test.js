@@ -19,7 +19,13 @@ const { src } = require('../../../helper/path');
 
 const { determineTestGroup } = require('../../../helper/utils');
 
-const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
+const {
+	outOfOrderArrayEqual,
+} = require('../../../helper/utils');
 const { opaqueTiles, overlayTiles } = require('../../../../../src/v5/services/maps/here.constants');
 
 jest.mock('../../../../../src/v5/utils/webRequests');

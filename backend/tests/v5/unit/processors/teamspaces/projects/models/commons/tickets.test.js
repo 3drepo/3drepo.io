@@ -18,7 +18,16 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, generateUUIDString } = require('../../../../../../helper/services');
+const { generateTicket } = require('../../../../../../helper/dataGen.tickets');
+const {
+	generateRandomObject,
+	generateUUID,
+	generateRandomString,
+	generateTemplate,
+	generateRandomNumber,
+	generateUUIDString,
+	generateGroup,
+} = require('../../../../../../helper/dataGen');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);

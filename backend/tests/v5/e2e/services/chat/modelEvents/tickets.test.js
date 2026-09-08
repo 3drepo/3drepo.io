@@ -20,7 +20,18 @@ const { times } = require('lodash');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
-const { generateComment, generateTicket, generateRandomString } = require('../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateTemplate,
+} = require('../../../../helper/dataGen');
+const {
+	generateComment,
+	generateTicket,
+} = require('../../../../helper/services');
 const { basePropertyLabels, propTypes } = require('../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -32,13 +43,13 @@ let agent;
 
 const generateBasicData = () => {
 	const basicData = {
-		user: ServiceHelper.generateUserCredentials(),
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		container: ServiceHelper.generateRandomModel(),
-		federation: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-		template: ServiceHelper.generateTemplate(),
-		templateWithComments: ServiceHelper.generateTemplate(false, false, { comments: true }),
+		user: generateUserCredentials(),
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		container: generateRandomModel(),
+		federation: generateRandomModel({ modelType: modelTypes.FEDERATION }),
+		template: generateTemplate(),
+		templateWithComments: generateTemplate(false, false, { comments: true }),
 	};
 
 	return basicData;
@@ -481,16 +492,16 @@ const ticketUpdatedTest = () => {
 
 			const propToUpdate = template.properties.find((p) => p.type === propTypes.NUMBER
                 && !p.deprecated).name;
-			const newPropValue = ServiceHelper.generateRandomNumber();
+			const newPropValue = generateRandomNumber();
 			const modToUpdate = template.modules.find((m) => m.properties.length > 0);
 			const modPropToUpdate = modToUpdate.properties.find((p) => p.type === propTypes.TEXT
                 && !p.deprecated).name;
 			const modPropToUnset = modToUpdate.properties.find((p) => p.type === propTypes.NUMBER
                 && !p.deprecated).name;
-			const newModPropValue = ServiceHelper.generateRandomString();
+			const newModPropValue = generateRandomString();
 
 			const updateData = {
-				title: ServiceHelper.generateRandomString(),
+				title: generateRandomString(),
 				properties: {
 					[propToUpdate]: newPropValue,
 				},
@@ -606,9 +617,9 @@ const ticketsUpdatedTest = () => {
 				const expectedData = [];
 
 				const updateData = tickets.map(({ _id }) => {
-					const newTitle = ServiceHelper.generateRandomString();
-					const newPropValue = ServiceHelper.generateRandomNumber();
-					const newModPropValue = ServiceHelper.generateRandomString();
+					const newTitle = generateRandomString();
+					const newPropValue = generateRandomNumber();
+					const newModPropValue = generateRandomString();
 
 					expectedData.push({
 						...data,
@@ -951,7 +962,7 @@ const groupUpdatedTest = () => {
 	describe('Updating a group', () => {
 		const { user, teamspace, project, container, federation } = generateBasicData();
 
-		const templateWithView = ServiceHelper.generateTemplate(false, true);
+		const templateWithView = generateTemplate(false, true);
 		const containerTicketWithView = ServiceHelper.generateTicket(templateWithView);
 		const federationTicketWithView = ServiceHelper.generateTicket(templateWithView);
 
