@@ -27,7 +27,10 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+} = require('../../../../../../../../helper/dataGen');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 

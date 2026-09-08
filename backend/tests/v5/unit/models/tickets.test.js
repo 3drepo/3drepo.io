@@ -18,7 +18,12 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUID, generateRandomNumber, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateRandomNumber,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Ticket = require(`${src}/models/tickets`);
 const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);

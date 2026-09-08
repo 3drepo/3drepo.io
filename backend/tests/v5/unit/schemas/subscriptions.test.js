@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
 
 const SubscriptionSchema = require(`${src}/schemas/subscriptions`);
 const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);

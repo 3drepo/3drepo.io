@@ -18,8 +18,10 @@
 const { CLASH_RUNS_COL, clashRunStatus } = require('./clashes.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { logger } = require('../utils/logger');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const ClashRuns = {};
@@ -63,6 +65,8 @@ ClashRuns.updateRunStatus = async (teamspace, project, runId, status, results) =
 		status,
 		results,
 	}));
+
+	publish(events.CLASH_RUN_STATUS_UPDATED, { teamspace, project, runId, status, results });
 };
 
 ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sort) => {

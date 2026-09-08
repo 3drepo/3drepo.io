@@ -19,9 +19,17 @@ const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { Readable } = require('stream');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateRandomObject, generateUUID,
-	generateUUIDString, generateRandomNumber,
-	generateRevisionEntry, generateRandomBuffer } = require('../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+	generateUUID,
+	generateUUIDString,
+	generateRandomNumber,
+	generateRandomBuffer,
+} = require('../../../../../../helper/dataGen');
+const {
+	generateRevisionEntry,
+} = require('../../../../../../helper/dataGen');
 
 const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
 

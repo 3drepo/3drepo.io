@@ -19,7 +19,10 @@ const { src } = require('../../../helper/path');
 
 const { determineTestGroup } = require('../../../helper/utils');
 
-const { generateRandomNumber, generateRandomString } = require('../../../helper/services');
+const {
+	generateRandomNumber,
+	generateRandomString,
+} = require('../../../helper/dataGen');
 const { createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
 
 jest.mock('../../../../../src/v5/utils/webRequests');

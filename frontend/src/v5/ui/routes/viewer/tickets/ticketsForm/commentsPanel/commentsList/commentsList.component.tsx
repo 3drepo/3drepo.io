@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,42 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
-import { formatMessage } from '@/v5/services/intl';
-import { useParams } from 'react-router-dom';
+
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { Comments, CreateCommentBox, EmptyCommentsBox, FillerRow, CommentsContainer, Table, TableBody, TableRow, VirtualisedList } from './commentsList.styles';
+import { FormattedMessage } from 'react-intl';
+import { Comment } from '../comment/comment.component';
+import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import {
-	enableRealtimeContainerNewTicketComment,
-	enableRealtimeContainerUpdateTicketComment,
-	enableRealtimeFederationNewTicketComment,
-	enableRealtimeFederationUpdateTicketComment,
-} from '@/v5/services/realtime/ticketComments.events';
-import { FormattedMessage } from 'react-intl';
-import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useContext, useEffect, useState } from 'react';
-import { Gap } from '@controls/gap';
-import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { useParams } from 'react-router-dom';
+import { Gap } from '@controls/gap/gap.styles';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeFederationNewTicketComment, enableRealtimeFederationUpdateTicketComment, enableRealtimeContainerNewTicketComment, enableRealtimeContainerUpdateTicketComment } from '@/v5/services/realtime/ticketComments.events';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { ViewerParams } from '../../../../routes.constants';
-import { Accordion, Comments, CreateCommentBox, EmptyCommentsBox, FillerRow, Table, TableBody, TableRow, VirtualisedList } from './commentsPanel.styles';
-import { Comment } from './comment/comment.component';
-import { TicketContext } from '../../ticket.context';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { TicketContext } from '../../../ticket.context';
 
-type CommentsPanelProps = {
-	scrollPanelIntoView: (event, isExpanding) => void,
-};
-export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
+export const CommentsList = () => {
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
-
 	const commentsLength = comments.length;
 
 	const getCommentIsFirstOfBlock = (index) => {
@@ -78,7 +68,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		});
 	};
 
-
 	useEffect(() => {
 		if (!ticketId) return;
 		TicketCommentsActionsDispatchers.fetchComments(
@@ -99,13 +88,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
-
 	return (
-		<Accordion
-			title={formatMessage({ id: 'customTicket.comments.title', defaultMessage: 'Comments' })}
-			Icon={CommentIcon}
-			onChange={scrollPanelIntoView}
-		>
+		<CommentsContainer>
 			<Comments>
 				{commentsLength ? (
 					<VirtualisedList
@@ -142,6 +126,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 				)}
 			</Comments>
 			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
-		</Accordion>
+		</CommentsContainer>
 	);
 };

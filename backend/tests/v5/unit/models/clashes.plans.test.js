@@ -19,7 +19,11 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 const { isObject, isUUID } = require(`${src}/utils/helper/typeCheck`);
-const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+	generateUUID,
+} = require('../../helper/dataGen');
 const { determineTestGroup } = require('../../helper/utils');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);

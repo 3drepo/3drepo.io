@@ -1,80 +1,214 @@
+/*
+ * Outlook (desktop) uses the Word rendering engine, which does NOT support:
+ *   - CSS custom properties (var(--x))
+ *   - display: flex / inline-flex / grid, or the gap property
+ *   - :first-child / :nth-child selectors
+ * All colours below are therefore literal hex values, all multi-column
+ * layouts are handled via real <table> markup in dailyDigest.html, and any
+ * "first row" styling is applied via a class from the template's JS loop
+ * rather than a CSS pseudo-selector.
+ */
+
+/* ── Notification container ─────────────────────── */
 div.notifications {
 	width: 100%;
 	padding: 10px 0;
-	align-items: center;
-	display: inline-flex
 }
 
 div.notificationsTable {
-	flex: 1 1 0;
+	width: 100%;
 	border-radius: 10px;
 	border: 1px #E5EDF4 solid;
-	flex-direction: column;
-	display: inline-flex
+	margin-top: 8px;
 }
 
 div.notificationsHeader {
-	align-self: stretch;
-	padding: 0px 10px;
+	padding: 14px;
 	background: #E5EDF4;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
-	justify-content: space-between;
-	align-items: center;
-	display: inline-flex
 }
 
-div.headerTitle {
-	display: flex;
-	align-items: center;
+div.notificationsContent {
+	padding: 5px 20px 5px 20px;
 }
 
 p.title {
 	font-size: 0.9rem;
 	color: #172B4D;
 	font-weight: 500;
-	margin: 20px 0;
+	margin: 0;
 	word-wrap: break-word;
 }
 
-p.notificationsText {
-	flex: 1 1 0;
-	margin: 10px 5px 10px 15px
+/* ── Model block & labels ────────────────────────── */
+table.modelBlock {
+	border-collapse: separate;
+	border-spacing: 0;
+	border: 1px solid #d9dee7;
+	border-radius: 8px;
+	margin-bottom: 8px;
+	margin-top: 8px;
+	background: #fff;
+	width: 100%;
 }
 
-
-div.notificationsContent {
-	padding: 5px 10px 5px 20px;
-	flex-direction: column;
-	align-items: flex-start;
-	display: flex
+.modelLabelCell {
+	width: 160px;
+	padding: 14px 16px;
+	border-right: 1px solid #d9dee7;
+	background: #f7f8fa;
+	vertical-align: top;
 }
 
-div.notificationsRow {
-	align-self: stretch;
-	justify-content: flex-start;
-	align-items: center;
-	padding: 0;
-	display: inline-flex
+.sectionLabel {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #6b7280;
+	margin-bottom: 2px;
 }
 
-.notificationIconBorder {
-	padding: 3px;
-	border-radius: 18px;
-	overflow: hidden;
-	box-shadow: 0 0 1px 1px #016CA7;
-	justify-content: center;
-	align-items: center;
-	display: flex
+.dataValue {
+	font-size: 13px;
+	font-weight: 500;
+	color: #6b7280;
 }
 
-.notificationDoneIconBorder {
-	box-shadow: 0 0 1px 1px #555f70;
-	height: 11px;
-
+/* ── Clash plan grouping & rows ──────────────────── */
+table.planGroup td {
+	padding: 12px 14px;
+	vertical-align: top;
 }
 
-img.notificationType {
-	width: 11px
+table.planGroup tr.rowSeparator td {
+	border-top: 1px solid #d9dee7;
 }
 
+table.planGroup tr.evenRows td {
+	background: #f9fbff;
+}
+
+.cellLabel {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #6b7280;
+	line-height: 1;
+}
+
+/* ── Ticket list ─────────────────────────────────── */
+table.modelTicketList {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+table.modelTicketList td {
+	padding: 11px 0;
+	font-size: 13px;
+	color: #6b7280;
+	vertical-align: middle;
+}
+
+table.modelTicketList tr.rowSeparator td {
+	border-top: 1px solid #d9dee7;
+}
+
+.openLink {
+	font-size: 10px;
+	font-weight: 400;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #6b7280;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.ticketIcon {
+	width: 20px;
+	height: 20px;
+	line-height: 18px;
+	text-align: center;
+	border-radius: 50%;
+	border: 1.5px solid #6b7280;
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 400;
+	color: #6b7280;
+}
+
+.ticketIcon.tAssign {
+	border-color: #1d4ed8;
+	color: #1d4ed8;
+}
+
+.ticketIcon.tResolved {
+	border-color: #15803d;
+	color: #15803d;
+}
+
+/* ── Status badge ────────────────────────────────── */
+.statusBadge {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 3px 8px 3px 6px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	line-height: 1.5;
+}
+
+.sSuccess {
+	background: #dcfce7;
+	color: #15803d;
+}
+
+.sFailed {
+	background: #fee2e2;
+	color: #dc2626;
+}
+
+.sAborted {
+	background: #fef9c3;
+	color: #b45309;
+}
+
+/* ── Result pills ────────────────────────────────── */
+.pill {
+	display: inline-block;
+	margin: 0 5px 5px 0;
+	padding: 4px 8px;
+	border-radius: 6px;
+	border: 1px solid;
+	font-size: 12px;
+	line-height: 1.2;
+}
+
+.pill strong {
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.pillNew {
+	background: #eff6ff;
+	border-color: #bfdbfe;
+	color: #1d4ed8;
+}
+
+.pillActive {
+	background: #fef9c3;
+	border-color: #fde68a;
+	color: #b45309;
+}
+
+.pillResolved {
+	background: #dcfce7;
+	border-color: #bbf7d0;
+	color: #15803d;
+}

@@ -18,7 +18,10 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../../helper/dataGen');
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { basePropertyLabels, statuses } = require(`${src}/schemas/tickets/templates.constants`);
