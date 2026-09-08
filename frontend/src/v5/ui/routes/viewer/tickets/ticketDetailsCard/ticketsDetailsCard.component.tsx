@@ -182,11 +182,6 @@ export const TicketDetailsCard = () => {
 		setTicketId.current();
 	}, []);
 
-	useEffect(() => () => {
-		onBlurHandler();
-		setTicketId.current();
-	}, []);
-
 	useEffect(() => {
 		if (!get(formData.formState.dirtyFields, viewProps?.name)) return;
 		// Trigger for TicketGroups onBlurHandler because with one react-hook-form update stoped working. 
