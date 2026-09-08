@@ -212,6 +212,9 @@ const testUserEventsListener = () => {
 
 describe(determineTestGroup(__filename), () => {
 	EventsListener.init();
+	afterAll(() => {
+		EventsManager.reset();
+	});
 	testAuthEventsListener();
 	testUserEventsListener();
 });

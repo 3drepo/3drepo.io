@@ -2053,6 +2053,9 @@ const testTemplateUpdated = () => {
 
 describe(determineTestGroup(__filename), () => {
 	ModelEventsListener.init();
+	afterAll(() => {
+		EventsManager.reset();
+	});
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
