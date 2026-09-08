@@ -94,6 +94,12 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 		const model = generateUUIDString();
 		const template = generateTemplate();
 		const ticket = generateTicket(template, true);
+		const plansForTeamspace = plans.map((plan, index) => (
+			index === 0 ? {
+				...plan,
+				tickets: { template: template._id, federation: model },
+			} : plan
+		));
 
 		const recipients = ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr;
 		const ticketId = stringToUUID(ticket._id);
@@ -105,7 +111,7 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 				: createModel(ts.user, model, generateRandomString()),
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
-			createClashPlans(ts.user, project, plans),
+			createClashPlans(ts.user, project, plansForTeamspace),
 			insertTicketAssignedNotifications(ts.user, project, model, times(2, () => ({
 				users: recipients,
 				ticket: ticketId,
@@ -118,35 +124,39 @@ const setupData = async ({ users, plans, ...teamspaces }) => {
 				users: recipients,
 				ticket: ticketId,
 				author: usernameArr[0] }]),
-			insertClashSucceededNotifications(ts.user, project, {
-				plan: plans[0]._id,
-				runId: generateUUID(),
-				results: { stats: { new: 1, active: 2, resolved: 3 } },
-				triggeredAt: new Date(),
-			}, recipients),
-			insertClashSucceededNotifications(ts.user, project, {
-				plan: generateRandomString(),
-				runId: generateUUID(),
-				results: { stats: { new: 1, active: 2, resolved: 3 } },
-				triggeredAt: new Date(),
-			}, recipients),
-			insertClashAbortedNotifications(ts.user, project, {
-				plan: plans[1]._id,
-				runId: generateUUID(),
-				error: { reason: generateRandomString() },
-				triggeredAt: new Date(),
-			}, recipients),
-			insertClashFailedNotifications(ts.user, project, {
-				plan: plans[2]._id,
-				runId: generateUUID(),
-				error: { reason: generateRandomString() },
-				triggeredAt: new Date(),
-			}, recipients),
-			insertClashSucceededNotifications(ts.user, project, {
-				plan: plans[0]._id, runId: generateUUID(), triggeredAt: new Date(),
-			}, recipients),
+			...(ts.user === teamspaces.teamspaceModelNotFound.user ? [] : [
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: plans[0]._id,
+					runId: generateUUID(),
+					results: { stats: { new: 1, active: 2, resolved: 3 } },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: generateRandomString(),
+					runId: generateUUID(),
+					results: { stats: { new: 1, active: 2, resolved: 3 } },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashAbortedNotifications(ts.user, project, {
+					plan: plans[1]._id,
+					runId: generateUUID(),
+					error: { reason: generateRandomString() },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashFailedNotifications(ts.user, project, {
+					plan: plans[2]._id,
+					runId: generateUUID(),
+					error: { reason: generateRandomString() },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: plans[0]._id, runId: generateUUID(), triggeredAt: new Date(),
+				}, recipients),
+			]),
 			insertBogusTicketNotification(ts.user, project, model, recipients, ticketId),
-			insertBogusClashNotification(ts.user, project, plans[0]._id, recipients),
+			...(ts.user === teamspaces.teamspaceModelNotFound.user ? [] : [
+				insertBogusClashNotification(ts.user, project, plans[0]._id, recipients),
+			]),
 		]);
 	}));
 };
@@ -183,8 +193,9 @@ const runTest = () => {
 		['should not include ticket data if the teamspace does not have the matching template', testData.teamspaceNoTemplate.user, true, 5],
 		['should not send email if the user does not exist', testData.teamspaceUserNotFound.user],
 		['should not send email if the project does not exist', testData.teamspaceProjNotFound.user],
+		['should not send email if the model does not exist', testData.teamspaceModelNotFound.user],
 		['should send email if the teamspace has notifications', testData.teamspace.user, true, 5],
-		['should work if teamspace is not specified', undefined, true, 15],
+		['should work if teamspace is not specified', undefined, true, 10],
 	];
 
 	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail, emailsSent) => {
