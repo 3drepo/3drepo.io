@@ -207,6 +207,51 @@ const testTransformUniqueArray = () => {
 	});
 };
 
+const testOneOfSchemas = () => {
+	describe('oneOfSchemas validator', () => {
+		const stringSchema = Yup.string().trim();
+		const numberSchema = Yup.number().integer();
+
+		test('Should cast and return value from the first matching schema', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([stringSchema, numberSchema]);
+			await expect(schema.validate('  hello  ')).resolves.toBe('hello');
+		});
+
+		test('Should cast and return value from a later matching schema', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([numberSchema, stringSchema]);
+			await expect(schema.validate('  hello  ')).resolves.toBe('hello');
+		});
+
+		test('Should cast string to number when number schema matches', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([numberSchema, stringSchema]);
+			await expect(schema.validate('123')).resolves.toBe(123);
+		});
+
+		test('Should throw combined error when no schema matches', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([numberSchema, Yup.string().min(5)]);
+			await expect(schema.validate('hi')).rejects.toThrow('Value did not match any schema');
+		});
+
+		test('Should apply defaults from matching object schema', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([
+				Yup.object({ type: Yup.string().default('perspective'), showHidden: Yup.boolean().default(false) }),
+				Yup.object({ name: Yup.string().required() }),
+			]);
+			await expect(schema.validate({})).resolves.toEqual({ type: 'perspective', showHidden: false });
+		});
+
+		test('Should allow null when schema is nullable', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([stringSchema, numberSchema]).nullable();
+			await expect(schema.validate(null)).resolves.toBeNull();
+		});
+
+		test('Should preserve custom error message', async () => {
+			const schema = YupHelper.utils.oneOfSchemas([numberSchema], 'Custom message');
+			await expect(schema.validate('not a number')).rejects.toThrow('Custom message');
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testId();
 	testColorArr();
@@ -220,4 +265,5 @@ describe(determineTestGroup(__filename), () => {
 	testEmbeddedImageOrRef();
 	testDateInThePast();
 	testTransformUniqueArray();
+	testOneOfSchemas();
 });
