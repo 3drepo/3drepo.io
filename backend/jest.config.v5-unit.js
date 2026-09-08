@@ -27,6 +27,6 @@ config.coveragePathIgnorePatterns = [
 ];
 
 config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
-config.maxWorkers = 2;
+config.maxWorkers = 1;
 
 module.exports = config;
