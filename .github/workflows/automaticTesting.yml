@@ -27,6 +27,10 @@ jobs:
           RABBITMQ_DEFAULT_PASS: guest
 
     steps:
+      - name: Increase Swap Space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 10
       - name: Check out Git repository
         uses: actions/checkout@v3
 
