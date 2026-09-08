@@ -356,6 +356,7 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 		[clashObjectIdTypes.INTERNAL]: defaultClashIdType,
 		[clashObjectIdTypes.IFC]: idTypeLabels.IFC,
 		[clashObjectIdTypes.REVIT]: idTypeLabels.REVIT,
+		[clashObjectIdTypes.DWG]: idTypeLabels.DWG,
 	};
 	const { clashIdToTicket } = clashContext;
 	const tagInstruction = getTagValueInstruction(clashContext.valuesAtCreation);
