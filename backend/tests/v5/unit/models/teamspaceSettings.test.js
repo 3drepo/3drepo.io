@@ -20,7 +20,10 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { USERS_DB_NAME } = require(`${src}/models/users.constants`);

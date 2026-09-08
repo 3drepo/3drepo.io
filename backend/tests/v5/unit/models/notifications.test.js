@@ -18,7 +18,10 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const db = require(`${src}/handler/db`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);

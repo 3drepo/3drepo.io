@@ -20,7 +20,12 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateTemplate,
+	generateAuditAction,
+} = require('../../../helper/dataGen');
 
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -34,22 +39,22 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const teamspace = { name: ServiceHelper.generateRandomString() };
-	const noTemplatesTS = { name: ServiceHelper.generateRandomString() };
+	const teamspace = { name: generateRandomString() };
+	const noTemplatesTS = { name: generateRandomString() };
 
 	return {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		normalUser: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		normalUser: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 		teamspace,
 		noTemplatesTS,
 		teamspaces: [teamspace, noTemplatesTS],
 		auditActions: [
-			ServiceHelper.generateAuditAction(actions.USER_ADDED),
-			ServiceHelper.generateAuditAction(actions.USER_REMOVED),
-			ServiceHelper.generateAuditAction(actions.PERMISSIONS_UPDATED),
-			ServiceHelper.generateAuditAction(actions.INVITATION_ADDED),
-			ServiceHelper.generateAuditAction(actions.INVITATION_REVOKED),
+			generateAuditAction(actions.USER_ADDED),
+			generateAuditAction(actions.USER_REMOVED),
+			generateAuditAction(actions.PERMISSIONS_UPDATED),
+			generateAuditAction(actions.INVITATION_ADDED),
+			generateAuditAction(actions.INVITATION_REVOKED),
 		].sort((a) => a.timestamp),
 	};
 };
@@ -84,7 +89,7 @@ const deprecateProperties = (properties) => properties.map((property) => ({ ...p
 const testAddTemplate = () => {
 	describe('Add template', () => {
 		const basicData = generateBasicData();
-		const templateToUse = ServiceHelper.generateTemplate();
+		const templateToUse = generateTemplate();
 		beforeAll(() => setupTestData(basicData));
 
 		describe.each([
@@ -118,8 +123,8 @@ const testAddTemplate = () => {
 const testUpdateTemplate = () => {
 	describe('Update template', () => {
 		const basicData = generateBasicData();
-		const templateToUse = ServiceHelper.generateTemplate();
-		const templateThatClashes = ServiceHelper.generateTemplate();
+		const templateToUse = generateTemplate();
+		const templateThatClashes = generateTemplate();
 		beforeAll(async () => {
 			await setupTestData(basicData);
 			await createTemplates(basicData, [templateToUse, templateThatClashes]);
@@ -159,7 +164,7 @@ const testUpdateTemplate = () => {
 const testGetTemplate = () => {
 	describe('Get template', () => {
 		const basicData = generateBasicData();
-		const templateToUse = ServiceHelper.generateTemplate();
+		const templateToUse = generateTemplate();
 		beforeAll(async () => {
 			await setupTestData(basicData);
 			await createTemplates(basicData, [templateToUse]);
@@ -190,7 +195,7 @@ const testGetTemplate = () => {
 const testGetTemplateList = () => {
 	describe('Get template List', () => {
 		const basicData = generateBasicData();
-		const templateList = times(5, () => ServiceHelper.generateTemplate());
+		const templateList = times(5, () => generateTemplate());
 		const route = (key, ts = basicData.teamspace.name) => `/v5/teamspaces/${ts}/settings/tickets/templates${key ? `?key=${key}` : ''}`;
 
 		beforeAll(async () => {

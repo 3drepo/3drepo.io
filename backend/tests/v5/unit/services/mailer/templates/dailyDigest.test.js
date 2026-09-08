@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { generateRandomString, generateUUID } = require('../../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+} = require('../../../../helper/dataGen');
 const isHtml = require('is-html-content');
 
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);

@@ -21,7 +21,10 @@ const { src } = require('../../../../helper/path');
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 
-const { generateRandomString, generateRandomObject } = require('../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../../../helper/dataGen');
 const { times } = require('lodash');
 
 jest.mock('../../../../../../src/v5/models/teamspaceSettings');

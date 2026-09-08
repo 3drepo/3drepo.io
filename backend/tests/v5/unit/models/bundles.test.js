@@ -22,7 +22,10 @@ jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Bundles = require(`${src}/models/bundles`);
 

@@ -20,7 +20,10 @@ const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 
 const { MODEL_VIEWER, PROJECT_ADMIN, MODEL_COMMENTER } = require(`${src}/utils/permissions/permissions.constants`);
-const { generateRandomString, generateUUID } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+} = require('../../../helper/dataGen');
 
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 

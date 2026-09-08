@@ -20,7 +20,11 @@ const { times } = require('lodash');
 
 const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateTemplate,
+} = require('../../../../../../../../helper/dataGen');
+const { generateTicket } = require('../../../../../../../../helper/dataGen.tickets');
 const { isEqual } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');

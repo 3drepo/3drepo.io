@@ -16,7 +16,10 @@
  */
 
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
-const { generateRandomNumber, generateRandomString } = require('../../../../../../../../helper/services');
+const {
+	generateRandomNumber,
+	generateRandomString,
+} = require('../../../../../../../../helper/dataGen');
 const { src } = require('../../../../../../../../helper/path');
 const { createResponseCode } = require('../../../../../../../../../../src/v5/utils/responseCodes');
 

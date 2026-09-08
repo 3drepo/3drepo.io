@@ -61,7 +61,7 @@ const {
 	generateRandomNumber,
 	generateRandomDate,
 	generateUUIDString,
-} = require('../../../../../../helper/services');
+} = require('../../../../../../helper/dataGen');
 const { stringToUUID, UUIDToString, generateUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
 

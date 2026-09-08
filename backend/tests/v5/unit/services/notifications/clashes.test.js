@@ -22,7 +22,7 @@ const { src } = require('../../../helper/path');
 
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 

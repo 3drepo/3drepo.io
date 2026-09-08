@@ -23,9 +23,11 @@ const {
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
+	generateRandomNumber,
+} = require('../../helper/dataGen');
+const {
 	outOfOrderArrayEqual,
 	db: dbHelper,
-	generateRandomNumber,
 } = require('../../helper/services');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 

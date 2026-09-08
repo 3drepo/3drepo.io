@@ -16,7 +16,7 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 const { src } = require('../../../helper/path');
 const { times } = require('lodash');

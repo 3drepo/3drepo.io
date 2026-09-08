@@ -20,7 +20,14 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateRandomDate,
+	generateRandomObject,
+	generateTemplate,
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 

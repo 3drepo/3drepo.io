@@ -19,14 +19,15 @@ const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
-	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
 	generateUUID,
 	generateUUIDString,
 	generateRandomDate,
 	generateTemplate,
-	generateTicket } = require('../../../helper/services');
+	generateGroup,
+} = require('../../../helper/dataGen');
+const { generateTicket } = require('../../../helper/dataGen.tickets');
 
 const FS = require('fs');
 

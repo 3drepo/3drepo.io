@@ -21,7 +21,7 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
-} = require('../../../helper/services');
+} = require('../../../helper/dataGen');
 const { src } = require('../../../helper/path');
 const { times } = require('lodash');
 
