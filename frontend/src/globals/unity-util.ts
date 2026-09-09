@@ -143,6 +143,17 @@ export interface PickInfo {
 	position: number[],
 }
 
+export type SharedIds = {
+	account: string,
+	model: string,
+	shared_ids: string[],
+}
+
+export type ObjectStatus = {
+	hiddenNodes: SharedIds[],
+	highlightedNodes: SharedIds[],
+}
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -1907,7 +1918,7 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of the model
 	 */
-	public static getObjectsStatus(account: string, model: string): Promise<object> {
+	public static getObjectsStatus(account: string, model: string): Promise<ObjectStatus> {
 		const newObjectStatusPromise = new Promise((resolve, reject) => {
 			this.objectStatusPromises.push({ resolve, reject });
 		});
@@ -1916,7 +1927,7 @@ export class UnityUtil {
 
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
-		return newObjectStatusPromise as Promise<object>;
+		return newObjectStatusPromise as Promise<ObjectStatus>;
 	}
 
 	/**
