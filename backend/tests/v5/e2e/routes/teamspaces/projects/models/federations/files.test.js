@@ -17,10 +17,18 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomModelProperties,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const CryptoJs = require('crypto-js');
-const { outOfOrderArrayEqual } = require('../../../../../../helper/services');
+const {
+	outOfOrderArrayEqual,
+} = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -29,83 +37,83 @@ let server;
 let agent;
 
 const users = {
-	tsAdmin: ServiceHelper.generateUserCredentials(),
-	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	viewer: ServiceHelper.generateUserCredentials(),
-	commenter: ServiceHelper.generateUserCredentials(),
+	tsAdmin: generateUserCredentials(),
+	noProjectAccess: generateUserCredentials(),
+	viewer: generateUserCredentials(),
+	commenter: generateUserCredentials(),
 };
 
-const nobody = ServiceHelper.generateUserCredentials();
+const nobody = generateUserCredentials();
 
-const teamspace = ServiceHelper.generateRandomString();
+const teamspace = generateRandomString();
 
 const project = {
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
+	id: generateUUIDString(),
+	name: generateRandomString(),
 };
 
 const containers = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 	},
 ];
 
 const containersNoRev = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 	},
 ];
 
 const models = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...generateRandomModelProperties(),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
 			subModels: containers.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
+			...generateRandomModelProperties(modelTypes.FEDERATION),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
 			subModels: containersNoRev.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...generateRandomModelProperties(),
 			federate: true,
 			subModels: [],
 		},
@@ -200,8 +208,8 @@ const testGetFederationMD5Hash = () => {
 			['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
 			['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
 			['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-			['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
-			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.modelNotFound],
+			['the teamspace does not exist.', { ...parameters, ts: generateUUIDString() }, false, templates.teamspaceNotFound],
+			['the federation does not exist.', { ...parameters, modelId: generateUUIDString() }, false, templates.modelNotFound],
 			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
 			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
 			['the admin access it but the federation is empty.', { ...parameters, modelId: models[2]._id }, true],

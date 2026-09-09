@@ -16,7 +16,11 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateRandomBuffer,
+} = require('../../../helper/dataGen');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
 const Yup = require('yup');

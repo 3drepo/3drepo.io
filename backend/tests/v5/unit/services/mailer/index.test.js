@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 const BaseTemplate = require('../../../../../src/v5/services/mailer/templates/baseTemplate');
 const SystemTemplate = require('../../../../../src/v5/services/mailer/templates/systemTemplate');
 
@@ -215,6 +215,13 @@ const testSendSystemEmail = () => {
 
 			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments))
 				.rejects.toEqual(templates.unknown);
+		});
+
+		test('should suppress the error if sendSystemMail fails and suppressErrors is true', async () => {
+			sendMailMock.mockRejectedValueOnce(templates.unknown);
+
+			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments, true))
+				.resolves.not.toThrow();
 		});
 
 		test('should throw error if the template name is not recognised', async () => {

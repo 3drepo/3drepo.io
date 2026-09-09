@@ -32,7 +32,7 @@ jest.mock('../../../../../src/v5/processors/teamspaces');
 const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
 
 const PermMiddlewares = require(`${src}/middleware/permissions`);
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 const authenticatedTeamspace = generateRandomString();
 

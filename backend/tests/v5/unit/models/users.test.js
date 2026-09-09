@@ -26,7 +26,10 @@ const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';

@@ -55,7 +55,7 @@ const onError = async (err) => {
 			title: 'Scheduler exited due to an error',
 			message: 'Error found whilst running the scheduler',
 		};
-		await sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data);
+		await sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, undefined, true);
 	}
 	handleErrorBeforeExit(err);
 };

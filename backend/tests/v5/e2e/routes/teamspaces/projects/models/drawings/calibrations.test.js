@@ -17,6 +17,15 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomNumber,
+	generateUserCredentials,
+	generateRandomProject,
+	generateCalibration,
+	generateRandomModelProperties,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { times } = require('lodash');
@@ -30,35 +39,35 @@ let agent;
 
 const generateBasicData = () => {
 	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		tsAdmin2: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		commenter: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		tsAdmin2: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		commenter: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 	};
 
-	const teamspace = ServiceHelper.generateRandomString();
-	const project = ServiceHelper.generateRandomProject();
+	const teamspace = generateRandomString();
+	const project = generateRandomProject();
 
 	const models = {
 		drawWithRevisions: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
 			properties: {
-				...ServiceHelper.generateRandomModelProperties(modelTypes.DRAWING),
+				...generateRandomModelProperties(modelTypes.DRAWING),
 				permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			},
 		},
 		drawWithNoRevisions: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.DRAWING),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: generateRandomModelProperties(modelTypes.DRAWING),
 		},
 		container: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 	};
 
@@ -81,7 +90,7 @@ const generateBasicData = () => {
 		},
 	};
 
-	const calibrations = times(5, () => ServiceHelper.generateCalibration());
+	const calibrations = times(5, () => generateCalibration());
 
 	return {
 		users,
@@ -140,12 +149,12 @@ const testGetCalibration = () => {
 
 		describe.each([
 			['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
-			['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['the teamspace does not exist', { ...params, ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 			['the user does not have access to the drawing', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-			['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the drawing does not exist', { ...params, drawing: ServiceHelper.generateRandomString() }, false, templates.modelNotFound],
-			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, false, templates.revisionNotFound],
+			['the project does not exist', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+			['the drawing does not exist', { ...params, drawing: generateRandomString() }, false, templates.modelNotFound],
+			['the revision does not exist', { ...params, revisionId: generateRandomString() }, false, templates.revisionNotFound],
 			['the model is of wrong type', { ...params, drawing: models.container }, false, templates.modelNotFound],
 			['the drawing has no revisions', { ...params, drawing: models.drawWithNoRevisions }, false, templates.revisionNotFound],
 			['the drawing has revisions but revisions have no calibrations', { ...params, revisionId: revisions.rev1._id }, false, templates.calibrationNotFound],
@@ -194,10 +203,10 @@ const testAddCalibration = () => {
 
 		const standardPayload = {
 			horizontal: {
-				model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
-				drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
+				model: times(2, () => times(3, () => generateRandomNumber())),
+				drawing: times(2, () => times(2, () => generateRandomNumber())),
 			},
-			verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)],
+			verticalRange: [generateRandomNumber(0, 10), generateRandomNumber(11, 20)],
 			units: 'mm',
 		};
 
@@ -207,17 +216,17 @@ const testAddCalibration = () => {
 
 		describe.each([
 			['the user does not have a valid session', { ...params, key: null }, standardPayload, false, templates.notLoggedIn],
-			['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, standardPayload, false, templates.teamspaceNotFound],
+			['the teamspace does not exist', { ...params, ts: generateRandomString() }, standardPayload, false, templates.teamspaceNotFound],
 			['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, standardPayload, false, templates.teamspaceNotFound],
 			['the user does not have access to the drawing', { ...params, key: users.noProjectAccess.apiKey }, standardPayload, false, templates.notAuthorized],
 			['the user has viewer permissions to the drawing', { ...params, key: users.viewer.apiKey }, standardPayload, false, templates.notAuthorized],
 			['the user has commenter permissions to the drawing', { ...params, key: users.commenter.apiKey }, standardPayload, false, templates.notAuthorized],
-			['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.projectNotFound],
-			['the drawing does not exist', { ...params, drawingId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.modelNotFound],
+			['the project does not exist', { ...params, projectId: generateRandomString() }, standardPayload, false, templates.projectNotFound],
+			['the drawing does not exist', { ...params, drawingId: generateRandomString() }, standardPayload, false, templates.modelNotFound],
 			['the model is of wrong type', { ...params, drawingId: models.container._id }, standardPayload, false, templates.modelNotFound],
-			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.revisionNotFound],
+			['the revision does not exist', { ...params, revisionId: generateRandomString() }, standardPayload, false, templates.revisionNotFound],
 			['the revision is void', { ...params, revisionId: revisions.rev4._id }, standardPayload, false, templates.revisionNotFound],
-			['the payload is invalid', params, { standardPayload, units: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+			['the payload is invalid', params, { standardPayload, units: generateRandomString() }, false, templates.invalidArguments],
 			['the payload is valid', params, standardPayload, true],
 			['usePrevious is set to true but revision is uncalibrated', { ...params, revisionId: revisions.rev1._id, usePrevious: true }, {}, false, templates.calibrationNotFound],
 			['usePrevious is set to true but revision is calibrated', { ...params, revisionId: revisions.rev2._id, usePrevious: true }, {}, false, templates.calibrationNotFound],

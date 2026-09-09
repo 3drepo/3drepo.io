@@ -44,7 +44,10 @@ const Intercom = require(`${src}/services/intercom`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const user = {
 	user: generateRandomString(),

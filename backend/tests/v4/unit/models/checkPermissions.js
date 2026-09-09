@@ -15,8 +15,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const proxyquire = require("proxyquire").noCallThru();
 const checkPermission  = proxyquire("../../../../src/v4/middlewares/checkPermissions", {
 	"./getPermissionsAdapter": {},
@@ -38,7 +36,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", [], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -53,7 +51,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -68,7 +66,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project", "assign_licence"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -83,7 +81,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", { "$or" : [["assign_licence"], ["create_project"]] }, getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 
 		});
@@ -99,7 +97,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_model"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -114,7 +112,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_model", "create_federation"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -129,7 +127,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", {"$or": [["create_model"], ["create_federation", "delete_project"]]}, getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 
 		});
@@ -145,7 +143,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["view_issue"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -160,7 +158,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["view_issue", "view_model"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -175,7 +173,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", { "$or": [["comment_issue"], ["view_issue", "view_model"]] }, getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -190,7 +188,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project", "create_model", "view_issue"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -205,7 +203,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", { "$or": [["revoke_licence"], ["create_project", "create_model", "view_issue"]] }, getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 
@@ -224,7 +222,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.false;
+				expect(res.granted).toBe(false);
 			});
 		});
 
@@ -239,7 +237,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.false;
+				expect(res.granted).toBe(false);
 			});
 		});
 
@@ -254,7 +252,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_model", "delete_project"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.false;
+				expect(res.granted).toBe(false);
 			});
 		});
 
@@ -269,7 +267,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project", "create_model", "view_issue", "comment_issue"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.false;
+				expect(res.granted).toBe(false);
 			});
 		});
 
@@ -284,7 +282,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", [["create_project", "create_model"], ["view_issue", "comment_issue"]], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.false;
+				expect(res.granted).toBe(false);
 			});
 		});
 	});
@@ -301,7 +299,7 @@ describe("Check permission function", function() {
 			}
 
 			return checkPermission("", "", "", "", ["create_project", "create_model", "view_issue", "comment_issue"], getPermissionsAdpater).then(res => {
-				expect(res.granted).to.be.true;
+				expect(res.granted).toBe(true);
 			});
 		});
 	});

@@ -19,7 +19,7 @@ const { determineTestGroup } = require('../../helper/utils');
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
 
 const { session } = require(`${src}/services/sessions`);
 const { disconnect } = require(`${src}/handler/db`);

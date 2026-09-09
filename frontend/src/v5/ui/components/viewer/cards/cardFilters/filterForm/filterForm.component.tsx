@@ -23,6 +23,7 @@ import { Container, TitleContainer } from './filterForm.styles';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
+import { useTagsSelectOptions } from './filterFormValues/filterFormValues.helpers';
 
 type FilterFormProps = {
 	module: string,
@@ -35,6 +36,7 @@ type FilterFormProps = {
 
 export const FilterForm = ({ module, property, type, filter, onSubmit, onClickBack }: FilterFormProps) => {
 	const { close } = useContext(ActionMenuContext);
+	const { selectOptions: tagOptions, isFetchingOptions } = useTagsSelectOptions(module, property, type);
 
 	const getInitialOperator = (): TicketFilterOperator => {
 		const defaultOperator = filter?.operator || getDefaultOperator(type);
@@ -74,6 +76,8 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onClickBa
 				isBackButton={!!onClickBack}
 				onClickCancelOrBack={onClickCancelOrBack}
 				onSubmit={handleSubmit}
+				tagOptions={tagOptions}
+				isFetchingOptions={isFetchingOptions}
 			/>
 		</Container>
 	);

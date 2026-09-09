@@ -17,6 +17,10 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateUserCredentials,
+} = require('../../helper/dataGen');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
@@ -30,11 +34,11 @@ let agent;
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
 // This is the user being used for tests
-const testUser = ServiceHelper.generateUserCredentials();
-const userWithFsAvatar = ServiceHelper.generateUserCredentials();
+const testUser = generateUserCredentials();
+const userWithFsAvatar = generateUserCredentials();
 
-const teamspace = ServiceHelper.generateRandomString();
-const fsAvatarData = ServiceHelper.generateRandomString();
+const teamspace = generateRandomString();
+const fsAvatarData = generateRandomString();
 const setupData = async () => {
 	await ServiceHelper.db.createUser(testUser);
 	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
@@ -47,13 +51,13 @@ const setupData = async () => {
 const testEndpointRoutes = () => {
 	describe('Endpoint routes', () => {
 		test('should fail with an endpoint that does not exist', async () => {
-			await agent.post(`/v5/${ServiceHelper.generateRandomString()}/`)
+			await agent.post(`/v5/${generateRandomString()}/`)
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.pageNotFound.status);
 		});
 
 		test('should fail with an endpoint that does not exist (v4)', async () => {
-			await agent.post(`/${ServiceHelper.generateRandomString()}/`)
+			await agent.post(`/${generateRandomString()}/`)
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.pageNotFound.status);
 		});
