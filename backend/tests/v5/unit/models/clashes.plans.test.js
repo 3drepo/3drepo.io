@@ -26,6 +26,10 @@ const {
 } = require('../../helper/dataGen');
 const { determineTestGroup } = require('../../helper/utils');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const ClashPlans = require(`${src}/models/clashes.plans`);
 const db = require(`${src}/handler/db`);
@@ -134,6 +138,8 @@ const testUpdatePlan = () => {
 	describe('Update plan', () => {
 		test('should update a plan and return its id', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
@@ -146,10 +152,14 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				{ $set: { ...data, updatedAt, updatedBy: user } });
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 		});
 
 		test('Should unset fields with null values', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
@@ -171,9 +181,14 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 		});
+
 		test('Should have a combination of $set and $unset if there are both null and non-null fields', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
+
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
@@ -196,10 +211,13 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 		});
 
 		test('should work with nested objects and unset nested fields with null values', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
@@ -236,10 +254,13 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 		});
 
 		test('should not try to recurse on the object if the data is a UUID', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
@@ -268,6 +289,8 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 		});
 	});
 };
