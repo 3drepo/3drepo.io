@@ -69,8 +69,9 @@ Accounts.setMFAPolicy = async (accountId, policySetting) => {
 		if (!Object.values(mfaPolicy).includes(policySetting)) throw new Error(`Unrecognised policy setting: ${policySetting}`);
 
 		const config = await getConfig();
+		const bearerHeader = await getBearerHeader();
 		const headers = {
-			...await getBearerHeader(),
+			...bearerHeader,
 			[HEADER_TENANT_ID]: accountId,
 		};
 
@@ -79,10 +80,19 @@ Accounts.setMFAPolicy = async (accountId, policySetting) => {
 			allowRememberMyDevice: false,
 		};
 
-		await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers });
+		// Frontegg has changed their settings, the mfa policy is now per application, so we need to first figure out
+		// the list of applications within the deployment.
+		// We would typically make a GET request to the following endpoint to retrieve the list of applications:
+		const { data: applications } = await get(`${config.vendorDomain}/applications/resources/applications/v1`, bearerHeader);
+
+		await Promise.all(applications.map(async ({ id }) => {
+			const putHeader = { [HEADER_APP_ID]: id, ...headers };
+			await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers: putHeader });
+		}));
 	} catch (err) {
-		logger.logError(`Failed to create account: ${err?.response?.data} `);
-		throw new Error(`Failed to create account on Accounts: ${err.message}`);
+		const errorMessage = err?.response?.data?.errors?.join(', ') || err.message;
+		logger.logError(`Failed to set MFA policy: ${errorMessage} `);
+		throw new Error(`Failed to set MFA policy on Account: ${errorMessage}`);
 	}
 };
 
@@ -104,7 +114,7 @@ Accounts.createAccount = async (name) => {
 		await Promise.all([
 			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${tenantId}/metadata`, metadataPayload, { headers }),
 			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, { tenantId }, { headers }),
-			Accounts.setMFAPolicy(tenantId, mfaPolicy.ENABLED),
+			config.disableMFA ? Promise.resolve() : Accounts.setMFAPolicy(tenantId, mfaPolicy.ENABLED),
 		]);
 
 		return tenantId;
