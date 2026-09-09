@@ -23,7 +23,8 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
-	generateRandomNumber } = require('../../../helper/services');
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
 const { idTypes } = require('../../../../../src/v5/models/metadata.constants');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -84,6 +85,16 @@ const testSchema = () => {
 		...overrides,
 	});
 
+	const externalIdValues = Object.values(idTypes).reduce((values, idType) => {
+		let value = generateRandomString();
+		if (idType === idTypes.IFC) {
+			value = generateRandomString(22);
+		} else if (idType === idTypes.REVIT) {
+			value = generateRandomNumber();
+		}
+		return { ...values, [idType]: value };
+	}, {});
+
 	const generateDuplicateContainerObjectGroup = () => {
 		const container = generateUUIDString();
 		return generateObjectGroup({
@@ -94,76 +105,90 @@ const testSchema = () => {
 		});
 	};
 
-	describe.each([
-		['data is a UUID and allowIds is set to true', true, false, generateUUID(), true],
-		['data is a UUID and allowIds is set to false', false, false, generateUUID(), false],
-		['data only has some of the values and fieldsOptional is set to true', false, true, { name: generateRandomString() }, true],
-		['data only has some of the values and fieldsOptional is set to false', false, false, { name: generateRandomString() }, false],
-		['data has both rules and objects and fieldsOptional is set to true', false, true, {
-			name: generateRandomString(),
-			rules: [{ field: generateRandomString(), operation: 'EXISTS' }],
-			objects: [{ _ids: [generateUUID()], container: generateUUIDString() }],
-		}, false],
-		[`data has objects with ${[idTypes.REVIT]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{ [idTypes.REVIT]: [generateRandomNumber()], container: generateUUIDString() }],
-		}, true],
-		[`data has objects with wrong type of ${[idTypes.REVIT]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{ [idTypes.REVIT]: [generateRandomString()], container: generateUUIDString() }],
-		}, false],
-		[`data has objects with ${[idTypes.IFC]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{ [idTypes.IFC]: [generateRandomString(22)], container: generateUUIDString() }],
-		}, true],
-		[`data has objects with wrong type of ${[idTypes.IFC]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{ [idTypes.IFC]: [generateRandomNumber()], container: generateUUIDString() }],
-		}, false],
-		[`data has objects with both ${[idTypes.IFC]} and ${[idTypes.REVIT]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{
-				[idTypes.IFC]: [generateRandomString(22)],
-				[idTypes.REVIT]: [generateRandomNumber()],
-				container: generateUUIDString() }],
-		}, true],
-		[`data has objects with both _ids and ${[idTypes.REVIT]}`, false, false, {
-			name: generateRandomString(),
-			objects: [{
-				_ids: [generateUUID()],
-				[idTypes.REVIT]: [generateRandomNumber()],
-				container: generateUUIDString(),
-			}],
-		}, true],
-		['data has objects with all id types', false, false, {
-			name: generateRandomString(),
-			objects: [{
-				_ids: [generateUUID()],
-				[idTypes.IFC]: [generateRandomString(22)],
-				[idTypes.REVIT]: [generateRandomNumber()],
-				container: generateUUIDString(),
-			}],
-		}, true],
-		['data has objects with only container and no ids', false, false, {
-			name: generateRandomString(),
-			objects: [{ container: generateUUIDString() }],
-		}, false],
-		['data has duplicate containers', false, false, generateDuplicateContainerObjectGroup(), false],
-		['data has excludeDefinedObjects set to true', false, false, generateObjectGroup({ excludeDefinedObjects: true }), true],
-		['data has excludeDefinedObjects set to false', false, false, generateObjectGroup({ excludeDefinedObjects: false }), true],
-		['data has excludeDefinedObjects set to null', false, true, { excludeDefinedObjects: null }, true],
-		['data has excludeDefinedObjects set to undefined', false, true, { excludeDefinedObjects: undefined }, true],
-		['data has excludeDefinedObjects with an invalid type', false, false, generateObjectGroup({ excludeDefinedObjects: generateRandomString() }), false],
-	])('Schema validation', (desc, allowIds, fieldsOptional, data, shouldPass) => {
-		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
-			const schemaToTest = GroupsSchema.schema(allowIds, fieldsOptional);
-			const fnTest = expect(schemaToTest.validate(data));
+	describe('Schema validation', () => {
+		describe.each([
+			['data is a UUID and allowIds is set to true', true, false, generateUUID(), true],
+			['data is a UUID and allowIds is set to false', false, false, generateUUID(), false],
+			['data only has some of the values and fieldsOptional is set to true', false, true, { name: generateRandomString() }, true],
+			['data only has some of the values and fieldsOptional is set to false', false, false, { name: generateRandomString() }, false],
+			['data has both rules and objects and fieldsOptional is set to true', false, true, {
+				name: generateRandomString(),
+				rules: [{ field: generateRandomString(), operation: 'EXISTS' }],
+				objects: [{ _ids: [generateUUID()], container: generateUUIDString() }],
+			}, false],
+			[`data has objects with ${[idTypes.REVIT]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{ [idTypes.REVIT]: [generateRandomNumber()], container: generateUUIDString() }],
+			}, true],
+			[`data has objects with wrong type of ${[idTypes.REVIT]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{ [idTypes.REVIT]: [generateRandomString()], container: generateUUIDString() }],
+			}, false],
+			[`data has objects with ${[idTypes.IFC]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{ [idTypes.IFC]: [generateRandomString(22)], container: generateUUIDString() }],
+			}, true],
+			[`data has objects with wrong type of ${[idTypes.IFC]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{ [idTypes.IFC]: [generateRandomNumber()], container: generateUUIDString() }],
+			}, false],
+			[`data has objects with both ${[idTypes.IFC]} and ${[idTypes.REVIT]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{
+					[idTypes.IFC]: [generateRandomString(22)],
+					[idTypes.REVIT]: [generateRandomNumber()],
+					container: generateUUIDString() }],
+			}, true],
+			[`data has objects with both _ids and ${[idTypes.REVIT]}`, false, false, {
+				name: generateRandomString(),
+				objects: [{
+					_ids: [generateUUID()],
+					[idTypes.REVIT]: [generateRandomNumber()],
+					container: generateUUIDString(),
+				}],
+			}, true],
+			['data has objects with all configured id types', false, false, {
+				name: generateRandomString(),
+				objects: [{
+					_ids: [generateUUID()],
+					...Object.fromEntries(Object.entries(externalIdValues)
+						.map(([idType, value]) => [idType, [value]])),
+					container: generateUUIDString(),
+				}],
+			}, true],
+			['data has objects with only container and no ids', false, false, {
+				name: generateRandomString(),
+				objects: [{ container: generateUUIDString() }],
+			}, false],
+			['data has duplicate containers', false, false, generateDuplicateContainerObjectGroup(), false],
+			['data has excludeDefinedObjects set to true', false, false, generateObjectGroup({ excludeDefinedObjects: true }), true],
+			['data has excludeDefinedObjects set to false', false, false, generateObjectGroup({ excludeDefinedObjects: false }), true],
+			['data has excludeDefinedObjects set to null', false, true, { excludeDefinedObjects: null }, true],
+			['data has excludeDefinedObjects set to undefined', false, true, { excludeDefinedObjects: undefined }, true],
+			['data has excludeDefinedObjects with an invalid type', false, false, generateObjectGroup({ excludeDefinedObjects: generateRandomString() }), false],
+		])('General cases', (desc, allowIds, fieldsOptional, data, shouldPass) => {
+			test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
+				const schemaToTest = GroupsSchema.schema(allowIds, fieldsOptional);
+				const fnTest = expect(schemaToTest.validate(data));
 
-			if (shouldPass) {
-				await fnTest.resolves.not.toBeUndefined();
-			} else {
-				await fnTest.rejects.not.toBeUndefined();
-			}
+				if (shouldPass) {
+					await fnTest.resolves.not.toBeUndefined();
+				} else {
+					await fnTest.rejects.not.toBeUndefined();
+				}
+			});
+		});
+
+		describe.each(Object.entries(externalIdValues))('External ID type: %s', (idType, value) => {
+			test('should preserve IDs in validated groups', async () => {
+				const data = generateObjectGroup({
+					objects: [{ [idType]: [value], container: generateUUIDString() }],
+				});
+
+				const result = await GroupsSchema.schema(false, false).validate(data);
+
+				expect(result.objects[0][idType]).toEqual([value]);
+			});
 		});
 	});
 };

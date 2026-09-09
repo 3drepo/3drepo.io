@@ -19,7 +19,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -39,7 +38,7 @@ describe("Job", function () {
 	const job = { _id: "job1", color: "#000000"};
 	const job2 = { _id: "job2", color: "#000000"};
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -52,7 +51,7 @@ describe("Job", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -84,7 +83,7 @@ describe("Job", function () {
 		agent.post(`/${username}/jobs`)
 			.send(job)
 			.expect(400 , function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.DUP_JOB.value);
+				expect(res.body.value).toBe(responseCodes.DUP_JOB.value);
 				done(err);
 			});
 
@@ -94,7 +93,7 @@ describe("Job", function () {
 		agent.post(`/${username}/jobs`)
 			.send({ _id: " ", color: "#000000"})
 			.expect(400 , function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
+				expect(res.body.value).toBe(responseCodes.JOB_ID_INVALID.value);
 				done(err);
 			});
 	});
@@ -103,7 +102,7 @@ describe("Job", function () {
 		agent.post(`/${username}/jobs`)
 			.send({ _id: "abcd", color: "000000"})
 			.expect(400 , function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
 	});
@@ -112,7 +111,7 @@ describe("Job", function () {
 		agent.post(`/${username}/jobs`)
 			.send({ _id: "", color: "#000000"})
 			.expect(400 , function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
+				expect(res.body.value).toBe(responseCodes.JOB_ID_INVALID.value);
 				done(err);
 			});
 	});
@@ -120,7 +119,7 @@ describe("Job", function () {
 	it("get job assigned to current user should succeed", function(done) {
 		agent.get(`/${username}/myJob`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(defaultAdmin);
+				expect(res.body).toEqual(defaultAdmin);
 				done(err);
 			});
 	});
@@ -134,7 +133,7 @@ describe("Job", function () {
 			function(done) {
 				agent.get(`/${username}/myJob`)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal(job2);
+						expect(res.body).toEqual(job2);
 						done(err);
 					});
 			}
@@ -171,7 +170,7 @@ describe("Job", function () {
 							updatedJob
 						];
 
-						expect(res.body).to.deep.equal(newJobs);
+						expect(res.body).toEqual(newJobs);
 						done(err);
 					});
 			},
@@ -183,7 +182,7 @@ describe("Job", function () {
 			function(done) {
 				agent.get(`/${username}/jobs`)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal(oldJobs);
+						expect(res.body).toEqual(oldJobs);
 						done(err);
 					});
 			}
@@ -210,14 +209,14 @@ describe("Job", function () {
 				agent.put(`/${username}/jobs/${job2._id}`)
 					.send(updatedJob)
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
 					});
 			},
 			function(done) {
 				agent.get(`/${username}/jobs`)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal(oldJobs);
+						expect(res.body).toEqual(oldJobs);
 						done(err);
 					});
 			}
@@ -227,7 +226,7 @@ describe("Job", function () {
 	it("should able to list the job created", function(done) {
 		agent.get(`/${username}/jobs`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([defaultAdmin, job, job2]);
+				expect(res.body).toEqual([defaultAdmin, job, job2]);
 				done(err);
 			});
 	});
@@ -235,7 +234,7 @@ describe("Job", function () {
 	it("should fail to assign a job that doesnt exist to a licence(user)", function(done) {
 		agent.post(`/${username}/jobs/nonsense/user1`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.JOB_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -254,7 +253,7 @@ describe("Job", function () {
 				agent.get(`/${username}/members`)
 					.expect(200, function(err, res) {
 						const entry = res.body.members.find(entry => entry.user === "user1");
-						expect(entry.job).to.equal(job._id);
+						expect(entry.job).toBe(job._id);
 						callback(err);
 					});
 			}
@@ -277,7 +276,7 @@ describe("Job", function () {
 					.expect(200, function(err, res) {
 						for(let i = 0; i < res.body.length; ++i) {
 							const entry = res.body.members.find(entry => entry.user === "user1");
-							expect(entry.job).to.equal(job2._id);
+							expect(entry.job).toBe(job2._id);
 						}
 
 						callback(err);
@@ -291,7 +290,7 @@ describe("Job", function () {
 	it("list job colours should show unique list and succeed", function(done) {
 		agent.get(`/${username}/jobs/colors`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([defaultAdmin.color, job.color]);
+				expect(res.body).toEqual([defaultAdmin.color, job.color]);
 				done(err);
 			});
 	});
@@ -320,7 +319,7 @@ describe("Job", function () {
 			function(done) {
 				agent.get(`/${username}/jobs/colors`)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal([defaultAdmin.color, job.color, updatedJob.color]);
+						expect(res.body).toEqual([defaultAdmin.color, job.color, updatedJob.color]);
 						done(err);
 					});
 			},
@@ -335,7 +334,7 @@ describe("Job", function () {
 	it("should fail to remove a job if it is assigned to someone", function(done) {
 		agent.delete(`/${username}/jobs/${job2._id}`)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.JOB_ASSIGNED.value);
+				expect(res.body.value).toBe(responseCodes.JOB_ASSIGNED.value);
 				done(err);
 			});
 	});
@@ -350,7 +349,7 @@ describe("Job", function () {
 	it("should not able to remove a job that doesnt exist", function(done) {
 		agent.delete(`/${username}/jobs/nonsense`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.JOB_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.JOB_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -358,7 +357,7 @@ describe("Job", function () {
 	it("job should be removed from the list", function(done) {
 		agent.get(`/${username}/jobs`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([defaultAdmin, job2]);
+				expect(res.body).toEqual([defaultAdmin, job2]);
 				done(err);
 			});
 	});

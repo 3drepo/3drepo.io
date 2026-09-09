@@ -18,8 +18,6 @@
  */
 
 const request = require("supertest");
-const expect = require("chai").expect;
-
 const SessionTracker = require("../../v4/helpers/sessionTracker");
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
@@ -38,8 +36,7 @@ describe("Account permission::", function () {
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 	let testSession;
 
-	before(async function () {
-		this.timeout(30000);
+	beforeAll(async function () {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, function () {
@@ -52,7 +49,7 @@ describe("Account permission::", function () {
 		await testSession.login(username);
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		if (server) {
 			server.close(function() {
 				console.log("API test server is closed");
@@ -67,7 +64,7 @@ describe("Account permission::", function () {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "nonsense", permissions: ["create_project"]})
 			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				expect(res.body.value).toBe(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -76,7 +73,7 @@ describe("Account permission::", function () {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "issue_username", permissions: ["create_project"]})
 			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				expect(res.body.value).toBe(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -85,7 +82,7 @@ describe("Account permission::", function () {
 		const { body } = await testSession.post(`/${username}/permissions`)
 			.send({ user: "user1", permissions: ["view_issue"]});
 
-		expect(body.value).to.equal(responseCodes.INVALID_PERM.value);
+		expect(body.value).toBe(responseCodes.INVALID_PERM.value);
 	});
 
 	it("should be able to assign permissions to a user", async function() {
@@ -99,7 +96,7 @@ describe("Account permission::", function () {
 		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
-		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+		expect(body.find(perm => perm.user === permission.user)).toEqual(permission);
 	});
 
 	it("should remove model and project permissions if a user becomes teamspace admin", async function() {
@@ -112,13 +109,13 @@ describe("Account permission::", function () {
 		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
-		expect(body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+		expect(body.find(perm => perm.user === permission.user)).toEqual(permission);
 
 		const newProjectPermissions = await findProjectPermsByUser(username, project, "testing");
-		expect(newProjectPermissions).to.deep.equal(undefined);
+		expect(newProjectPermissions).toEqual(undefined);
 
 		const newModelPermissions = await findModelSettingById(username, model, { 'permissions': 1 });
-		expect(newModelPermissions.permissions.find(p => p.user === "testing")).to.deep.equal(undefined);
+		expect(newModelPermissions.permissions.find(p => p.user === "testing")).toEqual(undefined);
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
@@ -128,7 +125,7 @@ describe("Account permission::", function () {
 		testSession.put(`/${username}/permissions/${username}`)
 			.send(permission)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
+				expect(res.body.value).toBe(responseCodes.OWNER_MUST_BE_ADMIN.value);
 				done(err);
 		});
 	});
@@ -140,7 +137,7 @@ describe("Account permission::", function () {
 		testSession.post(`/${username}/permissions`)
 			.send(permission)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
+				expect(res.body.value).toBe(responseCodes.OWNER_MUST_BE_ADMIN.value);
 				done(err);
 		});
 	});
@@ -154,7 +151,7 @@ describe("Account permission::", function () {
 				testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 						callback(err);
 					});
 			}
@@ -171,7 +168,7 @@ describe("Account permission::", function () {
 				testSession.post(`/${username}/permissions`)
 					.send(permission)
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 						callback(err);
 					});
 			}
@@ -186,7 +183,7 @@ describe("Account permission::", function () {
 				testSession.put(`/${username}/permissions/user2`)
 					.send({ })
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 						callback(err);
 					});
 			}
@@ -208,7 +205,7 @@ describe("Account permission::", function () {
 			callback => {
 				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
-						expect(res.body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
+						expect(res.body.find(perm => perm.user === "user2")).toEqual({user: "user2", permissions:[]});
 						callback(err);
 					});
 			}
@@ -225,7 +222,7 @@ describe("Account permission::", function () {
 		const {body} = await testSession.get(`/${username}/permissions`)
 					.expect(200);
 
-		expect(body.find(perm => perm.user === "user2")).to.deep.equal({user: "user2", permissions:[]});
+		expect(body.find(perm => perm.user === "user2")).toEqual({user: "user2", permissions:[]});
 	});
 
 	it("should be able to add user's permissions after it has been removed", function(done) {
@@ -245,7 +242,7 @@ describe("Account permission::", function () {
 				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 
-						expect(res.body.find(perm => perm.user === permission.user)).to.deep.equal(permission);
+						expect(res.body.find(perm => perm.user === permission.user)).toEqual(permission);
 						callback(err);
 					});
 			}
@@ -257,7 +254,7 @@ describe("Account permission::", function () {
 		testSession.put(`/${username}/permissions/user2`)
 			.send({ permissions: ["view_issue"]})
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PERM.value);
 				done(err);
 			});
 	});
@@ -276,8 +273,8 @@ describe("Account permission::", function () {
 				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
 						const permissions = res.body.filter(p => p.user === "user3");
-						expect(permissions.length).to.equal(1);
-						expect(permissions[0].permissions).to.deep.equal(["teamspace_admin", "create_project"]);
+						expect(permissions.length).toBe(1);
+						expect(permissions[0].permissions).toEqual(["teamspace_admin", "create_project"]);
 						done(err);
 					});
 			}
@@ -289,7 +286,7 @@ describe("Account permission::", function () {
 		testSession.put(`/${username}/permissions/user4`)
 			.send({ permissions: ["create_project"]})
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -297,7 +294,7 @@ describe("Account permission::", function () {
 	it("should fail to remove permission for an non existing record", function(done) {
 		testSession.delete(`/${username}/permissions/user4`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.ACCOUNT_PERM_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -315,7 +312,7 @@ describe("Account permission::", function () {
 			callback => {
 				testSession.get(`/${username}/permissions`)
 					.expect(200, function(err, res) {
-						expect(res.body.find(perm => perm.user === "user3").permissions.length).to.equal(0);
+						expect(res.body.find(perm => perm.user === "user3").permissions.length).toBe(0);
 						callback(err);
 					});
 			}

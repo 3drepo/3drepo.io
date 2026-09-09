@@ -19,7 +19,8 @@ const { determineTestGroup } = require('../../../../../helper/utils');
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const {
 	generateRandomString,
-	generateUUIDString } = require('../../../../../helper/services');
+	generateUUIDString,
+} = require('../../../../../helper/dataGen');
 
 const fs = require('fs/promises');
 const path = require('path');

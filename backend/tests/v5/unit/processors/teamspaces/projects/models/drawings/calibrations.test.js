@@ -22,7 +22,8 @@ const {
 	generateRandomString,
 	generateRandomObject,
 	generateRandomDate,
-	generateUUID } = require('../../../../../../helper/services');
+	generateUUID,
+} = require('../../../../../../helper/dataGen');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);

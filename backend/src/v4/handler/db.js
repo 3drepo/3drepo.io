@@ -263,7 +263,7 @@ const { _context, disconnect } = require(`${v5Path}/handler/db`);
 
 	Handler.listDatabases = async (nameOnly = true) => {
 		try {
-			const res = await Handler.runCommand("admin", { listDatabases: 1, nameOnly });
+			const res = await runCommand("admin", { listDatabases: 1, nameOnly });
 			return res.databases;
 		} catch (err) {
 			Handler.disconnect();
@@ -282,7 +282,7 @@ const { _context, disconnect } = require(`${v5Path}/handler/db`);
 		}
 	};
 
-	Handler.runCommand = function (database, cmd) {
+	const runCommand = function (database, cmd) {
 		return _context.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
@@ -324,7 +324,7 @@ const { _context, disconnect } = require(`${v5Path}/handler/db`);
 
 				if (!roleFound) {
 					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
-					await Handler.runCommand("admin", createRoleCmd);
+					await runCommand("admin", createRoleCmd);
 				}
 			};
 

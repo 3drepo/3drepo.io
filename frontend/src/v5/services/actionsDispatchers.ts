@@ -104,6 +104,7 @@ interface IViewerGuiActionCreators {
 	resetHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
 	setClippingMode: (mode: ClipMode) => Action;
 	setGizmoMode: (mode: GizmoMode) => Action;
+	resetClipping: () => Action;
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (panelName: string, visible?: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;

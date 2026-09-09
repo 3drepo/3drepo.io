@@ -55,7 +55,8 @@ export const getEditableProperties = (template) => {
 const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
 	if (defaultValue != null) return defaultValue;
 	switch (type) {
-		case 'manyOf': return [];
+		case 'manyOf':
+		case 'tags': return [];
 		case 'boolean': return false;
 		case 'text':
 		case 'longText':
@@ -344,7 +345,7 @@ export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProper
 
 export const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
 export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => definitionsAsArray
-	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+	.filter((definition) => ['manyOf', 'oneOf', 'text', 'tags'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 	.map((definition) => definition.name);
 
 export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {

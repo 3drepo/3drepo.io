@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../../../helper/utils');
 const { cloneDeep } = require('lodash');
 
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/dataGen');
 const { src } = require('../../../../../helper/path');
 
 const { generateUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);

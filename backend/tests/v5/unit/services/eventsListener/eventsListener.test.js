@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
@@ -26,6 +26,10 @@ const LoginRecords = require(`${src}/models/loginRecords`);
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
+
+jest.mock('../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => { });
@@ -35,17 +39,35 @@ jest.mock('../../../../../src/v5/handler/db', () => ({
 }));
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
-jest.mock('../../../../../src/v5/processors/teamspaces');
-const Teamspaces = require(`${src}/processors/teamspaces`);
 jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
 const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = () => setTimeout(() => {
+		unsubscribe();
+		resolve();
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
+
+const expectErrorNotification = (listenerName, payload) => {
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+	expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+		mailTemplates.LISTENER_ERROR_NOTIFICATION.name,
+		{
+			component: listenerName === 'userCreated' ? 'UserEventsListener' : 'AuthEventsListener',
+			listenerName,
+			payload,
+			error: expect.any(Object),
+		},
+		undefined,
+		true,
+	);
+};
 
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
@@ -92,9 +114,27 @@ const testAuthEventsListener = () => {
 				expect(Sessions.removeOldSessions).toHaveBeenCalledWith(username, sessionID, referer);
 				expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
 			});
+
+			test(`Should send an error notification if ${events.SESSION_CREATED} processing fails`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+				const data = {
+					username: generateRandomString(),
+					sessionID: generateRandomString(),
+					socketId: generateRandomString(),
+					ipAddress: generateRandomString(),
+					userAgent: generateRandomString(),
+					referer: generateRandomString(),
+				};
+				LoginRecords.saveSuccessfulLoginRecord.mockRejectedValueOnce(new Error(generateRandomString()));
+
+				EventsManager.publish(events.SESSION_CREATED, data);
+
+				await waitOnEvent;
+				expectErrorNotification('userLoggedIn', data);
+			});
 		});
 
-		describe(events.SESSION_REMOVED, () => {
+		describe(events.SESSIONS_REMOVED, () => {
 			test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
 				const data = {
@@ -134,6 +174,19 @@ const testAuthEventsListener = () => {
 					{ sessionIds: data.ids },
 				);
 			});
+
+			test(`Should send an error notification if ${events.SESSIONS_REMOVED} processing fails`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+				const data = {
+					ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+				};
+				ChatService.createInternalMessage.mockRejectedValueOnce(new Error(generateRandomString()));
+
+				EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+				await waitOnEvent;
+				expectErrorNotification('sessionsRemoved', data);
+			});
 		});
 	});
 };
@@ -145,15 +198,28 @@ const testUserEventsListener = () => {
 			const username = generateRandomString();
 			EventsManager.publish(events.USER_CREATED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
 			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
 			expect(Invitations.unpack).toHaveBeenCalledWith(username);
+		});
+
+		test(`Should send an error notification if ${events.USER_CREATED} processing fails`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_CREATED);
+			const data = { username: generateRandomString() };
+			Invitations.unpack.mockRejectedValueOnce(new Error(generateRandomString()));
+
+			EventsManager.publish(events.USER_CREATED, data);
+
+			await waitOnEvent;
+			expectErrorNotification('userCreated', data);
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
 	EventsListener.init();
+	afterAll(() => {
+		EventsManager.reset();
+	});
 	testAuthEventsListener();
 	testUserEventsListener();
 });

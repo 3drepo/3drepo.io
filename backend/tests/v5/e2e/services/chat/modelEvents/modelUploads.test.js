@@ -16,6 +16,13 @@
  */
 
 const { determineTestGroup } = require('../../../../helper/utils');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateCalibration,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
@@ -32,20 +39,20 @@ const { modelTypes, processStatuses, statusCodes } = require(`${src}/models/mode
 
 const { getRevisionFormat } = require(`${src}/models/revisions`);
 
-const user = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
-const container2 = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+const user = generateUserCredentials();
+const teamspace = generateRandomString();
+const project = generateRandomProject();
+const container = generateRandomModel();
+const container2 = generateRandomModel();
+const federation = generateRandomModel({ modelType: modelTypes.FEDERATION });
+const drawing = generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
 const federationRevision = ServiceHelper.generateRevisionEntry();
 const drawingRevision = { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 	incomplete: true,
 	status: processStatuses.PROCESSING };
 
-const calibration = ServiceHelper.generateCalibration();
+const calibration = generateCalibration();
 
 let agent;
 const setupData = async () => {
@@ -114,7 +121,7 @@ const modelUploadTest = () => {
 
 			await agent.post(`${route()}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('tag', ServiceHelper.generateRandomString())
+				.field('tag', generateRandomString())
 				.attach('file', objModel)
 				.expect(templates.ok.status);
 
@@ -209,9 +216,9 @@ const modelUploadTest = () => {
 
 			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('revCode', ServiceHelper.generateRandomString(10))
+				.field('revCode', generateRandomString(10))
 				.field('statusCode', statusCodes[0].code)
-				.field('desc', ServiceHelper.generateRandomString())
+				.field('desc', generateRandomString())
 				.attach('file', dwgModel)
 				.expect(templates.ok.status);
 
@@ -248,7 +255,7 @@ const modelUploadTest = () => {
 
 			await agent.post(`${route(teamspace, project.id, container2._id)}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('tag', ServiceHelper.generateRandomString())
+				.field('tag', generateRandomString())
 				.attach('file', objModel)
 				.expect(templates.ok.status);
 
@@ -269,7 +276,7 @@ const queueUpdateTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
+			await queueMessage(queueConfig.callback_queue, generateRandomString(),
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
 
@@ -305,7 +312,7 @@ const queueFinishedTest = () => {
 			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
 			const content = { value: 0, teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
+			await queueMessage(queueConfig.callback_queue, generateRandomString(),
 				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
 

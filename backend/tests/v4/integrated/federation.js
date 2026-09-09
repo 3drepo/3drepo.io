@@ -19,7 +19,6 @@
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -45,7 +44,7 @@ describe("Federated Model", function () {
 	const project = "project1";
 	let fedModelId;
 
-	before(async() => {
+	beforeAll(async() => {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -61,7 +60,7 @@ describe("Federated Model", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		purgeQueues().then(() => {
 			server.close(function() {
 				console.log("API test server is closed");
@@ -71,7 +70,6 @@ describe("Federated Model", function () {
 	});
 
 	it("should not be able to create the model - endpoint decommissioned", function(done) {
-		this.timeout(5000);
 
 		agent.post(`/${username}/model`)
 			.send({
@@ -86,7 +84,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(410, (err, res) => {
-				expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+				expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 				done(err)
 			})
 	});
@@ -104,7 +102,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(responseCodesV5.invalidArguments.status, function(err ,res) {
-				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
+				expect(res.body.code).toBe(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
@@ -122,7 +120,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(404, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+				expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 				done(err);
 
 			});
@@ -134,8 +132,8 @@ describe("Federated Model", function () {
 			.send({})
 			.expect(400, function(err, res) {
 
-				expect(err).to.be.null;
-				expect(res.body.value).to.equal(responseCodes.MODEL_IS_A_SUBMODEL.value);
+				expect(err).toBeNull();
+				expect(res.body.value).toBe(responseCodes.MODEL_IS_A_SUBMODEL.value);
 				done();
 			});
 	});
