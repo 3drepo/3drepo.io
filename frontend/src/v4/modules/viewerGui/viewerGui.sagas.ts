@@ -389,7 +389,7 @@ function* loadModel() {
 		yield Viewer.updateViewerSettings(modelSettings);
 
 		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity
-			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint));
 		}
 
 	} catch (error) {
