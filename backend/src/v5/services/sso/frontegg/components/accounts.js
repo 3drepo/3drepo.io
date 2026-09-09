@@ -80,9 +80,7 @@ Accounts.setMFAPolicy = async (accountId, policySetting) => {
 			allowRememberMyDevice: false,
 		};
 
-		// Frontegg has changed their settings, the mfa policy is now per application, so we need to first figure out
-		// the list of applications within the deployment.
-		// We would typically make a GET request to the following endpoint to retrieve the list of applications:
+		// Frontegg MFA policy is now scoped per application, so retrieve all applications in the deployment first.
 		const { data: applications } = await get(`${config.vendorDomain}/applications/resources/applications/v1`, bearerHeader);
 
 		await Promise.all(applications.map(async ({ id }) => {
