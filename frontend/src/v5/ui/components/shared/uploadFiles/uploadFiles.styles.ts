@@ -17,11 +17,16 @@
 
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
-import { FormModal } from '@controls/formModal/formModal.component';
+import { FormModal, type IFormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
-import { memo } from 'react';
+import { type ComponentType, memo } from 'react';
 
-export const Modal = memo(styled(FormModal as any)`
+type UploadFilesModalProps = IFormModal & {
+	fields: any[];
+	isuploading: boolean;
+};
+
+const StyledModal = styled(FormModal as ComponentType<UploadFilesModalProps>)`
 	.MuiPaper-root {
 		min-width: 955px;
 		.MuiDialogContent-root {
@@ -32,7 +37,9 @@ export const Modal = memo(styled(FormModal as any)`
 	.MuiDialogContent-root {
 		overflow: hidden;
 	}
-`, (prevProps, nextProps) => 
+`;
+
+export const Modal = memo(StyledModal, (prevProps, nextProps) => 
 	(prevProps.isValid === nextProps.isValid
 		&& (prevProps.fields.length === nextProps.fields.length )
 		&& prevProps.isuploading === nextProps.isuploading
