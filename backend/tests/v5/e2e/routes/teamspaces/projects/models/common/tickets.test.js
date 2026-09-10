@@ -1287,18 +1287,18 @@ const testUpdateTicket = () => {
 						[imagePropName]: updatedTicket.properties[imagePropName],
 						[requiredImagePropName]: updatedTicket.properties[requiredImagePropName],
 						[imageListPropName]: updatedTicket.properties[imageListPropName],
-				};
+					};
 
-				await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
-			} else {
-				expect(res.body.code).toEqual(expectedOutput.code);
-			}
-		});
-	};
+					await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
 
-	describe.each(generateTestData(true))('Federations', runTest);
-	describe.each(generateTestData())('Containers', runTest);
-});
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
 };
 
 const testUpdateManyTickets = () => {
