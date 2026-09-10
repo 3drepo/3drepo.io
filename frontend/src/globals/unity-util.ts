@@ -3317,4 +3317,12 @@ export class UnityUtil {
 		};
 		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
+
+	/**
+	 * Enable or disable click-through transparency for navigation.
+	 * @param enable
+	 */
+	public static navigationClickThroughTransparency(enable: boolean) {
+		UnityUtil.toUnity('NavigationClickThroughTransparency', UnityUtil.LoadingState.VIEWER_READY, String(enable));
+	}
 }
