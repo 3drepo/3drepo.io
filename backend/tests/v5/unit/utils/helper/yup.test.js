@@ -264,9 +264,10 @@ const testOneOfSchemas = () => {
 		});
 
 		test('Should stringify failures that do not have a message property', async () => {
+			const customFailure = { custom: 'error' };
 			const objectFailureSchema = {
 				validateSync: () => { throw new Error('sync validation failed'); },
-				validate: () => Promise.reject({ custom: 'error' }),
+				validate: () => Promise.reject(customFailure),
 			};
 			const schema = YupHelper.utils.oneOfSchemas([objectFailureSchema]);
 			await expect(schema.validate('value')).rejects.toThrow('Value did not match any schema: [object Object]');
