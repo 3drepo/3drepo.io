@@ -5365,10 +5365,10 @@ node-cache@^5.1.2:
   dependencies:
     clone "2.x"
 
-node-device-detector@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/node-device-detector/-/node-device-detector-2.2.0.tgz#7671ce5b11dfd7254bcdab0967da7f5fd101bed5"
-  integrity sha512-Ni3d9xa3J6QSNHm0VvOKM17x9dhlVVoPH18AIExrLwB/DdSSb5rWJzZ/JfuMwsJ45zqFJhPMFBwKEnwdgX8CpA==
+node-device-detector@2.2.7:
+  version "2.2.7"
+  resolved "https://registry.yarnpkg.com/node-device-detector/-/node-device-detector-2.2.7.tgz#2561dccaa18c0a05e7c0229834a9c178f268a0ef"
+  integrity sha512-75DMuWtUq5g7bLAd6wNpS/TWoGQD+xM30s4IbxsGHwvbSlZ5XbV2nmgn1sg4Fdqs29Sjf6bCLi8MUyiXDL9YTg==
 
 node-exports-info@^1.6.0:
   version "1.6.0"
