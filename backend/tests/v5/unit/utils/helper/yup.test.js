@@ -253,6 +253,24 @@ const testOneOfSchemas = () => {
 			const schema = YupHelper.utils.oneOfSchemas([numberSchema], 'Custom message');
 			await expect(schema.validate('not a number')).rejects.toThrow('Custom message');
 		});
+
+		test('Should handle a synchronously thrown validation error without an errors property', async () => {
+			const syncThrowingSchema = {
+				validateSync: () => { throw new Error('sync validation failed'); },
+				validate: () => { throw new Error('async validation failed'); },
+			};
+			const schema = YupHelper.utils.oneOfSchemas([syncThrowingSchema]);
+			await expect(schema.validate('value')).rejects.toThrow('Value did not match any schema: ');
+		});
+
+		test('Should stringify failures that do not have a message property', async () => {
+			const objectFailureSchema = {
+				validateSync: () => { throw new Error('sync validation failed'); },
+				validate: () => Promise.reject({ custom: 'error' }),
+			};
+			const schema = YupHelper.utils.oneOfSchemas([objectFailureSchema]);
+			await expect(schema.validate('value')).rejects.toThrow('Value did not match any schema: [object Object]');
+		});
 	});
 };
 

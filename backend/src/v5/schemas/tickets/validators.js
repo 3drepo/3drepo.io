@@ -79,7 +79,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		size: Yup.number().when('type', ([type], schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 	}).default(undefined), false);
 
-	const cameraOrGroupSchema = oneOfSchemas([camera, groupSchema(isUpdate)], 'Camera must be a camera object or a group');
+	const cameraOrGroupSchema = imposeNullableRule(oneOfSchemas([camera, groupSchema(isUpdate)], 'Camera must be a camera object or a group'));
 
 	const clippingPlanes = imposeNullableRule(Yup.array().of(
 		Yup.object().shape({

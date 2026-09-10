@@ -53,7 +53,7 @@ YupHelper.utils.oneOfSchemas = (schemas, message = 'Value did not match any sche
 				));
 				return true;
 			} catch (err) {
-				const failures = err.errors.map((failure) => failure.message);
+				const failures = (err?.errors ?? []).map((failure) => failure?.message ?? String(failure));
 				return context.createError({
 					message: `${message}: ${failures.join('; ')}`,
 				});
