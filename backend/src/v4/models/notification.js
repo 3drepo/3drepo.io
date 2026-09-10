@@ -412,7 +412,7 @@ module.exports = {
 					if (authUsers.canWrite) {
 						users.push(authUsers.user);
 					}
-				}));
+				}).catch(() => {}));
 			}
 		}
 
