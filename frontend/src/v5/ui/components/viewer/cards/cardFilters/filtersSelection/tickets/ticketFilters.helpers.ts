@@ -375,7 +375,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		filter.displayValues = arrToDisplayValue(filter.values as string[]);
 	}
 
-	if (isDateType(type)) {
+	if (isDateType(type) && !['ex', 'nex'].includes(filter.operator)) {
 		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
 
 		if (filter.operator === 'rng' || filter.operator === 'nrng') {

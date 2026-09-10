@@ -20,7 +20,10 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
@@ -726,6 +729,33 @@ const testGetTeamspaceInvites = () => {
 	});
 };
 
+const testIsAddOnEnabled = () => {
+	describe('Is addOn enabled', () => {
+		const teamspace = generateRandomString();
+
+		test('should return true if addOn is enabled', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { [ADD_ONS.VR]: true } });
+			const addOnName = ADD_ONS.VR;
+
+			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(true);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
+		});
+		test('should return false if addOn is not found', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { } });
+			const addOnName = ADD_ONS.VR;
+
+			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(false);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
+		});
+	});
+};
+
 const testGetTeamspaceSettingsByQuery = () => {
 	describe('Get teamspace settings by query', () => {
 		test('should call db.find with the given query and projection', async () => {
@@ -783,5 +813,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
 	testGetTeamspaceInvites();
+	testIsAddOnEnabled();
 	testGetTeamspaceSettingsByQuery();
 });

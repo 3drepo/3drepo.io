@@ -20,7 +20,8 @@ const { src } = require('../../../../../../../helper/path');
 const {
 	generateRandomString,
 	generateUUID,
-	generateRandomObject } = require('../../../../../../../helper/services');
+	generateRandomObject,
+} = require('../../../../../../../helper/dataGen');
 const { times } = require('lodash');
 
 jest.mock('../../../../../../../../../src/v5/models/bundles');

@@ -19,7 +19,7 @@ const { determineTestGroup } = require('../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/connections');
 const Connections = require(`${src}/services/sso/frontegg/components/connections`);
