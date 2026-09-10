@@ -17,7 +17,9 @@
 
 const { CLASH_TYPES } = require('../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
+const fs = require('fs');
 const { getArrayDifference } = require('../../utils/helper/arrays');
+const { resourcesPath } = require('../../../interop');
 const { toConstantCase } = require('../../utils/helper/strings');
 
 const createConstantMapping = (values) => {
@@ -162,7 +164,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash Plan ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Run ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash ID', propTypes.LONG_TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
-		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true }),
 		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: Object.values(CLASH_TYPES), [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: idTypeLabels, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
@@ -241,6 +243,7 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
+
 TemplateConstants.supportedPatterns = createConstantMapping([
 	'model_name',
 	'template_code',
@@ -249,6 +252,32 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 
 TemplateConstants.idTypeLabels = createConstantMapping(idTypeLabels);
 
-TemplateConstants.pinIcons = createConstantMapping(['DEFAULT', 'RISK', 'ISSUE', 'MARKER']);
+TemplateConstants.PIN_ICON_VARIANTS = ['normal', 'selected'];
+TemplateConstants.PIN_ICONS_DIR = `${resourcesPath}/tickets/pinIcons`;
+
+const getDefaultPinIconNames = () => {
+	const icons = [];
+
+	const files = fs.readdirSync(TemplateConstants.PIN_ICONS_DIR, { withFileTypes: true });
+
+	const iconMap = {};
+
+	files.forEach((entry) => {
+		const [iconName, variant, ext] = entry.name.split('.');
+
+		if (!entry.isFile() || ext !== 'svg' || !TemplateConstants.PIN_ICON_VARIANTS.includes(variant)) return;
+		if (!iconMap[iconName]) {
+			iconMap[iconName] = new Set();
+		}
+		iconMap[iconName].add(variant);
+		if (iconMap[iconName].size === TemplateConstants.PIN_ICON_VARIANTS.length) {
+			icons.push(iconName);
+		}
+	});
+
+	return icons.sort();
+};
+
+TemplateConstants.DEFAULT_PIN_ICONS = getDefaultPinIconNames();
 
 module.exports = TemplateConstants;

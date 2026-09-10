@@ -18,7 +18,18 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, generateUUIDString } = require('../../../../../../helper/services');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { generateTicket } = require('../../../../../../helper/dataGen.tickets');
+const {
+	generateRandomObject,
+	generateUUID,
+	generateRandomString,
+	generateTemplate,
+	generateRandomNumber,
+	generateUUIDString,
+	generateGroup,
+} = require('../../../../../../helper/dataGen');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -1512,6 +1523,28 @@ const testOnModelNameUpdated = () => {
 	});
 };
 
+const testOnClashPlanNameUpdated = () => {
+	const { CLOUD_CLASH } = presetModules;
+	const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
+
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const planId = generateUUID();
+	const planName = generateRandomString();
+
+	test('should call updateTicketsByQuery with the correct query', async () => {
+		TicketsModel.updateTicketsByQuery.mockResolvedValueOnce(undefined);
+
+		await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId, planName))
+			.resolves.toBeUndefined();
+
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledWith(teamspace, project,
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) },
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_NAME}`]: planName });
+	});
+};
+
 const testGetOpenTicketsCountForMultipleModels = () => {
 	describe('Get the number of open tickets for multiple models', () => {
 		const teamspace = generateRandomString();
@@ -1582,4 +1615,5 @@ describe(determineTestGroup(__filename), () => {
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
+	testOnClashPlanNameUpdated();
 });

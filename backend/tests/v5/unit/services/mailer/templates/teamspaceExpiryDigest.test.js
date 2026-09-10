@@ -17,7 +17,7 @@
 
 const { src } = require('../../../../helper/path');
 
-const { generateRandomString } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/dataGen');
 const isHtml = require('is-html-content');
 
 const teamspaceExpiryDigest = require(`${src}/services/mailer/templates/teamspaceExpiryDigest`);
