@@ -163,7 +163,7 @@ async function getObjectsArray(model, branch, revId, groupData, convertSharedIDs
 			const res = await sharedIdsToExternalIds(account, container, conRevId, shared_ids.map(utils.stringToUUID));
 
 			if(res) {
-				return {account, model: container, [res.key]: res.value};
+				return {account, model: container, [res.key]: res.values};
 			}
 
 			return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC]};

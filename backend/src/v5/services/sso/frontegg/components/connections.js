@@ -35,6 +35,7 @@ const configSchema = Yup.object({
 	key: Yup.string().required(), // vendor API key
 	userRole: Yup.string().required(), // Default role an application user is assigned to by default
 	vendorDomain: Yup.string().required(), // the API server to connect to for vendor API
+	disableMFA: Yup.boolean().default(false), // When true, skips automatic MFA policy configuration during teamspace creation
 }).required();
 
 const generateVendorToken = async () => {

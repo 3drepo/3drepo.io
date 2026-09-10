@@ -19,6 +19,7 @@ import Check from '@mui/icons-material/Check';
 import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
 
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { TREE_LIST_CLASS } from '@/v4/services/viewer/multiSelect';
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -114,6 +115,7 @@ export class Tree extends PureComponent<IProps, IState> {
 	public renderNodesList = renderWhenTrue(() => {
 		const { nodesList } = this.props;
 		return (<VirtualList
+			className={TREE_LIST_CLASS}
 			handle={this.nodeListRef}
 			items={nodesList}
 			itemHeight={TREE_ITEM_SIZE}

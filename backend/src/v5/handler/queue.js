@@ -64,7 +64,7 @@ const listenToQueue = async (conn, queueName, callback) => {
 const listenToExchange = async (conn, exchangeName, callback) => {
 	const channel = await conn.createChannel();
 	await channel.assertExchange(exchangeName, 'fanout', { durable: true });
-	const { queue } = await channel.assertQueue('', { exclusive: true });
+	const { queue } = await channel.assertQueue('', { exclusive: true, arguments: { 'x-expires': queueConfig.exchangeQueueTtl } });
 	await channel.bindQueue(queue, exchangeName, '');
 	const { consumerTag } = await channel.consume(queue, callbackWrapper(callback), { noAck: true, exclusive: true });
 
@@ -88,7 +88,7 @@ const connect = async () => {
 	if (connectionPromise) return connectionPromise;
 	try {
 		logger.logInfo(`Connecting to ${queueConfig.host}...`);
-		connectionPromise = amqp.connect(queueConfig.host);
+		connectionPromise = amqp.connect(queueConfig.host, { heartbeat: queueConfig.heartbeat });
 		const conn = await connectionPromise;
 		retry = 0;
 		connClosed = false;
@@ -141,26 +141,32 @@ Queue.listenToExchange = async (exchange, callback) => {
 Queue.queueMessage = async (queueName, correlationId, msg) => {
 	const conn = await connect();
 	const channel = await conn.createChannel();
-	await channel.assertQueue(queueName, { durable: true });
+	try {
+		await channel.assertQueue(queueName, { durable: true });
 
-	const dataBuf = Buffer.from(msg);
-	const meta = { correlationId, persistent: true };
+		const dataBuf = Buffer.from(msg);
+		const meta = { correlationId, persistent: true };
 
-	await channel.sendToQueue(queueName, dataBuf, meta);
-	await channel.close();
+		await channel.sendToQueue(queueName, dataBuf, meta);
+	} finally {
+		await channel.close().catch(/* istanbul ignore next */ () => {});
+	}
 	logger.logDebug(`Added message[${correlationId}] to queue [${queueName}]`);
 };
 
 Queue.broadcastMessage = async (exchangeName, msg) => {
 	const conn = await connect();
 	const channel = await conn.createChannel();
-	await channel.assertExchange(exchangeName, 'fanout', { durable: true });
+	try {
+		await channel.assertExchange(exchangeName, 'fanout', { durable: true });
 
-	const dataBuf = Buffer.from(msg);
-	const meta = { persistent: true };
+		const dataBuf = Buffer.from(msg);
+		const meta = { persistent: true };
 
-	await channel.publish(exchangeName, '', dataBuf, meta);
-	await channel.close();
+		await channel.publish(exchangeName, '', dataBuf, meta);
+	} finally {
+		await channel.close().catch(/* istanbul ignore next */ () => {});
+	}
 };
 
 // you shouldn't need to use this outside of testing

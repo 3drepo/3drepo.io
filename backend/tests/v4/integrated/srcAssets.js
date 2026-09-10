@@ -18,10 +18,9 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const {should, assert, expect, Assertion } = require("chai");
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
-const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 
 
@@ -37,7 +36,7 @@ describe("ModelAssets", function () {
 	let viewerAgent;
 	let noAccessAgent;
 
-	before(async function() {
+	beforeAll(async function () {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -55,79 +54,81 @@ describe("ModelAssets", function () {
 		await noAccessAgent.login(noAccessUser, password);
 	});
 
-	after(function(done) {
-		server.close(function() {
+	afterAll(function (done) {
+		server.close(function () {
 			console.log("API test server is closed");
 			done();
 		});
 	});
 
-	describe("Get SRC list", function() {
+	describe("Get SRC list", function () {
 		const goldenData = {
-			"models":[
-				{"database":"teamSpace1","model":"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac",
-				"assets":["c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4","e06a12a6-87eb-4f69-a83f-2a1caa8e6ba6"],
-					"offset":[516898996.60824203,127375.00000000003,-193839500.8370128]}]
+			"models": [
+				{
+					"database": "teamSpace1", "model": "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac",
+					"assets": ["c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4", "e06a12a6-87eb-4f69-a83f-2a1caa8e6ba6"],
+					"offset": [516898996.60824203, 127375.00000000003, -193839500.8370128]
+				}]
 		};
-		it("from a specific revision should succeed", function(done) {
+		it("from a specific revision should succeed", function (done) {
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/srcAssets.json`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 
 		});
 
-		it("from the latest revision should succeed", function(done) {
+		it("from the latest revision should succeed", function (done) {
 			agent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 
 		});
 
-		it("from invalid teamspace should fail", function(done) {
+		it("from invalid teamspace should fail", function (done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
 		});
 
-		it("from invalid model should fail", function(done) {
+		it("from invalid model should fail", function (done) {
 			agent.get(`/${username}/dfsfdsg/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 
 		});
 
-		it("from an invalid revision should succeed", function(done) {
+		it("from an invalid revision should succeed", function (done) {
 			agent.get(`/${username}/${model}/revision/blafldskf/srcAssets.json`)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.deep.eq(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.value).toEqual(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
-			});
+				});
 		});
 	});
 
-	describe("Get SRC list (Viewer)", function() {
+	describe("Get SRC list (Viewer)", function () {
 
-		it("from the latest revision should succeed", function(done) {
+		it("from the latest revision should succeed", function (done) {
 			viewerAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
 				.expect(200, done);
 		});
 
 	});
 
-	describe("Get SRC list (No Access)", function() {
-		it("!from the latest revision should fail", function(done) {
+	describe("Get SRC list (No Access)", function () {
+		it("from the latest revision should fail", function (done) {
 			noAccessAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -135,36 +136,36 @@ describe("ModelAssets", function () {
 	});
 
 
-	describe("Get SRC file", function() {
-		it("of a valid ID should succeed", function(done) {
+	describe("Get SRC file", function () {
+		it("of a valid ID should succeed", function (done) {
 			agent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(200, done);
 
 		});
 
-		it("of an invalid ID should fail", function(done) {
+		it("of an invalid ID should fail", function (done) {
 			agent.get(`/${username}/${model}/invalidID.src.mpc`)
-				.expect(404, (err,res) => {
-					expect(res.body.code).eq(responseCodesV5.fileNotFound.code);
+				.expect(404, (err, res) => {
+					expect(res.body.code).toBe(responseCodesV5.fileNotFound.code);
 					done(err);
 				});
 
 		});
 
 
-		it("from invalid teamspace should fail", function(done) {
+		it("from invalid teamspace should fail", function (done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
 		});
 
-		it("from invalid model should fail", function(done) {
+		it("from invalid model should fail", function (done) {
 			agent.get(`/${username}/dfsfdsg/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 
@@ -172,19 +173,19 @@ describe("ModelAssets", function () {
 
 	});
 
-	describe("Get SRC file (Viewer)", function() {
-		it("of a valid ID should succeed", function(done) {
+	describe("Get SRC file (Viewer)", function () {
+		it("of a valid ID should succeed", function (done) {
 			viewerAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(200, done);
 		});
 
 	});
 
-	describe("Get SRC file (No Access)", function() {
-		it("of a valid ID should fail", function(done) {
+	describe("Get SRC file (No Access)", function () {
+		it("of a valid ID should fail", function (done) {
 			noAccessAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
-				.expect(404, (err,res) => {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+				.expect(404, (err, res) => {
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});

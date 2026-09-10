@@ -49,7 +49,7 @@ import {
 
 interface IProps {
 	location: any;
-	fetchModelMaps: (teamspace, modelId) => void;
+	fetchModelMaps: (teamspace, projectId, modelId) => void;
 	updateModelSettings: (modelData, settings) => void;
 	settings: any;
 	isPending: boolean;
@@ -103,9 +103,9 @@ export class Gis extends PureComponent<IProps, IState> {
 	});
 
 	public componentDidMount() {
-		const { teamspace, model } = this.props.urlParams;
-		if (this.props.settings._id) {
-			this.props.fetchModelMaps(teamspace, model);
+		const { teamspace, project, model } = this.props.urlParams;
+		if (this.props.settings._id && project) {
+			this.props.fetchModelMaps(teamspace, project, model);
 		}
 	}
 

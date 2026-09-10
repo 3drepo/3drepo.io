@@ -18,7 +18,7 @@
 "use strict";
 
 const _ = require("lodash");
-const parse = require("csv-parse/lib/sync");
+const { parse } = require("csv-parse/sync");
 const db = require("../handler/db");
 const {Duplex} = require("stream");
 const responseCodes = require("../response_codes.js");

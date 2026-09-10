@@ -85,6 +85,7 @@ interface IProps {
 	fetchTeamspaces: (username) => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
+	resetClipping: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
 	resetViewerGui: () => void;
@@ -181,6 +182,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			this.props.fetchData(params.teamspace, params.model);
 			this.props.subscribeOnIssueChanges(params.teamspace, params.model);
 			this.props.subscribeOnRiskChanges(params.teamspace, params.model);
+			this.props.resetClipping();
 		}
 
 		if (!isEmpty(changes)) {
@@ -213,6 +215,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		this.props.viewer.destroy();
 		this.props.resetModel();
 		this.props.resetViewerGui();
+		this.props.resetClipping();
 		this.toggleViewerListeners(false);
 		this.props.clearCurrentlySelected();
 	}
