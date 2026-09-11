@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { Transformers, useSearchParam } from '../../../useSearchParam';
 import { PlaneType, Vector1D, Vector2D, Vector3D } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { EMPTY_VECTOR } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.constants';
@@ -87,6 +87,18 @@ export const CalibrationContextComponent = ({ children }) => {
 	const [isAlignPlaneActive, setIsAlignPlaneActive] = useState(false);
 	const [drawingId] = useSearchParam('drawingId');
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawingId);
+
+	useEffect(() => {
+		if (isCalibrating) return;
+
+		// reset values when calibration is not active
+		setVector3D(EMPTY_VECTOR);
+		setVector2D(EMPTY_VECTOR);
+		setIsCalibrating3D(false);
+		setIsCalibrating2D(false);
+		setIsCalibratingPlanes(false);
+		setIsAlignPlaneActive(false);
+	}, [isCalibrating]);
 
 	return (
 		<CalibrationContext.Provider value={{

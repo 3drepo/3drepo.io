@@ -34,6 +34,11 @@ const { src } = require('../../../../helper/path');
 const { readFile } = require('fs/promises');
 const Path = require('path');
 
+const { getTicketsByTemplateId } = require(`${src}/models/tickets`);
+const { modulePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
@@ -42,6 +47,7 @@ const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, propTypes, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
+const { CLASH_PLAN_NAME, CLASH_PLAN_ID } = modulePropertyLabels[presetModules.CLOUD_CLASH];
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { meshPrimitiveTypes, nodeTypes } = require(`${src}/models/scenes.constants`);
 
@@ -60,6 +66,7 @@ const setupBasicData = async ({
 	plan,
 	project2Plan,
 	template,
+	tickets,
 }) => {
 	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -84,6 +91,7 @@ const setupBasicData = async ({
 		ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
 		ServiceHelper.db.createClashPlans(teamspace, project2.id, [project2Plan]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
+		...tickets.map((ticket) => ServiceHelper.db.createTicket(teamspace, project.id, models[0]._id, ticket)),
 	]);
 };
 
@@ -101,6 +109,12 @@ const generateBasicData = () => {
 	const project2 = generateRandomProject();
 	const project2Plan = ServiceHelper.generateClashPlan(models[1]._id, models[0]._id);
 
+	const tickets = times(5, () => {
+		const ticket = ServiceHelper.generateTicket(template);
+		ticket.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_ID] = plan._id;
+		return ticket;
+	});
+
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin },
 		teamspace: generateRandomString(),
@@ -111,6 +125,7 @@ const generateBasicData = () => {
 		plan,
 		project2Plan,
 		template,
+		tickets,
 	});
 };
 
@@ -487,6 +502,18 @@ const testCreatePlan = () => {
 	});
 };
 
+const eventTriggeredPromise = (event) => {
+	let unsubscribe = () => {};
+	const promise = new Promise(
+		(resolve) => {
+			unsubscribe = EventsManager.subscribe(event,
+				(eventData) => setTimeout(() => resolve(eventData), 10));
+		},
+	);
+
+	return promise.finally(() => unsubscribe());
+};
+
 const testUpdatePlan = () => {
 	describe('Update clash test plan', () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
@@ -559,6 +586,8 @@ const testUpdatePlan = () => {
 			['template update invalidates stored ticket default statuses', { planId: clashPlanForTemplateUpdate._id, planData: { tickets: { template: templateWithCustomStatuses._id } } }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, orgPlanData = existingPlan, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.CLASH_PLAN_UPDATED);
+
 				const res = await agent.patch(route(ts, proj, planId, user.apiKey))
 					.send(planData)
 					.expect(expectedRes?.status || templates.ok.status);
@@ -572,6 +601,18 @@ const testUpdatePlan = () => {
 						updatedAt: plan.updatedAt,
 						updatedBy: user.user,
 					};
+
+					if (planData?.name) {
+						await waitOnEvent;
+						await ServiceHelper.sleepMS(1000);
+
+						const clashTickets = await getTicketsByTemplateId(ts, stringToUUID(template._id));
+
+						for (const ticket of clashTickets) {
+							expect(ticket.modules[presetModules.CLOUD_CLASH][CLASH_PLAN_NAME])
+								.toEqual(planData?.name);
+						}
+					}
 
 					if (expectedRes) {
 						if (expectedRes.tickets) {
