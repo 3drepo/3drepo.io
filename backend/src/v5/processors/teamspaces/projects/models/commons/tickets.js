@@ -25,7 +25,7 @@ const {
 	supportedPatterns,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
+const { commitGroupChanges, processCameraGroupUpdate, processGroupsUpdate } = require('./tickets.groups');
 const { deleteLogsByTicketIds, getTicketLogs } = require('../../../../../models/tickets.logs');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
@@ -104,6 +104,14 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
+
+				const oldCamera = getNestedProperty(oldProperties[name], 'camera');
+				const newCamera = getNestedProperty(updatedProperties[name], 'camera');
+				const updatedCamera = processCameraGroupUpdate(oldCamera, newCamera, externalReferences.groups);
+
+				if (updatedCamera !== newCamera) {
+					setNestedProperty(updatedProperties[name], 'camera', updatedCamera);
+				}
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
 			}

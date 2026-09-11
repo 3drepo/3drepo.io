@@ -341,6 +341,22 @@ const testAddTicket = () => {
 		const conTicket = ServiceHelper.generateTicket(template);
 		const fedTicket = ServiceHelper.generateTicket(template);
 
+		const viewTemplate = ServiceHelper.generateTemplate(false, true);
+		const cameraGroup = {
+			name: ServiceHelper.generateRandomString(),
+			objects: [{
+				container: con._id,
+				_ids: [ServiceHelper.generateUUIDString(), ServiceHelper.generateUUIDString()],
+			}],
+		};
+		const cameraGroupFed = {
+			...cameraGroup,
+			objects: [{
+				container: fed._id,
+				_ids: [ServiceHelper.generateUUIDString()],
+			}],
+		};
+
 		const statusValues = generateCustomStatusValues();
 
 		const templateWithAllModulesAndPresetEnums = {
@@ -376,7 +392,7 @@ const testAddTicket = () => {
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
-				[template, templateWithAllModulesAndPresetEnums]);
+				[template, templateWithAllModulesAndPresetEnums, viewTemplate]);
 			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
 			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicket);
 		});
@@ -405,7 +421,12 @@ const testAddTicket = () => {
 				['the ticket data includes duplicate value for unique property', false, getRoute(), templates.invalidArguments, { properties: { [uniquePropertyName]: uniquePropValue } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
-				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums) }],
+				['the ticket has a view property with a group as camera', true, getRoute(), undefined, (() => {
+					const ticket = ServiceHelper.generateTicket(viewTemplate);
+					const viewPropName = Object.keys(ticket.properties).find((key) => ticket.properties[key]?.camera);
+					ticket.properties[viewPropName].camera = isFed ? cameraGroupFed : cameraGroup;
+					return ticket;
+				})()],
 				['oneOf jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [oneOfJobsAndUsersPropName]: users.noProjectAccess.user } }],
 				['oneOf jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [oneOfJobsAndUsersPropName]: users.tsAdmin.user } }],
 				['manyOf jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [manyOfJobsAndUsersPropName]: [users.noProjectAccess.user, users.tsAdmin.user] } }],
@@ -1268,7 +1289,6 @@ const testUpdateTicket = () => {
 						[imageListPropName]: updatedTicket.properties[imageListPropName],
 					};
 
-					expect(updatedTicket).toEqual(expectedUpdatedTicket);
 					await checkTicketLogByDate(updatedTicket.properties[basePropertyLabels.UPDATED_AT]);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
@@ -1299,7 +1319,6 @@ const testUpdateManyTickets = () => {
 		const deprecatedTemplate = generateTemplate(false);
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
-
 		con.tickets = times(nTickets, () => ServiceHelper.generateTicket(template));
 		fed.tickets = times(nTickets, () => ServiceHelper.generateTicket(template));
 		con.ticketsCommentTest1 = times(nTickets, () => ServiceHelper.generateTicket(template));

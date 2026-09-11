@@ -193,6 +193,30 @@ TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 	});
 };
 
+TicketGroups.processCameraGroupUpdate = (oldCamera, newCamera, groupsState) => {
+	const isGroupObject = (obj) => !!(obj?.objects?.length || obj?.rules?.length);
+	if (oldCamera && isUUID(oldCamera)) {
+		groupsState.old.add(UUIDToString(oldCamera));
+
+		if (newCamera === undefined) {
+			// New camera is not specified so we are preserving the old one
+			groupsState.stillUsed.add(UUIDToString(oldCamera));
+		}
+	}
+
+	if (newCamera !== undefined) {
+		if (isUUID(newCamera)) {
+			groupsState.stillUsed.add(UUIDToString(newCamera));
+		} else if (isGroupObject(newCamera)) {
+			const groupId = generateUUID();
+			groupsState.toAdd.push({ ...newCamera, _id: groupId });
+			return groupId;
+		}
+	}
+
+	return newCamera;
+};
+
 const calculateRemovedGroups = ({ toRemove, old = new Set(), stillUsed = new Set(), ...otherGroups }) => {
 	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
 		Array.from(old).map(UUIDToString));
