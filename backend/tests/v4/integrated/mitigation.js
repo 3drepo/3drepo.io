@@ -19,14 +19,14 @@
 
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const chai = require("chai");
-const deepEqualInAnyOrder = require("deep-equal-in-any-order");
-chai.use(deepEqualInAnyOrder);
-const { expect } = chai;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates : responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
+
+// order-insensitive deep equality check (replaces chai's deep-equal-in-any-order plugin)
+const sortForCompare = (arr) => [...arr].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+const expectEqualInAnyOrder = (actual, expected) => expect(sortForCompare(actual)).toEqual(sortForCompare(expected));
 
 describe("Mitigations", function () {
 
@@ -218,7 +218,7 @@ describe("Mitigations", function () {
 		]
 	};
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 
 		await new Promise((resolve) => {
@@ -230,7 +230,7 @@ describe("Mitigations", function () {
 		});
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -238,8 +238,7 @@ describe("Mitigations", function () {
 	});
 
 	describe("Get mitigation criteria", function(done) {
-		before(async function() {
-			this.timeout(timeout);
+		beforeAll(async function() {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 
@@ -249,8 +248,8 @@ describe("Mitigations", function () {
 			agent.get(`/${username}/mitigations/criteria`)
 				.expect(200, function(err, res) {
 					const results = res.body;
-					expect(Object.keys(results).length).to.equal(Object.keys(goldenCriteria).length);
-					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
+					expect(Object.keys(results).length).toBe(Object.keys(goldenCriteria).length);
+					Object.keys(results).forEach((key) => expectEqualInAnyOrder(results[key], goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -259,7 +258,7 @@ describe("Mitigations", function () {
 			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
 				.expect(200, function(err, res) {
 					const results = res.body;
-					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
+					Object.keys(results).forEach((key) => expectEqualInAnyOrder(results[key], goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -267,7 +266,7 @@ describe("Mitigations", function () {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/mitigations/criteria`)
 				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -275,7 +274,7 @@ describe("Mitigations", function () {
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/mitigations/criteria`)
 				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -301,8 +300,7 @@ describe("Mitigations", function () {
 			"invalidFieldName": "randomData"
 		};
 
-		before(async function() {
-			this.timeout(timeout);
+		beforeAll(async function() {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 
@@ -313,7 +311,7 @@ describe("Mitigations", function () {
 			agent.post(`/${username}/mitigations`)
 				.send({})
 				.expect(200, function(err, res) {
-					expect(res.body.length).to.equal(totalSuggestions);
+					expect(res.body.length).toBe(totalSuggestions);
 					done(err);
 				});
 		});
@@ -322,7 +320,7 @@ describe("Mitigations", function () {
 			agent.post(`/${collaboratorTeamspace}/mitigations`)
 				.send({})
 				.expect(200, function(err, res) {
-					expect(res.body.length).to.equal(totalSuggestions);
+					expect(res.body.length).toBe(totalSuggestions);
 					done(err);
 				});
 		});
@@ -331,7 +329,7 @@ describe("Mitigations", function () {
 			agent.post(`/${notMemberOfTeamspace}/mitigations`)
 				.send({})
 				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -340,7 +338,7 @@ describe("Mitigations", function () {
 			agent.post(`/${fakeTeamspace}/mitigations`)
 				.send({})
 				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -353,7 +351,7 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
-						expect(res.body.length).to.equal(expectedLengths[key]);
+						expect(res.body.length).toBe(expectedLengths[key]);
 						done(err);
 					});
 			});
@@ -367,7 +365,7 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
-						expect(res.body.length).to.equal(totalSuggestions);
+						expect(res.body.length).toBe(totalSuggestions);
 						done(err);
 					});
 			});
@@ -382,7 +380,7 @@ describe("Mitigations", function () {
 			agent.post(`/${username}/mitigations`)
 				.send(criteria)
 				.expect(200, function(err, res) {
-					expect(res.body.length).to.equal(45);
+					expect(res.body.length).toBe(45);
 					done(err);
 				});
 		});

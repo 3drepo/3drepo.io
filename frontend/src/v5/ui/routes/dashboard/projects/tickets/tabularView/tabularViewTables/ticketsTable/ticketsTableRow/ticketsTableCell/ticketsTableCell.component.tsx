@@ -117,6 +117,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	switch (getPropertyType(name)) {
 		case 'manyOf':
+		case 'tags':
 			return (
 				<Cell name={name}>
 					{value?.join(', ')}

@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -27,6 +28,11 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
 // The contents of this type will change in line with the needs of
 // the Test Automation or Profiling Tools.
 type ModelStatistics = {
@@ -34,6 +40,50 @@ type ModelStatistics = {
 	bundleLoadingTasks: number,
 	frameCount: number,
 };
+
+type Deferred<T> = {
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
+};
+
+// Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
+// Used for requestPointInfo.
+export interface CanvasPosition {
+	x: number,
+	y: number,
+}
+
+// Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
+// Used for requestPointInfo.
+export interface ClientPosition {
+	clientX: number,
+	clientY: number,
+}
+
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
+export interface PointInfo {
+	id: string,
+	database: string,
+	model: string,
+	pin: boolean,
+	mousePos: number[],
+	position: number[],
+	normal: number[],
+	requestId: string,
+}
+
+export interface Bounds {
+	min: number[],
+	max: number[]
+}
+
+export interface PickInfo {
+	mousePos: number[],
+	position: number[],
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -140,6 +190,12 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectStatusPromises = [];
+
+	/** @hidden */
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -689,6 +745,58 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
+	public static respondToPointInfoRequest(pointInfo) {
+
+		let data: PointInfo;
+		
+		// Parse data
+		try {
+			data = JSON.parse(pointInfo) as PointInfo;
+		} catch (error) {
+			// In the case of malformed data, we can't recover the key and reject all currently open requests.
+			// This is preferrable to leaving them hanging indefinitely.
+			// If the viewer is sending malformed data they are probably all shot anyway.
+			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
+ 			UnityUtil.pointInfoPromises.clear();
+ 			return;
+		}
+
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', data);
+		}
+
+		// If there are any promises waiting for this point info, resolve or reject them
+		const key = data.requestId;
+		if (this.pointInfoPromises.has(key)) {
+			this.pointInfoPromises.get(key).resolve(data);
+			this.pointInfoPromises.delete(key);
+		} else {
+			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToBoundsRequest', json);
+		}
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		if (min?.length === 3 && max?.length === 3) {
+			deferred.resolve({
+				min,
+				max,
+			});
+		} else {
+			deferred.reject();
+		}
+	}
+
+	/** @hidden */
 	public static ready() {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
@@ -698,7 +806,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
-		const point = JSON.parse(pointInfo);
+		const point = JSON.parse(pointInfo) as PickInfo;
 		if (UnityUtil.verbose) {
 			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
@@ -1289,6 +1397,15 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
 	 /**
 	 * Enable Cursor
 	 * Note: Changing the snap mode can affect the cursor.
@@ -1537,13 +1654,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropRiskPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropRiskPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'RISK');
 	}
 
 	/**
@@ -1555,13 +1666,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropIssuePin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'ISSUE');
 	}
 
 	/**
@@ -1573,13 +1678,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropBookmarkPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'BOOKMARK');
 	}
 
 	/**
@@ -1591,13 +1690,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'TICKET');
 	}
 
 	/**
@@ -1700,6 +1793,119 @@ export class UnityUtil {
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
 		return newObjectStatusPromise as Promise<object>;
+	}
+
+	/**
+ 	 * Request point information for an arbitrary location on the Unity canvas.
+ 	 *
+ 	 * Accepts either:
+ 	 * - ClientPosition: `clientX`/`clientY` from PointerEvent/MouseEvent/Touch in viewport coordinates
+ 	 * - CanvasPosition: canvas pixel coordinates with (0,0) at the bottom-left corner
+ 	 * @category Model Interactions
+	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
+	 * @returns A promise that resolves with the point information object returned by the viewer.
+ 	 */
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
+		
+		let x: number;
+		let y: number;
+
+		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
+		if ('clientX' in position && 'clientY' in position) {
+
+			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
+			// bottom left-corner.
+
+			const canvas = this.unityInstance.Module.canvas;
+			const rect = canvas.getBoundingClientRect();
+			
+			// Apply display scale
+			const scale = window.devicePixelRatio || 1;
+			const scaledX = position.clientX * scale;
+			const scaledY = position.clientY * scale;
+			const scaledHeight = rect.height * scale;
+			const scaledLeft = rect.left * scale;
+			const scaledTop = rect.top * scale;
+			
+			x = Math.floor(scaledX - scaledLeft);
+			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
+		} else if ('x' in position && 'y' in position) {
+
+			// If it is a CanvasPosition, we can extract the coordinates directly.
+
+			x = position.x;
+			y = position.y;
+		} else {
+			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
+		}
+
+		// Round down the coordinates to the nearest integer, as Unity expects integer
+		// values for pixel coordinates and will truncate any decimal values.
+		x = Math.floor(x);
+		y = Math.floor(y);
+
+		const requestId = uuidGen();
+
+		const newPointInfoPromise = new Promise((resolve, reject) => {
+			
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
+			// with the point info, we can resolve the correct promise.
+			const key = requestId;
+			if (!this.pointInfoPromises.has(key)) {
+				this.pointInfoPromises.set(key, { resolve, reject });
+			} else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
+			}
+		});
+
+		const params = {
+			x,
+			y,
+			requestId,
+			options,
+		};
+
+		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	/**
+	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
+	 * uniqueId.
+	 * @param teamspace name of the teamspace
+	 * @param project name of the project
+	 * @param container name of the container - this must be the exact
+	 * container holding the unique id, it cannot be a federation.
+	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
+	 * them. If the array is empty, will return the bounds of the whole container.
+	 * @returns a promise containing the bounds in project coordinates. If the
+	 * teamspace/project/container/id combination are not valid, the promise
+	 * will be rejected.
+	 * @example ```
+	 * UnityUtil.viewer.objectSelected = (ev) => {
+		UnityUtil.requestBounds(ev.database, "", ev.model, [ev.id]).then((bounds) => {
+			var center = [
+				(bounds.max[0] + bounds.min[0]) * 0.5,
+				(bounds.max[1] + bounds.min[1]) * 0.5,
+				(bounds.max[2] + bounds.min[2]) * 0.5
+			];
+			UnityUtil.dropIssuePin("myPin",center,[1,0,0]);
+		})
+	  }```
+	 */
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
 	}
 
 	/**
@@ -1884,9 +2090,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Reset map sources. This removes all currently displayed maps
+	 * Reset map sources. This removes all currently displayed maps.
 	 * @category GIS
-	 * @param account - name of teamspace
 	 */
 	public static resetMapSources() {
 		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -1895,19 +2100,29 @@ export class UnityUtil {
 	/**
 	 * Add map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - The source in the form `provider/layer`. This should be
+	 * the `source` member of one of the layer objects returned by the get list
+	 * of maps ('/maps/') request.
+	 * @param height - The height in mm above the project origin at which to
+	 * place the map layer. If the layer already exists it will be moved to
+	 * the new height.
 	 */
-	public static addMapSource(mapSource: string) {
-		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static addMapSource(source: string, height?: number) {
+		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
+			source, 
+			height: (height ?? 0) * 0.001,
+		}),
+		);
 	}
 
 	/**
 	 * Remove map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - One of the source strings previously provided to
+	 * addMapSource. If the source does not exist this call does nothing.
 	 */
-	public static removeMapSource(mapSource: string) {
-		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static removeMapSource(source: string) {
+		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ source }));
 	}
 
 	/**
@@ -3044,5 +3259,62 @@ export class UnityUtil {
 	 */
 	public static setLabelScale(scale: number) {
 		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/**
+	 * Create or update a custom pin icon. Provide one or two images for the
+	 * normal and (optionally) selected states. If only one image is provided
+	 * it is reused for both states.
+	 *
+	 * @category Pins
+	 * @param images - Array of 1 or 2 DrawingImageSource entries.
+	 *   Index 0 is the normal/default state, index 1 (optional) is the selected state.
+	 * @param iconCode - A unique string code to identify this icon.
+	 *   Reserved codes (e.g. "RISK", "ISSUE", "BOOKMARK", "TICKET") map to
+	 *   built-in icons but may be overridden.
+	 */
+	public static createPinIcon(images: DrawingImageSource[], iconCode: string) {
+		const normalImage = images[0];
+		const selectedImage = images.length > 1 ? images[1] : null;
+
+		const normalDomId = this.domTextureReferenceCounter++;
+		this.domTextureReferences[normalDomId] = normalImage;
+		const normalDimensions = [normalImage.width, normalImage.height];
+
+		let selectedDomId = -1;
+		let selectedDimensions = [0, 0];
+		if (selectedImage) {
+			selectedDomId = this.domTextureReferenceCounter++;
+			this.domTextureReferences[selectedDomId] = selectedImage;
+			selectedDimensions = [selectedImage.width, selectedImage.height];
+		}
+
+		const params = {
+			iconCode: iconCode.toUpperCase(),
+			normalDomId,
+			normalDimensions,
+			selectedDomId,
+			selectedDimensions,
+		};
+
+		UnityUtil.toUnity('CreatePinIcon', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Add a Pin with a custom icon code.
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param color - RGB value for the colour of the pin
+	 * @param icon - the code for a custom or built-in icon (e.g. "RISK", "ISSUE", or a custom code)
+	 */
+	public static dropPin(id: string, position: number[], color: number[], icon: string) {
+		const params = {
+			id,
+			position,
+			color,
+			icon,
+		};
+		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 }

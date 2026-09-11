@@ -21,7 +21,10 @@ const { src } = require('../../helper/path');
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Bundles = require(`${src}/models/scenes.stash`);
 

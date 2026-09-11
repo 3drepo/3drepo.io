@@ -28,7 +28,7 @@ const {
 } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
 const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
-const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
+const { transformer: { uniqueArray }, types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
@@ -77,11 +77,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 				if (prop.type === propTypes.ONE_OF) {
 					validator = validator.oneOf(isNewTicket || prop.required ? values : values.concat(null));
 				} else if (prop.type === propTypes.MANY_OF) {
-					validator = Yup.array().of(types.strings.title.oneOf(values),
-					).transform((v) => {
-						if (v?.length) return v;
-						return isNewTicket ? undefined : null;
-					});
+					validator = uniqueArray(Yup.array().of(types.strings.title.oneOf(values)).min(1));
 				} else {
 					logger.logError(`Property values found for a non selection type (${prop.type})`);
 				}

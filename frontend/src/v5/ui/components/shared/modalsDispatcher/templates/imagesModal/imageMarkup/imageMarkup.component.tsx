@@ -119,12 +119,10 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 
 	const onClear = useCallback(() => {
 		markupRef.current.clearCanvas();
-		handleModeChange(MODES.BRUSH);
 	}, [handleModeChange]);
 
 	const onUndo = useCallback(() => {
 		CanvasHistoryActionsDispatchers.undo();
-		handleModeChange(MODES.BRUSH);
 	}, [handleModeChange]);
 	return (
 		<Container $cursor={cursor}>

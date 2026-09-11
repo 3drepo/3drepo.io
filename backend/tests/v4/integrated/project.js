@@ -19,7 +19,6 @@
 
 const request = require('supertest');
 const SessionTracker = require('../../v4/helpers/sessionTracker');
-const { expect } = require('chai');
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require('../../../src/v4/logger.js');
 
@@ -132,7 +131,7 @@ describe('Projects', () => {
 
 	const goldenFullModelList = [...goldenTestModelList, ...goldenRandomNameList];
 
-	before(async () => {
+	beforeAll(async () => {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -145,7 +144,7 @@ describe('Projects', () => {
 		await agent.login(username, password);
 	});
 
-	after((done) => {
+	afterAll((done) => {
 		server.close(() => {
 			console.log('API test server is closed');
 			done();
@@ -199,7 +198,7 @@ describe('Projects', () => {
 
 		agent.get(`/${username}/projects`)
 			.expect(200, (err, res) => {
-				expect(res.body).to.deep.equal(goldenProjects);
+				expect(res.body).toEqual(goldenProjects);
 				done(err);
 			});
 	});
@@ -221,10 +220,10 @@ describe('Projects', () => {
 				agent.get(`/${username}.json`)
 					.expect(200, (err, res) => {
 						const account = res.body.accounts.find((account) => account.account === username);
-						expect(account).to.exist;
+						expect(account).toBeTruthy();
 
 						const pg = account.projects.find((pg) => pg.name === project.name);
-						expect(pg).to.exist;
+						expect(pg).toBeTruthy();
 
 						callback(err);
 					});
@@ -236,7 +235,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send({ name: 'default' })
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PROJECT_NAME.value);
 				done(err);
 			});
 	});
@@ -249,7 +248,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_EXIST.value);
+				expect(res.body.value).toBe(responseCodes.PROJECT_EXIST.value);
 				done(err);
 			});
 	});
@@ -262,7 +261,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PROJECT_NAME.value);
 				done(err);
 			});
 	});
@@ -275,7 +274,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PROJECT_NAME.value);
 				done(err);
 			});
 	});
@@ -288,7 +287,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PROJECT_NAME.value);
 				done(err);
 			});
 	});
@@ -301,7 +300,7 @@ describe('Projects', () => {
 		agent.post(`/${username}/projects`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PROJECT_NAME.value);
 				done(err);
 			});
 	});
@@ -327,7 +326,7 @@ describe('Projects', () => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, (err, res) => {
 						const entriesFiltered = res.body.permissions.filter(((entry) => entry.permissions.length > 0));
-						expect(entriesFiltered).to.deep.equal(project.permissions);
+						expect(entriesFiltered).toEqual(project.permissions);
 						callback(err);
 					});
 			},
@@ -355,7 +354,7 @@ describe('Projects', () => {
 				agent.get(`/${username}/projects/${project.name}`)
 					.expect(200, (err, res) => {
 						const entriesFiltered = res.body.permissions.filter(((entry) => entry.permissions.length > 0));
-						expect(entriesFiltered).to.deep.equal(project.permissions);
+						expect(entriesFiltered).toEqual(project.permissions);
 						callback(err);
 					});
 			},
@@ -383,7 +382,7 @@ describe('Projects', () => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, (err, res) => {
 						const entriesFiltered = res.body.permissions.filter(((entry) => entry.permissions.length > 0));
-						expect(entriesFiltered).to.deep.equal(project.permissions);
+						expect(entriesFiltered).toEqual(project.permissions);
 						callback(err);
 					});
 			},
@@ -410,11 +409,11 @@ describe('Projects', () => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, async (err, res) => {
 						const entriesFiltered = res.body.permissions.filter(((entry) => entry.permissions.length > 0));
-						expect(entriesFiltered).to.deep.equal(project.permissions);
+						expect(entriesFiltered).toEqual(project.permissions);
 
 						const models = await findModelSettings(username, { _id: { $in: modelIds } }, { permissions: 1 });
 						const modelsFiltered = models.filter(((entry) => entry.permissions.filter((p) => p.user === 'testing').length));
-						expect(modelsFiltered).to.deep.equal([]);
+						expect(modelsFiltered).toEqual([]);
 
 						callback(err);
 					});
@@ -443,7 +442,7 @@ describe('Projects', () => {
 			(callback) => {
 				agent.get(`/${username}/projects/${projectName}`)
 					.expect(200, (err, res) => {
-						expect(res.body.permissions.find((x) => x.user === testUser).permissions.length).to.equal(0);
+						expect(res.body.permissions.find((x) => x.user === testUser).permissions.length).toBe(0);
 						callback(err);
 					});
 			},
@@ -467,10 +466,10 @@ describe('Projects', () => {
 				agent.get(`/${username}.json`)
 					.expect(200, (err, res) => {
 						const account = res.body.accounts.find((account) => account.account === username);
-						expect(account).to.exist;
+						expect(account).toBeTruthy();
 
 						const pg = account.projects.find((pg) => pg.name === project.name);
-						expect(pg).to.exist;
+						expect(pg).toBeTruthy();
 
 						callback(err);
 					});
@@ -496,10 +495,10 @@ describe('Projects', () => {
 				agent.get(`/${username}.json`)
 					.expect(200, (err, res) => {
 						const account = res.body.accounts.find((account) => account.account === username);
-						expect(account).to.exist;
+						expect(account).toBeTruthy();
 
 						const pg = account.projects.find((pg) => pg.name === project.name);
-						expect(pg).to.exist;
+						expect(pg).toBeTruthy();
 
 						callback(err);
 					});
@@ -519,7 +518,7 @@ describe('Projects', () => {
 		agent.put(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PERM.value);
 				done(err);
 			});
 	});
@@ -536,7 +535,7 @@ describe('Projects', () => {
 		agent.patch(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.INVALID_PERM.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_PERM.value);
 				done(err);
 			});
 	});
@@ -553,7 +552,7 @@ describe('Projects', () => {
 		agent.patch(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				expect(res.body.value).toBe(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -570,7 +569,7 @@ describe('Projects', () => {
 		agent.put(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				expect(res.body.value).toBe(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -587,7 +586,7 @@ describe('Projects', () => {
 		agent.patch(`/${username}/projects/${project.name}`)
 			.send(project)
 			.expect(400, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				expect(res.body.value).toBe(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -596,7 +595,7 @@ describe('Projects', () => {
 		agent.put(`/${username}/projects/notexist`)
 			.send({})
 			.expect(404, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -605,7 +604,7 @@ describe('Projects', () => {
 		agent.patch(`/${username}/projects/notexist`)
 			.send({})
 			.expect(404, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -613,7 +612,7 @@ describe('Projects', () => {
 	it('should fail to delete a project that doesnt exist', (done) => {
 		agent.delete(`/${username}/projects/notexist`)
 			.expect(404, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -621,7 +620,7 @@ describe('Projects', () => {
 	it('list all project models should fail;', (done) => {
 		agent.get(`/${username}/projects/${projectName}/models`)
 			.expect(v5Responses.endpointDecommissioned.status, (err, res) => {
-				expect(res.body.message).to.equal(
+				expect(res.body.message).toBe(
 					'This endpoint is no longer available. Please use GET /v5/teamspaces/{teamspace}/projects/{project}/{modelType} instead.'
 				);
 				done(err);
@@ -645,10 +644,10 @@ describe('Projects', () => {
 				agent.get(`/${username}.json`)
 					.expect(200, (err, res) => {
 						const account = res.body.accounts.find((account) => account.account === username);
-						expect(account).to.exist;
+						expect(account).toBeTruthy();
 
 						const pg = account.projects.find((pg) => pg.name === project.name);
-						expect(pg).to.not.exist;
+						expect(pg).toBeFalsy();
 
 						callback(err);
 					});
@@ -672,10 +671,10 @@ describe('Projects', () => {
 				agent.get(`/${username}.json`)
 					.expect(200, (err, res) => {
 						const account = res.body.accounts.find((account) => account.account === username);
-						expect(account).to.exist;
+						expect(account).toBeTruthy();
 
 						const pg = account.projects.find((pg) => pg.name === project.name);
-						expect(pg).to.not.exist;
+						expect(pg).toBeFalsy();
 
 						callback(err);
 					});
@@ -686,7 +685,7 @@ describe('Projects', () => {
 	it('should fail to delete a project that doesnt exist', (done) => {
 		agent.delete(`/${username}/projects/notexist`)
 			.expect(404, (err, res) => {
-				expect(res.body.value).to.equal(responseCodes.PROJECT_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.PROJECT_NOT_FOUND.value);
 				done(err);
 			});
 	});
