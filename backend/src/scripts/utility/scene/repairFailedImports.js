@@ -34,6 +34,7 @@
  */
 
 const { JSONParser } = require('@streamparser/json-node');
+const Mongo = require('mongodb');
 
 const { v5Path } = require('../../../interop');
 const { getProjectList } = require('../../../v5/models/projectSettings');
@@ -46,97 +47,165 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const Path = require('path');
 
-const { deleteMany } = require(`${v5Path}/handler/db`);
+const { deleteMany, findCursor } = require(`${v5Path}/handler/db`);
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 
+const BATCH_DELETE_SIZE = 100000;
+
 const getUUIDKey = (uuid) => uuid.buffer.toString('latin1');
+const getUUIDFromKey = (key) => new Mongo.Binary(Buffer.from(key, 'latin1'), 3);
 
 const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, revision, rootSharedId) => {
-	logger.logInfo('\t\tReading nodes...');
+	class GraphStore {
+		constructor(map, totalParents) {
+			this.map = map;
+			this.status = new Uint8Array(map.size); // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
+			this.parentsStart = new Uint32Array(map.size);
+			this.parentsSize = new Uint32Array(map.size);
+			this.parents = new Uint32Array(totalParents);
+			this.parentsChecked = new Uint8Array(map.size);
+			this.totalParents = 0;
+		}
 
-	const allNodes = await getNodesByQuery(
-		teamspace,
-		project,
-		container,
-		{ rev_id: revision },
-		{ _id: 0, shared_id: 1, parents: 1 },
-	);
+		setStatus(i, s) { this.status[i] = s; }
 
-	logger.logInfo(`\t\tRead ${allNodes.length} nodes from database.`);
+		checkedParents(i) { return this.parentsChecked[i]; }
 
-	logger.logInfo('\t\tCollecting referenced ids...');
+		setCheckedParents(i) { this.parentsChecked[i] = 1; }
 
-	logger.logInfo('\t\tIndexing nodes...');
+		isResolved(i) { return this.status[i] === 1 || this.status[i] === 2; }
 
-	for (const node of allNodes) {
-		node.status = 0; // 0 unknown, 1 referenced, 2 not referenced, 3 visiting
-		node.checkedParents = false;
+		isReferenced(i) { return this.status[i] === 1; }
+
+		isUnknown(i) { return this.status[i] === 0; }
+
+		getIndex(key) { return this.map.get(key); }
+
+		resetParents(i) {
+			this.parentsStart[i] = this.totalParents;
+			this.parentsSize[i] = 0;
+		}
+
+		addParent(i, key) {
+			const start = this.parentsStart[i];
+			const offset = this.parentsSize[i];
+			const index = this.map.get(key);
+			if (index === undefined) return;
+			this.parents[start + offset] = index;
+			this.parentsSize[i]++;
+			this.totalParents++;
+		}
+
+		hasParents(i) { return this.parentsSize[i] > 0; }
+
+		pushUnknownParents(nodeIndex, stack) {
+			const start = this.parentsStart[nodeIndex];
+			const end = start + this.parentsSize[nodeIndex];
+			for (let i = start; i < end; i++) {
+				const parent = this.parents[i];
+				if (this.isUnknown(parent)) {
+					stack.push(parent);
+				}
+			}
+		}
+
+		hasReferencedParent(nodeIndex) {
+			const start = this.parentsStart[nodeIndex];
+			const end = start + this.parentsSize[nodeIndex];
+			for (let i = start; i < end; i++) {
+				const parent = this.parents[i];
+				if (this.isReferenced(parent)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		size() { return this.map.size; }
 	}
-	const nodeByKey = new Map(allNodes.map((node) => [getUUIDKey(node.shared_id), node]));
 
-	logger.logInfo('\t\tDereferencing parents...');
+	let store;
 
-	for (const node of allNodes) {
-		if (node.parents) {
-			node.parents = node.parents.map((parent_id) => nodeByKey.get(getUUIDKey(parent_id)));
+	// Prime the contiguous arrays to hold the graph
+	{
+		let totalNodes = 0;
+		let totalParents = 0;
+
+		const cursor = await findCursor(
+			teamspace,
+			`${container}.scene`,
+			{ rev_id: revision },
+			{ _id: 0, shared_id: 1, parents: 1 },
+		);
+
+		const map = new Map();
+
+		for await (const document of cursor) {
+			totalParents += document.parents ? document.parents.length : 0;
+			map.set(getUUIDKey(document.shared_id), totalNodes++);
+		}
+
+		store = new GraphStore(map, totalParents);
+	}
+
+	// Run the query again to dereference the parents
+	{
+		const cursor = await findCursor(
+			teamspace,
+			`${container}.scene`,
+			{ rev_id: revision },
+			{ _id: 0, shared_id: 1, parents: 1 },
+		);
+
+		for await (const document of cursor) {
+			const node = store.getIndex(getUUIDKey(document.shared_id));
+			store.resetParents(node);
+			if (document.parents) {
+				for (const parent of document.parents) {
+					store.addParent(node, getUUIDKey(parent));
+				}
+			}
 		}
 	}
 
-	logger.logInfo('\t\tSetting initial conditions...');
+	const root = store.getIndex(getUUIDKey(rootSharedId));
+	store.setStatus(root, 1);
 
-	const root = nodeByKey.get(getUUIDKey(rootSharedId));
-	root.status = 1;
-
-	logger.logInfo('\t\tResolving...');
-
+	const stack = [];
 	const resolveNode = (node) => {
-		if (node.status === 1 || node.status === 2) {
-			return node.status === 1;
+		if (store.isResolved(node)) {
+			return store.isReferenced(node);
 		}
 
-		const stack = [node];
+		stack.push(node);
 
 		while (stack.length) {
 			const currentNode = stack[stack.length - 1];
 
-			if (currentNode.status === 1 || currentNode.status === 2) {
+			if (store.isResolved(currentNode)) {
 				stack.pop();
-			} else if (!currentNode?.parents?.length) {
-				currentNode.status = 2;
+			} else if (!store.hasParents(currentNode)) {
+				store.setStatus(currentNode, 2);
 				stack.pop();
-			} else if (!currentNode.checkedParents) {
-				currentNode.status = 3;
-				currentNode.checkedParents = true;
-
-				for (const parent of currentNode.parents) {
-					if (parent) {
-						if (parent.status !== 1 && parent.status !== 2 && parent.status !== 3) {
-							stack.push(parent);
-						}
-					}
-				}
+			} else if (!store.checkedParents(currentNode)) {
+				store.setStatus(currentNode, 3);
+				store.setCheckedParents(currentNode);
+				store.pushUnknownParents(currentNode, stack);
 			} else {
-				let isReferenced = false;
-				for (const parent of currentNode.parents) {
-					if (parent?.status === 1) {
-						isReferenced = true;
-						break;
-					}
-				}
-
-				currentNode.status = isReferenced ? 1 : 2;
+				const isReferenced = store.hasReferencedParent(currentNode);
+				store.setStatus(currentNode, isReferenced ? 1 : 2);
 				stack.pop();
 			}
 		}
 
-		return node.status === 1;
+		return store.isReferenced(node);
 	};
 
 	const unreferencedNodes = [];
-	for (const node of allNodes) {
-		if (!resolveNode(node)) {
-			unreferencedNodes.push(node.shared_id);
+	for (const [key, value] of store.map) {
+		if (!resolveNode(value)) {
+			unreferencedNodes.push(getUUIDFromKey(key));
 		}
 	}
 
@@ -204,8 +273,6 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 		return;
 	}
 
-	logger.logInfo('\t\tFinding ids to delete...');
-
 	const { unreferencedNodes: idsToDelete } = await getUnreferencedIdsFromHierarchy(
 		teamspace,
 		project,
@@ -220,22 +287,36 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 
 	logger.logInfo(`\t\tRemoving ${idsToDelete.length} orphaned nodes from ${container}/${UUIDToString(revision)}`);
 
-	// Get the nodes to delete with their blob references
-	const nodesToDelete = await getNodesBySharedIds(
-		teamspace,
-		project,
-		container,
-		revision,
-		idsToDelete,
-		{ _blobRef: 1 },
-	);
-	// eslint-disable-next-line no-underscore-dangle
-	const blobRefNames = [...new Set(nodesToDelete.filter((n) => n._blobRef).map((n) => n._blobRef.buffer.name))];
+	const blobRefNamesSet = new Set();
 
-	await Promise.all([
-		deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsToDelete } }),
-		removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefNames } }),
-	]);
+	for (let start = 0; start < idsToDelete.length; start += BATCH_DELETE_SIZE) {
+		const idsChunk = idsToDelete.slice(start, start + BATCH_DELETE_SIZE);
+
+		// eslint-disable-next-line no-await-in-loop
+		const nodesToDeleteChunk = await getNodesBySharedIds(
+			teamspace,
+			project,
+			container,
+			revision,
+			idsChunk,
+			{ _blobRef: 1 },
+		);
+
+		for (const node of nodesToDeleteChunk) {
+			// eslint-disable-next-line no-underscore-dangle
+			if (node._blobRef) blobRefNamesSet.add(node._blobRef.buffer.name);
+		}
+
+		// eslint-disable-next-line no-await-in-loop
+		await deleteMany(teamspace, `${container}.scene`, { rev_id: revision, shared_id: { $in: idsChunk } });
+	}
+
+	const blobRefNames = [...blobRefNamesSet];
+	for (let start = 0; start < blobRefNames.length; start += BATCH_DELETE_SIZE) {
+		const blobRefChunk = blobRefNames.slice(start, start + BATCH_DELETE_SIZE);
+		// eslint-disable-next-line no-await-in-loop
+		await removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefChunk } });
+	}
 };
 
 const processRevision = async (teamspace, project, container, revision) => {
