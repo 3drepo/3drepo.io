@@ -48,7 +48,10 @@ const testGetConfig = () => {
 		test('Should succeed and return the config', async () => {
 			const token = generateRandomString();
 			WebRequests.post.mockResolvedValue({ data: { token } });
-			await expect(Connections.getConfig()).resolves.toEqual(Config.sso.frontegg);
+			await expect(Connections.getConfig()).resolves.toEqual({
+				...Config.sso.frontegg,
+				disableMFA: false,
+			});
 
 			expect(Connections.getIdentityClient()).not.toBeUndefined();
 			expect(Connections.getBasicHeader()).not.toBeUndefined();

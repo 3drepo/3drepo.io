@@ -28,7 +28,9 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
-const { errCodes, membershipStatus, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, mfaPolicy } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+const {
+	errCodes, membershipStatus, HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, mfaPolicy,
+} = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 const postOptions = { headers: bearerHeader };
@@ -36,7 +38,7 @@ const postOptions = { headers: bearerHeader };
 const role = generateRandomString();
 
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
-Connections.getConfig.mockResolvedValue({ userRole: role });
+Connections.getConfig.mockResolvedValue({ userRole: role, disableMFA: false });
 
 jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/cacheService');
 const CacheService = require(`${src}/services/sso/frontegg/components/cacheService`);
@@ -131,6 +133,8 @@ const testCreateAccount = () => {
 	describe('Create account', () => {
 		test('Should return the tenant ID if the account has been created', async () => {
 			const teamspace = generateRandomString();
+			const applications = [{ id: generateRandomString() }, { id: generateRandomString() }];
+			WebRequests.get.mockResolvedValueOnce({ data: applications });
 
 			const returnedId = await Accounts.createAccount(teamspace);
 
@@ -156,14 +160,30 @@ const testCreateAccount = () => {
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
 				{ tenantId }, postOptions);
 
-			// call to set MFA policy
-			expect(WebRequests.put).toHaveBeenCalledTimes(1);
-			expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
+			// calls to set MFA policy for each application
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+			expect(WebRequests.put).toHaveBeenCalledTimes(applications.length);
+			applications.forEach(({ id }) => expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
 				{
 					enforceMFAType: mfaPolicy.ENABLED,
 					allowRememberMyDevice: false,
-				}, { headers: { ...bearerHeader,
-					[HEADER_TENANT_ID]: tenantId } });
+				}, { headers: {
+					[HEADER_APP_ID]: id,
+					...bearerHeader,
+					[HEADER_TENANT_ID]: tenantId,
+				} }));
+		});
+
+		test('Should skip setting MFA when disabled in config', async () => {
+			Connections.getConfig.mockResolvedValueOnce({ userRole: role, disableMFA: true });
+
+			const teamspace = generateRandomString();
+			const returnedId = await Accounts.createAccount(teamspace);
+
+			expect(returnedId).toBeDefined();
+			expect(WebRequests.post).toHaveBeenCalledTimes(3);
+			expect(WebRequests.get).not.toHaveBeenCalled();
+			expect(WebRequests.put).not.toHaveBeenCalled();
 		});
 
 		test('Should throw if something went wrong', async () => {
@@ -615,6 +635,8 @@ const testSetMFAPolicy = () => {
 	describe('Set MFA policy', () => {
 		test('Should succeed if policy setting is valid', async () => {
 			const accountId = generateRandomString();
+			const applications = [{ id: generateRandomString() }, { id: generateRandomString() }];
+			WebRequests.get.mockResolvedValueOnce({ data: applications });
 
 			const expectedHeader = {
 				...bearerHeader,
@@ -633,9 +655,10 @@ const testSetMFAPolicy = () => {
 				allowRememberMyDevice: false,
 			};
 
-			expect(WebRequests.put).toHaveBeenCalledTimes(1);
-			expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
-				expectedPayload, { headers: expectedHeader });
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+			expect(WebRequests.put).toHaveBeenCalledTimes(applications.length);
+			applications.forEach(({ id }) => expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
+				expectedPayload, { headers: { [HEADER_APP_ID]: id, ...expectedHeader } }));
 		});
 
 		test('Should error if policy setting is invalid', async () => {
@@ -643,9 +666,10 @@ const testSetMFAPolicy = () => {
 
 			const enforceMFAType = generateRandomString();
 			await expect(Accounts.setMFAPolicy(accountId, enforceMFAType)).rejects.toEqual(expect.objectContaining({
-				message: `Failed to create account on Accounts: Unrecognised policy setting: ${enforceMFAType}`,
+				message: `Failed to set MFA policy on Account: Unrecognised policy setting: ${enforceMFAType}`,
 			}));
 
+			expect(WebRequests.get).not.toHaveBeenCalled();
 			expect(WebRequests.put).not.toHaveBeenCalled();
 		});
 	});
