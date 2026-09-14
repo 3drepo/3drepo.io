@@ -78,7 +78,7 @@ export type ViewerInitState = {
 	// Despite the name, this does not only affect IFCs.
 	hideIfc?: boolean;
 };
- 
+
 /**
  * @hidden The contents of this type will change in line with the needs of
  * the Test Automation or Profiling Tools.
@@ -91,6 +91,9 @@ export type ModelStatistics = {
 	bundleLoadingTasks: number,
 	frameCount: number,
 	textureCount: number,
+	mapsBusy: number,
+	activeWebRequests1: number,
+	activeWebRequests2: number,
 };
 
 export enum SnapMode {
@@ -153,6 +156,14 @@ export type ObjectStatus = {
 	hiddenNodes: SharedIds[],
 	highlightedNodes: SharedIds[],
 }
+
+export type MapInitialisationInfo = {
+	surveyPoints: {
+ 		position: number[];
+  		latLong: [number, number];
+	}[];
+	angleFromNorth: number;
+};
 
 export class UnityUtil {
 	/** @hidden */
@@ -823,7 +834,7 @@ export class UnityUtil {
 	public static respondToPointInfoRequest(pointInfo) {
 
 		let data: PointInfo;
-		
+
 		// Parse data
 		try {
 			data = JSON.parse(pointInfo) as PointInfo;
@@ -1941,7 +1952,7 @@ export class UnityUtil {
 	 * @returns A promise that resolves with the point information object returned by the viewer.
  	 */
 	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
-		
+
 		let x: number;
 		let y: number;
 
@@ -1953,7 +1964,7 @@ export class UnityUtil {
 
 			const canvas = this.unityInstance.Module.canvas;
 			const rect = canvas.getBoundingClientRect();
-			
+
 			// Apply display scale
 			const scale = window.devicePixelRatio || 1;
 			const scaledX = position.clientX * scale;
@@ -1961,7 +1972,7 @@ export class UnityUtil {
 			const scaledHeight = rect.height * scale;
 			const scaledLeft = rect.left * scale;
 			const scaledTop = rect.top * scale;
-			
+
 			x = Math.floor(scaledX - scaledLeft);
 			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
 		} else if ('x' in position && 'y' in position) {
@@ -1982,7 +1993,7 @@ export class UnityUtil {
 		const requestId = uuidGen();
 
 		const newPointInfoPromise = new Promise((resolve, reject) => {
-			
+
 			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
 			// with the point info, we can resolve the correct promise.
 			const key = requestId;
@@ -2162,7 +2173,7 @@ export class UnityUtil {
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @param assetGroups? - When specified, only load the assets that belong to the groups in the list. To include assets without a groups, include an empty string ("") as part of the list.
 	 * @return returns a promise that resolves when the model start loading.
-	 * @example 
+	 * @example
 	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "16854ce0-6e82-11ea-9043-f5b42de4172c")
 	 * @example
 	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "11da8980-6e82-11ea-a9b4-253aa7f93e55", "e2bf461d-b1a8-4068-b26f-75925a14345f")
@@ -2244,7 +2255,7 @@ export class UnityUtil {
 	 */
 	public static addMapSource(source: string, height?: number) {
 		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
-			source, 
+			source,
 			height: (height ?? 0) * 0.001,
 		}),
 		);
@@ -2265,7 +2276,7 @@ export class UnityUtil {
 	 * @category GIS
 	 * @param surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
-	public static mapInitialise(surveyingInfo: [object]) {
+	public static mapInitialise(surveyingInfo: MapInitialisationInfo) {
 		// FIMXE: this should be MODEL_LOADING require #2010 to be fixed
 		UnityUtil.toUnity('MapsInitiate', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(surveyingInfo));
 	}
@@ -2472,7 +2483,7 @@ export class UnityUtil {
 	 * @param useSharedMemory - If true, the screenshot will be written to shared memory and the promise will resolve with the length of the data in shared memory.
 	 * If false, the promise will resolve with a base64 encoded string of the screenshot.
 	 */
-	public static requestScreenShot(useSharedMemory = false): Promise<string> {
+	public static requestScreenShot(useSharedMemory = false): Promise<string | number> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
@@ -2588,7 +2599,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static usePerspectiveProjection() {
-		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -3271,6 +3282,9 @@ export class UnityUtil {
 			bundleLoadingTasks: 0,
 			frameCount: 0,
 			textureCount: 0,
+			mapsBusy: 0,
+			activeWebRequests1: 0,
+			activeWebRequests2: 0,
 		};
 		if (UnityUtil.modelStatisticsArrayOffset) {
 			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
@@ -3281,19 +3295,22 @@ export class UnityUtil {
 			statistics.textureCount = heap[ptr64 + 18];
 			statistics.bundlesLoaded = heap[ptr64 + 23];
 			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.activeWebRequests2 = heap[ptr64 + 21];
+			statistics.activeWebRequests1 = heap[ptr64 + 22];
 			statistics.frameCount = heap[ptr64 + 30];
+			statistics.mapsBusy = heap[ptr64 + 31];
 		}
 		return statistics;
 	}
 
 	/**
-	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
-	 * with additional options for clipping and gizmo display. rect should be the 
-	 * size and location of the image, given as the location of three corners 
-	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project 
-	 * coordinates. If image is null, the location of the existing image is updated. 
-	 * If no image has ever been loaded, a white rectangle is shown in its place. 
-	 * The clip and gizmo parameters control whether the drawing plane is clipped and 
+	 * Shows the DrawingImageSource for the plane at the location specified by rect,
+	 * with additional options for clipping and gizmo display. rect should be the
+	 * size and location of the image, given as the location of three corners
+	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project
+	 * coordinates. If image is null, the location of the existing image is updated.
+	 * If no image has ever been loaded, a white rectangle is shown in its place.
+	 * The clip and gizmo parameters control whether the drawing plane is clipped and
 	 * whether the gizmo is shown, respectively.
 	 * @param image - DrawingImageSource for the drawing plane
 	 * @param rect - number[] specifying the world rectangle
@@ -3321,7 +3338,7 @@ export class UnityUtil {
 		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
 	}
 
-	/** 
+	/**
 	 * Disable the drawing plane
 	 */
 	public static disableDrawingPlane() {
@@ -3397,7 +3414,7 @@ export class UnityUtil {
 		}
 	}
 
-	/** 
+	/**
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.
 	 * @param scale Scale factor, where 1 is the default scale.
