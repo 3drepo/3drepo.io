@@ -55,6 +55,7 @@ interface TicketGroupsProps {
 	value?: Viewpoint;
 	onChange?: (newvalue) => void;
 	onBlur?: () => void;
+	isDirty?: boolean;
 }
 
 enum OverrideType {
@@ -67,7 +68,7 @@ const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED, 
 
 let count = 0;
 
-export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
+export const TicketGroups = ({ value, onChange, onBlur, isDirty }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
@@ -173,7 +174,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => {
+		if (isDirty) onBlur?.();
+	}, [value, isDirty]);
 
 	useEffect(() => {
 		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {

@@ -25,7 +25,7 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { get, isEmpty, set } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -182,12 +182,6 @@ export const TicketDetailsCard = () => {
 		setTicketId.current();
 	}, []);
 
-	useEffect(() => {
-		if (!get(formData.formState.dirtyFields, viewProps?.name)) return;
-		// Manually trigger onBlurHandler for TicketGroups, since dirtyFields isn't updated in time for onChange to save the updated values.
-		onBlurHandler();
-	}, [JSON.stringify(formData.formState.dirtyFields)]);
-
 	if (!ticket) return null;
 
 	return (
@@ -204,6 +198,7 @@ export const TicketDetailsCard = () => {
 						/>
 						<InputController
 							Input={TicketGroups}
+							onBlur={onBlurHandler}
 							name={viewProps.name}
 						/>
 					</>
