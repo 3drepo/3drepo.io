@@ -18,7 +18,7 @@
 import { RgbArray } from '@/v5/helpers/colors.helper';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
 
-export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'pastDate' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords';
+export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'pastDate' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords' | 'tags';
 
 export interface PropertyDefinition {
 	name: string;
@@ -54,28 +54,31 @@ export interface TemplateModule {
 	properties: PropertyDefinition[];
 }
 
-export type IPinColorMapping = {
+export type PinMapping<K extends string, V> = {
 	property: {
 		name: string,
 		module?: string,
 	}
 	mapping: [
 		{
-			default: RgbArray;
+			default: V;
 		},
-		{
+		({
 			value: any;
-			color: RgbArray;
-		}[],
+		} & Record<K, V>)[],
 	]
 };
 
+export type PinColorMapping = PinMapping<'color', RgbArray>;
+
 export type PinIcon =  'DEFAULT' | 'RISK' | 'ISSUE' | 'MARKER';
+
+export type PinIconMapping = PinMapping<'icon', PinIcon>;
 
 export type PinConfig = {
 	name?: string;
-	color?: RgbArray | IPinColorMapping;
-	icon?: PinIcon;
+	color?: RgbArray | PinColorMapping;
+	icon?: PinIcon | PinIconMapping;
 };
 
 export type StatusValue = {

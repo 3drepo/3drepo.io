@@ -22,7 +22,13 @@ const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
+const {
+	outOfOrderArrayEqual,
+} = require('../../../helper/utils');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 

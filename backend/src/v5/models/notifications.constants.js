@@ -21,6 +21,7 @@ const NotificationConstants = {};
 
 NotificationConstants.notificationTypes = createConstantsObject([
 	'TICKET_ASSIGNED', 'TICKET_UPDATED', 'TICKET_CLOSED',
+	'CLASH_RUN_SUCCEEDED', 'CLASH_RUN_FAILED', 'CLASH_RUN_ABORTED',
 ]);
 
 module.exports = NotificationConstants;

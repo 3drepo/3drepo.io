@@ -24,6 +24,8 @@ const Groups = require("./group");
 const responseCodes = require("../response_codes.js");
 const { systemLogger } = require("../logger.js");
 const C = require("../constants");
+const { v5Path } = require("../../interop");
+const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
 
 const checkCameraValues = (output, input) => {
 	// Check vectors/points
@@ -273,11 +275,9 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 		);
 
 		try {
-			// ESM module
-			const FileType = await import("file-type");
-			const type = await FileType.fileTypeFromBuffer(imageBuffer);
+			const ext = await fileExtensionFromBuffer(imageBuffer);
 
-			if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
+			if (!C.ACCEPTED_IMAGE_FORMATS.includes(ext)) {
 				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 		} catch(e) {

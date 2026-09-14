@@ -20,7 +20,10 @@ const { src } = require('../../../../../../../../helper/path');
 
 const { queryOperators, queryParamSchema, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
-const { generateRandomString, generateRandomNumber } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+} = require('../../../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
