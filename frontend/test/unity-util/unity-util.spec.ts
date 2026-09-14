@@ -412,7 +412,7 @@ describe('UnityUtil.requestPointInfo', () => {
                 requestId: 'test-request-id',
             }));
         });
-        
+
         jest.spyOn(uuidApi, 'uuid').mockReturnValue('test-request-id');
 
         UnityUtil.unityInstance = {
@@ -495,7 +495,7 @@ describe('UnityUtil.requestPointInfo', () => {
                 requestId: 'test-request-id',
                 foo: 'bar', // Some dummy
             }
-            
+
             UnityUtil.respondToPointInfoRequest(JSON.stringify(mockPointInfo));
         });
 
@@ -549,10 +549,10 @@ describe('UnityUtil.requestPointInfo', () => {
     });
 
     it('should drop all requests if the point info coming from the viewer is malformed', async () => {
-      
+
         const toUnitySpy = jest.spyOn(UnityUtil, 'toUnity').mockImplementation((methodName: string) => {
             const mockPointInfo = 'malformed response';
-            
+
             UnityUtil.respondToPointInfoRequest(mockPointInfo);
         });
 
@@ -563,7 +563,79 @@ describe('UnityUtil.requestPointInfo', () => {
 
         await expect(UnityUtil.requestPointInfo(canvasPosition)).rejects
             .toThrow('Unexpected token \'m\', "malformed response" is not valid JSON');
-        
+
         expect(toUnitySpy).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('ExternalWebRequestHandler.createGetRequest authentication', () => {
+    let cacheMock: IndexedDbCache;
+    let fetchMock: jest.Mock;
+    let handler: ExternalWebRequestHandler;
+    let originalFetch: any;
+    let sendMessageMock: jest.Mock;
+
+    const clearCsrfToken = () => {
+        document.cookie = 'csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    };
+
+    const createRequest = async () => {
+        const { promiseToResolve, resolve } = getWaitablePromise();
+        sendMessageMock.mockImplementationOnce(() => resolve(true));
+
+        handler.createGetRequest(1, '/resource', false);
+        await promiseToResolve;
+    };
+
+    beforeEach(() => {
+        originalFetch = (global as any).fetch;
+        fetchMock = jest.fn().mockResolvedValue(new Response(TEST_TEXT, { status: 200 }));
+        (global as any).fetch = fetchMock;
+        clearCsrfToken();
+
+        cacheMock = {
+            read: jest.fn().mockResolvedValue(undefined),
+            write: jest.fn(),
+        } as unknown as IndexedDbCache;
+
+        handler = new ExternalWebRequestHandler(cacheMock);
+        sendMessageMock = jest.fn();
+        handler.setUnityInstance({ SendMessage: sendMessageMock }, 'WebRequestHandler');
+        handler.setAPIHost(['https://api.example.com/']);
+    });
+
+    afterEach(() => {
+        clearCsrfToken();
+        (global as any).fetch = originalFetch;
+        jest.restoreAllMocks();
+    });
+
+    it('should prefer cookie authentication when a CSRF token is available', async () => {
+        document.cookie = 'csrf_token=cookie-token; path=/';
+        handler.setAPIKey('api-key');
+
+        await createRequest();
+
+        expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/resource', {
+            headers: { 'X-CSRF-TOKEN': 'cookie-token' },
+        });
+    });
+
+    it('should use API key authentication when a CSRF token is unavailable', async () => {
+        handler.setAPIKey('api-key');
+
+        await createRequest();
+
+        expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/resource?key=api-key', {
+            headers: {},
+        });
+    });
+
+    it('should just prefix the URL with the API host when authentication is unavailable', async () => {
+        await createRequest();
+
+        expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/resource', {
+            headers: {},
+        });
     });
 });
