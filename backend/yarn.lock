@@ -1821,10 +1821,10 @@ base64id@2.0.0, base64id@~2.0.0:
   resolved "https://registry.yarnpkg.com/base64id/-/base64id-2.0.0.tgz#2770ac6bc47d312af97a8bf9a634342e0cd25cb6"
   integrity sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==
 
-baseline-browser-mapping@^2.11.20:
-  version "2.11.21"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.21.tgz#99af73cb8e54007e4f5345e132278e26c2662f2c"
-  integrity sha512-uh8vpY/1/YyFkunIDFH/12p7/7VdPKA1hejMVEbdkEaWnUz0Hesvx5EbiU6XxjyHZIOju+ZMbQJkRh+es3/spQ==
+baseline-browser-mapping@^2.11.20, baseline-browser-mapping@^2.11.22:
+  version "2.11.22"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.11.22.tgz#d8b612f54517d8b3a31734623779e5ab8c5ff0b9"
+  integrity sha512-pWc4w51fBFd7mav43/zKRC+RI6f4yfzQoVlfvE8dECePyfkn1bzLp01Fj0QACcyCZyFhiEMyD2qScfKRWgWibA==
 
 basic-auth@^2.0.1:
   version "2.0.1"
@@ -5160,10 +5160,10 @@ node-cache@^5.1.2:
   dependencies:
     clone "2.x"
 
-node-device-detector@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/node-device-detector/-/node-device-detector-2.2.0.tgz#7671ce5b11dfd7254bcdab0967da7f5fd101bed5"
-  integrity sha512-Ni3d9xa3J6QSNHm0VvOKM17x9dhlVVoPH18AIExrLwB/DdSSb5rWJzZ/JfuMwsJ45zqFJhPMFBwKEnwdgX8CpA==
+node-device-detector@2.2.7:
+  version "2.2.7"
+  resolved "https://registry.yarnpkg.com/node-device-detector/-/node-device-detector-2.2.7.tgz#2561dccaa18c0a05e7c0229834a9c178f268a0ef"
+  integrity sha512-75DMuWtUq5g7bLAd6wNpS/TWoGQD+xM30s4IbxsGHwvbSlZ5XbV2nmgn1sg4Fdqs29Sjf6bCLi8MUyiXDL9YTg==
 
 node-exports-info@^1.6.0:
   version "1.6.0"
