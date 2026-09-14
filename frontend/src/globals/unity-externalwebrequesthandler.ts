@@ -50,7 +50,7 @@ export class ExternalWebRequestHandler {
 
 	/** An object providing an API to offline store */
 	offlineFetchInterceptor?: (url: string, options?: RequestInit) => Promise<Response>;
-	
+
 	/**
      * Set Offline fetch interceptor (e.g., from mobile device)
      */
@@ -136,16 +136,16 @@ export class ExternalWebRequestHandler {
 				}
 			}
 
-			if (!fetchUrl && this.apiKey) {
-				fetchUrl = `${this.apiHost}${url.startsWith('/') ? '' : '/'}${url}${url.includes('?') ? '&' : '?'}key=${this.apiKey}`;
-			}
-
 			if (!fetchUrl) {
-				throw new Error('ExternalWebRequestHandler has no cookie or API key and so this request cannot be authenticated.');
+				if (this.apiKey) {
+					fetchUrl = `${this.apiHost}${url.startsWith('/') ? '' : '/'}${url}${url.includes('?') ? '&' : '?'}key=${this.apiKey}`;
+				} else {
+					fetchUrl = `${this.apiHost}${url.startsWith('/') ? '' : '/'}${url}`;
+				}
 			}
 
 			// If offline interceptor is set (e.g., by Flutter), use it to fetch the resource, otherwise use the default fetch implementation
-			const response = this.offlineFetchInterceptor ? await this.offlineFetchInterceptor(url, { headers }) 
+			const response = this.offlineFetchInterceptor ? await this.offlineFetchInterceptor(url, { headers })
 				: await fetch(fetchUrl, { headers });
 
 			// Where the request gets a response outside the OK range, fetch will
