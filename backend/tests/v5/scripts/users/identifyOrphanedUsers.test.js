@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../helper/utils');
+const { determineTestGroup, outOfOrderArrayEqual } = require('../../helper/utils');
 const {
 	db: { reset: resetDB, createUser, createTeamspace, addLoginRecords },
 	generateRandomString,
 	generateUserCredentials,
 	fileExists,
 	generateRandomNumber,
-	outOfOrderArrayEqual,
 } = require('../../helper/services');
 
 const { times } = require('lodash');

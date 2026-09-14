@@ -17,8 +17,10 @@
 const { isObject, isUUID } = require('../utils/helper/typeCheck');
 const { CLASH_PLANS_COL } = require('./clashes.constants');
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { isEmpty } = require('../utils/helper/objects');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const ClashPlans = {};
@@ -71,6 +73,7 @@ ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 	}
 
 	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId, project }, updateQuery);
+	publish(events.CLASH_PLAN_UPDATED, { teamspace, project, planId, data });
 };
 
 ClashPlans.deletePlan = async (teamspace, project, planId) => {

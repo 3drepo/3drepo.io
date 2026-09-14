@@ -18,6 +18,8 @@ import styled from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import ArrowBackMui from '@mui/icons-material/ArrowBack';
 
+export const CARD_WIDTH = 380;
+
 export const ArrowBack = styled(ArrowBackMui)`
 	cursor: pointer;
 	height: 17px;
@@ -25,6 +27,8 @@ export const ArrowBack = styled(ArrowBackMui)`
 `;
 
 export const CardContainer = styled.div`
+	width: fit-content;
+	min-width: ${CARD_WIDTH}px;
 	display: flex;
 	height: 100%;
 	flex-direction: column;
@@ -32,7 +36,7 @@ export const CardContainer = styled.div`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 10px;
 	margin-bottom: 20px;
-	overflow: hidden;
+	overflow: visible hidden;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_2};
 
 	/* The property labels for Custom Tickets should be case sensitive

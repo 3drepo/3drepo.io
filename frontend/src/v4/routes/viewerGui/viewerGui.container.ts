@@ -66,6 +66,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 	resetModel: ModelActions.reset,
 	resetViewerGui: ViewerGuiActions.reset,
+	resetClipping: ViewerGuiActions.resetClipping,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	resetCompareComponent: CompareActions.resetComponentState,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,

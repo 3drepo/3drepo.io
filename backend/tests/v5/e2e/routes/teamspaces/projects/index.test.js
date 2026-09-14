@@ -18,6 +18,12 @@
 const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const { image, oversizedImage, objModel, src } = require('../../../../helper/path');
 
@@ -60,20 +66,20 @@ const setupBasicData = async ({ users, teamspace, projects, model, imageData }) 
 
 const generateBasicData = () => {
 	const [tsAdmin, nonAdminUser, unlicencedUser, modelPermUser, projectAdmin] = times(5,
-		() => ServiceHelper.generateUserCredentials());
+		() => generateUserCredentials());
 
-	const model = ServiceHelper.generateRandomModel({ viewers: [modelPermUser.user] });
+	const model = generateRandomModel({ viewers: [modelPermUser.user] });
 
-	const testProject = ServiceHelper.generateRandomProject();
-	const projectWithImage = ServiceHelper.generateRandomProject();
-	const projectWithPngImage = ServiceHelper.generateRandomProject();
+	const testProject = generateRandomProject();
+	const projectWithImage = generateRandomProject();
+	const projectWithPngImage = generateRandomProject();
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, modelPermUser, projectAdmin },
-		teamspace: ServiceHelper.generateRandomString(),
+		teamspace: generateRandomString(),
 		projects: { testProject, projectWithPngImage, projectWithImage },
 		model,
-		imageData: ServiceHelper.generateRandomString(),
+		imageData: generateRandomString(),
 	});
 };
 
@@ -87,13 +93,13 @@ const testGetProjectList = (internalService) => {
 		});
 
 		const externalTests = [
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 			['user has a valid session and has access to a project', { key: users.modelPermUser.apiKey }, true, projects.testProject],
 		];
 
 		const generalTests = [
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['user has a valid session and is teamspace admin', {}, true],
 		];
 
@@ -129,13 +135,13 @@ const testCreateProject = (internalService) => {
 		});
 
 		const externalTestCases = [
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['user is not admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 
 		];
 		const generalTestCases = [
-			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['project name is not valid', { projectName: 123 }, false, templates.invalidArguments],
 			['project name is already taken', { projectName: projects.testProject.name }, false, templates.invalidArguments],
 			['project name is already taken (case insensitive)', { projectName: projects.testProject.name.toUpperCase() }, false, templates.invalidArguments],
@@ -147,7 +153,7 @@ const testCreateProject = (internalService) => {
 			...(internalService ? [] : externalTestCases),
 			...generalTestCases,
 		])('', (desc,
-			{ ts = teamspace, key = users.tsAdmin.apiKey, projectName = ServiceHelper.generateRandomString() },
+			{ ts = teamspace, key = users.tsAdmin.apiKey, projectName = generateRandomString() },
 			success, expectedRes = templates.ok) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const res = await agent.post(route(ts, key))
@@ -165,7 +171,7 @@ const testCreateProject = (internalService) => {
 		});
 
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
-			const payload = { name: ServiceHelper.generateRandomString() };
+			const payload = { name: generateRandomString() };
 			const res = await Promise.all(
 				times(3, () => agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload)));
 
@@ -197,10 +203,10 @@ const testUpdateProject = () => {
 			key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		describe.each([
-			['without a valid session', { key: ServiceHelper.generateRandomString() }, {}, false, templates.notLoggedIn],
-			['without a valid teamspace', { ts: ServiceHelper.generateRandomString() }, {}, false, templates.teamspaceNotFound],
+			['without a valid session', { key: generateRandomString() }, {}, false, templates.notLoggedIn],
+			['without a valid teamspace', { ts: generateRandomString() }, {}, false, templates.teamspaceNotFound],
 			['if the user is not project admin', { key: users.nonAdminUser.apiKey }, {}, false, templates.notAuthorized],
-			['without a valid project', { project: ServiceHelper.generateRandomString() }, {}, false, templates.projectNotFound],
+			['without a valid project', { project: generateRandomString() }, {}, false, templates.projectNotFound],
 			['if the project data are not valid', {}, { name: 123 }, false, templates.invalidArguments],
 			['if the project name is taken by another project', {}, {}, false, templates.invalidArguments, { createProjectWithName: true }],
 			['if the project name is taken by another project (case insensitive)', {}, {}, false, templates.invalidArguments, { createProjectWithName: true, caseInsensitiveName: true }],
@@ -214,7 +220,7 @@ const testUpdateProject = () => {
 				let payloadToSend = payload;
 
 				if (options.createProjectWithName) {
-					const name = ServiceHelper.generateRandomString();
+					const name = generateRandomString();
 					const res = await agent.post(projectsRoute).send({ name }).expect(templates.ok.status);
 					temporaryProjectId = res.body._id;
 					payloadToSend = { name: options.caseInsensitiveName ? name.toUpperCase() : name };
@@ -261,10 +267,10 @@ const testDeleteProject = () => {
 		const route = (ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		describe.each([
-			['without a valid session', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-			['without a valid teamspace', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['without a valid session', { key: generateRandomString() }, false, templates.notLoggedIn],
+			['without a valid teamspace', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['if the user is not teamspace admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-			['without a valid project', { project: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['without a valid project', { project: generateRandomString() }, false, templates.projectNotFound],
 			['project', {}, true],
 		])('', (desc,
 			{ ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey },
@@ -317,10 +323,10 @@ const testGetProject = () => {
 		const route = (ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		describe.each([
-			['without a valid session', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-			['without a valid teamspace', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['without a valid session', { key: generateRandomString() }, false, templates.notLoggedIn],
+			['without a valid teamspace', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
 			['if the user is not teamspace member', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-			['without a valid project', { project: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['without a valid project', { project: generateRandomString() }, false, templates.projectNotFound],
 			['project', {}, true],
 		])('', (desc,
 			{ ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey },
@@ -350,9 +356,9 @@ const testGetProjectImage = () => {
 
 	const testCases = [
 		['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
-		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
 		['the project has no image', { ...baseRouteParams, projectId: projects.testProject.id }, false, templates.fileNotFound],
 		['the project has image', { ...baseRouteParams }, true, Buffer.from(imageData), undefined],
 		['the project has image (non project admin)', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, true, Buffer.from(imageData), undefined],
@@ -397,12 +403,12 @@ const testUpdateProjectImage = () => {
 	};
 
 	const testCases = [
-		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user does not have a valid session', { ...baseRouteParams, key: generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
 		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
 		['an oversized image is provided', { ...baseRouteParams, image: oversizedImage }, false, templates.maxSizeExceeded],
 		['a wrong file type is provided', { ...baseRouteParams, image: objModel }, false, templates.unsupportedFileFormat],
 		['the user is teamspace admin', { ...baseRouteParams }, true],
@@ -451,12 +457,12 @@ const testDeleteProjectImage = () => {
 	};
 
 	const testCases = [
-		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user does not have a valid session', { ...baseRouteParams, key: generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
 		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
 		['the project does not have an image', { ...baseRouteParams, projectId: projects.testProject.id }, true],
 		['the user is teamspace admin', { ...baseRouteParams }, true],
 		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
@@ -498,12 +504,12 @@ const testGetDrawingCategories = () => {
 	};
 
 	const testCases = [
-		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user does not have a valid session', { ...baseRouteParams, key: generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
 		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
-		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
 		['the user is teamspace admin', { ...baseRouteParams }, true],
 		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
 	];
@@ -543,10 +549,10 @@ const testGetStatusCodes = () => {
 	};
 
 	const testCases = [
-		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+		['the user does not have a valid session', { ...baseRouteParams, key: generateRandomString() }, false, templates.notLoggedIn],
+		['the teamspace does not exist', { ...baseRouteParams, teamspace: generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
-		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+		['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
 		['the user is teamspace admin', { ...baseRouteParams }, true],
 		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
 		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, true],

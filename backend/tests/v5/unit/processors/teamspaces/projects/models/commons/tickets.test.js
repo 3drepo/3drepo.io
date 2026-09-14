@@ -18,7 +18,18 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, generateUUIDString } = require('../../../../../../helper/services');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { generateTicket } = require('../../../../../../helper/dataGen.tickets');
+const {
+	generateRandomObject,
+	generateUUID,
+	generateRandomString,
+	generateTemplate,
+	generateRandomNumber,
+	generateUUIDString,
+	generateGroup,
+} = require('../../../../../../helper/dataGen');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -1163,6 +1174,41 @@ const testGetOpenTicketsCount = () => {
 	);
 };
 
+const testGetTagPropertyValues = () => {
+	describe('Get tag property values', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const templateId = generateUUID();
+
+		test('should get root tag property values', async () => {
+			const expectedOutput = times(3, generateRandomString);
+			const property = `properties.${generateRandomString()}`;
+			TicketsModel.getDistinctPropertyValues.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTagPropertyValues(teamspace, project, model, templateId, property))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledWith(
+				teamspace, project, model, templateId, property);
+		});
+
+		test('should get module tag property values', async () => {
+			const expectedOutput = times(3, generateRandomString);
+			const property = `modules.${generateRandomString()}.${generateRandomString()}`;
+			TicketsModel.getDistinctPropertyValues.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Tickets.getTagPropertyValues(teamspace, project, model, templateId, property))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getDistinctPropertyValues).toHaveBeenCalledWith(
+				teamspace, project, model, templateId, property);
+		});
+	});
+};
+
 const testRemoveTicketsWithTemplates = () => {
 	describe('Remove tickets with templates', () => {
 		test('should remove all tickets with templates, the ticket comments, logs and any resources', async () => {
@@ -1477,6 +1523,28 @@ const testOnModelNameUpdated = () => {
 	});
 };
 
+const testOnClashPlanNameUpdated = () => {
+	const { CLOUD_CLASH } = presetModules;
+	const { [CLOUD_CLASH]: cloudClashProps } = modulePropertyLabels;
+
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const planId = generateUUID();
+	const planName = generateRandomString();
+
+	test('should call updateTicketsByQuery with the correct query', async () => {
+		TicketsModel.updateTicketsByQuery.mockResolvedValueOnce(undefined);
+
+		await expect(Tickets.onClashPlanNameUpdated(teamspace, project, planId, planName))
+			.resolves.toBeUndefined();
+
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTicketsByQuery).toHaveBeenCalledWith(teamspace, project,
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_ID}`]: UUIDToString(planId) },
+			{ [`modules.${CLOUD_CLASH}.${cloudClashProps.CLASH_PLAN_NAME}`]: planName });
+	});
+};
+
 const testGetOpenTicketsCountForMultipleModels = () => {
 	describe('Get the number of open tickets for multiple models', () => {
 		const teamspace = generateRandomString();
@@ -1542,8 +1610,10 @@ describe(determineTestGroup(__filename), () => {
 	testGetTicketList();
 	testGetOpenTicketsCountForMultipleModels();
 	testGetOpenTicketsCount();
+	testGetTagPropertyValues();
 	testRemoveTicketsWithTemplates();
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
+	testOnClashPlanNameUpdated();
 });
