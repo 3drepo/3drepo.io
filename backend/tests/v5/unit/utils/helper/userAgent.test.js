@@ -18,6 +18,8 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
+const UaParserJs = require('ua-parser-js');
+
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 const ServiceHelper = require('../../../helper/dataGen');
 
@@ -51,6 +53,7 @@ const testGetUserAgentInfo = () => {
 
 		test('Should return user agent info object from browser', () => {
 			const browserUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41';
+			const rawUserAgentInfo = UaParserJs(browserUserAgent);
 			const expectedUserAgentInfo = {
 				application: {
 					major: '38',
@@ -65,6 +68,29 @@ const testGetUserAgentInfo = () => {
 				os: {
 					name: 'Linux',
 					version: 'x86_64',
+				},
+				device: 'desktop',
+			};
+			expect(rawUserAgentInfo.os.version).toBeUndefined();
+			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
+		});
+
+		test('Should not infer a version for an unrecognised Linux platform token', () => {
+			const browserUserAgent = 'Mozilla/5.0 (X11; Linux arm64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+			const expectedUserAgentInfo = {
+				application: {
+					major: '131',
+					name: 'Chrome',
+					type: 'browser',
+					version: '131.0.0.0',
+				},
+				engine: {
+					name: 'Blink',
+					version: '131.0.0.0',
+				},
+				os: {
+					name: 'Linux',
+					version: undefined,
 				},
 				device: 'desktop',
 			};
