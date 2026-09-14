@@ -19,7 +19,7 @@ const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
-const ServiceHelper = require('../../../helper/services');
+const ServiceHelper = require('../../../helper/dataGen');
 
 const matchHelper = (func, string, match) => {
 	const res = func(string);

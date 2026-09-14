@@ -26,7 +26,12 @@ jest.mock('fs', () => ({
 const fs = require('fs');
 const { PassThrough } = require('stream');
 
-const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateRandomObject,
+	generateUUID,
+} = require('../../../../helper/dataGen');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { meshPrimitiveTypes, nodeTypes } = require(`${src}/models/scenes.constants`);
@@ -1249,7 +1254,7 @@ const testProcessClashResults = () => {
 						project: UUIDToString(project),
 						planId: currentRun.plan._id,
 						runId: corId,
-					});
+					}, undefined, true);
 			});
 		});
 	});

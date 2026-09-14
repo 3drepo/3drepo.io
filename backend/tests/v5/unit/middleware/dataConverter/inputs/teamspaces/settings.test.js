@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/dataGen');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');

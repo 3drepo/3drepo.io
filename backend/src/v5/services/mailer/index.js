@@ -66,7 +66,7 @@ checkMailerConfig().catch(
 	},
 );
 
-Mailer.sendSystemEmail = async (templateName, data, attachments) => {
+Mailer.sendSystemEmail = async (templateName, data, attachments, suppressErrors = false) => {
 	const template = emailTemplates[templateName];
 
 	if (!template) {
@@ -90,7 +90,7 @@ Mailer.sendSystemEmail = async (templateName, data, attachments) => {
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
 		logger.logError(`Email error - ${err.message}`);
-		throw err;
+		if (!suppressErrors) throw err;
 	}
 };
 

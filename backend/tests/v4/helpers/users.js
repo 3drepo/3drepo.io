@@ -20,9 +20,6 @@ const { createAppAsync } = require("../../../src/v4/services/api.js");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const async = require("async");
-const { expect } = require("chai");
-
-
 const loginUsers = async (usernames, passwords) => {
 	const app =  await createAppAsync();
 	const server = await new Promise((resolve, reject) => {

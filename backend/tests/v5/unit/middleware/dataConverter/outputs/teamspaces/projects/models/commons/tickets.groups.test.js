@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
-const { generateRandomObject, generateRandomString } = require('../../../../../../../../helper/services');
+const {
+	generateRandomObject,
+	generateRandomString,
+} = require('../../../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

@@ -19,7 +19,10 @@ const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
-const { generateRandomString, generateRandomNumber } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+} = require('../../helper/dataGen');
 
 const MetaRules = require(`${src}/models/metadata.rules`);
 const { templates } = require(`${src}/utils/responseCodes`);

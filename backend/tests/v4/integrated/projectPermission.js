@@ -19,7 +19,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -72,7 +71,7 @@ describe("Project Permissions::", function () {
 		project: project
 	};
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -101,7 +100,7 @@ describe("Project Permissions::", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -147,16 +146,16 @@ describe("Project Permissions::", function () {
 			.get(`/${teamspace}/projects/project3`)
 			.expect(200, function(err, res) {
 
-				expect(err).to.be.null;
-				expect(res.body.permissions).to.exist;
+				expect(err).toBeNull();
+				expect(res.body.permissions).toBeTruthy();
 
 				const permissions = res.body.permissions;
 
-				expect(permissions.find(p => p.user === userProjectAdmin.username)).to.deep.equal({ user: userProjectAdmin.username, permissions: ["admin_project"]});
-				expect(permissions.find(p => p.user === "projectuser")).to.deep.equal({ user: "projectuser", permissions: []});
-				expect(permissions.find(p => p.user === "projectuser2")).to.deep.equal({ user: "projectuser2", permissions: []});
-				expect(permissions.find(p => p.user === "projectuser4")).to.deep.equal({ user: "projectuser4", permissions: []});
-				expect(permissions.find(p => p.user === "projectuser5")).to.deep.equal({ user: "projectuser5", permissions: []});
+				expect(permissions.find(p => p.user === userProjectAdmin.username)).toEqual({ user: userProjectAdmin.username, permissions: ["admin_project"]});
+				expect(permissions.find(p => p.user === "projectuser")).toEqual({ user: "projectuser", permissions: []});
+				expect(permissions.find(p => p.user === "projectuser2")).toEqual({ user: "projectuser2", permissions: []});
+				expect(permissions.find(p => p.user === "projectuser4")).toEqual({ user: "projectuser4", permissions: []});
+				expect(permissions.find(p => p.user === "projectuser5")).toEqual({ user: "projectuser5", permissions: []});
 
 				done();
 			});
@@ -174,14 +173,14 @@ describe("Project Permissions::", function () {
 					.get(`/${teamspace}/projects/project3`)
 					.expect(200, function(err, res) {
 
-						expect(err).to.be.null;
-						expect(res.body.permissions).to.exist;
+						expect(err).toBeNull();
+						expect(res.body.permissions).toBeTruthy();
 
 						permissions = res.body.permissions;
 						modelId = res.body.models;
 
 						const userPerm = permissions.find(p => p.user === userCanCreateModel.username);
-						expect(userPerm).to.exist;
+						expect(userPerm).toBeTruthy();
 
 						userPerm.permissions = [];
 						callback(err);

@@ -1,57 +1,174 @@
+<%
+	/*
+	 * Outlook's Reading Pane (single-click preview) does not reliably apply
+	 * <head><style> rules the way the fully opened message window does, so
+	 * the status badges and result pills also carry inline styles here as a
+	 * guaranteed fallback, duplicating the values from dailyDigest.styles.
+	 */
+	const badgeBaseStyle = 'display:inline-block;vertical-align:middle;padding:3px 8px 3px 6px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:0.02em;line-height:1.5;';
+	const badgeStyles = {
+		completed: `${badgeBaseStyle}background:#dcfce7;color:#15803d;`,
+		failed: `${badgeBaseStyle}background:#fee2e2;color:#dc2626;`,
+		aborted: `${badgeBaseStyle}background:#fef9c3;color:#b45309;`,
+	};
+	const pillBaseStyle = 'display:inline-block;margin:0 5px 5px 0;padding:4px 8px;border-radius:6px;border:1px solid;font-size:12px;line-height:1.2;';
+	const pillStyles = {
+		new: `${pillBaseStyle}background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;`,
+		active: `${pillBaseStyle}background:#fef9c3;border-color:#fde68a;color:#b45309;`,
+		resolved: `${pillBaseStyle}background:#dcfce7;border-color:#bbf7d0;color:#15803d;`,
+	};
+	/*
+	 * Outlook's Word engine doesn't reliably match selectors against elements
+	 * that carry more than one class (e.g. class="modelBlock planGroup"),
+	 * so the modelBlock border/radius is also applied inline on every such
+	 * table to guarantee it renders regardless of how many classes it has.
+	 */
+	const modelBlockStyle = 'border-collapse:separate;border-spacing:0;border:1px solid #d9dee7;border-radius:8px;margin-bottom:8px;margin-top:8px;background:#fff;width:100%;';
+	const dataValueStyle = 'font-size:13px;font-weight:500;color:#6b7280;';
+	// Links in the data are relative paths (e.g. /v5/dashboard/...) - domain must be prepended to make them absolute.
+	const toAbsoluteUrl = (relativeUrl) => `${domain}${relativeUrl}`;
+%>
 <p>Here is your daily digest based on your chosen notification preferences:</p>
-<p style="text-align: center"><span class="greeting"><%= teamspace %></span></p>
-<% for(const { project, model, tickets } of notifications) { %>
-	<div class="notifications">
-		<div class="notificationsTable">
-			<div class="notificationsHeader">
-				<div class="headerTitle">
-					<img src="<%= domain %>/assets/email-resources/notifications/tickets.png" style="margin-right:5px">
-					<p class="title"><%= project %>/<%= model %></p>
-				</div>
-			</div>
-			<div class="notificationsContent">
+<p style="text-align: center"><span class="greeting">
+		<%= teamspace %>
+	</span></p>
+<div class="notifications"></div>
+<% for(const { project, ticketData, clashData } of notifications) { %>
 
-				<% if(tickets.assigned) { %>
-				<div class="notificationsRow">
-					<div class="notificationIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/new.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank">
-							<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
-						</a>
-					</div>
-					<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-				<% if(tickets.updated) { %>
- 				 <div class="notificationsRow">
-					<div class="notificationIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/edit.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.updated.link %>" target="_blank">
-							<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
-						</a>
-					</div>
-					<a href="<%= domain %><%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-				<% if(tickets.closed) { %>
-				<div class="notificationsRow">
-					<div class="notificationIconBorder notificationDoneIconBorder">
-						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/done.png">
-					</div>
-					<div style="flex: 1 1 0">
-						<a href="<%= domain %><%= tickets.closed.link %>" target="_blank">
-					   		<p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
-					   	</a>
-					</div>
-					<a href="<%= domain %><%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
-				</div>
-				<% } %>
-			</div>
+	<div class="notificationsTable">
+		<div class="notificationsHeader">
+			<p class="title">
+				<%= project %>
+			</p>
+		</div>
+		<div class="notificationsContent">
+			<% if (clashData?.length > 0) { %>
+				<h3 class="sectionLabel">Clash activities</h3>
+				<% for(const { planName, link, runs } of clashData) { %>
+					<table class="modelBlock planGroup" style="<%= modelBlockStyle %>" cellpadding="0" cellspacing="0" border="0">
+						<% runs.forEach(({ status, results: { stats, error }, triggeredAt }, index) => { %>
+							<tr class="<%= index === 0 ? '' : 'rowSeparator' %> <%= index % 2 === 0 ? '' : 'evenRows' %>">
+								<td>
+									<% if (index === 0) { %>
+										<span class="cellLabel">Plan</span>
+										<div class="dataValue" style="<%= dataValueStyle %>">
+											<%= planName %>
+										</div>
+										<% } %>
+								</td>
+								<td>
+									<% if (index === 0) { %>
+										<span class="cellLabel">Ran at</span>
+										<% } %>
+											<div class="dataValue" style="<%= dataValueStyle %>">
+												<%= triggeredAt %>
+											</div>
+								</td>
+								<td>
+									<% if (index === 0) { %>
+										<span class="cellLabel">Status</span>
+										<% } %>
+											<% if (status === 'completed') { %>
+												<span class="statusBadge sSuccess" style="<%= badgeStyles.completed %>">Success</span>
+												<% } else if (status === 'failed') { %>
+													<span class="statusBadge sFailed" style="<%= badgeStyles.failed %>">Failed</span>
+													<% } else if (status === 'aborted') { %>
+														<span class="statusBadge sAborted" style="<%= badgeStyles.aborted %>">Aborted</span>
+														<% } %>
+								</td>
+								<td>
+									<% if (index === 0) { %>
+										<span class="cellLabel">Results</span>
+										<% } %>
+											<% if (status !== 'completed') { %>
+												<div class="dataValue" style="<%= dataValueStyle %>">
+													<%= error.reason %>
+												</div>
+												<% } else { %>
+													<span class="pill pillNew" style="<%= pillStyles.new %>"><strong>
+															<%= stats.new %>
+														</strong>&nbsp;new</span>
+													<span class="pill pillActive" style="<%= pillStyles.active %>"><strong>
+															<%= stats.active %>
+														</strong>&nbsp;active</span>
+													<span class="pill pillResolved" style="<%= pillStyles.resolved %>"><strong>
+															<%= stats.resolved %>
+														</strong>&nbsp;resolved</span>
+													<% } %>
+								</td>
+								<td style="width: 60px; text-align: right;">
+									<% if (link) { %>
+										<a href="<%= toAbsoluteUrl(link) %>" target="_blank" class="openLink">Open ↗</a>
+										<% } %>
+								</td>
+							</tr>
+							<% }) %>
+					</table>
+					<% } %>
+
+						<% } %>
+							<% if (ticketData?.length > 0) { %>
+								<h3 class="sectionLabel">Ticket activities</h3>
+								<% for(const { model, tickets } of ticketData) { %>
+									<%
+										const ticketRows = [
+											tickets.assigned && {
+												iconClass: 'tAssign',
+												icon: '＋',
+												label: 'Assigned',
+												link: tickets.assigned.link,
+												text: `${tickets.assigned.count} ${tickets.assigned.count === 1 ? 'ticket' : 'tickets'} were assigned to you.`,
+											},
+											tickets.updated && {
+												iconClass: '',
+												icon: '↻',
+												label: 'Updated',
+												link: tickets.updated.link,
+												text: `${tickets.updated.count} ${tickets.updated.count === 1 ? 'ticket' : 'tickets'} you are associated with were updated.`,
+											},
+											tickets.closed && {
+												iconClass: 'tResolved',
+												icon: '✔',
+												label: 'Resolved',
+												link: tickets.closed.link,
+												text: `${tickets.closed.count} ${tickets.closed.count === 1 ? 'ticket' : 'tickets'} you are associated with were resolved.`,
+											},
+										].filter(Boolean);
+									%>
+									<table class="modelBlock" style="<%= modelBlockStyle %>" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td class="modelLabelCell">
+												<div class="sectionLabel">Model</div>
+												<div class="dataValue" style="<%= dataValueStyle %>">
+													<%= model %>
+												</div>
+											</td>
+											<td style="padding: 0 16px;">
+												<table class="modelTicketList" cellpadding="0" cellspacing="0" border="0">
+													<% ticketRows.forEach(({ iconClass, icon, label, link, text }, index) => { %>
+														<tr class="<%= index === 0 ? '' : 'rowSeparator' %>">
+															<td style="width: 30px;"><span class="ticketIcon <%= iconClass %>"
+																	aria-label="<%= label %>">
+																	<%= icon %>
+																</span></td>
+															<td><a href="<%= toAbsoluteUrl(link) %>" target="_blank">
+																	<%= text %>
+																</a></td>
+															<td style="width: 60px; text-align: right;"><a href="<%= toAbsoluteUrl(link) %>"
+																	target="_blank" class="openLink">Open ↗</a></td>
+														</tr>
+														<% }) %>
+												</table>
+											</td>
+										</tr>
+									</table>
+									<% } %>
+										<% } %>
+
+
 		</div>
 	</div>
-<% } %>
 
+
+
+	<% } %>
