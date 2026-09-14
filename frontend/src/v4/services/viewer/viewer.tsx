@@ -308,7 +308,7 @@ export class ViewerService {
 	}
 
 	public getCurrentViewpointInfo() {
-		return UnityUtil.requestViewpoint('', '');
+		return UnityUtil.requestViewpoint();
 	}
 
 	public hideHiddenByDefaultObjects() {
