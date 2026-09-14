@@ -127,6 +127,7 @@ export const TicketDetailsCard = () => {
 		} catch (yupError) {
 			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
 		}
+
 		const values = dirtyValues(formValues, formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 
@@ -197,8 +198,8 @@ export const TicketDetailsCard = () => {
 						/>
 						<InputController
 							Input={TicketGroups}
-							name={viewProps.name}
 							onBlur={onBlurHandler}
+							name={viewProps.name}
 						/>
 					</>
 				)}

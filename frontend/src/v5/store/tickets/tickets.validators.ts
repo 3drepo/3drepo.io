@@ -155,7 +155,7 @@ export const getValidators = (template: ITemplate) => {
 	const { properties, modules } = template;
 	const validators: any = { title: getTitleValidator() };
 
-	validators.properties = propertiesValidator(properties || []);
+	validators.properties = propertiesValidator((properties || []).filter((property) => property.name !== 'Created at'));
 
 	if (modules) {
 		const modulesValidator = {};

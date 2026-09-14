@@ -59,20 +59,36 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
  *     }
  *  }
  *
+ * Exception: ViewpointState arrays (hidden/colored/transformed groups overrides) are never turned
+ * into null; the backend rejects null for these and requires an actual array (never absent),
+ * so an empty array must be sent through as-is (e.g. to persist deleting all overrides).
  */
 
-export const nullifyEmptyObjects = (tree) => Object.fromEntries(
-	Object.keys(tree).map((key) => {
+// ViewpointState is always stored under a property's 'state' key (see properties[key].state
+// across the tickets store/schemas), so a tree is a ViewpointState tree if its parent key is 'state'.
+// out sibling keys that didn't change (e.g. showHidden), so we can't rely on sibling keys being
+// present here - the parent key name is the only reliable signal left at this point.
+const VIEWPOINT_STATE_ARRAY_KEYS = ['hidden', 'colored', 'transformed'];
+const isViewpointStateParentKey = (parentKey) => parentKey === 'state';
+
+export const nullifyEmptyObjects = (tree, parentKey?: string) => Object.fromEntries(
+	Object.keys(tree).flatMap((key) => {
 		const value = tree[key];
-		if (value === '' || (Array.isArray(value) && value.length === 0)) {
-			return [key, null];
+		const isEmptyArray = Array.isArray(value) && value.length === 0;
+
+		if (isEmptyArray && isViewpointStateParentKey(parentKey) && VIEWPOINT_STATE_ARRAY_KEYS.includes(key)) {
+			return [[key, value]];
+		}
+
+		if (value === '' || isEmptyArray) {
+			return [[key, null]];
 		}
 
 		if (isBasicValue(value)) {
-			return [key, value];
+			return [[key, value]];
 		}
 
-		return [key, nullifyEmptyObjects(value)];
+		return [[key, nullifyEmptyObjects(value, key)]];
 	}),
 );
 
@@ -111,24 +127,6 @@ export const removeEmptyObjects = (tree) => {
 			return accum;
 		}
 		return ({ ...accum, [key]: sanitizedValue });
-	}, {});
-};
-
-export const diffObjects = (objec1, object2) => {
-	const keyObjc2 = Object.keys(object2);
-
-	return Object.keys(objec1).reduce((accum, key) => {
-		if (keyObjc2.includes(key)) {
-			if (_.isEqual(objec1[key], object2[key])) {
-				return accum;
-			} if (isBasicValue(objec1[key])) {
-				return { ...accum, [key]: objec1[key] };
-			}
-
-			return { ...accum, [key]: diffObjects(objec1[key], object2[key]) };
-		}
-
-		return { ...accum, [key]: objec1[key] };
 	}, {});
 };
 
