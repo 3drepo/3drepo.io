@@ -265,7 +265,7 @@ export class ViewerService {
 	public pickPointEvent(pointInfo) {
 		this.emit(VIEWER_EVENTS.PICK_POINT, pointInfo);
 
-		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
+		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT || !(pointInfo.position?.length)) {
 			return;
 		}
 
