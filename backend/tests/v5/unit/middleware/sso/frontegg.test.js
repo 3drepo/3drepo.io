@@ -18,7 +18,10 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../../helper/dataGen');
 
 const { errorCodes } = require(`${src}/services/sso/sso.constants`);
 

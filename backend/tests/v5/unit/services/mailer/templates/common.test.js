@@ -18,8 +18,8 @@
 const { determineTestGroup } = require('../../../../helper/utils');
 const Yup = require('yup');
 const { access } = require('fs/promises');
+const { generateRandomString } = require('../../../../helper/dataGen');
 const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
 const Common = require(`${src}/services/mailer/templates/common`);

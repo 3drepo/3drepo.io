@@ -17,7 +17,11 @@
 
 const { determineTestGroup } = require('../../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../../helper/path');
-const { generateUUID, generateRandomNumber, generateRandomString } = require('../../../../../../../../../helper/services');
+const {
+	generateUUID,
+	generateRandomNumber,
+	generateRandomString,
+} = require('../../../../../../../../../helper/dataGen');
 const { times } = require('lodash');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);

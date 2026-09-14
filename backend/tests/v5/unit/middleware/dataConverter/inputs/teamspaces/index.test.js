@@ -16,7 +16,10 @@
  */
 
 const { determineTestGroup } = require('../../../../../helper/utils');
-const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../../../../helper/dataGen');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/schemas/teamspaces');

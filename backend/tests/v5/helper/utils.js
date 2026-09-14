@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const determineTestGroup = (filePath) => {
+const Utils = {};
+
+Utils.determineTestGroup = (filePath) => {
 	const match = filePath.match(/^.*[\\/](e2e|unit|drivers|scripts)[\\/](.*)\.test\.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
@@ -23,4 +25,11 @@ const determineTestGroup = (filePath) => {
 	return filePath;
 };
 
-module.exports = { determineTestGroup };
+Utils.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+Utils.outOfOrderArrayEqual = (arr1, arr2) => {
+	expect(arr1.length).toEqual(arr2.length);
+	expect(arr1).toEqual(expect.arrayContaining(arr2));
+};
+
+module.exports = Utils;

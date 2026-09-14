@@ -23,6 +23,8 @@ const { processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 const utils = require("../utils");
 const Queue = require("../services/queue");
+const { sendSystemEmail } = require("../../v5/services/mailer");
+const { templates } = require("../../v5/services/mailer/mailer.constants");
 
 const eventTypes = Object.freeze({
 	CREATED: "Created",
@@ -32,35 +34,44 @@ const eventTypes = Object.freeze({
 
 async function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 
-	let channel = `notifications::${account}`;
-	if (model) {
-		const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
+	try {
+		let channel = `notifications::${account}`;
+		if (model) {
+			const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
 
-		const project = await findProjectByModelId(account, model, { _id: 1 });
+			const project = await findProjectByModelId(account, model, { _id: 1 });
 
-		if (!project) {
+			if (!project) {
 			// models must be inside a project
-			return;
+				return;
+			}
+
+			const projectId = utils.uuidToString(project._id);
+
+			channel = `${account}::${projectId}::${model}`;
 		}
 
-		const projectId = utils.uuidToString(project._id);
+		model = !model ? "" : `::${model}`;
+		extraKeys = !extraKeys ? [] : extraKeys;
+		const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
+		event = `${account}${model}${extraPrefix}::${event}`;
 
-		channel = `${account}::${projectId}::${model}`;
+		const msg = {
+			event,
+			channel,
+			emitter,
+			data
+		};
+
+		return Queue.insertEventMessage(msg);
+	} catch(err) {
+		await sendSystemEmail(templates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: "ChatEventV4",
+			listenerName: "insertEventQueue",
+			payload: { event, teamspace: account, model, data },
+			error: err
+		}, undefined, true);
 	}
-
-	model = !model ? "" : `::${model}`;
-	extraKeys = !extraKeys ? [] : extraKeys;
-	const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
-	event = `${account}${model}${extraPrefix}::${event}`;
-
-	const msg = {
-		event,
-		channel,
-		emitter,
-		data
-	};
-
-	return Queue.insertEventMessage(msg);
 }
 
 // Notifications chat events

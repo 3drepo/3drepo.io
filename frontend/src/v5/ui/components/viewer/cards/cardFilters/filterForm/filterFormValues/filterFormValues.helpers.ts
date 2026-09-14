@@ -19,8 +19,12 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { mapArrayToFormArray, mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
 import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { FormDateTime, FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
-import { isBoolean, uniqBy } from 'lodash';
+import { isBoolean, uniq, uniqBy } from 'lodash';
 import { BaseFilter, TicketFilter, TicketFilterOperator, TicketFilterType, TicketFilterValue } from '../../cardFilters.types';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router';
+import { fetchTagsValues, modelType as getModelType } from '@/v5/services/api/tickets';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {
 	amendDateUpperBounds,
 	floorToMinute,
@@ -64,6 +68,8 @@ export type FilterFormValuesProps = {
 	isBackButton?: boolean,
 	onSubmit: (newFilter: TicketFilter) => void,
 	onClickCancelOrBack?: () => void,
+	tagOptions?: SelectOption[],
+	isFetchingOptions?: boolean,
 };
 
 export type FilterFormValuesComponentProps = FilterFormValuesProps;
@@ -175,4 +181,57 @@ export const getSelectOptions = (module, property, type, templates, modelsIds): 
 	});
 
 	return uniqBy(options, (({ value }) => value));
+};
+
+export const useTagsSelectOptions = (
+	module: string,
+	property: string,
+	type: TicketFilterType,
+): { selectOptions: SelectOption[], isFetchingOptions: boolean } => {
+	const { templates, modelsIds } = useTicketFiltersContext();
+	const { teamspace, project } = useParams<{ teamspace: string; project: string }>();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const cache = useRef<Record<string, SelectOption[]>>({});
+	const [selectOptions, setSelectOptions] = useState<SelectOption[]>([]);
+	// For now isFetchingOptions is only used for tags properties
+	const [isFetchingOptions, setIsFetchingOptions] = useState(false);
+
+	useEffect(() => {
+		if (type !== 'tags') return;
+		if (!modelsIds.length || !teamspace || !project) return;
+
+		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tags');
+		if (!matchingTemplate) return;
+
+		const propName = module ? `${module}::${property}` : property;
+		const cacheKey = `${matchingTemplate._id}:${propName}:${modelsIds.join(',')}`;
+
+		if (cache.current[cacheKey]) {
+			setSelectOptions(cache.current[cacheKey]);
+			return;
+		}
+
+		let cancelled = false;
+
+		setIsFetchingOptions(true);
+		Promise.all(
+			modelsIds.map((modelId) => fetchTagsValues(
+				teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName,
+			).catch(() => ({ values: [] as string[] }))),
+		)
+			.then((results) => {
+				if (cancelled) return;
+				const values = uniq(results.flatMap(({ values: v }) => v));
+				const options = values.map((value) => ({ value }));
+				cache.current[cacheKey] = options;
+				setSelectOptions(options);
+			})
+			.finally(() => {
+				if (!cancelled) setIsFetchingOptions(false);
+			});
+
+		return () => { cancelled = true; };
+	}, [type, JSON.stringify(modelsIds), JSON.stringify(templates)]);
+
+	return { selectOptions, isFetchingOptions };
 };

@@ -45,6 +45,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			validator = Yup.array().nullable();
 			break;
 		case 'manyOf':
+		case 'tags':
 			validator = Yup.array();
 			break;
 		case 'image':
@@ -84,6 +85,15 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 					defaultMessage: 'Select at least one option',
 				}));
 		}
+
+		if (type === 'tags') {
+			validator = validator.min(1,
+				formatMessage({
+					id: 'validation.ticket.tags.required',
+					defaultMessage: 'Create at least one tag',
+				}));
+		}
+	
 		if (type === 'number') {
 			validator = requiredNumber(
 				formatMessage({
@@ -145,7 +155,7 @@ export const getValidators = (template: ITemplate) => {
 	const { properties, modules } = template;
 	const validators: any = { title: getTitleValidator() };
 
-	validators.properties = propertiesValidator(properties || []);
+	validators.properties = propertiesValidator((properties || []).filter((property) => property.name !== 'Created at'));
 
 	if (modules) {
 		const modulesValidator = {};
