@@ -20,6 +20,8 @@ const UaParserJs = require('ua-parser-js');
 
 const UserAgent = {};
 
+const getLinuxVersion = (userAgentString) => userAgentString.match(/\bLinux ([^;)]+)/i)?.[1];
+
 // Format:
 // PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
 // Example:
@@ -58,10 +60,14 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 	});
 
 	const { browser, engine, os } = UaParserJs(userAgentString);
+	const normalizedOS = {
+		...os,
+		version: os.version ?? (os.name === 'Linux' ? getLinuxVersion(userAgentString) : undefined),
+	};
 	const userAgentInfo = {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
-		os,
+		os: normalizedOS,
 		device: deviceDetector.detect(userAgentString).device.type,
 	};
 
