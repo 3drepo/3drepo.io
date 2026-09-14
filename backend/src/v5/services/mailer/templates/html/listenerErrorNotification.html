@@ -1,0 +1,17 @@
+<p>The following listener has thrown an unexpected error: </p>
+<p>
+	<b>Listener:</b>
+	<%= component %>.<%= listenerName %>
+	<br>
+	<b>Error:</b>
+	<%= error.message %>
+	<br>
+	<b>Code:</b>
+	<%= error.code %>
+	<br>
+	<b>Payload</b>:<br>
+	<%= JSON.stringify(payload) %>
+	<br>
+	<b>Stack trace:</b><br>
+	<%= error.stack %>
+</p>

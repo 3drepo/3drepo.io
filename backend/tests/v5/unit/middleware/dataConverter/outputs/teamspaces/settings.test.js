@@ -16,7 +16,7 @@
  */
 
 const { determineTestGroup } = require('../../../../../helper/utils');
-const { generateTemplate } = require('../../../../../helper/services');
+const { generateTemplate } = require('../../../../../helper/dataGen');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');

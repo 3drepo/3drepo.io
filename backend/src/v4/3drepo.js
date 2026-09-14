@@ -40,12 +40,8 @@ const certMap = {};
 let sslOptions = {};
 
 process.on("unhandledRejection", async (err) => {
-	try {
-		systemLogger.logError(`Unhandled promise rejection found with error: ${err?.message || err}`);
-		await sendSystemEmail(templates.ERROR_NOTIFICATION.name, {err, title: "Application exiting on unhandled promise rejection", message: "Unhandled promise rejection found"});
-	} catch(mailErr) {
-		systemLogger.logError(`Failed to send email: ${mailErr.message}`);
-	}
+	systemLogger.logError(`Unhandled promise rejection found with error: ${err?.message || err}`);
+	await sendSystemEmail(templates.ERROR_NOTIFICATION.name, {err, title: "Application exiting on unhandled promise rejection", message: "Unhandled promise rejection found"}, undefined, true);
 
 	// eslint-disable-next-line n/no-process-exit
 	process.exit(-1);

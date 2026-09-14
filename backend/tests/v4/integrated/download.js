@@ -18,7 +18,6 @@
  */
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -32,7 +31,7 @@ describe("Download", function () {
 	const password = "testing";
 	const model = "testproject";
 
-	before(async() => {
+	beforeAll(async() => {
 		const app = await createAppAsync();	
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -46,7 +45,7 @@ describe("Download", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();

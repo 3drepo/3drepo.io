@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src, srcV4 } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 jest.mock('../../../../../src/v4/models/invitations');
 const InvitationsModelV4 = require(`${srcV4}/models/invitations`);

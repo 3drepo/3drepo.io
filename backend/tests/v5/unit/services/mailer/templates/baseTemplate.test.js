@@ -16,8 +16,8 @@
  */
 
 const { determineTestGroup } = require('../../../../helper/utils');
+const { generateRandomString } = require('../../../../helper/dataGen');
 const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
 const BaseTemplate = require(`${src}/services/mailer/templates/baseTemplate`);
