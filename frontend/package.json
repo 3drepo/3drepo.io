@@ -112,7 +112,7 @@
 		"react-split-pane": "3.2.0",
 		"react-truncate": "2.4.0",
 		"react-use-intercom": "1.1.5",
-		"react-virtuoso": "4.12.3",
+		"react-virtuoso": "4.18.12",
 		"react-window": "1.8.9",
 		"redux": "4.0.0",
 		"redux-actions": "2.6.1",
