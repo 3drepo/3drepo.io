@@ -100,7 +100,7 @@ export enum SnapMode {
 	Off = 'Off',
 	Navigation = 'Navigation',
 	Drawing = 'Drawing',
-}
+};
 
 type Deferred<T> = {
 	resolve: (value: T | PromiseLike<T>) => void,
@@ -112,18 +112,18 @@ type Deferred<T> = {
 export interface CanvasPosition {
 	x: number,
 	y: number,
-}
+};
 
 // Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
 // Used for requestPointInfo.
 export interface ClientPosition {
 	clientX: number,
 	clientY: number,
-}
+};
 
 export interface PointInfoOptions {
 	useSnapping: boolean,
-}
+};
 
 export interface PointInfo {
 	id: string,
@@ -134,28 +134,28 @@ export interface PointInfo {
 	position: number[],
 	normal: number[],
 	requestId: string,
-}
+};
 
 export interface Bounds {
 	min: number[],
 	max: number[]
-}
+};
 
 export interface PickInfo {
 	mousePos: number[],
 	position: number[],
-}
+};
 
 export type SharedIds = {
 	account: string,
 	model: string,
 	shared_ids: string[],
-}
+};
 
 export type ObjectStatus = {
 	hiddenNodes: SharedIds[],
 	highlightedNodes: SharedIds[],
-}
+};
 
 export type MapInitialisationInfo = {
 	surveyPoints: {
@@ -911,7 +911,7 @@ export class UnityUtil {
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
-				if(ssJSON.ssBytes) {
+				if (ssJSON.ssBytes) {
 					promise.resolve(ssJSON.ssBytes);
 				} else {
 					promise.resolve(ssJSON.length);
@@ -2591,7 +2591,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static useOrthographicProjection() {
-		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
