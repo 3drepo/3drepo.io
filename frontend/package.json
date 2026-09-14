@@ -56,7 +56,7 @@
 		"@mui/x-date-pickers": "8.27.2",
 		"@pdftron/webviewer": "11.12.0",
 		"@popperjs/core": "2.6.0",
-		"@types/three": "0.167.1",
+		"@types/three": "0.185.4",
 		"@webscopeio/react-textarea-autocomplete": "4.9.2",
 		"axios": "1.18.0",
 		"babel-jest": "30.0.0",
