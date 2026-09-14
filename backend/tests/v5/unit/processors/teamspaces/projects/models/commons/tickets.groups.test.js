@@ -552,6 +552,80 @@ const testProcessGroupsUpdate = () => {
 	});
 };
 
+const testProcessCameraGroupUpdate = () => {
+	describe('Process camera group update', () => {
+		let groupsState;
+		const oldGroupId = generateUUIDString();
+		const newGroupId = generateUUIDString();
+		const newGroup = {
+			name: generateRandomString(),
+			objects: [{ container: generateUUID(), _ids: [generateUUID()] }],
+		};
+
+		beforeEach(() => {
+			groupsState = {
+				old: new Set(),
+				stillUsed: new Set(),
+				toAdd: [],
+			};
+		});
+
+		test('should preserve old camera group when new camera is undefined', () => {
+			const res = Groups.processCameraGroupUpdate(stringToUUID(oldGroupId), undefined, groupsState);
+
+			expect(res).toBeUndefined();
+			expect(groupsState.old.has(oldGroupId)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroupId)).toBe(true);
+			expect(groupsState.toAdd).toHaveLength(0);
+		});
+
+		test('should add new camera group and replace it with a UUID', () => {
+			const res = Groups.processCameraGroupUpdate(undefined, newGroup, groupsState);
+
+			expect(res).not.toEqual(newGroup);
+			expect(groupsState.toAdd).toHaveLength(1);
+			expect(groupsState.toAdd[0]).toEqual({ ...newGroup, _id: res });
+		});
+
+		test('should mark existing UUID camera as still used', () => {
+			const res = Groups.processCameraGroupUpdate(undefined, stringToUUID(newGroupId), groupsState);
+
+			expect(UUIDToString(res)).toBe(newGroupId);
+			expect(groupsState.stillUsed.has(newGroupId)).toBe(true);
+			expect(groupsState.toAdd).toHaveLength(0);
+		});
+
+		test('should remove old camera group when new camera is a regular camera object', () => {
+			const camera = { type: 'perspective', position: [1, 2, 3], forward: [0, 0, 1], up: [0, 1, 0] };
+			const res = Groups.processCameraGroupUpdate(stringToUUID(oldGroupId), camera, groupsState);
+
+			expect(res).toEqual(camera);
+			expect(groupsState.old.has(oldGroupId)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroupId)).toBe(false);
+			expect(groupsState.toAdd).toHaveLength(0);
+		});
+
+		test('should remove old camera group when new camera is null', () => {
+			const res = Groups.processCameraGroupUpdate(stringToUUID(oldGroupId), null, groupsState);
+
+			expect(res).toBeNull();
+			expect(groupsState.old.has(oldGroupId)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroupId)).toBe(false);
+			expect(groupsState.toAdd).toHaveLength(0);
+		});
+
+		test('should replace old camera group with a new camera group', () => {
+			const res = Groups.processCameraGroupUpdate(stringToUUID(oldGroupId), newGroup, groupsState);
+
+			expect(res).not.toEqual(newGroup);
+			expect(groupsState.old.has(oldGroupId)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroupId)).toBe(false);
+			expect(groupsState.toAdd).toHaveLength(1);
+			expect(groupsState.toAdd[0]).toEqual({ ...newGroup, _id: res });
+		});
+	});
+};
+
 const testCommitGroupChanges = () => {
 	describe('Commit group changes', () => {
 		const teamspace = generateRandomString();
@@ -638,5 +712,6 @@ describe(determineTestGroup(__filename), () => {
 	testAddGroups();
 	testUpdateGroup();
 	testProcessGroupsUpdate();
+	testProcessCameraGroupUpdate();
 	testCommitGroupChanges();
 });

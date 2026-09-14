@@ -25,6 +25,44 @@ const YupHelper = { validators: {}, transformer: {}, types: { strings: {} }, uti
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
 
+YupHelper.utils.oneOfSchemas = (schemas, message = 'Value did not match any schema') => {
+	const schema = Yup.mixed()
+		.transform((value, originalValue) => {
+			if (originalValue === undefined || originalValue === null) return value;
+
+			for (const candidate of schemas) {
+				try {
+					candidate.validateSync(originalValue, { abortEarly: false });
+					return candidate.cast(originalValue);
+				} catch {
+					// continue trying other schemas
+				}
+			}
+
+			return value;
+		})
+		.test('one-of-schemas', message, async (value, context) => {
+			if (context.originalValue === undefined || context.originalValue === null) return true;
+
+			try {
+				await Promise.any(schemas.map(
+					(candidate) => candidate.validate(context.originalValue, {
+						abortEarly: false,
+						context: context.options.context,
+					}),
+				));
+				return true;
+			} catch (err) {
+				const failures = (err?.errors ?? []).map((failure) => failure?.message ?? String(failure));
+				return context.createError({
+					message: `${message}: ${failures.join('; ')}`,
+				});
+			}
+		});
+
+	return schema;
+};
+
 YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 	allowFullStops ? /^[\w|_|.|-]*$/ : /^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string

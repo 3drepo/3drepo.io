@@ -216,17 +216,21 @@ const insertTicketsImageTest = async (isImport, propType) => {
 	expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 	if (isImport) {
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
-			{ teamspace,
+			{
+				teamspace,
 				project,
 				model,
 				author,
-				tickets: expectedOutput });
+				tickets: expectedOutput,
+			});
 	} else {
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-			{ teamspace,
+			{
+				teamspace,
 				project,
 				model,
-				ticket: expectedOutput[0] });
+				ticket: expectedOutput[0],
+			});
 	}
 };
 
@@ -332,9 +336,11 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 		}
 
 		return {
-			properties: { [imageTestData.propName]: propType === propTypes.IMAGE_LIST
-				? propRef
-				: generatePropData(propRef, propType) },
+			properties: {
+				[imageTestData.propName]: propType === propTypes.IMAGE_LIST
+					? propRef
+					: generatePropData(propRef, propType),
+			},
 			modules: {
 				[imageTestData.moduleName]: {
 					[imageTestData.propName]: propType === propTypes.IMAGE_LIST
@@ -365,10 +371,12 @@ const updateImagesTestHelper = async (updateMany, propType) => {
 	expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
 	response.forEach((res) => {
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-			{ teamspace,
+			{
+				teamspace,
 				project,
 				model,
-				...res });
+				...res,
+			});
 	});
 };
 
@@ -401,14 +409,22 @@ const generateGroupsTestData = (useGroupsUUID = false, nTickets = 1) => {
 	};
 
 	const generateStatesData = () => (
-		{ state: {
-			[viewGroups.COLORED]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
-				: generateGroup(true, { hasId: false }) })),
-			[viewGroups.HIDDEN]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
-				: generateGroup(false, { hasId: false }) })),
-			[viewGroups.TRANSFORMED]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
-				: generateGroup(false, { hasId: false }) })),
-		} }
+		{
+			state: {
+				[viewGroups.COLORED]: times(3, () => ({
+					group: useGroupsUUID ? generateUUID()
+						: generateGroup(true, { hasId: false }),
+				})),
+				[viewGroups.HIDDEN]: times(3, () => ({
+					group: useGroupsUUID ? generateUUID()
+						: generateGroup(false, { hasId: false }),
+				})),
+				[viewGroups.TRANSFORMED]: times(3, () => ({
+					group: useGroupsUUID ? generateUUID()
+						: generateGroup(false, { hasId: false }),
+				})),
+			},
+		}
 	);
 
 	const tickets = times(nTickets, () => ({
@@ -456,6 +472,7 @@ const insertTicketsGroupTests = (isImport) => {
 				testData.template._id, expect.any(Array));
 
 			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
+			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(isImport ? iterations : 1);
 
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
@@ -464,17 +481,21 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			if (isImport) {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
-					{ teamspace,
+					{
+						teamspace,
 						project,
 						model,
 						author,
-						tickets: expectedOutput });
+						tickets: expectedOutput,
+					});
 			} else {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-					{ teamspace,
+					{
+						teamspace,
 						project,
 						model,
-						ticket: expectedOutput[0] });
+						ticket: expectedOutput[0],
+					});
 			}
 		});
 	});
@@ -501,15 +522,18 @@ const updateGroupTestsHelper = (updateMany) => {
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
 
 			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
+			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
 			response.forEach((res) => {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-					{ teamspace,
+					{
+						teamspace,
 						project,
 						model,
-						...res });
+						...res,
+					});
 			});
 		};
 
@@ -540,6 +564,91 @@ const updateGroupTestsHelper = (updateMany) => {
 			});
 
 			await runTest(response, template, tickets, propName, moduleName, toUpdate);
+		});
+
+		test('Should replace the camera with the value returned by processCameraGroupUpdate', async () => {
+			const { template, tickets, propName, moduleName } = generateGroupsTestData(true, nTickets);
+			const response = [];
+
+			const oldCamera = generateUUID();
+			const newCamera = generateGroup(false, { hasId: false });
+			const updatedCamera = generateUUID();
+
+			tickets.forEach((ticket) => {
+				// eslint-disable-next-line no-param-reassign
+				ticket.properties[propName].camera = oldCamera;
+				// eslint-disable-next-line no-param-reassign
+				ticket.modules[moduleName][propName].camera = oldCamera;
+			});
+
+			const toUpdate = tickets.map((ticket) => ({
+				properties: {
+					[propName]: {
+						...ticket.properties[propName],
+						camera: newCamera,
+					},
+				},
+				modules: {
+					[moduleName]: {
+						[propName]: {
+							...ticket.modules[moduleName][propName],
+							camera: newCamera,
+						},
+					},
+				},
+			}));
+
+			times(nTickets, () => response.push({ ...generateRandomObject(), changes: generateRandomObject() }));
+
+			TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
+			TicketsModel.updateTickets.mockResolvedValueOnce(response);
+
+			GroupsProcessor.processCameraGroupUpdate.mockReturnValue(updatedCamera);
+
+			await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets, toUpdate))
+				.resolves.toBeUndefined();
+
+			const expectedUpdateData = tickets.map((ticket) => ({
+				properties: {
+					[propName]: {
+						...ticket.properties[propName],
+						camera: updatedCamera,
+					},
+				},
+				modules: {
+					[moduleName]: {
+						[propName]: {
+							...ticket.modules[moduleName][propName],
+							camera: updatedCamera,
+						},
+					},
+				},
+			}));
+
+			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+				tickets, expectedUpdateData, undefined);
+
+			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
+
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
+			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
+			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledWith(
+				oldCamera, newCamera, expect.any(Object),
+			);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
+			response.forEach((res) => {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
+					{
+						teamspace,
+						project,
+						model,
+						...res,
+					});
+			});
 		});
 	});
 };
@@ -579,17 +688,21 @@ const insertTicketsTestHelper = (isImport) => {
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		if (isImport) {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
-				{ teamspace,
+				{
+					teamspace,
 					project,
 					model,
 					author,
-					tickets: expectedOutput });
+					tickets: expectedOutput,
+				});
 		} else {
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-				{ teamspace,
+				{
+					teamspace,
 					project,
 					model,
-					ticket: expectedOutput[0] });
+					ticket: expectedOutput[0],
+				});
 		}
 	});
 
@@ -611,15 +724,19 @@ const testImportTickets = () => {
 		insertTicketsTestHelper(true);
 		describe('Import tickets with comments', () => {
 			const template = generateTemplate();
-			const tickets = times(10, () => ({ ...generateTicket(template),
-				comments: times(10, generateRandomObject) }));
+			const tickets = times(10, () => ({
+				...generateTicket(template),
+				comments: times(10, generateRandomObject),
+			}));
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const author = generateRandomString();
 			test('should call importComments if there are comments', async () => {
-				const expectedOutput = tickets.map(({ comments, ...ticketData }) => ({ ...ticketData,
-					_id: generateRandomString() }));
+				const expectedOutput = tickets.map(({ comments, ...ticketData }) => ({
+					...ticketData,
+					_id: generateRandomString(),
+				}));
 
 				TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce(expectedOutput);
 				TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
@@ -638,11 +755,13 @@ const testImportTickets = () => {
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
-					{ teamspace,
+					{
+						teamspace,
 						project,
 						model,
 						author,
-						tickets: expectedOutput });
+						tickets: expectedOutput,
+					});
 
 				const ticketsComments = tickets.map(({ comments }, i) => ({ ticket: expectedOutput[i]._id, comments }));
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
@@ -766,10 +885,12 @@ const testUpdateManyTickets = () => {
 			expect(EventsManager.publish).toHaveBeenCalledTimes(ticketCount);
 			response.forEach((res) => {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-					{ teamspace,
+					{
+						teamspace,
 						project,
 						model,
-						...res });
+						...res,
+					});
 			});
 		});
 
@@ -790,7 +911,8 @@ const testUpdateManyTickets = () => {
 					updateData.push({
 						title: generateRandomString(),
 						properties: {},
-						comments });
+						comments,
+					});
 
 					response.push({ ...generateRandomObject(), changes: generateRandomObject() });
 					const ticket = generateTicket(template);
@@ -819,10 +941,12 @@ const testUpdateManyTickets = () => {
 				expect(EventsManager.publish).toHaveBeenCalledTimes(ticketCount);
 				response.forEach((res) => {
 					expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-						{ teamspace,
+						{
+							teamspace,
 							project,
 							model,
-							...res });
+							...res,
+						});
 				});
 
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
@@ -947,134 +1071,163 @@ const testGetTicketList = () => {
 		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: true }],
 		['limit is provided', [], {}, undefined, { limit: generateRandomNumber() }],
 		['skip is provided', [], {}, undefined, { skip: generateRandomNumber() }],
-		[`${queryOperators.EXISTS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.EXISTS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.EXISTS }],
 			expectedQuery: { $and: [{ [propertyName]: { $exists: true } }] },
 		}],
-		[`${queryOperators.NOT_EXISTS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_EXISTS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EXISTS }],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $exists: true } } }] },
 		}],
-		[`${queryOperators.IS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.IS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] }],
 			expectedQuery: { $and: [{ [propertyName]: { $in: [propertyValue, propertyValue2] } }] },
 		}],
-		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: ['true'] }],
 			expectedQuery: { $and: [{ [propertyName]: { $in: [true] } }] },
 		}],
-		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, { }, {
+		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [`${propertyNumberValue}`] }],
 			expectedQuery: {
 				$and: [{ [propertyName]: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } }],
 			},
 		}],
-		[`${queryOperators.NOT_IS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_IS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [
 				{ propertyName, operator: queryOperators.NOT_IS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [propertyValue, propertyValue2] } } }] },
 		}],
-		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
 			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [true] } } }] },
 		}],
-		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
 			expectedQuery: {
 				$and: [{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } }],
 			},
 		}],
-		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.CONTAINS, value: [propertyValue, propertyValue2] }],
 			expectedQuery: { $and: [{ $or: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
 		}],
-		[`${queryOperators.NOT_CONTAINS} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_CONTAINS} query filter`, [], {}, undefined, {}, {
 			queryFilters: [
 				{ propertyName, operator: queryOperators.NOT_CONTAINS, value: [propertyValue, propertyValue2] },
 			],
 			expectedQuery: { $and: [{ $nor: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
 		}],
-		[`${queryOperators.RANGE} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.RANGE} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.RANGE, value: [[0, 10], [20, 30]] }],
-			expectedQuery: { $and: [{ $or: [
-				{ [propertyName]: { $gte: 0, $lte: 10 } },
-				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
-				{ [propertyName]: { $gte: 20, $lte: 30 } },
-				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
-			] }] },
+			expectedQuery: {
+				$and: [{
+					$or: [
+						{ [propertyName]: { $gte: 0, $lte: 10 } },
+						{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+						{ [propertyName]: { $gte: 20, $lte: 30 } },
+						{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+					],
+				}],
+			},
 		}],
-		[`${queryOperators.NOT_IN_RANGE} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.NOT_IN_RANGE} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.NOT_IN_RANGE, value: [[0, 10], [20, 30]] }],
-			expectedQuery: { $and: [{ $nor: [
-				{ [propertyName]: { $gte: 0, $lte: 10 } },
-				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
-				{ [propertyName]: { $gte: 20, $lte: 30 } },
-				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
-			] }] },
+			expectedQuery: {
+				$and: [{
+					$nor: [
+						{ [propertyName]: { $gte: 0, $lte: 10 } },
+						{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+						{ [propertyName]: { $gte: 20, $lte: 30 } },
+						{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+					],
+				}],
+			},
 		}],
-		[`${queryOperators.GREATER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.GREATER_OR_EQUAL_TO} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.GREATER_OR_EQUAL_TO, value: propertyNumberValue }],
-			expectedQuery: { $and: [{ $or: [
-				{ [propertyName]: { $gte: propertyNumberValue } },
-				{ [propertyName]: { $gte: new Date(propertyNumberValue) } },
-			] }] },
+			expectedQuery: {
+				$and: [{
+					$or: [
+						{ [propertyName]: { $gte: propertyNumberValue } },
+						{ [propertyName]: { $gte: new Date(propertyNumberValue) } },
+					],
+				}],
+			},
 		}],
-		[`${queryOperators.LESSER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+		[`${queryOperators.LESSER_OR_EQUAL_TO} query filter`, [], {}, undefined, {}, {
 			queryFilters: [{ propertyName, operator: queryOperators.LESSER_OR_EQUAL_TO, value: propertyNumberValue }],
-			expectedQuery: { $and: [{ $or: [
-				{ [propertyName]: { $lte: propertyNumberValue } },
-				{ [propertyName]: { $lte: new Date(propertyNumberValue) } },
-			] }] },
+			expectedQuery: {
+				$and: [{
+					$or: [
+						{ [propertyName]: { $lte: propertyNumberValue } },
+						{ [propertyName]: { $lte: new Date(propertyNumberValue) } },
+					],
+				}],
+			},
 		}],
-		['multiple query filters', [], {}, undefined, { }, {
+		['multiple query filters', [], {}, undefined, {}, {
 			queryFilters: [
 				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
-				{ propertyName: propertyName2,
+				{
+					propertyName: propertyName2,
 					operator: queryOperators.LESSER_OR_EQUAL_TO,
-					value: propertyNumberValue },
+					value: propertyNumberValue,
+				},
 			],
-			expectedQuery: { $and: [
-				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
-				{ $or: [
-					{ [propertyName2]: { $lte: propertyNumberValue } },
-					{ [propertyName2]: { $lte: new Date(propertyNumberValue) } },
-				] },
-			] },
+			expectedQuery: {
+				$and: [
+					{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+					{
+						$or: [
+							{ [propertyName2]: { $lte: propertyNumberValue } },
+							{ [propertyName2]: { $lte: new Date(propertyNumberValue) } },
+						],
+					},
+				],
+			},
 		}],
-		['template filter', [], {}, undefined, { }, {
+		['template filter', [], {}, undefined, {}, {
 			isTemplateQuery: true,
 			queryFilters: [
 				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.IS, value: [propertyValue] },
 				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
 			],
-			expectedQuery: { $and: [
-				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
-				{ type: { $in: ticketTemplates.map((t) => t._id) } },
-			],
+			expectedQuery: {
+				$and: [
+					{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+					{ type: { $in: ticketTemplates.map((t) => t._id) } },
+				],
 			},
 		}],
-		['ticket code filter', [], {}, undefined, { }, {
+		['ticket code filter', [], {}, undefined, {}, {
 			isTemplateQuery: true,
 			queryFilters: [
-				{ propertyName: specialQueryFields.TICKET_CODE,
+				{
+					propertyName: specialQueryFields.TICKET_CODE,
 					operator: queryOperators.IS,
-					value: [propertyValue] },
+					value: [propertyValue],
+				},
 			],
 			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
 			expectedQuery: {},
 		}],
-		['ticket code filter with multiple filters', [], {}, undefined, { }, {
+		['ticket code filter with multiple filters', [], {}, undefined, {}, {
 			isTemplateQuery: true,
 			queryFilters: [
-				{ propertyName: specialQueryFields.TICKET_CODE,
+				{
+					propertyName: specialQueryFields.TICKET_CODE,
 					operator: queryOperators.IS,
-					value: [propertyValue] },
+					value: [propertyValue],
+				},
 				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
 			],
-			expectedQuery: { $and: [
-				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
-			] },
+			expectedQuery: {
+				$and: [
+					{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+				],
+			},
 			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
 		}],
 	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc, limit, skip } = {}, { queryFilters, expectedQuery, ticketCodeQuery, isTemplateQuery } = {}) => {
@@ -1130,13 +1283,15 @@ const testGetTicketList = () => {
 			if (queryFilters?.length) {
 				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledWith(teamspace, project, model,
-					deleteIfUndefined({ projection,
+					deleteIfUndefined({
+						projection,
 						updatedSince,
 						sort,
 						limit,
 						skip,
 						query: expectedQuery,
-						ticketCodeQuery }));
+						ticketCodeQuery,
+					}));
 			} else {
 				expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
@@ -1334,7 +1489,7 @@ const testOnTemplateUpdated = () => {
 	const propName = generateRandomString();
 	describe.each([
 		['Should do nothing if there is no ticket associated with the template', { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, undefined, false],
-		['Should do nothing if the template does not contain automated properties', { }, undefined],
+		['Should do nothing if the template does not contain automated properties', {}, undefined],
 		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, 'xyz'],
 		[`Should update the field if it is automated (${supportedPatterns.TEMPLATE_CODE})`, { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, `code${temCode}`],
 		['Should update the field if it is automated (mutliple properties)',
@@ -1433,7 +1588,7 @@ const testOnModelNameUpdated = () => {
 	describe.each([
 		['Should do nothing if there is no ticket associated with the templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, true, false],
 		['Should do nothing if there is no templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, false, false],
-		['Should do nothing if the template does not contain automated properties', { }],
+		['Should do nothing if the template does not contain automated properties', {}],
 		[`Should do nothing if the template automated property does not contain ${supportedPatterns.MODEL_NAME}`, { value: 'xyz' }],
 		[`Should update the field if it is automated (${supportedPatterns.MODEL_NAME})`, { value: `code{${supportedPatterns.MODEL_NAME}}` }, `code${modelName}`],
 	])('On model name updated', (desc, config, value, hasTemplates = true, hasTickets = true) => {
@@ -1489,10 +1644,12 @@ const testOnModelNameUpdated = () => {
 
 			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace,
-				{ $or: [
-					{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-					{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-				] });
+				{
+					$or: [
+						{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+						{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+					],
+				});
 
 			if (fetchedTickets) {
 				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
@@ -1600,6 +1757,7 @@ const testGetOpenTicketsCountForMultipleModels = () => {
 describe(determineTestGroup(__filename), () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
+		GroupsProcessor.processCameraGroupUpdate.mockImplementation((_, newCamera) => newCamera);
 	});
 	testAddTicket();
 	testImportTickets();

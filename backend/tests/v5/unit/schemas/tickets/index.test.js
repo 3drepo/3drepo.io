@@ -1820,6 +1820,73 @@ const testSerialiseTicket = () => {
 
 			expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
 		});
+
+		describe('Views', () => {
+			test('Should serialise a UUID camera and state groups to strings', () => {
+				const viewProp = generateRandomString();
+				const cameraUUIDString = generateUUIDString();
+				const groupUUIDString = generateUUIDString();
+				const template = {
+					_id: generateUUID(),
+					properties: [{
+						type: propTypes.VIEW,
+						name: viewProp,
+					}],
+					modules: [],
+				};
+				const ticket = {
+					properties: {
+						[viewProp]: {
+							camera: stringToUUID(cameraUUIDString),
+							state: {
+								[viewGroups.HIDDEN]: [{ group: stringToUUID(groupUUIDString) }],
+							},
+						},
+					},
+					modules: {},
+				};
+
+				expect(TicketSchema.serialiseTicket(ticket, template)).toEqual({
+					properties: {
+						[viewProp]: {
+							camera: cameraUUIDString,
+							state: {
+								[viewGroups.HIDDEN]: [{ group: groupUUIDString }],
+							},
+						},
+					},
+					modules: {},
+				});
+			});
+
+			test('Should pass through a regular camera object unchanged', () => {
+				const viewProp = generateRandomString();
+				const camera = {
+					position: [-71589.0508593757, 18926.52733612061, 33778.59533505258],
+					up: [0.10712166130542755, 0.9851195216178894, -0.13440410792827606],
+					forward: [0.6139947175979614, -0.1718706339597702, -0.7703707218170166],
+					type: 'perspective',
+				};
+				const template = {
+					_id: generateUUID(),
+					properties: [{
+						type: propTypes.VIEW,
+						name: viewProp,
+					}],
+					modules: [],
+				};
+				const ticket = {
+					properties: {
+						[viewProp]: {
+							camera,
+						},
+					},
+					modules: {},
+				};
+
+				expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
+			});
+		});
 	});
 };
 
