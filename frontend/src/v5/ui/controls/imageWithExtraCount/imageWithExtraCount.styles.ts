@@ -28,6 +28,7 @@ export const OverlappingContainer = styled(OverlappingContainerBase)`
 export const Image = styled(ImageWithSkeleton)`
 	object-fit: cover;
 	aspect-ratio: 1 / 1;
+	height: 100%;
 	width: 100%;
 	cursor: pointer;
 	border-radius: 5px;
