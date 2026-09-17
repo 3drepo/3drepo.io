@@ -54,7 +54,7 @@ const USERS_TABLE_CELLS = [
 		type: CELL_TYPES.USER,
 		HeadingComponent: CellUserSearch,
 		CellComponent: UserItem,
-		searchBy: ['firstName', 'lastName', 'user', 'company']
+		searchBy: ['firstName', 'lastName', 'company']
 	},
 	{
 		name: 'Job',

@@ -153,7 +153,7 @@ export const selectFilteredNodesList = createSelector(
 		if (!selectedFilters.length) {
 			return nodes;
 		}
-		return searchByFilters(sortedNodes, selectedFilters, true);
+		return searchByFilters(sortedNodes, selectedFilters, true, ['name']);
 	}
 );
 
