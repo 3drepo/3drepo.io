@@ -198,20 +198,16 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	Object.values(idTypes).forEach((v) => { res[v] = []; });
 
 	metadata.forEach((entry) => {
-		// It may be possible that we are storing the same id in multiple metadata entries.
-		// So we are keeping track of what we've already found
-		const idCounted = new Set();
+		// Multiple metadata labels may identify same external ID.
+		const idTypesFound = new Set();
 
 		(entry.metadata || []).forEach(({ key, value }) => {
-			const idTypesFound = metadataKeyToIdTypes[key];
+			const idType = metadataKeyToIdTypes[key];
 
-			if (!idTypesFound) return;
+			if (!idType || idTypesFound.has(idType)) return;
 
-			idTypesFound.forEach((idType) => {
-				if (idCounted.has(idType)) return;
-				idCounted.add(idType);
-				res[idType].push(value);
-			});
+			idTypesFound.add(idType);
+			res[idType].push(value);
 		});
 	});
 
@@ -228,13 +224,6 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	if (targetCount) {
 		for (const idType of typePriority) {
 			if (res[idType]?.length === targetCount) {
-				if (idType === idTypes.DWG) {
-					// if all the entries are pure numbers, then it is more likely to be revit IDs
-					if (res[idTypes.REVIT]?.length === targetCount
-						&& res[idType].every((value) => !Number.isNaN(Number(value)))) {
-						return { key: idTypes.REVIT, values: Array.from(new Set(res[idTypes.REVIT])) };
-					}
-				}
 				// convert to set to purge duplicates
 				return { key: idType, values: Array.from(new Set(res[idType])) };
 			}
