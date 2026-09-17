@@ -28,7 +28,8 @@ import { useEffect } from 'react';
 
 const toTicketPath = (filter:TicketFilter) => {
 	if (filter.type === 'title') return filter.type;
-	return (filter.module ? 'module.' : '') + 'properties.' + filter.property;
+	if (!filter.module) return 'properties.' + filter.property;
+	return 'modules.' + filter.module + '.' + filter.property;
 };
 
 export const useRealtimeFiltering = (
