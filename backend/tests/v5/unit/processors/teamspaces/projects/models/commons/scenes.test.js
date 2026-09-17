@@ -29,7 +29,11 @@ const {
 } = require('../../../../../../helper/dataGen');
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const {
+	idTypesToKeys,
+	idTypes,
+	metadataKeyToIdTypes,
+} = require(`${src}/models/metadata.constants`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
@@ -381,7 +385,7 @@ const testGetExternalIdsFromMetadata = () => {
 
 	const getIDsFromMeta = (meta, targetType) => meta.flatMap(({ metadata }) => {
 		for (const { key, value } of metadata) {
-			if (metaKeyToIdType[key] === targetType) return value;
+			if (metadataKeyToIdTypes[key]?.includes(targetType)) return value;
 		}
 		return [];
 	});
@@ -393,6 +397,10 @@ const testGetExternalIdsFromMetadata = () => {
 		['rvt ids if matched', rvtOnlyMeta, undefined, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
 		['ifc guids if both rvt and ifc matched', bothMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(bothMeta, idTypes.IFC) }],
 		['dwg ids if matched', dwgOnlyMeta, undefined, { key: idTypes.DWG, values: getIDsFromMeta(dwgOnlyMeta, idTypes.DWG) }],
+		['revit ids when element ids are numeric', times(4, () => generateMeta(undefined, '12345', '12345')), undefined,
+			{ key: idTypes.REVIT, values: ['12345'] }],
+		['dwg ids when element ids are hexadecimal', times(4, () => generateMeta(undefined, 'ABCDEF', 'ABCDEF')), undefined,
+			{ key: idTypes.DWG, values: ['ABCDEF'] }],
 		['ifc guids if all id types matched according to type priority', allTypesMeta, undefined,
 			{ key: idTypes.IFC, values: getIDsFromMeta(allTypesMeta, idTypes.IFC) }],
 		['revit ids if requested', bothMeta, idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(bothMeta, idTypes.REVIT) }],

@@ -37,12 +37,16 @@ MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.DWG]: ['Entity Handle::Value', 'Element ID'],
 };
 
-MetaConstants.metaKeyToIdType = {};
+MetaConstants.metadataKeyToIdTypes = {};
 
 Object.keys(MetaConstants.idTypesToKeys).forEach((idType) => {
 	const keys = MetaConstants.idTypesToKeys[idType];
 	keys.forEach((label) => {
-		MetaConstants.metaKeyToIdType[label] = idType;
+		if (!MetaConstants.metadataKeyToIdTypes[label]) {
+			MetaConstants.metadataKeyToIdTypes[label] = [];
+		}
+
+		MetaConstants.metadataKeyToIdTypes[label].push(idType);
 	});
 });
 

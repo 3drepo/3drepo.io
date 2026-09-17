@@ -20,7 +20,12 @@ const Scene = {};
 const { UUIDToString, stringToUUID, unique } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
 const { getNodeByQuery, getNodesByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
-const { idTypes, idTypesToKeys, metaKeyToIdType, typePriority } = require('../../../../../models/metadata.constants');
+const {
+	idTypes,
+	idTypesToKeys,
+	metadataKeyToIdTypes,
+	typePriority,
+} = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
@@ -198,12 +203,15 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 		const idCounted = new Set();
 
 		(entry.metadata || []).forEach(({ key, value }) => {
-			const idType = metaKeyToIdType[key];
+			const idTypesFound = metadataKeyToIdTypes[key];
 
-			if (!idType || idCounted.has(idType)) return;
+			if (!idTypesFound) return;
 
-			idCounted.add(idType);
-			res[idType].push(value);
+			idTypesFound.forEach((idType) => {
+				if (idCounted.has(idType)) return;
+				idCounted.add(idType);
+				res[idType].push(value);
+			});
 		});
 	});
 
@@ -220,6 +228,13 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	if (targetCount) {
 		for (const idType of typePriority) {
 			if (res[idType]?.length === targetCount) {
+				if (idType === idTypes.DWG) {
+					// if all the entries are pure numbers, then it is more likely to be revit IDs
+					if (res[idTypes.REVIT]?.length === targetCount
+						&& res[idType].every((value) => !Number.isNaN(Number(value)))) {
+						return { key: idTypes.REVIT, values: Array.from(new Set(res[idTypes.REVIT])) };
+					}
+				}
 				// convert to set to purge duplicates
 				return { key: idType, values: Array.from(new Set(res[idType])) };
 			}
