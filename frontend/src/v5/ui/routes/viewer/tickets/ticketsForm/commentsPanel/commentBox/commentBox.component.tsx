@@ -63,7 +63,7 @@ import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
-import { cloneDeep, isEqual, isUndefined } from 'lodash';
+import { cloneDeep, compact, isEqual, isUndefined } from 'lodash';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 type ImageToUpload = {
@@ -90,17 +90,20 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId || null);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
-	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>(images.map((id) => ({ id, src: id })));
-	const imagesToDisplay = imagesToUpload.map((image) => {
-		if (!isResourceId(image.src)) return image;
-		return { ...image, src: getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, image.id, isFederation) };
-	});
+	const [imagesToUpload, setImagesToUpload] = useState<string[]>(images);
 	
+	// When updating a comment it can accept the existing ids or the dataurl, thats
+	// why we need a separate array for display purposes.
+	const imagesToDisplay = imagesToUpload.map((image) => {
+		if (!isResourceId(image)) return image;
+		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, image, isFederation);
+	});
+
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
 		mode: 'all',
 		defaultValues: {
@@ -114,13 +117,13 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 	const unsavedCommentRef = useRef<Partial<ITicketComment> | null>(null);
-	const discardDraftRef = useRef(false);
-	unsavedCommentRef.current = {
-		_id: commentId || null,
-		message: newMessage || '',
-		images: imagesToUpload.map(({ src }) => src),
-		view: viewpoint,
-	};
+	// const discardDraftRef = useRef(false);
+	// unsavedCommentRef.current = {
+	// 	_id: commentId || null,
+	// 	message: newMessage || '',
+	// 	images: imagesToUpload.map(({ src }) => src),
+	// 	view: viewpoint,
+	// };
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
 	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
@@ -130,9 +133,13 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const replyIsUnchanged = isEqual(initialCommentReply, commentReply);
 	const messageIsUnchanged = message === newMessage && imagesAreUnchanged && viewIsUnchanged && replyIsUnchanged;
-	const erroredImages = imagesToUpload.filter(({ error }) => error);
+
+	// This array has the same length as the images array and keeps track of which images have errors.
+	// empty strings indicate images without error. (this approach was taken to remove complexity from the rest of the functions)
+	const [erroredImages, setErroredImages] = useState(new Array(images.length));
+	const errors = compact(erroredImages);
 	const messageIsEmpty = !newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint;
-	const disableSendMessage = messageIsEmpty || charsLimitIsReached || erroredImages.length > 0 || messageIsUnchanged;
+	const disableSendMessage = messageIsEmpty || charsLimitIsReached || errors.length > 0 || messageIsUnchanged;
 
 	const resetCommentBox = () => {
 		reset();
@@ -143,14 +150,14 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const cancelEdit = () => {
-		discardDraftRef.current = true;
+		// discardDraftRef.current = true;
 		onCancelEdit();
 	};
 
 	const updateMessage = async () => {
 		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
-			images: imagesToUpload.map(({ src }) => src),
+			images: imagesToUpload,
 		};
 		if (commentReply) {
 			newComment.message = addReply(commentReply, sanitiseMessage(newComment.message));
@@ -173,7 +180,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		setIsSubmittingMessage(true);
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
-			images: imagesToUpload.map(({ src }) => src),
+			images: imagesToUpload,
 			message: newMessage,
 		};
 		if (commentReply) {
@@ -196,20 +203,27 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const editImage = async (image, index) => {
-		imagesToUpload[index].src = image;
+		imagesToUpload[index] = image;
+		console.log('editImage');
 		setImagesToUpload([...imagesToUpload]);
 	};
 
 	// @ts-ignore
-	const deleteImage = (index) => setImagesToUpload(imagesToUpload.toSpliced(index, 1));
+	const deleteImage = (index) => {
+		// console.log('deleteImage');
+		setErroredImages(erroredImages.toSpliced(index, 1));
+		setImagesToUpload(imagesToUpload.toSpliced(index, 1));
+	};
 
 	const uploadFiles = async (files: File[]) => {
-		const newImages = await Promise.all(files.map(async (file) => ({
-			name: file.name,
-			src: await convertFileToImageSrc(file) as string,
-			error: imageIsTooBig(file),
-			id: uuid(),
-		})));
+		const newErroredImages: string[] = [];
+
+		const newImages = await Promise.all(files.map(async (file) => {
+			newErroredImages.push( imageIsTooBig(file) ? file.name : '');
+			return await convertFileToImageSrc(file) as string;
+		}));
+
+		setErroredImages(erroredImages.concat(newErroredImages));
 		setImagesToUpload(imagesToUpload.concat(newImages));
 	};
 
@@ -219,7 +233,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const syncProps = useSyncProps({
-		images: imagesToDisplay.map(({ src }) => src),
+		images: imagesToDisplay,
 		onUpload: uploadImages,
 		onDelete: deleteImage,
 		onAddMarkup: editImage,
@@ -241,11 +255,8 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const uploadScreenshot = async (image) => {
-		const imageToUpload: ImageToUpload = {
-			src: image,
-			id: uuid(),
-		};
-		setImagesToUpload(imagesToUpload.concat(imageToUpload));
+		console.log('uploadScreenshot');
+		setImagesToUpload(imagesToUpload.concat(image));
 		openImagesDialog(imagesToUpload.length);
 	};
 	
@@ -269,23 +280,37 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		}
 	}, [commentReply?._id]);
 
-	useEffect(() => {
-		const draftImages = unsavedComment?.images || images;
-		reset({
-			message: desanitiseMessage(unsavedComment?.message || message),
-			images: draftImages,
-		});
-		const unsavedView = unsavedComment?.view;
-		if (!isUndefined(unsavedView)) {
-			setViewpoint(unsavedView);
-		}
-		setImagesToUpload(draftImages.map((src) => ({ src, id: uuid() })));
-	}, [unsavedComment]);
+	// useEffect(function restoreUnsavedComment() {
+	// 	if (!unsavedComment?._id) return;
 
-	useEffect(() => () => {
-		const draft = discardDraftRef.current ? undefined : cloneDeep(unsavedCommentRef.current || {});
-		TicketCommentsActionsDispatchers.setUnsavedComment(commentId || null, draft);
-	}, []);
+	// 	const draftImages = unsavedComment?.images || images;
+	// 	reset({
+	// 		message: desanitiseMessage(unsavedComment?.message || message),
+	// 		images: draftImages,
+	// 	});
+	// 	const unsavedView = unsavedComment?.view;
+	// 	if (!isUndefined(unsavedView)) {
+	// 		setViewpoint(unsavedView);
+	// 	}
+	// 	console.log('restoreUnsavedComment');
+	// 	setImagesToUpload(draftImages.map((src) => ({ src, id: uuid() })));
+	// }, [unsavedComment]);
+
+	// useEffect(() => () => {
+	// 	const draft = discardDraftRef.current ? undefined : cloneDeep(unsavedCommentRef.current || {});
+	// 	TicketCommentsActionsDispatchers.setUnsavedComment(commentId || null, draft);
+	// }, []);
+
+	console.log(JSON.stringify(imagesToUpload));
+
+	// useEffect(() => {
+	// 	return () => {
+	// 		console.log("should save the unsaved comment");
+	// 	};
+	// }, []);
+
+
+	const hasError = (index) => !!erroredImages[index];
 
 	return (
 		<Container
@@ -322,21 +347,21 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 						defaultMessage="Drop your files here"
 					/>
 				</DragAndDrop>
-				{imagesToUpload.length > 0 && (
+				{imagesToDisplay.length > 0 && (
 					<Images>
-						{imagesToDisplay.map(({ src, id, error }, index) => (
-							<ImageContainer key={id}>
-								<Image src={src} $error={error} onClick={() => openImagesDialog(index)} draggable={false} />
-								<DeleteButton onClick={() => deleteImage(index)} error={error}>
+						{imagesToDisplay.map((src, index) => (
+							<ImageContainer key={index}>
+								<Image src={src} $error={hasError(index)} onClick={() => openImagesDialog(index)} draggable={false} />
+								<DeleteButton onClick={() => deleteImage(index)} error={hasError(index)}>
 									<DeleteIcon />
 								</DeleteButton>
 							</ImageContainer>
 						))}
 					</Images>
 				)}
-				{erroredImages.length > 0 && (
+				{errors.length > 0 && (
 					<ErroredImageMessages>
-						{erroredImages.map(({ name }) => (
+						{errors.map(( name ) => (
 							<>
 								<strong>{name} </strong>
 								<FormattedMessage
