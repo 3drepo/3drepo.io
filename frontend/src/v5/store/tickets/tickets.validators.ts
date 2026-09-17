@@ -24,7 +24,7 @@ import { getEditableProperties } from './tickets.helpers';
 import { ITemplate, PropertyDefinition, Viewpoint } from './tickets.types';
 
 export const MAX_TEXT_LENGTH = 120;
-export const MAX_LONG_TEXT_LENGTH = 1200;
+export const MAX_LONG_TEXT_LENGTH = 60000;
 const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
 
 const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
