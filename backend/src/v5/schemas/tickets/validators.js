@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
+const { transformer: { uniqueArray }, utils: { stripWhen }, types } = require('../../utils/helper/yup');
 const { propTypes, viewGroups } = require('./templates.constants');
 const Yup = require('yup');
 const { schema: groupSchema } = require('./tickets.groups');
@@ -107,7 +107,7 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.TEXT:
 		return imposeNullableRule(types.strings.title);
 	case propTypes.LONG_TEXT:
-		return imposeNullableRule(types.strings.longDescription);
+		return imposeNullableRule(types.strings.ultralongDescription);
 	case propTypes.BOOLEAN:
 		return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
 	case propTypes.DATE:
@@ -119,7 +119,9 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.ONE_OF:
 		return imposeNullableRule(types.strings.title);
 	case propTypes.MANY_OF:
-		return imposeNullableRule(Yup.array().of(types.strings.title));
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
+	case propTypes.TAGS:
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
 	case propTypes.IMAGE:
 		return types.embeddedImage(isNullable);
 	case propTypes.IMAGE_LIST:

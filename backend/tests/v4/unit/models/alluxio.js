@@ -15,8 +15,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const responseCodes = require("../../../../src/v4/response_codes");
 const alluxio = require("../../../../src/v4/handler/alluxio");
 const config = require("../../../../src/v4/config");
@@ -28,7 +26,7 @@ const fileList = [];
 		it("get path should succeed", async function() {
 			const link = "test_string";
 			const path = await alluxio.getAlluxioPathFormat(link);
-			expect(path).to.equal(`/${link}`);
+			expect(path).toBe(`/${link}`);
 		});
 
 		it("get path on number should fail", async function() {
@@ -37,7 +35,7 @@ const fileList = [];
 				await alluxio.getAlluxioPathFormat(link);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -47,7 +45,7 @@ const fileList = [];
 				await alluxio.getAlluxioPathFormat(link);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -57,7 +55,7 @@ const fileList = [];
 				await alluxio.getAlluxioPathFormat(link);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -66,26 +64,26 @@ const fileList = [];
 		it("store file should succeed", async function() {
 			const data = "string data";
 			const result = await alluxio.storeFile(data);
-			expect(result).to.exist;
-			expect(result).to.have.property("_id");
-			expect(result).to.have.property("link");
-			expect(result).to.have.property("size");
-			expect(result).to.have.property("type");
-			expect(result.size).to.equal(data.length);
-			expect(result.type).to.equal("alluxio");
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("_id");
+			expect(result).toHaveProperty("link");
+			expect(result).toHaveProperty("size");
+			expect(result).toHaveProperty("type");
+			expect(result.size).toBe(data.length);
+			expect(result.type).toBe("alluxio");
 			fileList.push(result);
 		});
 
 		it("store file (buffer) should succeed", async function() {
 			const data = Buffer.alloc(8);
 			const result = await alluxio.storeFile(data);
-			expect(result).to.exist;
-			expect(result).to.have.property("_id");
-			expect(result).to.have.property("link");
-			expect(result).to.have.property("size");
-			expect(result).to.have.property("type");
-			expect(result.size).to.equal(data.length);
-			expect(result.type).to.equal("alluxio");
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("_id");
+			expect(result).toHaveProperty("link");
+			expect(result).toHaveProperty("size");
+			expect(result).toHaveProperty("type");
+			expect(result.size).toBe(data.length);
+			expect(result.type).toBe("alluxio");
 			fileList.push(result);
 		});
 
@@ -94,13 +92,13 @@ const fileList = [];
 				"test": "data"
 			});
 			const result = await alluxio.storeFile(data);
-			expect(result).to.exist;
-			expect(result).to.have.property("_id");
-			expect(result).to.have.property("link");
-			expect(result).to.have.property("size");
-			expect(result).to.have.property("type");
-			expect(result.size).to.equal(data.length);
-			expect(result.type).to.equal("alluxio");
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("_id");
+			expect(result).toHaveProperty("link");
+			expect(result).toHaveProperty("size");
+			expect(result).toHaveProperty("type");
+			expect(result.size).toBe(data.length);
+			expect(result.type).toBe("alluxio");
 			fileList.push(result);
 		});
 
@@ -110,7 +108,7 @@ const fileList = [];
 				await alluxio.storeFile(data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -119,7 +117,7 @@ const fileList = [];
 		it("get file should succeed", async function() {
 			const fileInfo = fileList[0];
 			const file = await alluxio.getFile(fileInfo.link);
-			expect(file).to.have.lengthOf(fileInfo.size);
+			expect(file).toHaveLength(fileInfo.size);
 		});
 
 		it("get file with incorrect key should fail", async function() {
@@ -127,8 +125,8 @@ const fileList = [];
 				await alluxio.getFile("badKey");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err.status).to.equal(responseCodes.NO_FILE_FOUND.status);
-				expect(err.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+				expect(err.status).toBe(responseCodes.NO_FILE_FOUND.status);
+				expect(err.value).toBe(responseCodes.NO_FILE_FOUND.value);
 			}
 		});
 	});
@@ -140,7 +138,7 @@ const fileList = [];
 			const fileInfo = fileList[1];
 			const stream = await alluxio.getFileStream(fileInfo.link);
 			console.log(stream);
-			expect(stream).to.have.lengthOf(fileInfo.size);
+			expect(stream).toHaveLength(fileInfo.size);
 		});
 		*/
 
@@ -149,8 +147,8 @@ const fileList = [];
 				await alluxio.getFileStream("badLink");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err.status).to.equal(responseCodes.NO_FILE_FOUND.status);
-				expect(err.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+				expect(err.status).toBe(responseCodes.NO_FILE_FOUND.status);
+				expect(err.value).toBe(responseCodes.NO_FILE_FOUND.value);
 			}
 		});
 	});
@@ -161,7 +159,7 @@ const fileList = [];
 		it("remove file should succeed", async function() {
 			fileInfo = fileList.pop();
 			const result = await alluxio.removeFile(fileInfo.link);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("remove same file again should fail", async function() {
@@ -169,7 +167,7 @@ const fileList = [];
 				await alluxio.removeFile(fileInfo.link);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -178,7 +176,7 @@ const fileList = [];
 				await alluxio.removeFile("notexist");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -189,7 +187,7 @@ const fileList = [];
 		it("remove files should succeed", async function() {
 			links = fileList.map(f => f.link);
 			const result = await alluxio.removeFiles(links);
-			expect(result).to.have.lengthOf(links.length);
+			expect(result).toHaveLength(links.length);
 		});
 
 		it("remove files for same links again should fail", async function() {
@@ -197,7 +195,7 @@ const fileList = [];
 				await alluxio.removeFiles(links);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -206,7 +204,7 @@ const fileList = [];
 				await alluxio.removeFiles(["bad", "nonexistent", "links"]);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});

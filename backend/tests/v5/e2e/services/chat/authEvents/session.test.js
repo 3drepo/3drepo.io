@@ -16,6 +16,10 @@
  */
 
 const { determineTestGroup } = require('../../../../helper/utils');
+const {
+	generateRandomString,
+	generateUserCredentials,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../../helper/path');
@@ -23,8 +27,8 @@ const SessionTracker = require('../../../../helper/sessionTracker');
 
 const { EVENTS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
-const user = ServiceHelper.generateUserCredentials();
-const anotherUser = ServiceHelper.generateUserCredentials();
+const user = generateUserCredentials();
+const anotherUser = generateUserCredentials();
 
 let agent;
 const setupData = () => Promise.all([
@@ -34,7 +38,7 @@ const setupData = () => Promise.all([
 
 const runSessionsRemovedTests = () => {
 	describe('Log out message', () => {
-		const referrer = `https://${ServiceHelper.generateRandomString()}.com`;
+		const referrer = `https://${generateRandomString()}.com`;
 		const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36';
 		test('Should log user out if they are logged in else where (login before socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
@@ -91,7 +95,7 @@ const runSessionsRemovedTests = () => {
 			});
 
 			await ServiceHelper.loginAndGetCookie(agent, user,
-				{ headers: { ...headers, referer: `https://${ServiceHelper.generateRandomString()}.com` } });
+				{ headers: { ...headers, referer: `https://${generateRandomString()}.com` } });
 			await expect(onLogOutMessage).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
 			socket.close();

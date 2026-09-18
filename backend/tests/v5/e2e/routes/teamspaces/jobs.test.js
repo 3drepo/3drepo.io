@@ -20,19 +20,22 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUserCredentials,
+} = require('../../../helper/dataGen');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
 
-const [tsAdmin, normalUser, nobody] = times(3, ServiceHelper.generateUserCredentials);
+const [tsAdmin, normalUser, nobody] = times(3, generateUserCredentials);
 
-const teamspace = { name: ServiceHelper.generateRandomString() };
+const teamspace = { name: generateRandomString() };
 
 const jobs = times(10, () => ({
-	_id: ServiceHelper.generateRandomString(), color: ServiceHelper.generateRandomString(),
+	_id: generateRandomString(), color: generateRandomString(),
 }));
 
 const setupData = async () => {

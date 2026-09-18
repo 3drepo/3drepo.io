@@ -58,7 +58,7 @@ export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: stri
 				group.objects = meshObjectsToV5GroupNode(data);
 			// eslint-disable-next-line no-underscore-dangle
 			} else if (group.objects.some((o) => !o._ids)) {
-				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false);
+				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false, revision);
 				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);

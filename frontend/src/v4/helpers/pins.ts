@@ -82,7 +82,7 @@ export const ticketToPin = (ticket, type, isSelected, color) =>
 	});
 
 export const issueToPin = (issue, isSelectedPin ) =>
-	ticketToPin(issue, 'issue', isSelectedPin, getIssuePinColor(issue));
+	ticketToPin(issue, 'ISSUE', isSelectedPin, getIssuePinColor(issue));
 
 export const riskToPin = (risk, isSelectedPin ) =>
-	ticketToPin(risk, 'risk', isSelectedPin, getRiskPinColor(risk));
+	ticketToPin(risk, 'RISK', isSelectedPin, getRiskPinColor(risk));

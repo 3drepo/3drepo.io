@@ -23,6 +23,8 @@ import styled from 'styled-components';
 export const Image = styled(AuthImg)`
 	object-fit: cover;
 	user-select: none;
+	width: 100%;
+	height: 100%;
 `;
 
 export const ImagePlaceholder = styled(CentredContainer)`

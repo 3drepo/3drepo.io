@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);

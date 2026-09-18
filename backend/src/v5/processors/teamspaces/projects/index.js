@@ -16,8 +16,9 @@
  */
 
 const { MODEL_CATEGORIES, modelTypes, statusCodes } = require('../../../models/modelSettings.constants');
-const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
+const { createProject, deleteProject, getProjectAdmins, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
 const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
+const { getModelById, getMultipleModelsByIds } = require('../../../models/modelSettings');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToSomeModels,
@@ -26,8 +27,10 @@ const {
 const { COL_NAME } = require('../../../models/projectSettings.constants');
 const { deleteClashDataInProject } = require('./clashes');
 const { deleteDrawing } = require('./models/drawings');
+const { getAllMembersInTeamspace } = require('..');
 const { getAllTemplates } = require('../../../models/tickets.templates');
-const { getModelById } = require('../../../models/modelSettings');
+const { getCommonElements } = require('../../../utils/helper/arrays');
+const { getTeamspaceAdmins } = require('../../../models/teamspaceSettings');
 const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
@@ -87,5 +90,19 @@ Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, p
 Projects.getDrawingCategories = () => MODEL_CATEGORIES;
 
 Projects.getStatusCodes = () => statusCodes;
+
+Projects.getUsersWithAccess = async (teamspace, project) => {
+	const [tsMembers, tsAdmins, projectAdmins] = await Promise.all([
+		getAllMembersInTeamspace(teamspace),
+		getTeamspaceAdmins(teamspace),
+		getProjectAdmins(teamspace, project),
+	]);
+
+	const { models: modelIds } = await getProjectById(teamspace, project, { models: 1 });
+	const models = await getMultipleModelsByIds(teamspace, modelIds, { permissions: 1 });
+	const modelMembers = models.flatMap(({ permissions }) => (permissions ? permissions.map(({ user }) => user) : []));
+
+	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers.map(({ user }) => user));
+};
 
 module.exports = Projects;
