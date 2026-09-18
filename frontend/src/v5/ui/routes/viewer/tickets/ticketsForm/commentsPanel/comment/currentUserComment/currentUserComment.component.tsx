@@ -26,6 +26,7 @@ import { Comment, CommentWithButtonsContainer, EditComment } from './currentUser
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 
 export type CurrentUserCommentProps = ITicketComment & {

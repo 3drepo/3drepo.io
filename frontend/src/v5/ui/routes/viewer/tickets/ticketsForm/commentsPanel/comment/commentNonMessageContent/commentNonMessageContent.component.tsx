@@ -94,10 +94,6 @@ export const CommentNonMessageContent = ({
 	});
 	const openImagesModal = (index) => DialogsActionsDispatchers.open(ImagesModal, { displayImageIndex: index },  syncProps);
 
-
-	console.log(JSON.stringify(imgsSrcs, null, 2));
-
-
 	return (
 		<>
 			{images.length === 1 && (
