@@ -355,6 +355,7 @@ const testProcessClashResults = () => {
 					});
 				});
 			});
+			TicketsGroups.processCameraGroupUpdate.mockImplementation((_, newCamera) => newCamera);
 			const mockValidation = (t, p, m, tem, tickets, { existingData, processValidatedData = true } = {}) => (
 				Promise.resolve(tickets.map((ticket, i) => ({
 					newTicket: processValidatedData && !existingData?.[i] ? { ...ticket, type: tem._id } : ticket,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { transformer: { uniqueArray }, utils: { stripWhen }, types } = require('../../utils/helper/yup');
+const { transformer: { uniqueArray }, utils: { stripWhen, oneOfSchemas }, types } = require('../../utils/helper/yup');
 const { propTypes, viewGroups } = require('./templates.constants');
 const Yup = require('yup');
 const { schema: groupSchema } = require('./tickets.groups');
@@ -79,6 +79,8 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		size: Yup.number().when('type', ([type], schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 	}).default(undefined), false);
 
+	const cameraOrGroupSchema = imposeNullableRule(oneOfSchemas([camera, groupSchema(isUpdate)], 'Camera must be a camera object or a group'));
+
 	const clippingPlanes = imposeNullableRule(Yup.array().of(
 		Yup.object().shape({
 			normal: types.position.required(),
@@ -89,7 +91,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 
 	const schema = {
 		state,
-		camera: !isUpdate && required ? camera.required() : camera,
+		camera: !isUpdate && required ? cameraOrGroupSchema.required() : cameraOrGroupSchema,
 		clippingPlanes,
 	};
 
