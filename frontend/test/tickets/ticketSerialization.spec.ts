@@ -223,7 +223,20 @@ describe('Tickets: filters', () => {
 
 	const risks = mockRiskCategories();
 	const jobsAndUsers = [...users, ...jobs];
-	const templates = [template, templateMockFactory()];
+	const secondTemplate = templateMockFactory({
+		properties: [
+			{
+				name: 'Colours',
+				type: 'manyOf',
+				values: ['orange', 'black', 'blue', 'silver'],
+			},
+			{
+				name: 'Second template property',
+				type: 'text',
+			},
+		],
+	});
+	const templates = [template, secondTemplate];
 
 	initializeIntl('en-GB');
 
@@ -296,6 +309,22 @@ describe('Tickets: filters', () => {
 
 			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
 			expect(filter).toEqual(deserializeFilter([template], serialized, jobsAndUsers, risks));
+		});
+
+		it('should work for manyOf values shared across templates and specific to each template', () => {
+			const filter: TicketFilter = {
+				module: '',
+				type: 'manyOf',
+				property: 'Colours',
+				filter: {
+					operator: 'is',
+					values: ['black', 'silver', 'orange', 'blue'],
+					displayValues: 'black, silver, orange, blue',
+				},
+			};
+
+			const serialized = serializeFilter(templates, filter, jobsAndUsers, risks);
+			expect(deserializeFilter(templates, serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work for general jobsAndUsers', () => {
