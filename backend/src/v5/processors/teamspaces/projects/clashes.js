@@ -20,6 +20,7 @@ const {
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
+	CLASH_RUNS_REF_COL,
 } = require('../../../models/clashes.constants');
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const {
@@ -41,7 +42,7 @@ const {
 	updatePlan,
 } = require('../../../models/clashes.plans');
 const { getBoundsForGroupsOfMeshNodes, getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
-const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
+const { getFile, getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { meshPrimitiveTypes, nodeTypes } = require('../../../models/scenes.constants');
 const { JSONParser } = require('@streamparser/json-node');
@@ -466,6 +467,19 @@ Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 		// eslint-disable-next-line no-param-reassign
 		selectionObj.revision = rev;
 	}));
+};
+
+Clashes.getDetailedRunReport = async (teamspace, project, runId) => {
+	const { _id: clashRunId } = await getClashRunByQuery(teamspace, project, {"plan._id": runId }, {_id: 1});
+	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_REF_COL, clashRunId);
+	
+	const chunks = [];
+	for await (const chunk of readStream) {
+		chunks.push(chunk);
+	}
+	const fileBuffer = Buffer.concat(chunks);
+
+	return JSON.parse(fileBuffer.toString('utf8'));
 };
 
 module.exports = Clashes;

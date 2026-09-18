@@ -126,6 +126,17 @@ const getRuns = async (req, res, next) => {
 	}
 };
 
+const getDetailedRunReport = async (req, res, next) => {
+	const { teamspace, project, planId, runId } = req.params;
+	try {
+		req.outputData = await Clashes.getDetailedRunReport(teamspace, project, planId, runId);
+		next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -859,6 +870,123 @@ const establishRoutes = () => {
 	 *         description: Returns the clash test run, including the copied clash config snapshot used for the run
 	 */
 	router.get('/:planId/runs/:runId', isAdminToProject, planExists, clashRunInPlan, serialiseClashRun);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs/{runId}/report:
+	 *   get:
+	 *     description: Returns the full clash report for a completed run as the JSON file.
+	 *     tags: [v:external, Clashes]
+	 *     operationId: getClashTestRunReport
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: planId
+	 *         description: ID of plan
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: runId
+	 *         description: ID of run
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/clashRunNotFound"
+	 *       200:
+	 *         description: Returns the full clash report
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 new:
+	 *                   type: array
+	 *                   description: Clashes that are new in this run
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       a:
+	 *                         type: object
+	 *                         description: The first object in the clash pair
+	 *                         properties:
+	 *                           container:
+	 *                             type: string
+	 *                             format: uuid
+	 *                             description: The container the object belongs to
+	 *                             example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                           idType:
+	 *                             type: string
+	 *                             description: The type of identifier used for the object
+	 *                             example: IFC
+	 *                           id:
+	 *                             type: string
+	 *                             description: The object identifier
+	 *                             example: objectId1
+	 *                       b:
+	 *                         type: object
+	 *                         description: The second object in the clash pair
+	 *                         properties:
+	 *                           container:
+	 *                             type: string
+	 *                             format: uuid
+	 *                             description: The container the object belongs to
+	 *                             example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                           idType:
+	 *                             type: string
+	 *                             description: The type of identifier used for the object
+	 *                             example: IFC
+	 *                           id:
+	 *                             type: string
+	 *                             description: The object identifier
+	 *                             example: objectId2
+	 *                       index:
+	 *                         type: string
+	 *                         description: A normalized identifier for the clash pair
+	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId1-ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId2
+	 *                       bbox:
+	 *                         type: object
+	 *                         description: The bounding box of the clash
+	 *                         properties:
+	 *                           min:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [0, 0, 0]
+	 *                           max:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [1, 1, 1]
+	 *                 active:
+	 *                   type: array
+	 *                   description: Clashes that were also present in the previous completed run
+	 *                   items:
+	 *                     type: object
+	 *                 resolved:
+	 *                   type: array
+	 *                   description: Clashes that were present in the previous completed run but are no longer detected
+	 *                   items:
+	 *                     type: object
+	 */
+	router.get('/:planId/runs/:runId/report', isAdminToProject, planExists, clashRunInPlan, getDetailedRunReport, serialiseClashRun);
 
 	/**
 	 * @openapi
