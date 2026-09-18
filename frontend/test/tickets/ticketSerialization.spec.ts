@@ -144,9 +144,9 @@ describe('Tickets: filters', () => {
 
 	const users =   [
         {
-                "user": "quantify",
-                "firstName": "overriding",
-                "lastName": "Credit",
+                "user": "john.smith",
+                "firstName": "John",
+                "lastName": "Smith",
                 "company": "bypassing",
                 "job": "Rustic",
                 "email": "Wilma54@yahoo.com",
@@ -154,9 +154,9 @@ describe('Tickets: filters', () => {
                 "avatarUrl": ""
         },
         {
-                "user": "Sleek",
-                "firstName": "Account",
-                "lastName": "infomediaries",
+                "user": "jane.doe",
+                "firstName": "Jane",
+                "lastName": "Doe",
                 "company": "Global",
                 "job": "Computer",
                 "email": "Rosa_Abernathy@hotmail.com",
@@ -164,9 +164,9 @@ describe('Tickets: filters', () => {
                 "avatarUrl": ""
         },
         {
-                "user": "Optional",
-                "firstName": "Supervisor",
-                "lastName": "Chicken",
+                "user": "alex.johnson",
+                "firstName": "Alex",
+                "lastName": "Johnson",
                 "company": "Automated",
                 "job": "front-end",
                 "email": "Michaela_Hackett@gmail.com",
@@ -174,9 +174,9 @@ describe('Tickets: filters', () => {
                 "avatarUrl": ""
         },
         {
-                "user": "PNG",
-                "firstName": "hub",
-                "lastName": "Refined",
+                "user": "sam.wilson",
+                "firstName": "Sam",
+                "lastName": "Wilson",
                 "company": "Beauty",
                 "job": "Supervisor",
                 "email": "Ray.Ziemann@gmail.com",
@@ -184,12 +184,22 @@ describe('Tickets: filters', () => {
                 "avatarUrl": ""
         },
         {
-                "user": "convergence",
-                "firstName": "copying",
-                "lastName": "hacking",
+                "user": "maria.garcia",
+                "firstName": "Maria",
+                "lastName": "Garcia",
                 "company": "calculate",
                 "job": "transmitting",
                 "email": "Fern43@gmail.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        },
+        {
+                "user": "john.smith2",
+                "firstName": "John",
+                "lastName": "Smith",
+                "company": "bypassing",
+                "job": "Rustic",
+                "email": "john.smith2@example.com",
                 "hasAvatar": false,
                 "avatarUrl": ""
         }
