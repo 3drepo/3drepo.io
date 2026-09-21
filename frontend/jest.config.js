@@ -29,7 +29,6 @@ module.exports = {
 	// ESM-only packages that need to be transformed by babel-jest (above) rather than loaded raw.
 	// Without this, Jest's CJS runtime fails to execute their native import statements.
 	transformIgnorePatterns: [
-		"node_modules/(?!(byte-size|react-intl|intl-messageformat|@formatjs)/.*)"
+		"node_modules/(?!(byte-size|decode-uri-component|react-intl|intl-messageformat|@formatjs)/.*)"
 	],
 };
-
