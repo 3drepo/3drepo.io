@@ -21,7 +21,6 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { FormHelperText } from '@mui/material';
@@ -109,7 +108,13 @@ export const TicketView = ({
 
 	const onDeleteCamera = async () => {
 		const { camera, ...view } = value || {};
-		onChange?.(isEmpty(view) ? null : view);
+		onChange?.({ camera: null, ...view });
+	};
+
+	// State
+	const onDeleteGroups = () => {
+		const { state, ...view } = value || {};
+		onChange?.({ state: null, ...view });
 	};
 
 	const onGoToCamera = async () => {
@@ -120,14 +125,6 @@ export const TicketView = ({
 		await goToView(value);
 	};
 
-	// State
-	const onDeleteGroups = () => {
-		const { state, ...view } = cloneDeep(value || {});
-		state.colored = [];
-		state.hidden = [];
-		state.transformed = [];
-		onChange?.({ state, ...view });
-	};
 
 	useEffect(() => onBlur?.(), [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
