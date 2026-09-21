@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useRef, Fragment, useState } from 'react';
+import { useEffect, useRef, Fragment, useState, forwardRef } from 'react';
 import { Group, Rect, Transformer } from 'react-konva';
 import { pick } from 'lodash';
 import { useHandleBubbling, cursorStylesEvents } from '../drawnObjects.hooks';
@@ -25,6 +25,29 @@ interface IProps {
 	isSelected: boolean;
 	handleChange: (props: any) => void;
 }
+
+const NonDraggableGroup = forwardRef<any, any>(({ children, ...props }, ref) => (
+	<Group ref={ref} {...props}>
+		{children}
+	</Group>
+));
+
+const DraggableShape = forwardRef<any, any>(({
+	children,
+	onDragEnd,
+	onTransformEnd,
+	...props
+}, ref) => (
+	<Group
+		ref={ref}
+		{...props}
+		draggable
+		onDragEnd={onDragEnd}
+		onTransformEnd={onTransformEnd}
+	>
+		{children}
+	</Group>
+));
 
 export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const {
@@ -72,6 +95,9 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	const handleBubbling = useHandleBubbling(isSelected);
+	// Changed draggable to use a conditional group component based because changing from draggable:true to draggable: false 
+	// seems to stop working and the group kept being draggable even when it shouldn't.
+	const ShapeGroup = isSelected ? DraggableShape : NonDraggableGroup;
 
 	useEffect(() => {
 		setRectProps(shape.current?.getClientRect() || {});
@@ -79,25 +105,25 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 
 	return (
 		<Fragment>
-			<Group
+			<ShapeGroup
 					ref={group}
 					{...additionalGroupProps}
 					name={elementProps.name}
 					transformer={transformer}
+					onDblClick={handleDoubleClick}
 					onDragEnd={handleTransformEnd}
 					onTransformEnd={handleTransformEnd}
-					onDblClick={handleDoubleClick}
-					draggable={isSelected}
 					{...handleBubbling}
 			>
 				<Component
 						ref={shape}
 						{...elementProps}
+						draggable={false}
 						stroke={color}
 						perfectDrawEnabled={false}
 				/>
 				{ isSelected && <Rect  {...rectProps} fill="transparent" visible={isSelected} 	{...cursorStylesEvents()} />}
-			</Group>
+			</ShapeGroup>
 			{ isSelected &&
 			<Transformer
 				ref={transformer}
