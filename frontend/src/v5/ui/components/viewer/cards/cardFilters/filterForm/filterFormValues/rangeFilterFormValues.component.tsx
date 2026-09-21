@@ -76,19 +76,17 @@ export const FilterFormRangeValues = ({
 	});
 
 	return (
-		<>
-			<FormProvider {...formData}>
-				<form>
-					<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
-						{fields.map((field, i) => (
-							<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-								<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
-							</ArrayFieldContainer>
-						))}
-					</ArrayFields>
-				</form>
-			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
-		</>
+		<FormProvider {...formData}>
+			<form onSubmit={submitForm}>
+				<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</ArrayFields>
+				<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
+			</form>
+		</FormProvider>
 	);
 };

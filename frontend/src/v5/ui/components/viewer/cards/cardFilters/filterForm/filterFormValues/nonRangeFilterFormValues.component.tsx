@@ -184,13 +184,11 @@ export const FilterFormNonRangeValues = ({
 	};
 
 	return (
-		<>
-			<FormProvider {...formData}>
-				<form>
-					{renderFields()}
-				</form>
-			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
-		</>
+		<FormProvider {...formData}>
+			<form onSubmit={submitForm}>
+				{renderFields()}
+				<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
+			</form>
+		</FormProvider>
 	);
 };
