@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-type QueryValue = string | number | boolean | null | undefined | QueryValue[];
-type QueryParams = Record<string, QueryValue>;
+type QueryParams = Record<string, any>;
 
-export const parse = (search: string): QueryParams => {
+export const parse = (search: string): any => {
 	const params = new URLSearchParams(search);
 	const result: QueryParams = Object.create(null);
 
