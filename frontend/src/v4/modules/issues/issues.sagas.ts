@@ -19,9 +19,9 @@ import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit} from 'lodash';
 import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
-import * as queryString from 'query-string';
 import { generatePath } from 'react-router-dom';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { stringify } from '@/v4/helpers/queryString';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { dispatch, getState } from '@/v5/helpers/redux.helpers';
@@ -352,7 +352,7 @@ function* goToIssue({ issue }) {
 		const path = generatePath(route, params);
 
 		queryParams = {... queryParams, issueId};
-		let query = queryString.stringify(queryParams);
+		let query = stringify(queryParams);
 		if (query) {
 			query = '?' + query;
 		}

@@ -17,10 +17,10 @@
 
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
-import * as queryString from 'query-string';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { generatePath } from 'react-router';
+import { stringify } from '@/v4/helpers/queryString';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
@@ -311,7 +311,7 @@ function* goToRisk({ risk }) {
 		const path = generatePath(route, params);
 
 		queryParams = {... queryParams, riskId};
-		let query = queryString.stringify(queryParams);
+		let query = stringify(queryParams);
 		if (query) {
 			query = '?' + query;
 		}
