@@ -31,7 +31,7 @@ import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions, selectTreeNodesList } from '../../modules/tree';
 import {
-	selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
+	selectDraggablePanels, selectIsFocusMode, selectLeftPanels,
 	ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withDataCache } from '../../services/dataCache';
@@ -45,7 +45,6 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelPending: selectIsPending,
 	leftPanels: selectLeftPanels,
-	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isFocusMode: selectIsFocusMode,
 	selectedTicket: selectSelectedTicket,

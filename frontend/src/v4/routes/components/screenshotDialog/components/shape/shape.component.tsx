@@ -95,7 +95,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	const handleBubbling = useHandleBubbling(isSelected);
-	// Changed draggable to use a conditional group component based because changing from draggable:true to draggable: false 
+	// Changed draggable to use a conditional group component based because changing from draggable:true to draggable: false
 	// seems to stop working and the group kept being draggable even when it shouldn't.
 	const ShapeGroup = isSelected ? DraggableShape : NonDraggableGroup;
 
