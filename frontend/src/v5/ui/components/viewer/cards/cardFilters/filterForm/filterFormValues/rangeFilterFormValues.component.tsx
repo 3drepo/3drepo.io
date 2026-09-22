@@ -34,6 +34,7 @@ import {
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { RangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { Gap } from '@controls/gap';
 
 const EMPTY_RANGE_VALUE = { value: null };
 
@@ -85,6 +86,7 @@ export const FilterFormRangeValues = ({
 						</ArrayFieldContainer>
 					))}
 				</ArrayFields>
+				<Gap $height="10px" />
 				<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
 			</form>
 		</FormProvider>
