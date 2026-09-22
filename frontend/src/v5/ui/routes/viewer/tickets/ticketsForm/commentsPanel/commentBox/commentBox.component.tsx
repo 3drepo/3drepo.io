@@ -194,8 +194,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const editImage = async (image, index) => {
-		imagesToUpload[index] = image;
-		setImagesToUpload([...imagesToUpload]);
+		const newImagesToUpload = [...imagesToUpload];
+		newImagesToUpload[index] = image;
+		setImagesToUpload(newImagesToUpload);
 	};
 
 	// @ts-ignore
