@@ -138,6 +138,13 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		setViewpoint(null);
 	};
 
+
+	const cancelEdit = () => {
+		resetCommentBox();
+		TicketCommentsActionsDispatchers.setUnsavedComment(commentId, null);
+		onCancelEdit();
+	};
+
 	const updateMessage = async () => {
 		const newComment: Partial<ITicketComment> = {
 			message: newMessage,
@@ -160,8 +167,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		);
 
 		TicketCommentsActionsDispatchers.setUnsavedComment(commentId, null);
-		resetCommentBox();
-		onCancelEdit();
+		cancelEdit();
 	};
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
@@ -374,7 +380,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
 					<EditCommentButtons>
-						<TicketButton variant="error" onClick={onCancelEdit}>
+						<TicketButton variant="error" onClick={cancelEdit}>
 							<CancelIcon />
 						</TicketButton>
 						<TicketButton variant="primary" onClick={updateMessage} disabled={disableSendMessage}>
