@@ -102,7 +102,7 @@
 		"react-is": "19.2.4",
 		"react-konva": "19.2.3",
 		"react-linkify": "1.0.0-alpha",
-		"react-markdown": "6.0.0",
+		"react-markdown": "10.1.0",
 		"react-popper": "2.3.0",
 		"react-redux": "9.2.0",
 		"react-rnd": "10.5.2",
