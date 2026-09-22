@@ -161,7 +161,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		const {teamSpace, project, modelId, navigate, issuesId} = this.props;
-		let pathname = viewerRoute(teamSpace, project, modelId)
+		let pathname = viewerRoute(teamSpace, project, modelId, undefined, undefined, false)
 		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_CLOSED) {
@@ -181,7 +181,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
-			pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
+			pathname = viewerRoute(teamSpace, project, modelId, this.props.revision, undefined, false);
 		}
 
 		navigate({ pathname, search })
