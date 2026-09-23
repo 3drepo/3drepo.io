@@ -348,7 +348,7 @@ function* goToIssue({ issue }) {
 
 		const issueId = (issue || {})._id;
 
-		const route = ROUTES.V5_MODEL_VIEWER;
+		const route = params.revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
 		const path = generatePath(route, params);
 
 		queryParams = {... queryParams, issueId};

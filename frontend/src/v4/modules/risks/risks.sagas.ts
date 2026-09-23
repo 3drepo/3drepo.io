@@ -307,7 +307,7 @@ function* goToRisk({ risk }) {
 
 		const riskId = (risk || {})._id;
 
-		const route = ROUTES.V5_MODEL_VIEWER;
+		const route = params.revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
 		const path = generatePath(route, params);
 
 		queryParams = {... queryParams, riskId};
