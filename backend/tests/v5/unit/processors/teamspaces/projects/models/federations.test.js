@@ -18,7 +18,13 @@
 const { determineTestGroup } = require('../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject, generateRandomNumber, generateUUIDString, generateRandomDate } = require('../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+	generateRandomNumber,
+	generateUUIDString,
+	generateRandomDate,
+} = require('../../../../../helper/dataGen');
 
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);

@@ -26,6 +26,7 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	helperText: string,
 	className: string,
 	inputRef: any,
+	isDirty: boolean,
 }>;
 
 // eslint-disable-next-line @typescript-eslint/comma-dangle
@@ -67,11 +68,12 @@ export const InputController: any = forwardRef(<T,>({
 			name={name}
 			control={control}
 			defaultValue={defaultValue}
-			render={({ field: { ref: fieldRef, ...field } }) => (
+			render={({ field: { ref: fieldRef, ...field }, fieldState: { isDirty } }) => (
 				// @ts-ignore
 				<Input
 					{...field}
 					{...props}
+					isDirty={isDirty}
 					value={transformInputValue(field.value) ?? ''}
 					onChange={(event) => {
 						field.onChange(transformOutputValue(event));

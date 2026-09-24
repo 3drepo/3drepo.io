@@ -20,19 +20,149 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { uuid as uuidGen } from '@/v4/helpers/uuid';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
 declare let createUnityInstance;
 
-type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+export type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
-// The contents of this type will change in line with the needs of
-// the Test Automation or Profiling Tools.
-type ModelStatistics = {
+export type Clip = {
+	normal: number[];
+	distance: number;
+	clipDirection: number;
+};
+
+export type Viewpoint = {
+	right: number[];
+	up: number[];
+	view_dir: number[];
+	position: number[];
+	look_at: number[];
+	near: number;
+	far: number;
+	fov: number;
+	aspect_ratio: number;
+	orthographicSize: number;
+	clippingPlanes?: Clip[];
+	type: string;
+};
+
+/**
+ * @hidden
+ */
+export type ViewerInitState = {
+	// Camera properties for the viewpoint. All of these must be set together
+	// for the viewpoint to be updated.
+	position?: number[];
+	up?: number[];
+	view_dir?: number[];
+	orthographicSize?: number;
+	animationTime?: number;
+	type?: string;
+
+	// Specify group-based overrides to apply on load. These should be Ids of
+	// Groups fetched using the /groups API. The response will contain the
+	// details of the override.
+	highlighted_group_id?: string;
+	hidden_group_id?: string;
+	override_group_ids?: string[];
+	transformation_group_ids?: string[];
+
+	// Clippling planes to apply at loading time.
+	clippingPlanes?: Clip[];
+
+	// When true, the Ids in the hidden group are immediately hidden. Otherwise
+	// hideHiddenByDefaultObjects must be called explicitly to hide them.
+	// Despite the name, this does not only affect IFCs.
+	hideIfc?: boolean;
+};
+
+/**
+ * @hidden The contents of this type will change in line with the needs of
+ * the Test Automation or Profiling Tools.
+ */
+export type ModelStatistics = {
+	numContainers: number,
+	numSupermeshes: number,
+	isNavigating: boolean,
 	bundlesLoaded: number,
 	bundleLoadingTasks: number,
 	frameCount: number,
+	textureCount: number,
+	mapsBusy: number,
+	activeWebRequests1: number,
+	activeWebRequests2: number,
+};
+
+export enum SnapMode {
+	Off = 'Off',
+	Navigation = 'Navigation',
+	Drawing = 'Drawing',
+}
+
+type Deferred<T> = {
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
+};
+
+// Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
+// Used for requestPointInfo.
+export interface CanvasPosition {
+	x: number,
+	y: number,
+}
+
+// Interface representing a position on the client screen, as presented in PointerEvents, MouseEvents, or Touches.
+// Used for requestPointInfo.
+export interface ClientPosition {
+	clientX: number,
+	clientY: number,
+}
+
+export interface PointInfoOptions {
+	useSnapping: boolean,
+}
+
+export interface PointInfo {
+	id: string,
+	database: string,
+	model: string,
+	pin: boolean,
+	mousePos: number[],
+	position: number[],
+	normal: number[],
+	requestId: string,
+}
+
+export interface Bounds {
+	min: number[],
+	max: number[]
+}
+
+export interface PickInfo {
+	mousePos: number[],
+	position: number[],
+}
+
+export type SharedIds = {
+	account: string,
+	model: string,
+	shared_ids: string[],
+};
+
+export type ObjectStatus = {
+	hiddenNodes: SharedIds[],
+	highlightedNodes: SharedIds[],
+};
+
+export type MapInitialisationInfo = {
+	surveyPoints: {
+ 		position: number[];
+  		latLong: [number, number];
+	}[];
+	angleFromNorth: number;
 };
 
 export class UnityUtil {
@@ -94,6 +224,12 @@ export class UnityUtil {
 	*/
 	public static modelStatisticsArrayOffset: number = 0;
 
+	/** Stores an offset into the WASM heap were the screenshot data can be found.
+	 * This is an internal property and subject to change without notice.
+	 *  @hidden
+	*/
+	public static screenshotDataArrayOffset: number = 0;
+
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
 	/** @hidden */
@@ -140,6 +276,12 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static objectStatusPromises = [];
+
+	/** @hidden */
+	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
+
+	/** @hidden */
+	public static boundsPromises = new Map<string, Deferred<Bounds>>();
 
 	/** @hidden */
 	public static loadedFlag = false;
@@ -689,6 +831,58 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
+	public static respondToPointInfoRequest(pointInfo) {
+
+		let data: PointInfo;
+
+		// Parse data
+		try {
+			data = JSON.parse(pointInfo) as PointInfo;
+		} catch (error) {
+			// In the case of malformed data, we can't recover the key and reject all currently open requests.
+			// This is preferrable to leaving them hanging indefinitely.
+			// If the viewer is sending malformed data they are probably all shot anyway.
+			//console.error('respondToPointInfoRequest: Malformed point info response received from viewer', pointInfo);
+ 			UnityUtil.pointInfoPromises.forEach((promise) => promise.reject(error));
+ 			UnityUtil.pointInfoPromises.clear();
+ 			return;
+		}
+
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToPointInfoRequest', data);
+		}
+
+		// If there are any promises waiting for this point info, resolve or reject them
+		const key = data.requestId;
+		if (this.pointInfoPromises.has(key)) {
+			this.pointInfoPromises.get(key).resolve(data);
+			this.pointInfoPromises.delete(key);
+		} else {
+			console.warn('No entries found for point info request');
+		}
+	}
+
+	/** @hidden **/
+	public static respondToBoundsRequest(json: string) {
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] respondToBoundsRequest', json);
+		}
+		const { requestId, min, max } = JSON.parse(json);
+		const deferred = this.boundsPromises.get(requestId);
+		if (!deferred) {
+			console.error('Received a response to a bounds request that does not exit');
+		}
+		if (min?.length === 3 && max?.length === 3) {
+			deferred.resolve({
+				min,
+				max,
+			});
+		} else {
+			deferred.reject();
+		}
+	}
+
+	/** @hidden */
 	public static ready() {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
@@ -698,7 +892,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static pickPointAlert(pointInfo) {
-		const point = JSON.parse(pointInfo);
+		const point = JSON.parse(pointInfo) as PickInfo;
 		if (UnityUtil.verbose) {
 			console.debug('[FROM UNITY] pickPointAlert', point);
 		}
@@ -717,7 +911,11 @@ export class UnityUtil {
 			}
 
 			UnityUtil.screenshotPromises.forEach((promise) => {
-				promise.resolve(ssJSON.ssBytes);
+				if (ssJSON.ssBytes) {
+					promise.resolve(ssJSON.ssBytes);
+				} else {
+					promise.resolve(ssJSON.length);
+				}
 			});
 		} catch (error) {
 			UnityUtil.screenshotPromises.forEach((promise) => {
@@ -913,24 +1111,23 @@ export class UnityUtil {
 
 	/**
 	 * Load comparator model for compare tool
-	 * This returns a promise which will be resolved when the comparator model is loaded
+	 * This returns a promise which will be resolved when the comparator model is
+	 * loaded.
 	 * @category Compare Tool
 	 * @param teamspace - teamspace
 	 * @param project - project
 	 * @param container - model ID
-	 * @param revision - Specific revision ID/tag to load
+	 * @param revision - Specific revision ID/tag to load. When loading a
+	 * Comparator a revision must always be provided.
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision = 'head'): Promise<void> {
+	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision: string): Promise<void> {
 		const params: any = {
 			database: teamspace,
 			project,
 			model: container,
+			revID: revision,
 		};
-
-		if (revision !== 'head') {
-			params.revID = revision;
-		}
 
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
@@ -1289,6 +1486,15 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
+	/**
+	 * Set the snap mode.
+	 * @param mode - The snap mode to be set like Off, Navigation or Drawing
+	 * @category Configurations
+	 */
+	public static setSnapMode(mode: SnapMode) {
+		UnityUtil.toUnity('SetSnapMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
 	 /**
 	 * Enable Cursor
 	 * Note: Changing the snap mode can affect the cursor.
@@ -1537,13 +1743,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropRiskPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropRiskPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'RISK');
 	}
 
 	/**
@@ -1555,13 +1755,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropIssuePin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'ISSUE');
 	}
 
 	/**
@@ -1573,13 +1767,7 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropBookmarkPin(id: string, position: number[], normal: number[], colour: number[]) {
-		const params = {
-			id,
-			position,
-			normal,
-			color: colour,
-		};
-		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.dropPin(id, position, colour, 'BOOKMARK');
 	}
 
 	/**
@@ -1591,13 +1779,64 @@ export class UnityUtil {
 	 * @param colour - RGB value for the colour of the pin
 	 */
 	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
+		UnityUtil.dropPin(id, position, colour, 'TICKET');
+	}
+
+	/**
+	 * Create or update a custom pin icon. Provide one or two images for the
+	 * normal and (optionally) selected states. If only one image is provided
+	 * it is reused for both states.
+	 *
+	 * @category Pins
+	 * @param images - Array of 1 or 2 DrawingImageSource entries.
+	 *   Index 0 is the normal/default state, index 1 (optional) is the selected state.
+	 * @param iconCode - A unique string code to identify this icon.
+	 *   Reserved codes (e.g. "RISK", "ISSUE", "BOOKMARK", "TICKET") map to
+	 *   built-in icons but may be overridden.
+	 */
+	public static createPinIcon(images: DrawingImageSource[], iconCode: string) {
+		const normalImage = images[0];
+		const selectedImage = images.length > 1 ? images[1] : null;
+
+		const normalDomId = this.domTextureReferenceCounter++;
+		this.domTextureReferences[normalDomId] = normalImage;
+		const normalDimensions = [normalImage.width, normalImage.height];
+
+		let selectedDomId = -1;
+		let selectedDimensions = [0, 0];
+		if (selectedImage) {
+			selectedDomId = this.domTextureReferenceCounter++;
+			this.domTextureReferences[selectedDomId] = selectedImage;
+			selectedDimensions = [selectedImage.width, selectedImage.height];
+		}
+
+		const params = {
+			iconCode: iconCode.toUpperCase(),
+			normalDomId,
+			normalDimensions,
+			selectedDomId,
+			selectedDimensions,
+		};
+
+		UnityUtil.toUnity('CreatePinIcon', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
+	}
+
+	/**
+	 * Add a Pin with a custom icon code.
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param color - RGB value for the colour of the pin
+	 * @param icon - the code for a custom or built-in icon (e.g. "RISK", "ISSUE", or a custom code)
+	 */
+	public static dropPin(id: string, position: number[], color: number[], icon: string) {
 		const params = {
 			id,
 			position,
-			normal,
-			color: colour,
+			color,
+			icon,
 		};
-		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	/**
@@ -1690,7 +1929,7 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of the model
 	 */
-	public static getObjectsStatus(account: string, model: string): Promise<object> {
+	public static getObjectsStatus(account: string, model: string): Promise<ObjectStatus> {
 		const newObjectStatusPromise = new Promise((resolve, reject) => {
 			this.objectStatusPromises.push({ resolve, reject });
 		});
@@ -1699,7 +1938,120 @@ export class UnityUtil {
 
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
-		return newObjectStatusPromise as Promise<object>;
+		return newObjectStatusPromise as Promise<ObjectStatus>;
+	}
+
+	/**
+ 	 * Request point information for an arbitrary location on the Unity canvas.
+ 	 *
+ 	 * Accepts either:
+ 	 * - ClientPosition: `clientX`/`clientY` from PointerEvent/MouseEvent/Touch in viewport coordinates
+ 	 * - CanvasPosition: canvas pixel coordinates with (0,0) at the bottom-left corner
+ 	 * @category Model Interactions
+	 * @param position - The position to request point information for as either ClientPosition or CanvasPosition
+	 * @returns A promise that resolves with the point information object returned by the viewer.
+ 	 */
+	public static requestPointInfo(position: CanvasPosition | ClientPosition, options: PointInfoOptions = { useSnapping: true }): Promise<PointInfo> {
+
+		let x: number;
+		let y: number;
+
+		// Type discrimination to check if the position is a ClientPosition or CanvasPosition
+		if ('clientX' in position && 'clientY' in position) {
+
+			// If it's a ClientPosition, convert coordinates to be in canvas with (0,0) at the
+			// bottom left-corner.
+
+			const canvas = this.unityInstance.Module.canvas;
+			const rect = canvas.getBoundingClientRect();
+
+			// Apply display scale
+			const scale = window.devicePixelRatio || 1;
+			const scaledX = position.clientX * scale;
+			const scaledY = position.clientY * scale;
+			const scaledHeight = rect.height * scale;
+			const scaledLeft = rect.left * scale;
+			const scaledTop = rect.top * scale;
+
+			x = Math.floor(scaledX - scaledLeft);
+			y = Math.floor(scaledHeight - 1 - (scaledY - scaledTop));
+		} else if ('x' in position && 'y' in position) {
+
+			// If it is a CanvasPosition, we can extract the coordinates directly.
+
+			x = position.x;
+			y = position.y;
+		} else {
+			return Promise.reject(new Error('requestPointInfo: Invalid position object provided. Expected either a ClientPosition or CanvasPosition.'));
+		}
+
+		// Round down the coordinates to the nearest integer, as Unity expects integer
+		// values for pixel coordinates and will truncate any decimal values.
+		x = Math.floor(x);
+		y = Math.floor(y);
+
+		const requestId = uuidGen();
+
+		const newPointInfoPromise = new Promise((resolve, reject) => {
+
+			// Store the promise in a map with the request id being the coordinates, so that when Unity responds
+			// with the point info, we can resolve the correct promise.
+			const key = requestId;
+			if (!this.pointInfoPromises.has(key)) {
+				this.pointInfoPromises.set(key, { resolve, reject });
+			} else {
+				// If a promise already exists for this request id, reject the new promise to avoid overwriting the existing one.
+				reject(new Error(`requestPointInfo: A request with the same requestId (${requestId}) is already in progress.`));
+			}
+		});
+
+		const params = {
+			x,
+			y,
+			requestId,
+			options,
+		};
+
+		UnityUtil.toUnity('RequestPointInfo', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+
+		return newPointInfoPromise as Promise<PointInfo>;
+	}
+
+	/**
+	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
+	 * uniqueId.
+	 * @param teamspace name of the teamspace
+	 * @param project name of the project
+	 * @param container name of the container - this must be the exact
+	 * container holding the unique id, it cannot be a federation.
+	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
+	 * them. If the array is empty, will return the bounds of the whole container.
+	 * @returns a promise containing the bounds in project coordinates. If the
+	 * teamspace/project/container/id combination are not valid, the promise
+	 * will be rejected.
+	 * @example ```
+	 * UnityUtil.viewer.objectSelected = (ev) => {
+		UnityUtil.requestBounds(ev.database, "", ev.model, [ev.id]).then((bounds) => {
+			var center = [
+				(bounds.max[0] + bounds.min[0]) * 0.5,
+				(bounds.max[1] + bounds.min[1]) * 0.5,
+				(bounds.max[2] + bounds.min[2]) * 0.5
+			];
+			UnityUtil.dropIssuePin("myPin",center,[1,0,0]);
+		})
+	  }```
+	 */
+	public static requestBounds(teamspace: string, project: string, container: string, uniqueIds: string[]): Promise<Bounds> {
+		const params = {
+			requestId: uuidGen(),
+			nameSpace: `${teamspace}.${container}`,
+			uniqueIds,
+		};
+		const promise = new Promise((resolve, reject) => {
+			this.boundsPromises.set(params.requestId, { resolve, reject });
+		});
+		UnityUtil.toUnity('RequestBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		return promise as Promise<Bounds>;
 	}
 
 	/**
@@ -1752,7 +2104,7 @@ export class UnityUtil {
 		account: string,
 		model: string,
 		idArr: string[],
-		color: [number],
+		color: number[],
 		toggleMode: boolean,
 		forceReHighlight: boolean,
 	) {
@@ -1821,7 +2173,7 @@ export class UnityUtil {
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @param assetGroups? - When specified, only load the assets that belong to the groups in the list. To include assets without a groups, include an empty string ("") as part of the list.
 	 * @return returns a promise that resolves when the model start loading.
-	 * @example 
+	 * @example
 	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "16854ce0-6e82-11ea-9043-f5b42de4172c")
 	 * @example
 	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "11da8980-6e82-11ea-a9b4-253aa7f93e55", "e2bf461d-b1a8-4068-b26f-75925a14345f")
@@ -1836,7 +2188,7 @@ export class UnityUtil {
 		model: string,
 		revision = 'head',
 		isFederation: boolean = false,
-		initView = null,
+		initView: ViewerInitState = null,
 		clearCanvas = true,
 		assetGroups?: string[],
 	): Promise<void> {
@@ -1884,9 +2236,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Reset map sources. This removes all currently displayed maps
+	 * Reset map sources. This removes all currently displayed maps.
 	 * @category GIS
-	 * @param account - name of teamspace
 	 */
 	public static resetMapSources() {
 		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -1895,19 +2246,29 @@ export class UnityUtil {
 	/**
 	 * Add map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - The source in the form `provider/layer`. This should be
+	 * the `source` member of one of the layer objects returned by the get list
+	 * of maps ('/maps/') request.
+	 * @param height - The height in mm above the project origin at which to
+	 * place the map layer. If the layer already exists it will be moved to
+	 * the new height.
 	 */
-	public static addMapSource(mapSource: string) {
-		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static addMapSource(source: string, height?: number) {
+		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
+			source,
+			height: (height ?? 0) * 0.001,
+		}),
+		);
 	}
 
 	/**
 	 * Remove map source.
 	 * @category GIS
-	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @param source - One of the source strings previously provided to
+	 * addMapSource. If the source does not exist this call does nothing.
 	 */
-	public static removeMapSource(mapSource: string) {
-		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
+	public static removeMapSource(source: string) {
+		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ source }));
 	}
 
 	/**
@@ -1915,7 +2276,7 @@ export class UnityUtil {
 	 * @category GIS
 	 * @param surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
-	public static mapInitialise(surveyingInfo: [object]) {
+	public static mapInitialise(surveyingInfo: MapInitialisationInfo) {
 		// FIMXE: this should be MODEL_LOADING require #2010 to be fixed
 		UnityUtil.toUnity('MapsInitiate', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(surveyingInfo));
 	}
@@ -1968,7 +2329,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the color reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshColor function
 	 */
-	public static resetMeshColor(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
+	public static resetMeshColor(account: string, model: string, meshIDs: string[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -1991,7 +2352,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the opacity override will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshOpacity function
 	 */
-	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number, excludeIds: boolean = false) {
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: string[], opacity: number, excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2013,7 +2374,7 @@ export class UnityUtil {
 	 * @param excludeIds - If set to true, the opacity reset will be applied to all meshes except the ones in meshIDs.
 	 * @return returns a promise which will resolve after Unity has invoked its resetMeshOpacity function
 	 */
-	public static resetMeshOpacity(account: string, model: string, meshIDs: [string], excludeIds: boolean = false) {
+	public static resetMeshOpacity(account: string, model: string, meshIDs: string[], excludeIds: boolean = false) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2115,15 +2476,18 @@ export class UnityUtil {
 	/**
 	 * Request a screenshot. The screenshot will be returned as a JSON
 	 * object with a single field, ssByte, containing the screenshot in
-	 * base64.
+	 * base64 or as a length value that can be used to read from shared memory.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
+	 * @return returns a promise which will resolve with a base64 encoded string holding
+	 * the screenshot or the length of the screenshot data in shared memory.
+	 * @param useSharedMemory - If true, the screenshot will be written to shared memory and the promise will resolve with the length of the data in shared memory.
+	 * If false, the promise will resolve with a base64 encoded string of the screenshot.
 	 */
-	public static requestScreenShot(): Promise<string> {
+	public static requestScreenShot(useSharedMemory = false): Promise<string | number> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
-		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, useSharedMemory ? 1 : 0);
 
 		return newScreenshotPromise as Promise<string>;
 	}
@@ -2131,23 +2495,16 @@ export class UnityUtil {
 	/**
 	 * Request the information of the current viewpoint
 	 * @category Model Interactions
-	 * @param account - name of teamspace
-	 * @param model - name of model
 	 * @return returns a promises which will resolve with the viewpoint information
 	 */
-	public static requestViewpoint(account: string, model: string): Promise<any> {
+	public static requestViewpoint(): Promise<Viewpoint> {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});
 
-		const param: any = {};
-		if (account && model) {
-			param.namespace = `${account}.${model}`;
-		}
+		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, '');
 
-		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
-
-		return newViewpointPromise as Promise<object>;
+		return newViewpointPromise as Promise<Viewpoint>;
 	}
 
 	/**
@@ -2234,7 +2591,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static useOrthographicProjection() {
-		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -2242,7 +2599,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static usePerspectiveProjection() {
-		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -2274,17 +2631,21 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of model
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
+	 * @param near - the near plane of the camera to be set after the animation is complete. This will be immediately overridden if the camera moves again.
+	 * @param far - the far plane of the camera to be set after the animation is complete. This will be immediately overridden if the camera moves again.
 	 */
 	public static setViewpoint(
 		position: number[],
 		up: number[],
 		forward: number[],
-		lookAt: number[],
+		lookAt: number[] | undefined,
 		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
 		animationTime?: number,
+		near?: number,
+		far?: number,
 	) {
 		const param: any = {};
 		if (account && model) {
@@ -2305,6 +2666,8 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
+		param.near = near;
+		param.far = far;
 		param.position = position;
 		param.up = up;
 		param.forward = forward;
@@ -2912,28 +3275,42 @@ export class UnityUtil {
 	 */
 	public static getModelStatistics(): ModelStatistics {
 		const statistics: ModelStatistics = {
+			numContainers: 0,
+			numSupermeshes: 0,
+			isNavigating: false,
 			bundlesLoaded: 0,
 			bundleLoadingTasks: 0,
 			frameCount: 0,
+			textureCount: 0,
+			mapsBusy: 0,
+			activeWebRequests1: 0,
+			activeWebRequests2: 0,
 		};
 		if (UnityUtil.modelStatisticsArrayOffset) {
 			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
 			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.numContainers = heap[ptr64 + 0];
+			statistics.numSupermeshes = heap[ptr64 + 2];
+			statistics.isNavigating = heap[ptr64 + 4] !== 0;
+			statistics.textureCount = heap[ptr64 + 18];
 			statistics.bundlesLoaded = heap[ptr64 + 23];
 			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.activeWebRequests2 = heap[ptr64 + 21];
+			statistics.activeWebRequests1 = heap[ptr64 + 22];
 			statistics.frameCount = heap[ptr64 + 30];
+			statistics.mapsBusy = heap[ptr64 + 31];
 		}
 		return statistics;
 	}
 
 	/**
-	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
-	 * with additional options for clipping and gizmo display. rect should be the 
-	 * size and location of the image, given as the location of three corners 
-	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project 
-	 * coordinates. If image is null, the location of the existing image is updated. 
-	 * If no image has ever been loaded, a white rectangle is shown in its place. 
-	 * The clip and gizmo parameters control whether the drawing plane is clipped and 
+	 * Shows the DrawingImageSource for the plane at the location specified by rect,
+	 * with additional options for clipping and gizmo display. rect should be the
+	 * size and location of the image, given as the location of three corners
+	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project
+	 * coordinates. If image is null, the location of the existing image is updated.
+	 * If no image has ever been loaded, a white rectangle is shown in its place.
+	 * The clip and gizmo parameters control whether the drawing plane is clipped and
 	 * whether the gizmo is shown, respectively.
 	 * @param image - DrawingImageSource for the drawing plane
 	 * @param rect - number[] specifying the world rectangle
@@ -2961,7 +3338,7 @@ export class UnityUtil {
 		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
 	}
 
-	/** 
+	/**
 	 * Disable the drawing plane
 	 */
 	public static disableDrawingPlane() {
@@ -3037,12 +3414,26 @@ export class UnityUtil {
 		}
 	}
 
-	/** 
+	/**
 	 * Increases or decreases the size of measurement tool labels. This takes
 	 * effect immediately and applies to existing and new labels.
 	 * @param scale Scale factor, where 1 is the default scale.
 	 */
 	public static setLabelScale(scale: number) {
 		UnityUtil.toUnity('SetLabelScale', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/**
+	 * @hidden
+	 */
+	static randomiseDrawOrder() {
+		UnityUtil.toUnity('RandomiseDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
+	}
+
+	/**
+	 * @hidden
+	 */
+	static resetDrawOrder() {
+		UnityUtil.toUnity('ResetDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
 	}
 }

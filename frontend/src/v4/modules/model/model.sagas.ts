@@ -30,7 +30,7 @@ import { SnackbarActions } from '../snackbar';
 import { TeamspacesActions } from '../teamspaces';
 import { uploadFileStatuses } from './model.helpers';
 import { ModelActions, ModelTypes } from './model.redux';
-import { selectRevisions } from './model.selectors';
+import { selectIsFederation, selectRevisions } from './model.selectors';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -223,9 +223,10 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 	}
 }
 
-export function* fetchMaps({ teamspace, modelId }) {
+export function* fetchMaps({ teamspace, project, modelId }) {
 	try {
-		const response = yield API.getModelMaps(teamspace, modelId);
+		const isFederation = yield select(selectIsFederation);
+		const response = yield API.getModelMaps(teamspace, project, modelId, isFederation);
 
 		yield put(ModelActions.fetchMapsSuccess(response.data.maps));
 	} catch (e) {

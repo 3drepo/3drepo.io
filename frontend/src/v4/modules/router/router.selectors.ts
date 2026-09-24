@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as queryString from 'query-string';
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
+import { parse } from '../../helpers/queryString';
 
 const selectRouterDomain = (state) => state.router || {};
 
@@ -85,5 +85,5 @@ export const selectUrlParams =  createSelector(
 );
 
 export const selectQueryParams = createSelector(
-	selectLocation, (location) => queryString.parse(location.search)
+	selectLocation, (location) => parse(location.search)
 );

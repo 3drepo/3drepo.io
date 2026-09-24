@@ -17,7 +17,11 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
-const { generateRandomString, generateRandomDate, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomDate,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 const { src } = require('../../helper/path');
 
 const { actions } = require(`${src}/models/teamspaces.audits.constants`);

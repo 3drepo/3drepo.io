@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys, last, set } from 'lodash';
+import { camelCase, isEmpty, isEqual, mapKeys, last, set } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
@@ -55,7 +55,8 @@ export const getEditableProperties = (template) => {
 const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
 	if (defaultValue != null) return defaultValue;
 	switch (type) {
-		case 'manyOf': return [];
+		case 'manyOf':
+		case 'tags': return [];
 		case 'boolean': return false;
 		case 'text':
 		case 'longText':
@@ -317,26 +318,28 @@ export const normalizeTicketAssignees = (ticket: ITicket) => {
 
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
 
-const fillEmptyOverrides = (values: Partial<ITicket>) => {
-	Object.values(values).forEach((value) => {
-		if (isObject(value) && 'state' in value) {
-			const viewValue: Viewpoint | undefined = value;
-
-			viewValue.state ||= {} as any;
-			viewValue.state.colored ||= [];
-			viewValue.state.hidden ||= [];
-			viewValue.state.transformed ||= [];
+const normalizeViewProperty = (values: any, properties: PropertyDefinition[] = []) => {
+	Object.entries(values).forEach(([propertyName, value]:[string, any]) => {
+		const property = properties.find(({ name }) => name === propertyName);
+		if (property?.type === 'view' && value) {
+			const viewValue: Viewpoint = value;
+			viewValue.state = value?.state || null;
+			viewValue.screenshot = value?.screenshot || null;
+			viewValue.camera = value?.camera || null;
 		}
 	});
 };
 
-export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
+export const normalizeViewsInTicket = (values: Partial<ITicket>, template?: Partial<ITemplate>) => {
 	if (values.properties) {
-		fillEmptyOverrides(values.properties);
+		normalizeViewProperty(values.properties, template?.properties);
 	}
 
 	if (values.modules) {
-		Object.values(values.modules).forEach(fillEmptyOverrides);
+		Object.entries(values.modules).forEach(([moduleName, moduleProperties]) => {
+			const module = template?.modules?.find(({ name, type }) => name === moduleName || type === moduleName);
+			normalizeViewProperty(moduleProperties, module?.properties);
+		});
 	}
 };
 
@@ -344,7 +347,7 @@ export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProper
 
 export const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
 export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => definitionsAsArray
-	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+	.filter((definition) => ['manyOf', 'oneOf', 'text', 'tags'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 	.map((definition) => definition.name);
 
 export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {

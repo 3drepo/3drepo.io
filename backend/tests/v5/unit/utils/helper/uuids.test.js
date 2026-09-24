@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { generateUUIDString, generateUUID } = require('../../../helper/services');
+const {
+	generateUUIDString,
+	generateUUID,
+} = require('../../../helper/dataGen');
 
 const UUIDHelper = require(`${src}/utils/helper/uuids`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);

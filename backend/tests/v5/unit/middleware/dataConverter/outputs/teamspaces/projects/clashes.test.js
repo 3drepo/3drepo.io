@@ -16,11 +16,17 @@
  */
 
 const { src } = require('../../../../../../helper/path');
-const ServiceHelper = require('../../../../../../helper/services');
+const {
+	generateClashPlan,
+	generateClashRun,
+} = require('../../../../../../helper/dataGen.clashes');
+const {
+	generateRandomString,
+	generateTemplate,
+	generateUUIDString,
+} = require('../../../../../../helper/dataGen');
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { omit, times } = require('lodash');
-
-const { generateRandomString, generateUUIDString } = ServiceHelper;
 
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -76,7 +82,7 @@ const testSerialiseClashPlans = () => {
 	describe('Serialise clash plans', () => {
 		test('should convert UUID fields in plans list output', () => {
 			const plans = times(3,
-				() => ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString()));
+				() => generateClashPlan(generateUUIDString(), generateUUIDString()));
 			const req = { outputData: plans.map(deserialisePlan) };
 
 			ClashOutputMiddleware.serialiseClashPlans(req, {});
@@ -92,8 +98,8 @@ const testSerialiseClashPlans = () => {
 const testSerialiseClashPlan = () => {
 	describe('Serialise clash plan', () => {
 		test('should convert nested UUID fields and ticket dates', () => {
-			const template = ServiceHelper.generateTemplate();
-			const plan = ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString(), {
+			const template = generateTemplate();
+			const plan = generateClashPlan(generateUUIDString(), generateUUIDString(), {
 				federation: { _id: generateUUIDString() },
 				template,
 				creator: generateRandomString(),
@@ -117,12 +123,12 @@ const testSerialiseClashRuns = () => {
 				resolved: [generateRandomString()],
 			};
 			const runs = [
-				ServiceHelper.generateClashRun(undefined, clashResults),
-				ServiceHelper.generateClashRun(undefined, undefined, {
+				generateClashRun(undefined, clashResults),
+				generateClashRun(undefined, undefined, {
 					status: clashRunStatus.FAILED,
 					results: { error: { reason: generateRandomString() } },
 				}),
-				ServiceHelper.generateClashRun(undefined, undefined, {
+				generateClashRun(undefined, undefined, {
 					queueId: generateRandomString(),
 				}),
 			].map((run) => omit(run, 'clashResults'));
@@ -141,8 +147,8 @@ const testSerialiseClashRuns = () => {
 const testSerialiseClashRun = () => {
 	describe('Serialise clash run', () => {
 		test('should serialise run and nested plan UUID/date fields without reshaping run data', () => {
-			const template = ServiceHelper.generateTemplate();
-			const plan = ServiceHelper.generateClashPlan(generateUUIDString(), generateUUIDString(), {
+			const template = generateTemplate();
+			const plan = generateClashPlan(generateUUIDString(), generateUUIDString(), {
 				federation: { _id: generateUUIDString() },
 				template,
 				creator: generateRandomString(),
@@ -157,7 +163,7 @@ const testSerialiseClashRun = () => {
 				active: [generateRandomString()],
 				resolved: [generateRandomString()],
 			};
-			const run = omit(ServiceHelper.generateClashRun(planSnapshot, clashResults), 'clashResults');
+			const run = omit(generateClashRun(planSnapshot, clashResults), 'clashResults');
 			const req = { outputData: deserialiseRun(run, template) };
 
 			ClashOutputMiddleware.serialiseClashRun(req, {});

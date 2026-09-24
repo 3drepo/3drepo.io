@@ -22,7 +22,7 @@ import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { isDateType, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { FormBooleanSelect, FormJobsAndUsersSelect, FormMultiSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormBooleanSelect, FormJobsAndUsersSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { getFilterFromEvent, getOptionFromValue, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -42,6 +42,9 @@ import {
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { BusyMultiSelect } from '@controls/inputs/multiSelect/busyMultiSelect/busyMultiSelect.component';
+import { formatMessage } from '@/v5/services/intl';
+import { Gap } from '@controls/gap/gap.styles';
 
 const EMPTY_VALUE = { value: '' };
 
@@ -54,6 +57,8 @@ export const FilterFormNonRangeValues = ({
 	isBackButton,
 	onClickCancelOrBack,
 	onSubmit,
+	tagOptions = [],
+	isFetchingOptions = false,
 }: FilterFormValuesComponentProps) => {
 	const { templates, modelsIds } = useTicketFiltersContext();
 
@@ -76,7 +81,7 @@ export const FilterFormNonRangeValues = ({
 	ContainersHooksSelectors.selectContainers();
 
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-	const selectOptions = getSelectOptions(module, property, type, templates, modelsIds);
+	const selectOptions = type === 'tags' ? tagOptions : getSelectOptions(module, property, type, templates, modelsIds);
 	const isJobsAndUsers = getIsJobsAndUsersProperty(templates, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
@@ -145,8 +150,10 @@ export const FilterFormNonRangeValues = ({
 
 		if (isSelectType(type)) {
 			return (
-				<FormMultiSelect
+				<BusyMultiSelect
 					name={FIELD_ARRAY_NAME}
+					busy={isFetchingOptions}
+					busyLabel={formatMessage({ id: 'filterForm.multiSelect.fetchingValues', defaultMessage: 'Fetching available values...' })}
 					transformInputValue={mapFormArrayToArray}
 					transformOutputValue={(e) => getFilterFromEvent(e)}
 					renderValue={(values: string[]) => arrToDisplayValue(
@@ -163,7 +170,7 @@ export const FilterFormNonRangeValues = ({
 							</MultiSelectMenuItem>
 						),
 					)}
-				</FormMultiSelect>
+				</BusyMultiSelect>
 			);
 		}
 
@@ -178,13 +185,12 @@ export const FilterFormNonRangeValues = ({
 	};
 
 	return (
-		<>
-			<FormProvider {...formData}>
-				<form>
-					{renderFields()}
-				</form>
-			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
-		</>
+		<FormProvider {...formData}>
+			<form onSubmit={submitForm}>
+				{renderFields()}
+				<Gap $height="10px" />
+				<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
+			</form>
+		</FormProvider>
 	);
 };

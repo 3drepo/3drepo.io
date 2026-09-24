@@ -17,10 +17,10 @@
 
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
-import * as queryString from 'query-string';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { generatePath } from 'react-router';
+import { stringify } from '@/v4/helpers/queryString';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
@@ -289,34 +289,37 @@ function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 }
 
 function* goToRisk({ risk }) {
-	const params = yield select(selectUrlParams);
-	let queryParams =  yield select(selectQueryParams);
+	try {
+		const params = yield select(selectUrlParams);
+		let queryParams =  yield select(selectQueryParams);
+		// Im not longer in the viewer or board
+		// this happens when unmounting the card which
+		// makes sense when you close the card in the viewer and want to remove the selected risk
+		// but when navigating back to the dashboard no, so. fixed here
+		if (!params) {
+			return;
+		}
 
-	if (!risk) {
-		yield put(RouterActions.removeSearchParams(['riskId']))
-		return
+		if (!risk) {
+			yield put(RouterActions.removeSearchParams(['riskId']))
+			return
+		}
+
+		const riskId = (risk || {})._id;
+
+		const route = params.revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
+		const path = generatePath(route, params);
+
+		queryParams = {... queryParams, riskId};
+		let query = stringify(queryParams);
+		if (query) {
+			query = '?' + query;
+		}
+
+		yield put(RouterActions.navigate(`${path}${query}`));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('go to', 'risk', error));
 	}
-
-	// Im not longer in the viewer or board
-	// this happens when unmounting the card which
-	// makes sense when you close the card in the viewer and want to remove the selected risk
-	// but when navigating back to the dashboard no, so. fixed here
-	if (!params) {
-		return;
-	}
-
-	const riskId = (risk || {})._id;
-
-	const route = ROUTES.V5_MODEL_VIEWER;
-	const path = generatePath(route, params);
-
-	queryParams = {... queryParams, riskId};
-	let query = queryString.stringify(queryParams);
-	if (query) {
-		query = '?' + query;
-	}
-
-	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, riskId }) {

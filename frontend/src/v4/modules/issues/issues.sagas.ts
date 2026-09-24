@@ -19,9 +19,9 @@ import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit} from 'lodash';
 import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
-import * as queryString from 'query-string';
 import { generatePath } from 'react-router-dom';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { stringify } from '@/v4/helpers/queryString';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { dispatch, getState } from '@/v5/helpers/redux.helpers';
@@ -329,34 +329,38 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 }
 
 function* goToIssue({ issue }) {
-	const params = yield select(selectUrlParams);
-	let queryParams =  yield select(selectQueryParams);
+	try {
+		const params = yield select(selectUrlParams);
+		let queryParams =  yield select(selectQueryParams);
 
-	if (!issue) {
-		yield put(RouterActions.removeSearchParams(['issueId']))
-		return
+		// Im not longer in the viewer or board
+		// this happens when unmounting the card which
+		// makes sense when you close the card in the viewer and want to remove the selected risk
+		// but when navigating back to the dashboard no, so. fixed here
+		if (!params) {
+			return;
+		}
+
+		if (!issue) {
+			yield put(RouterActions.removeSearchParams(['issueId']))
+			return
+		}
+
+		const issueId = (issue || {})._id;
+
+		const route = params.revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
+		const path = generatePath(route, params);
+
+		queryParams = {... queryParams, issueId};
+		let query = stringify(queryParams);
+		if (query) {
+			query = '?' + query;
+		}
+
+		yield put(RouterActions.navigate(`${path}${query}`));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('go to', 'issue', error));
 	}
-
-	// Im not longer in the viewer or board
-	// this happens when unmounting the card which
-	// makes sense when you close the card in the viewer and want to remove the selected risk
-	// but when navigating back to the dashboard no, so. fixed here
-	if (!params) {
-		return;
-	}
-
-	const issueId = (issue || {})._id;
-
-	const route = ROUTES.V5_MODEL_VIEWER;
-	const path = generatePath(route, params);
-
-	queryParams = {... queryParams, issueId};
-	let query = queryString.stringify(queryParams);
-	if (query) {
-		query = '?' + query;
-	}
-
-	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, issueId }) {

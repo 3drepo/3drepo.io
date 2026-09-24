@@ -138,6 +138,10 @@ export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
+export const selectIsExpandedTicketView = createSelector(
+	selectTicketsCardDomain, (state) => state.isExpandedTicketView,
+);
+
 export const selectGroupBy = createSelector(
 	selectTicketsCardDomain, (state) => state.groupByField || NONE_OPTION,
 );
@@ -151,10 +155,15 @@ export const selectTicketPins = createSelector(
 	selectSelectedDate,
 	selectIsShowingPins,
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate, isShowingPins): IPin[] => {
-		if (view === TicketsCardViews.New || !tickets.length || (view === TicketsCardViews.List && !isShowingPins)) return [];
 		if (view === TicketsCardViews.Details) {
-			return getTicketPins(templates, selectedTicket, selectedTicketPinId);
+			const pins = getTicketPins(templates, selectedTicket, selectedTicketPinId);
+			return pins;
 		}
+
+		if (view === TicketsCardViews.New || !tickets.length || (view === TicketsCardViews.List && !isShowingPins)) {
+			return [];
+		}
+		
 		return tickets.reduce(
 			(accum, ticket) => {
 				const pin = ticket.properties?.Pin;
