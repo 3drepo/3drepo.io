@@ -17,12 +17,14 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
-import { fillOverridesIfEmpty } from '@/v5/store/tickets/tickets.helpers';
+import { normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
+import { getState } from '@/v5/helpers/redux.helpers';
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 import { fetchTicketGroup } from '../api/tickets';
+import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
 
 export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 
@@ -32,7 +34,9 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 		{ teamspace, project, model: containerId },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
-			fillOverridesIfEmpty(ticket);
+			const fullTicket = selectTicketByIdRaw(getState(), containerId, (ticket as any)._id);
+			const template = fullTicket ? selectTemplateById(getState(), containerId, fullTicket.type) : undefined;
+			normalizeViewsInTicket(ticket, template);
 			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
 		},
 	)
@@ -58,7 +62,7 @@ export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: stri
 				group.objects = meshObjectsToV5GroupNode(data);
 			// eslint-disable-next-line no-underscore-dangle
 			} else if (group.objects.some((o) => !o._ids)) {
-				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false);
+				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false, revision);
 				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);

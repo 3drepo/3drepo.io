@@ -44,6 +44,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 import { BusyMultiSelect } from '@controls/inputs/multiSelect/busyMultiSelect/busyMultiSelect.component';
 import { formatMessage } from '@/v5/services/intl';
+import { Gap } from '@controls/gap/gap.styles';
 
 const EMPTY_VALUE = { value: '' };
 
@@ -184,13 +185,12 @@ export const FilterFormNonRangeValues = ({
 	};
 
 	return (
-		<>
-			<FormProvider {...formData}>
-				<form>
-					{renderFields()}
-				</form>
-			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
-		</>
+		<FormProvider {...formData}>
+			<form onSubmit={submitForm}>
+				{renderFields()}
+				<Gap $height="10px" />
+				<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
+			</form>
+		</FormProvider>
 	);
 };

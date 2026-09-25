@@ -286,7 +286,8 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, 
 		model: modelId,
 		revision,
 	};
-	const basePath = generatePath(ROUTES.V5_MODEL_VIEWER, pathParams);
+	const route = revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
+	const basePath = generatePath(route, pathParams);
 	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
 
 	copy(url);

@@ -17,9 +17,10 @@
 
 import { Viewer3D } from '@/v4/routes/viewer3D';
 import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
+import { ViewerParams } from '../../routes.constants';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
@@ -29,6 +30,7 @@ const MIN_PANEL_WIDTH = 68;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
+	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { isCalibrating } = useContext(CalibrationContext);
 
@@ -47,7 +49,17 @@ export const ViewerCanvases = () => {
 				$is2DOpen={is2DOpen}
 			>
 				<Pane size={size} minSize={MIN_PANEL_WIDTH}> 
-					<Viewer3D location={{ pathname }} />
+					<Viewer3D
+						location={{ pathname }}
+						match={{
+							params: {
+								model: containerOrFederation,
+								project,
+								teamspace,
+								revision,
+							},
+						}}
+					/>
 				</Pane>
 				<Pane minSize={is2DOpen ? MIN_PANEL_WIDTH : 0}>
 					{is2DOpen ? <Viewer2D /> : <div />}

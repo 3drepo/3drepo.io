@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -26,7 +26,6 @@ import { Comment, CommentWithButtonsContainer, EditComment } from './currentUser
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-
 
 export type CurrentUserCommentProps = ITicketComment & {
 	metadata?: TicketCommentReplyMetadata;
@@ -47,9 +46,17 @@ export const CurrentUserComment = ({
 	...props
 }: CurrentUserCommentProps) => {
 	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
-	const [isEditMode, setIsEditMode] = useState(!!unsavedComment);
+
+	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState(metadata);
+
+	useEffect(() => {
+		if (unsavedComment) {
+			setIsEditMode(true);
+		}
+	}, [unsavedComment]);
+
 
 	if (deleted) return (<DeletedComment author={author} />);
 

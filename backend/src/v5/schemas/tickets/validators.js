@@ -123,7 +123,7 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.TEXT:
 		return imposeNullableRule(types.strings.title);
 	case propTypes.LONG_TEXT:
-		return imposeNullableRule(types.strings.longDescription);
+		return imposeNullableRule(types.strings.ultralongDescription);
 	case propTypes.BOOLEAN:
 		return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
 	case propTypes.DATE:

@@ -97,7 +97,7 @@ export const selectFilteredGroups = createSelector(
 			return isSmart ? showSmart : showStandard;
 		});
 
-		return searchByFilters(filteredByType, selectedFilters);
+		return searchByFilters(filteredByType, selectedFilters, false, ['name']);
 	}
 );
 
