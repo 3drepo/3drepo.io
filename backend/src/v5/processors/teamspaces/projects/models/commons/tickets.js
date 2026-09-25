@@ -25,7 +25,7 @@ const {
 	supportedPatterns,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { commitGroupChanges, processCameraGroupUpdate, processGroupsUpdate } = require('./tickets.groups');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { deleteLogsByTicketIds, getTicketLogs } = require('../../../../../models/tickets.logs');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
@@ -104,14 +104,7 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
-
-				const oldCamera = getNestedProperty(oldProperties[name], 'camera');
-				const newCamera = getNestedProperty(updatedProperties[name], 'camera');
-				const updatedCamera = processCameraGroupUpdate(oldCamera, newCamera, externalReferences.groups);
-
-				if (updatedCamera !== newCamera) {
-					setNestedProperty(updatedProperties[name], 'camera', updatedCamera);
-				}
+				processGroupsUpdate(oldProperties[name], updatedProperties[name], ['camera.zoomTo'], externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
 			}
@@ -523,10 +516,12 @@ Tickets.onClashPlanNameUpdated = async (teamspace, project, planId, planName) =>
 };
 
 Tickets.onModelNameUpdated = async (teamspace, project, model) => {
-	const templates = await getTemplatesByQuery(teamspace, { $or: [
-		{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-		{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-	] });
+	const templates = await getTemplatesByQuery(teamspace, {
+		$or: [
+			{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+			{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+		],
+	});
 
 	await Promise.all(templates.map(async (template) => {
 		await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.MODEL_NAME);

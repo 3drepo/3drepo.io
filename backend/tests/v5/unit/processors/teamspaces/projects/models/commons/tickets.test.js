@@ -471,8 +471,7 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 				testData.template._id, expect.any(Array));
 
-			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
-			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 4 * iterations : 4);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(isImport ? iterations : 1);
 
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
@@ -521,8 +520,7 @@ const updateGroupTestsHelper = (updateMany) => {
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
 
-			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
-			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 4 * nTickets : 4);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
@@ -540,11 +538,15 @@ const updateGroupTestsHelper = (updateMany) => {
 		test('New groups should be extracted and replaced with a group UUID', async () => {
 			const { template, tickets, propName, moduleName } = generateGroupsTestData(false, nTickets);
 			const response = [];
+			const newCamera = { zoomTo: [{ group: { ...generateGroup(false, { hasId: false }), name: 'cameraGroup' } }] };
 
 			const toUpdate = tickets.map(({ modules, properties }) => {
 				const data = {
 					properties: {
-						[propName]: properties[propName],
+						[propName]: {
+							...properties[propName],
+							camera: newCamera,
+						},
 					},
 					modules: {
 						[moduleName]: {
@@ -564,91 +566,6 @@ const updateGroupTestsHelper = (updateMany) => {
 			});
 
 			await runTest(response, template, tickets, propName, moduleName, toUpdate);
-		});
-
-		test('Should replace the camera with the value returned by processCameraGroupUpdate', async () => {
-			const { template, tickets, propName, moduleName } = generateGroupsTestData(true, nTickets);
-			const response = [];
-
-			const oldCamera = generateUUID();
-			const newCamera = generateGroup(false, { hasId: false });
-			const updatedCamera = generateUUID();
-
-			tickets.forEach((ticket) => {
-				// eslint-disable-next-line no-param-reassign
-				ticket.properties[propName].camera = oldCamera;
-				// eslint-disable-next-line no-param-reassign
-				ticket.modules[moduleName][propName].camera = oldCamera;
-			});
-
-			const toUpdate = tickets.map((ticket) => ({
-				properties: {
-					[propName]: {
-						...ticket.properties[propName],
-						camera: newCamera,
-					},
-				},
-				modules: {
-					[moduleName]: {
-						[propName]: {
-							...ticket.modules[moduleName][propName],
-							camera: newCamera,
-						},
-					},
-				},
-			}));
-
-			times(nTickets, () => response.push({ ...generateRandomObject(), changes: generateRandomObject() }));
-
-			TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
-			TicketsModel.updateTickets.mockResolvedValueOnce(response);
-
-			GroupsProcessor.processCameraGroupUpdate.mockReturnValue(updatedCamera);
-
-			await expect(Tickets.updateManyTickets(teamspace, project, model, template, tickets, toUpdate))
-				.resolves.toBeUndefined();
-
-			const expectedUpdateData = tickets.map((ticket) => ({
-				properties: {
-					[propName]: {
-						...ticket.properties[propName],
-						camera: updatedCamera,
-					},
-				},
-				modules: {
-					[moduleName]: {
-						[propName]: {
-							...ticket.modules[moduleName][propName],
-							camera: updatedCamera,
-						},
-					},
-				},
-			}));
-
-			expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
-				tickets, expectedUpdateData, undefined);
-
-			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
-			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
-
-			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
-			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
-			expect(GroupsProcessor.processCameraGroupUpdate).toHaveBeenCalledWith(
-				oldCamera, newCamera, expect.any(Object),
-			);
-			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
-
-			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
-			response.forEach((res) => {
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET,
-					{
-						teamspace,
-						project,
-						model,
-						...res,
-					});
-			});
 		});
 	});
 };
@@ -1757,7 +1674,6 @@ const testGetOpenTicketsCountForMultipleModels = () => {
 describe(determineTestGroup(__filename), () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
-		GroupsProcessor.processCameraGroupUpdate.mockImplementation((_, newCamera) => newCamera);
 	});
 	testAddTicket();
 	testImportTickets();

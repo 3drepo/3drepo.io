@@ -356,6 +356,26 @@ const testAddTicket = () => {
 				_ids: [ServiceHelper.generateUUIDString()],
 			}],
 		};
+		const cameraSmartGroup = {
+			name: ServiceHelper.generateRandomString(),
+			rules: [
+				{
+					name: ServiceHelper.generateRandomString(),
+					field: {
+						operator: 'CONTAINS',
+						values: [ServiceHelper.generateRandomString()],
+					},
+					operator: 'IS',
+					values: [ServiceHelper.generateRandomString()],
+				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					field: { operator: 'IS', values: [ServiceHelper.generateRandomString()] },
+					operator: 'IS',
+					values: [ServiceHelper.generateRandomString()],
+				},
+			],
+		};
 
 		const statusValues = generateCustomStatusValues();
 
@@ -424,7 +444,15 @@ const testAddTicket = () => {
 				['the ticket has a view property with a group as camera', true, getRoute(), undefined, (() => {
 					const ticket = ServiceHelper.generateTicket(viewTemplate);
 					const viewPropName = Object.keys(ticket.properties).find((key) => ticket.properties[key]?.camera);
-					ticket.properties[viewPropName].camera = isFed ? cameraGroupFed : cameraGroup;
+					ticket.properties[viewPropName].camera = {
+						zoomTo: [{ group: isFed ? cameraGroupFed : cameraGroup }],
+					};
+					return ticket;
+				})()],
+				['the ticket has a view property with a smart group as camera', true, getRoute(), undefined, (() => {
+					const ticket = ServiceHelper.generateTicket(viewTemplate);
+					const viewPropName = Object.keys(ticket.properties).find((key) => ticket.properties[key]?.camera);
+					ticket.properties[viewPropName].camera = { zoomTo: [{ group: cameraSmartGroup }] };
 					return ticket;
 				})()],
 				['oneOf jobsAndUsers property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [oneOfJobsAndUsersPropName]: users.noProjectAccess.user } }],

@@ -897,6 +897,61 @@ const testCompositeTypes = () => {
 				.resolves.toEqual({ ...input, modules: {}, type: template._id });
 		});
 
+		test('Should succeed if a required view has a group camera', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: {
+						camera: {
+							zoomTo: [{ group: generateGroup(false, { hasId: false, serialised: true }) }],
+						},
+					},
+				},
+			};
+
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, modules: {}, type: template._id });
+		});
+
+		test('Should succeed if an optional view has a group camera', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: {
+						camera: {
+							zoomTo: [{ group: generateGroup(false, { hasId: false, serialised: true }) }],
+						},
+					},
+				},
+			};
+
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, modules: {}, type: template._id });
+		});
+
 		test('Should fail if a required view property has no camera on creation', async () => {
 			const propName = generateRandomString();
 			const template = {
