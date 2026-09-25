@@ -70,7 +70,15 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		},
 	).default(undefined), true);
 
-	const camera = imposeNullableRule(Yup.object({
+	const groupCameraSchema = imposeNullableRule(Yup.object({
+		zoomTo: Yup.array().of(
+			Yup.object({
+				group: groupSchema(isUpdate, isUpdate),
+			}),
+		),
+	}), false);
+
+	const standardCameraSchema = imposeNullableRule(Yup.object({
 		type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
 			.default(CameraType.PERSPECTIVE),
 		position: types.position.required(),
@@ -78,6 +86,14 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		up: types.position.required(),
 		size: Yup.number().when('type', ([type], schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 	}).default(undefined), false);
+
+	const camera = Yup.lazy((value) => {
+		const cameraRequired = !isUpdate && required;
+		if (value !== undefined && 'zoomTo' in value) {
+			return cameraRequired ? groupCameraSchema.required() : groupCameraSchema;
+		}
+		return cameraRequired ? standardCameraSchema.required() : standardCameraSchema;
+	});
 
 	const clippingPlanes = imposeNullableRule(Yup.array().of(
 		Yup.object().shape({
@@ -89,7 +105,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 
 	const schema = {
 		state,
-		camera: !isUpdate && required ? camera.required() : camera,
+		camera,
 		clippingPlanes,
 	};
 
