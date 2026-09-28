@@ -16,8 +16,8 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ModelHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CompareActionsDispatchers, DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
@@ -37,6 +37,7 @@ import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.compone
 import { useApplyViewForTicketURL } from './applyViewForTicketURL.hook';
 
 export const Viewer = () => {
+	const revisions = ModelHooksSelectors.selectRevisions();
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
@@ -92,6 +93,13 @@ export const Viewer = () => {
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
+	useEffect(() => {
+		if (revisions.length) {
+			CompareActionsDispatchers.getCompareModels(revision || 'HEAD');
+		}
+	}, [revision, revisions]);
+
+
 	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
 
 	if (selectedContainer?.revisionsCount === 0) {
@@ -110,6 +118,7 @@ export const Viewer = () => {
 			revision,
 		},
 	};
+
 
 	return (
 		<>
