@@ -20,6 +20,12 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
 
+
+type MeshId = string;
+type HexColor = string;
+
+export type ColorOverrides = Record<MeshId, HexColor>;
+
 // Adds to a dictionary of shared_id -> value a new group with
 // its share_ids from 'objects' field pointing to value
 export const addToGroupDictionary = (dict, group, value) => {
