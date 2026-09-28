@@ -20,7 +20,6 @@ const {
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
-	CLASH_RUNS_REF_COL,
 } = require('../../../models/clashes.constants');
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const {
@@ -42,7 +41,7 @@ const {
 	updatePlan,
 } = require('../../../models/clashes.plans');
 const { getBoundsForGroupsOfMeshNodes, getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
-const { getFile, getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
+const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { meshPrimitiveTypes, nodeTypes } = require('../../../models/scenes.constants');
 const { JSONParser } = require('@streamparser/json-node');
@@ -469,10 +468,17 @@ Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 	}));
 };
 
-Clashes.getDetailedRunReport = async (teamspace, project, runId) => {
-	const { _id: clashRunId } = await getClashRunByQuery(teamspace, project, {"plan._id": runId }, {_id: 1});
-	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_REF_COL, clashRunId);
-	
+Clashes.getDetailedRunReport = async (teamspace, project, planId, runId) => {
+	const { status } = await getClashRunByQuery(teamspace, project,
+		{ _id: runId, 'plan._id': planId },
+		{ _id: 1, status: 1 });
+
+	if (status !== clashRunStatus.COMPLETED) {
+		throw templates.clashRunNotFound;
+	}
+
+	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_COL, runId);
+
 	const chunks = [];
 	for await (const chunk of readStream) {
 		chunks.push(chunk);
