@@ -97,7 +97,7 @@ export const ticketCommentsReducer = createReducer(INITIAL_STATE, produceAll({
 
 export interface ITicketCommentsState {
 	commentsByTicketId: Record<string, ITicketComment[]>,
-	unsavedComments: Partial<ITicketComment>[],
+	unsavedComments: Partial<ITicketComment & { erroredImages?: string[] }>[],
 }
 
 export type FetchCommentsAction = Action<'FETCH_COMMENTS'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
@@ -162,7 +162,7 @@ export interface ITicketCommentsActionCreators {
 	) => GoToCommentViewpointAction;
 	setUnsavedComment: (
 		commentId?: string | null,
-		comment?: Partial<ITicketComment>,
+		comment?: Partial<ITicketComment & { erroredImages?: string[] }>,
 	) => SetUnsavedCommentAction;
 	resetUnsavedComments: () => ResetUnsavedCommentsAction;
 }

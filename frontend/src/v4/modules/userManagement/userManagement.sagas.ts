@@ -186,7 +186,8 @@ export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { used } = yield select(selectCurrentQuotaSeats);
-		const user = yield select(selectUser, teamspace, username)
+		const users = yield select(selectUsers);
+		const user = users.find(({ user: u }) => u === username);
 		const fullName = `${user.firstName} ${user.lastName}`
 		DialogsActionsDispatchers.open('delete', {
 			onClickConfirm: () => new Promise<void>(

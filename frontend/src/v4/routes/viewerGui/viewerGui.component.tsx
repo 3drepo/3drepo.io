@@ -28,8 +28,6 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Activities } from './components/activities/';
-import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
 import Gis from './components/gis/gis.container';
@@ -45,7 +43,7 @@ import Sequences from './components/sequences/sequences.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
-import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
+import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
@@ -69,7 +67,6 @@ interface IProps {
 		presenter?: string;
 	};
 	leftPanels: string[];
-	rightPanels: string[];
 	draggablePanels: string[];
 	selectedTicket: ITicket | undefined;
 	treeNodesList: any;
@@ -230,16 +227,14 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
+		const { leftPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
 
 		return (
 			<GuiContainer $isCalibrating={isCalibrating}>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
-					<RevisionsSwitch />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
-					{this.renderRightPanels(rightPanels)}
 					{this.renderDraggablePanels(draggablePanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
@@ -310,13 +305,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
 			})}
 		</LeftPanels>
-	)
-
-	private renderRightPanels = (panels) => (
-		<RightPanels>
-			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
-			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
-		</RightPanels>
 	)
 
 	private renderDraggablePanels = (panels) => (

@@ -289,7 +289,14 @@ const getPropertyDefs = (
 		displayValues.push(...(propertyDisplayValues || []));
 	});
 	if (!propertyExists && !isBaseProperty(type)) throw (new InvalidPropertyError(property, type)); 
-	return { values: uniq(values), displayValues: uniq(displayValues) };
+	const uniqueEntries = uniqBy(values.map((value, index) => ({
+		value,
+		displayValue: displayValues[index],
+	})), 'value');
+	return {
+		values: uniqueEntries.map(({ value }) => value),
+		displayValues: uniqueEntries.map(({ displayValue }) => displayValue),
+	};
 };
 
 // NOTE: serialization assumes there are no name clashes: that means 

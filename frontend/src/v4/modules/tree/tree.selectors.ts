@@ -153,7 +153,7 @@ export const selectFilteredNodesList = createSelector(
 		if (!selectedFilters.length) {
 			return nodes;
 		}
-		return searchByFilters(sortedNodes, selectedFilters, true);
+		return searchByFilters(sortedNodes, selectedFilters, true, ['name']);
 	}
 );
 
@@ -408,7 +408,7 @@ export const selectModelHasHiddenNodes = createSelector(
 		let meshes;
 		const [root] = nodesList;
 		if (isEmpty(subModelsRootNodes)) {
-			meshes = meshesByNodeId[root.namespacedId][root._id];
+			meshes = meshesByNodeId[root.namespacedId]?.[root._id] || [];
 		} else {
 			const subModelsMeshesById: Array<Record<string, string[]>> = Object.entries(subModelsRootNodes).flatMap(([modelId, node]: any) => (
 				node.children.length ? meshesByNodeId[`${root.teamspace}@${modelId}`] : []

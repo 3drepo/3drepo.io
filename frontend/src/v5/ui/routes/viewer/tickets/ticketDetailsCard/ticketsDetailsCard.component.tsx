@@ -196,11 +196,13 @@ export const TicketDetailsCard = () => {
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
 						/>
-						<InputController
-							Input={TicketGroups}
-							onBlur={onBlurHandler}
-							name={viewProps.name}
-						/>
+						<ExpandableCard ExpandedComponent={null}>
+							<InputController
+								Input={TicketGroups}
+								onBlur={onBlurHandler}
+								name={viewProps.name}
+							/>
+						</ExpandableCard>
 					</>
 				)}
 				{detailsView === TicketDetailsView.Form && (

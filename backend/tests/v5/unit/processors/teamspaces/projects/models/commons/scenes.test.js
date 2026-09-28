@@ -29,7 +29,11 @@ const {
 } = require('../../../../../../helper/dataGen');
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const {
+	idTypesToKeys,
+	idTypes,
+	metadataKeyToIdTypes,
+} = require(`${src}/models/metadata.constants`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
@@ -381,7 +385,7 @@ const testGetExternalIdsFromMetadata = () => {
 
 	const getIDsFromMeta = (meta, targetType) => meta.flatMap(({ metadata }) => {
 		for (const { key, value } of metadata) {
-			if (metaKeyToIdType[key] === targetType) return value;
+			if (metadataKeyToIdTypes[key] === targetType) return value;
 		}
 		return [];
 	});

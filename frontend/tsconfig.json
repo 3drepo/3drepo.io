@@ -16,12 +16,8 @@
       "webpack-env"
     ],
     "lib": [
-      "es2015",
-      "es2019",
+      "es2023",
       "dom",
-      "es2020.string",
-      "es2021.string",
-      "es2022.Array",
       "WebWorker",
       "DOM.Iterable"
     ],
