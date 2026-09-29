@@ -765,7 +765,7 @@ export class UnityUtil {
 			ev.project,
 			ev.model,
 			ev.revision,
-			ev.isComparator
+			ev.isComparator,
 		);
 
 		if (!ev.isComparator) {
@@ -1129,7 +1129,7 @@ export class UnityUtil {
 			project,
 			container,
 			revision,
-			true
+			true,
 		);
 
 		const promise = this.createModelLoadedPromise(namespace);
@@ -2217,7 +2217,7 @@ export class UnityUtil {
 			project,
 			model,
 			revision,
-			false
+			false,
 		);
 
 		if (this.modelLoadedPromises.has(namespace)) {
@@ -2227,7 +2227,7 @@ export class UnityUtil {
 		const promise = this.createModelLoadedPromise(namespace);
 
 		UnityUtil.loadedPromise = Promise.all(
-			[...this.modelLoadedPromises.values()].map((d) => d.promise)
+			[...this.modelLoadedPromises.values()].map((d) => d.promise),
 		);
 
 		// eslint-disable-next-line no-console
@@ -3450,7 +3450,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	static getModelNamespace(teamspace: string, project: string, model: string, revision: string, comparator: boolean): string {
-		return `${teamspace}.${project}.${model}.${revision ? revision : ''}.${comparator}`
+		return `${teamspace}.${project}.${model}.${revision ? revision : ''}.${comparator}`;
 	}
 
 	/** @hidden */
