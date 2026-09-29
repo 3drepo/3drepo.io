@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -34,7 +34,9 @@ import { CalibrationContext } from '../dashboard/projects/calibration/calibratio
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
-import { useApplyViewForTicketURL } from './applyViewForTicketURL.hook';
+import { ApplyViewForTicketURL } from './applyViewForTicketURL/applyViewForTicketURL.component';
+import { selectTicketsRaw } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -52,9 +54,8 @@ export const Viewer = () => {
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-
 	const handlePinClick = ({ id }) => {
+		const tickets = selectTicketsRaw(getState(), containerOrFederation);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 
@@ -64,7 +65,7 @@ export const Viewer = () => {
 	useEffect(() => {
 		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
 		return () => ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
-	}, [tickets]);
+	}, [containerOrFederation]);
 
 	useEffect(() => {
 		if (teamspace) {
@@ -87,8 +88,6 @@ export const Viewer = () => {
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
 	}, [teamspace, project]);
-
-	useApplyViewForTicketURL();
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
@@ -113,6 +112,7 @@ export const Viewer = () => {
 
 	return (
 		<>
+			<ApplyViewForTicketURL />
 			<TicketFiltersSetter key={revision} />
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
