@@ -2221,7 +2221,7 @@ export class UnityUtil {
 		);
 
 		if (this.modelLoadedPromises.has(namespace)) {
-			throw new Error(`Model ${params} is already being loaded`);
+			throw new Error(`Model ${JSON.stringify(params)} is already being loaded`);
 		}
 
 		const promise = this.createModelLoadedPromise(namespace);
@@ -2231,7 +2231,7 @@ export class UnityUtil {
 		);
 
 		// eslint-disable-next-line no-console
-		console.log(`[${new Date()}] Loading model: `, params);
+		console.log(`[${new Date()}] Loading model: `, JSON.stringify(params));
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return promise;
