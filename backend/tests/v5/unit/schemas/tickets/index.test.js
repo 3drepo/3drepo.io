@@ -1892,7 +1892,7 @@ const testSerialiseTicket = () => {
 				const ticket = {
 					properties: {
 						[viewProp]: {
-							camera: stringToUUID(cameraUUIDString),
+							camera:{zoomTo: [ { group: stringToUUID(cameraUUIDString) } ]},
 							state: {
 								[viewGroups.HIDDEN]: [{ group: stringToUUID(groupUUIDString) }],
 							},
@@ -1904,7 +1904,7 @@ const testSerialiseTicket = () => {
 				expect(TicketSchema.serialiseTicket(ticket, template)).toEqual({
 					properties: {
 						[viewProp]: {
-							camera: cameraUUIDString,
+							camera: {zoomTo: [ { group: cameraUUIDString } ]},
 							state: {
 								[viewGroups.HIDDEN]: [{ group: groupUUIDString }],
 							},
