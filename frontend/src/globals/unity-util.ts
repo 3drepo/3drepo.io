@@ -107,6 +107,12 @@ type Deferred<T> = {
 	reject: (reason?: unknown) => void,
 };
 
+type DeferredPromise<T> = {
+	resolve: (value: T | PromiseLike<T>) => void,
+	reject: (reason?: unknown) => void,
+	promise: Promise<T>,
+};
+
 // Interface representing a position on the canvas, in pixels, with (0,0) being the bottom-left corner of the canvas.
 // Used for requestPointInfo.
 export interface CanvasPosition {
@@ -165,6 +171,16 @@ export type MapInitialisationInfo = {
 	angleFromNorth: number;
 };
 
+export type ModelLoadedEvent = {
+	teamspace: string;
+    project: string;
+    model: string; // UUID of a Federation or Container, depending on which was provided to loadModel
+    revision: string;
+    isComparator: boolean;
+    min: number[];
+    max: number[];
+};
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -207,7 +223,7 @@ export class UnityUtil {
 	public static LoadingState = {
 		VIEWER_READY: 1, // Viewer has been loaded
 		MODEL_LOADING: 2, // model information has been fetched, world offset determined, model starts loading
-		MODEL_LOADED: 3, // Models
+		MODEL_LOADED: 3, // At least one base (not comparator) model has loaded
 	};
 
 	/** @hidden */
@@ -250,20 +266,10 @@ export class UnityUtil {
 	public static loadedPromise;
 
 	/** @hidden */
-	public static loadedResolve;
-
-	/** @hidden */
 	public static loadingPromise;
 
 	/** @hidden */
 	public static loadingResolve;
-
-	// Diff promises
-	/** @hidden */
-	public static loadComparatorResolve;
-
-	/** @hidden */
-	public static loadComparatorPromise;
 
 	/** @hidden */
 	public static unityHasErrored = false;
@@ -278,13 +284,13 @@ export class UnityUtil {
 	public static objectStatusPromises = [];
 
 	/** @hidden */
+	public static modelLoadedPromises = new Map<string, DeferredPromise<void>>();
+
+	/** @hidden */
 	public static pointInfoPromises = new Map<string, Deferred<PointInfo>>();
 
 	/** @hidden */
 	public static boundsPromises = new Map<string, Deferred<Bounds>>();
-
-	/** @hidden */
-	public static loadedFlag = false;
 
 	/** @hidden */
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
@@ -512,7 +518,6 @@ export class UnityUtil {
 		// These next lines ensure that the resolution functions that Unity will
 		// call are created by the time the viewer starts up.
 		UnityUtil.onLoading();
-		UnityUtil.onLoaded();
 
 		createUnityInstance(canvas, config, (progress) => {
 			this.onProgress(progress);
@@ -568,22 +573,6 @@ export class UnityUtil {
 
 	/**
 	 * @hidden
-	 * @category To Unity
-	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
-	 */
-	public static cancelLoadModel() {
-		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
-			// If the previous model is being loaded but hasn't finished yet
-			UnityUtil.loadedResolve.reject('cancel');
-		}
-
-		if (UnityUtil.loadingResolve) {
-			UnityUtil.loadingResolve.reject('cancel');
-		}
-	}
-
-	/**
-	 * @hidden
 	 * Check if an error is Unity related
 	 */
 	public static isUnityError(err) {
@@ -626,23 +615,30 @@ export class UnityUtil {
 
 	/**
 	 * Returns a promise that lets you know when the model has finished loading.
+	 * The Promise will resolve when all outstanding loadModel calls have
+	 * completed. If this is called before loadModel is called for the first time,
+	 * the promise will resolve after the first loadModel call.
 	 * @Category State Queries
 	 * @return returns a Promise that resolves when the model has finished loading.
-	 *         The Promise returns the bounding box of the model.
 	 */
-	public static onLoaded(): Promise<object> {
+	public static onLoaded(): Promise<void> {
+		// It is preferable for callers to use the promises returned by loadModel.
+		// However there is still a case for waiting on the first model to be
+		// loaded, so keep support for this.
 		if (!UnityUtil.loadedPromise) {
-			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadedResolve = { resolve, reject };
-			});
+			UnityUtil.loadedPromise = this.createModelLoadedPromise('firstModel');
 		}
 		return UnityUtil.loadedPromise;
 	}
 
 	/**
-	 * Returns a promise that lets you know when the model has started to load
+	 * Returns a promise that lets you know when the model has started to load.
+	 * This resolves when the coordinate system & units are established and
+	 * afterwards the viewer can transform to and from Project coordinates,
+	 * for example, safely create Measurements or Shapes.
+	 * This is resolved once per session.
 	 * @Category State Queries
-	 * @return returns a Promise that resolves when the model has started to load
+	 * @return returns a Promise that resolves when a model has started to load
 	 */
 	public static onLoading(): Promise<void> {
 		if (!UnityUtil.loadingPromise) {
@@ -764,21 +760,23 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static comparatorLoaded() {
-		UnityUtil.loadComparatorResolve?.resolve();
-		UnityUtil.loadComparatorPromise = null;
-		UnityUtil.loadComparatorResolve = null;
-	}
+	public static loaded(json: string) {
+		const ev = JSON.parse(json) as ModelLoadedEvent;
+		const namespace = this.getModelNamespace(
+			ev.teamspace,
+			ev.project,
+			ev.model,
+			ev.revision,
+			ev.isComparator
+		);
 
-	/** @hidden */
-	public static loaded(bboxStr) {
+		if (!ev.isComparator) {
+			this.resolveModelLoadedPromise('firstModel');
+		}
+		this.resolveModelLoadedPromise(namespace);
+
 		// eslint-disable-next-line no-console
-		console.log(`[${new Date()}]Loading model done. `);
-		const res = {
-			bbox: JSON.parse(bboxStr),
-		};
-		UnityUtil.loadedResolve.resolve(res);
-		UnityUtil.loadedFlag = true;
+		console.log(`[${new Date()}] Loading model ${json} done.`);
 	}
 
 	/** @hidden */
@@ -1110,9 +1108,9 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Load comparator model for compare tool
+	 * Load comparator model for compare tool.
 	 * This returns a promise which will be resolved when the comparator model is
-	 * loaded.
+	 * loaded. The Comparator will only be loaded once the base model is loaded.
 	 * @category Compare Tool
 	 * @param teamspace - teamspace
 	 * @param project - project
@@ -1128,15 +1126,17 @@ export class UnityUtil {
 			model: container,
 			revID: revision,
 		};
+		const namespace = this.getModelNamespace(
+			teamspace,
+			project,
+			container,
+			revision,
+			true
+		);
 
+		const promise = this.createModelLoadedPromise(namespace);
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-
-		if (!UnityUtil.loadComparatorPromise) {
-			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadComparatorResolve = { resolve, reject };
-			});
-		}
-		return UnityUtil.loadComparatorPromise;
+		return promise;
 	}
 
 	/**
@@ -2160,14 +2160,13 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Loading another model. NOTE: this will also clear the canvas of existing models
-	 * Use branch = master and revision = head to get the latest revision.
-	 * If you want to know when the model finishes loading, use [[onLoaded]]
+	 * Load a another Container or Federation into the viewer. Returns a promise
+	 * that resolves when the model has finished loading.
 	 * @category Configurations
 	 * @param teamspace - name of teamspace
 	 * @param model - name of model
 	 * @param project - ID of the project
-	 * @param revision - ID of revision
+	 * @param revision - ID of revision. If not defined the latest revision will be loaded.
 	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
@@ -2192,7 +2191,7 @@ export class UnityUtil {
 		clearCanvas = true,
 		assetGroups?: string[],
 	): Promise<void> {
-		if (clearCanvas && UnityUtil.loadedFlag) {
+		if (clearCanvas) {
 			UnityUtil.reset(!initView);
 		}
 
@@ -2215,12 +2214,29 @@ export class UnityUtil {
 			params.assetGroups = assetGroups;
 		}
 
-		UnityUtil.onLoaded();
+		const namespace = UnityUtil.getModelNamespace(
+			teamspace,
+			project,
+			model,
+			revision,
+			false
+		);
+
+		if (this.modelLoadedPromises.has(namespace)) {
+			throw new Error(`Model ${params} is already being loaded`);
+		}
+
+		const promise = this.createModelLoadedPromise(namespace);
+
+		UnityUtil.loadedPromise = Promise.all(
+			[...this.modelLoadedPromises.values()].map((d) => d.promise)
+		);
+
 		// eslint-disable-next-line no-console
-		console.log(`[${new Date()}]Loading model: `, params);
+		console.log(`[${new Date()}] Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
-		return UnityUtil.onLoading();
+		return promise;
 	}
 
 	/**
@@ -2400,12 +2416,10 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static reset(resetProjection = true) {
-		UnityUtil.cancelLoadModel();
+		UnityUtil.modelLoadedPromises = new Map();
 		UnityUtil.loadedPromise = null;
-		UnityUtil.loadedResolve = null;
 		UnityUtil.loadingPromise = null;
 		UnityUtil.loadingResolve = null;
-		UnityUtil.loadedFlag = false;
 
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.disableSnapping();
@@ -3396,8 +3410,7 @@ export class UnityUtil {
 		UnityUtil.loadingPromise = undefined;
 		UnityUtil.loadingResolve = undefined;
 		UnityUtil.loadedPromise = undefined;
-		UnityUtil.loadedResolve = undefined;
-		UnityUtil.loadedFlag = false;
+		UnityUtil.modelLoadedPromises = new Map();
 
 		UnityUtil.hideProgressBar();
 
@@ -3435,5 +3448,41 @@ export class UnityUtil {
 	 */
 	static resetDrawOrder() {
 		UnityUtil.toUnity('ResetDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
+	}
+
+	/** @hidden */
+	static getModelNamespace(teamspace: string, project: string, model: string, revision: string, comparator: boolean): string {
+		return `${teamspace}.${project}.${model}.${revision ? revision : ''}.${comparator}`
+	}
+
+	/** @hidden */
+	static createDeferredPromise<T>(): DeferredPromise<T> {
+		let resolvePromise;
+		let rejectPromise;
+		const promise = new Promise<T>((resolve, reject) => {
+			resolvePromise = resolve;
+			rejectPromise = reject;
+		});
+		return {
+			promise,
+			resolve: resolvePromise,
+			reject: rejectPromise,
+		};
+	}
+
+	/** @hidden */
+	static createModelLoadedPromise(namespace: string): Promise<void> {
+		if (this.modelLoadedPromises.has(namespace)) {
+			throw new Error(`Model ${namespace} is already loading.`);
+		}
+		const deferred = this.createDeferredPromise<void>();
+		this.modelLoadedPromises.set(namespace, deferred);
+		return deferred.promise;
+	}
+
+	/** @hidden */
+	static resolveModelLoadedPromise(namespace: string): void {
+		this.modelLoadedPromises.get(namespace)?.resolve();
+		this.modelLoadedPromises.delete(namespace);
 	}
 }
