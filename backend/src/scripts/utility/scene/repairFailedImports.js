@@ -46,7 +46,6 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const Path = require('path');
-const { error } = require('console');
 
 const { deleteMany, findCursor } = require(`${v5Path}/handler/db`);
 const FilesManager = require(`${v5Path}/services/filesManager`);
@@ -319,8 +318,8 @@ const cleanupOrphanedNodesForRevision = async (teamspace, project, container, re
 			// eslint-disable-next-line no-await-in-loop
 			await removeFilesWithMeta(teamspace, `${container}.scene`, { _id: { $in: blobRefChunk } });
 		}
-	} catch(err) {
-		console.error(`Failed to delete nodes: ${err.toString()}`);
+	} catch (err) {
+		logger.error(`Failed to delete nodes: ${err.toString()}`);
 	}
 };
 
