@@ -177,8 +177,6 @@ export type ModelLoadedEvent = {
     model: string; // UUID of a Federation or Container, depending on which was provided to loadModel
     revision: string;
     isComparator: boolean;
-    min: number[];
-    max: number[];
 };
 
 export class UnityUtil {
