@@ -93,9 +93,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 
 	const getPageSize = () => {
+		const info = documentViewer.current.getDocument().getPageInfo(1);
 		return {
-			width: documentViewer.current.getPageWidth(1),
-			height: documentViewer.current.getPageHeight(1),
+			width: info.width,
+			height: info.height,
 		};
 	};
 
@@ -127,24 +128,39 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
 	// within the 2D overlay). https://docs.apryse.com/web/guides/coordinates.
-	// Currently, this means we do not support rotating pages, which is a
-	// feature of Apryse. To do this, we would need to introduce the concept of
-	// document coordinates vs mouse coordinates to the viewer2D component.
+	// snapToNearest, however, operates in true PDF page coordinates, which are
+	// unaffected by the page's rotation - so mousePos must be converted to PDF
+	// coordinates before snapping, and the result converted back afterwards.
 
 	const snap = (mousePos: Vector2Like, radius: number): Promise<SnapResults> => {
 		if (!snappingTask.current) {
-			snappingTask.current = documentViewer.current.snapToNearest(1, mousePos.x, mousePos.y, snapModes.current).then((snapPos) => {
+			const doc = documentViewer.current.getDocument();
+			const pdfMousePos = doc.getPDFCoordinates(1, mousePos.x, mousePos.y);
+			//const pdfMousePos = mousePos;
+
+			const rotation = doc.getPageRotation(1);
+			snappingTask.current = documentViewer.current.snapToNearest(1, pdfMousePos.x, pdfMousePos.y, snapModes.current).then((pdfSnapPos) => {
 				const results = new SnapResults();
+				const snapPos = doc.getViewerCoordinates(1, pdfSnapPos.x, pdfSnapPos.y);
+				//const snapPos = pdfSnapPos;
+
+
+				console.log("Rotation " + rotation);
+				console.log("Mouse" + JSON.stringify(mousePos));
+				console.log("PDF" + JSON.stringify(pdfMousePos));
+				console.log("Snapped PDF" + JSON.stringify(pdfSnapPos));
+				console.log("Snapped Viewer" + JSON.stringify(snapPos));
+
 				// snapToNearest will consider the entire document, so filter
 				// the results by the radius to match the expected behaviour
 				// of the other viewers.
 				const d = (snapPos.x - mousePos.x) * (snapPos.x - mousePos.x) + (snapPos.y - mousePos.y) * (snapPos.y - mousePos.y);
 				if (d < (radius * radius)) {
-					if (snapPos.modeName == 'PATH_ENDPOINT') {
+					if (pdfSnapPos.modeName == 'PATH_ENDPOINT') {
 						results.closestNode = snapPos;
-					} else if (snapPos.modeName == 'LINE_INTERSECTION') {
+					} else if (pdfSnapPos.modeName == 'LINE_INTERSECTION') {
 						results.closestIntersection = snapPos;
-					} else if (snapPos.modeName == 'POINT_ON_LINE') {
+					} else if (pdfSnapPos.modeName == 'POINT_ON_LINE') {
 						results.closestEdge = snapPos;
 					}
 				}
@@ -209,6 +225,12 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// @ts-ignore: setCustomFunctions type def doesn't currently have the argument
 		displayMode.setCustomFunctions({
+			// pageToWindow and windowToPage are called by Apryse to map between
+			// the coordinates of the window and the page elements it is rendering
+			// to the canvas. The local transforms (e.g. 90° page rotations)
+			// inside Apryse are already accounted for in the size of this canvas,
+			// so these methods need only to map between the window and that.
+
 			pageToWindow: function (pagePt) {
 				const zoom = docViewer.getZoomLevel();
 
@@ -295,12 +317,15 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	// These next functions take care of these and ensure they are only loaded
 	// once.
 
-	const loadScript = async (uri) => {
+	const loadScript = async (uri, isModule = false) => {
 		if (document.querySelectorAll(`script[src='${uri}']`).length) {
 			return Promise.resolve();
 		}
 		const script = document.createElement('script');
 		script.src = uri;
+		if (isModule) {
+			script.type = 'module';
+		}
 		document.body.appendChild(script);
 		return new Promise((resolve)=>{
 			script.onload = resolve;
@@ -308,36 +333,20 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	const startLibraries = async () => {
-		const core = window.Core as typeof Core & { PDFNetRunning: boolean };
-		if (!core.PDFNetRunning) {
-			core.setWorkerPath('/lib/webviewer/core');
-
-			// This next snippet is concerned with PDFNet initialises the
-			// fullAPI, which is required for snapping...
-
-			async function main() {
-				const doc = await core.PDFNet.PDFDoc.create();
-				doc.initSecurityHandler();
-				doc.lock();
-			}
-
-			const { apryseLicense } = clientConfigService;
-			if (!apryseLicense) {
-				console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
-				return;
-			}
-
-			await core.PDFNet.runWithCleanup(
-				main,
-				apryseLicense,
-			);
-			core.PDFNetRunning = true;
+		const core = window.Core;
+		const { apryseLicense } = clientConfigService;
+		if (!apryseLicense) {
+			throw new Error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
 		}
+
+		core.setWorkerPath('/lib/webviewer/core');
+		core.enableFullPDF();
+
+		await core.PDFNet.initialize(apryseLicense);
 	};
 
 	const loadDependencies = async () => {
-		// core defines a namespace that PDFNet depends on, so must be loaded first.
-		await loadScript('/lib/webviewer/core/webviewer-core.min.js');
+		await loadScript('/lib/webviewer/core/webviewer-core.min.js', true);
 		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
 		await startLibraries();
 	};

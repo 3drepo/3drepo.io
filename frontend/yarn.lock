@@ -2095,10 +2095,10 @@
   dependencies:
     pako "^1.0.10"
 
-"@pdftron/webviewer@11.13.0":
-  version "11.13.0"
-  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-11.13.0.tgz#fac95ec1202ad2f72b67fb2a926f39b3bd464349"
-  integrity sha512-isIddLMhSeix0DPw819HHY+YS50HoG5/ZSA1mTLpHhpXNV5UlHtkYcP16/Os1Aylrjvvc6lKpX3dZ3ZQqS0aJA==
+"@pdftron/webviewer@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@pdftron/webviewer/-/webviewer-12.1.0.tgz#816d5c3ac00e7772347defce403f90205a6ef616"
+  integrity sha512-oJ/e0uea0Lu0cWW0VeFbtEgscebLwHviUZNJZG+GjOELUngJcAj6UXPeM7tU3HitwtipSNdxZWG13ZBbDDc5ag==
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"

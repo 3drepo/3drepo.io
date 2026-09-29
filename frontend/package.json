@@ -54,7 +54,7 @@
 		"@mui/styled-engine-sc": "7.3.9",
 		"@mui/system": "7.3.9",
 		"@mui/x-date-pickers": "8.27.2",
-		"@pdftron/webviewer": "11.13.0",
+		"@pdftron/webviewer": "12.1.0",
 		"@popperjs/core": "2.11.8",
 		"@types/three": "0.185.4",
 		"@webscopeio/react-textarea-autocomplete": "4.9.2",
