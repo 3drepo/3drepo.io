@@ -837,7 +837,7 @@ export class ViewerService {
 				viewpoint);
 			document.body.style.cursor = 'initial';
 			this.emit(VIEWER_EVENTS.MODEL_LOADED, 1);
-		} catch(error) {
+		} catch (error) {
 			document.body.style.cursor = 'initial';
 			if (error !== 'cancel') {
 				console.error('Unity error loading model= ', error);

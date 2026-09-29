@@ -173,10 +173,10 @@ export type MapInitialisationInfo = {
 
 export type ModelLoadedEvent = {
 	teamspace: string;
-    project: string;
-    model: string; // UUID of a Federation or Container, depending on which was provided to loadModel
-    revision: string;
-    isComparator: boolean;
+	project: string;
+	model: string; // UUID of a Federation or Container, depending on which was provided to loadModel
+	revision: string;
+	isComparator: boolean;
 };
 
 export class UnityUtil {
