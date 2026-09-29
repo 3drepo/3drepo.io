@@ -27,7 +27,7 @@ const {
 	viewGroups,
 } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
-const { isDate, isObject, isUUID, isUUIDString } = require('../../utils/helper/typeCheck');
+const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
 const { transformer: { uniqueArray }, types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
@@ -376,7 +376,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.object({
 					screenshot: uuidString.nullable(),
 					camera: Yup.object({
-						'zoomTo': groupCast
+						zoomTo: groupCast,
 					}).nullable().default(undefined),
 					state: Yup.object({
 						[viewGroups.COLORED]: groupCast,
