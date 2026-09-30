@@ -121,8 +121,6 @@ const getUnreferencedIdsFromHierarchy = async (teamspace, project, container, re
 			}
 			return false;
 		}
-
-		size() { return this.map.size; }
 	}
 
 	let store;
