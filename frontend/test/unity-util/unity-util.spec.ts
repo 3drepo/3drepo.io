@@ -302,8 +302,6 @@ describe('UnityUtil.doAutorecovery', () => {
         UnityUtil.loadingPromise = undefined;
         UnityUtil.loadingResolve = undefined;
         UnityUtil.loadedPromise = undefined;
-        UnityUtil.loadedResolve = undefined;
-        UnityUtil.loadedFlag = false;
     });
 
     it('should capture state, rebuild canvas, restore state and notify viewer', async () => {
