@@ -25,16 +25,17 @@ import { getFilterFormTitle, isSelectType } from '@components/viewer/cards/cardF
 import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useSelector } from 'react-redux';
 
-import { set, uniq } from 'lodash';
+import { isEqual, set, uniq } from 'lodash';
 import { DialogsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
-import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
+import { selectTemplateById, selectTicketsById } from '@/v5/store/tickets/tickets.selectors';
 import { getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { memo, useMemo } from 'react';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -43,11 +44,14 @@ type IBulkEditFormProps = {
 };
 type FormType = { value: any; };
 
-export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
+export const TicketsBulkEditForm = memo(({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
 	const { filters, choosablefilters, modelsIds: modelsIdsContext } = useTicketFiltersContext();
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
 	const { teamspace, containerOrFederation, project: projectId } = useParams();
-	const selectedTickets = TicketsHooksSelectors.selectTicketsById(Array.from(selectedIds));
+	const ticketIds = useMemo(() => Array.from(selectedIds), [selectedIds]);
+	const selectedTickets: { _id: string, type: string }[] = useSelector((state: object) => selectTicketsById(state, ticketIds)
+		.map(({ _id, type: ticketType }) => ({ _id, type: ticketType })), isEqual);
+
 	const templatesIds = uniq(selectedTickets.map((t) => t.type));
 	const state = getState();
 	
@@ -178,4 +182,4 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 			</Container>
 		</FormProvider>
 	);
-};
+});

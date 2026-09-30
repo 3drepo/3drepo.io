@@ -22,18 +22,18 @@ import { TicketFiltersSelectionList } from '@components/viewer/cards/cardFilters
 import { TicketsFiltersModal, TicketsFiltersModalItem, TicketsFiltersSearchInput } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { PopoverOrigin, PopoverProps } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { isEqual } from 'lodash';
 import { ActionMenuButton } from '../ticketsList.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsBulkEditForm.component';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getState } from '@/v5/helpers/redux.helpers';
-import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
+import { selectTemplateById, selectTicketsData } from '@/v5/store/tickets/tickets.selectors';
+import { selectFilteredTicketIds } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';
 
 // HACK: reconstructing the property name until refactor of properties list is done to just use 
@@ -60,32 +60,31 @@ const propertyNameFromFilter = (filter: TicketFilter) => {
 
 export const BulkUpdateDropdown = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
-	
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
 	const showFiltersList = !selectedFilter?.property;
 	const { selectedItems: selectedContextItems } = useContext(TicketsBulkUpdateContext);
 
-	const templatesSet = new Set<ITemplate>();
-	const state = getState();
+	const filteredTickets: { _id: string, type: string }[] = useSelector((state) => {
+		const ticketsData = selectTicketsData(state);
+		return Array.from(selectFilteredTicketIds(state))
+			.filter((id) => selectedContextItems.has(id) && ticketsData[id])
+			.map((id) => ({ _id: id, type: ticketsData[id].type }));
+	}, isEqual);
+	const templates = useSelector((state: object) => Array.from(new Set(filteredTickets.map(({ type }) => type)))
+		.map((id) => selectTemplateById(state, containerOrFederation, id)), isEqual);
 
-	// If the tickets get updated and the filtering filters them out 
-	// the selectedItems must be filtered also.
-	const selectedItems = new Set<string>();
+	const { selectedItems, selectableItems } = useMemo(() => {
+		const selectedIds = new Set<string>();
 
-	filteredTickets.forEach((ticket) => {
-		if (selectedContextItems.has(ticket._id) ) {
-			const template = selectTemplateById(state, containerOrFederation, ticket.type);
-			templatesSet.add(template);
-			selectedItems.add(ticket._id);
-		}
-	});
+		filteredTickets.forEach((ticket) => {
+			selectedIds.add(ticket._id);
+		});
 
-	const templates = Array.from(templatesSet);
+		const filters = templatesToFilters(templates).filter((filter) =>
+			templates.some((template) => canBulkEditProperty(template, propertyNameFromFilter(filter))));
 
-	const selectableItems = templatesToFilters(templates).filter((filter) => {
-		return templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
-	});
+		return { selectedItems: selectedIds, selectableItems: filters };
+	}, [filteredTickets, templates]);
 	
 	const clearFilter = () => setSelectedFilter(null);
     
