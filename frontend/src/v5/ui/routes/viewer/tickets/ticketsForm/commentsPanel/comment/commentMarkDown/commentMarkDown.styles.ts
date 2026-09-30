@@ -19,4 +19,7 @@ import styled from 'styled-components';
 
 export const OverflowContainer = styled.span`
 	word-break: break-word;
+	white-space: pre-wrap;
 `;
+
+

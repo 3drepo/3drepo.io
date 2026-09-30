@@ -17,7 +17,11 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
-const { generateRandomString, generateRandomNumber, generateUUID } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateUUID,
+} = require('../../helper/dataGen');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');

@@ -19,14 +19,15 @@ const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
-	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
 	generateUUID,
 	generateUUIDString,
 	generateRandomDate,
 	generateTemplate,
-	generateTicket } = require('../../../helper/services');
+	generateGroup,
+} = require('../../../helper/dataGen');
+const { generateTicket } = require('../../../helper/dataGen.tickets');
 
 const FS = require('fs');
 
@@ -642,7 +643,7 @@ const testAllProperties = () => {
 
 		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
-			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
+			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(60001)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
 			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), new Date('3000-01-01T00:00:00.000Z').getTime()],

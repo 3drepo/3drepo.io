@@ -21,17 +21,18 @@ const { times } = require('lodash');
 const {
 	resetFileshare,
 	db: { reset: resetDB, createTeamspace, createUser,
-		createProject, createModel, createTemplates, createTicket },
+		createProject, createModel, createTemplates, createTicket, createClashPlans },
 	generateRandomString,
 	generateUserCredentials,
 	generateUUID, generateUUIDString,
 	generateTemplate, generateTicket,
+	generateClashPlan,
 } = require('../../helper/services');
 
 const { src, utilScripts } = require('../../helper/path');
 
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
-const { insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
+const { insertClashAbortedNotifications, insertClashFailedNotifications, insertClashSucceededNotifications, insertTicketAssignedNotifications, insertTicketUpdatedNotifications, insertTicketClosedNotifications } = require(`${src}/models/notifications`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
 
@@ -43,7 +44,7 @@ const mailer = require(`${src}/services/mailer`);
 const { disconnect, insertMany } = require(`${src}/handler/db`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 
-const insertBogusNotification = (teamspace, project, model, users, ticket) => insertMany(
+const insertBogusTicketNotification = (teamspace, project, model, users, ticket) => insertMany(
 	INTERNAL_DB, 'notifications',
 	users.map((user) => ({
 		_id: generateUUID(),
@@ -56,7 +57,24 @@ const insertBogusNotification = (teamspace, project, model, users, ticket) => in
 	})),
 );
 
-const setupData = async ({ users, ...teamspaces }) => {
+const insertBogusClashNotification = (teamspace, project, plan, users) => insertMany(
+	INTERNAL_DB, 'notifications',
+	users.map((user) => ({
+		_id: generateUUID(),
+		user,
+		type: generateRandomString(),
+		timestamp: new Date(),
+		data: {
+			teamspace,
+			project,
+			plan,
+			results: { stats: { new: 1, active: 2, resolved: 3 } },
+			triggeredAt: new Date(),
+		},
+	})),
+);
+
+const setupData = async ({ users, plans, ...teamspaces }) => {
 	await Promise.all([...users, ...Object.values(teamspaces)].map((entry) => createUser(entry)));
 
 	const usernameArr = users.map(({ user }) => user);
@@ -76,6 +94,12 @@ const setupData = async ({ users, ...teamspaces }) => {
 		const model = generateUUIDString();
 		const template = generateTemplate();
 		const ticket = generateTicket(template, true);
+		const plansForTeamspace = plans.map((plan, index) => (
+			index === 0 ? {
+				...plan,
+				tickets: { template: template._id, federation: model },
+			} : plan
+		));
 
 		const recipients = ts.user === teamspaces.teamspaceUserNotFound.user ? [generateRandomString()] : usernameArr;
 		const ticketId = stringToUUID(ticket._id);
@@ -83,13 +107,15 @@ const setupData = async ({ users, ...teamspaces }) => {
 		await Promise.all([
 			ts.user === teamspaces.teamspaceProjNotFound.user ? Promise.resolve()
 				: createProject(ts.user, project, generateRandomString(), [model]),
-			createModel(ts.user, model, generateRandomString()),
+			ts.user === teamspaces.teamspaceModelNotFound.user ? Promise.resolve()
+				: createModel(ts.user, model, generateRandomString()),
 			ts.user === teamspaces.teamspaceNoTemplate.user ? Promise.resolve() : createTemplates(ts.user, [template]),
 			createTicket(ts.user, project, model, ticket),
-			insertTicketAssignedNotifications(ts.user, project, model, [{
+			createClashPlans(ts.user, project, plansForTeamspace),
+			insertTicketAssignedNotifications(ts.user, project, model, times(2, () => ({
 				users: recipients,
 				ticket: ticketId,
-				assignedBy: usernameArr[0] }]),
+				assignedBy: usernameArr[0] }))),
 			insertTicketUpdatedNotifications(ts.user, project, model, [{
 				users: recipients,
 				ticket: ticketId,
@@ -98,7 +124,39 @@ const setupData = async ({ users, ...teamspaces }) => {
 				users: recipients,
 				ticket: ticketId,
 				author: usernameArr[0] }]),
-			insertBogusNotification(ts.user, project, model, recipients, ticketId),
+			...(ts.user === teamspaces.teamspaceModelNotFound.user ? [] : [
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: plans[0]._id,
+					runId: generateUUID(),
+					results: { stats: { new: 1, active: 2, resolved: 3 } },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: generateRandomString(),
+					runId: generateUUID(),
+					results: { stats: { new: 1, active: 2, resolved: 3 } },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashAbortedNotifications(ts.user, project, {
+					plan: plans[1]._id,
+					runId: generateUUID(),
+					error: { reason: generateRandomString() },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashFailedNotifications(ts.user, project, {
+					plan: plans[2]._id,
+					runId: generateUUID(),
+					error: { reason: generateRandomString() },
+					triggeredAt: new Date(),
+				}, recipients),
+				insertClashSucceededNotifications(ts.user, project, {
+					plan: plans[0]._id, runId: generateUUID(), triggeredAt: new Date(),
+				}, recipients),
+			]),
+			insertBogusTicketNotification(ts.user, project, model, recipients, ticketId),
+			...(ts.user === teamspaces.teamspaceModelNotFound.user ? [] : [
+				insertBogusClashNotification(ts.user, project, plans[0]._id, recipients),
+			]),
 		]);
 	}));
 };
@@ -110,7 +168,15 @@ const createData = () => ({
 	teamspaceNoTemplate: generateUserCredentials(),
 	teamspaceUserNotFound: generateUserCredentials(),
 	teamspaceProjNotFound: generateUserCredentials(),
-	users: times(5, generateUserCredentials),
+	teamspaceModelNotFound: generateUserCredentials(),
+	users: [...times(4, generateUserCredentials), { ...generateUserCredentials(),
+		basicData: {
+			firstName: generateRandomString(),
+			lastName: generateRandomString(),
+			email: `${generateRandomString()}@${generateRandomString(6)}.com`,
+			billing: { billingInfo: { company: generateRandomString(), countryCode: generateRandomString() } },
+		} }],
+	plans: times(3, () => generateClashPlan(generateRandomString(), generateRandomString())),
 });
 
 const runTest = () => {
@@ -124,18 +190,19 @@ const runTest = () => {
 	const testCases = [
 		['should not send email if the teamspace does not have the addOn enabled', testData.teamspaceNoDigest.user],
 		['should not send email if the teamspace does not have any notifications', testData.teamspaceNoNotifications.user],
-		['should not send email if the teamspace does not have the matching template', testData.teamspaceNoTemplate.user],
+		['should not include ticket data if the teamspace does not have the matching template', testData.teamspaceNoTemplate.user, true, 5],
 		['should not send email if the user does not exist', testData.teamspaceUserNotFound.user],
 		['should not send email if the project does not exist', testData.teamspaceProjNotFound.user],
-		['should send email if the teamspace has notifications', testData.teamspace.user, true],
-		['should work if teamspace is not specified', undefined, true],
+		['should not send email if the model does not exist', testData.teamspaceModelNotFound.user],
+		['should send email if the teamspace has notifications', testData.teamspace.user, true, 5],
+		['should work if teamspace is not specified', undefined, true, 10],
 	];
 
-	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail) => {
+	describe.each(testCases)('Send daily digests ', (desc, teamspace, sendMail, emailsSent) => {
 		test(desc, async () => {
 			await SendDailyDigests.run(teamspace);
 			if (sendMail) {
-				expect(mailer.sendEmail).toHaveBeenCalledTimes(testData.users.length);
+				expect(mailer.sendEmail).toHaveBeenCalledTimes(emailsSent);
 				testData.users.forEach(({ basicData: { email } }) => {
 					expect(mailer.sendEmail).toHaveBeenCalledWith(
 						emailTemplates.DAILY_DIGEST.name, email, expect.any(Object));

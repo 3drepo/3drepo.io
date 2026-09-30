@@ -17,7 +17,12 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomObject,
+	generateUUID,
+} = require('../../helper/dataGen');
 
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 

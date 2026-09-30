@@ -17,6 +17,12 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomModelProperties,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
@@ -27,92 +33,92 @@ let server;
 let agent;
 
 const users = {
-	tsAdmin: ServiceHelper.generateUserCredentials(),
-	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	viewer: ServiceHelper.generateUserCredentials(),
-	commenter: ServiceHelper.generateUserCredentials(),
+	tsAdmin: generateUserCredentials(),
+	noProjectAccess: generateUserCredentials(),
+	viewer: generateUserCredentials(),
+	commenter: generateUserCredentials(),
 };
 
-const nobody = ServiceHelper.generateUserCredentials();
+const nobody = generateUserCredentials();
 
-const teamspace = ServiceHelper.generateRandomString();
+const teamspace = generateRandomString();
 
 const project = {
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
+	id: generateUUIDString(),
+	name: generateRandomString(),
 };
 
 const containers = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 	},
 ];
 
 const containersNoRev = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			...generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 	},
 ];
 
 const models = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...generateRandomModelProperties(),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
 			subModels: containers.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
+			...generateRandomModelProperties(modelTypes.FEDERATION),
 			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
 			subModels: containersNoRev.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...generateRandomModelProperties(),
 			federate: true,
 			subModels: [],
 		},
 	},
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		_id: generateUUIDString(),
+		name: generateRandomString(),
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
+			...generateRandomModelProperties(),
 		},
 	},
 ];
@@ -244,7 +250,7 @@ const testNewRevision = () => {
 
 		test('should fail if container ids does not exist in the project', async () => {
 			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: [ServiceHelper.generateUUIDString()] })
+				.send({ containers: [generateUUIDString()] })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});

@@ -149,7 +149,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				newValues.group.objects = meshObjectsToV5GroupNode(data);
 				newValues.group.rules = rules;
 			} else {
-				newValues.group = value.group;
+				newValues.group.objects = value.group.objects;
+				newValues.group.rules = value.group.rules;
 			}
 		} 
 

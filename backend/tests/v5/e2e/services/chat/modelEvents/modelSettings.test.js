@@ -19,22 +19,27 @@ const { determineTestGroup } = require('../../../../helper/utils');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
-const { generateRandomString } = require('../../../../helper/services');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+} = require('../../../../helper/dataGen');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const user = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
-const containerToBeDeleted = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-const federationToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
-const drawingToBeDeleted = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+const user = generateUserCredentials();
+const teamspace = generateRandomString();
+const project = generateRandomProject();
+const container = generateRandomModel();
+const containerToBeDeleted = generateRandomModel();
+const federation = generateRandomModel({ modelType: modelTypes.FEDERATION });
+const federationToBeDeleted = generateRandomModel({ modelType: modelTypes.FEDERATION });
+const drawing = generateRandomModel({ modelType: modelTypes.DRAWING });
+const drawingToBeDeleted = generateRandomModel({ modelType: modelTypes.DRAWING });
 
 let agent;
 const setupData = async () => {
@@ -97,7 +102,7 @@ const modelSettingsTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString() };
+			const payload = { name: generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
@@ -118,7 +123,7 @@ const modelSettingsTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString() };
+			const payload = { name: generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
@@ -139,7 +144,7 @@ const modelSettingsTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString() };
+			const payload = { name: generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
@@ -164,7 +169,7 @@ const modelAddedTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString(), unit: 'mm', type: generateRandomString(), code: generateRandomString(3) };
+			const payload = { name: generateRandomString(), unit: 'mm', type: generateRandomString(), code: generateRandomString(3) };
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
@@ -194,7 +199,7 @@ const modelAddedTest = () => {
 				setTimeout(reject, 1000);
 			});
 
-			const payload = { name: ServiceHelper.generateRandomString(), unit: 'mm', desc: generateRandomString(), code: generateRandomString(3) };
+			const payload = { name: generateRandomString(), unit: 'mm', desc: generateRandomString(), code: generateRandomString(3) };
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations?key=${user.apiKey}`)
 				.send(payload)
 				.expect(templates.ok.status);
@@ -225,7 +230,7 @@ const modelAddedTest = () => {
 			});
 
 			const payload = {
-				name: ServiceHelper.generateRandomString(),
+				name: generateRandomString(),
 				type: generateRandomString(),
 				number: generateRandomString(),
 				calibration: { verticalRange: [0, 10], units: 'm' },

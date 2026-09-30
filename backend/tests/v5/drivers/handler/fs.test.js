@@ -20,7 +20,7 @@ const { src } = require('../../helper/path');
 const { readFile, writeFile, access, rm, unlink } = require('fs/promises');
 const Path = require('path');
 
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/dataGen');
 const { Readable } = require('stream');
 const { times, cloneDeep } = require('lodash');
 

@@ -20,7 +20,9 @@ const { src } = require('../../../../../../../../helper/path');
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 const { isString } = require(`${src}/utils/helper/typeCheck`);
-const { generateLegacyGroup } = require('../../../../../../../../helper/services');
+const {
+	generateLegacyGroup,
+} = require('../../../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

@@ -17,6 +17,12 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomModel,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
@@ -32,22 +38,22 @@ let agent;
 
 const testExportGroups = () => {
 	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 	};
 
-	const teamspace = ServiceHelper.generateRandomString();
+	const teamspace = generateRandomString();
 
 	const project = {
-		id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		id: generateUUIDString(),
+		name: generateRandomString(),
 	};
 
-	const container = ServiceHelper.generateRandomModel();
-	const containerNoGroups = ServiceHelper.generateRandomModel();
-	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-	const fedNoGroups = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const container = generateRandomModel();
+	const containerNoGroups = generateRandomModel();
+	const fed = generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const fedNoGroups = generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 	const groups = [
 		ServiceHelper.generateLegacyGroup(teamspace, container._id),
@@ -58,10 +64,10 @@ const testExportGroups = () => {
 	const legacyFieldSchema = {
 		...ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 		rules: [{
-			name: ServiceHelper.generateRandomString(),
-			field: ServiceHelper.generateRandomString(),
+			name: generateRandomString(),
+			field: generateRandomString(),
 			operator: valueOperators.IS.name,
-			values: [ServiceHelper.generateRandomString()],
+			values: [generateRandomString()],
 		}],
 	};
 
@@ -136,20 +142,20 @@ const testExportGroups = () => {
 
 const testImportGroups = () => {
 	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 	};
 
-	const teamspace = ServiceHelper.generateRandomString();
+	const teamspace = generateRandomString();
 
 	const project = {
-		id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		id: generateUUIDString(),
+		name: generateRandomString(),
 	};
 
-	const container = ServiceHelper.generateRandomModel();
-	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const container = generateRandomModel();
+	const fed = generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 	const groups = [
 		ServiceHelper.generateLegacyGroup(teamspace, container._id),
@@ -160,16 +166,16 @@ const testImportGroups = () => {
 	const legacyFieldSchema = {
 		...ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 		rules: [{
-			name: ServiceHelper.generateRandomString(),
-			field: ServiceHelper.generateRandomString(),
+			name: generateRandomString(),
+			field: generateRandomString(),
 			operator: valueOperators.IS.name,
-			values: [ServiceHelper.generateRandomString()],
+			values: [generateRandomString()],
 		}],
 	};
 
 	const postData = { groups };
 
-	const changedGroup = { ...groups[0], name: ServiceHelper.generateRandomString() };
+	const changedGroup = { ...groups[0], name: generateRandomString() };
 	const newGroup = ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false);
 	const partialGroupUpdateTestData = [changedGroup, newGroup];
 

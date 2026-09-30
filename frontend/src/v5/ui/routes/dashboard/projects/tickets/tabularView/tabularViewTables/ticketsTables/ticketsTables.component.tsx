@@ -20,7 +20,7 @@ import { TicketsTable } from '../ticketsTable/ticketsTable.component';
 import { groupTickets, UNSET } from '../../../../../../../components/tickets/ticketsGroupBy.helper';
 import { Container } from './ticketsTables.styles';
 import { TabularViewContext } from '../../tabularViewContext/tabularViewContext';
-import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
+import { NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
@@ -45,7 +45,7 @@ export const TicketsTables = ({
 	useWatchPropertyChange(sortingColumn, refreshSorting);
 	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
+		const presetValue = (groupByValue === UNSET) ? null : { key: groupBy, value: groupByValue };
 		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 

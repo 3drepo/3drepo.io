@@ -17,6 +17,10 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateUserCredentials,
+} = require('../../helper/dataGen');
 const ServiceHelper = require('../../helper/services');
 const { src } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
@@ -28,8 +32,8 @@ let agent;
 
 const testAuthenticate = () => {
 	describe('Get authenticate link', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const redirectURI = ServiceHelper.generateRandomString();
+		const testUser = generateUserCredentials();
+		const redirectURI = generateRandomString();
 		let sessionedAgent;
 
 		beforeAll(async () => {
@@ -62,10 +66,10 @@ const testAuthenticate = () => {
 
 const testAuthenticateAgainstTeamspace = () => {
 	describe('Get authenticate by teamspace link', () => {
-		const tsUser = ServiceHelper.generateUserCredentials();
-		const noAccessUser = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
-		const redirectURI = ServiceHelper.generateRandomString();
+		const tsUser = generateUserCredentials();
+		const noAccessUser = generateUserCredentials();
+		const teamspace = generateRandomString();
+		const redirectURI = generateRandomString();
 
 		beforeAll(async () => {
 			await Promise.all([
@@ -81,7 +85,7 @@ const testAuthenticateAgainstTeamspace = () => {
 		describe.each([
 			['the user is not logged in', undefined, generateURL(), false, templates.notLoggedIn],
 			['redirectURL is not provided', tsUser, generateURL(teamspace, false), false, templates.invalidArguments],
-			['teamspace is not found', tsUser, generateURL(ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['teamspace is not found', tsUser, generateURL(generateRandomString()), false, templates.teamspaceNotFound],
 			['the user is not a member of the teamspace', noAccessUser, generateURL(), false, templates.teamspaceNotFound],
 			['the user is a member of the teamspace', tsUser, generateURL(), true],
 		])('', (desc, user, url, success, err = templates.ok) => {

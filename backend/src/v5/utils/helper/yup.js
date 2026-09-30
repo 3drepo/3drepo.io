@@ -67,6 +67,9 @@ YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
 // This is used for longer descriptions such as groups, issues, risks
 YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
+// This is used for even longer descriptions (long text property) in tickets
+YupHelper.types.strings.ultralongDescription = Yup.string().min(1).max(60000);
+
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {
 		if (originalValue === null) return null;

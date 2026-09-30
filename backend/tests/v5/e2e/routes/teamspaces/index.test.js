@@ -21,7 +21,14 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { image, src } = require('../../../helper/path');
 const fs = require('fs');
-const { generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
+const {
+	generateRandomModel,
+	generateRandomProject,
+	generateRandomString,
+	generateRandomEmail,
+	generateRandomNumber,
+	generateUserCredentials,
+} = require('../../../helper/dataGen');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require(`${src}/utils/config`);
@@ -38,16 +45,16 @@ let agent;
 
 const testGetTeamspaceList = () => {
 	describe('Get teamspace list', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const teamspaces = times(5, () => ServiceHelper.generateRandomString());
-		const teamspacesWithAdmin = times(5, () => ServiceHelper.generateRandomString());
+		const testUser = generateUserCredentials();
+		const teamspaces = times(5, () => generateRandomString());
+		const teamspacesWithAdmin = times(5, () => generateRandomString());
 
 		beforeAll(async () => {
 			await Promise.all(teamspaces.map((ts) => ServiceHelper.db.createTeamspace(ts)));
 			await ServiceHelper.db.createUser(testUser, teamspaces);
 			await Promise.all([
 				...teamspacesWithAdmin.map((ts) => ServiceHelper.db.createTeamspace(ts, [testUser.user])),
-				...times(5, () => ServiceHelper.db.createTeamspace(ServiceHelper.generateRandomString())),
+				...times(5, () => ServiceHelper.db.createTeamspace(generateRandomString())),
 			]);
 		});
 		test('should fail without a valid session', async () => {
@@ -67,21 +74,21 @@ const testGetTeamspaceList = () => {
 
 const testGetTeamspaceMembers = () => {
 	describe('Get teamspace members info', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
 		const jobToUsers = times(3, () => ({
-			_id: ServiceHelper.generateRandomString(),
+			_id: generateRandomString(),
 			users: [],
 		}));
 
 		const members = times(10, (i) => {
-			const mem = ServiceHelper.generateUserCredentials();
+			const mem = generateUserCredentials();
 			jobToUsers[i % 2].users.push(mem.user);
 
 			return mem;
 		});
 
-		const teamspace = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
 
 		const route = (ts = teamspace) => `/v5/teamspaces/${ts}/members`;
 
@@ -108,7 +115,7 @@ const testGetTeamspaceMembers = () => {
 		});
 
 		test('should fail if the teamspace does not exist', async () => {
-			const res = await agent.get(`${route(ServiceHelper.generateRandomString())}/?key=${userNoAccess.apiKey}`)
+			const res = await agent.get(`${route(generateRandomString())}/?key=${userNoAccess.apiKey}`)
 				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
@@ -154,12 +161,12 @@ const testGetTeamspaceMembers = () => {
 
 const testGetAvatar = () => {
 	describe('Get teamspace avatar', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
 
-		const teamspaceWithAvatar = ServiceHelper.generateRandomString();
-		const teamspaceWithoutAvatar = ServiceHelper.generateRandomString();
-		const fsAvatarData = ServiceHelper.generateRandomString();
+		const teamspaceWithAvatar = generateRandomString();
+		const teamspaceWithoutAvatar = generateRandomString();
+		const fsAvatarData = generateRandomString();
 
 		beforeAll(async () => {
 			await Promise.all([
@@ -178,7 +185,7 @@ const testGetAvatar = () => {
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
-			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the teamspace does not exist', route(userNoAccess.apiKey, generateRandomString()), false, templates.teamspaceNotFound],
 			['the teamspace does not have an avatar', route(testUser.apiKey, teamspaceWithoutAvatar), false, templates.fileNotFound],
 			['the teamspace has avatar', route(testUser.apiKey), true, Buffer.from(fsAvatarData)],
 
@@ -198,13 +205,13 @@ const testGetAvatar = () => {
 
 const testGetQuotaInfo = () => {
 	describe('Get quota info', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
-		const userNotAdmin = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
+		const userNotAdmin = generateUserCredentials();
 
-		const teamspaceWithLicense = ServiceHelper.generateRandomString();
-		const teamspaceWithExpiredLicense = ServiceHelper.generateRandomString();
-		const teamspaceWithoutLicense = ServiceHelper.generateRandomString();
+		const teamspaceWithLicense = generateRandomString();
+		const teamspaceWithExpiredLicense = generateRandomString();
+		const teamspaceWithoutLicense = generateRandomString();
 
 		const activeLicense = {
 			discretionary: {
@@ -267,7 +274,7 @@ const testGetQuotaInfo = () => {
 
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
-			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the teamspace does not exist', route(userNoAccess.apiKey, generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user does not have admin permissions to the teamspace', route(userNotAdmin.apiKey), false, templates.notAuthorized],
 			['the teamspace license has expired', route(testUser.apiKey, teamspaceWithExpiredLicense), false, templates.licenceExpired],
@@ -290,14 +297,14 @@ const testGetQuotaInfo = () => {
 
 const testRemoveTeamspaceMember = () => {
 	describe('Remove teamspace member', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
-		const userNotAdmin = ServiceHelper.generateUserCredentials();
-		const userToRemove = ServiceHelper.generateUserCredentials();
-		const testUser2 = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
+		const userNotAdmin = generateUserCredentials();
+		const userToRemove = generateUserCredentials();
+		const testUser2 = generateUserCredentials();
 
-		const teamspace = ServiceHelper.generateRandomString();
-		const userProvisionedTeamspace = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
+		const userProvisionedTeamspace = generateRandomString();
 
 		const route = (key, ts = teamspace, username = userToRemove.user) => `/v5/teamspaces/${ts}/members/${username}${key ? `?key=${key}` : ''}`;
 
@@ -320,11 +327,11 @@ const testRemoveTeamspaceMember = () => {
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
 			['the teamspace has userProvisioned true', route(testUser.apiKey, userProvisionedTeamspace), false, templates.userProvisioned],
-			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the teamspace does not exist', route(userNoAccess.apiKey, generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user does not have admin permissions to the teamspace', route(userNotAdmin.apiKey), false, templates.notAuthorized],
 			['the user is admin', route(testUser.apiKey), true, userToRemove.user],
-			['the user is admin but the user to remove does not exist', route(testUser.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.notAuthorized],
+			['the user is admin but the user to remove does not exist', route(testUser.apiKey, teamspace, generateRandomString()), false, templates.notAuthorized],
 			['the user is admin but the user is not a member', route(testUser.apiKey, teamspace, userNoAccess.user), false, templates.notAuthorized],
 			['the user tries to remove themselves even if they are not admin', route(testUser2.apiKey, teamspace, testUser2.user), true, testUser2.user],
 
@@ -346,13 +353,13 @@ const testRemoveTeamspaceMember = () => {
 
 const testGetMemberAvatar = () => {
 	describe('Get teamspace member avatar', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
-		const userNotAdmin = ServiceHelper.generateUserCredentials();
-		const userWithAvatar = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
+		const userNotAdmin = generateUserCredentials();
+		const userWithAvatar = generateUserCredentials();
 
-		const teamspace = ServiceHelper.generateRandomString();
-		const avatar = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
+		const avatar = generateRandomString();
 
 		const route = (key, member = userWithAvatar, ts = teamspace) => `/v5/teamspaces/${ts}/members/${member}/avatar${key ? `?key=${key}` : ''}`;
 
@@ -371,7 +378,7 @@ const testGetMemberAvatar = () => {
 
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
-			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
+			['the teamspace does not exist', route(userNoAccess.apiKey, generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user requested does not have access to the teamspace', route(testUser.apiKey, userNoAccess.user), false, templates.userNotFound],
 			['the user has an avatar (admin requested)', route(testUser.apiKey, userWithAvatar.user), true, Buffer.from(avatar)],
@@ -394,11 +401,11 @@ const testGetMemberAvatar = () => {
 
 const testGetAddOns = () => {
 	describe('Get add ons', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
+		const userNoAccess = generateUserCredentials();
 
-		const teamspace = ServiceHelper.generateRandomString();
-		const teamspaceNoAddOns = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
+		const teamspaceNoAddOns = generateRandomString();
 
 		const route = (key, ts) => `/v5/teamspaces/${ts}/addOns${key ? `?key=${key}` : ''}`;
 
@@ -442,13 +449,13 @@ const testGetAddOns = () => {
 
 const testUpdateQuota = (internalService) => {
 	describe('Update quota', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
-		const teamspace = ServiceHelper.generateRandomString();
+		const testUser = generateUserCredentials();
+		const teamspace = generateRandomString();
 
 		const updatedQuota = {
 			expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
-			collaborators: parseInt(ServiceHelper.generateRandomNumber(0), 10),
-			data: parseInt(ServiceHelper.generateRandomNumber(0), 10),
+			collaborators: parseInt(generateRandomNumber(0), 10),
+			data: parseInt(generateRandomNumber(0), 10),
 		};
 
 		const route = (key, ts) => `/v5/teamspaces/${ts}/quota${internalService ? '' : `?key=${key}`}`;
@@ -489,13 +496,13 @@ const testUpdateQuota = (internalService) => {
 
 const testDeleteQuota = (internalService) => {
 	describe('Delete quota', () => {
-		const testUser = ServiceHelper.generateUserCredentials();
+		const testUser = generateUserCredentials();
 
-		const teamspace = ServiceHelper.generateRandomString();
+		const teamspace = generateRandomString();
 		const quota = {
 			expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
-			collaborators: parseInt(ServiceHelper.generateRandomNumber(0), 10),
-			data: parseInt(ServiceHelper.generateRandomNumber(0), 10),
+			collaborators: parseInt(generateRandomNumber(0), 10),
+			data: parseInt(generateRandomNumber(0), 10),
 		};
 
 		const route = (key, ts) => `/v5/teamspaces/${ts}/quota${key ? `?key=${key}` : ''}`;
@@ -532,17 +539,17 @@ const testDeleteQuota = (internalService) => {
 };
 
 const testCreateTeamspace = (isInternal) => {
-	const existingTeamspace = ServiceHelper.generateRandomString();
-	const freeAccountIdTest = { name: ServiceHelper.generateRandomString() };
+	const existingTeamspace = generateRandomString();
+	const freeAccountIdTest = { name: generateRandomString() };
 	const usedAccountIdTest = { name: existingTeamspace };
 	const route = '/v5/teamspaces/';
 	const testCases = isInternal ? [
 		['No name is provided', {}, false, templates.invalidArguments],
 		['Invalid name is provided', { name: '@Asfds' }, false, templates.invalidArguments],
-		['Valid name is provided', { name: ServiceHelper.generateRandomString() }, true],
+		['Valid name is provided', { name: generateRandomString() }, true],
 		['The teamspace already exists', { name: existingTeamspace }, false, templates.invalidArguments],
-		['An email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomEmail() }, true],
-		['An invalid email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+		['An email is provided', { name: generateRandomString(), admin: generateRandomEmail() }, true],
+		['An invalid email is provided', { name: generateRandomString(), admin: generateRandomString() }, false, templates.invalidArguments],
 		['An available account Id provided', freeAccountIdTest, true],
 		['An used account Id provided', usedAccountIdTest, false, templates.invalidArguments],
 	] : [

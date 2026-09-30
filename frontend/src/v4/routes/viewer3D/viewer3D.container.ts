@@ -29,13 +29,14 @@ import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/mod
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
 import { TreeActions } from '../../modules/tree';
-import { selectAllTransparencyOverrides, selectColorOverrides } from '../../modules/viewerGui';
+import { selectAllTransparencyOverrides, selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
 
 const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
 	transparencies: selectAllTransparencyOverrides,
+	rightPanels: selectRightPanels,
 	issuePins: selectIssuePins,
 	riskPins: selectRiskPins,
 	measurementPins: selectMeasurementPins,

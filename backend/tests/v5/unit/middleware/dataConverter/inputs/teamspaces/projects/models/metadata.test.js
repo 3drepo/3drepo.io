@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { src } = require('../../../../../../../helper/path');
-const { generateRandomString, generateRandomNumber } = require('../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomNumber,
+} = require('../../../../../../../helper/dataGen');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

@@ -18,7 +18,16 @@
 const { Readable } = require('stream');
 
 const { determineTestGroup } = require('../../helper/utils');
-const { db, generateRandomString, generateRevisionEntry, generateBasicNode, generateMeshNode, generateTextureNode } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateBasicNode,
+	generateMeshNode,
+	generateTextureNode,
+} = require('../../helper/dataGen');
+const {
+	db,
+	generateRevisionEntry,
+} = require('../../helper/services');
 const { utilScripts, src, srcV4 } = require('../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);

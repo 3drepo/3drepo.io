@@ -18,9 +18,9 @@
 import { selectCurrentProjectDetails as v5selectCurrentProjectDetails } from '@/v5/store/projects/projects.selectors';
 import { isEmpty, pick, values } from 'lodash';
 import { orderBy } from 'lodash';
-import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
+import { parse } from '../../helpers/queryString';
 import { RouteParams, ROUTES } from '../../constants/routes';
 import { sortByField } from '../../helpers/sorting';
 import { selectCurrentUser } from '../currentUser';
@@ -132,7 +132,7 @@ export const selectUrlQueryProject = createSelector(
 		/**********/
 
 
-		const { project } = queryString.parse(location.search);
+		const { project } = parse(location.search);
 		const projectFound = projects.find(({ name }) => name === project);
 		return projectFound ? project : '';
 	}

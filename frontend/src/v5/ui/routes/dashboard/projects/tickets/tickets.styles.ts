@@ -49,6 +49,14 @@ export const FlexContainer = styled.div`
 	flex-direction: row;
 `;
 
+export const CircleButtons = styled(FlexContainer)`
+	gap: 5px;
+
+	.MuiButtonBase-root {
+		margin: 8px 0;
+	}
+`;
+
 export const SelectorsContainer = styled(FlexContainer)`
 	gap: 5px;
 
@@ -89,7 +97,6 @@ export const SidePanel = styled(Drawer).attrs({
 	SlideProps: { unmountOnExit: true },
 	PaperProps: {
 		style: {
-			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
 			zIndex: 12,

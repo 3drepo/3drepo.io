@@ -24,7 +24,7 @@ import { getEditableProperties } from './tickets.helpers';
 import { ITemplate, PropertyDefinition, Viewpoint } from './tickets.types';
 
 export const MAX_TEXT_LENGTH = 120;
-export const MAX_LONG_TEXT_LENGTH = 1200;
+export const MAX_LONG_TEXT_LENGTH = 60000;
 const maxStringLength = (type) => (type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH);
 
 const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
@@ -155,7 +155,7 @@ export const getValidators = (template: ITemplate) => {
 	const { properties, modules } = template;
 	const validators: any = { title: getTitleValidator() };
 
-	validators.properties = propertiesValidator(properties || []);
+	validators.properties = propertiesValidator((properties || []).filter((property) => property.name !== 'Created at'));
 
 	if (modules) {
 		const modulesValidator = {};

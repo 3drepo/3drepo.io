@@ -19,6 +19,12 @@ const DeviceDetector = require('node-device-detector');
 const UaParserJs = require('ua-parser-js');
 
 const UserAgent = {};
+const LEGACY_LINUX_PLATFORM_TOKENS = new Set(['x86_64', 'i386', 'i686', 'armv7l', 'aarch64']);
+
+const getLinuxVersion = (userAgentString) => {
+	const platformToken = userAgentString.match(/\bLinux ([^;)]+)/i)?.[1];
+	return LEGACY_LINUX_PLATFORM_TOKENS.has(platformToken) ? platformToken : undefined;
+};
 
 // Format:
 // PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
@@ -58,10 +64,14 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 	});
 
 	const { browser, engine, os } = UaParserJs(userAgentString);
+	const normalizedOS = {
+		...os,
+		version: os.version ?? (os.name === 'Linux' ? getLinuxVersion(userAgentString) : undefined),
+	};
 	const userAgentInfo = {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
-		os,
+		os: normalizedOS,
 		device: deviceDetector.detect(userAgentString).device.type,
 	};
 

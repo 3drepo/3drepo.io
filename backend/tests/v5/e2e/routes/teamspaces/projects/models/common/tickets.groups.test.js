@@ -18,6 +18,17 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomIfcGuid,
+	generateRandomRvtId,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateTemplate,
+	generateBasicNode,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
@@ -35,23 +46,23 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const template = ServiceHelper.generateTemplate(false, true);
-	const con = ServiceHelper.generateRandomModel();
-	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION,
+	const template = generateTemplate(false, true);
+	const con = generateRandomModel();
+	const fed = generateRandomModel({ modelType: modelTypes.FEDERATION,
 		properties: { subModels: [{ _id: con._id }] } });
 	con.rev = ServiceHelper.generateRevisionEntry();
 	fed.rev = ServiceHelper.generateRevisionEntry();
 
 	return ({
 		users: {
-			tsAdmin: ServiceHelper.generateUserCredentials(),
-			tsAdmin2: ServiceHelper.generateUserCredentials(),
-			viewer: ServiceHelper.generateUserCredentials(),
-			noProjectAccess: ServiceHelper.generateUserCredentials(),
-			nobody: ServiceHelper.generateUserCredentials(),
+			tsAdmin: generateUserCredentials(),
+			tsAdmin2: generateUserCredentials(),
+			viewer: generateUserCredentials(),
+			noProjectAccess: generateUserCredentials(),
+			nobody: generateUserCredentials(),
 		},
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
 		con,
 		fed,
 		template,
@@ -106,15 +117,15 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 
 		model.ticket = { ...cloneDeep(ticket), _id: ticketRes._id };
 
-		model.notFound = { _id: ServiceHelper.generateUUIDString() };
+		model.notFound = { _id: generateUUIDString() };
 	}));
 	/* eslint-enable no-param-reassign */
 };
 
 const setupExtIDTicket = (container) => {
-	const viewName = ServiceHelper.generateRandomString();
+	const viewName = generateRandomString();
 	const template = {
-		...ServiceHelper.generateTemplate(),
+		...generateTemplate(),
 		properties: [
 			{
 				name: viewName,
@@ -127,21 +138,21 @@ const setupExtIDTicket = (container) => {
 
 	const revId = container.rev._id;
 
-	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
+	const rootNode = generateBasicNode('transformation', revId);
 
-	const rootMeta = ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: [{
+	const rootMeta = generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: [{
 		key: idTypesToKeys[idTypes.IFC][0],
-		value: ServiceHelper.generateRandomIfcGuid(),
+		value: generateRandomIfcGuid(),
 	},
 	{
 		key: idTypesToKeys[idTypes.REVIT][0],
-		value: ServiceHelper.generateRandomRvtId(),
+		value: generateRandomRvtId(),
 	},
 
 	] });
 
-	const mesh1 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
-	const mesh2 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const mesh1 = generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const mesh2 = generateBasicNode('mesh', revId, [rootNode.shared_id]);
 
 	const nodes = [rootNode, rootMeta, mesh1, mesh2];
 	const meshIdStr1 = UUIDToString(mesh1._id);
@@ -163,7 +174,7 @@ const setupExtIDTicket = (container) => {
 
 	const createSmartGroupWithMatchingMeta = ({ key, value }) => {
 		const rule = {
-			name: ServiceHelper.generateRandomString(),
+			name: generateRandomString(),
 			field: { operator: fieldOperators.IS.name, values: [key] },
 			operator: valueOperators.IS.name,
 			values: [value],
@@ -178,10 +189,10 @@ const setupExtIDTicket = (container) => {
 		groupWithRvtIds: { data: createGroupWithExtIds({ [idTypes.REVIT]: [rootMeta.metadata[1].value] }),
 			convertedObjs: [meshIdStr1, meshIdStr2] },
 		groupWithIfcGuidsNotFound: { data: createGroupWithExtIds({
-			[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] }),
+			[idTypes.IFC]: [generateRandomIfcGuid()] }),
 		convertedObjs: [] },
 		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({
-			[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()] }),
+			[idTypes.REVIT]: [generateRandomRvtId()] }),
 		convertedObjs: [] },
 		smartGroupWithIfcGuids: {
 			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[0]),
@@ -195,7 +206,7 @@ const setupExtIDTicket = (container) => {
 		},
 		smartGroupWithIfcGuidsNotFound: {
 			data: createSmartGroupWithMatchingMeta({ ...rootMeta.metadata[0],
-				value: ServiceHelper.generateRandomIfcGuid() }),
+				value: generateRandomIfcGuid() }),
 			convertedObjs: [],
 			original: { [idTypes.IFC]: [] },
 		},
@@ -271,8 +282,8 @@ const testGetGroup = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketName: 'notFound' }, false, templates.ticketNotFound],
@@ -344,32 +355,32 @@ const testUpdateGroup = () => {
 			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
-			const payload = { name: ServiceHelper.generateRandomString() };
+			const payload = { name: generateRandomString() };
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, payload, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, payload, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, payload, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, payload, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, payload, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, payload, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, payload, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, payload, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, payload, false, templates.ticketNotFound],
-				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, payload, false, templates.ticketNotFound],
+				['the group does not exist', { ...baseRouteParams, groupId: generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
 				['the payload has excludeDefinedObjects', { ...baseRouteParams, checkOutput: false }, { excludeDefinedObjects: true }, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
-					{ container: con._id, [idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
+					{ container: con._id, [idTypes.IFC]: [generateRandomIfcGuid()] },
 				] }, true],
 				['the payload has rvt ids', { ...baseRouteParams, checkOutput: false }, { objects: [
-					{ container: con._id, [idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()] },
+					{ container: con._id, [idTypes.REVIT]: [generateRandomRvtId()] },
 				] }, true],
 				['the payload has no ids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id },
 				] }, false, templates.invalidArguments],
 				['the payload has more than one type of ids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id,
-						[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()],
-						[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
+						[idTypes.REVIT]: [generateRandomRvtId()],
+						[idTypes.IFC]: [generateRandomIfcGuid()] },
 				] }, true],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
@@ -379,8 +390,8 @@ const testUpdateGroup = () => {
 					],
 				}],
 				objects: [{
-					container: ServiceHelper.generateUUIDString(),
-					_ids: [ServiceHelper.generateUUIDString()],
+					container: generateUUIDString(),
+					_ids: [generateUUIDString()],
 				}] }, false, templates.invalidArguments],
 			];
 		};

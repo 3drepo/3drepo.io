@@ -18,7 +18,11 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateUUIDString,
+	generateUUID,
+} = require('../../helper/dataGen');
 
 const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');

@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketCommentsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath, useNavigate } from 'react-router-dom';
-import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
+import CloseTicketIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { CircleButton } from '@controls/circleButton';
 import { SelectChangeEvent } from '@mui/material';
@@ -34,7 +34,7 @@ import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWE
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
-import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout } from '../tickets.styles';
+import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout, CircleButtons } from '../tickets.styles';
 import { INITIAL_COLUMNS_NO_OVERRIDES, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
@@ -61,6 +61,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { SortedTableComponent } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../../../../components/tickets/ticketsGroupBy.helper';
+import { ExpandIcon } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketDetailsCard.styles';
+import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -427,10 +429,20 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
+	const isSidebarOpen = !!ticketId && haveValidContainerOrFederation;
+	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && isSidebarOpen && selectedTemplate?.config?.comments;
+	const hideExpandButton = !selectedTemplate?.config?.comments || isNewTicket;
 
+	const onClickExpandTicketMode = () => {
+		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
+	};
 
+	useEffect(() => {
+		TicketCommentsActionsDispatchers.resetUnsavedComments();
+	}, [ticketId]);
+	
 	return (
-		<SidePanel open={!!ticketId && haveValidContainerOrFederation}>
+		<SidePanel open={isSidebarOpen}>
 			<SlidePanelHeader>
 				<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 					<OpenInViewerButton disabled={isNewTicket}>
@@ -440,20 +452,29 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 						/>
 					</OpenInViewerButton>
 				</Link>
-				<CircleButton onClick={clearTicketId}>
-					<ExpandIcon />
-				</CircleButton>
+				<CircleButtons>
+					{!hideExpandButton && (
+						<CircleButton onClick={onClickExpandTicketMode} selected={isExpanded}>
+							<ExpandIcon />
+						</CircleButton>
+					)}
+					<CircleButton onClick={clearTicketId}>
+						<CloseTicketIcon />
+					</CircleButton>
+				</CircleButtons>
 			</SlidePanelHeader>
 			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
 				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
 				{isNewTicket && (
-					<NewTicketSlide
-						presetValue={presetValue}
-						template={selectedTemplate}
-						containerOrFederation={containerOrFederation}
-						onSave={onSaveTicket}
-						onDirtyStateChange={setIsNewTicketDirty}
-					/>
+					<ExpandableCard ExpandedComponent={null}>
+						<NewTicketSlide
+							presetValue={presetValue}
+							template={selectedTemplate}
+							containerOrFederation={containerOrFederation}
+							onSave={onSaveTicket}
+							onDirtyStateChange={setIsNewTicketDirty}
+						/>
+					</ExpandableCard>
 				)}
 			</TicketContextComponent>
 		</SidePanel>

@@ -17,23 +17,31 @@
 
 const MetaConstants = {};
 
-// The order on this object determines the priority.
 MetaConstants.idTypes = {
 	IFC: 'ifc_guids',
 	REVIT: 'revit_ids',
+	DWG: 'dwg_ids',
 };
+
+// This array determines the priority of the ID types when processing metadata.
+MetaConstants.typePriority = [
+	MetaConstants.idTypes.IFC,
+	MetaConstants.idTypes.REVIT,
+	MetaConstants.idTypes.DWG,
+];
 
 MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
 	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
+	[MetaConstants.idTypes.DWG]: ['Entity Handle::Value'],
 };
 
-MetaConstants.metaKeyToIdType = {};
+MetaConstants.metadataKeyToIdTypes = {};
 
 Object.keys(MetaConstants.idTypesToKeys).forEach((idType) => {
 	const keys = MetaConstants.idTypesToKeys[idType];
 	keys.forEach((label) => {
-		MetaConstants.metaKeyToIdType[label] = idType;
+		MetaConstants.metadataKeyToIdTypes[label] = idType;
 	});
 });
 

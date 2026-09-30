@@ -61,6 +61,10 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 	return response;
 };
 
+Tickets.updateTicketsByQuery = async (teamspace, project, query, setUpdate) => {
+	await DbHandler.updateMany(teamspace, TICKETS_COL, { project, ...query }, { $set: setUpdate });
+};
+
 Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, author) => {
 	const changeSet = [];
 
@@ -234,7 +238,7 @@ Tickets.getAllTickets = (
 	{
 		projection = { teamspace: 0, project: 0, model: 0 },
 		updatedSince,
-		sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 },
+		sort = { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 },
 		limit,
 		skip = 0,
 	} = {},
