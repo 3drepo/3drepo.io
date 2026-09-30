@@ -32,7 +32,7 @@ export const Modal = memo(styled(FormModal as any)`
 	.MuiDialogContent-root {
 		overflow: hidden;
 	}
-`, (prevProps, nextProps) => 
+`, (prevProps: any, nextProps: any) => 
 	(prevProps.isValid === nextProps.isValid
 		&& (prevProps.fields.length === nextProps.fields.length )
 		&& prevProps.isuploading === nextProps.isuploading

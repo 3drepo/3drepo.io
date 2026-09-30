@@ -15,7 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../helper/utils');
+const { determineTestGroup, sleepMS } = require('../../../helper/utils');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+} = require('../../../helper/dataGen');
 const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../helper/path');
@@ -24,12 +30,12 @@ const { EVENTS, ERRORS, ACTIONS, SOCKET_HEADER } = require(`${src}/services/chat
 const { broadcastMessage } = require(`${src}/handler/queue`);
 const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
-const tsAdmin = ServiceHelper.generateUserCredentials();
-const nobody = ServiceHelper.generateUserCredentials();
+const tsAdmin = generateUserCredentials();
+const nobody = generateUserCredentials();
 
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
+const teamspace = generateRandomString();
+const project = generateRandomProject();
+const container = generateRandomModel();
 
 let agent;
 const setupData = async () => {
@@ -138,7 +144,7 @@ const testUnauthenticatedUser = () => {
 				{ headers: { [SOCKET_HEADER]: socket.id }, teamspace });
 
 			// introduce a delay to let backend sort out their events (i.e. hooking the session with the socket)
-			await ServiceHelper.sleepMS(100);
+			await sleepMS(100);
 			await expect(onJoinSuccessCheck(socket, { notifications: true })).resolves.toBeUndefined();
 			socket.close();
 		});
@@ -163,11 +169,11 @@ const testTSAdmin = () => {
 			['should not be able to join someone else\'s notification room (v4)', { account: nobody.user }, ERRORS.UNAUTHORISED],
 			['should be able to join a model room', { teamspace, project: project.id, model: container._id }],
 			['should be able to join a model room (v4)', { account: teamspace, model: container._id }],
-			['should not be able to join a model room that doesn\'t exist', { teamspace, project: project.id, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should not be able to join a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a model room that doesn\'t exist', { teamspace, project: project.id, model: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a model room that doesn\'t exist (v4)', { account: teamspace, model: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should be able to join a project room', { teamspace, project: project.id }],
-			['should not be able to join a project room that doesn\'t exist', { teamspace, project: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should not be able to join a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a project room that doesn\'t exist', { teamspace, project: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be able to join a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -186,9 +192,9 @@ const testTSAdmin = () => {
 			['should be able to leave the notification room (v4)', { account: tsAdmin.user }],
 			['should be able to leave a model room', { teamspace, project: project.id, model: container._id }],
 			['should be able to leave a model room (v4)', { account: teamspace, model: container._id }],
-			['should not be be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should be able to leave a project room', { teamspace, project: project.id }],
-			['should not be be able to leave a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should not be be able to leave a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Leave room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -244,12 +250,12 @@ const broadcastErrorTests = () => {
 	describe('Error catching on message processing', () => {
 		test('should not crash the service if message processing failed', async () => {
 			await Promise.all([
-				broadcastMessage(eventExchange, ServiceHelper.generateRandomString()),
+				broadcastMessage(eventExchange, generateRandomString()),
 				broadcastMessage(eventExchange,
-					JSON.stringify({ [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() })),
+					JSON.stringify({ [generateRandomString()]: generateRandomString() })),
 				broadcastMessage(eventExchange,
 					JSON.stringify({
-						[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+						[generateRandomString()]: generateRandomString(),
 						internal: true,
 					})),
 			]);

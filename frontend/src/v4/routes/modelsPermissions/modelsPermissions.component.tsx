@@ -16,11 +16,11 @@
  */
 import { PureComponent } from 'react';
 import memoizeOne from 'memoize-one';
-import * as queryString from 'query-string';
 
 import { formatMessage } from '@/v5/services/intl';
 import { getModelType } from '@/v5/store/projects/projects.helpers';
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
+import { parse } from '../../helpers/queryString';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
@@ -163,7 +163,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const queryParams = queryString.parse(this.props.location.search);
+		const queryParams = parse(this.props.location.search);
 		if (queryParams.modelId) {
 			this.props.onSelectionChange([{ model: queryParams.modelId }]);
 		}

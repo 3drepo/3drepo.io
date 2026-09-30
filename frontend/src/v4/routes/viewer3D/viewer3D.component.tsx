@@ -27,11 +27,15 @@ import { MeasurementsActionsDispatchers } from '@/v5/services/actionsDispatchers
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
 import { ViewerService } from '../../services/viewer/viewer';
+import { Activities } from '../viewerGui/components/activities';
+import { Bim } from '../viewerGui/components/bim';
+import { Container as GuiContainer, RightPanels } from '../viewerGui/viewerGui.styles';
 import { Calibration3DInfoBox } from './calibration3DInfoBox/calibration3DInfoBox.component';
 import { ViewerContainer } from './viewer3D.styles';
 
@@ -43,9 +47,11 @@ interface IProps {
 		params: {
 			model: string;
 			teamspace: string;
+			project?: string;
 			revision?: string;
 		}
 	};
+	rightPanels: string[];
 	colorOverrides: any;
 	transparencies: any;
 	issuePins: any[];
@@ -280,10 +286,18 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const { rightPanels, match: { params } } = this.props;
+
 		return (
 			<ViewerContainer visible={this.shouldBeVisible} >
 				{this.props.isCalibrating && <Calibration3DInfoBox />}
 				<div ref={this.containerRef} className={this.props.className} />
+				<GuiContainer>
+					<RightPanels>
+						{rightPanels.includes(VIEWER_PANELS.BIM) && <Bim {...params} />}
+						{rightPanels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
+					</RightPanels>
+				</GuiContainer>
 				{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
 			</ ViewerContainer>
 		);

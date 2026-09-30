@@ -20,7 +20,12 @@ const Scene = {};
 const { UUIDToString, stringToUUID, unique } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
 const { getNodeByQuery, getNodesByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
-const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const {
+	idTypes,
+	idTypesToKeys,
+	metadataKeyToIdTypes,
+	typePriority,
+} = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
@@ -193,16 +198,15 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	Object.values(idTypes).forEach((v) => { res[v] = []; });
 
 	metadata.forEach((entry) => {
-		// It may be possible that we are storing the same id in multiple metadata entries.
-		// So we are keeping track of what we've already found
-		const idCounted = new Set();
+		// Multiple metadata labels may identify same external ID.
+		const idTypesFound = new Set();
 
 		(entry.metadata || []).forEach(({ key, value }) => {
-			const idType = metaKeyToIdType[key];
+			const idType = metadataKeyToIdTypes[key];
 
-			if (!idType || idCounted.has(idType)) return;
+			if (!idType || idTypesFound.has(idType)) return;
 
-			idCounted.add(idType);
+			idTypesFound.add(idType);
 			res[idType].push(value);
 		});
 	});
@@ -218,8 +222,8 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	const targetCount = metadata.length;
 
 	if (targetCount) {
-		for (const idType of Object.keys(res)) {
-			if (res[idType].length === targetCount) {
+		for (const idType of typePriority) {
+			if (res[idType]?.length === targetCount) {
 				// convert to set to purge duplicates
 				return { key: idType, values: Array.from(new Set(res[idType])) };
 			}

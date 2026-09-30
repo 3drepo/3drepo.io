@@ -47,5 +47,5 @@ export const Link = styled(LinkBase)`
 `;
 
 export const Form = styled.form`
-	height: calc(100% - 103px);
+	height: calc(100% - 54px);
 `;

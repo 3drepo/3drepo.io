@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
 const { times } = require('lodash');
 

@@ -36,7 +36,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	onModelStatusChanged: ['modelData', 'teamspace', 'project', 'modelId', 'modelName'],
 	subscribeOnStatusChange: ['teamspace', 'project', 'modelData'],
 	unsubscribeOnStatusChange: ['teamspace', 'project', 'modelData'],
-	fetchMaps: ['teamspace', 'modelId'],
+	fetchMaps: ['teamspace', 'project', 'modelId'],
 	fetchMapsSuccess: ['maps'],
 	updateSettingsSuccess: ['settings'],
 	fetchMetaKeys: ['teamspace', 'modelId'],

@@ -35,7 +35,7 @@ const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { generateRandomString } = require('../../../../../../../../helper/services');
+const { generateRandomString } = require('../../../../../../../../helper/dataGen');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 

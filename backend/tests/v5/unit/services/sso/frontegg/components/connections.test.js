@@ -19,7 +19,7 @@ const { determineTestGroup } = require('../../../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
@@ -48,7 +48,10 @@ const testGetConfig = () => {
 		test('Should succeed and return the config', async () => {
 			const token = generateRandomString();
 			WebRequests.post.mockResolvedValue({ data: { token } });
-			await expect(Connections.getConfig()).resolves.toEqual(Config.sso.frontegg);
+			await expect(Connections.getConfig()).resolves.toEqual({
+				...Config.sso.frontegg,
+				disableMFA: false,
+			});
 
 			expect(Connections.getIdentityClient()).not.toBeUndefined();
 			expect(Connections.getBasicHeader()).not.toBeUndefined();

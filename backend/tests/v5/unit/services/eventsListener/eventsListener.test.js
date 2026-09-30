@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
@@ -45,9 +45,14 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = () => setTimeout(() => {
+		unsubscribe();
+		resolve();
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const expectErrorNotification = (listenerName, payload) => {
 	expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
@@ -212,6 +217,9 @@ const testUserEventsListener = () => {
 
 describe(determineTestGroup(__filename), () => {
 	EventsListener.init();
+	afterAll(() => {
+		EventsManager.reset();
+	});
 	testAuthEventsListener();
 	testUserEventsListener();
 });

@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../utils/helper/uuids');
 const Yup = require('yup');
+
+const { clashRunStatus } = require('../../../models/clashes.constants');
 const config = require('../../../utils/config');
 const { generateTemplateFn } = require('./common');
 const { readFileSync } = require('fs');
+
+const notifiableClashRunStatuses = [
+	clashRunStatus.COMPLETED,
+	clashRunStatus.FAILED,
+	clashRunStatus.ABORTED,
+];
 
 const ticketObjectSchema = Yup.object({
 	count: Yup.number().min(1).required(),
@@ -30,14 +39,34 @@ const dataSchema = Yup.object({
 	teamspace: Yup.string().required(),
 	domain: Yup.string().default(() => config.getBaseURL()),
 	notifications: Yup.array().of(Yup.object({
-		project: Yup.string().required(),
-		model: Yup.string().required(),
-		tickets: Yup.object({
-			updated: ticketObjectSchema,
-			assigned: ticketObjectSchema,
-			closed: ticketObjectSchema,
-		}).required(),
-
+		project: Yup.string().required()
+			.transform((val, orgVal) => UUIDToString(orgVal)),
+		ticketData: Yup.array().of(Yup.object({
+			model: Yup.string().required(),
+			tickets: Yup.object({
+				updated: ticketObjectSchema,
+				assigned: ticketObjectSchema,
+				closed: ticketObjectSchema,
+			}).required(),
+		})).required(),
+		clashData: Yup.array().of(Yup.object({
+			planName: Yup.string().required(),
+			link: Yup.string(),
+			runs: Yup.array().of(Yup.object({
+				status: Yup.string().oneOf(notifiableClashRunStatuses).required(),
+				results: Yup.object({
+					stats: Yup.object({
+						new: Yup.number().min(0),
+						active: Yup.number().min(0),
+						resolved: Yup.number().min(0),
+					}),
+					error: Yup.object({
+						reason: Yup.string().default('Unknown'),
+					}),
+				}).required(),
+				triggeredAt: Yup.string().required(),
+			})).min(1).required(),
+		})).required(),
 	})).min(1).required(),
 }).required(true);
 

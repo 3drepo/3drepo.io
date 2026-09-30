@@ -20,7 +20,10 @@ const { calibrationStatuses } = require('../../../../../../../../../../src/v5/mo
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString, generateRandomObject } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

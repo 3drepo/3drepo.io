@@ -21,7 +21,10 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const { generateRandomString, generateRandomEmail } = require('../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomEmail,
+} = require('../../../../../../../helper/dataGen');
 
 const config = require(`${src}/utils/config`);
 const { FileStorageTypes } = require(`${src}/utils/config.constants`);

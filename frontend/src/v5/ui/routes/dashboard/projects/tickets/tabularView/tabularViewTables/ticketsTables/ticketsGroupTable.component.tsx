@@ -22,6 +22,7 @@ import { Title } from './ticketsTables.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { TicketsTable } from '../ticketsTable/ticketsTable.component';
+import { UNSET } from '@components/tickets/ticketsGroupBy.helper';
 
 type TicketsTableGroupProps = {
 	propertyValue: string;
@@ -56,7 +57,7 @@ export const TicketsTableGroup = ({
 	>
 		<TicketsTable
 			tickets={tickets}
-			onNewTicket={onNewTicket(propertyValue)}
+			onNewTicket={onNewTicket(propertyValue || UNSET)}
 			onEditTicket={setTicketValue}
 			selectedTicketId={selectedTicketId}
 		/>

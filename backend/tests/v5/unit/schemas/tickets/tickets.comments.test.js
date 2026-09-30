@@ -20,7 +20,11 @@ const { times } = require('lodash');
 
 const { readFileSync } = require('fs');
 const { src, image } = require('../../../helper/path');
-const { generateRandomString, generateUUIDString, generateRandomNumber } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUUIDString,
+	generateRandomNumber,
+} = require('../../../helper/dataGen');
 
 const CommentSchema = require(`${src}/schemas/tickets/tickets.comments`);
 

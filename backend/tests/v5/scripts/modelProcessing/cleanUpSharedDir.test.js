@@ -16,10 +16,10 @@
  */
 
 const { determineTestGroup } = require('../../helper/utils');
+const { generateRandomString } = require('../../helper/dataGen');
 const {
 	fileExists,
 	resetSharedDir,
-	generateRandomString,
 } = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');

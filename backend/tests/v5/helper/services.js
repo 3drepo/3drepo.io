@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Crypto = require('crypto');
 const amqp = require('amqplib');
 const http = require('http');
 const fs = require('fs');
-const { times } = require('lodash');
 
+const DataGen = require('./dataGen');
+const DataGenClashes = require('./dataGen.clashes');
+const DataGenTickets = require('./dataGen.tickets');
 const SessionTracker = require('./sessionTracker');
+const Utils = require('./utils');
 
 const { image, src, srcV4 } = require('./path');
 
@@ -32,22 +34,13 @@ const { io: ioClient } = require('socket.io-client');
 const { stopPurge } = require(`${src}/models/frontegg.cache`);
 const { tmpdir } = require('os');
 
-const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const path = require('path');
 const { PassThrough } = require('stream');
 
 const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
-const {
-	CLASH_TYPES,
-	CLASH_PLANS_COL,
-	CLASH_RUNS_COL,
-	SELF_INTERSECTIONS_CHECK_OPTIONS,
-	triggerOptions,
-	clashObjectIdTypes,
-	clashRunStatus,
-} = require(`${src}/models/clashes.constants`);
+const { CLASH_PLANS_COL, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -57,26 +50,21 @@ const config = require(`${src}/utils/config`);
 const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
-const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
-const { isArray } = require(`${src}/utils/helper/typeCheck`);
 const FilesManager = require(`${src}/services/filesManager`);
-const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
-const { actions: actionTypes } = require(`${src}/models/teamspaces.audits.constants`);
-
-const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
-const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
-
-const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
-const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
 const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
+Object.assign(ServiceHelper, DataGen);
+Object.assign(ServiceHelper, DataGenTickets, DataGenClashes);
+Object.assign(ServiceHelper, Utils);
 
 queue.purgeQueues = async () => {
 	const { host, model_queue, clash_queue, callback_queue } = config.cn_queue;
@@ -346,11 +334,18 @@ db.createProjectImage = (teamspace, project, type, imageData) => createImage(tea
 	type, project, imageData);
 
 db.createClashPlans = async (teamspace, project, plans) => {
-	const formattedPlans = plans.map((plan) => ({
-		...plan,
-		_id: stringToUUID(plan._id),
-		project: stringToUUID(project),
-	}));
+	const formattedPlans = plans.map((plan) => {
+		if (plan.tickets) {
+			// eslint-disable-next-line no-param-reassign
+			plan.tickets.template = stringToUUID(plan.tickets.template);
+		}
+
+		return ({
+			...plan,
+			_id: stringToUUID(plan._id),
+			project: stringToUUID(project),
+		});
+	});
 	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
@@ -437,7 +432,7 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
 ServiceHelper.createTmpDir = () => {
 	const tmpDir = tmpdir();
-	const folder = generateUUIDString();
+	const folder = ServiceHelper.generateUUIDString();
 	const fullPath = path.posix.join(tmpDir, folder);
 	fs.mkdirSync(fullPath, { recursive: true });
 
@@ -454,7 +449,6 @@ ServiceHelper.createQueryString = (options) => {
 
 	return '';
 };
-ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
 	let flag = true;
 	try {
@@ -463,366 +457,6 @@ ServiceHelper.fileExists = (filePath) => {
 		flag = false;
 	}
 	return flag;
-};
-
-ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
-	expect(arr1.length).toEqual(arr2.length);
-	expect(arr1).toEqual(expect.arrayContaining(arr2));
-};
-
-ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
-ServiceHelper.generateUUID = () => generateUUID();
-// the last character is always 'a' to avoid generating a string that is compatible with Number() which gives unexpected results in some tests.
-ServiceHelper.generateRandomString = (l = 20) => (l ? `${Crypto.randomBytes(Math.ceil(l / 2)).toString('hex').slice(0, l - 1)}a` : '');
-ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
-ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
-ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
-	+ Math.random() * (end.getTime() - start.getTime()));
-ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
-ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
-ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
-ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
-
-ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
-
-ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
-	name: ServiceHelper.generateRandomString(15),
-	type,
-}));
-
-ServiceHelper.generateSequenceEntry = (rid) => {
-	const startDate = ServiceHelper.generateRandomDate();
-	const endDate = ServiceHelper.generateRandomDate(startDate);
-
-	const sequence = {
-		_id: generateUUID(),
-		rev_id: rid,
-		name: ServiceHelper.generateRandomString(),
-		startDate,
-		endDate,
-		frames: [
-			{
-				dateTime: startDate,
-				state: ServiceHelper.generateUUIDString(),
-			},
-			{
-				dateTime: startDate,
-				state: ServiceHelper.generateUUIDString(),
-			},
-		],
-	};
-
-	const generateDate = () => ServiceHelper.generateRandomDate(startDate, endDate);
-	const states = sequence.frames.map(({ state }) => ({
-		id: state,
-		buffer: Buffer.from(ServiceHelper.generateRandomString(), 'utf-8'),
-	}));
-
-	const activities = times(5, () => ({
-		_id: generateUUID(),
-		name: ServiceHelper.generateRandomString(),
-		startDate: generateDate(),
-		endDate: generateDate(),
-		sequenceId: sequence._id,
-		data: times(3, () => ({
-
-			key: ServiceHelper.generateRandomString(),
-			value: ServiceHelper.generateRandomString(),
-		})),
-
-	}));
-
-	const activityTree = Buffer.from(ServiceHelper.generateRandomString(), 'utf-8');
-
-	return { sequence, states, activities, activityTree };
-};
-
-ServiceHelper.generateUserCredentials = () => ({
-	user: ServiceHelper.generateRandomString(),
-	password: ServiceHelper.generateRandomString(),
-	apiKey: ServiceHelper.generateRandomString(),
-	basicData: {
-		firstName: ServiceHelper.generateRandomString(),
-		lastName: ServiceHelper.generateRandomString(),
-		email: `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`,
-		billing: {
-			billingInfo: {
-				company: ServiceHelper.generateRandomString(),
-				countryCode: 'GB',
-			},
-		},
-	},
-});
-
-ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
-});
-
-ServiceHelper.generateRandomModel = ({ modelType = modelTypes.CONTAINER, viewers, commenters,
-	collaborators, properties = {} } = {}) => {
-	const permissions = [];
-	if (viewers?.length) {
-		permissions.push(...viewers.map((user) => ({ user, permission: 'viewer' })));
-	}
-
-	if (commenters?.length) {
-		permissions.push(...commenters.map((user) => ({ user, permission: 'commenter' })));
-	}
-
-	if (collaborators?.length) {
-		permissions.push(...collaborators.map((user) => ({ user, permission: 'collaborator' })));
-	}
-
-	return {
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: {
-			...ServiceHelper.generateRandomModelProperties(modelType),
-			...properties,
-			permissions,
-		},
-	};
-};
-
-ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType, timestamp, status) => {
-	const _id = ServiceHelper.generateUUIDString();
-	const entry = deleteIfUndefined({
-		_id,
-		tag: modelType === modelTypes.DRAWING ? undefined : ServiceHelper.generateRandomString(),
-		status,
-		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
-		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
-		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
-		author: ServiceHelper.generateRandomString(),
-		timestamp: timestamp || ServiceHelper.generateRandomDate(),
-		desc: ServiceHelper.generateRandomString(),
-		void: !!isVoid,
-	});
-
-	if (hasFile) {
-		entry.rFile = modelType === modelTypes.DRAWING ? [ServiceHelper.generateUUIDString()] : [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
-		entry.refData = ServiceHelper.generateRandomString();
-
-		if (modelType === modelTypes.DRAWING) {
-			entry.image = ServiceHelper.generateUUIDString();
-			entry.thumbnail = ServiceHelper.generateUUIDString();
-
-			entry.imageData = ServiceHelper.generateRandomString();
-			entry.thumbnailData = ServiceHelper.generateRandomString();
-		}
-	}
-
-	return entry;
-};
-
-ServiceHelper.generateCalibration = () => ({
-	_id: ServiceHelper.generateUUIDString(),
-	horizontal: {
-		model: times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
-		drawing: times(2, () => times(2, () => ServiceHelper.generateRandomNumber())),
-	},
-	verticalRange: [0, 10],
-	units: 'mm',
-	createdAt: ServiceHelper.generateRandomDate(),
-	createdBy: ServiceHelper.generateRandomString(),
-});
-
-ServiceHelper.generateRandomModelProperties = (modelType = modelTypes.CONTAINER) => ({
-	desc: ServiceHelper.generateRandomString(),
-	...(modelType === modelTypes.DRAWING ? {
-		number: ServiceHelper.generateRandomString(),
-		type: ServiceHelper.generateRandomString(),
-		calibration: { verticalRange: [ServiceHelper.generateRandomNumber(0, 10), ServiceHelper.generateRandomNumber(11, 20)], units: 'm' },
-		modelType,
-	} : {
-		properties: {
-			code: ServiceHelper.generateRandomString(),
-			unit: 'm',
-		},
-		...(modelType === modelTypes.FEDERATION ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
-		status: 'ok',
-		surveyPoints: [
-			{
-				position: [
-					ServiceHelper.generateRandomNumber(),
-					ServiceHelper.generateRandomNumber(),
-					ServiceHelper.generateRandomNumber(),
-				],
-				latLong: [
-					ServiceHelper.generateRandomNumber(),
-					ServiceHelper.generateRandomNumber(),
-				],
-			},
-		],
-		angleFromNorth: 123,
-		defaultView: ServiceHelper.generateUUIDString(),
-		defaultLegend: ServiceHelper.generateUUIDString(),
-	}),
-});
-
-ServiceHelper.generateTemplate = (deprecated, hasView = false, configOptions = {}) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	code: ServiceHelper.generateRandomString(3),
-	name: ServiceHelper.generateRandomString(),
-	config: configOptions,
-	properties: [
-		{
-			name: ServiceHelper.generateRandomString(),
-			type: propTypes.DATE,
-			required: true,
-		},
-		{
-			name: ServiceHelper.generateRandomString(),
-			type: propTypes.TEXT,
-			deprecated: true,
-		},
-		{
-			name: ServiceHelper.generateRandomString(),
-			type: propTypes.NUMBER,
-			default: ServiceHelper.generateRandomNumber(),
-		},
-		...(hasView ? [{
-			name: ServiceHelper.generateRandomString(),
-			type: propTypes.VIEW,
-		}] : []),
-	],
-	modules: [
-		{
-			type: presetModules.SHAPES,
-			deprecated: true,
-			properties: [],
-		},
-		{
-			name: ServiceHelper.generateRandomString(),
-			properties: [
-				{
-					name: ServiceHelper.generateRandomString(),
-					type: propTypes.TEXT,
-				},
-				{
-					name: ServiceHelper.generateRandomString(),
-					type: propTypes.NUMBER,
-					default: ServiceHelper.generateRandomNumber(),
-					deprecated: true,
-				},
-				{
-					name: ServiceHelper.generateRandomString(),
-					type: propTypes.NUMBER,
-					default: ServiceHelper.generateRandomNumber(),
-				},
-				...(hasView ? [{
-					name: ServiceHelper.generateRandomString(),
-					type: propTypes.VIEW,
-					default: ServiceHelper.generateRandomNumber(),
-				}] : []),
-			],
-		},
-	],
-	...deleteIfUndefined({ deprecated }),
-});
-
-const generateProperties = (propTemplate, internalType, container) => {
-	const properties = {};
-
-	propTemplate.forEach(({ name, deprecated, readOnly, type, values }) => {
-		if (deprecated || readOnly) return;
-		if (type === propTypes.TEXT) {
-			properties[name] = ServiceHelper.generateRandomString();
-		} if (type === propTypes.LONG_TEXT) {
-			properties[name] = ServiceHelper.generateRandomString();
-		} else if (type === propTypes.DATE) {
-			properties[name] = internalType ? new Date() : Date.now();
-		} else if (type === propTypes.NUMBER) {
-			properties[name] = ServiceHelper.generateRandomNumber();
-		} else if (type === propTypes.BOOLEAN) {
-			properties[name] = ServiceHelper.generateRandomBoolean();
-		} else if (type === propTypes.ONE_OF && isArray(values)) {
-			properties[name] = values[values.length - 1];
-		} else if (type === propTypes.MANY_OF && isArray(values)) {
-			properties[name] = values;
-		} else if (type === propTypes.TAGS) {
-			properties[name] = times(3, () => ServiceHelper.generateRandomString());
-		} else if (type === propTypes.COORDS) {
-			properties[name] = [0, 0, 0];
-		} else if (type === propTypes.VIEW) {
-			properties[name] = {
-				camera: {
-					position: [0, 0, 0],
-					forward: [0, 0, 0],
-					up: [0, 0, 0],
-				},
-				state: {
-					hidden: [
-						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
-						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container }) },
-					],
-				},
-			};
-		}
-	});
-
-	return properties;
-};
-
-ServiceHelper.generateAuditAction = (actionType) => {
-	const actionData = {
-		[actionTypes.USER_ADDED]: { user: ServiceHelper.generateRandomString() },
-		[actionTypes.USER_REMOVED]: { user: ServiceHelper.generateRandomString() },
-		[actionTypes.INVITATION_ADDED]: {
-			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
-			permissions: { teamspace_admin: true },
-		},
-		[actionTypes.INVITATION_REVOKED]: {
-			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
-			permissions: { teamspace_admin: true },
-		},
-		[actionTypes.PERMISSIONS_UPDATED]: { users: [ServiceHelper.generateRandomString()],
-			permissions: [{
-				model: ServiceHelper.generateUUID(),
-				project: ServiceHelper.generateUUID(),
-				from: [MODEL_COMMENTER],
-				to: [MODEL_VIEWER],
-			}] },
-	};
-
-	return {
-		_id: ServiceHelper.generateUUIDString(),
-		action: actionType,
-		executor: ServiceHelper.generateRandomString(),
-		timestamp: ServiceHelper.generateRandomDate(),
-		data: actionData[actionType],
-	};
-};
-
-ServiceHelper.generateRandomObject = () => ({
-	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
-	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
-	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
-	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
-});
-
-ServiceHelper.generateTicket = (template, internalType = false, container) => {
-	const fullTemplate = generateFullSchema(template) ?? template;
-	const modules = {};
-	(fullTemplate?.modules || []).forEach(({ name, type, deprecated, properties }) => {
-		if (deprecated) return;
-		const id = name ?? type;
-		modules[id] = generateProperties(properties, internalType, container);
-	});
-
-	const ticket = {
-		_id: ServiceHelper.generateUUIDString(),
-		type: fullTemplate._id,
-		title: ServiceHelper.generateRandomString(),
-		properties: generateProperties(fullTemplate.properties, internalType, container),
-		modules,
-	};
-
-	return ticket;
 };
 
 ServiceHelper.generateImportedComment = () => {
@@ -848,178 +482,10 @@ ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) 
 	};
 };
 
-// This generates groups for v5 schema (used for tickets), use generateLegacyGroup if you need v4 compatible groups
-ServiceHelper.generateGroup = (isSmart = false, {
-	serialised = false,
-	hasId = true,
-	container = ServiceHelper.generateUUIDString(),
-	nObjects = 3,
-	excludeDefinedObjects,
-} = {}) => {
-	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
-	const group = deleteIfUndefined({
-		_id: hasId ? genId() : undefined,
-		name: ServiceHelper.generateRandomString(),
-		excludeDefinedObjects,
-	});
-
-	if (isSmart) {
-		group.rules = [
-			{
-				name: ServiceHelper.generateRandomString(),
-				field: { operator: fieldOperators.CONTAINS.name, values: [ServiceHelper.generateRandomString()] },
-				operator: valueOperators.IS.name,
-				values: [
-					ServiceHelper.generateRandomString(),
-				],
-			},
-			{
-				name: ServiceHelper.generateRandomString(),
-				field: { operator: fieldOperators.IS.name, values: [ServiceHelper.generateRandomString()] },
-				operator: valueOperators.IS.name,
-				values: [
-					ServiceHelper.generateRandomString(),
-				],
-			},
-		];
-	} else {
-		group.objects = [{
-			container,
-			_ids: times(nObjects, genId),
-		}];
-	}
-
-	return group;
-};
-
 ServiceHelper.createGroupWithRule = (rule) => {
 	const group = ServiceHelper.generateGroup(true, { serialised: true, hasId: false });
 	return { ...group, rules: [rule] };
 };
-
-// This generates groups with v4 schema. use generateGroup for v5 (tickets) schema
-ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
-	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
-	const group = {
-		_id: genId(),
-		name: ServiceHelper.generateRandomString(),
-		color: [1, 1, 1],
-		createdAt: Date.now(),
-		updatedAt: Date.now(),
-		updatedBy: ServiceHelper.generateRandomString(),
-		author: ServiceHelper.generateRandomString(),
-	};
-
-	if (isSmart) {
-		group.rules = [
-			{
-				name: ServiceHelper.generateRandomString(),
-				field: { operator: fieldOperators.IS.name, values: ['IFC GUID'] },
-				operator: valueOperators.IS.name,
-				values: [
-					ServiceHelper.generateRandomString(),
-				],
-			},
-		];
-	} else {
-		group.objects = [{
-			account, model,
-		}];
-
-		if (isIfcGuids) {
-			group.objects[0].ifc_guids = [
-				ServiceHelper.generateRandomString(22),
-				ServiceHelper.generateRandomString(22),
-				ServiceHelper.generateRandomString(22),
-			];
-		} else {
-			group.objects[0].shared_ids = [genId(), genId(), genId()];
-		}
-	}
-
-	return group;
-};
-
-ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
-});
-
-ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
-	let tickets;
-	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
-		const { federation, template, creator } = ticketInfo;
-		const ticket = ServiceHelper.generateTicket(template, false, federation);
-		const valuesAtCreation = Object.keys(ticket.properties).map(
-			(key) => ({ property: key, value: ticket.properties[key] }));
-		tickets = {
-			federation: federation._id, template: template._id, valuesAtCreation, creator,
-		};
-	}
-	return deleteIfUndefined({
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		type: CLASH_TYPES.HARD,
-		tolerance: 0.01,
-		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-		trigger: [triggerOptions.MANUAL, triggerOptions.NEW_REVISION],
-		selectionA: [{
-			container: model1,
-		}],
-		selectionB: [{
-			container: model2,
-		}],
-		tickets,
-	});
-};
-
-const generateClashRunPlan = (plan) => plan && deleteIfUndefined({
-	_id: plan._id,
-	type: plan.type,
-	tolerance: plan.tolerance,
-	selfIntersectionsCheck: plan.selfIntersectionsCheck,
-	selectionA: plan.selectionA,
-	selectionB: plan.selectionB,
-});
-
-ServiceHelper.generateClashes = (plan, number = 20) => {
-	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
-	const objectId = (container) => [
-		container,
-		clashObjectIdTypes.INTERNAL,
-		ServiceHelper.generateRandomString(),
-		bbox,
-	].join('::');
-
-	return times(number, () => ({
-		a: objectId(plan.selectionA[0].container),
-		b: objectId(plan.selectionB[0].container),
-		positions: [
-			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
-		],
-		fingerprint: ServiceHelper.generateRandomNumber() }));
-};
-
-ServiceHelper.generateClashRun = (plan, clashResults, overrides = {}) => deleteIfUndefined({
-	_id: ServiceHelper.generateUUIDString(),
-	triggeredBy: ServiceHelper.generateRandomString(),
-	triggeredAt: Date.now(),
-	plan: generateClashRunPlan(plan),
-	...(clashResults ? {
-		updatedAt: Date.now(),
-		status: clashRunStatus.COMPLETED,
-		results: {
-			stats: {
-				new: clashResults.new.length,
-				active: clashResults.active.length,
-				resolved: clashResults.resolved.length,
-			},
-		},
-		clashResults,
-	} : { status: clashRunStatus.PLANNED }),
-	...overrides,
-});
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
 
@@ -1098,40 +564,6 @@ ServiceHelper.resetSharedDir = () => {
 	const fsDir = config.cn_queue.shared_storage;
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
-};
-
-ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) => deleteIfUndefined({
-	_id: generateUUID(),
-	shared_id: generateUUID(),
-	rev_id: stringToUUID(rev_id),
-	type,
-	parents,
-	...additionalData,
-});
-
-ServiceHelper.generateMeshNode = (rev_id, parents) => {
-	const blobData = {
-		vertices: times(9, () => ServiceHelper.generateRandomNumber(-100, 100)),
-		normals: times(9, () => ServiceHelper.generateRandomNumber(-1, 1)),
-		faces: [3, ...times(3, () => Math.floor(ServiceHelper.generateRandomNumber(0, 2)))],
-	};
-
-	// javascript is 64-bit float by default, need to convert to proper typed array and back
-	blobData.vertices = Array.from(new Float32Array(blobData.vertices));
-	blobData.normals = Array.from(new Float32Array(blobData.normals));
-
-	return ServiceHelper.generateBasicNode('mesh', rev_id, parents, { blobData });
-};
-
-ServiceHelper.generateTextureNode = (rev_id, parents) => {
-	const blobData = {
-		data: ServiceHelper.generateRandomString(256),
-	};
-	const nodeData = {
-		blobData,
-		extension: 'png',
-	};
-	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
 };
 
 module.exports = ServiceHelper;

@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/dataGen');
 
 jest.mock('../../../../../src/v5/handler/realTimeMsging');
 const RTM = require(`${src}/handler/realTimeMsging`);

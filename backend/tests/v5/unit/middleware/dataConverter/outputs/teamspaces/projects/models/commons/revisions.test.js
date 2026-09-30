@@ -17,7 +17,9 @@
 
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
-const { generateRevisionEntry } = require('../../../../../../../../helper/services');
+const {
+	generateRevisionEntry,
+} = require('../../../../../../../../helper/dataGen');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../../../../helper/utils');
+const { determineTestGroup, sleepMS } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
@@ -25,11 +25,15 @@ const {
 	generateUUIDString,
 	generateRandomIfcGuid,
 	generateRandomRvtId,
-	sleepMS,
-	generateRandomObject } = require('../../../../../../helper/services');
+	generateRandomObject,
+} = require('../../../../../../helper/dataGen');
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const {
+	idTypesToKeys,
+	idTypes,
+	metadataKeyToIdTypes,
+} = require(`${src}/models/metadata.constants`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
@@ -343,7 +347,7 @@ const testGetBoundsForGroupsOfMeshNodes = () => {
 };
 
 const testGetExternalIdsFromMetadata = () => {
-	const generateMeta = (ifc, revit) => {
+	const generateMeta = (ifc, revit, dwg) => {
 		const metadata = [{ key: generateRandomString(), value: generateRandomString() }];
 
 		if (revit) {
@@ -358,16 +362,30 @@ const testGetExternalIdsFromMetadata = () => {
 			})));
 		}
 
+		if (dwg) {
+			metadata.push(...Object.values(idTypesToKeys[idTypes.DWG]).map((key) => ({
+				key, value: dwg,
+			})));
+		}
+
 		return { metadata };
 	};
 
 	const ifcOnlyMeta = times(4, () => generateMeta(generateRandomIfcGuid()));
-	const rvtOnlyMeta = times(4, () => generateMeta(undefined, generateRandomRvtId()));
+	const rvtOnlyMeta = times(4, () => ({
+		metadata: [{
+			key: idTypesToKeys[idTypes.REVIT][1],
+			value: generateRandomRvtId(),
+		}],
+	}));
+	const dwgOnlyMeta = times(4, () => generateMeta(undefined, undefined, generateRandomString()));
 	const bothMeta = times(4, () => generateMeta(generateRandomIfcGuid(), generateRandomRvtId()));
+	const allTypesMeta = times(4, () => generateMeta(
+		generateRandomIfcGuid(), generateRandomRvtId(), generateRandomString()));
 
 	const getIDsFromMeta = (meta, targetType) => meta.flatMap(({ metadata }) => {
 		for (const { key, value } of metadata) {
-			if (metaKeyToIdType[key] === targetType) return value;
+			if (metadataKeyToIdTypes[key] === targetType) return value;
 		}
 		return [];
 	});
@@ -378,6 +396,9 @@ const testGetExternalIdsFromMetadata = () => {
 		['ifc guids if matched', ifcOnlyMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(ifcOnlyMeta, idTypes.IFC) }],
 		['rvt ids if matched', rvtOnlyMeta, undefined, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
 		['ifc guids if both rvt and ifc matched', bothMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(bothMeta, idTypes.IFC) }],
+		['dwg ids if matched', dwgOnlyMeta, undefined, { key: idTypes.DWG, values: getIDsFromMeta(dwgOnlyMeta, idTypes.DWG) }],
+		['ifc guids if all id types matched according to type priority', allTypesMeta, undefined,
+			{ key: idTypes.IFC, values: getIDsFromMeta(allTypesMeta, idTypes.IFC) }],
 		['revit ids if requested', bothMeta, idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(bothMeta, idTypes.REVIT) }],
 		['partial match of a specific id if requested', [...ifcOnlyMeta, ...rvtOnlyMeta], idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
 		['undefined if partial match and no specific type is requested', [...ifcOnlyMeta, ...rvtOnlyMeta]],

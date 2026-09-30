@@ -19,5 +19,6 @@ const InteropHelper = {};
 
 InteropHelper.v4Path = `${__dirname}/v4`;
 InteropHelper.v5Path = `${__dirname}/v5`;
+InteropHelper.resourcesPath = `${__dirname}/../resources`;
 
 module.exports = InteropHelper;
