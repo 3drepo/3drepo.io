@@ -2144,6 +2144,7 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
 	 * When enabled, when the camera is not moving, the main scene will not be redrawn.
 	 * @category Configurations
 	 */
