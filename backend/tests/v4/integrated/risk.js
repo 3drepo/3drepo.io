@@ -19,7 +19,6 @@
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { createAppAsync } = require("../../../src/v4/services/api.js");
-const { createRisk } = require("../helpers/risks.js");
 const { v5Path } = require("../../../src/interop")
 const { templates: { endpointDecommissioned } } = require(`${v5Path}/utils/responseCodes.js`);
 const { generateRandomNumber } = require("../../v5/helper/dataGen");
@@ -30,19 +29,13 @@ describe("Risks", function () {
 	let agent;
 	let agent2;
 	let altUserAgent;
-	let teamspace = "teamSpace1";
 
 	const username = "issue_username";
-	const username2 = "issue_username2";
 	const password = "password";
 	const altUser = "commenterTeamspace1Model1JobA";
 
-	const projectAdminUser = "imProjectAdmin";
-
 	const model = "project1";
 
-	const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mPUjrj6n4EIwDiqkL4KAV6SF3F1FmGrAAAAAElFTkSuQmCC";
-	const altBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 	const baseRisk = {
 		"safetibase_id": "12456-abcdef",
 		"associated_activity": "replacement",
@@ -73,15 +66,9 @@ describe("Risks", function () {
 		"location_desc": "Rooftop"
 	};
 	const risk = Object.assign({ "name": "Risk test" }, baseRisk);
-	const levelOfRisk = (0 === risk.likelihood && 0 === risk.consequence) ? 0 : -1;
 	const riskId = generateRandomNumber();
 	const viewpointId = generateRandomNumber();
 	const revisionId = generateRandomNumber();
-
-
-	const formatReference = (riskId) => {
-		return `${username}::${model}::${riskId}`;
-	}
 
 	beforeAll(async function () {
 		const app = await createAppAsync();
