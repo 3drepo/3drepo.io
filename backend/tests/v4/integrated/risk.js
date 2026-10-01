@@ -104,7 +104,7 @@ describe("Risks", function () {
 				.send(risk)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message via revision path", function (done) {
@@ -112,7 +112,7 @@ describe("Risks", function () {
 				.send(risk)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -121,7 +121,7 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -130,7 +130,7 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/risks/${riskId}/thumbnail`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -139,7 +139,7 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/risks`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -148,14 +148,14 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/risks/${riskId}/viewpoints/${viewpointId}/screenshot`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message on low resolution screenshot request", function (done) {
 			agent.get(`/${username}/${model}/risks/${riskId}/viewpoints/${viewpointId}/screenshotSmall.png`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -164,7 +164,7 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/revisions/${revisionId}/risks`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -173,14 +173,14 @@ describe("Risks", function () {
 			agent.get(`/${username}/${model}/risks.html`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message via revision risks path", function (done) {
 			agent.get(`/${username}/${model}/revisions/${revisionId}/risks.html`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -189,14 +189,14 @@ describe("Risks", function () {
 			agent.patch(`/${username}/${model}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message when doing it via revision path", function (done) {
 			agent.patch(`/${username}/${model}/revisions/${revisionId}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -205,14 +205,14 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message when deliting a comment to a risk", function (done) {
 			agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
@@ -221,14 +221,14 @@ describe("Risks", function () {
 			agent.post(`/${username}/${model}/risks/${riskId}/resources`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 		it("should return a routeDecommissioned message when deleting a resource from a risk", function (done) {
 			agent.delete(`/${username}/${model}/risks/${riskId}/resources`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
-					return done(err);
+					done(err);
 				});
 		});
 	});
