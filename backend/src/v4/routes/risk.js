@@ -113,7 +113,7 @@ const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks/:riskId", routeDecommissioned);
+router.get("/risks/:riskId", routeDecommissioned());
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get risk thumbnail
@@ -121,7 +121,7 @@ router.get("/risks/:riskId", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks/:riskId/thumbnail.png", routeDecommissioned);
+router.get("/risks/:riskId/thumbnail.png", routeDecommissioned());
 
 /**
  * @api {get} /:teamspace/:model/risks List all risks
@@ -136,7 +136,7 @@ router.get("/risks/:riskId/thumbnail.png", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks", routeDecommissioned);
+router.get("/risks", routeDecommissioned());
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png Get risk screenshot
@@ -144,7 +144,7 @@ router.get("/risks", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", routeDecommissioned);
+router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", routeDecommissioned());
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png Get low-res screenshot
@@ -152,9 +152,9 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", routeDecommissioned)
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", routeDecommissioned);
+router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", routeDecommissioned());
 
-router.get("/revision/:rid/risks", routeDecommissioned);
+router.get("/revision/:rid/risks", routeDecommissioned());
 
 /**
  * @api {get} /:teamspace/:model/risks.html Render risks as HTML
@@ -169,9 +169,9 @@ router.get("/revision/:rid/risks", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.get("/risks.html", routeDecommissioned);
+router.get("/risks.html", routeDecommissioned());
 
-router.get("/revision/:rid/risks.html", routeDecommissioned);
+router.get("/revision/:rid/risks.html", routeDecommissioned());
 
 /**
  * @api {post} /:teamspace/:model/revision/:revId/risks Create a risk for a revision
@@ -186,7 +186,7 @@ router.get("/revision/:rid/risks.html", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.post("/risks", routeDecommissioned);
+router.post("/risks", routeDecommissioned());
 
 /**
  * @api {patch} /:teamspace/:model/revision/:revId/risks/:riskId Update risk for a revision
@@ -201,11 +201,11 @@ router.post("/risks", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.patch("/risks/:riskId", routeDecommissioned);
+router.patch("/risks/:riskId", routeDecommissioned());
 
-router.post("/revision/:rid/risks", routeDecommissioned);
+router.post("/revision/:rid/risks", routeDecommissioned());
 
-router.patch("/revision/:rid/risks/:riskId", routeDecommissioned);
+router.patch("/revision/:rid/risks/:riskId", routeDecommissioned());
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/comments Add a comment
@@ -213,7 +213,7 @@ router.patch("/revision/:rid/risks/:riskId", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  **/
-router.post("/risks/:riskId/comments", routeDecommissioned);
+router.post("/risks/:riskId/comments", routeDecommissioned());
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
@@ -221,7 +221,7 @@ router.post("/risks/:riskId/comments", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  **/
-router.delete("/risks/:riskId/comments", routeDecommissioned);
+router.delete("/risks/:riskId/comments", routeDecommissioned());
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
@@ -229,7 +229,7 @@ router.delete("/risks/:riskId/comments", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.post("/risks/:riskId/resources", routeDecommissioned);
+router.post("/risks/:riskId/resources", routeDecommissioned());
 
 /**
  * @api {delete} /:teamspace/:model/risks/:riskId/resources Detach a resource from a risk
@@ -237,6 +237,6 @@ router.post("/risks/:riskId/resources", routeDecommissioned);
  * @apiGroup Risks
  * @apiDescription Route has been decommissioned.
  */
-router.delete("/risks/:riskId/resources", routeDecommissioned);
+router.delete("/risks/:riskId/resources", routeDecommissioned());
 
 module.exports = router;

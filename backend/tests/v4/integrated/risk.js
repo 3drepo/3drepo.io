@@ -99,7 +99,7 @@ describe("Risks", function () {
 	});
 
 	describe("Creating a risk", function () {
-		it("should return a routeDecommissioned message", function (done) {
+		it("should return a routeDecommissioned message", (done) => {
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(endpointDecommissioned.status, (err, res) => {
@@ -107,8 +107,8 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message via revision path", function (done) {
-			agent.post(`/${username}/${model}/revisions/${revisionId}/risks`)
+		it("should return a routeDecommissioned message via revision path", (done) => {
+			agent.post(`/${username}/${model}/revision/${revisionId}/risks`)
 				.send(risk)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
@@ -117,7 +117,7 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting a risk by riskId", function () {
-		it("should return a routeDecommissioned message", function (done) {
+		it("should return a routeDecommissioned message", (done) => {
 			agent.get(`/${username}/${model}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
@@ -126,8 +126,8 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting a risk by thumbnail", function () {
-		it("should return a routeDecommissioned message", function (done) {
-			agent.get(`/${username}/${model}/risks/${riskId}/thumbnail`)
+		it("should return a routeDecommissioned message", (done) => {
+			agent.get(`/${username}/${model}/risks/${riskId}/thumbnail.png`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
@@ -135,7 +135,7 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting a list of risks", function () {
-		it("should return a routeDecommissioned message", function (done) {
+		it("should return a routeDecommissioned message", (done) => {
 			agent.get(`/${username}/${model}/risks`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
@@ -144,14 +144,14 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting a risk screenshot", function () {
-		it("should return a routeDecommissioned message on regular screenshot request", function (done) {
-			agent.get(`/${username}/${model}/risks/${riskId}/viewpoints/${viewpointId}/screenshot`)
+		it("should return a routeDecommissioned message on regular screenshot request", (done) => {
+			agent.get(`/${username}/${model}/risks/${riskId}/viewpoints/${viewpointId}/screenshot.png`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message on low resolution screenshot request", function (done) {
+		it("should return a routeDecommissioned message on low resolution screenshot request", (done) => {
 			agent.get(`/${username}/${model}/risks/${riskId}/viewpoints/${viewpointId}/screenshotSmall.png`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
@@ -160,8 +160,8 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting revision risks", function () {
-		it("should return a routeDecommissioned message", function (done) {
-			agent.get(`/${username}/${model}/revisions/${revisionId}/risks`)
+		it("should return a routeDecommissioned message", (done) => {
+			agent.get(`/${username}/${model}/revision/${revisionId}/risks`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
@@ -169,15 +169,15 @@ describe("Risks", function () {
 		});
 	});
 	describe("Getting risks as HTML", function () {
-		it("should return a routeDecommissioned message via risk path", function (done) {
+		it("should return a routeDecommissioned message via risk path", (done) => {
 			agent.get(`/${username}/${model}/risks.html`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message via revision risks path", function (done) {
-			agent.get(`/${username}/${model}/revisions/${revisionId}/risks.html`)
+		it("should return a routeDecommissioned message via revision risks path", (done) => {
+			agent.get(`/${username}/${model}/revision/${revisionId}/risks.html`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
@@ -185,15 +185,15 @@ describe("Risks", function () {
 		});
 	});
 	describe("Update risk", function () {
-		it("should return a routeDecommissioned message", function (done) {
+		it("should return a routeDecommissioned message", (done) => {
 			agent.patch(`/${username}/${model}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message when doing it via revision path", function (done) {
-			agent.patch(`/${username}/${model}/revisions/${revisionId}/risks/${riskId}`)
+		it("should return a routeDecommissioned message when doing it via revision path", (done) => {
+			agent.patch(`/${username}/${model}/revision/${revisionId}/risks/${riskId}`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
@@ -201,14 +201,14 @@ describe("Risks", function () {
 		});
 	});
 	describe("Comment and risks", function () {
-		it("should return a routeDecommissioned message when adding a comment to a risk", function (done) {
+		it("should return a routeDecommissioned message when adding a comment to a risk", (done) => {
 			agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message when deliting a comment to a risk", function (done) {
+		it("should return a routeDecommissioned message when deliting a comment to a risk", (done) => {
 			agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
@@ -217,14 +217,14 @@ describe("Risks", function () {
 		});
 	});
 	describe("Resources and risks", function () {
-		it("should return a routeDecommissioned message when adding a resource to a risk", function (done) {
+		it("should return a routeDecommissioned message when adding a resource to a risk", (done) => {
 			agent.post(`/${username}/${model}/risks/${riskId}/resources`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message when deleting a resource from a risk", function (done) {
+		it("should return a routeDecommissioned message when deleting a resource from a risk", (done) => {
 			agent.delete(`/${username}/${model}/risks/${riskId}/resources`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);
