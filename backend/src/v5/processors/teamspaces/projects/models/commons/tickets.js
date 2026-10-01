@@ -104,6 +104,7 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
 					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
 					externalReferences.groups);
+				processGroupsUpdate(oldProperties[name], updatedProperties[name], ['camera.zoomTo'], externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
 			}
@@ -515,10 +516,12 @@ Tickets.onClashPlanNameUpdated = async (teamspace, project, planId, planName) =>
 };
 
 Tickets.onModelNameUpdated = async (teamspace, project, model) => {
-	const templates = await getTemplatesByQuery(teamspace, { $or: [
-		{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-		{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
-	] });
+	const templates = await getTemplatesByQuery(teamspace, {
+		$or: [
+			{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+			{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+		],
+	});
 
 	await Promise.all(templates.map(async (template) => {
 		await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.MODEL_NAME);
