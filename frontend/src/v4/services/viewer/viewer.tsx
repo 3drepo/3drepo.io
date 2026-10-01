@@ -296,7 +296,7 @@ export class ViewerService {
 
 	public async isModelLoaded() {
 		await UnityUtil.onReady();
-		return UnityUtil.onLoaded();
+		await UnityUtil.onLoaded();
 	}
 
 	public getDefaultHighlightColor() {
