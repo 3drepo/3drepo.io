@@ -827,19 +827,22 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(teamspace, project, model, revision, isFederation, viewpoint);
-
-		await UnityUtil.onLoaded().then((bbox) => {
+		try {
+			await UnityUtil.loadModel(
+				teamspace,
+				project,
+				model,
+				revision,
+				isFederation,
+				viewpoint);
 			document.body.style.cursor = 'initial';
-
 			this.emit(VIEWER_EVENTS.MODEL_LOADED, 1);
-			this.emit(VIEWER_EVENTS.BBOX_READY, bbox);
-		}).catch((error) => {
+		} catch (error) {
 			document.body.style.cursor = 'initial';
 			if (error !== 'cancel') {
 				console.error('Unity error loading model= ', error);
 			}
-		});
+		};
 
 		return UnityUtil.onLoading();
 	}
