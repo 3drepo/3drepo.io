@@ -26,7 +26,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
 const utils = require("../utils");
-const keyAuthentication =  require("../middlewares/keyAuthentication");
+const keyAuthentication = require("../middlewares/keyAuthentication");
 const { respond } = require(`${v5Path}/utils/responder`);
 const { templates } = require(`${v5Path}/utils/responseCodes`);
 
@@ -36,7 +36,7 @@ const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants`);
 const APIService = {};
 
 const addV4Routes = (app) => {
-	if(!app.get(BYPASS_AUTH)) {
+	if (!app.get(BYPASS_AUTH)) {
 		app.use("/", require("../routes/user"));
 
 		app.use("/:account", require("../routes/job"));
@@ -134,7 +134,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
-	// record start time of the request
+		// record start time of the request
 		req.startTime = Date.now();
 		systemLogger.logInfo(`[IN] ${req.method} ${req.originalUrl}`, undefined, logLabels.network);
 		// intercept OPTIONS method
@@ -145,7 +145,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 		}
 	});
 
-	if(v5Init) {
+	if (v5Init) {
 		await Promise.all([
 			require(`${v5Path}/services/eventsListener/eventsListener`).init(),
 			require("../models/chatEvent").subscribeToV5Events(),
@@ -159,8 +159,8 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 
 	addV4Routes(app);
 
-	app.use(function(err, req, res, next) {
-		if(err) {
+	app.use(function (err, req, res, next) {
+		if (err) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		}
 
