@@ -1181,30 +1181,6 @@ export class UnityUtil {
 		UnityUtil.toUnity('DiffToolShowBaseModel', undefined, undefined);
 	}
 
-	/**
-	* Compare transparent objects as if they are opaque objects
-	* @category Compare Tool
-	*/
-	public static diffToolRenderTransAsOpaque() {
-		UnityUtil.toUnity('DiffToolRenderTransAsOpaque', undefined, undefined);
-	}
-
-	/**
-	* Ignore semi-transparent objects in diff
-	* @category Compare Tool
-	*/
-	public static diffToolRenderTransAsInvisible() {
-		UnityUtil.toUnity('DiffToolRenderTransAsInvisible', undefined, undefined);
-	}
-
-	/**
-	* Compare transparent objects as of normal
-	* @category Compare Tool
-	*/
-	public static diffToolRenderTransAsDefault() {
-		UnityUtil.toUnity('DiffToolRenderTransAsDefault', undefined, undefined);
-	}
-
 	// The following methods are concerned with the clip tool. There are three
 	// types of method.
 	// - The start/stop methods turn the tool on and off and change the mode.
