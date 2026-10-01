@@ -19,16 +19,11 @@
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { createAppAsync } = require("../../../src/v4/services/api.js");
-const responseCodes = require("../../../src/v4/response_codes.js");
-const async = require("async");
-const { login } = require("../helpers/users.js");
 const { createRisk } = require("../helpers/risks.js");
-const { createModel } = require("../helpers/models.js");
 const { v5Path } = require("../../../src/interop")
 const { templates: { endpointDecommissioned } } = require(`${v5Path}/utils/responseCodes.js`);
+const { generateRandomNumber } = require("../../v5/helper/dataGen");
 
-
-const { deleteNotifications, fetchNotification } = require("../helpers/notifications.js");
 
 describe("Risks", function () {
 	let server;
