@@ -2146,8 +2146,8 @@ export class UnityUtil {
 	 * When enabled, when the camera is not moving, the main scene will not be redrawn.
 	 * @category Configurations
 	 */
-	public static toggleRenderCaching(enable: boolean) {
-		UnityUtil.toUnity('ToggleRenderCaching', UnityUtil.LoadingState.VIEWER_READY, enable ? 1 : 0);
+	public static enableRenderCaching(enable: boolean) {
+		UnityUtil.toUnity('EnableRenderCaching', UnityUtil.LoadingState.VIEWER_READY, enable ? 1 : 0);
 	}
 
 	/**
