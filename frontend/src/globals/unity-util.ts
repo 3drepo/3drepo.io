@@ -2222,6 +2222,8 @@ export class UnityUtil {
 		UnityUtil.loadedPromise = Promise.all(
 			[...this.modelLoadedPromises.values()].map((d) => d.promise),
 		);
+		// Avoid an unhandled rejection if this is cancelled before anyone awaits it.
+		UnityUtil.loadedPromise.catch(() => {});
 
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}] Loading model: `, JSON.stringify(params));
@@ -2407,8 +2409,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static reset(resetProjection = true) {
-		UnityUtil.modelLoadedPromises = new Map();
-		UnityUtil.loadedPromise = null;
+		UnityUtil.rejectModelLoadedPromises();
 		UnityUtil.loadingPromise = null;
 		UnityUtil.loadingResolve = null;
 
@@ -3395,8 +3396,7 @@ export class UnityUtil {
 		UnityUtil.readyPromise = undefined;
 		UnityUtil.loadingPromise = undefined;
 		UnityUtil.loadingResolve = undefined;
-		UnityUtil.loadedPromise = undefined;
-		UnityUtil.modelLoadedPromises = new Map();
+		UnityUtil.rejectModelLoadedPromises();
 
 		UnityUtil.hideProgressBar();
 
@@ -3470,5 +3470,18 @@ export class UnityUtil {
 	static resolveModelLoadedPromise(namespace: string): void {
 		this.modelLoadedPromises.get(namespace)?.resolve();
 		this.modelLoadedPromises.delete(namespace);
+	}
+
+	/** @hidden */
+	static rejectModelLoadedPromises(): void {
+		const pending = this.modelLoadedPromises;
+		const firstModel = pending.get('firstModel');
+		pending.delete('firstModel');
+
+		// onLoaded() callers waiting for the first model should survive a reset
+		this.modelLoadedPromises = new Map(firstModel ? [['firstModel', firstModel]] : []);
+		this.loadedPromise = firstModel?.promise ?? null;
+
+		pending.forEach((deferred) => deferred.reject('cancel'));
 	}
 }
