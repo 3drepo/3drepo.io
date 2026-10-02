@@ -42,7 +42,7 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
-const { getFileAsStream } = require(`${src}/services/filesManager`);
+const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -378,6 +378,83 @@ const testGetRun = () => {
 	});
 };
 
+const testGetRunReport = () => {
+	describe('Get clash test run report', () => {
+		const route = (ts, project, planId, runId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs/${runId}/report${key ? `?key=${key}` : ''}`;
+		const basicData = generateBasicData();
+		const { users, teamspace, project, models, plan: existingPlan, project2Plan } = basicData;
+		const plan2 = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
+		const runPlan = injectRevisionIntoPlan(existingPlan);
+		const plan2RunPlan = injectRevisionIntoPlan(plan2);
+		const completedRunResults = generateRunResults();
+		const storedReport = `${JSON.stringify(completedRunResults, null, '\t')}\n`;
+		const completedRun = ServiceHelper.generateClashRun(runPlan, completedRunResults, {
+			triggeredAt: generateRandomDate().getTime(),
+			updatedAt: generateRandomDate().getTime(),
+		});
+		const incompleteRun = ServiceHelper.generateClashRun(runPlan, undefined, {
+			status: clashRunStatus.PLANNED,
+			triggeredAt: generateRandomDate().getTime(),
+		});
+		const plan2Run = ServiceHelper.generateClashRun(plan2RunPlan, completedRunResults, {
+			triggeredAt: generateRandomDate().getTime(),
+			updatedAt: generateRandomDate().getTime(),
+		});
+
+		beforeAll(async () => {
+			await setupBasicData(basicData);
+			await Promise.all([
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [plan2]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, runPlan, [completedRun, incompleteRun]),
+				ServiceHelper.db.createClashRuns(teamspace, project.id, plan2RunPlan, [plan2Run]),
+			]);
+			await storeFile(teamspace, CLASH_RUNS_COL, stringToUUID(completedRun._id), Buffer.from(storedReport));
+		});
+
+		test('should stream the stored JSON report without changing its contents', async () => {
+			const res = await agent.get(route(teamspace, project.id, existingPlan._id,
+				completedRun._id, users.tsAdmin.apiKey))
+				.expect(templates.ok.status)
+				.expect('Content-Type', /application\/json/);
+
+			expect(res.text).toBe(storedReport);
+			expect(res.body).toEqual(completedRunResults);
+		});
+
+		describe.each([
+			['teamspace is not found', { ts: generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: generateRandomString() }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['the project does not exist', { proj: generateRandomString() }, false, templates.projectNotFound],
+			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
+			['the plan does not exist', { planId: generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan belongs to a different project', { planId: project2Plan._id }, false, templates.clashPlanNotFound],
+			['the run does not exist', { runId: generateRandomString() }, false, templates.clashRunNotFound],
+			['the run belongs to a different plan', { runId: plan2Run._id }, false, templates.clashRunNotFound],
+			['the run has not completed', { runId: incompleteRun._id }, false, templates.clashRunNotCompleted],
+			['user has admin access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user is teamspace admin', {}, true],
+		])('', (desc, {
+			ts = teamspace,
+			proj = project.id,
+			planId = existingPlan._id,
+			runId = completedRun._id,
+			key = users.tsAdmin.apiKey,
+		}, success, expectedRes) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const res = await agent.get(route(ts, proj, planId, runId, key))
+					.expect(expectedRes?.status || templates.ok.status);
+
+				if (success) {
+					expect(res.body).toEqual(completedRunResults);
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
 const testCreatePlan = () => {
 	describe('Create clash test plan', () => {
 		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes${key ? `?key=${key}` : ''}`;
@@ -503,7 +580,7 @@ const testCreatePlan = () => {
 };
 
 const eventTriggeredPromise = (event) => {
-	let unsubscribe = () => {};
+	let unsubscribe = () => { };
 	const promise = new Promise(
 		(resolve) => {
 			unsubscribe = EventsManager.subscribe(event,
@@ -840,6 +917,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetPlan();
 	testGetRuns();
 	testGetRun();
+	testGetRunReport();
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();

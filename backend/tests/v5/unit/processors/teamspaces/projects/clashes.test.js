@@ -363,7 +363,8 @@ const testCreateRun = () => {
 		selfIntersectionsCheck: false,
 		trigger: [generateRandomString()],
 		selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
-		selectionB: [{ container: generateRandomString(),
+		selectionB: [{
+			container: generateRandomString(),
 			revision: generateUUID(),
 			rules: [generateRandomObject()],
 		}],
@@ -1269,8 +1270,8 @@ const testSetLastRevForSelections = () => {
 			const lastRevisionA = generateUUID();
 			const lastRevisionB = generateUUID();
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionA });
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
@@ -1298,9 +1299,9 @@ const testSetLastRevForSelections = () => {
 			const selectionB = [{ container: generateRandomString() }];
 			const revisions = times(3, () => generateUUID());
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			revisions.forEach((revision) => RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision }));
 
 			await Clashes.setLastRevForSelections(teamspace, selectionA, selectionB);
@@ -1323,7 +1324,7 @@ const testSetLastRevForSelections = () => {
 			const lastRevisionB = generateUUID();
 
 			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
 			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
@@ -1346,8 +1347,8 @@ const testSetLastRevForSelections = () => {
 			const selectionB = [{ container: generateRandomString() }];
 			const lastRevisionB = generateUUID();
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
@@ -1369,6 +1370,89 @@ const testSetLastRevForSelections = () => {
 	});
 };
 
+const testGetDetailedRunReport = () => {
+	describe('Get Detailed Run Report', () => {
+		const teamspace = generateRandomString();
+		const runId = generateRandomString();
+
+		test('should return the storage stream descriptor without waiting for the stream to end', async () => {
+			const readStream = new PassThrough();
+			const expectedOutput = {
+				readStream,
+				size: generateRandomNumber(),
+				mimeType: 'application/json',
+				encoding: 'gzip',
+				filename: 'report.json.gz',
+			};
+			FilesManager.getFileAsStream.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Clashes.getDetailedRunReport(teamspace, runId))
+				.resolves.toBe(expectedOutput);
+
+			expect(readStream.readableEnded).toBe(false);
+			expect(readStream.readableFlowing).toBe(null);
+			readStream.destroy();
+
+			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace, CLASH_RUNS_COL, runId);
+		});
+
+		test.each([
+			['valid JSON', JSON.stringify({ new: [], active: [], resolved: [] })],
+			['malformed JSON', '{"new":['],
+			['empty content', ''],
+		])('should return the stream without consuming or parsing %s', async (description, content) => {
+			const readStream = new PassThrough();
+			readStream.end(Buffer.from(content));
+			const expectedOutput = { readStream, size: Buffer.byteLength(content) };
+			FilesManager.getFileAsStream.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Clashes.getDetailedRunReport(teamspace, runId))
+				.resolves.toBe(expectedOutput);
+
+			expect(readStream.readableLength).toBe(Buffer.byteLength(content));
+			expect(readStream.readableFlowing).toBe(null);
+			readStream.destroy();
+
+			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace, CLASH_RUNS_COL, runId);
+		});
+
+		test.each([
+			['storage failure', new Error(generateRandomString())],
+			['missing report', templates.fileNotFound],
+		])('should propagate a %s from getFileAsStream', async (description, error) => {
+			FilesManager.getFileAsStream.mockRejectedValueOnce(error);
+
+			await expect(Clashes.getDetailedRunReport(teamspace, runId))
+				.rejects.toBe(error);
+
+			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace, CLASH_RUNS_COL, runId);
+		});
+
+		test('should propagate synchronous errors from getFileAsStream', () => {
+			const error = new Error(generateRandomString());
+			FilesManager.getFileAsStream.mockImplementationOnce(() => {
+				throw error;
+			});
+
+			expect(() => Clashes.getDetailedRunReport(teamspace, runId)).toThrow(error);
+
+			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace, CLASH_RUNS_COL, runId);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
@@ -1380,4 +1464,5 @@ describe(determineTestGroup(__filename), () => {
 	testCreateRun();
 	testProcessClashResults();
 	testSetLastRevForSelections();
+	testGetDetailedRunReport();
 });
