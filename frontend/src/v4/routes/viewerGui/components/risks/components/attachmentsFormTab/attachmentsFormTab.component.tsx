@@ -18,6 +18,8 @@ import { FunctionComponent } from 'react';
 import { Resources } from '../../../../../components/resources/resources.component';
 import { Content } from '../riskDetails/riskDetails.styles';
 
+// TODO delete/move
+
 interface IProps {
 	active: boolean;
 	resources: any;

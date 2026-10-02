@@ -34,12 +34,11 @@ export const Board = () => {
 
 	const match = useMatch('*');
 	const dispatch = useDispatch();
-	const board = useSelector(selectBoardDomain);
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = CurrentUserHooksSelectors.selectUsername();
 
-	const componentIsReady = username && projectName && board?.boardType;
+	const componentIsReady = username && projectName;
 
 	useEffect(() => {
 		if (!componentIsReady) return;
@@ -60,7 +59,6 @@ export const Board = () => {
 				match={match}
 				navigate={navigate}
 				location={location}
-				selectedRiskFilters={[]}
 			/>
 		</Container>
 	);

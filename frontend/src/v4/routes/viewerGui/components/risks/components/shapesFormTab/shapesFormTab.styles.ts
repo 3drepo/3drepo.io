@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
+// todo delete/move
 export const MeasuringTypeContainer = styled.div`
 	display: flex;
 	margin-top: 10px;

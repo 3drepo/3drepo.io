@@ -31,25 +31,20 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { KanbanBoard, KanbanMoveAcrossLanesEvent } from '@components/kanbanBoard/kanbanBoard.component';
 import { ISSUE_FILTERS } from '../../constants/issues';
-import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { filtersValuesMap as risksFilters, getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
-import {
-	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
-} from '../../modules/board/board.constants';
+import { ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 
 import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
-import { Panel } from '../components/panel/panel.component';
 
 import { isViewer } from '../../helpers/permissions';
 import { renderActionsMenu } from '../../helpers/reportedItems';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import { getProjectModels, getTeamspaceProjects } from './board.helpers';
+import { getProjectModels } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
@@ -64,9 +59,8 @@ import {
 	SelectContainer,
 	ViewConfig
 } from './board.styles';
-import { BoardTitleComponent } from './components/boardTitleComponent.component';
 
-const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
+const types = [{ value: 'issues', name: 'Issues' }];
 
 interface ICard {
 	id: string;
@@ -93,26 +87,22 @@ interface IProps {
 	teamspaces: any[];
 	isPending: boolean;
 	filterProp: string;
-	boardType: string;
 	searchEnabled: boolean;
 	jobs: any[];
 	topicTypes: any[];
 	selectedIssueFilters: any[];
-	selectedRiskFilters: any[];
 	sortOrder: string;
 	cards: ICard[];
 	projectsMap: any;
 	modelsMap: any;
 	showClosedIssues: boolean;
 	modelSettings: any;
-	fetchData: (boardType, teamspace, project, modelId) => void;
-	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
+	fetchData: (teamspace, project, modelId) => void;
+	fetchCardData: (teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
 	showDialog: (config: any) => void;
 	setFilterProp: (filterProp: string) => void;
-	setBoardType: (boardType: string) => void;
 	updateIssue: (teamspace, model, issueData: any) => void;
-	updateRisk: (teamspace, model, riskData: any) => void;
 	toggleSearchEnabled: () => void;
 	setFilters: (filters) => void;
 	importBCF: (teamspace, modelId, file, revision) => void;
@@ -124,32 +114,13 @@ interface IProps {
 	showSnackbar: (text) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
-	subscribeOnRiskChanges: (teamspace, modelId) => void;
-	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	resetModel: () => void;
 	resetIssues: () => void;
-	resetRisks: () => void;
 	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
 	setSortBy: (field) => void;
-	criteria: any;
-	risksEnabled: boolean,
+	// criteria: any;
 	issuesEnabled: boolean,
 }
-
-const PANEL_PROPS = {
-	paperProps: {
-		height: '100%'
-	}
-};
-
-const RiskBoardCard = ({ metadata, onClick }: any) => (
-	<BoardItem
-		key={metadata.id}
-		{...metadata}
-		onItemClick={onClick}
-		panelName="risk "
-	/>
-);
 
 const IssueBoardCard = ({ metadata, onClick }: any) => (
 	<BoardItem
@@ -163,45 +134,29 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
 	const firstUpdate = useRef(true);
-	const { type, teamspace, project: projectId, containerOrFederation } = useParams<ViewerParams & RouteParams>();
+	const { teamspace, project: projectId, containerOrFederation } = useParams<ViewerParams & RouteParams>();
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = v5Project;
 	const modelId = containerOrFederation;
-	const isIssuesBoard = type === 'issues';
-	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
 
 	const {
 		resetModel,
 		resetIssues,
-		resetRisks,
 	} = props;
 
 	useEffect(() => {
-		if (type !== props.boardType) {
-			props.setBoardType(type);
-		}
-
-		if (!isIssuesBoard) {
-			props.setFilterProp(RISK_FILTER_PROPS.level_of_risk.value);
-			props.subscribeOnRiskChanges(teamspace, modelId);
-		} else {
-			props.subscribeOnIssueChanges(teamspace, modelId);
-			props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
-		}
+		props.subscribeOnIssueChanges(teamspace, modelId);
+		props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
 
 		return () => {
-			if (!isIssuesBoard) {
-				props.unsubscribeOnRiskChanges(teamspace, modelId);
-			} else {
-				props.unsubscribeOnIssueChanges(teamspace, modelId);
-			}
+			props.unsubscribeOnIssueChanges(teamspace, modelId);
 			props.setFilters([]);
 		};
-	}, [type]);
+	}, []);
 
 	useEffect(() => {
-		props.fetchData(type, teamspace, project, modelId);
-	}, [type, teamspace, project, modelId]);
+		props.fetchData(teamspace, project, modelId);
+	}, [teamspace, project, modelId]);
 
 	const removeReactTrelloTooltip = () => {
 		const board = boardRef.current;
@@ -222,44 +177,27 @@ export function Board(props: IProps) {
 		return () => {
 			resetModel();
 			resetIssues();
-			resetRisks();
 		};
 	}, []);
 
 	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
 
 	const isDraggable = get(
-		isIssuesBoard ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS,
+		ISSUE_FILTER_PROPS,
 		[props.filterProp, 'draggable'],
 		false
 	);
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
-	const getPath = ({ typePath = type, modelPath = modelId }: any) => {
+	const getPath = ({ modelPath = modelId }: any) => {
 		const boardPath = modelPath ? BOARD_ROUTE_WITH_MODEL : BOARD_ROUTE;
 		return generatePath(boardPath, {
-			type: typePath,
+			type: 'issues',
 			containerOrFederation: modelPath,
 			project: projectId,
 			teamspace,
 		});
-	};
-
-	const handleTypeChange = (e) => {
-		const url = getPath({ typePath: e.target.value });
-		props.navigate(url);
-		props.setBoardType(e.target.value);
-	};
-
-	const handleTeamspaceChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}`;
-		props.navigate(url);
-	};
-
-	const handleProjectChange = (e) => {
-		const url = getPath({ projectPath: e.target.value });
-		props.navigate(url);
 	};
 
 	useEffect(() => {
@@ -275,13 +213,8 @@ export function Board(props: IProps) {
 		const newModelId = e.target.value;
 		const url = getPath({ modelPath: newModelId });
 
-		if (!isIssuesBoard) {
-			props.unsubscribeOnRiskChanges(teamspace, modelId);
-			props.subscribeOnRiskChanges(teamspace, newModelId);
-		} else {
-			props.unsubscribeOnIssueChanges(teamspace, modelId);
-			props.subscribeOnIssueChanges(teamspace, newModelId);
-		}
+		props.unsubscribeOnIssueChanges(teamspace, modelId);
+		props.subscribeOnIssueChanges(teamspace, newModelId);
 
 		props.navigate(url);
 	};
@@ -295,7 +228,7 @@ export function Board(props: IProps) {
 	const handleNavigationChange = (newIndex) => {
 		const newCardId = props.cards[newIndex].id;
 		props.resetCardData();
-		props.fetchCardData(type, teamspace, modelId, newCardId);
+		props.fetchCardData(teamspace, modelId, newCardId);
 	};
 
 	const handleOpenDialog = useCallback((cardId?) => {
@@ -311,10 +244,6 @@ export function Board(props: IProps) {
 			return [toLaneId];
 		}
 
-		if (filterProp === RISK_FILTER_PROPS.mitigation_status.value && filterProp === toLaneId ) {
-			return '';
-		}
-
 		return toLaneId;
 	};
 
@@ -327,11 +256,7 @@ export function Board(props: IProps) {
 			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId: targetLaneId })
 		};
 
-		if (isIssuesBoard) {
-			props.updateIssue(teamspace, modelId, { _id: cardId, ...updatedProps });
-		} else {
-			props.updateRisk(teamspace, modelId, { _id: cardId, ...updatedProps });
-		}
+		props.updateIssue(teamspace, modelId, { _id: cardId, ...updatedProps });
 	};
 
 	const handleCardDrop = () => {
@@ -380,55 +305,29 @@ export function Board(props: IProps) {
 			disabled={props.isPending || !modelId || !project || hasViewerPermissions}
 		>
 			<Add />
-			{isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
-			{!isIssuesBoard && formatMessage({ id: 'board.newRisk.button', defaultMessage: 'New risk' })}
+			{formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
 		</AddButton>
 	);
 
-	const FILTER_VALUES = isIssuesBoard ? ISSUE_FILTER_VALUES : RISK_FILTER_VALUES;
-
-	const renderFilters = () => {
-		const risksAndIssuesEnabled = props.issuesEnabled && props.risksEnabled;
-
-		return (
-			<>
-				{risksAndIssuesEnabled && (
-					<SelectContainer>
-						<FormControl>
-							<InputLabel disabled={!containerOrFederation} shrink htmlFor="type-select">Show</InputLabel>
-							<CellSelect
-								placeholder="Select type"
-								items={types}
-								value={type}
-								onChange={handleTypeChange}
-								disabled={!types.length || !containerOrFederation}
-								disabledPlaceholder
-								inputId="type-select"
-							/>
-						</FormControl>
-					</SelectContainer>
-				)
-				}
-				<SelectContainer>
-					<FormControl>
-						<InputLabel disabled={!containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>
-						<CellSelect
-							placeholder="Select grouping type"
-							items={FILTER_VALUES}
-							value={props.filterProp}
-							onChange={handleFilterClick}
-							disabled={!FILTER_VALUES.length || !containerOrFederation}
-							disabledPlaceholder
-							inputId="group-select"
-						/>
-					</FormControl>
-				</SelectContainer>
-			</>
-		);
-	};
+	const renderFilters = () => (
+		<SelectContainer>
+			<FormControl>
+				<InputLabel disabled={!containerOrFederation} shrink htmlFor="group-select">Group by</InputLabel>
+				<CellSelect
+					placeholder="Select grouping type"
+					items={ISSUE_FILTER_VALUES}
+					value={props.filterProp}
+					onChange={handleFilterClick}
+					disabled={!ISSUE_FILTER_VALUES.length || !containerOrFederation}
+					disabledPlaceholder
+					inputId="group-select"
+				/>
+			</FormControl>
+		</SelectContainer>
+	);
 
 	const components = {
-		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
+		Card: IssueBoardCard,
 	};
 
 	const renderBoard = renderWhenTrue(() => (
@@ -453,13 +352,11 @@ export function Board(props: IProps) {
 
 	const renderNoData = renderWhenTrue(() => (
 		<LoaderContainer>
-			<NoDataMessage>No {type} have been created yet.</NoDataMessage>
+			<NoDataMessage>No issues have been created yet.</NoDataMessage>
 		</LoaderContainer>
 	));
 
 	const renderNoSelected = renderWhenTrue(() => {
-		const noModelAndProject = !modelId && !project;
-		const noModel = !modelId;
 		const messagePrefix = 'You have to choose';
 		const chooseMessage = formatMessage({ defaultMessage: 'Please select a federation or container to proceed', id: 'board.emptyBoard.placeholder' });
 		const areModels =
@@ -476,14 +373,9 @@ export function Board(props: IProps) {
 		);
 	});
 
-	const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
-
 	const filterItems = () => {
-		const filterValuesMap = isIssuesBoard
-				? issuesFilters(props.jobs, props.topicTypes)
-				: risksFilters(props.jobs, props.criteria);
-
-		const generatedFilters = FILTER_ITEMS.map((issueFilter) => {
+		const filterValuesMap =  issuesFilters(props.jobs, props.topicTypes)
+		const generatedFilters = ISSUE_FILTERS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
@@ -507,7 +399,7 @@ export function Board(props: IProps) {
 	};
 
 	const menuProps = {...props, teamspace, model: modelId};
-	const headerMenu = isIssuesBoard ? getIssueMenuItems(menuProps) : getRisksMenuItems(menuProps);
+	const headerMenu = getIssueMenuItems(menuProps);
 
 	const getMenuButton = () => (
 		<ButtonMenu
@@ -535,12 +427,10 @@ export function Board(props: IProps) {
 			<FilterPanel
 				onChange={props.setFilters}
 				filters={filters}
-				selectedFilters={selectedFilters}
+				selectedFilters={props.selectedIssueFilters}
 			/>
 		);
 	});
-
-	const BoardTitle = (<BoardTitleComponent renderActions={renderActions} />);
 
 	return (
 		<Container>

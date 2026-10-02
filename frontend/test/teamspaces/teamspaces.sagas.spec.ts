@@ -26,7 +26,6 @@ describe('Teamspaces: sagas', () => {
 	const teamspaceName = 'teamspaceId';
 	const teamspace = { name: teamspaceName, isAdmin: true };
 	const teamspaces = [teamspace];
-	const addOns: AddOns = { modules: [AddOnModule.Risks], usersProvisioned: false, disablePermissionsOnUI: false };
 	let dispatch, getState, waitForActions;
 
 	beforeEach(() => {
