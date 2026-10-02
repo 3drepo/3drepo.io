@@ -208,7 +208,7 @@ describe("Risks", function () {
 					done(err);
 				});
 		});
-		it("should return a routeDecommissioned message when deliting a comment to a risk", (done) => {
+		it("should return a routeDecommissioned message when deleting a comment to a risk", (done) => {
 			agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
 				.expect(endpointDecommissioned.status, (err, res) => {
 					expect(res.body.message).toBe(endpointDecommissioned.message);

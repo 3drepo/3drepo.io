@@ -198,7 +198,7 @@ describe("Teamspace", function () {
 			expect(body).toEqual(user.quota);
 		});
 
-		it("should be able to fetch suscriptions", async function () {
+		it("should be able to fetch subscriptions", async function () {
 			const { body } = await agent.get(`/${user.user}/subscriptions`)
 				.expect(200);
 
