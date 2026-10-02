@@ -17,7 +17,6 @@
 
 import { selectTicketPins } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.selectors';
@@ -28,7 +27,6 @@ import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectSlo
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
 import { selectHighlightedShapes as selectRisksHighlightedShapes,
 	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
-import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
@@ -55,8 +53,4 @@ const mapStateToProps = createStructuredSelector({
 	ticketPins: selectTicketPins
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange,
-}, dispatch);
-
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Viewer3D));
+export default withViewer(connect(mapStateToProps)(Viewer3D));
