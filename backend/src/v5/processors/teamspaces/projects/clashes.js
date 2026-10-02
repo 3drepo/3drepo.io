@@ -428,7 +428,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 		if (hasErrors) {
 			const errMessage = `The following errors were found: ${Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
-				}`;
+			}`;
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { reason: errMessage } });
 			return;

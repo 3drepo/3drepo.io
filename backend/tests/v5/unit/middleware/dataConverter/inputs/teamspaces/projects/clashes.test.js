@@ -282,8 +282,8 @@ const testValidateNewPlanData = () => {
 						modules: [{
 							type: presetModules.CLOUD_CLASH,
 							deprecated: true,
-							properties: []
-						}]
+							properties: [],
+						}],
 					});
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
@@ -587,8 +587,8 @@ const testValidateUpdatePlanData = () => {
 						modules: [{
 							type: presetModules.CLOUD_CLASH,
 							deprecated: true,
-							properties: []
-						}]
+							properties: [],
+						}],
 					});
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));

@@ -483,7 +483,7 @@ const testCreatePlan = () => {
 		) => {
 			const planData = ServiceHelper.generateClashPlan(
 				models[0]._id, models[1]._id, includeTicketObject
-				? { federation, template: templateToUse, creator } : undefined);
+					? { federation, template: templateToUse, creator } : undefined);
 			if (planData.tickets) {
 				planData.tickets = { ...planData.tickets, ...ticketOverrides };
 			}
