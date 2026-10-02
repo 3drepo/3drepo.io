@@ -16,12 +16,14 @@
  */
 
 const {
+	clashRunCompleted,
 	clashRunInPlan,
 	planContainersHaveRevs,
 	planExists,
 	validateNewPlanData,
 	validateUpdatePlanData,
 } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
+const { respond, writeStreamRespond } = require('../../../utils/responder');
 const {
 	serialiseClashPlan,
 	serialiseClashPlans,
@@ -33,7 +35,6 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { isAdminToProject } = require('../../../middleware/permissions');
-const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
@@ -126,11 +127,11 @@ const getRuns = async (req, res, next) => {
 	}
 };
 
-const getDetailedRunReport = async (req, res, next) => {
-	const { teamspace, project, planId, runId } = req.params;
+const getDetailedRunReport = async (req, res) => {
+	const { teamspace, runId } = req.params;
 	try {
-		req.outputData = await Clashes.getDetailedRunReport(teamspace, project, planId, runId);
-		next();
+		const { readStream, size, encoding } = await Clashes.getDetailedRunReport(teamspace, runId);
+		writeStreamRespond(req, res, templates.ok, readStream, { fileSize: size, encoding, mimeType: 'application/json' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -921,72 +922,19 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   description: Clashes that are new in this run
 	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       a:
-	 *                         type: object
-	 *                         description: The first object in the clash pair
-	 *                         properties:
-	 *                           container:
-	 *                             type: string
-	 *                             format: uuid
-	 *                             description: The container the object belongs to
-	 *                             example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                           idType:
-	 *                             type: string
-	 *                             description: The type of identifier used for the object
-	 *                             example: IFC
-	 *                           id:
-	 *                             type: string
-	 *                             description: The object identifier
-	 *                             example: objectId1
-	 *                       b:
-	 *                         type: object
-	 *                         description: The second object in the clash pair
-	 *                         properties:
-	 *                           container:
-	 *                             type: string
-	 *                             format: uuid
-	 *                             description: The container the object belongs to
-	 *                             example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                           idType:
-	 *                             type: string
-	 *                             description: The type of identifier used for the object
-	 *                             example: IFC
-	 *                           id:
-	 *                             type: string
-	 *                             description: The object identifier
-	 *                             example: objectId2
-	 *                       index:
-	 *                         type: string
-	 *                         description: A normalized identifier for the clash pair
-	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId1-ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId2
-	 *                       bbox:
-	 *                         type: object
-	 *                         description: The bounding box of the clash
-	 *                         properties:
-	 *                           min:
-	 *                             type: array
-	 *                             items:
-	 *                               type: number
-	 *                             example: [0, 0, 0]
-	 *                           max:
-	 *                             type: array
-	 *                             items:
-	 *                               type: number
-	 *                             example: [1, 1, 1]
+	 *                     $ref: '#/components/schemas/clashEntry'
 	 *                 active:
 	 *                   type: array
 	 *                   description: Clashes that were also present in the previous completed run
 	 *                   items:
-	 *                     type: object
+	 *                     $ref: '#/components/schemas/clashEntry'
 	 *                 resolved:
 	 *                   type: array
 	 *                   description: Clashes that were present in the previous completed run but are no longer detected
 	 *                   items:
-	 *                     type: object
+	 *                     $ref: '#/components/schemas/clashEntry'
 	 */
-	router.get('/:planId/runs/:runId/report', isAdminToProject, planExists, clashRunInPlan, getDetailedRunReport, serialiseClashRun);
+	router.get('/:planId/runs/:runId/report', isAdminToProject, planExists, clashRunInPlan, clashRunCompleted, getDetailedRunReport);
 
 	/**
 	 * @openapi

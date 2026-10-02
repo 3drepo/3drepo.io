@@ -283,8 +283,10 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 		await sendClashRunToQueue(teamspace, project, runId, context);
 	} else {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
-			{ error: {
-				reason: 'The defined selections do not yield any candidates to execute a clash run.' },
+			{
+				error: {
+					reason: 'The defined selections do not yield any candidates to execute a clash run.',
+				},
 			});
 	}
 
@@ -426,7 +428,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 		if (hasErrors) {
 			const errMessage = `The following errors were found: ${Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
-			}`;
+				}`;
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { reason: errMessage } });
 			return;
@@ -441,11 +443,13 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 	await storeFile(teamspace, CLASH_RUNS_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
 	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,
-		{ stats: {
-			new: categorizedClashes.new.length,
-			active: categorizedClashes.active.length,
-			resolved: categorizedClashes.resolved.length,
-		} });
+		{
+			stats: {
+				new: categorizedClashes.new.length,
+				active: categorizedClashes.active.length,
+				resolved: categorizedClashes.resolved.length,
+			},
+		});
 	publish(events.CLASH_RUN_RESULTS_PROCESSED, {
 		teamspace,
 		project,
@@ -468,24 +472,6 @@ Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 	}));
 };
 
-Clashes.getDetailedRunReport = async (teamspace, project, planId, runId) => {
-	const { status } = await getClashRunByQuery(teamspace, project,
-		{ _id: runId, 'plan._id': planId },
-		{ _id: 1, status: 1 });
-
-	if (status !== clashRunStatus.COMPLETED) {
-		throw templates.clashRunNotFound;
-	}
-
-	const { readStream } = await getFileAsStream(teamspace, CLASH_RUNS_COL, runId);
-
-	const chunks = [];
-	for await (const chunk of readStream) {
-		chunks.push(chunk);
-	}
-	const fileBuffer = Buffer.concat(chunks);
-
-	return JSON.parse(fileBuffer.toString('utf8'));
-};
+Clashes.getDetailedRunReport = (teamspace, runId) => getFileAsStream(teamspace, CLASH_RUNS_COL, runId);
 
 module.exports = Clashes;
