@@ -214,10 +214,15 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			window.dispatchEvent(new Event('resize'));
 		}
 
+		// Because the viewpoint is set here instead of derived from the selectors,
+		// the viewpoint stays as a reference in the state.
+		// Thats why we need to wait for the groups to be fetched before proceeding.
 		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 	}
 }
 
+// This is only for V4 viewpoints. The fetch for tickets its in a different place.
+// In v5 the ticket groups are assigned in the selector bit
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
 		const groupsObject = yield getViewpointWithGroups({teamspace, modelId, view});
