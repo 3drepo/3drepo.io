@@ -5,6 +5,9 @@ on:
     branches:
       - master
       - staging
+    tags:
+      - qa_deploy
+      - dev_deploy
   repository_dispatch:
     types:
       - deploy-command
@@ -34,10 +37,15 @@ jobs:
       checkout_ref: ${{ steps.meta.outputs.checkout_ref }}
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
       source_branch: ${{ steps.meta.outputs.source_branch }}
+      environment: ${{ steps.meta.outputs.environment }}
+      release_name: ${{ steps.meta.outputs.release_name }}
+      values_dir: ${{ steps.meta.outputs.values_dir }}
+      values_file: ${{ steps.meta.outputs.values_file }}
     steps:
       - id: meta
         env:
           EVENT_NAME: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
           REPOSITORY_NAME: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
           PUSH_SHA: ${{ github.sha }}
@@ -64,11 +72,23 @@ jobs:
             commit_sha="$PR_HEAD_SHA"
           fi
 
+          if [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "qa_deploy" ]]; then
+            environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;  values_file=values.yaml
+          elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "dev_deploy" ]]; then
+            environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io; values_file=values.yaml
+          else
+            environment=staging; release_name=""; values_dir=deployments/asite-stg/helm/3drepo.io; values_file=DefaultStgValues.yaml
+          fi
+
           {
             echo "checkout_repository=$checkout_repository"
             echo "checkout_ref=$checkout_ref"
             echo "commit_sha=$commit_sha"
             echo "source_branch=$source_branch"
+            echo "environment=$environment"
+            echo "release_name=$release_name"
+            echo "values_dir=$values_dir"
+            echo "values_file=$values_file"
           } >> "$GITHUB_OUTPUT"
 
   deriveReleaseName:
@@ -150,14 +170,14 @@ jobs:
         uses: azure/k8s-set-context@v4
         with:
           method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
+          kubeconfig: ${{ needs.metadata.outputs.environment == 'qa' && secrets.KUBE_CONFIG_QA || needs.metadata.outputs.environment == 'dev' && secrets.KUBE_CONFIG_DEV || secrets.KUBE_CONFIG_STAGING }}
 
       - name: Get default Helm values file
         uses: actions/checkout@v4
         with:
           repository: 3drepo/DevOps
           token: ${{ secrets.REPO_INSTALLER_TOKEN }}
-          sparse-checkout: deployments/asite-stg/helm/3drepo.io
+          sparse-checkout: ${{ needs.metadata.outputs.values_dir }}
           sparse-checkout-cone-mode: false
           path: devops
 
@@ -179,7 +199,9 @@ jobs:
 
       - name: Deploy with Helm
         env:
-          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
+          ENVIRONMENT: ${{ needs.metadata.outputs.environment }}
+          RELEASE_NAME: ${{ needs.metadata.outputs.release_name != '' && needs.metadata.outputs.release_name || needs.deriveReleaseName.outputs.release_name }}
+          VALUES_PATH: devops/${{ needs.metadata.outputs.values_dir }}/${{ needs.metadata.outputs.values_file }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -199,7 +221,7 @@ jobs:
 
           # Temp file (not process substitution) so a ksm failure aborts before helm runs.
           ksm --ini-file "$HOME/.keeper/keeper.ini" interpolate --validate \
-            devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml > "$values_file"
+            "$VALUES_PATH" > "$values_file"
 
           helm_set_args=(
             --set "image.tag=$COMMIT_SHA"
@@ -207,7 +229,7 @@ jobs:
           )
 
           override="${CUSTOM_HELM_OVERRIDE#,}"
-          if [[ -n "$override" ]]; then
+          if [[ -n "$override" && "$ENVIRONMENT" == "staging" ]]; then
             helm_set_args+=(--set "$override")
           fi
 
