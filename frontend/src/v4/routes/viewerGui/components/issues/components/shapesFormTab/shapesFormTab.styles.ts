@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO delete/move
 import styled from 'styled-components';
-
 import { COLOR } from '../../../../../../styles';
 
-export const Container = styled.div`
+export const MeasuringTypeContainer = styled.div`
 	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	color: ${(props) => props.color || COLOR.WHITE};
-`;
-
-export const Header = styled.div`
-	display: flex;
-	justify-content: center;
-	font-size: 12px;
-	margin-top: 5px;
-`;
-
-export const Status = styled.div`
-	display: flex;
-	align-items: center;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	line-height: 2.1;
 `;

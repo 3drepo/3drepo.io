@@ -15,19 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO delete/move
-
-
 import { isEmpty } from 'lodash';
 import { useEffect } from 'react';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';
 
-// eslint-disable-next-line max-len
 import { AllMeasurementsList } from '../../../measurements/components/measurementsList/allMeasurementsList.component';
 import { MeasuringType } from '../../../measurements/components/measuringType';
-import { Content } from '../riskDetails/riskDetails.styles';
+import { Content } from '../issueDetails/issueDetails.styles';
 import {MeasuringTypeContainer} from './shapesFormTab.styles';
 
 interface IProps {

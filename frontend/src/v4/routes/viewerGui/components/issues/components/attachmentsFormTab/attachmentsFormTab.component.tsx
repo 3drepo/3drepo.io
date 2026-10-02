@@ -14,43 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-// TODO delete/move
-
 import { FunctionComponent } from 'react';
-import { SequencingDates } from '../../../../../components/sequencingDates/sequencingDates.component';
-import { Content } from '../riskDetails/riskDetails.styles';
+import { Resources } from '../../../../../components/resources/resources.component';
+import { Content } from '../issueDetails/issueDetails.styles';
 
 interface IProps {
 	active: boolean;
-	canComment: boolean;
+	resources: any;
+	onRemoveResource: (resource) => void;
+	attachFileResources: () => void;
+	attachLinkResources: () => void;
+	showDialog: (config: any) => void;
+	canEdit: boolean;
 	formRef: any;
-	isNewTicket: boolean;
-	showSequenceDate: (value) => void;
-	min: number;
-	max: number;
-	selectedDate?: Date;
-	endTimeValue?: Date;
-	startTimeValue?: Date;
-	sequences?: any[];
 }
 
-export const SequencingFormTab: FunctionComponent<IProps> = ({
-	active, canComment, showSequenceDate, min, max, selectedDate, endTimeValue, startTimeValue, sequences
+export const AttachmentsFormTab: FunctionComponent<IProps> = ({
+	active, resources, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canEdit, formRef,
 }) => {
-	const startDate = sequences ? sequences[0]?.startDate : undefined;
-
 	return (
 		<Content active={active}>
-			<SequencingDates
-				showSequenceDate={showSequenceDate}
-				canEdit={canComment}
-				min={min}
-				max={max}
-				selectedDate={selectedDate}
-				endTimeValue={endTimeValue}
-				startTimeValue={startTimeValue}
-				startDate={startDate}
+			<Resources
+				showDialog={showDialog}
+				resources={resources}
+				onSaveFiles={attachFileResources}
+				onSaveLinks={attachLinkResources}
+				onRemoveResource={onRemoveResource}
+				canEdit={canEdit}
+				formRef={formRef}
 			/>
 		</Content>
 	);
