@@ -118,44 +118,44 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	const isNullable = isUpdate && !required;
 	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
 	switch (propType) {
-		case propTypes.TEXT:
-			return imposeNullableRule(types.strings.title);
-		case propTypes.LONG_TEXT:
-			return imposeNullableRule(types.strings.ultralongDescription);
-		case propTypes.BOOLEAN:
-			return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
-		case propTypes.DATE:
-			return imposeNullableRule(types.date);
-		case propTypes.PAST_DATE:
-			return imposeNullableRule(types.dateInThePast);
-		case propTypes.NUMBER:
-			return imposeNullableRule(Yup.number());
-		case propTypes.ONE_OF:
-			return imposeNullableRule(types.strings.title);
-		case propTypes.MANY_OF:
-			return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
-		case propTypes.TAGS:
-			return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
-		case propTypes.IMAGE:
-			return types.embeddedImage(isNullable);
-		case propTypes.IMAGE_LIST:
-			return imposeNullableRule(Yup.array().of(isUpdate ? types.embeddedImageOrRef() : types.embeddedImage()).min(1));
-		case propTypes.VIEW:
-			return Validators.generateViewValidator(isUpdate, required);
-		case propTypes.MEASUREMENTS:
-			return imposeNullableRule(Yup.array().of(
-				Yup.object().shape({
-					positions: Yup.array().of(types.position).min(2).required(),
-					value: Yup.number().required(),
-					color: types.colorArr.required(),
-					type: Yup.number().min(0).max(1).required(),
-					name: types.strings.title.required(),
-				}),
-			));
-		case propTypes.COORDS:
-			return imposeNullableRule(types.position);
-		default:
-			return undefined;
+	case propTypes.TEXT:
+		return imposeNullableRule(types.strings.title);
+	case propTypes.LONG_TEXT:
+		return imposeNullableRule(types.strings.ultralongDescription);
+	case propTypes.BOOLEAN:
+		return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
+	case propTypes.DATE:
+		return imposeNullableRule(types.date);
+	case propTypes.PAST_DATE:
+		return imposeNullableRule(types.dateInThePast);
+	case propTypes.NUMBER:
+		return imposeNullableRule(Yup.number());
+	case propTypes.ONE_OF:
+		return imposeNullableRule(types.strings.title);
+	case propTypes.MANY_OF:
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
+	case propTypes.TAGS:
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
+	case propTypes.IMAGE:
+		return types.embeddedImage(isNullable);
+	case propTypes.IMAGE_LIST:
+		return imposeNullableRule(Yup.array().of(isUpdate ? types.embeddedImageOrRef() : types.embeddedImage()).min(1));
+	case propTypes.VIEW:
+		return Validators.generateViewValidator(isUpdate, required);
+	case propTypes.MEASUREMENTS:
+		return imposeNullableRule(Yup.array().of(
+			Yup.object().shape({
+				positions: Yup.array().of(types.position).min(2).required(),
+				value: Yup.number().required(),
+				color: types.colorArr.required(),
+				type: Yup.number().min(0).max(1).required(),
+				name: types.strings.title.required(),
+			}),
+		));
+	case propTypes.COORDS:
+		return imposeNullableRule(types.position);
+	default:
+		return undefined;
 	}
 };
 
