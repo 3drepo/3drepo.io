@@ -471,7 +471,7 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 				testData.template._id, expect.any(Array));
 
-			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 4 * iterations : 4);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(isImport ? iterations : 1);
 
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
@@ -520,7 +520,7 @@ const updateGroupTestsHelper = (updateMany) => {
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
 
-			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 4 * nTickets : 4);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);

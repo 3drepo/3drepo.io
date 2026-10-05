@@ -102,9 +102,11 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 				// Make constants out of these
 				processImageUpdate(false, 'screenshot');
 				processGroupsUpdate(oldProperties[name], updatedProperties[name],
-					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+					[
+						...Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+						'camera.zoomTo',
+					],
 					externalReferences.groups);
-				processGroupsUpdate(oldProperties[name], updatedProperties[name], ['camera.zoomTo'], externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
 			}
