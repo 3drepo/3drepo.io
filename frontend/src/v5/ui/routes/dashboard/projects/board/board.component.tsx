@@ -16,11 +16,10 @@
  */
 import { useEffect } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Board as V4Board } from '@/v4/routes/board';
-import { selectBoardDomain } from '@/v4/modules/board';
 import { useNavigate, useLocation, useMatch, useParams, Navigate } from 'react-router-dom';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 import { Container } from './board.styles';

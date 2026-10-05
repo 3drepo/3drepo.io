@@ -17,9 +17,8 @@
 
 import { css } from 'styled-components';
 import { ActionsLine } from '@/v4/routes/components/textField/textField.styles';
-import { DescriptionImage, Content as PropertiesTabContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { StyledFormControl, DescriptionImage, Content as PropertiesTabContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { DateFieldContainer as IssuesDateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
-import { StyledFormControl } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 
