@@ -60,6 +60,7 @@ interface ICanvasHistoryActionCreators {
 
 interface ICompareActionCreators {
 	resetComponentState: () => Action;
+	getCompareModels: (revision: string) => Action;
 }
 
 interface ITreeActionCreators {

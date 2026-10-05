@@ -436,6 +436,32 @@ const testFind = () => {
 	});
 };
 
+const testFindCursor = () => {
+	describe('Find Cursor', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return matching documents', async () => {
+			const cursor = await DB.findCursor(dbName, col, { _id: data[3]._id });
+			await expect(cursor.toArray()).resolves.toEqual([data[3]]);
+		});
+
+		test('Should return matching documents (sort, projection, skip and limit)', async () => {
+			const cursor = await DB.findCursor(dbName, col, {}, { n: 1, _id: 0 }, { n: 1 }, 2, 3);
+			await expect(cursor.toArray()).resolves.toEqual(data.slice(3, 5).map(({ n }) => ({ n })));
+		});
+
+		test('Should return an empty cursor if no document is found', async () => {
+			const cursor = await DB.findCursor(dbName, col, { [generateRandomString()]: generateRandomString() });
+			await expect(cursor.toArray()).resolves.toEqual([]);
+		});
+	});
+};
+
 const testFindOne = () => {
 	describe('Find One', () => {
 		const data = generateBSONData(10);
@@ -1010,6 +1036,7 @@ describe(determineTestGroup(__filename), () => {
 	testAggregate();
 	testDistinct();
 	testFind();
+	testFindCursor();
 	testFindOne();
 	testFindOneAndUpdate();
 	testFindOneAndDelete();

@@ -37,7 +37,6 @@ import { Legend } from './components/legend';
 import { PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
-import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
 import { Tree } from './components/tree';
