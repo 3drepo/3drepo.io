@@ -19,77 +19,67 @@ const chatEvent = require("../models/chatEvent");
 const C = require("../constants");
 
 module.exports = {
-	onNotification: function(req, res, next) {
+	onNotification: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const notifications = req.userNotifications  || [];
+		const notifications = req.userNotifications || [];
 
 		const deletedNotifications = notifications.filter(n => n.deleted);
 		const upsertedNotifications = notifications.filter(n => !n.deleted);
 
-		deletedNotifications.forEach(chatEvent.deletedNotification.bind(null,sessionId));
-		upsertedNotifications.forEach(chatEvent.upsertedNotification.bind(null,sessionId));
+		deletedNotifications.forEach(chatEvent.deletedNotification.bind(null, sessionId));
+		upsertedNotifications.forEach(chatEvent.upsertedNotification.bind(null, sessionId));
 		next();
 	},
 
-	onCommentCreated: function(req, res, next) {
+	onCommentCreated: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId || req.params.riskId;
-		const notifications = req.userNotifications  || [];
+		const _id = req.params.issueId;
+		const notifications = req.userNotifications || [];
 
 		chatEvent.newComment(sessionId, account, model, _id, comment);
-		notifications.forEach(chatEvent.upsertedNotification.bind(null,sessionId));
+		notifications.forEach(chatEvent.upsertedNotification.bind(null, sessionId));
 		next();
 	},
 
-	onCommentDeleted: function(req, res, next) {
+	onCommentDeleted: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId || req.params.riskId;
+		const _id = req.params.issueId;
 
-		chatEvent.commentDeleted (sessionId, account, model, _id, comment);
+		chatEvent.commentDeleted(sessionId, account, model, _id, comment);
 		next();
 	},
 
-	onResourcesCreated: function(req, res, next) {
+	onResourcesCreated: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const {account, model} = req.params;
+		const { account, model } = req.params;
 		const resource = req.dataModel;
 
 		chatEvent.resourcesCreated(sessionId, account, model, resource);
 		next();
 	},
 
-	onResourceDeleted: function(req, res, next) {
+	onResourceDeleted: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const {account, model} = req.params;
+		const { account, model } = req.params;
 		const resource = req.dataModel;
 
 		chatEvent.resourceDeleted(sessionId, account, model, resource);
 		next();
 	},
 
-	onUpdateIssue: function(req, res, next) {
+	onUpdateIssue: function (req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const {account, model} = req.params;
+		const { account, model } = req.params;
 		const issue = req.dataModel;
 		const data = req.data;
 
 		chatEvent.issueChanged(sessionId, account, model, issue._id, data);
-		next();
-	},
-
-	onUpdateRisk: function(req, res, next) {
-		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const {account, model} = req.params;
-		const risk = req.dataModel;
-		const data = req.data;
-
-		chatEvent.riskChanged(sessionId, account, model, risk._id, data);
 		next();
 	}
 };

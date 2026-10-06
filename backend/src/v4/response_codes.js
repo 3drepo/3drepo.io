@@ -21,7 +21,7 @@
 
 	const _ = require("lodash");
 	const config = require("./config");
-	const { systemLogger, logLabels} = require("./logger.js");
+	const { systemLogger, logLabels } = require("./logger.js");
 	const utils = require("./utils");
 	const { v5Path } = require("../interop");
 	const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants.js`);
@@ -104,7 +104,7 @@
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
 		FILE_IMPORT_GEOMETRY_ERR: { message: "File contains geometry that are not polylines/triangles", status: 400 },
 
-		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
+		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500 },
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
 
 		INVALID_MESH: { message: "Mesh not valid for processing", status: 500 },
@@ -130,7 +130,7 @@
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
-		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
+		OWNER_MUST_BE_ADMIN: { message: "Cannot alter permissions of teamspace owner", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
 		PASSWORD_TOO_SHORT: { message: "Password is too short", status: 400 },
 		PASSWORD_TOO_WEAK: { message: "Password is too weak", status: 400 },
@@ -165,7 +165,7 @@
 		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },
 		INVALID_COOKIE: { message: "Your cookie has expired", status: 401 },
 
-		STASH_NOT_FOUND: { message: "Stash not found" , status: 500},
+		STASH_NOT_FOUND: { message: "Stash not found", status: 500 },
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_NO_TEXT: { message: "Cannot create comment with no text", status: 400 },
@@ -175,14 +175,6 @@
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },
 		PROJECT_NOT_FOUND: { message: "Project not found", status: 404 },
 
-		RISK_NO_NAME: { message: "Create risk without name", status: 400 },
-		RISK_LIKELIHOOD_INVALID: { message: "Invalid risk likelihood", status: 400 },
-		RISK_CONSEQUENCE_INVALID: { message: "Invalid risk consequence", status: 400 },
-		RISK_LEVEL_READONLY: { message: "Level of risk cannot be changed", status: 400 },
-		RISK_NOT_FOUND: { message: "Risk not found", status: 404 },
-		RISK_UPDATE_FAILED: { message: "Failed updating risk", status: 500 },
-		RISK_UPDATE_PERMISSION_DECLINED: { message: "No permission to update risk", status: 400 },
-
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
@@ -190,7 +182,7 @@
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
-		RESOURCE_NOT_ATTACHED: { message: "The resource is not attached to that particular entity", status: 400},
+		RESOURCE_NOT_ATTACHED: { message: "The resource is not attached to that particular entity", status: 400 },
 
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },
@@ -212,7 +204,7 @@
 
 		LICENCE_REMOVAL_SPACE_EXCEEDED: { message: "Your current quota usage exceeds the requested change.", status: 400 },
 		REMOVE_ASSIGNED_LICENCE: { message: "Some of the licences are assigned and can\"t be removed", status: 400 },
-		LICENCE_LIMIT_REACHED: {message: "All licenses have been assigned", status: 400},
+		LICENCE_LIMIT_REACHED: { message: "All licenses have been assigned", status: 400 },
 
 		BILLING_NOT_FOUND: { message: "Billing not found", status: 404 },
 		PAYPAL_ERROR: { status: 400 },
@@ -236,7 +228,7 @@
 		MODEL_IS_A_SUBMODEL: { message: "Model cannot be deleted as it is currently a sub model of another federation", status: 400 },
 		SUBMODEL_IS_MISSING: { message: "subModels field is missing in request body", status: 400 },
 
-		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.imageSizeLimit / 1024 / 1024 } MB` },
+		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.imageSizeLimit / 1024 / 1024} MB` },
 		INVALID_USERNAME: { message: "Invalid username", status: 400 },
 		FILE_NO_EXT: { message: "Filename must have extension", status: 400 },
 
@@ -258,39 +250,39 @@
 		INVALID_MODEL_CODE: { message: "Model code must contain only alphabets and numerical digits", status: 400 },
 		DUPLICATED_ENTRIES: { message: "Two or more given fields are the same", status: 400 },
 
-		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404},
-		BUNDLE_STASH_NOT_FOUND: { message: "Asset bundle not found", status: 404},
+		MESH_STASH_NOT_FOUND: { message: "Message stash not found", status: 404 },
+		BUNDLE_STASH_NOT_FOUND: { message: "Asset bundle not found", status: 404 },
 		INVALID_ROLE_TEMPLATE: { message: "Role template requested doesn't exist", status: 500 },
-		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500},
-		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500},
-		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400},
+		MISSING_INIT_INVOICE: { message: "Missing init invoice", status: 500 },
+		MISSING_LAST_INVOICE: { message: "Missing last invoice", status: 500 },
+		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400 },
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
-		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
-		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500},
+		SEQ_TAG_NOT_FOUND: { message: "Sequence Tag not set", status: 404 },
+		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500 },
 
-		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
-		DUP_JOB: {message: "Duplicate job id", status: 400},
-		JOB_ASSIGNED: {message: "Cannot remove assigned job", status: 400},
-		JOB_ID_INVALID: { message: "Invalid job ID", status: 400},
-		DUP_PERM_TEMPLATE: {message: "Duplicate template ID", status: 400},
-		PERM_NOT_FOUND: {message: "Permission template not found", status: 404},
-		INVALID_PERM: {message: "Invalid permission", status: 400},
+		JOB_NOT_FOUND: { message: "Job not found", status: 404 },
+		DUP_JOB: { message: "Duplicate job id", status: 400 },
+		JOB_ASSIGNED: { message: "Cannot remove assigned job", status: 400 },
+		JOB_ID_INVALID: { message: "Invalid job ID", status: 400 },
+		DUP_PERM_TEMPLATE: { message: "Duplicate template ID", status: 400 },
+		PERM_NOT_FOUND: { message: "Permission template not found", status: 404 },
+		INVALID_PERM: { message: "Invalid permission", status: 400 },
 		GROUP_BY_FIELD_NOT_SUPPORTED: { message: "Group by field is not supported", status: 400 },
-		DUP_ACCOUNT_PERM: { message: "Duplicate account permission", status: 400},
-		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404},
-		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
-		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
+		DUP_ACCOUNT_PERM: { message: "Duplicate account permission", status: 400 },
+		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404 },
+		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404 },
+		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400 },
 
-		UNSUPPORTED_STORAGE_TYPE : {message: "File is stored in an unsupported storage type", status: 500},
-		UNRECOGNISED_STORAGE_TYPE : {message: "File is stored an unrecognised storage type", status: 500},
+		UNSUPPORTED_STORAGE_TYPE: { message: "File is stored in an unsupported storage type", status: 500 },
+		UNRECOGNISED_STORAGE_TYPE: { message: "File is stored an unrecognised storage type", status: 500 },
 
-		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
+		VAT_CODE_ERROR: { message: "Error validating VAT number", status: 500 },
 
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
-		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404},
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404 },
 
-		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid",  status:400 }
+		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid", status: 400 }
 	};
 
 	let valueCounter = 0;
@@ -333,7 +325,7 @@
 			let errorCode = mongoErr.code;
 
 			// replica error format
-			if(mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err) {
+			if (mongoErr.errors && mongoErr.errors[0] && mongoErr.errors[0].err) {
 				errorCode = mongoErr.errors[0].err.code;
 			}
 
@@ -398,7 +390,7 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl, app} = {}) => {
+	const genResponseLogging = ({ status, code }, { contentLength }, { session, startTime, method, originalUrl, app } = {}) => {
 		const isInternal = !!app?.get(BYPASS_AUTH);
 		let user;
 		if (session?.user) {
@@ -413,7 +405,7 @@
 
 		createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
 
-		return systemLogger.formatResponseMsg({status,code,latency,contentLength,user,method, originalUrl});
+		return systemLogger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
 	};
 
 	/**
@@ -438,7 +430,7 @@
 				systemLogger.logError(resCode.stack, undefined, logLabels.network);
 			}
 
-			if(!resCode.value) {
+			if (!resCode.value) {
 				resCode = responseCodes.PROCESS_ERROR(resCode);
 			}
 
@@ -464,7 +456,7 @@
 
 		} else {
 
-			if(cache) {
+			if (cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
 			}
 
@@ -494,7 +486,7 @@
 
 			} else {
 
-				if(extraInfo) {
+				if (extraInfo) {
 					meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
 						.length;
 
@@ -511,7 +503,7 @@
 		}
 	};
 
-	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
+	responseCodes.writeStreamRespond = function (place, req, res, next, readStream, customHeaders) {
 
 		let length = 0;
 
@@ -541,12 +533,12 @@
 		});
 	};
 
-	responseCodes.onSuccessfulOperation = function(req, res) {
+	responseCodes.onSuccessfulOperation = function (req, res) {
 		const currentUrl = utils.APIInfo(req);
 		responseCodes.respond(currentUrl, req, res, null, responseCodes.OK, utils.objectIdToString(req.dataModel));
 	};
 
-	responseCodes.onError = function(req, res, err) {
+	responseCodes.onError = function (req, res, err) {
 		const currentUrl = utils.APIInfo(req);
 		responseCodes.respond(currentUrl, req, res, null, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	};
