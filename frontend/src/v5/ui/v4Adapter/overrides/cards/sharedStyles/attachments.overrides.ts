@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import {
 	ResourceItemContainer,
 	ResourceItemLeftColumn,

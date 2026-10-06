@@ -38,7 +38,7 @@ import { RouteTitle } from '@/v5/services/routing/routeTitle.component';
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
-	const { title: kanbanTitle, shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
+	const { title: kanbanTitle, shouldRenderContent: shouldRenderKanbanContent, issuesEnabled } = useKanbanNavigationData();
 	const hasPermissions = !TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
 	const isFetchingAddons = TeamspacesHooksSelectors.selectIsFetchingAddons();
 	const isFetchingProject = isEmpty(ProjectsHooksSelectors.selectCurrentProjectDetails());
@@ -56,14 +56,11 @@ export const ProjectContent = () => {
 			<Route path="federations" element={<RouteTitle title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })}><Federations /></RouteTitle>} />
 			<Route path="containers" element={<RouteTitle title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })}><Containers /></RouteTitle>} />
 			<Route path="drawings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })}><Drawings /></RouteTitle>} />
-			{(shouldRenderKanbanContent) &&
-				<Route path="board/:type/:containerOrFederation?" element={issuesOrRisksEnabled && <Board />} />
+			{(shouldRenderKanbanContent) && // issues TODO do we need shouldRender and issues enabled?
+				<Route path="board/:type/:containerOrFederation?" element={issuesEnabled && <Board />} />
 			}
 			{issuesEnabled && (
 				<Route path="board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/issues`} /></RouteTitle>} />
-			)}
-			{(!issuesEnabled && riskEnabled) && (
-				<Route path="board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} />
 			)}
 			<Route path="tickets/*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} />
 			<Route path="project_settings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} />
