@@ -8,7 +8,6 @@ on:
     tags:
       - qa_deploy
       - dev_deploy
-      - staging_deploy   # TEMP: pre-merge staging test, remove before merge
   repository_dispatch:
     types:
       - deploy-command
@@ -77,9 +76,6 @@ jobs:
             environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;  values_file=values.yaml
           elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "dev_deploy" ]]; then
             environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io; values_file=values.yaml
-          elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "staging_deploy" ]]; then
-            # TEMP: pre-merge staging test (remove before merge). Pins the real 'staging' release.
-            environment=staging; release_name=staging; values_dir=deployments/asite-stg/helm/3drepo.io; values_file=DefaultStgValues.yaml
           else
             environment=staging; release_name=""; values_dir=deployments/asite-stg/helm/3drepo.io; values_file=DefaultStgValues.yaml
           fi
