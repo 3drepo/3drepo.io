@@ -17,16 +17,18 @@
 
 import { debounce } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { TicketsCardActionsDispatchers } from '../actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
 import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket, enableRealtimeUpdateTicketGroup, ticketEvent } from './ticket.events';
 
-export const enableRealtimeUpdateTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => {
+export const enableRealtimeUpdateTicketFilter =
+(teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision?: string) => {
 	let queuedTicketIds: string[] = [];
 	const debouncedApplyFilter = debounce(() => {
 		if (!queuedTicketIds.length) return;
 
 		TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerOrFederation, isFederation, queuedTicketIds);
+		queuedTicketIds.forEach((ticketId) => TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticketId, revision));
 		queuedTicketIds = [];
 	}, 200);
 
@@ -50,11 +52,11 @@ export const enableRealtimeNewTicketFilter = (teamspace: string, project: string
 	)
 );
 
-export const enableRealtimeTickets = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision) => 
+export const enableRealtimeTickets = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision?: string) => 
 	combineSubscriptions(
 		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, revision),
+		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation),
 		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicketFilter(teamspace, project, containerOrFederation, isFederation),
+		enableRealtimeUpdateTicketFilter(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
 	);

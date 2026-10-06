@@ -18,7 +18,7 @@
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
-import { debounce, uniq } from 'lodash';
+import { debounce } from 'lodash';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -32,7 +32,7 @@ export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `feder
 const UPDATE_TICKETS_BATCH_INTERVAL = 200;
 
 // Container ticket
-export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => {
+export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean) => {
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
 	// We debounce in order to batch multiple ticket updates together
@@ -41,10 +41,7 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 
 		const tickets = queuedTickets.map(addUpdatedAtTime);
 		queuedTickets = [];
-		const ticketIds = uniq(tickets.map(({ _id }) => _id));
-
 		TicketsActionsDispatchers.upsertTicketsSuccess(containerId, tickets);
-		ticketIds.forEach((ticketId) => TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerId, ticketId, revision));
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
 	return subscribeToRoomEvent(
