@@ -18,12 +18,12 @@
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
-import { uniq } from 'lodash';
+import { debounce, uniq } from 'lodash';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { subscribeToRoomEvent } from './realtime.service';
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
+import { TicketsActionsDispatchers } from '../actionsDispatchers';
 import { fetchTicketGroup } from '../api/tickets';
 import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
 
@@ -34,11 +34,9 @@ const UPDATE_TICKETS_BATCH_INTERVAL = 200;
 // Container ticket
 export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => {
 	let queuedTickets: Partial<ITicket>[] = [];
-	let flushTimeout: ReturnType<typeof setTimeout> = null;
-
-	const flush = (applyFilters = true) => {
-		clearTimeout(flushTimeout);
-		flushTimeout = null;
+	// Bulk updated tickets will fire an event for every ticket
+	// We debounce in order to batch multiple ticket updates together
+	const debouncedApplyUpdates = debounce(() => {
 		if (!queuedTickets.length) return;
 
 		const tickets = queuedTickets.map(addUpdatedAtTime);
@@ -47,12 +45,9 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 
 		TicketsActionsDispatchers.upsertTicketsSuccess(containerId, tickets);
 		ticketIds.forEach((ticketId) => TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerId, ticketId, revision));
-		if (applyFilters) {
-			TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerId, isFed, ticketIds);
-		}
-	};
+	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
-	const unsubscribe = subscribeToRoomEvent(
+	return subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
@@ -61,15 +56,9 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 			normalizeViewsInTicket(ticket, template);
 
 			queuedTickets.push(ticket as Partial<ITicket>);
-			flushTimeout ??= setTimeout(flush, UPDATE_TICKETS_BATCH_INTERVAL);
+			debouncedApplyUpdates();
 		},
 	);
-
-	return () => {
-		unsubscribe();
-		// Keep pending ticket data, but don't filter against a card that may belong to another model now
-		flush(false);
-	};
 };
 
 export const enableRealtimeNewTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
@@ -78,7 +67,6 @@ export const enableRealtimeNewTicket = (teamspace: string, project: string, cont
 		ticketEvent(isFed, 'NewTicket'),
 		(ticket: ITicket) => {
 			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
- 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerId, isFed, ticket._id);
 		},
 	)
 );
