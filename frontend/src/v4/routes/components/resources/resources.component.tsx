@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { COMMENT_FIELD_NAME } from '../../viewerGui/components/commentForm/commentForm.constants';
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
-import { FieldsRow } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow } from '../../viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '../components.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import {

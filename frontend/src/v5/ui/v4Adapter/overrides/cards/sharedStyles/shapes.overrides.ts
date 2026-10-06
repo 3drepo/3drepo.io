@@ -16,8 +16,8 @@
  */
 
 import { css } from 'styled-components';
-import { Content } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/components/shapesFormTab/shapesFormTab.styles';
+import { Content } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/issues/components/shapesFormTab/shapesFormTab.styles';
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
 import {
 	SectionHeader,

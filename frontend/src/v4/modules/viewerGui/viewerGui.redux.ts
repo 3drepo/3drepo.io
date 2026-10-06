@@ -120,7 +120,7 @@ const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
 	const locked = [...state.lockedPanels];
-	const leftPanels = getViewerLeftPanels(true, true).map(({ type }) => type).includes(panelName) ?
+	const leftPanels = getViewerLeftPanels(true).map(({ type }) => type).includes(panelName) ?
 			updatePanelsList([...state.leftPanels], locked, panelName, visibility) : [...state.leftPanels];
 	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
 			updatePanelsList([...state.rightPanels], locked, panelName, visibility) : [...state.rightPanels];
