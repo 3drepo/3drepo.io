@@ -20,30 +20,17 @@ import { TeamspacesHooksSelectors } from '../services/selectorsHooks';
 
 export const useKanbanNavigationData = () => {
 	const issuesEnabled = TeamspacesHooksSelectors.selectIssuesEnabled();
-	const riskEnabled = TeamspacesHooksSelectors.selectRisksEnabled();
 	const fetchingAddons = TeamspacesHooksSelectors.selectIsFetchingAddons();
-	const issuesOrRisksEnabled = issuesEnabled || riskEnabled;
-	const shouldRenderContent = fetchingAddons || issuesOrRisksEnabled;
-	const shouldRenderLink = !fetchingAddons && issuesOrRisksEnabled;
+	const shouldRenderContent = fetchingAddons || issuesEnabled;
+	const shouldRenderLink = !fetchingAddons && issuesEnabled;
 
 	let title = ':project';
 	let linkLabel = '';
 	
-	if (issuesEnabled && !riskEnabled) {
+	if (issuesEnabled) {
 		title = formatMessage({ id: 'pageTitle.issues', defaultMessage: ':project - Issues' });
 		linkLabel = formatMessage({ id: 'projectNavigation.issuesLinkLabel', defaultMessage: 'Issues' });
 	}
 
-	if (!issuesEnabled && riskEnabled) {
-		title = formatMessage({ id: 'pageTitle.risks', defaultMessage: ':project - Risks' });
-		linkLabel = formatMessage({ id: 'projectNavigation.risksLinkLabel', defaultMessage: 'Risks' });
-	}
-
-	if (issuesEnabled && riskEnabled) {
-		title = formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' });
-		linkLabel = formatMessage({ id: 'projectNavigation.issuesAndRisksLinkLabel', defaultMessage: 'Issues and risks' });
-	}
-
-
-	return { title, linkLabel, shouldRenderContent, shouldRenderLink, issuesOrRisksEnabled, issuesEnabled, riskEnabled };
+	return { title, linkLabel, shouldRenderContent, shouldRenderLink, issuesEnabled };
 };

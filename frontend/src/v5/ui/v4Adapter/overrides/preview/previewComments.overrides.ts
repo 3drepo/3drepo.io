@@ -22,8 +22,7 @@ import { Container as CommentPadding } from '@/v4/routes/components/messagesList
 import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollapsableContainerButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Fullname } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
-import { Container as TabContainer, TabContent as TabContentRisks, Content as ContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { TabContent as TabContentIssues, Content as ContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { TabContent, Content, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { CommentWrapper, Container as SystemMessage, Avatar as MessageInfoIcon, DateTimeContainer as MessageDateTime } from '@/v4/routes/components/messagesList/components/message/components/systemMessage/systemMessage.styles';
 
@@ -182,16 +181,11 @@ export default css`
 			width: unset;
 		}
 
-		${TabContainer} {
-			margin: 0;
-			padding-top: 15px;
-		}
-
-		${TabContentIssues}, ${TabContentRisks} {
+		${TabContent} {
 			background-color: inherit;
 			padding: 0;
 
-			${ContentIssues}, ${ContentRisks} {
+			${Content} {
 				padding: 0 16px;
 				margin-bottom: 16px;
 				height: 100%;

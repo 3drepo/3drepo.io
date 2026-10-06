@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InputLabel from '@mui/material/InputLabel';
 import CameraIcon from '@mui/icons-material/AddAPhoto';
 import AddPhoto from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import SaveIcon from '@mui/icons-material/Save';
 import ShortTextIcon from '@mui/icons-material/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
@@ -28,14 +26,11 @@ import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
 
-import { LEVELS_RENDER_VALUE, RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
 import { UserAvatar } from '../../../components/messagesList/components/message/components/userAvatar';
 import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import {
 	TicketPopover as TicketSuggestion
@@ -71,7 +66,6 @@ interface IProps {
 	hideComment?: boolean;
 	hideScreenshot?: boolean;
 	hideUploadButton?: boolean;
-	showResidualRiskInput?: boolean;
 	isModelLoaded: boolean;
 	viewer: any;
 	onSave: (commentData, finishSubmitting) => void;
@@ -87,7 +81,6 @@ interface IProps {
 interface IState {
 	isPinActive: boolean;
 	newScreenshot: string;
-	isResidualRiskInputActive: boolean;
 	optionsCaret: string;
 }
 
@@ -114,14 +107,6 @@ const TicketSuggestionItem = ({ entity }) => (
 );
 
 export class CommentForm extends PureComponent<IProps, IState> {
-	get commentTypeIcon() {
-		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
-	}
-
-	get commentTypeLabel() {
-		return this.state.isResidualRiskInputActive ? 'Text Comment' : 'Residual Risk';
-	}
-
 	get commentPlaceholder() {
 		if (this.props.canComment) {
 			return 'Leave a comment';
@@ -143,7 +128,6 @@ export class CommentForm extends PureComponent<IProps, IState> {
 	public state = {
 		isPinActive: false,
 		newScreenshot: '',
-		isResidualRiskInputActive: this.props.showResidualRiskInput,
 		optionsCaret: 'start',
 	};
 
@@ -173,10 +157,9 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	public renderCommentTypeToggle = renderWhenTrue(() => (
 		<TooltipButton
-			Icon={this.commentTypeIcon}
-			color={this.getButtonColor(this.state.isResidualRiskInputActive)}
-			label={this.commentTypeLabel}
-			action={this.handleChangeCommentType}
+			Icon={ShortTextIcon}
+			color="action"
+			label="Text Comment"
 			disabled={!this.props.canComment}
 		/>
 	));
@@ -273,49 +256,6 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		);
 	});
 
-	public renderResidualRiskFields = renderWhenTrue(() => (
-		<Container>
-			<FieldsRow container alignItems="center" justifyContent="space-between">
-				<StyledFormControl>
-					<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
-					<Field name="likelihood" render={({ field }) => (
-						<CellSelect
-							{...field}
-							items={RISK_LIKELIHOODS}
-							inputId="likelihood"
-							disabled={!this.props.canComment}
-							renderValue={(val: number) => LEVELS_RENDER_VALUE[val]}
-						/>
-					)} />
-				</StyledFormControl>
-
-				<StyledFormControl>
-					<InputLabel shrink htmlFor="consequence">Risk Consequence</InputLabel>
-					<Field name="consequence" render={({ field }) => (
-						<CellSelect
-							{...field}
-							items={RISK_CONSEQUENCES}
-							inputId="consequence"
-							disabled={!this.props.canComment}
-						/>
-					)} />
-				</StyledFormControl>
-			</FieldsRow>
-
-			<Field name="mitigation_desc" render={({ field }) => (
-				<StyledTextField
-					{...field}
-					multiline
-					fullWidth
-					InputLabelProps={{ shrink: true }}
-					label="Residual Risk"
-					placeholder="Describe the residual risk"
-					disabled={!this.props.canComment}
-				/>
-			)} />
-		</Container>
-	));
-
 	public componentDidUpdate = (prevProps) => {
 		if (prevProps.screenshot !== this.props.screenshot) {
 			this.setState({
@@ -379,18 +319,11 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleChangeCommentType = () => {
-		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
-
-		this.setState({ isResidualRiskInputActive });
-	}
-
 	public render() {
 		const {
 			hideComment,
 			hideScreenshot,
 			hideUploadButton,
-			showResidualRiskInput,
 			formRef,
 			canComment,
 			postCommentIsPending,
@@ -408,13 +341,11 @@ export class CommentForm extends PureComponent<IProps, IState> {
 					onSubmit={this.handleSave}
 				>
 					<StyledForm>
-						{this.renderResidualRiskFields(showResidualRiskInput && this.state.isResidualRiskInputActive)}
-						{this.renderCommentField(!hideComment && (!showResidualRiskInput || !this.state.isResidualRiskInputActive))}
+						{this.renderCommentField(!hideComment)}
 						<Actions>
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderUploadImageButton(!hideUploadButton)}
-								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field
 								render={({ form }) => (
@@ -437,15 +368,5 @@ export class CommentForm extends PureComponent<IProps, IState> {
 				</Formik>
 			</Container>
 		);
-	}
-
-	private getButtonColor(buttonState) {
-		let color;
-
-		if (this.props.canComment) {
-			color = buttonState ? 'secondary' : 'action';
-		}
-
-		return color;
 	}
 }

@@ -30,9 +30,9 @@ import {
 } from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canComment } from '../../../../../../helpers/issues';
-import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
-import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
-import { ShapesFormTab } from '../../../risks/components/shapesFormTab/shapesFormTab.component';
+import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
+import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
+import { ShapesFormTab } from '../shapesFormTab/shapesFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
 import { StyledTab, StyledTabs, TabContent } from './issueDetails.styles';
 import { IssueSchema } from './issueDetails.schema';

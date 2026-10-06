@@ -25,8 +25,6 @@ import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectSlopeMeasurements, selectAreaMeasurements, selectLengthMeasurements } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
-import { selectHighlightedShapes as selectRisksHighlightedShapes,
-	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
@@ -36,7 +34,6 @@ const mapStateToProps = createStructuredSelector({
 	transparencies: selectAllTransparencyOverrides,
 	rightPanels: selectRightPanels,
 	issuePins: selectIssuePins,
-	riskPins: selectRiskPins,
 	measurementPins: selectMeasurementPins,
 	measurementsAngle: selectAngleMeasurements,
 	measurementsSlope: selectSlopeMeasurements,
@@ -48,8 +45,6 @@ const mapStateToProps = createStructuredSelector({
 	transformations: selectTransformations,
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,
-	risksShapes: selectRisksShapes,
-	risksHighlightedShapes: selectRisksHighlightedShapes,
 	ticketPins: selectTicketPins
 });
 

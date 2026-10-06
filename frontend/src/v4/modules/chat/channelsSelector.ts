@@ -22,7 +22,6 @@ import { IssuesChatEvents } from "./issues.chat.events";
 import { ModelChatEvents } from "./models.chat.events";
 import { NotificationsChatEvents } from "./notifications.chat.events";
 import { PresentationChatEvents } from "./presentation.chat.events";
-import { RisksChatEvents } from "./risks.chat.events";
 import { TeamspacesChatEvents } from "./teamspaces.chat.events";
 
 export class ChannelSelector {
@@ -30,11 +29,6 @@ export class ChannelSelector {
 	 * This property contains the object to subscribe to the issues and comments for the issues chat events
 	 */
 	public issues: IssuesChatEvents;
-
-	/**
-	 * This property contains the object to subscribe to the risks and comments for the risks chat events
-	 */
-	public risks: RisksChatEvents;
 
 	/**
 	 * This property contains the object to subscribe to the groups chat events
@@ -70,7 +64,6 @@ export class ChannelSelector {
 
 		this[CHAT_CHANNELS.GROUPS] = new ChatEvents(channel, 'group');
 		this[CHAT_CHANNELS.ISSUES] = new IssuesChatEvents(channel);
-		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(channel);
 		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(channel);
 		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(channel, 'view');
 		this[CHAT_CHANNELS.RESOURCES] = new ChatEvents(channel, 'resource');
