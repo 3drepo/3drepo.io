@@ -17,13 +17,13 @@
 
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
-import { useSearchParam } from '../../useSearchParam';
+import { useSearchParam } from '../useSearchParam';
 import { useParams } from 'react-router';
-import { ViewerParams } from '../../routes.constants';
+import { ViewerParams } from '../routes.constants';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 
-export const ApplyViewForTicketURL = () => {
+export const useApplyViewForTicketURL = () => {
 	const { containerOrFederation, teamspace, project, revision } = useParams<ViewerParams>();
 	const [ticketId] = useSearchParam('ticketId');
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
@@ -36,5 +36,4 @@ export const ApplyViewForTicketURL = () => {
 		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticketId, revision);
 	}, [ticketId, hasTicketData]);
 	
-	return null;
 };
