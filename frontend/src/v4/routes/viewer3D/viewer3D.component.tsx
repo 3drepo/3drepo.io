@@ -28,7 +28,16 @@ import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
+import {
+	addColorOverrides,
+	addTransparencyOverrides,
+	overridesColorAddedOrUpdated,
+	overridesColorRemoved,
+	overridesTransparencyDiff,
+	overridesTransparencyRemoved,
+	removeColorOverrides,
+	removeTransparencyOverrides,
+} from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
@@ -64,7 +73,6 @@ interface IProps {
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
-	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
 	isPresentationPaused: boolean;
 	issuesShapes: any[];
@@ -141,11 +149,19 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesColorDiff(curr, prev);
-		const toRemove = overridesColorDiff(prev, curr);
+		const toAdd = overridesColorAddedOrUpdated(prev, curr);
+		const toRemove = overridesColorRemoved(prev, curr);
 
 		removeColorOverrides(toRemove);
 		addColorOverrides(toAdd);
+	}
+
+	public renderTransparencies(prev, curr) {
+		const toAdd = overridesTransparencyDiff(prev, curr);
+		const toRemove = overridesTransparencyRemoved(prev, curr);
+
+		removeTransparencyOverrides(toRemove);
+		addTransparencyOverrides(toAdd);
 	}
 
 	public renderTransformations(prev, curr) {
@@ -209,7 +225,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 
 		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			currProps.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+			this.renderTransparencies(prevProps.transparencies, transparencies);
 		}
 
 		if (transformations && !isEqual(transformations, prevProps.transformations)) {

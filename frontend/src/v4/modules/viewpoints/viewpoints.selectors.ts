@@ -17,7 +17,7 @@
 import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
-import { addToGroupDictionary } from '../../helpers/colorOverrides';
+import { addToGroupDictionary, ColorOverrides } from '../../helpers/colorOverrides';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectQueryParams } from '../router/router.selectors';
@@ -162,7 +162,7 @@ export const selectOverridesDict = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectOverridesDict, (overrides) => overrides?.colors || {}
+	selectOverridesDict, (overrides): ColorOverrides => overrides?.colors || {}
 );
 
 export const selectTransparencies = createSelector(
