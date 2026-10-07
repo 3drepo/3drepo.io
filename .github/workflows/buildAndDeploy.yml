@@ -252,15 +252,22 @@ jobs:
             "${helm_set_args[@]}"
 
           # Post-deploy health check; flags the job if the release is unhealthy.
+          # Rollouts always take a bit (spot nodes spin up, image pull), so wait first,
+          # then poll quietly — only surface the check output on success or final failure.
           kctx="$(kubectl config current-context)"
-          for attempt in $(seq 1 12); do
-            if python3 devops/tools/post-deployment/postDeployCheck.py \
-                 --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --no-logs --no-color; then
-              echo "post-deploy check passed"; exit 0
+          chk="devops/tools/post-deployment/postDeployCheck.py"
+          attempts=10
+          sleep 90
+          for attempt in $(seq 1 $attempts); do
+            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --no-logs --no-color 2>&1)"; then
+              echo "$out"
+              echo "post-deploy check passed (attempt $attempt/$attempts)"
+              exit 0
             fi
-            echo "post-deploy check attempt $attempt not green yet; retrying in 50s..."
-            sleep 50
+            echo "post-deploy check not green yet (attempt $attempt/$attempts); waiting 60s..."
+            if [ "$attempt" -lt "$attempts" ]; then sleep 60; fi
           done
+          echo "$out"
           echo "::error::post-deploy check failed for $RELEASE_NAME ($ENVIRONMENT)"
           exit 1
 
