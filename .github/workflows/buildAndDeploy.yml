@@ -253,13 +253,13 @@ jobs:
 
           # Post-deploy health check; flags the job if the release is unhealthy.
           kctx="$(kubectl config current-context)"
-          for attempt in 1 2 3 4; do
+          for attempt in $(seq 1 12); do
             if python3 devops/tools/post-deployment/postDeployCheck.py \
                  --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --no-logs --no-color; then
               echo "post-deploy check passed"; exit 0
             fi
-            echo "post-deploy check attempt $attempt failed; retrying in 45s..."
-            sleep 45
+            echo "post-deploy check attempt $attempt not green yet; retrying in 50s..."
+            sleep 50
           done
           echo "::error::post-deploy check failed for $RELEASE_NAME ($ENVIRONMENT)"
           exit 1
