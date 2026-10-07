@@ -267,6 +267,7 @@ describe("Teamspace", function () {
 			powerBIEnabled: true,
 			modules: [
 				"issues",
+				"risks"
 			]
 		}
 		it("as the teamspace owner should succeed", function (done) {
