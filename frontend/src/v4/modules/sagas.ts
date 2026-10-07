@@ -45,7 +45,6 @@ import legendSaga from './legend/legend.sagas';
 import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
-import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
 import teamspaceSaga from './teamspace/teamspace.sagas';
@@ -75,7 +74,6 @@ export default function* rootSaga() {
 		fork(measurementsSaga),
 		fork(modelSaga),
 		fork(notificationsSaga),
-		fork(risksSaga),
 		fork(sequencesSaga),
 		fork(starredSaga),
 		fork(teamspaceSaga),

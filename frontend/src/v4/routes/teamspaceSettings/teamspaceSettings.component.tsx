@@ -16,16 +16,10 @@
  */
 import { PureComponent } from 'react';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import EditIcon from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
-import { Switch } from '@mui/material';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,25 +28,19 @@ import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { FileInputField } from './components/fileInputField/fileInputField.component';
 import {
 	BackButton,
 	ButtonContainer,
 	Container,
-	CreateMitigationsGrid,
 	DateInputsGrid,
 	DataText,
 	FileGrid,
 	Headline,
-	InfoColumnWrapper,
 	LoaderContainer,
 	PermissionsLogContainer,
-	StyledButton,
 	StyledForm,
 	StyledGrid,
 	StyledIcon,
-	StyledIconButton,
-	SuggestionsContainer
 } from './teamspaceSettings.styles';
 
 const PANEL_PROPS = {
@@ -185,93 +173,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		onChange(event, ...params);
 	}
 
-	private handleDownloadTreatmentsTemplate = () => {
-		this.props.downloadTreatmentsTemplate();
-	}
-
-	private handleDownloadTreatments = () => {
-		this.props.downloadTreatments(this.teamspace);
-	}
-
-	private renderLastTreatmentsUpdated = () => {
-		const { fileName } = this.state;
-		if (fileName) {
-			return (
-				<Tooltip title={fileName} placement="bottom">
-					<span>
-						{fileName}
-					</span>
-				</Tooltip>
-			);
-		}
-
-		if (this.treatmentsUpdatedAt) {
-			return (
-				<>
-					Last imported: {formatDateTime(this.treatmentsUpdatedAt)}
-				</>
-			);
-		}
-		return 'No suggestions uploaded';
-	}
-
-	private renderTreatmentSuggestionsSection = () => {
-		return (
-			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<Headline color="textPrimary" variant="subtitle1">Treatment Suggestions</Headline>
-				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
-					<InfoColumnWrapper container>
-						<DataText variant="body1">
-							{this.renderLastTreatmentsUpdated()}
-						</DataText>
-					</InfoColumnWrapper>
-					<Grid container alignItems="center" wrap="nowrap">
-						<Field name="file" render={({ field }) =>
-							<FileInputField
-								{...field}
-								renderButton={() => (
-									<StyledIconButton component="span" aria-label="Upload treatments">
-										<EditIcon />
-									</StyledIconButton>
-								)}
-								onChange={this.handleFileChange(field.onChange)}
-							/>}
-						/>
-						<StyledIconButton
-							aria-label="Download treatments"
-							disabled={!this.treatmentsUpdatedAt}
-							onClick={this.handleDownloadTreatments}
-						>
-							<CloudDownloadIcon />
-						</StyledIconButton>
-						<StyledButton
-							color="primary"
-							onClick={this.handleDownloadTreatmentsTemplate}
-						>
-						Get Template
-						</StyledButton>
-					</Grid>
-				</FileGrid>
-			</SuggestionsContainer>
-		);
-	}
-
-	private renderCreateMitigationSuggestionsOption = () => {
-		return (
-			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<CreateMitigationsGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
-					<InfoColumnWrapper container>
-						<DataText variant="body1">
-							Create Treatment Suggestions from Agreed Risks
-						</DataText>
-					</InfoColumnWrapper>
-					<Field name="createMitigationSuggestions" render={ ({ field }) => (
-						<Switch checked={field.value} {...field} value="true" color="secondary" />
-					)} />
-				</CreateMitigationsGrid>
-			</SuggestionsContainer>
-		);
-	}
 
 	private renderPermissionLogOption = () => {
 		const { isTeamspaceAdmin } = this.props;
@@ -374,9 +275,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 								render={({ field }) => <ChipsInput {...field} placeholder="Enter new category..." />}
 							/>
 						</StyledGrid>
-
-						{this.renderTreatmentSuggestionsSection()}
-						{this.renderCreateMitigationSuggestionsOption()}
 						{this.renderPermissionLogOption()}
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={({ form }) =>
@@ -392,7 +290,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 						</ButtonContainer>
 					</StyledForm>
 				</Formik>
-
 			</Container>
 		);
 	}

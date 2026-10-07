@@ -59,23 +59,20 @@ interface IProps {
 	id: number;
 	text: string;
 	issuesMap: object;
-	risksMap: object;
 	urlParams: any;
-	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
+	fetchCardData: (teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
 }
 
-export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps) => {
+export const TicketReference = ({ id, text, issuesMap, urlParams, ...props }: IProps) => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-	const ticketData = issuesMap[id] ? issuesMap[id] : risksMap[id];
-	const { teamspace, type } = urlParams;
-	const isBoardView = Boolean(type);
+	const { teamspace } = urlParams;
 
-	if (!ticketData) {
-		return <>text</>;
+	if (!issuesMap[id]) {
+		return <>{text}</>;
 	}
 
-	const { _id: ticketId, model, number: ticketNumber, name, desc, statusColor, StatusIconComponent } = ticketData;
+	const { _id: ticketId, model, number: ticketNumber, name, desc, statusColor, StatusIconComponent } = issuesMap[id];
 
 	const handlePopoverOpen = (event: React.MouseEvent<any, MouseEvent>) => setAnchorEl(event.currentTarget);
 
@@ -83,19 +80,17 @@ export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...p
 
 	const handleCardChange = () => {
 		props.resetCardData();
-		props.fetchCardData(type, teamspace, model, ticketId);
+		props.fetchCardData(teamspace, model, ticketId);
 	};
-
-	const idField = issuesMap[id] ? 'issueId' : 'riskId';
 
 	return (
 		<>
 			<ReferenceLink
-				to={`/viewer/${teamspace}/${model}?${idField}=${ticketId}`}
+				to={`/viewer/${teamspace}/${model}?issueId=${ticketId}`}
 				onPopoverOpen={handlePopoverOpen}
 				onPopoverClose={handlePopoverClose}
 				onCardChange={handleCardChange}
-				isBoardView={isBoardView}
+				isBoardView
 			>
 				{text}
 			</ReferenceLink>
