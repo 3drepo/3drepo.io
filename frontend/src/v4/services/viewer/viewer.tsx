@@ -863,12 +863,12 @@ export class ViewerService {
 	 * Mesh Color
 	 */
 
-	public overrideMeshColor(teamspace, model, meshIDs, color) {
-		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color);
+	public overrideMeshColor(teamspace, model, meshIDs, color, excludeIds) {
+		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color, excludeIds);
 	}
 
-	public resetMeshColor(teamspace, model, meshIDs) {
-		UnityUtil.resetMeshColor(teamspace, model, meshIDs);
+	public resetMeshColor(teamspace, model, meshIDs, excludeIds) {
+		UnityUtil.resetMeshColor(teamspace, model, meshIDs, excludeIds);
 	}
 
 	/**

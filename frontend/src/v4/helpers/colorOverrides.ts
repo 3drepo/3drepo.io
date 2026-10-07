@@ -16,6 +16,7 @@
  */
 import { getState } from '@/v5/helpers/redux.helpers';
 import { hexToGLColor } from '@/v5/helpers/colors.helper';
+import { isString } from 'lodash';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
@@ -99,6 +100,7 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
 		const value = valueConvert(override[field]);
+		const excludeIds = isString(override[field]) && override[field].substr(-1) === '-';
 
 		if (treeNodes.length) {
 			const selectNodesFn = selectGetNodesIdsFromSharedIds([override]);
@@ -109,7 +111,7 @@ export const addOverrides = (field, valueConvert, addOverride) => async (overrid
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					addOverride(teamspace, modelId, meshes, value);
+					addOverride(teamspace, modelId, meshes, value, excludeIds);
 				}
 			}
 		}
