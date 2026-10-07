@@ -259,7 +259,7 @@ jobs:
           attempts=10
           sleep 90
           for attempt in $(seq 1 $attempts); do
-            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --no-logs --no-color 2>&1)"; then
+            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --release-only --no-color 2>&1)"; then
               echo "$out"
               echo "post-deploy check passed (attempt $attempt/$attempts)"
               exit 0
