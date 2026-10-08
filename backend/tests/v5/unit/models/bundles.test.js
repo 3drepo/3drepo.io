@@ -30,7 +30,6 @@ const {
 const Bundles = require(`${src}/models/bundles`);
 
 const repobundleExt = '.stash.repobundles';
-const unity3dExt = '.stash.unity3d';
 
 const testGetAssetList = () => {
 	describe('Bundles.getAssetList', () => {
@@ -51,50 +50,15 @@ const testGetAssetList = () => {
 			);
 		});
 
-		test('Should return unity3d bundle if repobundle not found but unity3d found', async () => {
-			const unityBundleData = generateRandomObject();
-			db.findOne
-				.mockResolvedValueOnce(undefined) // first call for repobundle
-				.mockResolvedValueOnce(unityBundleData);
-
-			await expect(Bundles.getAssetList(teamspace, container, revision)).resolves.toEqual(unityBundleData);
-
-			expect(db.findOne).toHaveBeenCalledTimes(2);
-			expect(db.findOne).toHaveBeenNthCalledWith(
-				1,
-				teamspace,
-				`${container}${repobundleExt}`,
-				{ _id: revision },
-				{ _id: 0 },
-			);
-			expect(db.findOne).toHaveBeenNthCalledWith(
-				2,
-				teamspace,
-				`${container}${unity3dExt}`,
-				{ _id: revision },
-				{ _id: 0 },
-			);
-		});
-
-		test('Should throw fileNotFound if neither repobundle nor unity3d found', async () => {
-			db.findOne
-				.mockResolvedValueOnce(undefined) // first call for repobundle
-				.mockResolvedValueOnce(undefined); // second call for unity3d
+		test('Should throw fileNotFound if repobundle is not found', async () => {
+			db.findOne.mockResolvedValueOnce(undefined);
 
 			await expect(Bundles.getAssetList(teamspace, container, revision)).rejects.toEqual(templates.fileNotFound);
 
-			expect(db.findOne).toHaveBeenCalledTimes(2);
-			expect(db.findOne).toHaveBeenNthCalledWith(
-				1,
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(
 				teamspace,
 				`${container}${repobundleExt}`,
-				{ _id: revision },
-				{ _id: 0 },
-			);
-			expect(db.findOne).toHaveBeenNthCalledWith(
-				2,
-				teamspace,
-				`${container}${unity3dExt}`,
 				{ _id: revision },
 				{ _id: 0 },
 			);

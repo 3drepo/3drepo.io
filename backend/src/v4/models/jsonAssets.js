@@ -31,8 +31,8 @@ const JSONAssets = {};
 
 async function getSubTreeInfo(federation) {
 	const subTreeInfo = [];
-	federation.subModels.forEach(({_id, node_id}) => {
-		const prom = History.findLatest(federation.teamspace, _id, {_id: 1}).then((rev) => ({
+	federation.subModels.forEach(({ _id, node_id }) => {
+		const prom = History.findLatest(federation.teamspace, _id, { _id: 1 }).then((rev) => ({
 			_id: node_id,
 			rid: rev ? utils.uuidToString(rev._id) : C.MASTER_BRANCH,
 			teamspace: federation.teamspace,
@@ -46,30 +46,30 @@ async function getSubTreeInfo(federation) {
 async function appendSubModelFiles(federation, outStream, username, filename) {
 
 	let hasFirstEntry = false;
-	for(const container of federation.subModels) {
-		if(container) {
+	for (const container of federation.subModels) {
+		if (container) {
 			const model = container._id;
 			const account = federation.teamspace;
 
 			const granted = await hasReadAccessToModelHelper(username, account, model);
-			if(!granted) {
+			if (!granted) {
 				continue;
 			}
 
-			const revision = await History.findLatest(account, model, {_id: 1});
-			if(revision) {
+			const revision = await History.findLatest(account, model, { _id: 1 });
+			if (revision) {
 				const revisionString = utils.uuidToString(revision._id);
 				const fullFileName = `${revisionString}/${filename}`;
 				try {
 					const fileStream = await FileRef.getJSONFileStream(account, model, fullFileName);
-					if(hasFirstEntry) {
+					if (hasFirstEntry) {
 						outStream.write(",");
 					}
 					hasFirstEntry = true;
 					await new Promise((resolve) => {
 						let first = true;
 						fileStream.readStream.on("data", d => {
-							if(first) {
+							if (first) {
 								outStream.write(
 									"{\"account\":\"" + account +
 									"\",\"model\":\"" + model +
@@ -80,7 +80,7 @@ async function appendSubModelFiles(federation, outStream, username, filename) {
 								outStream.write(d);
 							}
 						});
-						fileStream.readStream.on("end", ()=> resolve());
+						fileStream.readStream.on("end", () => resolve());
 						fileStream.readStream.on("error", err => outStream.emit("error", err));
 					});
 				} catch {
@@ -116,7 +116,7 @@ async function getHelperJSONFile(account, model, branch, rev, username, filename
 
 			await new Promise((resolve) => {
 				readStream.on("data", d => outStream.write(d));
-				readStream.on("end", ()=> resolve());
+				readStream.on("end", () => resolve());
 				readStream.on("error", err => outStream.emit("error", err));
 			});
 		} catch {
@@ -138,7 +138,7 @@ async function getHelperJSONFile(account, model, branch, rev, username, filename
 	};
 }
 
-JSONAssets.getSuperMeshMapping = function(account, model, id) {
+JSONAssets.getSuperMeshMapping = function (account, model, id) {
 	const name = `${id}.json.mpc`;
 	return FileRef.getJSONFile(account, model, name);
 };
@@ -170,20 +170,20 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 	outStream.write(startStr);
 
 	const fileGroups = splitEntriesToGroups(jsonFiles);
-	for(let j = 0; j < fileGroups.length; ++j) {
+	for (let j = 0; j < fileGroups.length; ++j) {
 		const filesToProcess = fileGroups[j];
 		const files = await Promise.all(
 			filesToProcess.map(async (fileName) => {
 				const regexRes = fileName.match(regex);
-				return {fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0])};
+				return { fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0]) };
 			}));
 
-		for(let i = 0; i < files.length; ++i) {
-			const {fileName, file} = files[i];
+		for (let i = 0; i < files.length; ++i) {
+			const { fileName, file } = files[i];
 
 			const regexRes = fileName.match(regex);
 			const id = regexRes[1];
-			if(file) {
+			if (file) {
 				outStream.write(`{"id":"${id}","data":`);
 				const { readStream } = file;
 
@@ -191,7 +191,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 					readStream.on("data", d => {
 						outStream.write(d);
 					});
-					readStream.on("end", ()=> {
+					readStream.on("end", () => {
 						resolve();
 					});
 					readStream.on("error", err => {
@@ -199,7 +199,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 					});
 				});
 
-				const eofStr = `}${fileName !== jsonFiles[jsonFiles.length - 1] ? "," : "" }`;
+				const eofStr = `}${fileName !== jsonFiles[jsonFiles.length - 1] ? "," : ""}`;
 				outStream.write(eofStr);
 			}
 		}
@@ -214,14 +214,14 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
 	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
 	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
-	if(fileRef?.size) {
+	if (fileRef?.size) {
 		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
 
 		await new Promise((resolve) => {
 			readStream.on("data", d => {
 				outStream.write(d);
 			});
-			readStream.on("end", ()=> {
+			readStream.on("end", () => {
 				resolve();
 			});
 			readStream.on("error", err => {
@@ -230,7 +230,7 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 		});
 	} else {
 
-		if(fileRef) {
+		if (fileRef) {
 			await FileRef.removeJSONFile(account, model, cacheFileName);
 		}
 		const passThruStr = Stream.PassThrough();
@@ -242,7 +242,7 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 			outStream.write(d);
 			cacheStream.write(d);
 		});
-		passThruStr.on("end", ()=> {
+		passThruStr.on("end", () => {
 			cacheStream.end();
 		});
 		passThruStr.on("error", err => {
@@ -257,21 +257,16 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 
 const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 	modelsToProcess = modelsToProcess.filter(Boolean); // Remove any falsy values so they'll be ignored when building the array
-	for(let i = 0; i < modelsToProcess.length; ++i) {
+	for (let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
-		let assetList = await DB.findOne(
-			entry.account, `${entry.model}.stash.repobundles`, {_id: entry.rev}, {jsonFiles: 1});
+		const assetList = await DB.findOne(
+			entry.account, `${entry.model}.stash.repobundles`, { _id: entry.rev }, { jsonFiles: 1 });
 
-		if(!assetList) {
-			assetList = await DB.findOne(
-				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
-		}
-
-		if(assetList) {
+		if (assetList) {
 			await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, outStream);
 		}
 
-		if(i !== modelsToProcess.length - 1) {
+		if (i !== modelsToProcess.length - 1) {
 			outStream.write(",");
 		}
 	}
@@ -285,34 +280,34 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 
 	let modelsToProcess;
 
-	if(isFed) {
-		const getSubModelInfoProms = settings.subModels.map(async ({_id}) => {
-			const revNode = await History.findLatest(account, _id, {_id: 1});
-			if(revNode) {
-				return {account, model: _id, rev: revNode._id};
+	if (isFed) {
+		const getSubModelInfoProms = settings.subModels.map(async ({ _id }) => {
+			const revNode = await History.findLatest(account, _id, { _id: 1 });
+			if (revNode) {
+				return { account, model: _id, rev: revNode._id };
 			}
 		});
 		modelsToProcess = await Promise.all(getSubModelInfoProms);
 	} else {
-		const history = await History.getHistory(account, model, branch, rev, {_id: 1});
-		modelsToProcess = [{account, model, rev: history._id}];
+		const history = await History.getHistory(account, model, branch, rev, { _id: 1 });
+		modelsToProcess = [{ account, model, rev: history._id }];
 	}
 
 	const outStream = Stream.PassThrough();
 
-	if(isFed) {
+	if (isFed) {
 		outStream.write("{\"submodels\":[");
 	}
 	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
 		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
 		// return the stream handler to the client before we start streaming data.
-		if(isFed) {
+		if (isFed) {
 			outStream.write("]}");
 		}
 		outStream.end();
 	}).catch((err) => outStream.emit("error", err));
 
-	return { readStream: outStream, isFed};
+	return { readStream: outStream, isFed };
 
 };
 
@@ -344,7 +339,7 @@ function generateFullTreeForFederation(federation) {
 		if (subModel.group) {
 			const group = subModel.group;
 			parentNode = groupNodes[group];
-			if(!parentNode) {
+			if (!parentNode) {
 				const node_id = uuidv5(group, federation.node_id);
 				const node_shared_id = uuidv5("shared", node_id);
 				parentNode = {
@@ -399,7 +394,7 @@ function generateTreeNodeIdsForFederation(settings) {
 
 	settings.node_id = uuidv5(settings.teamspace, settings._id);
 	settings.node_shared_id = uuidv5("shared", settings.node_id);
-	if(settings.subModels) {
+	if (settings.subModels) {
 		for (const container of settings.subModels) {
 			container.node_id = uuidv5(container._id, settings._id);
 			container.node_shared_id = uuidv5("shared", container.node_id);
@@ -408,7 +403,7 @@ function generateTreeNodeIdsForFederation(settings) {
 	}
 }
 
-JSONAssets.getTree = async function(account, model, branch, rev) {
+JSONAssets.getTree = async function (account, model, branch, rev) {
 
 	const settings = await ModelSetting.findModelSettingById(account, model);
 
@@ -420,7 +415,7 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 
 	settings.teamspace = account;
 
-	if(isFed) {
+	if (isFed) {
 		// Only federations are guaranteed to have UUIDs as _ids, which is a
 		// preqrequsitie for the procedural properties, so this is conditional
 		// on being a federation
@@ -441,18 +436,18 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 
 		await new Promise((resolve) => {
 			readStream.on("data", d => outStream.write(d));
-			readStream.on("end", ()=> resolve());
+			readStream.on("end", () => resolve());
 			readStream.on("error", err => outStream.emit("error", err));
 		});
 	}
 
 	outStream.write(", \"subTrees\":[");
 
-	if(isFed) {
+	if (isFed) {
 		const subTreeInfo = await getSubTreeInfo(settings);
-		for(let i = 0; i < subTreeInfo.length; ++i) {
-			if(subTreeInfo[i]) {
-				if(i > 0) {
+		for (let i = 0; i < subTreeInfo.length; ++i) {
+			if (subTreeInfo[i]) {
+				if (i > 0) {
 					outStream.write(",");
 				}
 				const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
@@ -493,9 +488,9 @@ function getFederationTreePath(settings) {
 	const group_node_ids = {};
 	const idToPath = {};
 	for (const container of settings.subModels) {
-		if(container.group) {
+		if (container.group) {
 			let group_id = group_node_ids[container.group];
-			if(!group_id) {
+			if (!group_id) {
 				group_id = uuidv5(container.group, settings.node_id);
 				group_node_ids[container.group] = group_id;
 			}
@@ -513,19 +508,19 @@ function getFederationTreePath(settings) {
 	};
 }
 
-JSONAssets.getModelProperties = function(account, model, branch, rev, username) {
-	return getHelperJSONFile(account, model, branch, rev, username, "modelProperties", getFederationModelProperties, "properties", true, {hiddenNodes: []});
+JSONAssets.getModelProperties = function (account, model, branch, rev, username) {
+	return getHelperJSONFile(account, model, branch, rev, username, "modelProperties", getFederationModelProperties, "properties", true, { hiddenNodes: [] });
 };
 
-JSONAssets.getIdMap = function(account, model, branch, rev, username) {
+JSONAssets.getIdMap = function (account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "idMap", getFederationIdMap);
 };
 
-JSONAssets.getIdToMeshes = function(account, model, branch, rev, username) {
+JSONAssets.getIdToMeshes = function (account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "idToMeshes", getFederationIdToMeshes);
 };
 
-JSONAssets.getTreePath = function(account, model, branch, rev, username) {
+JSONAssets.getTreePath = function (account, model, branch, rev, username) {
 	return getHelperJSONFile(account, model, branch, rev, username, "tree_path", getFederationTreePath);
 };
 

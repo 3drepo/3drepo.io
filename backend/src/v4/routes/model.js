@@ -18,7 +18,7 @@
 "use strict";
 
 const express = require("express");
-const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const ModelSetting = require("../models/modelSetting");
@@ -30,8 +30,8 @@ const Scene = require("../models/scene");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const config = require("../config");
-const {v5Path} = require("../../interop");
-const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
+const { v5Path } = require("../../interop");
+const { validateNewRevisionData: validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 const ResponderV5 = require(`${v5Path}/utils/responder`);
 const ResponseCodes = require(`${v5Path}/utils/responseCodes`);
@@ -187,94 +187,17 @@ router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, update
 
 router.post("/model", routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}"));
 
-// Unity information
+router.get("/:model/revision/master/head/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get unity assets
- * @apiName getUnityAssets
+ * @api {get} /:teamspace/:model/revision/:rev/repoAssets.json Get revision's RepoBundles
+ * @apiName getRevRepoAssets
  * @apiGroup Model
- * @apiDescription Get the lastest model's version unity assets
+ * @apiDescription Get the model's RepoBundles for a particular revision.
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
- *
- * @apiSuccessExample {json} Success:
- * {
- *    models: [
- *       {
- *          _id: "Mw+Qm5J5QaqofBxG9TqOkw==",
- *          assets: [
- *             "/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500.unity3d"
- *          ],
- *          database: "teamSpace1",
- *          model: "3549ddf6-885d-4977-87f1-eeac43a0e818",
- *          offset: [
- *             -688.095458984375,
- *             6410.9140625,
- *             683.460205078125
- *          ],
- *          jsonFiles: [
- *             "/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc"
- *          ]
- *       }
- *    ]
- * }
- */
-
-router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
-
-/**
- * @api {get} /:teamspace/:model/revision/:rev/unityAssets.json Get revision's unity assets
- * @apiName getRevUnityAssets
- * @apiGroup Model
- * @apiDescription Get the model's assets but of a particular revision
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
- * @apiParam {String} rev The revision of the model to get unity assets for
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
- *
- * @apiSuccessExample {json} Success:
- * {
- *    models: [
- *       {
- *          _id: "Mw+Qm5J5QaqofBxG9TqOkw==",
- *          assets: [
- *             "/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500.unity3d"
- *          ],
- *          database: "teamSpace1",
- *          model: "3549ddf6-885d-4977-87f1-eeac43a0e818",
- *          offset: [
- *             -688.095458984375,
- *             6410.9140625,
- *             683.460205078125
- *          ],
- *          jsonFiles: [
- *             "/teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc"
- *          ]
- *       }
- *    ]
- * }
- *
- */
-
-router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
-
-// RepoBundles information
-
-/**
- * @api {get} /:teamspace/:model/revision/master/head/repoAssets.json Get unity assets
- * @apiName getRepoAssets
- * @apiGroup Model
- * @apiDescription Get the lastest model's version assets. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
+ * @apiParam {String} model The model Id to get RepoBundles for.
+ * @apiParam {String} rev The revision of the model to get RepoBundles for
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/repoAssets.json HTTP/1.1
@@ -302,51 +225,13 @@ router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessTo
  * }
  */
 
-router.get("/:model/revision/master/head/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
-
-/**
- * @api {get} /:teamspace/:model/revision/:rev/unityAssets.json Get revision's unity assets
- * @apiName getRevUnityAssets
- * @apiGroup Model
- * @apiDescription Get the model's assets but of a particular revision. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
- * @apiParam {String} rev The revision of the model to get unity assets for
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
- *
- * @apiSuccessExample {json} Success:
- * {
- *    models: [
- *       {
- *          _id: "Mw+Qm5J5QaqofBxG9TqOkw==",
- *          assets: [
- *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
- *          ],
- *          database: "teamSpace1",
- *          model: "3549ddf6-885d-4977-87f1-eeac43a0e818",
- *          offset: [
- *             -688.095458984375,
- *             6410.9140625,
- *             683.460205078125
- *          ],
- *          jsonFiles: [
- *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
- *          ]
- *       }
- *    ]
- * }
- */
-
 router.get("/:model/revision/:rev/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/assetsMeta Get unity assets metadata
+ * @api {get} /:teamspace/:model/revision/master/head/assetsMeta Get asset metadata
  * @apiName getAssetsMeta
  * @apiGroup Model
- * @apiDescription Get the lastest model's version unity assets metadata
+ * @apiDescription Get the latest model's version asset metadata
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The model Id
@@ -373,7 +258,7 @@ router.get("/:model/revision/master/head/assetsMeta", middlewares.hasReadAccessT
 
 /**
  * @api {get} /:teamspace/:model/revision/:rev/assetsMeta Get revision's metadata about the assets generated
- * @apiName getRevUnityAssets
+ * @apiName getRevAssetsMeta
  * @apiGroup Model
  * @apiDescription Get the model's assets metadata of a particular revision
  *
@@ -409,14 +294,14 @@ router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAcce
  * @api {get} /:teamspace/:model/:uid.json.mpc Get JSON Mpc
  * @apiName getJsonMpc
  * @apiGroup Model
- * @apiDescription Get the unity bundle mpc json file. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json
+ * @apiDescription Get the bundle mpc json file. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/repoAssets.json or /:teamspace/:model/revision/:rev/repoAssets.json
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model to get JSON Mpc for.
  * @apiParam {String} uid.json.mpc id of the json.mpc file
  *
  * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc HTTP/1.1
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500.json.mpc HTTP/1.1
  *
  * @apiSuccessExample {json} Success:
  * {
@@ -445,20 +330,7 @@ router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAcce
  *
  */
 
-router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMpc);
-
-/**
- * @api {get} /:teamspace/:model/:uid.unity3d Get Unity Bundle
- * @apiName getUnityBundle
- * @apiGroup Model
- * @apiDescription Gets an actual unity bundle file. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model id of the model
- * @apiParam {String} uid.unity3d id of the unity bundle
- */
-
-router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
+router.get("/:model/:uid.json.mpc", middlewares.hasReadAccessToModel, getJsonMpc);
 
 router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
 
@@ -466,7 +338,7 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
  * @api {get} /:teamspace/:model/:uid.repobundle Get RepoBundle by Id
  * @apiName getRepoBundle
  * @apiGroup Model
- * @apiDescription  Gets an actual Repo Bundle file containing a set of assets. The path for this api is provided in the data retrieved by either one of the endpoints /:teamspace/:model/revision/master/head/unityAssets.json or /:teamspace/:model/revision/:rev/unityAssets.json
+ * @apiDescription Gets an actual Repo Bundle file containing a set of assets. The path for this API is provided in the data retrieved by either /:teamspace/:model/revision/master/head/repoAssets.json or /:teamspace/:model/revision/:rev/repoAssets.json.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
@@ -1470,7 +1342,7 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
  */
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
-router.post("/:model/upload",  routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions"));
+router.post("/:model/upload", routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions"));
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel
@@ -1504,7 +1376,7 @@ router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
 
 function updateSettings(req, res, next) {
 	const place = utils.APIInfo(req);
-	const {account, model} = req.params;
+	const { account, model } = req.params;
 
 	return ModelSetting.updateModelSetting(account, model, req.body).then(modelSetting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, modelSetting.properties);
@@ -1515,7 +1387,7 @@ function updateSettings(req, res, next) {
 
 function getHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const {account, model} = req.params;
+	const { account, model } = req.params;
 
 	return ModelSetting.getHeliSpeed(account, model).then(heliSpeed => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, heliSpeed);
@@ -1526,7 +1398,7 @@ function getHeliSpeed(req, res, next) {
 
 function updateHeliSpeed(req, res, next) {
 	const place = utils.APIInfo(req);
-	const {account, model} = req.params;
+	const { account, model } = req.params;
 
 	return ModelSetting.updateHeliSpeed(account, model, req.body.heliSpeed).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
@@ -1538,7 +1410,7 @@ function updateHeliSpeed(req, res, next) {
 function getModelSetting(req, res, next) {
 	const place = utils.APIInfo(req);
 	const username = req.session.user.username;
-	const {model, account} = req.params;
+	const { model, account } = req.params;
 
 	ModelHelpers.getModelSetting(account, model, username).then(setting => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, setting);
@@ -1549,25 +1421,25 @@ function getModelSetting(req, res, next) {
 
 async function updateModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const {teamspace, federation} = req.params;
+	const { teamspace, federation } = req.params;
 	const owner = req.session.user.username;
 
 	try {
-		await FederationsV5.newRevision(teamspace, federation, {owner, ...req.body});
+		await FederationsV5.newRevision(teamspace, federation, { owner, ...req.body });
 		const setting = await ModelHelpers.getModelSetting(teamspace, federation, owner);
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
 			account: teamspace,
 			model: federation,
-			setting: {...setting, subModels: req.body.containers }
+			setting: { ...setting, subModels: req.body.containers }
 		});
-	} catch(err) {
+	} catch (err) {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	}
 }
 
 function deleteModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const {account, model} = req.params;
+	const { account, model } = req.params;
 
 	// delete
 	ModelHelpers.removeModel(account, model).then((removedModel) => {
@@ -1579,17 +1451,17 @@ function deleteModel(req, res, next) {
 
 function getHeaders(cache = false) {
 	const headers = {
-		"Content-Type" : "application/json"
+		"Content-Type": "application/json"
 	};
 
-	if(cache) {
+	if (cache) {
 		headers["Cache-Control"] = "private, max-age=" + config.cachePolicy.maxAge;
 	}
 	return headers;
 }
 
 function getIdMap(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 
 	JSONAssets.getIdMap(
 		account,
@@ -1606,7 +1478,7 @@ function getIdMap(req, res, next) {
 }
 
 function getIdToMeshes(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 
 	JSONAssets.getIdToMeshes(
 		account,
@@ -1624,7 +1496,7 @@ function getIdToMeshes(req, res, next) {
 }
 
 function getModelTree(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 
 	JSONAssets.getTree(
 		account,
@@ -1640,7 +1512,7 @@ function getModelTree(req, res, next) {
 }
 
 function getModelProperties(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 
 	JSONAssets.getModelProperties(
 		account,
@@ -1658,7 +1530,7 @@ function getModelProperties(req, res, next) {
 }
 
 function getTreePath(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 
 	JSONAssets.getTreePath(
 		account,
@@ -1676,7 +1548,7 @@ function getTreePath(req, res, next) {
 }
 
 function searchModelTree(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 	const username = req.session.user.username;
 	const searchString = req.query.searchString;
 
@@ -1694,7 +1566,7 @@ function searchModelTree(req, res, next) {
 }
 
 function downloadLatest(req, res, next) {
-	const {account, model} = req.params;
+	const { account, model } = req.params;
 
 	ModelHelpers.downloadLatest(account, model).then(file => {
 		const headers = {
@@ -1719,7 +1591,7 @@ function updatePermissions(req, res, next) {
 }
 
 function batchUpdatePermissions(req, res, next) {
-	return ModelSetting.batchUpdatePermissions(req.params.account, req.body,req.session.user.username).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body, req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1745,7 +1617,7 @@ function getMultipleModelsPermissions(req, res, next) {
 }
 
 function getAssetsMeta(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
@@ -1756,24 +1628,12 @@ function getAssetsMeta(req, res, next) {
 	});
 }
 
-function getUnityAssets(req, res, next) {
-	const {account, model, rev} = req.params;
-	const username = req.session.user.username;
-	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
-
-	UnityAssets.getAssetList(account, model, branch, rev, username, true).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
 function getRepoAssets(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	UnityAssets.getAssetList(account, model, branch, rev, username, false).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, rev, username).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -1781,7 +1641,7 @@ function getRepoAssets(req, res, next) {
 }
 
 function getSrcAssets(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
@@ -1793,7 +1653,7 @@ function getSrcAssets(req, res, next) {
 }
 
 function getJsonMpc(req, res, next) {
-	const {account, model, uid} = req.params;
+	const { account, model, uid } = req.params;
 
 	JSONAssets.getSuperMeshMapping(account, model, utils.uuidToString(uid)).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
@@ -1803,11 +1663,11 @@ function getJsonMpc(req, res, next) {
 }
 
 function getAllJsonMpcs(req, res, next) {
-	const {account, model, rev} = req.params;
+	const { account, model, rev } = req.params;
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({readStream, isFed}) => {
+	JSONAssets.getAllSuperMeshMapping(account, model, branch, rev, username).then(({ readStream, isFed }) => {
 		const headers = getHeaders(rev && !isFed);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, readStream, headers);
 	}).catch(err => {
@@ -1816,7 +1676,7 @@ function getAllJsonMpcs(req, res, next) {
 }
 
 function getSubModelRevisions(req, res, next) {
-	const {account, model, revId} = req.params;
+	const { account, model, revId } = req.params;
 	const branch = revId ? undefined : "master";
 
 	ModelHelpers.getSubModelRevisions(account, model, branch, revId).then((result) => {
@@ -1826,18 +1686,8 @@ function getSubModelRevisions(req, res, next) {
 	});
 }
 
-function getUnityBundle(req, res, next) {
-	const {account, model, uid} = req.params;
-
-	UnityAssets.getUnityBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
-		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
 function getRepoBundle(req, res, next) {
-	const {account, model, uid} = req.params;
+	const { account, model, uid } = req.params;
 
 	UnityAssets.getRepoBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
@@ -1847,7 +1697,7 @@ function getRepoBundle(req, res, next) {
 }
 
 function getTexture(req, res, next) {
-	const {account, model, uid} = req.params;
+	const { account, model, uid } = req.params;
 
 	UnityAssets.getTexture(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
@@ -1857,7 +1707,7 @@ function getTexture(req, res, next) {
 }
 
 function getSRC(req, res, next) {
-	const {account, model, uid} = req.params;
+	const { account, model, uid } = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
 	SrcAssets.getSRC(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
@@ -1869,10 +1719,10 @@ function getSRC(req, res, next) {
 }
 
 function getMesh(req, res, next) {
-	const {model, account, meshId} = req.params;
+	const { model, account, meshId } = req.params;
 
 	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
-		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
+		res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
 		stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
