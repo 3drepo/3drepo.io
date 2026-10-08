@@ -94,11 +94,6 @@ export const selectTicketOverrides = createSelector(
 	(overridesDicts) => overridesDicts.overrides,
 );
 
-export const selectTicketTransparencies = createSelector(
-	selectTicketOverridesDict,
-	(overridesDicts) => overridesDicts.transparencies,
-);
-
 export const selectTicketHasClearedOverrides = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => !ticketCardState.overrides,

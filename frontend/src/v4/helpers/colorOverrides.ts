@@ -38,7 +38,7 @@ export const addToGroupDictionary = (dict, group, value) => {
 	return dict;
 };
 
-export const overridesAddedOrUpdated = (field) => (prev, curr) => {
+export const overridesColorAddedOrUpdated = (prev, curr) => {
 	const keys = Object.keys(curr);
 	const diffDict = {};
 	const result = [];
@@ -49,7 +49,7 @@ export const overridesAddedOrUpdated = (field) => (prev, curr) => {
 			value = curr[key];
 
 			if (!diffDict[value]) {
-				const overrideByColor = {[field]: value, shared_ids: []};
+				const overrideByColor = {color: value, shared_ids: []};
 				diffDict[value] = overrideByColor;
 				result.push(overrideByColor);
 			}
@@ -61,7 +61,7 @@ export const overridesAddedOrUpdated = (field) => (prev, curr) => {
 	return result;
 };
 
-export const overridesRemoved = (field) => (prev, curr) => {
+export const overridesColorRemoved = (prev, curr) => {
 	const keys = Object.keys(prev);
 	const removedDict = {};
 	const result = [];
@@ -72,7 +72,7 @@ export const overridesRemoved = (field) => (prev, curr) => {
 			value = prev[key];
 
 			if (!removedDict[value]) {
-				const changedValue = {[field]: value, shared_ids: []};
+				const changedValue = {color: value, shared_ids: []};
 				removedDict[value] = changedValue;
 				result.push(changedValue);
 			}
@@ -82,37 +82,6 @@ export const overridesRemoved = (field) => (prev, curr) => {
 	});
 
 	return result;
-};
-
-export const overridesColorAddedOrUpdated = overridesAddedOrUpdated('color');
-export const overridesColorRemoved = overridesRemoved('color');
-
-export const addOverrides = (field, valueConvert, addOverride) => async (overrides) => {
-	if (!overrides.length) {
-		return;
-	}
-	const state = getState();
-	const treeNodes = selectTreeNodesList(state);
-
-	for (let i = 0; i < overrides.length; i++) {
-		const override = overrides[i];
-		const value = valueConvert(override[field]);
-		const excludeIds = isString(override[field]) && override[field].substr(-1) === '-';
-
-		if (treeNodes.length) {
-			const selectNodesFn = selectGetNodesIdsFromSharedIds([override]);
-			const nodes = selectNodesFn(state);
-
-			if (nodes) {
-				const modelsList = selectGetMeshesByIds(nodes)(state);
-
-				for (let j = 0; j < modelsList.length; j++) {
-					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					addOverride(teamspace, modelId, meshes, value, excludeIds);
-				}
-			}
-		}
-	}
 };
 
 export const addColorOverrides = async (overrides) => {
@@ -136,8 +105,8 @@ export const addColorOverrides = async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					Viewer.overrideMeshColor(teamspace, modelId, meshes, value, excludeIds);
 					Viewer.overrideMeshOpacity(teamspace, modelId, meshes, value[3], excludeIds);
+					Viewer.overrideMeshColor(teamspace, modelId, meshes, value, excludeIds);
 				}
 			}
 		}
@@ -165,7 +134,6 @@ export const removeColorOverrides = async (overrides) => {
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
-
 					Viewer.resetMeshOpacity(teamspace, modelId, meshes, excludeIds);
 					Viewer.resetMeshColor(teamspace, modelId, meshes, excludeIds);
 				}

@@ -58,7 +58,6 @@ interface IProps {
 	};
 	rightPanels: string[];
 	colorOverrides: any;
-	transparencies: any;
 	issuePins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
@@ -204,7 +203,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 	public async onComponentDidUpdate(prevProps, currProps) {
 		const { colorOverrides, issuePins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies, transformations,
+			gisCoordinates, gisLayers, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
