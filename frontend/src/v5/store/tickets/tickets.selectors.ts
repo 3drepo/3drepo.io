@@ -23,8 +23,8 @@ import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProject, selectCurrentProjectTemplateById } from '../projects/projects.selectors';
-import { selectFederationById } from '../federations/federations.selectors';
-import { selectContainerById } from '../containers/containers.selectors';
+import { selectFederationById, selectFederationRole } from '../federations/federations.selectors';
+import { selectContainerById, selectContainerRole } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsSortingPropertyDictionary } from './card/ticketsCard.types';
 import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
@@ -32,6 +32,8 @@ import { generatePath } from 'react-router';
 import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { selectCurrentUser } from '../currentUser/currentUser.selectors';
 import { selectMyJob } from '@/v4/modules/jobs/jobs.selectors';
+import { Role } from '../currentUser/currentUser.types';
+import { isCommenterRole } from '../store.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -274,5 +276,22 @@ export const selectTicketsTableLink = createSelector(
 		const ticketsPath = params.ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
 		const pathname = generatePath(ticketsPath, params as any);
 		return ({ pathname, search });
+	},
+);
+
+export const selectHasPermissionForTemplate = createSelector(
+	selectTemplateById,
+	selectContainerRole,
+	selectFederationRole,
+	selectCurrentUser,
+	selectMyJob,
+	(state, modelId, templateId, permission) => permission,
+	(template, contRole, fedRole, currentUser, myJob, permission) => {
+		const modelPermissions = contRole || fedRole;
+		if (modelPermissions === Role.ADMIN) return true; // model admin trumps all else
+		if (!isCommenterRole(modelPermissions)) return false; // must have at least commenter role to proceed
+		const permissionsList = get(template, `config.permissions.${permission}`);
+
+		return !isArray(permissionsList) || !isEmpty(intersection(permissionsList, [currentUser.username, currentUser.email, myJob]));
 	},
 );
