@@ -36,6 +36,8 @@ const { cloneDeep } = require('../../utils/helper/objects');
 
 const { propTypesToValidator } = require('./validators');
 const { uniqueElements } = require('../../utils/helper/arrays');
+const { getJobs } = require('../../models/jobs');
+const { getUsersByQuery } = require('../../models/users');
 
 const TemplateSchema = {};
 
@@ -214,33 +216,56 @@ const customStatus = Yup.object({
 	type: Yup.string().oneOf(Object.values(statusTypes)).required(),
 });
 
-const configSchema = Yup.object().shape({
+const getConfigSchema = async (teamspace) => {
+	const jobs = await getJobs(teamspace);
+	const users = await getUsersByQuery(undefined, { user: 1, 'customData.email': 1 });
+	const jobsAndUsers = [...jobs.map(({ _id }) => _id), ...users.map(({ user }) => user)];
+	const emailToUser = Object.fromEntries(users.map(({ user, customData: { email } }) => [email, user]));
+	const jobOrUserArr = Yup.array().min(1)
+		.of(Yup.string().oneOf(jobsAndUsers, ({ path }) => `${path} must be a valid job, username or email`))
+		.transform((values) => (values?.length ? values.map((value) => emailToUser[value] ?? value) : values));
+
+	const configSchema = Yup.object().shape({
 	// If new configs are added, please ensure we add it to the e2e test case
-	comments: defaultFalse,
-	issueProperties: defaultFalse,
-	attachments: defaultFalse,
-	defaultView: defaultFalse,
-	defaultImage: Yup.boolean().when('defaultView', ([defaultView], schema) => (defaultView ? schema.strip() : defaultFalse)),
-	pin: Yup.lazy((val) => (val?.color || val?.icon
-		? Yup.object({ color: pinColSchema, icon: pinIconSchema })
-		: defaultFalse)),
-	status: Yup.object({
-		values: Yup.array().of(customStatus).min(1).required()
-			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length)
-			.test('Open status', `values must contain at least one "${statusTypes.OPEN}" status`, (vals) => vals.some(({ type }) => type === statusTypes.OPEN))
-			.test('Done status', `values must contain at least one "${statusTypes.DONE}" status`, (vals) => vals.some(({ type }) => type === statusTypes.DONE)),
-		default: Yup.mixed().when('values', ([values], schema) => (values
-			? schema.oneOf(values.map(({ name }) => name)).required()
-			: schema)),
-	}).default(undefined),
-	tabular: Yup.object({
-		columns: Yup.array().of(Yup.object({
-			property: Yup.string().required(),
-			module: Yup.string().notRequired().default(undefined),
-		}),
-		).min(1).required(),
-	}).default(undefined),
-}).default({});
+		comments: defaultFalse,
+		issueProperties: defaultFalse,
+		attachments: defaultFalse,
+		defaultView: defaultFalse,
+		defaultImage: Yup.boolean().when('defaultView', ([defaultView], schema) => (defaultView ? schema.strip() : defaultFalse)),
+		pin: Yup.lazy((val) => (val?.color || val?.icon
+			? Yup.object({ color: pinColSchema, icon: pinIconSchema })
+			: defaultFalse)),
+		status: Yup.object({
+			values: Yup.array().of(customStatus).min(1).required()
+				.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length)
+				.test('Open status', `values must contain at least one "${statusTypes.OPEN}" status`, (vals) => vals.some(({ type }) => type === statusTypes.OPEN))
+				.test('Done status', `values must contain at least one "${statusTypes.DONE}" status`, (vals) => vals.some(({ type }) => type === statusTypes.DONE)),
+			default: Yup.mixed().when('values', ([values], schema) => (values
+				? schema.oneOf(values.map(({ name }) => name)).required()
+				: schema)),
+		}).default(undefined),
+		tabular: Yup.object({
+			columns: Yup.array().of(Yup.object({
+				property: Yup.string().required(),
+				module: Yup.string().notRequired().default(undefined),
+			}),
+			).min(1).required(),
+		}).default(undefined),
+		permissions: Yup.object({
+			create: jobOrUserArr,
+			view: jobOrUserArr,
+			comment: jobOrUserArr,
+			edit: Yup.object({
+				assign: jobOrUserArr,
+				status: jobOrUserArr,
+				default: jobOrUserArr,
+			}).default(undefined),
+		}).default(undefined)
+			.test('not-empty', 'Permissions cannot be an empty object', (value) => value === undefined || Object.keys(value).length > 0),
+	}).default({});
+
+	return configSchema;
+};
 
 const pinMappingTest = (val, context) => {
 	const template = TemplateSchema.generateFullSchema(val);
@@ -306,28 +331,32 @@ const validTabularPropsTest = (val, context) => {
 	return true;
 };
 
-const schema = Yup.object().shape({
-	name: nameSchema.required(),
-	code: Yup.string().length(3).required(),
-	config: configSchema,
-	deprecated: defaultFalse,
-	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
-		(val) => val.every(({ name }) => !Object.values(basePropertyLabels).includes(name))),
-	modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
-		const modNames = new Set();
-		for (const { name, type } of arr) {
-			const id = (name || type).toUpperCase();
-			if (modNames.has(id)) {
-				return context.createError({ message: `Module "${id}" has been defined multiple times.` });
+const getSchema = async (teamspace) => {
+	const schema = Yup.object().shape({
+		name: nameSchema.required(),
+		code: Yup.string().length(3).required(),
+		config: await getConfigSchema(teamspace),
+		deprecated: defaultFalse,
+		properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
+			(val) => val.every(({ name }) => !Object.values(basePropertyLabels).includes(name))),
+		modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
+			const modNames = new Set();
+			for (const { name, type } of arr) {
+				const id = (name || type).toUpperCase();
+				if (modNames.has(id)) {
+					return context.createError({ message: `Module "${id}" has been defined multiple times.` });
+				}
+				modNames.add(id);
 			}
-			modNames.add(id);
-		}
 
-		return true;
-	}),
-}).test(pinMappingTest)
-	.test(validTabularPropsTest)
-	.noUnknown();
+			return true;
+		}),
+	}).test(pinMappingTest)
+		.test(validTabularPropsTest)
+		.noUnknown();
+
+	return schema;
+};
 
 TemplateSchema.getClosedStatuses = (template, includeVoid = true) => {
 	if (template?.config?.status) {
@@ -339,7 +368,10 @@ TemplateSchema.getClosedStatuses = (template, includeVoid = true) => {
 	return includeVoid ? [statuses.CLOSED, statuses.VOID] : [statuses.CLOSED];
 };
 
-TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
+TemplateSchema.validate = async (template, teamspace) => {
+	const schema = await getSchema(teamspace);
+	return schema.validate(template, { stripUnknown: true });
+};
 
 TemplateSchema.generateFullSchema = (template, isImport = false) => {
 	const result = cloneDeep(template);
