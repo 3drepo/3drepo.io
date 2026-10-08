@@ -80,21 +80,6 @@ export const selectTemplates = createSelector(
 	(state, modelId) => (state.templatesByModelId[modelId] || []).map(removeDeprecated),
 );
 
-export const selectCreatableTemplates = createSelector(
-	selectTemplates,
-	selectCurrentUser,
-	selectMyJob,
-	(templates, currentUser, job) => {
-		const { username, email } = currentUser;
-		return templates.filter(({ deprecated, config }) => {
-			const permissionsList = config?.permissions?.create;
-			const hasPermission = isArray(permissionsList) && !isEmpty(intersection(permissionsList, [username, email, job]));
-			if (isArray(permissionsList) && !hasPermission) return false;
-			return !deprecated;
-		});
-	},
-);
-
 export const selectTemplateById = createSelector(
 	selectTicketsDomain,
 	selectTemplates,
@@ -294,4 +279,12 @@ export const selectHasPermissionForTemplate = createSelector(
 
 		return !isArray(permissionsList) || !isEmpty(intersection(permissionsList, [currentUser.username, currentUser.email, myJob]));
 	},
+);
+
+export const selectCreatableTemplates = createSelector(
+	(state) => state,
+	(state, modelId) => modelId,
+	selectTemplates,
+	(state, modelId, templates) => templates.filter(
+		({ _id, deprecated }) => selectHasPermissionForTemplate(state, modelId, _id, 'create') && !deprecated),
 );

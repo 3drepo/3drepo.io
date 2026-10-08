@@ -27,7 +27,7 @@ import { formatMessage } from '@/v5/services/intl';
 
 export const NewTicketMenu = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectActiveTemplates(containerOrFederation);
+	const templates = TicketsHooksSelectors.selectCreatableTemplates(containerOrFederation);
 
 	const goToNewTicket = ({ _id }) => {
 		TicketsCardActionsDispatchers.setSelectedTemplate(_id);
