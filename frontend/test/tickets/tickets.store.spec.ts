@@ -17,11 +17,19 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions, TicketsTypes } from '@/v5/store/tickets/tickets.redux';
-import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
+import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories, selectHasPermissionForTemplate } from '@/v5/store/tickets/tickets.selectors';
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
+import { JobsActions } from '@/v4/modules/jobs/jobs.redux';
+import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
+import { containerMockFactory } from '../containers/containers.fixtures';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
+import { IContainer, NewContainer } from '@/v5/store/containers/containers.types';
+import { currentUserMockFactory } from '../currentUser/currentUser.fixtures';
+import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 
 describe('Tickets: store', () => {
 	let dispatch, getState, waitForActions;
@@ -297,6 +305,69 @@ describe('Tickets: store', () => {
 	
 			expect(templatesFromState[0]).toEqual(templateWithoutDeprecated);	
 		});
+
+		describe('permissions', () => {
+			const templateId = 'templateId';
+			const user = currentUserMockFactory({ username: 'myUsername', email: 'my@email.com' });
+			const job = 'Good Job';
+			const mockContainer = containerMockFactory({ _id: modelId, role: Role.COMMENTER });
+			const template = templateMockFactory({ _id: templateId, config: { permissions: {
+					create: [ user.email ],
+					view: [ job ],
+					comment: [ user.username ],
+					edit: {
+						assign: [ 'otherUsername' ],
+						// status is intentionally not included 
+						default: [ user.username ],
+					}}}});
+
+			beforeEach(() => {
+				dispatch(ProjectsActions.setCurrentProject(projectId));
+				dispatch(CurrentUserActions.fetchUserSuccess(user))
+				dispatch(JobsActions.getMyJobSuccess(job));
+				dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [template]));
+				dispatch(ContainersActions.fetchContainersSuccess(projectId, [mockContainer]))
+			});
+			
+			it('should not allow viewers permission to a template - even if they are listed in the template permissions', () => {
+				const mockContainer = containerMockFactory({ _id: modelId, role: Role.VIEWER });
+				dispatch(ContainersActions.fetchContainersSuccess(projectId, [mockContainer]))
+				
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
+				expect(hasPermissions).toBe(false);
+			});
+			it('should always allow admins permission to a template - even if they are not in the template permissions', () => {
+				const mockContainer = containerMockFactory({ _id: modelId, role: Role.ADMIN });
+				dispatch(ContainersActions.fetchContainersSuccess(projectId, [mockContainer]))
+				
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
+				expect(hasPermissions).toBe(true);
+			});
+			it('should use template level permissions for commenters/collaborators', () => {
+				const hasAssignPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'edit.assign')
+				const hasDefaultPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'edit.default')
+				expect(hasAssignPermissions).toBe(false);
+				expect(hasDefaultPermissions).toBe(true);
+			});
+			it('should use model level permissions if template level permissions are not defined', () => {
+				const hasStatusPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'edit.status')
+				expect(hasStatusPermissions).toBe(true);
+			});
+			it('should apply permissions based on emails', () => {
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'create')
+				expect(hasPermissions).toBe(true);
+				dispatch(CurrentUserActions.updateUserSuccess({ email: 'newEmail@example.com' }))
+				const hasPermissionsAfterEmailChange = selectHasPermissionForTemplate(getState(), modelId, templateId, 'create')
+				expect(hasPermissionsAfterEmailChange).toBe(false);
+			});
+			it('should apply permissions based on jobs', () => {
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'view')
+				expect(hasPermissions).toBe(true);
+				dispatch(JobsActions.getMyJobSuccess('New Job'))
+				const hasPermissionsAfterJobChange = selectHasPermissionForTemplate(getState(), modelId, templateId, 'view')
+				expect(hasPermissionsAfterJobChange).toBe(false);
+			});
+		})
 	});
 
 

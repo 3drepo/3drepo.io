@@ -114,6 +114,16 @@ export interface ITemplate {
 		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
 		tabular?: ITabularConfig;
+		permissions?: {
+			create?: string[],
+			view?: string[],
+			comment?: string[],
+			edit?: {
+				assign?: string[],
+				status?: string[],
+				default?: string[],
+			},
+		};
 	};
 }
 
