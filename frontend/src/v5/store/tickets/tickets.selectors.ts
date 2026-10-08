@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy, get, isEmpty } from 'lodash';
+import { orderBy, get, isEmpty, intersection, isArray } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
@@ -30,6 +30,8 @@ import { TicketsSortingPropertyDictionary } from './card/ticketsCard.types';
 import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath } from 'react-router';
 import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
+import { selectCurrentUser } from '../currentUser/currentUser.selectors';
+import { selectMyJob } from '@/v4/modules/jobs/jobs.selectors';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -76,9 +78,19 @@ export const selectTemplates = createSelector(
 	(state, modelId) => (state.templatesByModelId[modelId] || []).map(removeDeprecated),
 );
 
-export const selectActiveTemplates = createSelector(
+export const selectCreatableTemplates = createSelector(
 	selectTemplates,
-	(templates) => templates.filter(({ deprecated }) => !deprecated),
+	selectCurrentUser,
+	selectMyJob,
+	(templates, currentUser, job) => {
+		const { username, email } = currentUser;
+		return templates.filter(({ deprecated, config }) => {
+			const permissionsList = config?.permissions?.create;
+			const hasPermission = isArray(permissionsList) && !isEmpty(intersection(permissionsList, [username, email, job]));
+			if (isArray(permissionsList) && !hasPermission) return false;
+			return !deprecated;
+		});
+	},
 );
 
 export const selectTemplateById = createSelector(
