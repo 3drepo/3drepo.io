@@ -23,7 +23,6 @@ const responseCodes = require("../response_codes");
 const utils = require("../utils");
 const { v5Path } = require("../../interop");
 const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
-const SettingProcessorV5 = require(`${v5Path}/processors/teamspaces/settings`);
 
 const colName = "teamspace";
 
@@ -44,10 +43,6 @@ class TeamspaceSettings {
 		}
 
 		return foundSettings;
-	}
-
-	async getRiskCategories(teamspace) {
-		return (await SettingProcessorV5.getRiskCategories(teamspace)) || [];
 	}
 
 	async update(account, data) {
