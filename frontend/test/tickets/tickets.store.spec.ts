@@ -17,7 +17,7 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions, TicketsTypes } from '@/v5/store/tickets/tickets.redux';
-import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories, selectHasPermissionForTemplate } from '@/v5/store/tickets/tickets.selectors';
+import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories, selectHasPermissionForTemplate, selectCreatableTemplates } from '@/v5/store/tickets/tickets.selectors';
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
@@ -366,6 +366,16 @@ describe('Tickets: store', () => {
 				dispatch(JobsActions.getMyJobSuccess('New Job'))
 				const hasPermissionsAfterJobChange = selectHasPermissionForTemplate(getState(), modelId, templateId, 'view')
 				expect(hasPermissionsAfterJobChange).toBe(false);
+			});
+
+			it('should not list templates for which the user does not have create permission', () => {
+				const templateWithoutPermission = templateMockFactory({ config: { permissions: { create: ['someOtherUser'] } } });
+				const templateWithPermission = templateMockFactory({ config: { permissions: { create: [user.username] } } });
+				dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [templateWithPermission, templateWithoutPermission]));
+				const creatableTemplates = selectCreatableTemplates(getState(), modelId);
+				const creatableTemplateIds = creatableTemplates.map(({ _id }) => _id);
+				expect(creatableTemplateIds).not.toContain(templateWithoutPermission._id);
+				expect(creatableTemplateIds).toContain(templateWithPermission._id);
 			});
 		})
 	});
