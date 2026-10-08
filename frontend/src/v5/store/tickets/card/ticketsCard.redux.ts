@@ -126,6 +126,7 @@ export const setReadOnly = (state: ITicketsCardState, { readOnly }: SetReadOnlyA
 };
 
 export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverridesAction) => {
+	console.log('Setting overrides:', JSON.stringify(overrides));
 	state.overrides = overrides;
 };
 

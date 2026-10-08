@@ -30,13 +30,9 @@ import { ROUTES } from '../../constants/routes';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import {
 	addColorOverrides,
-	addTransparencyOverrides,
 	overridesColorAddedOrUpdated,
 	overridesColorRemoved,
-	overridesTransparencyDiff,
-	overridesTransparencyRemoved,
 	removeColorOverrides,
-	removeTransparencyOverrides,
 } from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
@@ -156,13 +152,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		addColorOverrides(toAdd);
 	}
 
-	public renderTransparencies(prev, curr) {
-		const toAdd = overridesTransparencyDiff(prev, curr);
-		const toRemove = overridesTransparencyRemoved(prev, curr);
-
-		removeTransparencyOverrides(toRemove);
-		addTransparencyOverrides(toAdd);
-	}
 
 	public renderTransformations(prev, curr) {
 		const changes = transformationDiffChanges(prev, curr);
@@ -222,10 +211,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
-		}
-
-		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			this.renderTransparencies(prevProps.transparencies, transparencies);
 		}
 
 		if (transformations && !isEqual(transformations, prevProps.transformations)) {
