@@ -313,8 +313,7 @@ describe('Tickets: store', () => {
 			const mockContainer = containerMockFactory({ _id: modelId, role: Role.COMMENTER });
 			const template = templateMockFactory({ _id: templateId, config: { permissions: {
 					create: [ user.email ],
-					view: [ job ],
-					comment: [ user.username ],
+					comment: [ job ],
 					edit: {
 						assign: [ 'otherUsername' ],
 						// status is intentionally not included 
@@ -333,14 +332,14 @@ describe('Tickets: store', () => {
 				const mockContainer = containerMockFactory({ _id: modelId, role: Role.VIEWER });
 				dispatch(ContainersActions.fetchContainersSuccess(projectId, [mockContainer]))
 				
-				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'edit.default')
 				expect(hasPermissions).toBe(false);
 			});
 			it('should always allow admins permission to a template - even if they are not in the template permissions', () => {
 				const mockContainer = containerMockFactory({ _id: modelId, role: Role.ADMIN });
 				dispatch(ContainersActions.fetchContainersSuccess(projectId, [mockContainer]))
 				
-				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'edit.assign')
 				expect(hasPermissions).toBe(true);
 			});
 			it('should use template level permissions for commenters/collaborators', () => {
@@ -361,10 +360,10 @@ describe('Tickets: store', () => {
 				expect(hasPermissionsAfterEmailChange).toBe(false);
 			});
 			it('should apply permissions based on jobs', () => {
-				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'view')
+				const hasPermissions = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
 				expect(hasPermissions).toBe(true);
 				dispatch(JobsActions.getMyJobSuccess('New Job'))
-				const hasPermissionsAfterJobChange = selectHasPermissionForTemplate(getState(), modelId, templateId, 'view')
+				const hasPermissionsAfterJobChange = selectHasPermissionForTemplate(getState(), modelId, templateId, 'comment')
 				expect(hasPermissionsAfterJobChange).toBe(false);
 			});
 

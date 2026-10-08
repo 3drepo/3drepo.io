@@ -116,7 +116,6 @@ export interface ITemplate {
 		tabular?: ITabularConfig;
 		permissions?: {
 			create?: string[],
-			view?: string[],
 			comment?: string[],
 			edit?: {
 				assign?: string[],
