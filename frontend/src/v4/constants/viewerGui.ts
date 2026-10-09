@@ -26,14 +26,12 @@ import IssuesIcon from '@assets/icons/outlined/issue-outlined.svg';
 import MeasureIcon from '@assets/icons/outlined/measure-outlined.svg';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
-import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 
 import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
 	ISSUES: 'issues',
-	RISKS: 'risks',
 	TICKETS: 'tickets',
 	BIM: 'bim',
 	TREE: 'tree',
@@ -49,7 +47,6 @@ export const VIEWER_PANELS = {
 
 export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.ISSUES]: IssuesIcon,
-	[VIEWER_PANELS.RISKS]: RisksIcon,
 	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
@@ -63,7 +60,6 @@ export const VIEWER_PANELS_ICONS = {
 
 export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.ISSUES]: 200,
-	[VIEWER_PANELS.RISKS]: 200,
 	[VIEWER_PANELS.TICKETS]: 200,
 	[VIEWER_PANELS.GROUPS]: 200,
 	[VIEWER_PANELS.VIEWS]: 200,
@@ -77,7 +73,6 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 
 export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.ISSUES]: 'Issues',
-	[VIEWER_PANELS.RISKS]: 'SafetiBase',
 	[VIEWER_PANELS.TICKETS]: 'Tickets',
 	[VIEWER_PANELS.GROUPS]: 'Groups',
 	[VIEWER_PANELS.VIEWS]: 'Views',
@@ -95,7 +90,7 @@ const getPanelConfig = (panelType) => ({
 	type: panelType
 });
 
-export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
+export const getViewerLeftPanels = (issuesEnabled) =>  {
 	const leftPanels = [
 		VIEWER_PANELS.TICKETS,
 		VIEWER_PANELS.GROUPS,
@@ -108,10 +103,6 @@ export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
 		VIEWER_PANELS.DRAWINGS,
 	].filter((panel) =>
 	(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES))
-
-	if (risksEnabled) {
-		leftPanels.unshift(VIEWER_PANELS.RISKS);
-	}
 
 	if (issuesEnabled) {
 		leftPanels.unshift(VIEWER_PANELS.ISSUES);

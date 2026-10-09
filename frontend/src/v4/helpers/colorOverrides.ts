@@ -20,6 +20,12 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
 	selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
 
+
+type MeshId = string;
+type HexColor = string;
+
+export type ColorOverrides = Record<MeshId, HexColor>;
+
 // Adds to a dictionary of shared_id -> value a new group with
 // its share_ids from 'objects' field pointing to value
 export const addToGroupDictionary = (dict, group, value) => {
@@ -31,32 +37,57 @@ export const addToGroupDictionary = (dict, group, value) => {
 	return dict;
 };
 
-export const overridesDiff = (field) => (overrideA, overrideB) => {
-	const keys = Object.keys(overrideA);
-	const diff = {};
+export const overridesAddedOrUpdated = (field) => (prev, curr) => {
+	const keys = Object.keys(curr);
+	const diffDict = {};
 	const result = [];
 	let value = null;
 
 	keys.forEach((key) => {
-		if (overrideA[key] !== overrideB[key]) {
-			value = overrideA[key];
+		if (curr[key] !== prev[key]) {
+			value = curr[key];
 
-			if (!diff[value]) {
+			if (!diffDict[value]) {
 				const overrideByColor = {[field]: value, shared_ids: []};
-				diff[value] = overrideByColor;
+				diffDict[value] = overrideByColor;
 				result.push(overrideByColor);
 			}
 
-			diff[value].shared_ids.push(key);
+			diffDict[value].shared_ids.push(key);
 		}
 	});
 
 	return result;
 };
 
-export const overridesColorDiff = overridesDiff('color');
+export const overridesRemoved = (field) => (prev, curr) => {
+	const keys = Object.keys(prev);
+	const removedDict = {};
+	const result = [];
+	let value = null;
 
-export const overridesTransparencyDiff = overridesDiff('transparency');
+	keys.forEach((key) => {
+		if (prev[key] && !curr[key]) {
+			value = prev[key];
+
+			if (!removedDict[value]) {
+				const changedValue = {[field]: value, shared_ids: []};
+				removedDict[value] = changedValue;
+				result.push(changedValue);
+			}
+
+			removedDict[value].shared_ids.push(key);
+		}
+	});
+
+	return result;
+};
+
+export const overridesColorAddedOrUpdated = overridesAddedOrUpdated('color');
+export const overridesColorRemoved = overridesRemoved('color');
+
+export const overridesTransparencyDiff = overridesAddedOrUpdated('transparency');
+export const overridesTransparencyRemoved = overridesRemoved('transparency');
 
 export const addOverrides = (field, valueConvert, addOverride) => async (overrides) => {
 	if (!overrides.length) {

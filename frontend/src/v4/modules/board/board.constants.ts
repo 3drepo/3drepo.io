@@ -19,7 +19,6 @@ import { values } from 'lodash';
 
 export const BOARD_TYPES = {
 	ISSUES: 'issues',
-	RISKS: 'risks'
 };
 
 export const NOT_DEFINED_PROP = 'not defined';
@@ -56,40 +55,4 @@ export const ISSUE_FILTER_PROPS = {
 	}
 };
 
-export const RISK_FILTER_PROPS = {
-	level_of_risk: {
-		value: 'level_of_risk',
-		name: 'Level of risk',
-	},
-	residual_level_of_risk: {
-		value: 'residual_level_of_risk',
-		name: 'Level of mitigated risk'
-	},
-	category: {
-		value: 'category',
-		name: 'Category',
-		draggable: true
-	},
-	mitigation_status: {
-		value: 'mitigation_status',
-		name: 'Mitigation status',
-		draggable: true
-	},
-	assigned_roles: {
-		value: 'assigned_roles',
-		name: 'Owner',
-		draggable: true
-	},
-	creator_role: {
-		value: 'creator_role',
-		name: 'Created By'
-	},
-	due_date: {
-		value: 'due_date',
-		name: 'Due date',
-		notDefinedLabel: 'No due date'
-	}
-};
-
 export const ISSUE_FILTER_VALUES = values(ISSUE_FILTER_PROPS);
-export const RISK_FILTER_VALUES = values(RISK_FILTER_PROPS);

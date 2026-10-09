@@ -28,11 +28,6 @@ import { GroupsActions } from '../groups';
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
-import {
-	addTransparencyOverrides,
-	overridesTransparencyDiff,
-	removeTransparencyOverrides,
-} from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
@@ -682,17 +677,6 @@ function* zoomToHighlightedNodes() {
 	}
 }
 
-function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
-
-	yield waitForTreeToBeReady();
-	yield all([
-		removeTransparencyOverrides(toRemove),
-		addTransparencyOverrides(toAdd)
-	]);
-}
-
 function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
@@ -726,7 +710,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
 	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
-	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
 	yield takeLatest(TreeTypes.SET_SUBMODELS_VISIBILITY, setSubmodelsVisibility);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

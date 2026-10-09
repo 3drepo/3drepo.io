@@ -17,10 +17,9 @@
 import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
-import { addToGroupDictionary } from '../../helpers/colorOverrides';
+import { addToGroupDictionary, ColorOverrides } from '../../helpers/colorOverrides';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
-import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 
 export const getGroupsIDsOfViewpoint = function (viewpoint) {
@@ -163,7 +162,7 @@ export const selectOverridesDict = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectOverridesDict, (overrides) => overrides?.colors || {}
+	selectOverridesDict, (overrides): ColorOverrides => overrides?.colors || {}
 );
 
 export const selectTransparencies = createSelector(
@@ -171,10 +170,9 @@ export const selectTransparencies = createSelector(
 );
 
 export const selectInitialView =  createSelector(
-	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssue, selectActiveRisk,
-		({viewpointsMap}, {viewId},  defaultView, activeIssue, activeRisk) => {
+	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssue,
+		({viewpointsMap}, {viewId},  defaultView, activeIssue) => {
 			return !isEmpty(activeIssue) ? activeIssue :
-				!isEmpty(activeRisk) ?  activeRisk :
 				(!viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id]);
 		}
 );
