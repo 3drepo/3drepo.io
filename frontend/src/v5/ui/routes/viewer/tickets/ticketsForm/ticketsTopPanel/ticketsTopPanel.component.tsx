@@ -23,7 +23,7 @@ import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useContext, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import { BaseProperties, IssueProperties } from '../../tickets.constants';
+import { BaseProperties, IssueProperties, TicketsCardViews } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
@@ -49,11 +49,11 @@ export const TicketsTopPanel = ({
 	const { formState, getValues } = useFormContext();
 	const { containerOrFederation } = useContext(TicketContext);
 
-
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnlyDefault = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
-	const readOnlyStatus = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.status');
-	const readOnlyAssign = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.assignees');
+	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
+	const readOnlyDefault = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const readOnlyStatus = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.status');
+	const readOnlyAssign = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.assignees');
 
 	const ref = useRef<HTMLTextAreaElement>(null);
 

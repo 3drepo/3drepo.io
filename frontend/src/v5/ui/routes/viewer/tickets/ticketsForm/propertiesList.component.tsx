@@ -40,7 +40,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { formState } = useFormContext();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const ticketIsReadOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, selectedTicketId, 'edit.default');
+	const ticketIsReadOnly = !isNewTicket || !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, selectedTicketId, 'edit.default');
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
 
 	if (!properties.length) return null;
