@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, clashRunStatus, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getClashRunById, getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
 const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
-const { getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
@@ -293,6 +293,20 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 		const { teamspace } = req.params;
 
 		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Clashes.clashRunCompleted = async (req, res, next) => {
+	const { teamspace, project, runId } = req.params;
+
+	try {
+		const { status } = await getClashRunById(teamspace, project, runId);
+		if (status !== clashRunStatus.COMPLETED) {
+			throw createResponseCode(templates.clashRunNotCompleted);
+		}
 		await next();
 	} catch (err) {
 		respond(req, res, err);
