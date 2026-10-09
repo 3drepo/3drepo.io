@@ -41,9 +41,6 @@ const GeoMaths = require(`${src}/utils/helper/geoMaths`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-jest.mock('../../../../../../../../src/v5/models/scenes.stash');
-const SceneStashModel = require(`${src}/models/scenes.stash`);
-
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetaModel = require(`${src}/models/metadata`);
 
@@ -254,9 +251,9 @@ const testGetBoundsForGroupsOfMeshNodes = () => {
 			transformQueries.forEach((parentIds, index) => {
 				expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2 + index,
 					teamspace, project, container, {
-						shared_id: { $in: parentIds },
-						type: nodeTypes.TRANSFORMATION,
-					}, { shared_id: 1, parents: 1, matrix: 1 });
+					shared_id: { $in: parentIds },
+					type: nodeTypes.TRANSFORMATION,
+				}, { shared_id: 1, parents: 1, matrix: 1 });
 			});
 			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
 				modelTypes.CONTAINER, revision, { coordOffset: 1 });
@@ -483,10 +480,10 @@ const testGetMeshData = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: meshId, type: nodeTypes.MESH }, {
-					parents: 1,
-					_blobRef: 1,
-					primitive: 1,
-				});
+				parents: 1,
+				_blobRef: 1,
+				primitive: 1,
+			});
 		});
 		test('Should throw an error if mesh node has no _blobRef', async () => {
 			ScenesModel.getNodeByQuery.mockResolvedValueOnce({});
@@ -497,10 +494,10 @@ const testGetMeshData = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: meshId, type: nodeTypes.MESH }, {
-					parents: 1,
-					_blobRef: 1,
-					primitive: 1,
-				});
+				parents: 1,
+				_blobRef: 1,
+				primitive: 1,
+			});
 		});
 		test('Should throw an error if parent transformation is missing', async () => {
 			const parentId = generateUUIDString();
@@ -526,15 +523,15 @@ const testGetMeshData = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(2);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container,
 				{ _id: meshId, type: nodeTypes.MESH }, {
-					parents: 1,
-					_blobRef: 1,
-					primitive: 1,
-				});
+				parents: 1,
+				_blobRef: 1,
+				primitive: 1,
+			});
 			expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(2, teamspace, project, container,
 				{ shared_id: parentId, type: nodeTypes.TRANSFORMATION }, {
-					parents: 1,
-					matrix: 1,
-				});
+				parents: 1,
+				matrix: 1,
+			});
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 		});
 
@@ -545,8 +542,8 @@ const testGetMeshData = () => {
 		[
 			['Should return identity matrix if parent node has no matrix', [{}], GeoMaths.matrices.identity()],
 			['Should return parent\'s matrix if parent node exists', [{ matrix: matrix1 }], matrix1],
-			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
-			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
 		]
 			.forEach(([desc, parentMocks, expectedMatrix]) => {
 				test(desc, async () => {
@@ -608,18 +605,18 @@ const testGetMeshData = () => {
 					expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1 + parentMocks.length);
 					expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container,
 						{ _id: meshId, type: nodeTypes.MESH }, {
-							parents: 1,
-							_blobRef: 1,
-							primitive: 1,
-						});
+						parents: 1,
+						_blobRef: 1,
+						primitive: 1,
+					});
 					parentMocks.forEach((_, index) => {
 						const sharedId = index === 0 ? parentId : parentMocks[index - 1].parents[0];
 						expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(
 							2 + index, teamspace, project, container,
 							{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, {
-								parents: 1,
-								matrix: 1,
-							});
+							parents: 1,
+							matrix: 1,
+						});
 					});
 
 					expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(2);
@@ -653,10 +650,10 @@ const testGetTexture = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: textureId, type: nodeTypes.TEXTURE }, {
-					_id: 1,
-					_blobRef: 1,
-					extension: 1,
-				});
+				_id: 1,
+				_blobRef: 1,
+				extension: 1,
+			});
 		});
 		test('Should throw an error if texture node has no _blobRef', async () => {
 			ScenesModel.getNodeByQuery.mockResolvedValueOnce({});
@@ -667,10 +664,10 @@ const testGetTexture = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: textureId, type: nodeTypes.TEXTURE }, {
-					_id: 1,
-					_blobRef: 1,
-					extension: 1,
-				});
+				_id: 1,
+				_blobRef: 1,
+				extension: 1,
+			});
 		});
 
 		test('Should return texture stream and mime type if texture node is found', async () => {
@@ -709,10 +706,10 @@ const testGetTexture = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: textureId, type: nodeTypes.TEXTURE }, {
-					_id: 1,
-					_blobRef: 1,
-					extension: 1,
-				});
+				_id: 1,
+				_blobRef: 1,
+				extension: 1,
+			});
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.scene`,
@@ -755,34 +752,6 @@ const testGetTexture = () => {
 	});
 };
 
-const testGetSuperMeshesInfo = () => {
-	describe('Get supermeshes info in revision', () => {
-		const teamspace = generateRandomString();
-		const model = generateRandomString();
-		const revision = generateUUID();
-
-		test('Should return supermeshes info in revision', async () => {
-			const data = generateRandomObject();
-			SceneStashModel.getSuperMeshesInRevision.mockResolvedValueOnce(data);
-
-			expect(await Scenes.getSuperMeshesInfo(teamspace, model, revision)).toEqual({ superMeshes: data });
-
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledTimes(1);
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledWith(
-				teamspace, model, revision,
-				{
-					_id: 1,
-					vertices_count: 1,
-					faces_count: 1,
-					uv_channels_count: 1,
-					bounding_box: 1,
-					primitive: 1,
-				},
-			);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetBoundsForGroupsOfMeshNodes();
@@ -791,5 +760,4 @@ describe(determineTestGroup(__filename), () => {
 	testPrepareCache();
 	testGetTexture();
 	testGetMeshData();
-	testGetSuperMeshesInfo();
 });

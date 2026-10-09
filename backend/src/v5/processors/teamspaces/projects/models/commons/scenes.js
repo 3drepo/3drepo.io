@@ -31,7 +31,6 @@ const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getRevisionByIdOrTag } = require('../../../../../models/revisions');
-const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { nodeTypes } = require('../../../../../models/scenes.constants');
 const stringToStream = require('string-to-stream');
@@ -279,10 +278,10 @@ const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
 Scene.getTexture = async (teamspace, project, container, textureId) => {
 	const textureNode = await getNodeByQuery(teamspace, project, container,
 		{ _id: textureId, type: nodeTypes.TEXTURE }, {
-			_id: 1,
-			_blobRef: 1,
-			extension: 1,
-		});
+		_id: 1,
+		_blobRef: 1,
+		extension: 1,
+	});
 
 	// eslint-disable-next-line no-underscore-dangle
 	if (!textureNode || !textureNode._blobRef) {
@@ -334,19 +333,6 @@ Scene.getMeshData = async (teamspace, project, container, meshId) => {
 	combinedStream.append(GeoMaths.faces.toJSONStream(facesStream));
 	combinedStream.append(stringToStream(']}'));
 	return combinedStream;
-};
-
-Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
-	const projection = {
-		_id: 1,
-		vertices_count: 1,
-		faces_count: 1,
-		uv_channels_count: 1,
-		bounding_box: 1,
-		primitive: 1,
-	};
-	const superMeshes = await getSuperMeshesInRevision(teamspace, container, revision, projection);
-	return { superMeshes };
 };
 
 module.exports = Scene;
