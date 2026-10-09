@@ -463,11 +463,11 @@ const testCreateRun = () => {
 
 	const makeMesh = ({ _id = generateRandomString(), parent = generateRandomString(),
 		sharedId = generateRandomString(), name } = {}) => ({
-			_id,
-			parents: [parent],
-			shared_id: sharedId,
-			...(name ? { name } : {}),
-		});
+		_id,
+		parents: [parent],
+		shared_id: sharedId,
+		...(name ? { name } : {}),
+	});
 
 	const makeMetadata = (parent, externalId) => ({
 		parents: [parent],
