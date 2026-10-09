@@ -2142,19 +2142,12 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Enables the Pause Rendering feature of the viewer - when the camera is not moving, the main scene will not be redrawn.
+	 * @hidden
+	 * When enabled, when the camera is not moving, the main scene will not be redrawn.
 	 * @category Configurations
 	 */
-	public static pauseRendering() {
-		UnityUtil.toUnity('PauseRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
-	}
-
-	/**
-	 * Disables the Pause Rendering feature of the viewer - the entire scene will render every frame regardless of camera behaviour.
-	 * @category Configurations
-	 */
-	public static resumeRendering() {
-		UnityUtil.toUnity('ResumeRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	public static enableRenderCaching(enable: boolean) {
+		UnityUtil.toUnity('EnableRenderCaching', UnityUtil.LoadingState.VIEWER_READY, enable ? 1 : 0);
 	}
 
 	/**
@@ -2984,11 +2977,6 @@ export class UnityUtil {
 	/** @hidden */
 	public static toggleUtilityCamera() {
 		UnityUtil.toUnity('ToggleUtilityCamera', UnityUtil.LoadingState.VIEWER_READY);
-	}
-
-	/** @hidden */
-	public static toggleCameraPause() {
-		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
 	/** How many non-trivial jobs the viewer can complete per frame when the

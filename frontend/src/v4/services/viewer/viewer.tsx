@@ -1204,14 +1204,6 @@ export class ViewerService {
 	 * Controlling
 	 */
 
-	public pauseRendering() {
-		UnityUtil.pauseRendering();
-	}
-
-	public resumeRendering() {
-		UnityUtil.resumeRendering();
-	}
-
 	public setModelCache = (cache: boolean) => {
 		if (cache) {
 			UnityUtil.enableExternalWebRequestHandler();
