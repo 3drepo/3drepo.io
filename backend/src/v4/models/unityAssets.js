@@ -21,7 +21,7 @@ const History = require("./history");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
 const db = require("../handler/db");
-const {v5Path} = require("../../interop");
+const { v5Path } = require("../../interop");
 const responseCodes = require("../response_codes");
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const { getSubModels } = require("./ref");
@@ -30,31 +30,22 @@ const UnityAssets = {};
 
 async function getAssetListForSubModel(teamspace, container, username) {
 	const granted = await middlewares.hasReadAccessToModelHelper(username, teamspace, container);
-	if(granted) {
-		const revInfo = await History.findLatest(teamspace, container, {_id: 1});
+	if (granted) {
+		const revInfo = await History.findLatest(teamspace, container, { _id: 1 });
 		if (revInfo) {
 			return await getAssetListEntry(teamspace, container, revInfo._id);
 		}
 	}
 }
 
-// This method returns RepoBundles, and falls back to AssetBundles if they
-// are not available. If the legacy flag is set, the method will only return
-// AssetBundles.
-
 async function getAssetListEntry(account, model, revId) {
-	const assets = await db.findOne(account, model + ".stash.repobundles", {_id: revId});
-	if(assets) {
-		return Promise.resolve(assets);
-	}else {
-		return db.findOne(account, model + ".stash.unity3d", {_id: revId});
-	}
+	return db.findOne(account, model + ".stash.repobundles", { _id: revId });
 }
 
-UnityAssets.getAssetList = async function(account, model, branch, rev, username) {
+UnityAssets.getAssetList = async function (account, model, branch, rev, username) {
 	const subModels = await getSubModels(account, model);
 	const fetchPromise = [];
-	if(subModels.length) { // This is implicitly a federation
+	if (subModels.length) { // This is implicitly a federation
 		// This is a federation, get asset lists from subModels and merge them
 		subModels.forEach((container) => {
 			fetchPromise.push(getAssetListForSubModel(account, container.model, username));
@@ -65,23 +56,17 @@ UnityAssets.getAssetList = async function(account, model, branch, rev, username)
 		fetchPromise.push(getAssetListEntry(account, model, history._id));
 	}
 	return Promise.all(fetchPromise).then((assetLists) => {
-		return {models: assetLists.filter((list) => list)};
+		return { models: assetLists.filter((list) => list) };
 	});
 };
 
-UnityAssets.getUnityBundle = function(account, model, id) {
-	const bundleFileName = `${id}.unity3d`;
-	const collection = `${model}.stash.unity3d.ref`;
-	return FilesManager.getFileAsStream(account, collection, bundleFileName);
-};
-
-UnityAssets.getRepoBundle = function(account, model, id) {
+UnityAssets.getRepoBundle = function (account, model, id) {
 	const bundleFileName = `${id}`;
 	const collection = `${model}.stash.repobundles.ref`;
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
-UnityAssets.getTexture = async function(account, model, id) {
+UnityAssets.getTexture = async function (account, model, id) {
 	const textureFilename = `${id}`;
 	const collection = `${model}.scene`;
 
@@ -91,11 +76,11 @@ UnityAssets.getTexture = async function(account, model, id) {
 		extension: 1
 	});
 
-	if(!node) {
+	if (!node) {
 		throw (responseCodes.TEXTURE_NOT_FOUND);
 	}
 
-	const {elements, buffer} = node._blobRef;
+	const { elements, buffer } = node._blobRef;
 
 	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
 	const chunkInfo = {
@@ -105,7 +90,7 @@ UnityAssets.getTexture = async function(account, model, id) {
 
 	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, chunkInfo);
 
-	if(node.extension === "jpg") {
+	if (node.extension === "jpg") {
 		node.extension = "jpeg"; // jpg is not a valid mime type, only jpeg, even though the extensions are equivalent
 	}
 

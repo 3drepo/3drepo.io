@@ -41,9 +41,6 @@ const GeoMaths = require(`${src}/utils/helper/geoMaths`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-jest.mock('../../../../../../../../src/v5/models/scenes.stash');
-const SceneStashModel = require(`${src}/models/scenes.stash`);
-
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetaModel = require(`${src}/models/metadata`);
 
@@ -545,8 +542,8 @@ const testGetMeshData = () => {
 		[
 			['Should return identity matrix if parent node has no matrix', [{}], GeoMaths.matrices.identity()],
 			['Should return parent\'s matrix if parent node exists', [{ matrix: matrix1 }], matrix1],
-			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
-			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
 		]
 			.forEach(([desc, parentMocks, expectedMatrix]) => {
 				test(desc, async () => {
@@ -755,34 +752,6 @@ const testGetTexture = () => {
 	});
 };
 
-const testGetSuperMeshesInfo = () => {
-	describe('Get supermeshes info in revision', () => {
-		const teamspace = generateRandomString();
-		const model = generateRandomString();
-		const revision = generateUUID();
-
-		test('Should return supermeshes info in revision', async () => {
-			const data = generateRandomObject();
-			SceneStashModel.getSuperMeshesInRevision.mockResolvedValueOnce(data);
-
-			expect(await Scenes.getSuperMeshesInfo(teamspace, model, revision)).toEqual({ superMeshes: data });
-
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledTimes(1);
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledWith(
-				teamspace, model, revision,
-				{
-					_id: 1,
-					vertices_count: 1,
-					faces_count: 1,
-					uv_channels_count: 1,
-					bounding_box: 1,
-					primitive: 1,
-				},
-			);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetBoundsForGroupsOfMeshNodes();
@@ -791,5 +760,4 @@ describe(determineTestGroup(__filename), () => {
 	testPrepareCache();
 	testGetTexture();
 	testGetMeshData();
-	testGetSuperMeshesInfo();
 });
