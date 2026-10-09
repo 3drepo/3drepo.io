@@ -18,6 +18,7 @@ const { fieldOperators, valueOperators } = require('../../models/metadata.rules.
 const { presetModules, propTypes, statusTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
+const { idTypes } = require('../../models/metadata.constants');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
 
@@ -28,6 +29,12 @@ Schemas.securitySchemes = {
 		in: 'query',
 		name: 'key',
 	},
+};
+
+Schemas.schemas.idTypes = {
+	type: 'string',
+	enum: Object.values(idTypes),
+	description: 'The type of identifier used for the object',
 };
 
 const helpers = {
@@ -48,8 +55,14 @@ Schemas.schemas.clashEntry = {
 					...helpers.stringDef('The container the object belongs to', 'ef0857b6-4cc7-4be1-b2d6-c032dce7806a'),
 					format: 'uuid',
 				},
-				idType: helpers.stringDef('The type of identifier used for the object', 'IFC'),
-				id: helpers.stringDef('The object identifier', 'objectId1'),
+				idType: {
+					$ref: '#/components/schemas/idTypes',
+				},
+				id: {
+					type: 'string',
+					format: 'uuid',
+					description: 'The object identifier',
+				},
 			},
 		},
 		b: {
@@ -60,12 +73,18 @@ Schemas.schemas.clashEntry = {
 					...helpers.stringDef('The container the object belongs to', 'ef0857b6-4cc7-4be1-b2d6-c032dce7806a'),
 					format: 'uuid',
 				},
-				idType: helpers.stringDef('The type of identifier used for the object', 'IFC'),
-				id: helpers.stringDef('The object identifier', 'objectId2'),
+				idType: {
+					$ref: '#/components/schemas/idTypes',
+				},
+				id: {
+					type: 'string',
+					format: 'uuid',
+					description: 'The object identifier',
+				},
 			},
 		},
 		index: helpers.stringDef('A normalized identifier for the clash pair',
-			'ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId1-ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::objectId2'),
+			'ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::1kYqvrv7r7Ee9Lf6DEVcpT-ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::2kYqvrv7r7Ee9Lf6DEVcpT'),
 		bbox: {
 			type: 'object',
 			description: 'The bounding box of the clash',

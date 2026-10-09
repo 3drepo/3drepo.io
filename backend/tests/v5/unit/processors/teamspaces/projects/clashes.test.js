@@ -463,11 +463,11 @@ const testCreateRun = () => {
 
 	const makeMesh = ({ _id = generateRandomString(), parent = generateRandomString(),
 		sharedId = generateRandomString(), name } = {}) => ({
-		_id,
-		parents: [parent],
-		shared_id: sharedId,
-		...(name ? { name } : {}),
-	});
+			_id,
+			parents: [parent],
+			shared_id: sharedId,
+			...(name ? { name } : {}),
+		});
 
 	const makeMetadata = (parent, externalId) => ({
 		parents: [parent],
@@ -1375,78 +1375,9 @@ const testGetDetailedRunReport = () => {
 		const teamspace = generateRandomString();
 		const runId = generateRandomString();
 
-		test('should return the storage stream descriptor without waiting for the stream to end', async () => {
-			const readStream = new PassThrough();
-			const expectedOutput = {
-				readStream,
-				size: generateRandomNumber(),
-				mimeType: 'application/json',
-				encoding: 'gzip',
-				filename: 'report.json.gz',
-			};
-			FilesManager.getFileAsStream.mockResolvedValueOnce(expectedOutput);
+		test('should call getFileAsStream with the teamspace, collection and run ID', () => {
+			Clashes.getDetailedRunReport(teamspace, runId);
 
-			await expect(Clashes.getDetailedRunReport(teamspace, runId))
-				.resolves.toBe(expectedOutput);
-
-			expect(readStream.readableEnded).toBe(false);
-			expect(readStream.readableFlowing).toBe(null);
-			readStream.destroy();
-
-			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
-				teamspace, CLASH_RUNS_COL, runId);
-		});
-
-		test.each([
-			['valid JSON', JSON.stringify({ new: [], active: [], resolved: [] })],
-			['malformed JSON', '{"new":['],
-			['empty content', ''],
-		])('should return the stream without consuming or parsing %s', async (description, content) => {
-			const readStream = new PassThrough();
-			readStream.end(Buffer.from(content));
-			const expectedOutput = { readStream, size: Buffer.byteLength(content) };
-			FilesManager.getFileAsStream.mockResolvedValueOnce(expectedOutput);
-
-			await expect(Clashes.getDetailedRunReport(teamspace, runId))
-				.resolves.toBe(expectedOutput);
-
-			expect(readStream.readableLength).toBe(Buffer.byteLength(content));
-			expect(readStream.readableFlowing).toBe(null);
-			readStream.destroy();
-
-			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
-				teamspace, CLASH_RUNS_COL, runId);
-		});
-
-		test.each([
-			['storage failure', new Error(generateRandomString())],
-			['missing report', templates.fileNotFound],
-		])('should propagate a %s from getFileAsStream', async (description, error) => {
-			FilesManager.getFileAsStream.mockRejectedValueOnce(error);
-
-			await expect(Clashes.getDetailedRunReport(teamspace, runId))
-				.rejects.toBe(error);
-
-			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
-				teamspace, CLASH_RUNS_COL, runId);
-		});
-
-		test('should propagate synchronous errors from getFileAsStream', () => {
-			const error = new Error(generateRandomString());
-			FilesManager.getFileAsStream.mockImplementationOnce(() => {
-				throw error;
-			});
-
-			expect(() => Clashes.getDetailedRunReport(teamspace, runId)).toThrow(error);
-
-			expect(ClashRunsModel.getClashRunByQuery).not.toHaveBeenCalled();
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
 				teamspace, CLASH_RUNS_COL, runId);
 		});

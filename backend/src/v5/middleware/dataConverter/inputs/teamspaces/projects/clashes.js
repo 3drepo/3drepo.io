@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, clashRunStatus, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getClashRunById, getClashRunByQuery } = require('../../../../../models/clashes.runs');
@@ -304,7 +304,7 @@ Clashes.clashRunCompleted = async (req, res, next) => {
 
 	try {
 		const { status } = await getClashRunById(teamspace, project, runId);
-		if (status !== 'completed') {
+		if (status !== clashRunStatus.COMPLETED) {
 			throw createResponseCode(templates.clashRunNotCompleted);
 		}
 		await next();
