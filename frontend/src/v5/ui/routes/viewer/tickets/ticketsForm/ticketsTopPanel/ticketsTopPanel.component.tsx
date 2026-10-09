@@ -51,8 +51,9 @@ export const TicketsTopPanel = ({
 
 
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
-	// ISSUE #6319 TODO add assignees and status readOnly
+	const readOnlyDefault = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const readOnlyStatus = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.status');
+	const readOnlyAssign = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.assignees');
 
 	const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -76,7 +77,7 @@ export const TicketsTopPanel = ({
 				defaultValue={title}
 				formError={formState.errors[BaseProperties.TITLE]}
 				onBlur={onPropertyBlur}
-				disabled={readOnly}
+				disabled={readOnlyDefault}
 				ref={ref}
 			/>
 			{createdAt && (
@@ -95,18 +96,18 @@ export const TicketsTopPanel = ({
 						defaultMessage: 'Description',
 					})}
 					formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
-					disabled={readOnly}
+					disabled={readOnlyDefault}
 				/>
 				{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 			</DescriptionProperty>
 			<FlexContainer>
 				{hasIssueProperties ? (
-					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnlyDefault} />
 				) : (
-					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
+					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnlyStatus} />
 				)}
 			</FlexContainer>
-			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
+			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnlyAssign} />)}
 			<PropertiesList module="properties" properties={propertiesToInclude} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);
