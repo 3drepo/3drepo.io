@@ -118,9 +118,10 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
-	const readOnly = isFed(containerOrFederation)
-		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
-		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	// 6319 todo can create template for multiple models
+	// const readOnly = isFed(containerOrFederation)
+	// 	? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
+	// 	: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
@@ -155,9 +156,9 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
-	useEffect(() => {
-		TicketsCardActionsDispatchers.setReadOnly(readOnly);
-	}, [readOnly]);
+	// useEffect(() => {
+	// 	TicketsCardActionsDispatchers.setReadOnly(readOnly);
+	// }, [readOnly]);
 
 	useEffect(() => {
 		if (templates.length) return;

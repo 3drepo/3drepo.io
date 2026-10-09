@@ -24,7 +24,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress, Tooltip } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
@@ -42,6 +42,7 @@ import {
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { RgbArray, rgbToHex } from '@/v5/helpers/colors.helper';
+import { TicketContext } from '../../../../ticket.context';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
@@ -56,7 +57,9 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);
-	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const { containerOrFederation } = useContext(TicketContext);
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
 	const isHidden = groupType === 'hidden';
@@ -143,7 +146,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 					</GroupsCount>
 				</NameContainer>
 				<Buttons>
-					{isAdmin && (
+					{!readOnly && (
 						<TicketButton variant="error" onClick={handleDeleteGroup}>
 							<DeleteIcon />
 						</TicketButton>

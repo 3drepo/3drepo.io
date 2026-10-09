@@ -24,7 +24,7 @@ import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { useContext } from 'react';
 import {
@@ -39,13 +39,17 @@ import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import { TicketContext } from '../../../ticket.context';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
 	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
 	const overridesIndexes = overrides.map(({ index }) => index);
 	const state = getCollectionState(overridesIndexes);
-	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	const { containerOrFederation } = useContext(TicketContext);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	
 	const dispatch = useDispatch();
 
 	const handleCheckboxClick = (e) => {
@@ -82,7 +86,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 						</NameContainer>
 					</CollectionHeadline>
 					<Buttons>
-						{isAdmin && (
+						{!readOnly && (
 							<TicketButton variant="error" onClick={handleDeleteCollection}>
 								<DeleteIcon />
 							</TicketButton>

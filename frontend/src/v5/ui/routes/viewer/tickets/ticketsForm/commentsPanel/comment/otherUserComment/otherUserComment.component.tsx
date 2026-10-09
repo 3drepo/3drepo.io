@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
@@ -23,6 +23,8 @@ import { Comment, AuthorAvatar, ImportedAuthorAvatar } from './otherUserComment.
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
 import { getFullnameFromUser, getImportedUser } from '@/v5/store/users/users.helpers';
+import { TicketContext } from '../../../../ticket.context';
+import { useContext } from 'react';
 
 type OtherUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
@@ -43,7 +45,9 @@ export const OtherUserComment = ({
 	const imported = !!originalAuthor;
 	const authorUser = UsersHooksSelectors.selectUser(teamspace, author);
 	const importedAuthorUser = getImportedUser(originalAuthor);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const { containerOrFederation } = useContext(TicketContext);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'comment');
 
 	const getAuthorDisplayName = () => {
 		if (!isFirstOfBlock) return null;

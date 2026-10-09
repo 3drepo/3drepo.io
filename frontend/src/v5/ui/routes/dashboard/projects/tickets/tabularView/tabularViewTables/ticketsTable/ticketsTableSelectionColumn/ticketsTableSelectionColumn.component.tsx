@@ -44,6 +44,7 @@ type SelectionRowType = {
 };
 const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => {
 	const tooltipTitle = disabled ? formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' }) : '';
+	// ISSUE #6319 read only check for specific ticket
 	return (
 		<Row key={ticketId} $selected={selectedTicketId === ticketId}>
 			<CellContainer alwaysVisible>

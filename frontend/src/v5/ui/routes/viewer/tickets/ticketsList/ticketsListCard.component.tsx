@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
@@ -47,17 +47,21 @@ import { TextOverflow } from '@controls/textOverflow';
 import { useSearchParam } from '../../../useSearchParam';
 import { isEqual } from 'lodash';
 
-const TicketsActions = ({ readOnly, groupBy }) => {
+const TicketsActions = ({ groupBy }) => {
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
 	const [, setGroupByParam] = useSearchParam('groupBy');
+	// CardHooksSelectors.selectReadOnl TODO
+	const canEditTicket = true;
+	const canCreateTicket = TicketsHooksSelectors.selectCreatableTemplates(containerOrFederation).length > 0;
 
 	const bulkCheckboxTooltipMessage = !bulkModeOn ? 
 		formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' }) :
 		formatMessage({ id: 'viewer.cards.tickets.disableBulkUpdate', defaultMessage: 'Disable bulk update' });
 
 	return (<>
-		{!bulkModeOn && !readOnly && (<NewTicketMenu />)}
-		{!readOnly &&  (<Tooltip title={bulkCheckboxTooltipMessage} >
+		{!bulkModeOn && canCreateTicket && (<NewTicketMenu />)}
+		{!canEditTicket &&  (<Tooltip title={bulkCheckboxTooltipMessage} >
 			<BulkCheckbox checked={bulkModeOn} onClick={toggleBulkMode}  />
 		</Tooltip>)}
 		{bulkModeOn && (
@@ -92,7 +96,8 @@ const GroupByLabel = ({ groupBy }) => {
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	// const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	// const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
@@ -133,7 +138,7 @@ export const TicketsListCard = () => {
 					<CardHeader
 						icon={<TicketsIcon />}
 						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-						actions={(<TicketsActions readOnly={readOnly} groupBy={groupBy}/>)}
+						actions={(<TicketsActions groupBy={groupBy}/>)}
 					/>
 					<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 						<CardFilters />

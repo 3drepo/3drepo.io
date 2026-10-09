@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
@@ -50,7 +50,10 @@ export const TicketsTopPanel = ({
 	const { containerOrFederation } = useContext(TicketContext);
 
 
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	// ISSUE #6319 TODO add assignees and status readOnly
+
 	const ref = useRef<HTMLTextAreaElement>(null);
 
 	const owner = getValues(`properties.${BaseProperties.OWNER}`);

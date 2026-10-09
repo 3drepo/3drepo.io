@@ -38,9 +38,9 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { containerOrFederation } = useContext(TicketContext);
 
 	const { formState } = useFormContext();
-	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketIsReadOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, selectedTicketId, 'edit.default');
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
 
 	if (!properties.length) return null;

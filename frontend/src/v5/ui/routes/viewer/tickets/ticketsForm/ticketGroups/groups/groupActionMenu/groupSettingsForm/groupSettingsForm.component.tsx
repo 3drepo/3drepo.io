@@ -17,7 +17,7 @@
 
 /* eslint-disable no-param-reassign */
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -110,9 +110,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [rules, setRules] = useState([]);
 
 	const [selectedRule, setSelectedRule] = useState(null);
-	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
 
 	const formRef = useRef(null);
 
@@ -197,7 +199,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	};
 
 	const toggleExcludeDefinedObjects = () => {
-		if (!isAdmin) return;
+		if (readOnly) return;
 		setValue('group.excludeDefinedObjects', !watch('group.excludeDefinedObjects'), {
 			shouldDirty: true,
 			shouldValidate: true,
@@ -311,7 +313,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							})}
 							required
 							formError={errors?.group?.name}
-							disabled={!isAdmin}
+							disabled={readOnly}
 						/>
 						{isColored && (
 							<ColorPicker
@@ -320,7 +322,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									setValue('opacity', opacity, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
 								}}
 								value={({ color: watch('color'), opacity: watch('opacity') })}
-								disabled={!isAdmin}
+								disabled={readOnly}
 							/>
 						)}
 					</LabelAndColor>
@@ -332,27 +334,27 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								defaultMessage: 'Description',
 							})}
 							formError={errors?.group?.description}
-							disabled={!isAdmin}
+							disabled={readOnly}
 						/>
 					</FormRow>
 					<FormRow>
 						<InputController
 							Input={GroupsCollectionSelect}
 							name="prefix"
-							label={isAdmin ? formatMessage({
-								id: 'ticketsGroupSettings.form.collection',
-								defaultMessage: 'Add group to collection',
-							}) : formatMessage({
+							label={readOnly ? formatMessage({
 								id: 'ticketsGroupSettings.form.collection.disabled',
 								defaultMessage: 'Parent collection',
+							}) : formatMessage({
+								id: 'ticketsGroupSettings.form.collection',
+								defaultMessage: 'Add group to collection',
 							})}
 							formError={errors?.prefix}
-							disabled={!isAdmin}
+							disabled={readOnly}
 							prefixes={currentPrefixes}
 						/>
 					</FormRow>
 					{
-						isAdmin && (
+						!readOnly && (
 							<NewCollectionActionMenu
 								TriggerButton={(
 									<NewCollectionLink>
@@ -382,13 +384,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 						<Toggle
 							value={isSmart}
 							onClick={() => setIsSmart((prev) => !prev)}
-							disabled={!isAdmin}
+							disabled={readOnly}
 						/>
-						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(true)}>
+						<ToggleLabel disabled={readOnly} onClick={() => setIsSmart(true)}>
 							<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
 						</ToggleLabel>
 					</ToggleWrapper>
-					{isAdmin && isSmart && (
+					{!readOnly && isSmart && (
 						<Instruction>
 							<FormattedMessage
 								id="ticketsGroupSettings.smartGroupInstruction"
@@ -396,7 +398,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							/>
 						</Instruction>
 					)}
-					{isAdmin && !isSmart && (
+					{!readOnly && !isSmart && (
 						<Instruction>
 							<FormattedMessage
 								id="ticketsGroupSettings.manualGroupInstruction"
@@ -408,9 +410,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 						<Toggle
 							value={excludeDefinedObjects}
 							onClick={toggleExcludeDefinedObjects}
-							disabled={!isAdmin}
+							disabled={readOnly}
 						/>
-						<ToggleLabel disabled={!isAdmin} onClick={toggleExcludeDefinedObjects}>
+						<ToggleLabel disabled={readOnly} onClick={toggleExcludeDefinedObjects}>
 							<FormattedMessage
 								id="ticketsGroupSettings.form.excludeDefinedObjects"
 								defaultMessage="Exclude specified objects"
@@ -442,8 +444,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								}}
 							>
 								<GroupRulesForm
-									containerOrFederation={containerOrFederation}
 									rule={selectedRule?.value}
+									readOnly={readOnly}
 									onSubmit={handleGroupRulesFormSubmit}
 									onClose={resetFilterMenu}
 									existingRules={rules}
@@ -454,7 +456,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									id="ticketsGroupSettings.subHeading.filters"
 									defaultMessage="Filters"
 								/>
-								{isAdmin && (
+								{!readOnly && (
 									<AddFilterTitle>
 										<TriggerButton onClick={handleAddFilterClick}>
 											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
@@ -478,7 +480,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 												setRules(newRules);
 												resetFilterMenu();
 											}}
-											isReadOnly={!isAdmin}
+											isReadOnly={readOnly}
 											onClick={() => {
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);
@@ -504,7 +506,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>
-					{ isAdmin && (
+					{ !readOnly && (
 						<ActionMenuItem>
 							<SubmitButton
 								size="medium"

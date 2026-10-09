@@ -44,7 +44,8 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticket._id, 'edit.default');
+
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
 	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
