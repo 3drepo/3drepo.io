@@ -30,13 +30,9 @@ import { ROUTES } from '../../constants/routes';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import {
 	addColorOverrides,
-	addTransparencyOverrides,
 	overridesColorAddedOrUpdated,
 	overridesColorRemoved,
-	overridesTransparencyDiff,
-	overridesTransparencyRemoved,
 	removeColorOverrides,
-	removeTransparencyOverrides,
 } from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
@@ -62,7 +58,6 @@ interface IProps {
 	};
 	rightPanels: string[];
 	colorOverrides: any;
-	transparencies: any;
 	issuePins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
@@ -156,13 +151,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		addColorOverrides(toAdd);
 	}
 
-	public renderTransparencies(prev, curr) {
-		const toAdd = overridesTransparencyDiff(prev, curr);
-		const toRemove = overridesTransparencyRemoved(prev, curr);
-
-		removeTransparencyOverrides(toRemove);
-		addTransparencyOverrides(toAdd);
-	}
 
 	public renderTransformations(prev, curr) {
 		const changes = transformationDiffChanges(prev, curr);
@@ -215,17 +203,13 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 	public async onComponentDidUpdate(prevProps, currProps) {
 		const { colorOverrides, issuePins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies, transformations,
+			gisCoordinates, gisLayers, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
-		}
-
-		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			this.renderTransparencies(prevProps.transparencies, transparencies);
 		}
 
 		if (transformations && !isEqual(transformations, prevProps.transformations)) {
