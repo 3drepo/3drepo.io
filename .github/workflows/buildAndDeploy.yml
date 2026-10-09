@@ -260,8 +260,10 @@ jobs:
               echo "post-deploy check passed (attempt $attempt/$attempts)"
               exit 0
             fi
-            echo "post-deploy check not green yet (attempt $attempt/$attempts); waiting 60s..."
-            if [ "$attempt" -lt "$attempts" ]; then sleep 60; fi
+            if [ "$attempt" -lt "$attempts" ]; then
+              echo "post-deploy check not green yet (attempt $attempt/$attempts); waiting 60s..."
+              sleep 60
+            fi
           done
           echo "$out"
           echo "::error::post-deploy check failed for $RELEASE_NAME ($ENVIRONMENT)"
