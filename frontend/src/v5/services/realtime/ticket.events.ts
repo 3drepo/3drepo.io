@@ -17,7 +17,8 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
-import { normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
+import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
+import { debounce } from 'lodash';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -28,25 +29,42 @@ import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tick
 
 export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 
+const UPDATE_TICKETS_BATCH_INTERVAL = 200;
+
 // Container ticket
-export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
-	subscribeToRoomEvent(
+export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean) => {
+	let queuedTickets: Partial<ITicket>[] = [];
+	// Bulk updated tickets will fire an event for every ticket
+	// We debounce in order to batch multiple ticket updates together
+	const debouncedApplyUpdates = debounce(() => {
+		if (!queuedTickets.length) return;
+
+		const tickets = queuedTickets.map(addUpdatedAtTime);
+		queuedTickets = [];
+		TicketsActionsDispatchers.upsertTicketsSuccess(containerId, tickets);
+	}, UPDATE_TICKETS_BATCH_INTERVAL);
+
+	return subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
 			const fullTicket = selectTicketByIdRaw(getState(), containerId, (ticket as any)._id);
 			const template = fullTicket ? selectTemplateById(getState(), containerId, fullTicket.type) : undefined;
 			normalizeViewsInTicket(ticket, template);
-			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
+
+			queuedTickets.push(ticket as Partial<ITicket>);
+			debouncedApplyUpdates();
 		},
-	)
-);
+	);
+};
 
 export const enableRealtimeNewTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		ticketEvent(isFed, 'NewTicket'),
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision),
+		(ticket: ITicket) => {
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
+		},
 	)
 );
 

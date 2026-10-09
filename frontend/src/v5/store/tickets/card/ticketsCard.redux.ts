@@ -47,6 +47,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setFiltering: ['isFiltering'],
 	setGroupBy: ['groupByField'],
 	applyFilterForTicket: ['teamspace', 'projectId', 'modelId', 'isFederation', 'ticketId'],
+	applyFilterForTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'ticketIds'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -204,6 +205,7 @@ export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing:
 export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean } ;
 export type SetFilteringAction = Action<'SET_FILTERING'> & { isFiltering: boolean } ;
 export type ApplyFilterForTicketAction = Action<'APPLY_FILTER_FOR_TICKET'> & TeamspaceProjectAndModel & { isFederation: boolean, ticketId: string } ;
+export type ApplyFilterForTicketsAction = Action<'APPLY_FILTER_FOR_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, ticketIds: string[] } ;
 export type SetFiltersAction = Action<'SET_FILTERS'> & { filters: TicketFilter[] };
 export type SetGroupByAction = Action<'SET_GROUP_BY'> & { groupByField: string };
 
@@ -244,5 +246,12 @@ export interface ITicketsCardActionCreators {
 		isFederation: boolean,
 		ticketId: string,
 	) => ApplyFilterForTicketAction,
+	applyFilterForTickets: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean,
+		ticketIds: string[],
+	) => ApplyFilterForTicketsAction,
 	setGroupBy: (groupByField: string) => SetGroupByAction,
 }
