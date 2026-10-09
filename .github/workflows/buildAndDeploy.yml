@@ -30,7 +30,7 @@ env:
 jobs:
   metadata:
     name: Prepare deployment metadata
-    if: github.event_name == 'push' || github.event.client_payload.pull_request != null
+    if: (github.event_name == 'push' && github.event.deleted != true) || github.event.client_payload.pull_request != null
     runs-on: ubuntu-24.04
     outputs:
       checkout_repository: ${{ steps.meta.outputs.checkout_repository }}
