@@ -16,18 +16,19 @@
  */
 
 "use strict";
-(function() {
+(function () {
 
 	const _ = require("lodash");
 	const express = require("express");
-	const C = require("../constants");
-	const router = express.Router({mergeParams: true});
+	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
-	const multer = require("multer");
 	const TeamspaceSettings = require("../models/teamspaceSetting");
 	const User = require("../models/user");
 	const utils = require("../utils");
+
+	const { v5Path } = require("../../interop");
+	const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 	/**
 	 * @apiDefine Teamspace Teamspace
@@ -39,38 +40,17 @@
 	 * @api {get} /:teamspace/settings/mitigations.csv Download mitigations file
 	 * @apiName getMitigationsFile
 	 * @apiGroup Teamspace
-	 * @apiDescription Returns a CSV file containing all defined suggested risk mitigations.
-	 *
-	 * @apiUse Teamspace
-	 *
-	 * @apiExample {get} Example usage
-	 * GET /acme/settings/mitigations.csv HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * <Risk mitigations CSV file>
+	 * @apiDescription Route has been decommissioned.
 	 */
-	router.get("/settings/mitigations.csv", middlewares.isAccountAdmin, getMitigationsFile);
+	router.get("/settings/mitigations.csv", routeDecommissioned());
 
 	/**
 	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
 	 * @apiName uploadMitigationsFile
 	 * @apiGroup Teamspace
-	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
-	 *
-	 * @apiUse Teamspace
-	 *
-	 * @apiExample {post} Example usage
-	 * POST /acme/settings/mitigations.csv HTTP/1.1
-	 * <Risk mitigations CSV file>
-	 *
-	 * @apiSuccessExample {json} Success-Response
-	 * HTTP/1.1 200 OK
-	 * {
-	 * 	"status":"ok"
-	 * }
+	 * @apiDescription Route has been decommissioned.
 	 */
-	router.post("/settings/mitigations.csv", middlewares.isAccountAdmin, uploadMitigationsFile);
+	router.post("/settings/mitigations.csv", routeDecommissioned());
 
 	/**
 	 * @api {get} /:teamspace/settings Get teamspace settings
@@ -218,15 +198,15 @@
 	 *          company: "Teamspace one",
 	 *          permissions: [
 	 *             "teamspace_admin"
- 	 *          ],
- 	 *          job: "jobA",
+		 *          ],
+		 *          job: "jobA",
 	 *          isCurrentUser: true
 	 *       },
 	 *       {
 	 *          user: "unassignedTeamspace1UserJobA",
- 	 *          firstName: "John",
- 	 *          lastName: "Williams",
- 	 *          company: "Teamspace One",
+		 *          firstName: "John",
+		 *          lastName: "Williams",
+		 *          company: "Teamspace One",
 	 *          permissions: [],
 	 *          job: "jobA",
 	 *          isCurrentUser: false
@@ -498,7 +478,7 @@
 				userData.isCurrentUser = req.session.user.username === userData.user;
 				return userData;
 			});
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {members});
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, { members });
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
@@ -519,7 +499,7 @@
 	function removeTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
 		User.removeTeamMember(req.params.account, req.params.user, req.query.cascadeRemove, req.session.user.username).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { user: req.params.user });
 		})
 			.catch(err => {
 				responseCodes.respond(responsePlace, req, res, next,
@@ -540,46 +520,6 @@
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, settings);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function getMitigationsFile(req, res, next) {
-		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigationsStream) => {
-			const timestamp = (new Date()).toLocaleString();
-			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
-
-			const headers = {
-				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",
-				"Content-Type": "text/csv"
-			};
-
-			res.set(headers);
-			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigationsStream, headers);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function uploadMitigationsFile(req, res, next) {
-		const place = utils.APIInfo(req);
-		const {account} = req.params;
-		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const user = req.session.user.username;
-
-		const upload = multer({
-			storage: multer.memoryStorage()
-		});
-
-		upload.single("file")(req, res, (err) => {
-			if (err) {
-				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
-			} else {
-				TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer).then((result) => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
-				}).catch(promErr => {
-					responseCodes.respond(place, req, res, next, promErr, promErr);
-				});
-			}
 		});
 	}
 

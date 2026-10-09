@@ -29,22 +29,20 @@ const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
 const ISSUES_FILE_REF_EXT = ".issues.ref";
-const RISKS_FILE_REF_EXT = ".risks.ref";
 
 const ISSUES_RESOURCE_PROP = "issueIds";
-const RISKS_RESOURCE_PROP = "riskIds";
-const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
+const attachResourceProps = [ISSUES_RESOURCE_PROP];
 
 const extensionRe = /\.(\w+)$/;
 
 const FileRef = {};
 
-const getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, {_id: id}, projection);
+const getRefEntry = (account, collection, id, projection = {}) => db.findOne(account, collection, { _id: id }, projection);
 
 async function _fetchFile(account, model, ext, fileName, metadata = false) {
-	const collection =  model ? `${model}${ext}` : ext;
+	const collection = model ? `${model}${ext}` : ext;
 	const entry = await getRefEntry(account, collection, fileName);
-	if(!entry) {
+	if (!entry) {
 		throw ResponseCodes.NO_FILE_FOUND;
 	}
 
@@ -52,21 +50,21 @@ async function _fetchFile(account, model, ext, fileName, metadata = false) {
 
 	if (metadata) {
 		const type = (((entry.name || "").match(extensionRe) || [])[0] || "").toLowerCase();
-		return {file:fileBuffer, type, name: entry.name , size: entry.size};
+		return { file: fileBuffer, type, name: entry.name, size: entry.size };
 	}
 	return fileBuffer;
 
 }
 
-async function fetchFileStream(account,collection, fileName) {
+async function fetchFileStream(account, collection, fileName) {
 
 	const entry = await getRefEntry(account, collection, fileName);
-	if(!entry) {
+	if (!entry) {
 		throw ResponseCodes.NO_FILE_FOUND;
 	}
 
-	const stream  = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
-	return {readStream: stream, size: entry.size };
+	const stream = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
+	return { readStream: stream, size: entry.size };
 }
 
 function removeAllFiles(account, collection) {
@@ -75,13 +73,13 @@ function removeAllFiles(account, collection) {
 			const query = [
 				{
 					$match: {
-						noDelete: {$exists: false}
+						noDelete: { $exists: false }
 					}
 				},
 				{
 					$group: {
 						_id: "$type",
-						links: {$addToSet:  "$link"}
+						links: { $addToSet: "$link" }
 					}
 				}];
 
@@ -97,20 +95,20 @@ function removeAllFiles(account, collection) {
 }
 
 async function insertRef(account, collection, user, name, refInfo) {
-	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
+	const ref = { ...refInfo, name, user, createdAt: (new Date()).getTime() };
 	await db.insertOne(account, collection, ref);
 
 	return ref;
 }
 
-const storeFileStream = async function(account, collection, user, name, data, extraFields = null) {
+const storeFileStream = async function (account, collection, user, name, data, extraFields = null) {
 	let refInfo = await ExternalServices.storeFileStream(account, collection, data);
-	refInfo = {...refInfo ,...(extraFields || {}) };
+	refInfo = { ...refInfo, ...(extraFields || {}) };
 	return await insertRef(account, collection, user, name, refInfo);
 };
 
-FileRef.storeJSONFileStream = async (account, model, data, user, name, extraFields = {}) =>  {
-	return storeFileStream(account, `${model}${JSON_FILE_REF_EXT}`, user, name, data, { _id: name, ...extraFields});
+FileRef.storeJSONFileStream = async (account, model, data, user, name, extraFields = {}) => {
+	return storeFileStream(account, `${model}${JSON_FILE_REF_EXT}`, user, name, data, { _id: name, ...extraFields });
 };
 
 FileRef.fileExists = async (account, collection, id) => {
@@ -120,7 +118,7 @@ FileRef.fileExists = async (account, collection, id) => {
 
 FileRef.fetchFileStream = (account, collection, fileName) => fetchFileStream(account, `${collection}.ref`, fileName);
 
-FileRef.getOriginalFile = function(account, model, fileName) {
+FileRef.getOriginalFile = function (account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
 	return fetchFileStream(account, collection, fileName, false);
 };
@@ -130,9 +128,9 @@ FileRef.fetchFile = (account, model, collName, ref_id) => {
 };
 
 FileRef.removeFile = async (account, model, collName, ref_id) => {
-	const refCollName =   model + "." + collName + ".ref";
+	const refCollName = model + "." + collName + ".ref";
 
-	const entry = await db.findOne(account, refCollName, {_id: ref_id});
+	const entry = await db.findOne(account, refCollName, { _id: ref_id });
 
 	if (!entry) {
 		return [];
@@ -140,17 +138,17 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 
 	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
-		db.deleteOne(account, refCollName, {_id:entry._id})
+		db.deleteOne(account, refCollName, { _id: entry._id })
 	]);
 };
 
-FileRef.getTotalModelFileSize = function(account, model) {
+FileRef.getTotalModelFileSize = function (account, model) {
 	return db.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
-		if(col) {
-			return col.find({},{size : 1}).toArray().then((res) => {
+		if (col) {
+			return col.find({}, { size: 1 }).toArray().then((res) => {
 				if (res && res.length) {
-					totalSize =  res.reduce((total, current) => total + current.size, 0);
+					totalSize = res.reduce((total, current) => total + current.size, 0);
 				}
 				return totalSize;
 			});
@@ -160,46 +158,46 @@ FileRef.getTotalModelFileSize = function(account, model) {
 	}).then(modelVersionsFileSize =>
 		db.getCollection(account, model + RESOURCES_FILE_REF_EXT)
 			.then(col =>
-				col.find({ size: { $exists: true} }, {size : 1}).toArray())
+				col.find({ size: { $exists: true } }, { size: 1 }).toArray())
 			.then(res => {
-				const resourcesSize =  (res || []).reduce((total, current) => total + current.size, 0);
+				const resourcesSize = (res || []).reduce((total, current) => total + current.size, 0);
 				return modelVersionsFileSize + resourcesSize;
 			})
 	);
 };
 
-FileRef.getUnityBundle = function(account, model, fileName) {
+FileRef.getUnityBundle = function (account, model, fileName) {
 	return _fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
 };
 
-FileRef.getSequenceActivitiesFile = function(account, model, fileName) {
+FileRef.getSequenceActivitiesFile = function (account, model, fileName) {
 	return _fetchFile(account, model, ACTIVITIES_FILE_REF_EXT, fileName, false, false);
 };
 
-FileRef.getSequenceStateFile = function(account, model, fileName) {
+FileRef.getSequenceStateFile = function (account, model, fileName) {
 	return _fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
 };
 
-FileRef.jsonFileExists = function(account, model, fileName) {
+FileRef.jsonFileExists = function (account, model, fileName) {
 	return FileRef.fileExists(account, `${model}${JSON_FILE_REF_EXT}`, fileName);
 };
 
-FileRef.getJSONFile = function(account, model, fileName) {
+FileRef.getJSONFile = function (account, model, fileName) {
 	return _fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
 };
 
 FileRef.removeJSONFile = async (account, model, fileName) => {
 	const collection = `${model}${JSON_FILE_REF_EXT}`;
 	const entry = await getRefEntry(account, collection, fileName);
-	if(entry) {
+	if (entry) {
 		await Promise.all([
-			db.deleteOne(account, collection , {_id: fileName}),
+			db.deleteOne(account, collection, { _id: fileName }),
 			ExternalServices.removeFiles(account, collection, entry.type, [entry.link])
 		]);
 	}
 };
 
-FileRef.getResourceFile = function(account, model, fileName) {
+FileRef.getResourceFile = function (account, model, fileName) {
 	return _fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
 
@@ -209,12 +207,12 @@ FileRef.getResourceFile = function(account, model, fileName) {
  * @param {*} fileName
  * @returns { Promise<{readStream: stream.Readable , size: Number}>}
  */
-FileRef.getJSONFileStream = function(account, model, fileName) {
+FileRef.getJSONFileStream = function (account, model, fileName) {
 	const collection = model + JSON_FILE_REF_EXT;
 	return fetchFileStream(account, collection, fileName, true);
 };
 
-FileRef.removeAllFilesFromModel = function(account, model) {
+FileRef.removeAllFilesFromModel = function (account, model) {
 	const promises = [];
 	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
@@ -222,19 +220,18 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + ISSUES_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model + RISKS_FILE_REF_EXT));
 
 	return Promise.all(promises);
 };
 
-FileRef.removeResourceFromEntity  = async function(account, model, property, propertyId, resourceId) {
+FileRef.removeResourceFromEntity = async function (account, model, property, propertyId, resourceId) {
 	if (!account || !model || !resourceId || !propertyId) {
 		throw ResponseCodes.INVALID_ARGUMENTS;
 	}
 
 	const collName = model + RESOURCES_FILE_REF_EXT;
 	const collection = await db.getCollection(account, collName);
-	const ref = await collection.findOne({_id: resourceId});
+	const ref = await collection.findOne({ _id: resourceId });
 
 	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
 		throw ResponseCodes.RESOURCE_NOT_ATTACHED;
@@ -249,32 +246,32 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
 		}
 
-		await collection.deleteOne({_id:resourceId});
+		await collection.deleteOne({ _id: resourceId });
 	} else {
 		delete ref._id;
-		await collection.updateOne({_id: resourceId}, { $set: ref });
+		await collection.updateOne({ _id: resourceId }, { $set: ref });
 	}
 
 	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
 	return ref;
 };
 
-FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
+FileRef.storeFileAsResource = async function (account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
 
 	return await this.storeFile(account, collName, user, name, data, extraFields);
 };
 
-FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
+FileRef.storeFile = async function (account, collection, user, name, data, extraFields = null) {
 	let refInfo = await ExternalServices.storeFile(account, collection, data);
-	refInfo = {...refInfo ,...(extraFields || {}) };
+	refInfo = { ...refInfo, ...(extraFields || {}) };
 
 	return await insertRef(account, collection, user, name, refInfo);
 };
 
-FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
+FileRef.storeUrlAsResource = async function (account, model, user, name, link, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const refInfo = {_id: utils.generateUUID({string: true}), link, type: "http", ...extraFields  };
+	const refInfo = { _id: utils.generateUUID({ string: true }), link, type: "http", ...extraFields };
 	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };
