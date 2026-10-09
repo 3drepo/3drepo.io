@@ -26,7 +26,7 @@ import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroups
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
-import { selectIsTreeProcessed } from '@/v4/modules/tree';
+import { selectGetAllMeshes, selectIsTreeProcessed } from '@/v4/modules/tree';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -34,6 +34,28 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 }));
 
 export const convertToV4GroupNodes = (group?: Group) => {
+	if (group?.excludeDefinedObjects) {
+		const excludedMeshesByContainer = new Map<string, Set<string>>();
+		(group.objects || []).forEach(({ container, _ids }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(container) || new Set<string>();
+			_ids.forEach((id) => excludedMeshes.add(id));
+			excludedMeshesByContainer.set(container, excludedMeshes);
+		});
+
+		const allMeshes = selectGetAllMeshes(getState());
+		return allMeshes.flatMap(({ teamspace: account, model, meshes }) => {
+			const excludedMeshes = excludedMeshesByContainer.get(model) || new Set();
+			const filteredMeshes = excludedMeshes.size ? meshes.filter((mesh) => !excludedMeshes.has(mesh)) : meshes;
+			if (!filteredMeshes.length) return [];
+
+			return [{
+				account,
+				model,
+				shared_ids: toSharedIds(filteredMeshes),
+			}];
+		});
+	}
+
 	return (group?.objects || []).map(({ container: model, _ids }) => ({
 		account: selectCurrentTeamspace(getState()),
 		model,
@@ -125,8 +147,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	};
 
 	if (color) {
-		const excludedFlag = Boolean(v5Group.excludeDefinedObjects) ? '-' : '' ;
-		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]) + excludedFlag;
+		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]);
 	}
 
 	if (opacity) {
@@ -196,9 +217,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
-		const excludeIdsFlag = (current.group as Group).excludeDefinedObjects ? '-' : '';
-
-		const color = current.color ? getGroupHexColor(current.color.concat( Math.round(current.opacity * 255))) + excludeIdsFlag : undefined;
+		const color = current.color ? getGroupHexColor(current.color.concat( Math.round(current.opacity * 255))) : undefined;
 		const v4Objects = convertToV4GroupNodes(current.group as Group);
 
 		return v4Objects.reduce((dict, objects) => {

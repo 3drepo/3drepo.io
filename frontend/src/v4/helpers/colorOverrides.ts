@@ -16,9 +16,8 @@
  */
 import { getState } from '@/v5/helpers/redux.helpers';
 import { hexToGLColor } from '@/v5/helpers/colors.helper';
-import { isString } from 'lodash';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
-	selectTreeNodesList } from '../modules/tree';
+	selectGetAllMeshes, selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
 
 
@@ -84,27 +83,48 @@ export const overridesColorRemoved = (prev, curr) => {
 	return result;
 };
 
+// This function return the meshes if the amount is larger than half of the total meshes in the model
+// it returns the complement and excludeIds flag set to true if the majority of meshes are included
+const getMeshesForOverride = (meshesOverrides, allMeshes) => meshesOverrides.map((modelMeshes) => {
+	const modelKey = `${modelMeshes.teamspace}__${modelMeshes.modelId}`;
+	const allModelMeshes = allMeshes.find(({ teamspace, model }) =>
+		`${teamspace}__${model}` === modelKey
+	);
+
+	if (!allModelMeshes || modelMeshes.meshes.length <= allModelMeshes.meshes.length / 2) {
+		return { ...modelMeshes, excludeIds: false };
+	}
+
+	const meshesToExclude = new Set(modelMeshes.meshes);
+	return {
+		...modelMeshes,
+		meshes: allModelMeshes.meshes.filter((meshId) => !meshesToExclude.has(meshId)),
+		excludeIds: true,
+	};
+});
+
 export const addColorOverrides = async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
 	const state = getState();
 	const treeNodes = selectTreeNodesList(state);
+	const allMeshes = selectGetAllMeshes(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
 		const value = hexToGLColor(override['color']);
-		const excludeIds = isString(override['color']) && override['color'].substr(-1) === '-';
 
 		if (treeNodes.length) {
 			const selectNodesFn = selectGetNodesIdsFromSharedIds([override]);
 			const nodes = selectNodesFn(state);
 
 			if (nodes) {
-				const modelsList = selectGetMeshesByIds(nodes)(state);
+				const originalMeshesOverrides = selectGetMeshesByIds(nodes)(state);
+				const meshesForOverride = getMeshesForOverride(originalMeshesOverrides, allMeshes);
 
-				for (let j = 0; j < modelsList.length; j++) {
-					const { meshes, teamspace, modelId } = modelsList[j] as any;
+				for (let j = 0; j < meshesForOverride.length; j++) {
+					const { meshes, teamspace, modelId, excludeIds } = meshesForOverride[j] as any;
 					Viewer.overrideMeshOpacity(teamspace, modelId, meshes, value[3], excludeIds);
 					Viewer.overrideMeshColor(teamspace, modelId, meshes, value, excludeIds);
 				}
@@ -120,20 +140,21 @@ export const removeColorOverrides = async (overrides) => {
 
 	const state = getState();
 	const treeNodes = selectTreeNodesList(state);
+	const allMeshes = selectGetAllMeshes(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
-		const excludeIds = isString(override['color']) && override['color'].substr(-1) === '-';
 
 		if (treeNodes.length) {
 			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
 			const nodes = selectNodes(state);
 
 			if (nodes) {
-				const modelsList = selectGetMeshesByIds(nodes)(state);
+				const originalMeshesOverrides = selectGetMeshesByIds(nodes)(state);
+				const meshesForOverride = getMeshesForOverride(originalMeshesOverrides, allMeshes);
 
-				for (let j = 0; j < modelsList.length; j++) {
-					const { meshes, teamspace, modelId } = modelsList[j] as any;
+				for (let j = 0; j < meshesForOverride.length; j++) {
+					const { meshes, teamspace, modelId, excludeIds } = meshesForOverride[j] as any;
 					Viewer.resetMeshOpacity(teamspace, modelId, meshes, excludeIds);
 					Viewer.resetMeshColor(teamspace, modelId, meshes, excludeIds);
 				}
