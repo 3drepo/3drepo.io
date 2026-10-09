@@ -5,6 +5,9 @@ on:
     branches:
       - master
       - staging
+    tags:
+      - qa_deploy
+      - dev_deploy
   repository_dispatch:
     types:
       - deploy-command
@@ -27,17 +30,22 @@ env:
 jobs:
   metadata:
     name: Prepare deployment metadata
-    if: github.event_name == 'push' || github.event.client_payload.pull_request != null
+    if: (github.event_name == 'push' && github.event.deleted != true) || github.event.client_payload.pull_request != null
     runs-on: ubuntu-24.04
     outputs:
       checkout_repository: ${{ steps.meta.outputs.checkout_repository }}
       checkout_ref: ${{ steps.meta.outputs.checkout_ref }}
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
       source_branch: ${{ steps.meta.outputs.source_branch }}
+      environment: ${{ steps.meta.outputs.environment }}
+      release_name: ${{ steps.meta.outputs.release_name }}
+      values_dir: ${{ steps.meta.outputs.values_dir }}
+      values_file: ${{ steps.meta.outputs.values_file }}
     steps:
       - id: meta
         env:
           EVENT_NAME: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
           REPOSITORY_NAME: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
           PUSH_SHA: ${{ github.sha }}
@@ -64,11 +72,23 @@ jobs:
             commit_sha="$PR_HEAD_SHA"
           fi
 
+          if [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "qa_deploy" ]]; then
+            environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;  values_file=values.yaml
+          elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "dev_deploy" ]]; then
+            environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io; values_file=values.yaml
+          else
+            environment=staging; release_name=""; values_dir=deployments/asite-stg/helm/3drepo.io; values_file=DefaultStgValues.yaml
+          fi
+
           {
             echo "checkout_repository=$checkout_repository"
             echo "checkout_ref=$checkout_ref"
             echo "commit_sha=$commit_sha"
             echo "source_branch=$source_branch"
+            echo "environment=$environment"
+            echo "release_name=$release_name"
+            echo "values_dir=$values_dir"
+            echo "values_file=$values_file"
           } >> "$GITHUB_OUTPUT"
 
   deriveReleaseName:
@@ -146,18 +166,14 @@ jobs:
         with:
           version: 'v1.34.2'
 
-      - name: Set Kubernetes context
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG_STAGING }}
-
       - name: Get default Helm values file
         uses: actions/checkout@v4
         with:
           repository: 3drepo/DevOps
           token: ${{ secrets.REPO_INSTALLER_TOKEN }}
-          sparse-checkout: deployments/asite-stg/helm/3drepo.io
+          sparse-checkout: |
+            ${{ needs.metadata.outputs.values_dir }}
+            tools/post-deployment
           sparse-checkout-cone-mode: false
           path: devops
 
@@ -179,7 +195,9 @@ jobs:
 
       - name: Deploy with Helm
         env:
-          RELEASE_NAME: ${{ needs.deriveReleaseName.outputs.release_name }}
+          ENVIRONMENT: ${{ needs.metadata.outputs.environment }}
+          RELEASE_NAME: ${{ needs.metadata.outputs.release_name != '' && needs.metadata.outputs.release_name || needs.deriveReleaseName.outputs.release_name }}
+          VALUES_PATH: devops/${{ needs.metadata.outputs.values_dir }}/${{ needs.metadata.outputs.values_file }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -187,7 +205,8 @@ jobs:
           # Resolve keeper:// refs to a temp file within this step; the trap wipes both
           # the ini and the resolved-values file on exit (success or failure).
           values_file="$(mktemp)"
-          trap 'rm -f "$values_file" "$HOME/.keeper/keeper.ini"' EXIT
+          kubeconfig_file="$(mktemp)"
+          trap 'rm -f "$values_file" "$kubeconfig_file" "$HOME/.keeper/keeper.ini"' EXIT
 
           umask 077                                    # ini created 0600, no chmod race
           mkdir -p "$HOME/.keeper"
@@ -197,9 +216,18 @@ jobs:
             exit 1
           fi
 
+          # Target cluster kubeconfig from KSM (per environment), not a GitHub secret.
+          case "$ENVIRONMENT" in
+            qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;
+            dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;
+            *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;
+          esac
+          ksm --ini-file "$HOME/.keeper/keeper.ini" secret notation "$kcfg_uid/field/password" | base64 -d > "$kubeconfig_file"
+          export KUBECONFIG="$kubeconfig_file"
+
           # Temp file (not process substitution) so a ksm failure aborts before helm runs.
           ksm --ini-file "$HOME/.keeper/keeper.ini" interpolate --validate \
-            devops/deployments/asite-stg/helm/3drepo.io/DefaultStgValues.yaml > "$values_file"
+            "$VALUES_PATH" > "$values_file"
 
           helm_set_args=(
             --set "image.tag=$COMMIT_SHA"
@@ -207,7 +235,7 @@ jobs:
           )
 
           override="${CUSTOM_HELM_OVERRIDE#,}"
-          if [[ -n "$override" ]]; then
+          if [[ -n "$override" && "$ENVIRONMENT" == "staging" ]]; then
             helm_set_args+=(--set "$override")
           fi
 
@@ -218,6 +246,28 @@ jobs:
             --namespace default \
             -f "$values_file" \
             "${helm_set_args[@]}"
+
+          # Post-deploy health check; flags the job if the release is unhealthy.
+          # Rollouts always take a bit (spot nodes spin up, image pull), so wait first,
+          # then poll quietly, only surface the check output on success or final failure.
+          kctx="$(kubectl config current-context)"
+          chk="devops/tools/post-deployment/postDeployCheck.py"
+          attempts=10
+          sleep 90
+          for attempt in $(seq 1 $attempts); do
+            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --release-only --no-color 2>&1)"; then
+              echo "$out"
+              echo "post-deploy check passed (attempt $attempt/$attempts)"
+              exit 0
+            fi
+            if [ "$attempt" -lt "$attempts" ]; then
+              echo "post-deploy check not green yet (attempt $attempt/$attempts); waiting 60s..."
+              sleep 60
+            fi
+          done
+          echo "$out"
+          echo "::error::post-deploy check failed for $RELEASE_NAME ($ENVIRONMENT)"
+          exit 1
 
       - name: Log out from registries
         if: always()
