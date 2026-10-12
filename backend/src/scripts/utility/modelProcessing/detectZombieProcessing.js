@@ -42,6 +42,10 @@ const processTeamspace = async (teamspace, results) => {
 		status: { $exists: true, $nin: terminalProcessStatuses },
 		timestamp: { $lt: expiredTimestamp },
 	};
+	const zombieModelQuery = {
+		status: { $exists: true, $nin: terminalProcessStatuses },
+		lastProcessingUpdate: { $lt: expiredTimestamp },
+	};
 	const zombieClashRunQuery = {
 		status: { $exists: true, $nin: terminalClashRunStatuses },
 		updatedAt: { $lt: expiredTimestamp },
@@ -49,12 +53,13 @@ const processTeamspace = async (teamspace, results) => {
 
 	logger.logInfo(`\t-${teamspace}`);
 
-	const zombieModels = await find(teamspace, SETTINGS_COL, zombieQuery, { status: 1, timestamp: 1 });
+	const zombieModels = await find(teamspace, SETTINGS_COL, zombieModelQuery,
+		{ status: 1, lastProcessingUpdate: 1 });
 	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
 	const zombieClashRuns = await find(teamspace, CLASH_RUNS_COL, zombieClashRunQuery, { status: 1, updatedAt: 1 });
 
-	results.models.push(...zombieModels.map(({ _id: id, status, timestamp }) => ({
-		teamspace, id, status, timestamp,
+	results.models.push(...zombieModels.map(({ _id: id, status, lastProcessingUpdate }) => ({
+		teamspace, id, status, timestamp: lastProcessingUpdate,
 	})));
 	results.drawings.push(...zombieDrawings.map(({ _id: id, status, timestamp }) => ({
 		teamspace,

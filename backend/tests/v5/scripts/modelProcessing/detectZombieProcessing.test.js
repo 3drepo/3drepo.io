@@ -52,7 +52,11 @@ const setupData = () => {
 		const teamspace = generateRandomString();
 		const models = await Promise.all(times(modelStates.length, async (n) => {
 			const { _id, name, properties } = generateRandomModel({
-				properties: deleteIfUndefined({ status: modelStates[n], timestamp: recentDate }),
+				properties: deleteIfUndefined({
+					status: modelStates[n],
+					timestamp: recentDate,
+					lastProcessingUpdate: recentDate,
+				}),
 			});
 			await createModel(teamspace, _id, name, properties);
 			return { model: _id, status: modelStates[n] };

@@ -446,6 +446,7 @@ const testUpdateModelStatus = () => {
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -462,7 +463,11 @@ const testUpdateModelStatus = () => {
 				teamspace,
 				SETTINGS_COL,
 				{ _id: model },
-				{ $set: { status: processStatuses.QUEUED, corID: corId } },
+				{ $set: expect.objectContaining({
+					status: processStatuses.QUEUED,
+					corID: corId,
+					lastProcessingUpdate: expect.any(Date),
+				}) },
 				{ projection: { federate: 1, modelType: 1 } },
 			);
 		});
@@ -477,6 +482,7 @@ const testUpdateModelStatus = () => {
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -492,6 +498,7 @@ const testUpdateModelStatus = () => {
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -507,6 +514,7 @@ const testUpdateModelStatus = () => {
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.status).toEqual(status);
 			expect(action.$set.corId).toEqual(undefined);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
@@ -549,7 +557,11 @@ const testNewRevisionProcessed = () => {
 				expect(action.$set.errorReason.errorCode).toEqual(retVal);
 				expect(action.$set.errorReason).toHaveProperty('timestamp');
 			}
-			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+			expect(action.$unset).toEqual({
+				corID: 1,
+				lastProcessingUpdate: 1,
+				...(success ? { status: 1 } : {}),
+			});
 
 			const expectedData = { ...action.$set, status: action.$set.status || processStatuses.OK };
 			if (expectedData.errorReason) {
@@ -665,7 +677,7 @@ const testNewRevisionProcessed = () => {
 			const action = DBHandler.updateOne.mock.calls[0][3];
 			expect(action.$unset.status).toEqual(1);
 			expect(action.$set).toHaveProperty('timestamp');
-			expect(action.$unset).toEqual({ corID: 1, status: 1 });
+			expect(action.$unset).toEqual({ corID: 1, lastProcessingUpdate: 1, status: 1 });
 
 			expect(EventsManager.publish.mock.calls.length).toBe(0);
 		});

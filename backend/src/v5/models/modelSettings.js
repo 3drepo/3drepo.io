@@ -169,7 +169,7 @@ Models.getDrawings = (ts, ids, projection, sort) => {
 
 Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
-	const updateObj = { status };
+	const updateObj = { status, lastProcessingUpdate: new Date() };
 	if (revId) {
 		const corID = UUIDToString(revId);
 		updateObj.corID = corID;
@@ -235,7 +235,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user) => {
 	const query = { _id: model, corID: UUIDToString(revId) };
 	const set = {};
-	const unset = { corID: 1 };
+	const unset = { corID: 1, lastProcessingUpdate: 1 };
 
 	if (success) {
 		unset.status = 1;
