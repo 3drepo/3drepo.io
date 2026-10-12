@@ -175,10 +175,8 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 		updateObj.corID = corID;
 
 		// Interim updates must match their revision to avoid overwriting a terminal state from an out-of-order callback.
-		// Completion unsets corID, so late updates no longer match; queued updates establish the initial corID.
-		if (status !== processStatuses.QUEUED) {
-			query.corID = corID;
-		}
+		// Queued status is only written internally, so it establishes corID only when no process is already active.
+		query.corID = status === processStatuses.QUEUED ? { $exists: false } : corID;
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });

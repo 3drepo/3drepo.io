@@ -24,7 +24,11 @@ const {
 	generateUUID,
 } = require('../../helper/dataGen');
 
-const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const {
+	getInfoFromCode,
+	modelTypes,
+	processStatuses,
+} = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -453,7 +457,7 @@ const testUpdateModelStatus = () => {
 				{ teamspace, model, project, data: { status }, modelType: modelTypes.CONTAINER });
 		});
 
-		test('should not attempt to match the corID when setting queued status', async () => {
+		test('should only set queued status when no process is already active', async () => {
 			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ federate: false });
 			await expect(Model.updateModelStatus(
 				teamspace, project, model, processStatuses.QUEUED, corId,
@@ -462,7 +466,7 @@ const testUpdateModelStatus = () => {
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledWith(
 				teamspace,
 				SETTINGS_COL,
-				{ _id: model },
+				{ _id: model, corID: { $exists: false } },
 				{ $set: expect.objectContaining({
 					status: processStatuses.QUEUED,
 					corID: corId,
@@ -534,7 +538,7 @@ const testNewRevisionProcessed = () => {
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED}
 			and a ${events.MODEL_SETTINGS_UPDATE} event`,
 		async () => {
-			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+			DBHandler.updateOne.mockResolvedValueOnce(true);
 			EventsManager.publish.mockClear();
 
 			const resInfo = { ...getInfoFromCode(retVal), retVal };
@@ -683,6 +687,7 @@ const testNewRevisionProcessed = () => {
 		});
 	});
 };
+
 const testUpdateModelSettings = () => {
 	const checkResults = (fn, model, updateObject) => {
 		expect(fn).toHaveBeenCalledTimes(1);

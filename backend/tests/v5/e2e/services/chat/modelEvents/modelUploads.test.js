@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup, sleepMS } = require('../../../../helper/utils');
+const { determineTestGroup } = require('../../../../helper/utils');
 const {
 	generateRandomString,
 	generateUserCredentials,
@@ -100,8 +100,12 @@ const setupData = async () => {
 		ServiceHelper.db.createCalibration(teamspace, project.id, drawing._id,
 			drawingRevision._id, calibration),
 	]);
-	await DBHandler.updateOne(teamspace, 'settings', { _id: container._id },
-		{ $set: { corID: containerRevision._id } });
+	await Promise.all([
+		DBHandler.updateOne(teamspace, 'settings', { _id: container._id },
+			{ $set: { corID: containerRevision._id } }),
+		DBHandler.updateOne(teamspace, 'settings', { _id: container2._id },
+			{ $set: { corID: containerRevision._id } }),
+	]);
 };
 
 const waitForEvent = (socket, event) => new Promise((resolve) => {
@@ -373,23 +377,45 @@ const queueFinishedTest = () => {
 		});
 
 		test('should ignore a late container processing update after completion', async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
+			const data = { teamspace, project: project.id, model: container2._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+			const callbackConsumedPromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 			const content = { status: 'processing', teamspace, container: container._id };
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
-			await sleepMS(500);
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
+				JSON.stringify({ value: 0, teamspace, container: container2._id }));
+			await expect(callbackConsumedPromise).resolves.toEqual(expect.objectContaining({
+				...data,
+				data: expect.objectContaining({ status: 'ok' }),
+			}));
 
 			const modelSettings = await DBHandler.findOne(teamspace, 'settings',
 				{ _id: container._id }, { status: 1, corID: 1 });
 			expect(modelSettings).toEqual({ _id: container._id });
+			socket.close();
 		});
 
 		test('should ignore a late drawing processing update after completion', async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
+			const data = { teamspace, project: project.id, model: container2._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+			const callbackConsumedPromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 			const content = { status: 'processing', teamspace, drawing: drawing._id };
 			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
-			await sleepMS(500);
+			await DBHandler.updateOne(teamspace, 'settings', { _id: container2._id },
+				{ $set: { corID: containerRevision._id } });
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
+				JSON.stringify({ value: 0, teamspace, container: container2._id }));
+			await expect(callbackConsumedPromise).resolves.toEqual(expect.objectContaining({
+				...data,
+				data: expect.objectContaining({ status: 'ok' }),
+			}));
 
 			const revision = await DBHandler.findOne(teamspace, 'drawings.history',
 				{ _id: stringToUUID(drawingRevision._id) }, { status: 1, incomplete: 1 });
 			expect(revision).toEqual({ _id: stringToUUID(drawingRevision._id) });
+			socket.close();
 		});
 	});
 };

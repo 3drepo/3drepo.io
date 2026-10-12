@@ -373,11 +373,12 @@ const testParseClashResults = () => {
 		});
 
 		test('Should ignore a late interim status after a clash run has completed', async () => {
+			const callbackConsumedPromise = eventTriggeredPromise(events.CLASH_RUN_STATUS_UPDATED);
 			await queueMessage(callbackq, runWithPreviousRun._id, JSON.stringify({
 				...basicCBData,
 				status: clashRunStatus.QUEUED,
 			}));
-			await sleepMS(500);
+			await callbackConsumedPromise;
 
 			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
 				{ _id: stringToUUID(runWithPreviousRun._id) }, { _id: 1, status: 1 });
