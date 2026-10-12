@@ -35,13 +35,13 @@ const { disconnect } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL, clashRunStatus, terminalClashRunStatuses } = require(`${src}/models/clashes.constants`);
 
 const ResetProcessingFlags = require(`${utilScripts}/modelProcessing/resetProcessingFlags`);
 
 const modelStates = ['ok', 'failed', 'processing', 'queued'];
 const clashRunStates = Object.values(clashRunStatus);
-const terminalClashRunStates = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED];
+const terminalClashRunStates = terminalClashRunStatuses;
 const manualCancellationReason = 'Cancelled manually';
 const resetTypes = {
 	MODELS: 'models',

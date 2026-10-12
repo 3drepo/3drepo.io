@@ -171,7 +171,14 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
 	const updateObj = { status };
 	if (revId) {
-		updateObj.corID = UUIDToString(revId);
+		const corID = UUIDToString(revId);
+		updateObj.corID = corID;
+
+		// Interim updates must match their revision to avoid overwriting a terminal state from an out-of-order callback.
+		// Completion unsets corID, so late updates no longer match; queued updates establish the initial corID.
+		if (status !== processStatuses.QUEUED) {
+			query.corID = corID;
+		}
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
@@ -226,7 +233,7 @@ Models.updateModelSubModels = async (teamspace, project, model, user, revId, con
 
 Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user) => {
-	const query = { _id: model };
+	const query = { _id: model, corID: UUIDToString(revId) };
 	const set = {};
 	const unset = { corID: 1 };
 

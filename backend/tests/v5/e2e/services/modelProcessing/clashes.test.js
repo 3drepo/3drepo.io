@@ -372,6 +372,21 @@ const testParseClashResults = () => {
 			});
 		});
 
+		test('Should ignore a late interim status after a clash run has completed', async () => {
+			await queueMessage(callbackq, runWithPreviousRun._id, JSON.stringify({
+				...basicCBData,
+				status: clashRunStatus.QUEUED,
+			}));
+			await sleepMS(500);
+
+			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(runWithPreviousRun._id) }, { _id: 1, status: 1 });
+			expect(run).toEqual({
+				_id: stringToUUID(runWithPreviousRun._id),
+				status: clashRunStatus.COMPLETED,
+			});
+		});
+
 		describe('Tag metadata placeholders', () => {
 			beforeEach(() => {
 				writeResultsFile(tagRun, [tagClash]);

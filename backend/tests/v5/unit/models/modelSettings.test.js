@@ -29,6 +29,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -433,7 +434,7 @@ const testUpdateModelStatus = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
-		const status = 'queued';
+		const status = processStatuses.PROCESSING;
 		const corId = generateRandomString();
 
 		test(`should update container status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
@@ -441,6 +442,7 @@ const testUpdateModelStatus = () => {
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
@@ -450,12 +452,28 @@ const testUpdateModelStatus = () => {
 				{ teamspace, model, project, data: { status }, modelType: modelTypes.CONTAINER });
 		});
 
+		test('should not attempt to match the corID when setting queued status', async () => {
+			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ federate: false });
+			await expect(Model.updateModelStatus(
+				teamspace, project, model, processStatuses.QUEUED, corId,
+			)).resolves.toBe(undefined);
+
+			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledWith(
+				teamspace,
+				SETTINGS_COL,
+				{ _id: model },
+				{ $set: { status: processStatuses.QUEUED, corID: corId } },
+				{ projection: { federate: 1, modelType: 1 } },
+			);
+		});
+
 		test(`should update federation status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
 			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ federate: true });
 
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
@@ -470,6 +488,7 @@ const testUpdateModelStatus = () => {
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
@@ -517,6 +536,7 @@ const testNewRevisionProcessed = () => {
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+			expect(DBHandler.updateOne.mock.calls[0][2]).toEqual({ _id: model, corID: UUIDToString(corId) });
 			const action = DBHandler.updateOne.mock.calls[0][3];
 			if (success) {
 				expect(action.$set.status).toBe(undefined);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../../helper/utils');
+const { determineTestGroup, sleepMS } = require('../../../../helper/utils');
 const {
 	generateRandomString,
 	generateUserCredentials,
@@ -28,9 +28,12 @@ const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 const { isUUIDString } = require('../../../../../../src/v5/utils/helper/typeCheck');
 
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { queueMessage } = require(`${src}/handler/queue`);
+const DBHandler = require(`${src}/handler/db`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -97,6 +100,8 @@ const setupData = async () => {
 		ServiceHelper.db.createCalibration(teamspace, project.id, drawing._id,
 			drawingRevision._id, calibration),
 	]);
+	await DBHandler.updateOne(teamspace, 'settings', { _id: container._id },
+		{ $set: { corID: containerRevision._id } });
 };
 
 const waitForEvent = (socket, event) => new Promise((resolve) => {
@@ -276,7 +281,7 @@ const queueUpdateTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, generateRandomString(),
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
 
@@ -312,8 +317,6 @@ const queueFinishedTest = () => {
 			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
 			const content = { value: 0, teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, generateRandomString(),
-				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
 
 			const modelUpdateResults = await modelUpdatePromise;
@@ -368,6 +371,26 @@ const queueFinishedTest = () => {
 
 			socket.close();
 		});
+
+		test('should ignore a late container processing update after completion', async () => {
+			const content = { status: 'processing', teamspace, container: container._id };
+			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
+			await sleepMS(500);
+
+			const modelSettings = await DBHandler.findOne(teamspace, 'settings',
+				{ _id: container._id }, { status: 1, corID: 1 });
+			expect(modelSettings).toEqual({ _id: container._id });
+		});
+
+		test('should ignore a late drawing processing update after completion', async () => {
+			const content = { status: 'processing', teamspace, drawing: drawing._id };
+			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
+			await sleepMS(500);
+
+			const revision = await DBHandler.findOne(teamspace, 'drawings.history',
+				{ _id: stringToUUID(drawingRevision._id) }, { status: 1, incomplete: 1 });
+			expect(revision).toEqual({ _id: stringToUUID(drawingRevision._id) });
+		});
 	});
 };
 
@@ -383,7 +406,7 @@ describe(determineTestGroup(__filename), () => {
 	afterAll(() => Promise.all([
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
-	modelUploadTest();
 	queueUpdateTest();
 	queueFinishedTest();
+	modelUploadTest();
 });

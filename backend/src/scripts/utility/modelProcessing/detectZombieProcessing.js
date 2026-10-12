@@ -26,9 +26,9 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../utils');
 
 const { find } = require(`${v5Path}/handler/db`);
-const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { SETTINGS_COL, terminalProcessStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
-const { CLASH_RUNS_COL, clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
+const { CLASH_RUNS_COL, terminalClashRunStatuses } = require(`${v5Path}/models/clashes.constants`);
 const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
 const { templates: emailTemplates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
@@ -39,11 +39,11 @@ let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 const processTeamspace = async (teamspace, results) => {
 	const expiredTimestamp = new Date(new Date() - TIME_LIMIT);
 	const zombieQuery = {
-		status: { $exists: true, $not: { $regex: `(${processStatuses.OK})|(${processStatuses.FAILED})` } },
+		status: { $exists: true, $nin: terminalProcessStatuses },
 		timestamp: { $lt: expiredTimestamp },
 	};
 	const zombieClashRunQuery = {
-		status: { $exists: true, $nin: [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED] },
+		status: { $exists: true, $nin: terminalClashRunStatuses },
 		updatedAt: { $lt: expiredTimestamp },
 	};
 
