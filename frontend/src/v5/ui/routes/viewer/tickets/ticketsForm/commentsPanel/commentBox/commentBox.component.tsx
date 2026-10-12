@@ -27,14 +27,15 @@ import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage, measureCharacterPos, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { MenuItem } from '@mui/material';
+import { MenuItem, Popper } from '@mui/material';
+import { VirtualElement } from '@popperjs/core';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import {
 	Controls,
@@ -52,6 +53,7 @@ import {
 	ActionIcon,
 	EditCommentButtons,
 	MessageAndImages,
+	MentionMessage,
 } from './commentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
@@ -113,6 +115,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	
 	const containerRef = useRef<HTMLElement>(null);
 	const inputRef = useRef<any>(null);
+	const [mentionAnchor, setMentionAnchor] = useState<VirtualElement | null>(null);
 	const isEditMode = !!commentId;
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
@@ -251,6 +254,27 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		openImagesDialog(imagesToUpload.length);
 	};
 
+	const handleMessageChange = (event) => {
+		const textarea = (event.target instanceof HTMLTextAreaElement ? event.target : inputRef.current) as HTMLTextAreaElement;
+		const caretPosition = textarea?.selectionStart ?? textarea?.value.length ?? 0;
+		const textBeforeCaret = textarea?.value.slice(0, caretPosition) || '';
+		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
+		const mentionStart = textBeforeCaret.lastIndexOf('@');
+		const tokenStart = textBeforeCaret.length - currentToken.length;
+
+		if (mentionStart < tokenStart) {
+			setMentionAnchor(null);
+			return;
+		}
+
+		if (textBeforeCaret[mentionStart] === '@' && !mentionAnchor) {
+			setMentionAnchor({
+				contextElement: textarea,
+				getBoundingClientRect: () => measureCharacterPos(textarea, mentionStart + 1),
+			});
+		}
+	};
+
 	const uploadScreenshot = async (image) => {
 		setImagesToUpload(imagesToUpload.concat(image));
 		openImagesDialog(imagesToUpload.length);
@@ -324,7 +348,23 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 						maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 					}}
 					ref={inputRef}
+					onChange={handleMessageChange}
+					onClick={() => setMentionAnchor(null)}
+					onBlur={() => setMentionAnchor(null)}
 				/>
+				<Popper
+					open={!!mentionAnchor}
+					anchorEl={mentionAnchor}
+					placement="bottom-start"
+					sx={{ zIndex: 1500 }}
+					modifiers={[
+						{ name: 'offset', options: { offset: [0, 6] } },
+						{ name: 'flip', options: { padding: 8 } },
+						{ name: 'preventOverflow', options: { padding: 8 } },
+					]}
+				>
+					<MentionMessage>im here</MentionMessage>
+				</Popper>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
 					<FormattedMessage
 						id="customTicket.comments.dropFiles"
