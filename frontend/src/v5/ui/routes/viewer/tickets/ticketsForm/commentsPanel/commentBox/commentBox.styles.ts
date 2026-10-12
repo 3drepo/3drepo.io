@@ -23,6 +23,7 @@ import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
 import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
+import { Paper } from '@mui/material';
 
 export const Container = styled.section`
 	display: flex;
@@ -157,6 +158,14 @@ export const MessageInput = styled(FormTextAreaExpandable)`
 		border: none;
 		box-shadow: none;
 	}
+`;
+
+export const MentionMessage = styled(Paper)`
+	padding: 8px 12px;
+	border-radius: 4px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Controls = styled.div`
