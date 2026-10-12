@@ -33,7 +33,6 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -548,7 +547,7 @@ const testNewRevisionProcessed = () => {
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
-			expect(DBHandler.updateOne.mock.calls[0][2]).toEqual({ _id: model, corID: UUIDToString(corId) });
+			expect(DBHandler.updateOne.mock.calls[0][2]).toEqual({ _id: model });
 			const action = DBHandler.updateOne.mock.calls[0][3];
 			if (success) {
 				expect(action.$set.status).toBe(undefined);

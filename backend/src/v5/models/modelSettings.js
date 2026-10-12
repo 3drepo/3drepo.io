@@ -174,7 +174,6 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 		const corID = UUIDToString(revId);
 		updateObj.corID = corID;
 
-		// Interim updates must match their revision to avoid overwriting a terminal state from an out-of-order callback.
 		// Queued status is only written internally, so it establishes corID only when no process is already active.
 		query.corID = status === processStatuses.QUEUED ? { $exists: false } : corID;
 	}
@@ -231,7 +230,7 @@ Models.updateModelSubModels = async (teamspace, project, model, user, revId, con
 
 Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user) => {
-	const query = { _id: model, corID: UUIDToString(revId) };
+	const query = { _id: model };
 	const set = {};
 	const unset = { corID: 1, lastProcessingUpdate: 1 };
 
