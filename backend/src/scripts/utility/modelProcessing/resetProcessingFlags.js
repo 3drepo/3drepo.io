@@ -64,7 +64,7 @@ const processTeamspace = async (teamspace, id, type) => {
 		},
 	});
 
-	const modelAction = { $unset: { status: 1 } };
+	const modelAction = { $unset: { status: 1, corID: 1, lastProcessingUpdate: 1 } };
 	const drawingAction = { $set: { status: processStatuses.FAILED } };
 	const clashRunAction = {
 		$set: {
