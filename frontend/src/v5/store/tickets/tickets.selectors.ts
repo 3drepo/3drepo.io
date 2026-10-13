@@ -288,3 +288,30 @@ export const selectCreatableTemplates = createSelector(
 	(state, modelId, templates) => templates.filter(
 		({ _id, deprecated }) => selectHasPermissionForTemplate(state, modelId, _id, 'create') && !deprecated),
 );
+
+export const selectIsTemplateEditable = createSelector(
+	(state, modelId, templateId) =>
+		selectTemplateById(state, modelId, templateId) 
+		|| selectCurrentProjectTemplateById(state, templateId),
+	selectContainerRole,
+	selectFederationRole,
+	selectCurrentUser,
+	selectMyJob,
+	(template, contRole, fedRole, currentUser, myJob) => {
+		const modelPermissions = contRole || fedRole;
+		if (modelPermissions === Role.ADMIN) return true; // model admin trumps all else
+		if (!isCommenterRole(modelPermissions)) return false; // must have at least commenter role to proceed
+		const editObject = get(template, 'config.permissions.edit');
+		return Object.values(editObject || {}).some((value) => intersection([currentUser.username, currentUser.email, myJob], value).length > 0);
+	},
+);
+
+export const selectEditableTicketIds = createSelector(
+	(state) => state,
+	(_, tickets: ITicket[]) => tickets,
+	(state, tickets) => new Set(
+		tickets
+			.filter(({ modelId, type }) => selectIsTemplateEditable(state, modelId, type))
+			.map(({ _id }) => _id),
+	),
+);

@@ -31,6 +31,8 @@ import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.hel
 import { formatMessage } from '@/v5/services/intl';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
+import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -50,6 +52,8 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
 	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, ticket.type);
+	const editable = TicketsHooksSelectors.selectIsTemplateEditable(containerOrFederation, ticket.type);
+	const tooltipTitle = editable ? '' : formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' });
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
@@ -69,6 +73,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		if (bulkModeOn) {
+			if (!editable) return;
 			toggleSelection(ticket._id);
 			return;
 		}
@@ -87,8 +92,16 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						{bulkModeOn && (<TicketCheckbox checked={bulkSelection.has(ticket._id)}/>)}
-						{ticket.title}
+						{bulkModeOn && (
+							<Tooltip title={tooltipTitle}>
+								<div>
+									<TicketCheckbox checked={bulkSelection.has(ticket._id)} disabled={!editable} />
+								</div>
+							</Tooltip>
+						)}
+						<TextOverflow>
+							{ticket.title}
+						</TextOverflow>
 					</Title>
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (

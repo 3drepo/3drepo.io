@@ -29,11 +29,11 @@ import { TabularViewContext } from '../../../tabularViewContext/tabularViewConte
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTable.constants';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
 	selectedTicketId: string;
-	disabledModelIds: string[];
 };
 
 type SelectionRowType = {
@@ -44,7 +44,6 @@ type SelectionRowType = {
 };
 const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => {
 	const tooltipTitle = disabled ? formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' }) : '';
-	// ISSUE #6319 read only check for specific ticket
 	return (
 		<Row key={ticketId} $selected={selectedTicketId === ticketId}>
 			<CellContainer alwaysVisible>
@@ -61,15 +60,15 @@ const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disa
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
 	selectedTicketId,
-	disabledModelIds,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TabularViewContext);
 	const ticketIds = tickets.map((t) => t._id);
 	const oldTicketsIds = useRef<string[]>(ticketIds);
 
+	const editableTicketIdsSet = TicketsHooksSelectors.selectEditableTicketIds(tickets);
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
-	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
+	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id) || !editableTicketIdsSet.has(_id)) && editableTicketIdsSet.size > 0;
 	const someSelected = !allSelected && ticketIds.some((id) => selectedIdsSet.has(id));
 
 	const onCheck = useCallback((e, ticketId) => {
@@ -88,14 +87,14 @@ export const TicketsTableSelectionColumn = ({
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
 			tickets.forEach((t) => {
-				if (disabledModelIds.includes(t.modelId)) return;
+				if (!editableTicketIdsSet.has(t._id)) return;
 				if (e.target.checked) next.add(t._id);
 				else next.delete(t._id);
 				return;
 			});
 			return next;
 		});
-	}, [tickets, disabledModelIds]);
+	}, [tickets, editableTicketIdsSet]);
 
 	useEffect(() => {
 		const removedTicketIds = oldTicketsIds.current.filter((id) => !ticketIds.includes(id));
@@ -132,7 +131,7 @@ export const TicketsTableSelectionColumn = ({
 									selected={selectedIdsSet.has(ticket._id)}
 									onCheck={onCheck}
 									selectedTicketId={selectedTicketId}
-									disabled={disabledModelIds.includes(ticket.modelId)}
+									disabled={!editableTicketIdsSet.has(ticket._id)}
 								/>
 							))}
 						</div>

@@ -84,12 +84,11 @@ export const TicketsTable = ({ tickets, onEditTicket, onNewTicket, selectedTicke
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
-	const disabledModelIds: string[] = models.filter(({ role }) => !isCommenterRole(role)).map(({ _id }) => _id);
 	const hideSelectionColumn = models.every(({ role }) => !isCommenterRole(role));
 
 	return (
 		<RoundedContainer $hideSelectionColumn={hideSelectionColumn} $hideNewTicketButton={hideNewticketButton}>
-			{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} disabledModelIds={disabledModelIds} />}
+			{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} />}
 			<Table $canCreateTicket={!newTicketButtonIsDisabled}>
 				<TicketsTableBody
 					tickets={tickets}

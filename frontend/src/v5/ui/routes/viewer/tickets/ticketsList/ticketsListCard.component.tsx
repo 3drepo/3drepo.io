@@ -51,8 +51,8 @@ const TicketsActions = ({ groupBy }) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
 	const [, setGroupByParam] = useSearchParam('groupBy');
-	// CardHooksSelectors.selectReadOnl TODO
-	const canEditTicket = true;
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const canEditTicket = TicketsHooksSelectors.selectEditableTicketIds(tickets)?.size > 0;
 	const canCreateTicket = TicketsHooksSelectors.selectCreatableTemplates(containerOrFederation).length > 0;
 
 	const bulkCheckboxTooltipMessage = !bulkModeOn ? 
@@ -61,7 +61,7 @@ const TicketsActions = ({ groupBy }) => {
 
 	return (<>
 		{!bulkModeOn && canCreateTicket && (<NewTicketMenu />)}
-		{!canEditTicket &&  (<Tooltip title={bulkCheckboxTooltipMessage} >
+		{canEditTicket &&  (<Tooltip title={bulkCheckboxTooltipMessage} >
 			<BulkCheckbox checked={bulkModeOn} onClick={toggleBulkMode}  />
 		</Tooltip>)}
 		{bulkModeOn && (
@@ -96,8 +96,6 @@ const GroupByLabel = ({ groupBy }) => {
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	// const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	// const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
