@@ -29,10 +29,9 @@ import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tick
 
 export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 
-const UPDATE_TICKETS_BATCH_INTERVAL = 200;
+export const UPDATE_TICKETS_BATCH_INTERVAL = 200;
 
-// Container ticket
-export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean) => {
+export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
 	// We debounce in order to batch multiple ticket updates together
@@ -41,15 +40,15 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 
 		const tickets = queuedTickets.map(addUpdatedAtTime);
 		queuedTickets = [];
-		TicketsActionsDispatchers.upsertTicketsSuccess(containerId, tickets);
+		TicketsActionsDispatchers.upsertTicketsSuccess(containerOrFederation, tickets);
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
 	return subscribeToRoomEvent(
-		{ teamspace, project, model: containerId },
+		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
-			const fullTicket = selectTicketByIdRaw(getState(), containerId, (ticket as any)._id);
-			const template = fullTicket ? selectTemplateById(getState(), containerId, fullTicket.type) : undefined;
+			const fullTicket = selectTicketByIdRaw(getState(), containerOrFederation, (ticket as any)._id);
+			const template = fullTicket ? selectTemplateById(getState(), containerOrFederation, fullTicket.type) : undefined;
 			normalizeViewsInTicket(ticket, template);
 
 			queuedTickets.push(ticket as Partial<ITicket>);
@@ -58,29 +57,29 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 	);
 };
 
-export const enableRealtimeNewTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
+export const enableRealtimeNewTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
-		{ teamspace, project, model: containerId },
+		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFed, 'NewTicket'),
 		(ticket: ITicket) => {
-			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerOrFederation, ticket, revision);
 		},
 	)
 );
 
-export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerId: string, isFed:boolean, revision: string) => (
+export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision: string) => (
 	subscribeToRoomEvent(
-		{ teamspace, project, model: containerId },
+		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFed, 'UpdateTicketGroup'),
 
 		async (group: Group) => {
 			if (group.rules) {
-				const { data } = await getMeshIDsByQuery(teamspace, containerId, group.rules, revision);
+				const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, group.rules, revision);
 				// eslint-disable-next-line no-param-reassign
 				group.objects = meshObjectsToV5GroupNode(data);
 			// eslint-disable-next-line no-underscore-dangle
 			} else if (group.objects.some((o) => !o._ids)) {
-				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false, revision);
+				const { objects } = await fetchTicketGroup(teamspace, project, containerOrFederation, group.ticket, group._id, false, revision);
 				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);

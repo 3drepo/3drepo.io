@@ -16,33 +16,42 @@
  */
 
 import { debounce } from 'lodash';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
 import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
-import { enableRealtimeNewTicket, enableRealtimeUpdateTicket, enableRealtimeUpdateTicketGroup, ticketEvent } from './ticket.events';
+import { enableRealtimeNewTicket, enableRealtimeUpdateTicketGroup, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL } from './ticket.events';
+import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
+import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
-export const enableRealtimeUpdateTicketFilter =
-(teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision?: string) => {
-	let queuedTicketIds: string[] = [];
-	const debouncedApplyFilter = debounce(() => {
-		if (!queuedTicketIds.length) return;
+const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
+	let queuedTickets: Partial<ITicket>[] = [];
+	// Bulk updated tickets will fire an event for every ticket
+	// We debounce in order to batch multiple ticket updates together
+	const debouncedApplyUpdates = debounce(() => {
+		if (!queuedTickets.length) return;
 
-		TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerOrFederation, isFederation, queuedTicketIds);
-		queuedTicketIds.forEach((ticketId) => TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticketId, revision));
-		queuedTicketIds = [];
-	}, 200);
+		const tickets = queuedTickets.map(addUpdatedAtTime);
+		queuedTickets = [];
+		TicketsActionsDispatchers.upsertTicketsSuccess(containerOrFederation, tickets);
+		TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerOrFederation, isFed, tickets.map(( ticket ) => ticket._id));
+	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
 	return subscribeToRoomEvent(
 		{ teamspace, project, model: containerOrFederation },
-		ticketEvent(isFederation, 'UpdateTicket'),
-		(ticket: Partial<ITicket>) => {
-			queuedTicketIds.push(ticket._id);
-			debouncedApplyFilter();
+		ticketEvent(isFed, 'UpdateTicket'),
+		(ticket: Partial<EditableTicket>) => {
+			const fullTicket = selectTicketByIdRaw(getState(), containerOrFederation, (ticket as any)._id);
+			const template = fullTicket ? selectTemplateById(getState(), containerOrFederation, fullTicket.type) : undefined;
+			normalizeViewsInTicket(ticket, template);
+
+			queuedTickets.push(ticket as Partial<ITicket>);
+			debouncedApplyUpdates();
 		},
 	);
 };
 
-export const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
+const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFederation, 'NewTicket'),
@@ -57,6 +66,5 @@ export const enableRealtimeTickets = (teamspace: string, project: string, contai
 		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation),
 		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicketFilter(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
 	);
