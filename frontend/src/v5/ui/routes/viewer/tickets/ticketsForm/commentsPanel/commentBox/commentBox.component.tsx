@@ -53,8 +53,8 @@ import {
 	ActionIcon,
 	EditCommentButtons,
 	MessageAndImages,
-	MentionMessage,
 } from './commentBox.styles';
+import { MentionsListComponent } from './mentionsList/mentionsList.component';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
 import { TicketContext } from '../../../ticket.context';
@@ -116,6 +116,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const containerRef = useRef<HTMLElement>(null);
 	const inputRef = useRef<any>(null);
 	const [mentionAnchor, setMentionAnchor] = useState<VirtualElement | null>(null);
+	const [mentionQuery, setMentionQuery] = useState('');
 	const isEditMode = !!commentId;
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
@@ -254,6 +255,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		openImagesDialog(imagesToUpload.length);
 	};
 
+	const closeMentionPopup = () => {
+		setMentionAnchor(null);
+		setMentionQuery('');
+	};
+
 	const handleMessageChange = (event) => {
 		const textarea = (event.target instanceof HTMLTextAreaElement ? event.target : inputRef.current) as HTMLTextAreaElement;
 		const caretPosition = textarea?.selectionStart ?? textarea?.value.length ?? 0;
@@ -261,18 +267,55 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
 		const mentionStart = textBeforeCaret.lastIndexOf('@');
 		const tokenStart = textBeforeCaret.length - currentToken.length;
+		const query = textBeforeCaret.slice(mentionStart + 1);
 
 		if (mentionStart < tokenStart) {
-			setMentionAnchor(null);
+			closeMentionPopup();
 			return;
 		}
 
 		if (textBeforeCaret[mentionStart] === '@' && !mentionAnchor) {
+			setMentionQuery(query);
 			setMentionAnchor({
 				contextElement: textarea,
 				getBoundingClientRect: () => measureCharacterPos(textarea, mentionStart + 1),
 			});
+		} else if (textBeforeCaret[mentionStart] === '@') {
+			setMentionQuery(query);
 		}
+	};
+
+	const handleMessageKeyDown = (event) => {
+		if (!mentionAnchor) return;
+
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			closeMentionPopup();
+			return;
+		}
+	};
+
+	const handleMention = (mention: string) => {
+		const textarea = inputRef.current as HTMLTextAreaElement;
+		const caretPosition = textarea.selectionStart;
+		const textBeforeCaret = textarea.value.slice(0, caretPosition);
+		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
+		const mentionStart = textBeforeCaret.length - currentToken.length;
+		const textAfterCaret = textarea.value.slice(caretPosition);
+		const mentionEndOffset = textAfterCaret.search(/\s/);
+		const mentionEnd = mentionEndOffset === -1
+			? textarea.value.length
+			: caretPosition + mentionEndOffset;
+		const selectedMention = `@${mention} `;
+		const updatedMessage = `${textarea.value.slice(0, mentionStart)}${selectedMention}${textarea.value.slice(mentionEnd)}`;
+		const newCaretPosition = mentionStart + selectedMention.length;
+
+		setValue('message', updatedMessage, { shouldDirty: true });
+		closeMentionPopup();
+		requestAnimationFrame(() => {
+			textarea.focus();
+			textarea.setSelectionRange(newCaretPosition, newCaretPosition);
+		});
 	};
 
 	const uploadScreenshot = async (image) => {
@@ -349,8 +392,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					}}
 					ref={inputRef}
 					onChange={handleMessageChange}
-					onClick={() => setMentionAnchor(null)}
-					onBlur={() => setMentionAnchor(null)}
+					onKeyDown={handleMessageKeyDown}
+					onClick={closeMentionPopup}
+					onBlur={closeMentionPopup}
 				/>
 				<Popper
 					open={!!mentionAnchor}
@@ -363,7 +407,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 						{ name: 'preventOverflow', options: { padding: 8 } },
 					]}
 				>
-					<MentionMessage>im here</MentionMessage>
+					<MentionsListComponent query={mentionQuery} onMention={handleMention} />
 				</Popper>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
 					<FormattedMessage
