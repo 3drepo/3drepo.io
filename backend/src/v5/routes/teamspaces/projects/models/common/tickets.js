@@ -18,7 +18,6 @@
 const {
 	addTicket: addConTicket,
 	getTagPropertyValues: getConTagPropertyValues,
-	getTicketById: getConTicketById,
 	getTicketHistory: getConTicketHistory,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
@@ -29,7 +28,6 @@ const {
 const {
 	addTicket: addFedTicket,
 	getTagPropertyValues: getFedTagPropertyValues,
-	getTicketById: getFedTicketById,
 	getTicketHistory: getFedTicketHistory,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
@@ -37,7 +35,7 @@ const {
 	updateTicket: updateFedTicket,
 	updateManyTickets: updateManyFedTickets,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { checkTicketExists, templateExists, validateImportTickets, validateNewTicket, validateTagProperty, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { checkTicketExists, hasTemplateViewPermission, templateExists, validateImportTickets, validateNewTicket, validateTagProperty, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -96,14 +94,9 @@ const getAllTemplates = async (req, res, next) => {
 	}
 };
 
-const getTicket = (isFed) => async (req, res, next) => {
-	const { teamspace, project, model, ticket } = req.params;
-
+const getTicket = async (req, res, next) => {
 	try {
-		const getTicketById = isFed ? getFedTicketById : getConTicketById;
-		req.ticket = await getTicketById(teamspace, project, model, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
-
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -969,7 +962,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: ticket modules and their properties
 	 *
 	 */
-	router.get('/:ticket', hasReadAccess, getTicket(isFed), serialiseTicket);
+	router.get('/:ticket', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicket, serialiseTicket);
 
 	/**
 	 * @openapi

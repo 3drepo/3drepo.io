@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets, updateTicketsByQuery } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets, updateTicketsByQuery } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -259,8 +259,6 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
 	teamspace, TICKETS_RESOURCES_COL, resource, { teamspace, project, model, ticket },
 );
-
-Tickets.getTicketById = getTicketById;
 
 Tickets.getTicketHistory = getTicketLogs;
 

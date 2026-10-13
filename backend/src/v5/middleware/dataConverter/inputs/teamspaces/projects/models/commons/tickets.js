@@ -17,14 +17,15 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { getArrayDifference, getCommonElements } = require('../../../../../../../utils/helper/arrays');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
-const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
+const { getJobsByUsers } = require('../../../../../../../models/jobs');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
-const { propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
+const { basePropertyLabels, propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 const { validateTickets } = require('../../../../../../../schemas/tickets');
@@ -220,15 +221,101 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 	}
 };
 
+const hasTemplatePermission = async (req, colName) => {
+	const { permissions } = req.templateData.config;
+
+	if (permissions?.[colName]) {
+		const user = getUserFromSession(req.session);
+		const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
+		const userAndJobs = [user, ...userJobs];
+
+		const hasPermission = getCommonElements(permissions[colName], userAndJobs).length > 0;
+
+		if (!hasPermission) {
+			throw createResponseCode(templates.notAuthorized, `You do not have template permission to ${colName} this ticket`);
+		}
+	}
+};
+
+TicketsMiddleware.hasTemplateViewPermission = async (req, res, next) => {
+	try {
+		await hasTemplatePermission(req, 'view');
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const hasTemplateCreatePermission = async (req, res, next) => {
+	try {
+		await hasTemplatePermission(req, 'create');
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
+	try {
+		const { permissions } = req.templateData.config;
+		const editPermissions = permissions?.edit;
+
+		if (editPermissions) {
+			const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
+			const { assign: assignPerms, status: statusPerms, default: defaultPerms } = editPermissions;
+
+			const user = getUserFromSession(req.session);
+			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
+			const userAndJobs = [user, ...userJobs];
+
+			const checkPerm = (permArray) => {
+				const hasPermission = getCommonElements(permArray, userAndJobs).length;
+				if (!hasPermission) {
+					throw createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+				}
+			};
+
+			let isAssignedModified;
+			let isStatusModified;
+			for (const ticket of ticketUpdates) {
+				if (ticket.properties[basePropertyLabels.ASSIGNEES] !== undefined) {
+					isAssignedModified = true;
+				}
+
+				if (ticket.properties[basePropertyLabels.STATUS] !== undefined) {
+					isStatusModified = true;
+				}
+			}
+
+			if (isAssignedModified && assignPerms?.length) {
+				checkPerm(assignPerms);
+			}
+
+			if (isStatusModified && statusPerms?.length) {
+				checkPerm(statusPerms);
+			}
+
+			checkPerm(defaultPerms);
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
 TicketsMiddleware.validateImportTickets = validateMany([templateIDToParams(true), checkTicketTemplateExists,
-	bodyContainsTicketsArray, validateTicketImportData(true)]);
+	bodyContainsTicketsArray, hasTemplateCreatePermission, validateTicketImportData(true)]);
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), checkTicketTemplateExists,
-	validateTicket(true)]);
-TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
+	hasTemplateCreatePermission, validateTicket(true)]);
+
+TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists,
+	hasTemplateEditPermission(false), validateTicket(false)]);
+
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
-	checkAllTicketsExist, validateTicketImportData(false)]);
+	checkAllTicketsExist, hasTemplateEditPermission(true), validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
