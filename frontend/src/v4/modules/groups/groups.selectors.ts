@@ -18,7 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
-import { addToGroupDictionary } from '../../helpers/colorOverrides';
+import { addToGroupDictionary, ColorOverrides } from '../../helpers/colorOverrides';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
 import { IGroupState } from './groups.redux';
@@ -155,7 +155,7 @@ export const selectOverridesDict = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectOverridesDict, (overrides) => overrides.colors
+	selectOverridesDict, (overrides): ColorOverrides => overrides.colors
 );
 
 export const selectTransparencies = createSelector(

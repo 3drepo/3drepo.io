@@ -123,12 +123,12 @@ export class PreviewListItem extends PureComponent<IProps, any> {
 	);
 
 	public renderViewModel = renderWhenTrue(() => {
-		const { type, id, teamspace, model } = this.props;
+		const { id, teamspace, model } = this.props;
 		return (
 			<OpenInViewerButton
 				teamspace={teamspace}
 				model={model}
-				query={`${type === 'issues' ? 'issueId' : 'riskId'}=${id}`}
+				query={`issueId=${id}`}
 			/>
 		);
 	});

@@ -37,7 +37,7 @@ const EnhancedLink = ({ children, href, ...props }) => {
 
 	return cond([
 		[() => value.match(MARKDOWN_RESOURCE_REFERENCE_REGEX), () => {
-			return (<ResourceReference id={href} text={value} type={props.title} />);
+			return (<ResourceReference id={href} text={value} />);
 		}],
 		[() => value.match(MARKDOWN_TICKET_REFERENCE_REGEX), () => {
 			return (<TicketReference id={href} text={value} />);

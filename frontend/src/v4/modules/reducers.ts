@@ -36,7 +36,6 @@ import { reducer as legendReducer } from './legend/legend.redux';
 import { reducer as measurementsReducer } from './measurements/measurements.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
-import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as routerReducer } from './router/router.redux';
 import { reducer as sequencesReducer } from './sequences/sequences.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
@@ -70,7 +69,6 @@ export default function createReducer() {
 		measurements: measurementsReducer,
 		model: modelReducer,
 		notifications: notificationsReducer,
-		risks: risksReducer,
 		sequences: sequencesReducer,
 		snackbar: snackbarReducer,
 		starred: starredReducer,

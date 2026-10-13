@@ -20,7 +20,6 @@ import {
 	getDialogForm,
 	getDialogSize,
 	getDialogTitle,
-	getTemplateComponent
 } from '../../routes/board/board.helpers';
 
 import { CommentsActions } from '../comments';
@@ -29,14 +28,14 @@ import { DialogActions } from '../dialog';
 import { IssuesActions, IssuesTypes } from '../issues';
 import { JobsActions } from '../jobs';
 import { selectCurrentModel, ModelActions } from '../model';
-import { RisksActions, RisksTypes } from '../risks';
+import IssueDetails from '../../routes/viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { selectUrlParams } from '../router/router.selectors';
 import { TeamspaceActions } from '../teamspace';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { BoardActions, BoardTypes } from './board.redux';
-import { selectBoardType, selectCards } from './board.selectors';
+import { selectCards } from './board.selectors';
 
-function* fetchData({ boardType, teamspace, project, modelId }) {
+function* fetchData({ teamspace, project, modelId }) {
 	try {
 		yield put(BoardActions.setIsPending(true));
 		const teamspaces = yield select(selectTeamspaces);
@@ -59,19 +58,11 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		if (teamspace && project && modelId) {
 			yield put(CommentsActions.fetchUsers(teamspace));
 
-			if (boardType === 'issues') {
-				yield all([
-					put(IssuesActions.fetchIssues(teamspace, modelId)),
-					put(TeamspaceActions.fetchSettings(teamspace))
-				]);
-				yield take(IssuesTypes.FETCH_ISSUES_SUCCESS);
-			} else {
-				yield all([
-					put(RisksActions.fetchRisks(teamspace, modelId)),
-					put(RisksActions.fetchMitigationCriteria(teamspace))
-				]);
-				yield take(RisksTypes.FETCH_RISKS_SUCCESS);
-			}
+			yield all([
+				put(IssuesActions.fetchIssues(teamspace, modelId)),
+				put(TeamspaceActions.fetchSettings(teamspace))
+			]);
+			yield take(IssuesTypes.FETCH_ISSUES_SUCCESS);
 		}
 
 		if (teamspace) {
@@ -85,14 +76,8 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 
 function* fetchCardData({ teamspace, modelId, cardId }) {
 	try {
-		const boardType = yield select(selectBoardType);
 		const cardData = { account: teamspace, model: modelId, _id: cardId };
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.setActiveIssue(cardData, null, true));
-		} else {
-			yield put(RisksActions.setActiveRisk(cardData, null, true));
-		}
+		yield put(IssuesActions.setActiveIssue(cardData, null, true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
 	}
@@ -100,23 +85,20 @@ function* fetchCardData({ teamspace, modelId, cardId }) {
 
 function* openCardDialog({ cardId, onNavigationChange, disableReset }) {
 	const { teamspace, modelId } = yield select(selectUrlParams);
-	const boardType = yield select(selectBoardType);
 
 	if (cardId) {
-		yield put(BoardActions.fetchCardData(boardType, teamspace, modelId, cardId));
+		yield put(BoardActions.fetchCardData(teamspace, modelId, cardId));
 	}
 
 	const cards = yield select(selectCards);
-	const isIssuesBoard = boardType === 'issues';
-	const TemplateComponent = getTemplateComponent(isIssuesBoard);
 
 	if (!cardId && !disableReset) {
 		yield put(BoardActions.resetCardData());
 	}
 
 	const config = {
-		title: getDialogTitle({ cardId, isIssuesBoard, cards, onNavigationChange }),
-		template: getDialogForm(getDialogSize(cardId), TemplateComponent),
+		title: getDialogTitle({ cardId, cards, onNavigationChange }),
+		template: getDialogForm(getDialogSize(cardId), IssueDetails),
 		data: {
 			teamspace,
 			model: modelId,
@@ -133,9 +115,7 @@ function* openCardDialog({ cardId, onNavigationChange, disableReset }) {
 
 function* resetCardData() {
 	try {
-		const boardType = yield select(selectBoardType);
-		const resetData = boardType === 'issues' ? IssuesActions.setNewIssue : RisksActions.setNewRisk;
-		yield put(resetData());
+		yield put(IssuesActions.setNewIssue());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'card data', error));
 	}
@@ -143,13 +123,7 @@ function* resetCardData() {
 
 function* setFilters({ filters }) {
 	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.setFilters(filters));
-		} else {
-			yield put(RisksActions.setFilters(filters));
-		}
+		yield put(IssuesActions.setFilters(filters));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'board filters', error));
 	}
@@ -157,13 +131,7 @@ function* setFilters({ filters }) {
 
 function* printItems({ teamspace, modelId }) {
 	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.printIssues(teamspace, modelId));
-		} else {
-			yield put(RisksActions.printRisks(teamspace, modelId));
-		}
+		yield put(IssuesActions.printIssues(teamspace, modelId));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('print', 'board items', error));
 	}
@@ -171,13 +139,7 @@ function* printItems({ teamspace, modelId }) {
 
 function* downloadItems({ teamspace, modelId }) {
 	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.downloadIssues(teamspace, modelId));
-		} else {
-			yield put(RisksActions.downloadRisks(teamspace, modelId));
-		}
+		yield put(IssuesActions.downloadIssues(teamspace, modelId));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('download', 'board items', error));
 	}
@@ -185,13 +147,7 @@ function* downloadItems({ teamspace, modelId }) {
 
 function* toggleSortOrder() {
 	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.toggleSortOrder());
-		} else {
-			yield put(RisksActions.toggleSortOrder());
-		}
+		yield put(IssuesActions.toggleSortOrder());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle sort order', 'board items', error));
 	}
@@ -199,13 +155,7 @@ function* toggleSortOrder() {
 
 function* setSortBy({field}) {
 	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.setSortBy(field));
-		} else {
-			yield put(RisksActions.setSortBy(field));
-		}
+		yield put(IssuesActions.setSortBy(field));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set sort by', 'board items', error));
 	}

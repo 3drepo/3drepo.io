@@ -39,7 +39,7 @@ const sanitizeGroup = ({objects}) => {
  */
 
 export const getGroups = (teamspace, modelId, revision?) => {
-	const query = 'noIssues=true&noRisks=true&noViews=true&noSequences=true';
+	const query = 'noIssues=true&noViews=true&noSequences=true';
 	let res;
 	if (revision) {
 		res = api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?${query}`);

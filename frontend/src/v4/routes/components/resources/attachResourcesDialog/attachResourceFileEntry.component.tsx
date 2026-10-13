@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import {
 	FieldsRow,
 	StyledFormControl
-} from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+} from '../../../viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { RemoveButton } from '../removeButton.component';
 import { ResourceIcon } from "../resourceIcon";
 import { ResourceListItem } from './attachResourcesDialog.styles';

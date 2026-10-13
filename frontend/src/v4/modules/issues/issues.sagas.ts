@@ -335,7 +335,7 @@ function* goToIssue({ issue }) {
 
 		// Im not longer in the viewer or board
 		// this happens when unmounting the card which
-		// makes sense when you close the card in the viewer and want to remove the selected risk
+		// makes sense when you close the card in the viewer and want to remove the selected issue
 		// but when navigating back to the dashboard no, so. fixed here
 		if (!params) {
 			return;

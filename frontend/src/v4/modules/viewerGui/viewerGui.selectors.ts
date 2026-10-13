@@ -18,6 +18,7 @@
 import { createSelector } from 'reselect';
 import { selectTicketOverrides, selectTicketTransparencies } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { ColorOverrides } from '../../helpers/colorOverrides';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
 	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
@@ -87,7 +88,7 @@ export const selectIsClipEdit = createSelector(
 
 export const selectColorOverrides = createSelector(
 	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides,
-		(viewsOverrides, groupsOverrides, ticketsOverrides) =>
+		(viewsOverrides: ColorOverrides, groupsOverrides: ColorOverrides, ticketsOverrides: ColorOverrides) =>
 			({...viewsOverrides,  ...groupsOverrides, ...ticketsOverrides })
 );
 

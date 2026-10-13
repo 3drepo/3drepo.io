@@ -16,7 +16,6 @@
  */
 import { isEqual } from 'lodash';
 import { getIssuePinColor } from './issues';
-import { getRiskPinColor } from './risks';
 
 const pinsById = (pins) => pins.reduce((map, pin) =>  {
  map[pin.id] = pin; return map;
@@ -83,6 +82,3 @@ export const ticketToPin = (ticket, type, isSelected, color) =>
 
 export const issueToPin = (issue, isSelectedPin ) =>
 	ticketToPin(issue, 'ISSUE', isSelectedPin, getIssuePinColor(issue));
-
-export const riskToPin = (risk, isSelectedPin ) =>
-	ticketToPin(risk, 'RISK', isSelectedPin, getRiskPinColor(risk));

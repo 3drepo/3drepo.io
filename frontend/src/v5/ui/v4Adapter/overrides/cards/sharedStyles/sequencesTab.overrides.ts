@@ -16,7 +16,7 @@
  */
 
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
-import { StyledFormControl, Content as SequenceContent } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { StyledFormControl, Content as SequenceContent } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { css } from 'styled-components';
 
 // The 4D tab

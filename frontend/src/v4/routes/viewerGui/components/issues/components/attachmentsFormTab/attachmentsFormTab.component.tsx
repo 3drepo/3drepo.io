@@ -16,7 +16,7 @@
  */
 import { FunctionComponent } from 'react';
 import { Resources } from '../../../../../components/resources/resources.component';
-import { Content } from '../riskDetails/riskDetails.styles';
+import { Content } from '../issueDetails/issueDetails.styles';
 
 interface IProps {
 	active: boolean;

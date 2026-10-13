@@ -23,20 +23,12 @@ export const exportBCF = async (teamspace, model, issueNumbers) => {
 	await downloadFile(getAPIUrl(`${teamspace}/${model}/issues.bcfzip?numbers=${issueNumbers}`));
 };
 
-const handlePrint = (dataType) => (teamspace, model, dataNumbers) => {
-	const printUrl = getAPIUrl(`${teamspace}/${model}/${dataType}.html?numbers=${dataNumbers}`);
+export const printIssues = (teamspace, model, dataNumbers) => {
+	const printUrl = getAPIUrl(`${teamspace}/${model}/issues.html?numbers=${dataNumbers}`);
 	window.open(printUrl, '_blank', 'noopener');
 };
 
-export const printIssues = handlePrint('issues');
-
-export const printRisks = handlePrint('risks');
-
-const handleExportToJSON = (dataType) => (teamspace, model, dataNumbers) => {
-	const endpoint = `${teamspace}/${model}/${dataType}?numbers=${dataNumbers}&convertCoords=1`;
-	return downloadJSON(dataType, model, endpoint);
+export const exportIssuesToJSON = (teamspace, model, dataNumbers) => {
+	const endpoint = `${teamspace}/${model}/issues?numbers=${dataNumbers}&convertCoords=1`;
+	return downloadJSON('issues', model, endpoint);
 };
-
-export const exportIssuesToJSON = handleExportToJSON('issues');
-
-export const exportRisksToJSON = handleExportToJSON('risks');
