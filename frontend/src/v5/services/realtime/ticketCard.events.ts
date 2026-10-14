@@ -16,13 +16,16 @@
  */
 
 import { debounce } from 'lodash';
-import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
 import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
-import { enableRealtimeNewTicket, enableRealtimeUpdateTicketGroup, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL } from './ticket.events';
+import { enableRealtimeNewTicket, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL } from './ticketTable.events';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
 import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
+import { getMeshIDsByQuery } from '@/v4/services/api';
+import { fetchTicketGroup } from '../api/tickets';
 
 const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
 	let queuedTickets: Partial<ITicket>[] = [];
@@ -57,6 +60,26 @@ const enableRealtimeNewTicketFilter = (teamspace: string, project: string, conta
 		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
  			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
+		},
+	)
+);
+
+export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision: string) => (
+	subscribeToRoomEvent(
+		{ teamspace, project, model: containerOrFederation },
+		ticketEvent(isFed, 'UpdateTicketGroup'),
+
+		async (group: Group) => {
+			if (group.rules) {
+				const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, group.rules, revision);
+				// eslint-disable-next-line no-param-reassign
+				group.objects = meshObjectsToV5GroupNode(data);
+			// eslint-disable-next-line no-underscore-dangle
+			} else if (group.objects.some((o) => !o._ids)) {
+				const { objects } = await fetchTicketGroup(teamspace, project, containerOrFederation, group.ticket, group._id, false, revision);
+				group.objects = objects;
+			}
+			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
 		},
 	)
 );
