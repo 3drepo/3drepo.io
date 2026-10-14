@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { List, ListItemButton, ListItemText } from '@mui/material';
+import { List, ListItemText } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
-import { MentionMessage } from '../commentBox.styles';
+import { MentionItem, MentionMessage } from '../commentBox.styles';
 
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -64,7 +64,7 @@ interface MentionsListComponentProps {
 }
 
 export const MentionsListComponent = ({ query, onMention }: MentionsListComponentProps) => {
-	const users = ['Alice', 'Bob', 'Charlie', 'David', 'sanmont3d', 'mosment', 'Grace', 'Hannah', 'Ian', 'Julia'];
+	const users = ['Alice Smith', 'Bob Jones', 'Charlie Brown', 'David Wilson', 'Sanmont 3D', 'Mosment Taylor', 'Grace Davis', 'Hannah Moore', 'Ian Thomas', 'Julia Evans'];
 
 
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -79,7 +79,7 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (!(event.target instanceof HTMLTextAreaElement) || !visibleItems.length) return;
+			if (!(event.target instanceof HTMLElement) || !event.target.isContentEditable || !visibleItems.length) return;
 
 			if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 				event.preventDefault();
@@ -101,15 +101,16 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 		<MentionMessage>
 			<List disablePadding>
 				{visibleItems.map((item, index) => (
-					<ListItemButton
+					<MentionItem
 						key={item}
 						dense
 						selected={selectedIndex === index}
+						onMouseEnter={() => setSelectedIndex(index)}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => onMention(item)}
 					>
 						<ListItemText primary={item} />
-					</ListItemButton>
+					</MentionItem>
 				))}
 			</List>
 		</MentionMessage>
