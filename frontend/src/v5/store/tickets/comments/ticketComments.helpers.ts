@@ -95,36 +95,14 @@ export const commentWithGroups = (groups) => (comment) => {
 	return { ...comment, view: { ...comment.view, state } };
 };
 
-export const measureCharacterPos = (textarea: HTMLTextAreaElement, characterIndex: number): DOMRect => {
-	const mirror = document.createElement('div');
-	const styles = getComputedStyle(textarea);
-	const marker = document.createElement('span');
+export const getCaretCharacterIndex = (element: HTMLElement): number => {
+	const selection = window.getSelection();
+	if (!selection?.rangeCount || !selection.anchorNode || !element.contains(selection.anchorNode)) {
+		return element.innerText.length;
+	}
 
-	Array.from(styles).forEach((property) => {
-		mirror.style.setProperty(property, styles.getPropertyValue(property));
-	});
-	mirror.style.position = 'fixed';
-	mirror.style.left = `${textarea.getBoundingClientRect().left}px`;
-	mirror.style.top = `${textarea.getBoundingClientRect().top}px`;
-	mirror.style.width = `${textarea.clientWidth}px`;
-	mirror.style.height = 'auto';
-	mirror.style.visibility = 'hidden';
-	mirror.style.pointerEvents = 'none';
-	mirror.style.whiteSpace = 'pre-wrap';
-	mirror.style.wordWrap = 'break-word';
-	mirror.textContent = textarea.value.slice(0, characterIndex);
-	marker.textContent = '\u200b';
-	mirror.appendChild(marker);
-	document.body.appendChild(mirror);
-
-	const textareaRect = textarea.getBoundingClientRect();
-	const mirrorRect = mirror.getBoundingClientRect();
-	const markerRect = marker.getBoundingClientRect();
-	const left = textareaRect.left + markerRect.left - mirrorRect.left - textarea.scrollLeft;
-	const top = textareaRect.top + markerRect.top - mirrorRect.top - textarea.scrollTop;
-	const width = Math.max(1, markerRect.width);
-	const height = Math.max(1, markerRect.height);
-	mirror.remove();
-
-	return new DOMRect(left, top, width, height);
+	const range = selection.getRangeAt(0).cloneRange();
+	range.selectNodeContents(element);
+	range.setEnd(selection.anchorNode, selection.anchorOffset);
+	return range.toString().length;
 };
