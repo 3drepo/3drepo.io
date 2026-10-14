@@ -17,13 +17,11 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
-import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaExpandable.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
 import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
-import { Paper } from '@mui/material';
+import { ListItemButton, Paper } from '@mui/material';
 
 export const Container = styled.section`
 	display: flex;
@@ -144,19 +142,27 @@ export const ErroredImageMessages = styled.div`
 	margin: 0 0 4px 15px;
 `;
 
-export const MessageInput = styled(FormTextAreaExpandable)`
+export const MessageInput = styled.div`
 	padding: 8px 15px 0;
-	overflow: hidden;
+	min-height: 80px;
+	max-height: 160px;
+	overflow-y: auto;
+	outline: none;
+	white-space: pre-wrap;
+	word-break: break-word;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	line-height: 16px;
 
-	.MuiInputBase-multiline {
-		padding: 0;
-		line-height: 16px;
+	&:empty:before {
+		content: attr(data-placeholder);
+		color: ${({ theme }) => theme.palette.base.lighter};
+		pointer-events: none;
 	}
 
-	${TextAreaContainer} {
-		overflow-y: scroll;
-		border: none;
-		box-shadow: none;
+	& [data-mention='true'] {
+		color: ${({ theme }) => theme.palette.primary.main};
+		border-radius: 3px;
+		padding: 1px 2px;
 	}
 `;
 
@@ -166,6 +172,17 @@ export const MentionMessage = styled(Paper)`
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const MentionItem = styled(ListItemButton)`
+	&&:hover {
+		background-color: transparent;
+	}
+
+	&&.Mui-selected,
+	&&.Mui-selected:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 `;
 
 export const Controls = styled.div`

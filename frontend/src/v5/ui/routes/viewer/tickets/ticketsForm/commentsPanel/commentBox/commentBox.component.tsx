@@ -27,7 +27,7 @@ import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage, measureCharacterPos, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { addReply, getCaretCharacterIndex, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, desanitiseMessage, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
@@ -92,7 +92,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const errorerImagesRef = useRef<string[]>([]);
 	
-	const { watch, reset, control, getValues, getFieldState, setValues, setValue, formState: { isDirty } } = useForm<{ message: string, images: string[] }>({
+	const { watch, reset, getValues, getFieldState, setValues, setValue, formState: { isDirty } } = useForm<{ message: string, images: string[] }>({
 		mode: 'all',
 		defaultValues: {
 			message: desanitiseMessage(message),
@@ -114,7 +114,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	});
 	
 	const containerRef = useRef<HTMLElement>(null);
-	const inputRef = useRef<any>(null);
+	const inputRef = useRef<HTMLDivElement>(null);
+	// Keep the range immediately before the query so selecting a mention can replace it without traversing editor nodes.
+	const mentionStartRangeRef = useRef<Range | null>(null);
 	const [mentionAnchor, setMentionAnchor] = useState<VirtualElement | null>(null);
 	const [mentionQuery, setMentionQuery] = useState('');
 	const isEditMode = !!commentId;
@@ -137,6 +139,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 
 	const resetCommentBox = () => {
 		reset();
+		if (inputRef.current) inputRef.current.textContent = '';
 		setCommentReply(null);
 		setIsSubmittingMessage(false);
 		setViewpoint(null);
@@ -258,12 +261,17 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const closeMentionPopup = () => {
 		setMentionAnchor(null);
 		setMentionQuery('');
+		mentionStartRangeRef.current = null;
 	};
 
-	const handleMessageChange = (event) => {
-		const textarea = (event.target instanceof HTMLTextAreaElement ? event.target : inputRef.current) as HTMLTextAreaElement;
-		const caretPosition = textarea?.selectionStart ?? textarea?.value.length ?? 0;
-		const textBeforeCaret = textarea?.value.slice(0, caretPosition) || '';
+	const handleMessageInput = () => {
+		const editor = inputRef.current;
+		if (!editor) return;
+		// Store plain text in the form while keeping styled mention spans in the editable DOM.
+		const messageValue = editor.innerText;
+		setValue('message', messageValue, { shouldDirty: true });
+		const caretPosition = getCaretCharacterIndex(editor);
+		const textBeforeCaret = messageValue.slice(0, caretPosition);
 		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
 		const mentionStart = textBeforeCaret.lastIndexOf('@');
 		const tokenStart = textBeforeCaret.length - currentToken.length;
@@ -275,10 +283,20 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		}
 
 		if (textBeforeCaret[mentionStart] === '@' && !mentionAnchor) {
+			const selection = window.getSelection();
+			if (!selection?.rangeCount) return;
+			// The current caret range anchors the popup; a collapsed range one character earlier marks the @ start.
+			const anchorRange = selection.getRangeAt(0).cloneRange();
+			const mentionStartRange = anchorRange.cloneRange();
+			if (mentionStartRange.startContainer.nodeType === Node.TEXT_NODE && mentionStartRange.startOffset > 0) {
+				mentionStartRange.setStart(mentionStartRange.startContainer, mentionStartRange.startOffset - 1);
+				mentionStartRange.collapse(true);
+				mentionStartRangeRef.current = mentionStartRange;
+			}
 			setMentionQuery(query);
 			setMentionAnchor({
-				contextElement: textarea,
-				getBoundingClientRect: () => measureCharacterPos(textarea, mentionStart + 1),
+				contextElement: editor,
+				getBoundingClientRect: () => anchorRange.getBoundingClientRect(),
 			});
 		} else if (textBeforeCaret[mentionStart] === '@') {
 			setMentionQuery(query);
@@ -296,26 +314,47 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	const handleMention = (mention: string) => {
-		const textarea = inputRef.current as HTMLTextAreaElement;
-		const caretPosition = textarea.selectionStart;
-		const textBeforeCaret = textarea.value.slice(0, caretPosition);
-		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
-		const mentionStart = textBeforeCaret.length - currentToken.length;
-		const textAfterCaret = textarea.value.slice(caretPosition);
-		const mentionEndOffset = textAfterCaret.search(/\s/);
-		const mentionEnd = mentionEndOffset === -1
-			? textarea.value.length
-			: caretPosition + mentionEndOffset;
-		const selectedMention = `@${mention} `;
-		const updatedMessage = `${textarea.value.slice(0, mentionStart)}${selectedMention}${textarea.value.slice(mentionEnd)}`;
-		const newCaretPosition = mentionStart + selectedMention.length;
+		const editor = inputRef.current;
+		if (!editor) return;
+		const selection = window.getSelection();
+		const mentionStartRange = mentionStartRangeRef.current;
+		if (!selection?.rangeCount || !mentionStartRange) return;
+		// Replace the stored @query range through the current caret with a styled mention label.
+		const range = mentionStartRange.cloneRange();
+		const caretRange = selection.getRangeAt(0);
+		range.setEnd(caretRange.startContainer, caretRange.startOffset);
+		range.deleteContents();
+		const mentionElement = document.createElement('span');
+		mentionElement.dataset.mention = 'true';
+		mentionElement.textContent = mention;
+		const trailingSpace = document.createTextNode(' ');
+		range.insertNode(mentionElement);
+		mentionElement.after(trailingSpace);
+		range.setStartAfter(trailingSpace);
+		range.collapse(true);
+		selection.removeAllRanges();
+		selection.addRange(range);
 
-		setValue('message', updatedMessage, { shouldDirty: true });
+		setValue('message', editor.innerText, { shouldDirty: true });
 		closeMentionPopup();
-		requestAnimationFrame(() => {
-			textarea.focus();
-			textarea.setSelectionRange(newCaretPosition, newCaretPosition);
-		});
+		editor.focus();
+	};
+
+	const handlePaste = (event) => {
+		event.preventDefault();
+		// Insert clipboard text only, preventing pasted HTML/styles from entering the editable.
+		const plainText = event.clipboardData.getData('text/plain');
+		const selection = window.getSelection();
+		if (!selection?.rangeCount) return;
+		const range = selection.getRangeAt(0);
+		range.deleteContents();
+		const textNode = document.createTextNode(plainText);
+		range.insertNode(textNode);
+		range.setStartAfter(textNode);
+		range.collapse(true);
+		selection.removeAllRanges();
+		selection.addRange(range);
+		handleMessageInput();
 	};
 
 	const uploadScreenshot = async (image) => {
@@ -335,6 +374,12 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		if (isEditMode) return;
 		resetCommentBox();
 	}, [ticketId, isEditMode]);
+
+	useEffect(() => {
+		if (inputRef.current && !inputRef.current.innerText) {
+			inputRef.current.textContent = desanitiseMessage(message);
+		}
+	}, [message]);
 
 	useEffect(() => {
 		if (commentReply?.message || commentReply?.images?.length || commentReply?.view) {
@@ -357,6 +402,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	useEffect(() => {
 		if (unsavedComment) {
 			setValues(unsavedComment, { shouldDirty: true });
+			if (inputRef.current) inputRef.current.textContent = unsavedComment.message || '';
 			setErroredImages(unsavedComment.erroredImages || []);
 		}
 	}, [unsavedComment]);
@@ -381,17 +427,17 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</CommentReplyContainer>
 				)}
 				<MessageInput
-					name="message"
-					placeholder={formatMessage({
+					contentEditable
+					role="textbox"
+					aria-multiline="true"
+					data-placeholder={formatMessage({
 						id: 'customTicket.comments.leaveAComment',
 						defaultMessage: 'Leave a comment',
 					})}
-					control={control}
-					inputProps={{
-						maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
-					}}
+					suppressContentEditableWarning
 					ref={inputRef}
-					onChange={handleMessageChange}
+					onInput={handleMessageInput}
+					onPaste={handlePaste}
 					onKeyDown={handleMessageKeyDown}
 					onClick={closeMentionPopup}
 					onBlur={closeMentionPopup}
