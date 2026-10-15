@@ -40,7 +40,6 @@ export interface INotification {
 	modelName: string;
 	issuesId?: string[];
 	referrer?: string;
-	riskId?: string;
 	issueId?: string;
 	revision?: string;
 	revisions?: string[];
@@ -177,7 +176,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		if (this.props.type === TYPES.USER_REFERENCED) {
-			search = this.props.issueId ? `?issueId=${this.props.issueId}` : `?riskId=${this.props.riskId}`;
+			search = `?issueId=${this.props.issueId}`;
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {

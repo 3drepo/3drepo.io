@@ -28,7 +28,16 @@ import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
+import {
+	addColorOverrides,
+	addTransparencyOverrides,
+	overridesColorAddedOrUpdated,
+	overridesColorRemoved,
+	overridesTransparencyDiff,
+	overridesTransparencyRemoved,
+	removeColorOverrides,
+	removeTransparencyOverrides,
+} from '../../helpers/colorOverrides';
 import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
@@ -55,7 +64,6 @@ interface IProps {
 	colorOverrides: any;
 	transparencies: any;
 	issuePins: any[];
-	riskPins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
 	measurementsSlope: any[];
@@ -65,13 +73,10 @@ interface IProps {
 	gisLayers: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
-	handleTransparencyOverridesChange: any;
 	viewerManipulationEnabled: boolean;
 	isPresentationPaused: boolean;
 	issuesShapes: any[];
-	risksShapes: any[];
 	issuesHighlightedShapes: any[];
-	risksHighlightedShapes: any[];
 	ticketPins: any;
 	isCalibrating: boolean;
 }
@@ -144,11 +149,19 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public renderColorOverrides(prev, curr) {
-		const toAdd = overridesColorDiff(curr, prev);
-		const toRemove = overridesColorDiff(prev, curr);
+		const toAdd = overridesColorAddedOrUpdated(prev, curr);
+		const toRemove = overridesColorRemoved(prev, curr);
 
 		removeColorOverrides(toRemove);
 		addColorOverrides(toAdd);
+	}
+
+	public renderTransparencies(prev, curr) {
+		const toAdd = overridesTransparencyDiff(prev, curr);
+		const toRemove = overridesTransparencyRemoved(prev, curr);
+
+		removeTransparencyOverrides(toRemove);
+		addTransparencyOverrides(toAdd);
 	}
 
 	public renderTransformations(prev, curr) {
@@ -201,10 +214,9 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public async onComponentDidUpdate(prevProps, currProps) {
-		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
+		const { colorOverrides, issuePins, measurementPins, hasGisCoordinates,
 			gisCoordinates, gisLayers, transparencies, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
-			risksShapes, risksHighlightedShapes,
 			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
 
@@ -213,7 +225,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 		}
 
 		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			currProps.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+			this.renderTransparencies(prevProps.transparencies, transparencies);
 		}
 
 		if (transformations && !isEqual(transformations, prevProps.transformations)) {
@@ -222,10 +234,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
 			this.renderPins(prevProps.issuePins, issuePins);
-		}
-
-		if (!isEqual(riskPins, prevProps.riskPins)) {
-			this.renderPins(prevProps.riskPins, riskPins);
 		}
 
 		if (!isEqual(measurementPins, prevProps.measurementPins)) {
@@ -250,14 +258,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 
 		if (!isEqual(prevProps.issuesHighlightedShapes, issuesHighlightedShapes)) {
 			await this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
-		}
-
-		if (!isEqual(prevProps.risksShapes, risksShapes)) {
-			await this.renderMeasurements(prevProps.risksShapes, risksShapes);
-		}
-
-		if (!isEqual(prevProps.risksHighlightedShapes, risksHighlightedShapes)) {
-			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
 		}
 
 		if (!isEqual(prevProps.measurementsAngle, measurementsAngle)) {
@@ -307,7 +307,6 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 const getCalibrationProps = (props) => ({
 	...props,
 	issuePins: [],
-	riskPins: [],
 	measurementPins: [],
 	ticketPins: [],
 	measurementsArea: [],
