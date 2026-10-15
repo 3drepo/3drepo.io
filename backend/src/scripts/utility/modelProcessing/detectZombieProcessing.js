@@ -38,7 +38,7 @@ let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 
 const processTeamspace = async (teamspace, results) => {
 	const expiredTimestamp = new Date(new Date() - TIME_LIMIT);
-	const zombieQuery = {
+	const zombieDrawingQuery = {
 		status: { $exists: true, $nin: terminalProcessStatuses },
 		timestamp: { $lt: expiredTimestamp },
 	};
@@ -55,7 +55,7 @@ const processTeamspace = async (teamspace, results) => {
 
 	const zombieModels = await find(teamspace, SETTINGS_COL, zombieModelQuery,
 		{ status: 1, lastProcessingUpdate: 1 });
-	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
+	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieDrawingQuery, { status: 1, timestamp: 1 });
 	const zombieClashRuns = await find(teamspace, CLASH_RUNS_COL, zombieClashRunQuery, { status: 1, updatedAt: 1 });
 
 	results.models.push(...zombieModels.map(({ _id: id, status, lastProcessingUpdate }) => ({
