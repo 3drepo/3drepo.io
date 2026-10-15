@@ -25,6 +25,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 
 export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 export const UPDATE_TICKETS_BATCH_INTERVAL = 200;
+export const UPDATE_TICKETS_BATCH_SIZE = 300;
 
 export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
 	let queuedTickets: Partial<ITicket>[] = [];
@@ -48,6 +49,9 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 
 			queuedTickets.push(ticket as Partial<ITicket>);
 			debouncedApplyUpdates();
+			if (queuedTickets.length >= UPDATE_TICKETS_BATCH_SIZE) {
+				debouncedApplyUpdates.flush();
+			}
 		},
 	);
 };

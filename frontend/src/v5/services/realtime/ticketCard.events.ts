@@ -19,7 +19,7 @@ import { debounce } from 'lodash';
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
 import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
-import { enableRealtimeNewTicket, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL } from './ticketTable.events';
+import { enableRealtimeNewTicket, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL, UPDATE_TICKETS_BATCH_SIZE } from './ticketTable.events';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
 import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -30,14 +30,14 @@ import { fetchTicketGroup } from '../api/tickets';
 const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
-	// We debounce in order to batch multiple ticket updates together
+	// Debounce smaller batches and flush immediately when the batch reaches its size limit
 	const debouncedApplyUpdates = debounce(() => {
 		if (!queuedTickets.length) return;
 
 		const tickets = queuedTickets.map(addUpdatedAtTime);
-		queuedTickets = [];
 		TicketsActionsDispatchers.upsertTicketsSuccess(containerOrFederation, tickets);
 		TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerOrFederation, isFed, tickets.map(( ticket ) => ticket._id));
+		queuedTickets = [];
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
 	return subscribeToRoomEvent(
@@ -50,6 +50,9 @@ const enableRealtimeUpdateTicket = (teamspace: string, project: string, containe
 
 			queuedTickets.push(ticket as Partial<ITicket>);
 			debouncedApplyUpdates();
+			if (queuedTickets.length >= UPDATE_TICKETS_BATCH_SIZE) {
+				debouncedApplyUpdates.flush();
+			}
 		},
 	);
 };
