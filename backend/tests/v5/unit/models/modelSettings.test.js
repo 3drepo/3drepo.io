@@ -24,7 +24,11 @@ const {
 	generateUUID,
 } = require('../../helper/dataGen');
 
-const { getInfoFromCode, modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const {
+	getInfoFromCode,
+	modelTypes,
+	processStatuses,
+} = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -433,7 +437,7 @@ const testUpdateModelStatus = () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
-		const status = 'queued';
+		const status = processStatuses.PROCESSING;
 		const corId = generateRandomString();
 
 		test(`should update container status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
@@ -441,13 +445,34 @@ const testUpdateModelStatus = () => {
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
 				{ teamspace, model, project, data: { status }, modelType: modelTypes.CONTAINER });
+		});
+
+		test('should only set queued status when no process is already active', async () => {
+			DBHandler.findOneAndUpdate.mockResolvedValueOnce({ federate: false });
+			await expect(Model.updateModelStatus(
+				teamspace, project, model, processStatuses.QUEUED, corId,
+			)).resolves.toBe(undefined);
+
+			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledWith(
+				teamspace,
+				SETTINGS_COL,
+				{ _id: model, corID: { $exists: false } },
+				{ $set: expect.objectContaining({
+					status: processStatuses.QUEUED,
+					corID: corId,
+					lastProcessingUpdate: expect.any(Date),
+				}) },
+				{ projection: { federate: 1, modelType: 1 } },
+			);
 		});
 
 		test(`should update federation status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
@@ -456,9 +481,11 @@ const testUpdateModelStatus = () => {
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -470,9 +497,11 @@ const testUpdateModelStatus = () => {
 			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
 			expect(DBHandler.findOneAndUpdate).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOneAndUpdate.mock.calls[0][2]).toEqual({ _id: model, corID: corId });
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -488,6 +517,7 @@ const testUpdateModelStatus = () => {
 			const action = DBHandler.findOneAndUpdate.mock.calls[0][3];
 			expect(action.$set.status).toEqual(status);
 			expect(action.$set.corId).toEqual(undefined);
+			expect(action.$set.lastProcessingUpdate).toBeInstanceOf(Date);
 
 			expect(EventsManager.publish).not.toHaveBeenCalled();
 		});
@@ -507,7 +537,7 @@ const testNewRevisionProcessed = () => {
 		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED}
 			and a ${events.MODEL_SETTINGS_UPDATE} event`,
 		async () => {
-			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+			DBHandler.updateOne.mockResolvedValueOnce(true);
 			EventsManager.publish.mockClear();
 
 			const resInfo = { ...getInfoFromCode(retVal), retVal };
@@ -517,6 +547,7 @@ const testNewRevisionProcessed = () => {
 			)).resolves.toBe(undefined);
 
 			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+			expect(DBHandler.updateOne.mock.calls[0][2]).toEqual({ _id: model });
 			const action = DBHandler.updateOne.mock.calls[0][3];
 			if (success) {
 				expect(action.$set.status).toBe(undefined);
@@ -529,7 +560,11 @@ const testNewRevisionProcessed = () => {
 				expect(action.$set.errorReason.errorCode).toEqual(retVal);
 				expect(action.$set.errorReason).toHaveProperty('timestamp');
 			}
-			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+			expect(action.$unset).toEqual({
+				corID: 1,
+				lastProcessingUpdate: 1,
+				...(success ? { status: 1 } : {}),
+			});
 
 			const expectedData = { ...action.$set, status: action.$set.status || processStatuses.OK };
 			if (expectedData.errorReason) {
@@ -645,12 +680,13 @@ const testNewRevisionProcessed = () => {
 			const action = DBHandler.updateOne.mock.calls[0][3];
 			expect(action.$unset.status).toEqual(1);
 			expect(action.$set).toHaveProperty('timestamp');
-			expect(action.$unset).toEqual({ corID: 1, status: 1 });
+			expect(action.$unset).toEqual({ corID: 1, lastProcessingUpdate: 1, status: 1 });
 
 			expect(EventsManager.publish.mock.calls.length).toBe(0);
 		});
 	});
 };
+
 const testUpdateModelSettings = () => {
 	const checkResults = (fn, model, updateObject) => {
 		expect(fn).toHaveBeenCalledTimes(1);
