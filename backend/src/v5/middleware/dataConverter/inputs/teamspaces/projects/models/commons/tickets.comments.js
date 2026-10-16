@@ -18,7 +18,8 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { getCommentById } = require('../../../../../../../models/tickets.comments');
-const { getTicketById } = require('../../../../../../../models/tickets');
+const { getCommonElements } = require('../../../../../../../utils/helper/arrays');
+const { getJobsByUsers } = require('../../../../../../../models/jobs');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
@@ -52,14 +53,11 @@ const validateComment = async (req, res, next) => {
 	}
 };
 
-CommentsMiddleware.canUpdateComment = async (req, res, next) => {
+const canUpdateComment = async (req, res, next) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project, model, ticket, comment: _id } = req.params;
 
 	try {
-		// to ensure ticket exists
-		await getTicketById(teamspace, project, model, ticket, { _id: 1 });
-
 		const comment = await getCommentById(teamspace, project, model, ticket, _id);
 
 		if (comment.importedAt) {
@@ -81,7 +79,30 @@ CommentsMiddleware.canUpdateComment = async (req, res, next) => {
 	}
 };
 
-CommentsMiddleware.validateNewComment = validateComment;
-CommentsMiddleware.validateUpdateComment = validateMany([CommentsMiddleware.canUpdateComment, validateComment]);
+const hasTemplatePermission = async (req, res, next) => {
+	try {
+		const { permissions } = req.templateData.config;
+
+		if (permissions?.comment) {
+			const user = getUserFromSession(req.session);
+			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
+			const userAndJobs = [user, ...userJobs];
+
+			const hasPermission = getCommonElements(permissions.comment, userAndJobs).length > 0;
+
+			if (!hasPermission) {
+				throw createResponseCode(templates.notAuthorized, 'You do not have template permission to create or edit comments on this ticket');
+			}
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+CommentsMiddleware.validateNewComment = validateMany([hasTemplatePermission, validateComment]);
+CommentsMiddleware.canUpdateComment = validateMany([hasTemplatePermission, canUpdateComment]);
+CommentsMiddleware.validateUpdateComment = validateMany([hasTemplatePermission, canUpdateComment, validateComment]);
 
 module.exports = CommentsMiddleware;

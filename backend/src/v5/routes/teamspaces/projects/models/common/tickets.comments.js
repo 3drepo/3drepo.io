@@ -561,7 +561,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully deleted
 	 */
-	router.delete('/:comment', hasCommenterAccess, canUpdateComment, deleteComment(isFed));
+	router.delete('/:comment', hasCommenterAccess, checkTicketExists, canUpdateComment, deleteComment(isFed));
 
 	return router;
 };
