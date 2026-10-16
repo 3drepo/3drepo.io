@@ -46,8 +46,8 @@ export const OtherUserComment = ({
 	const authorUser = UsersHooksSelectors.selectUser(teamspace, author);
 	const importedAuthorUser = getImportedUser(originalAuthor);
 	const { containerOrFederation } = useContext(TicketContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'comment');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment');
 
 	const getAuthorDisplayName = () => {
 		if (!isFirstOfBlock) return null;

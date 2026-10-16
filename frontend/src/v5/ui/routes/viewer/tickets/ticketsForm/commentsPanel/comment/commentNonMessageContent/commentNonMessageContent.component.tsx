@@ -50,8 +50,9 @@ export const CommentNonMessageContent = ({
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'comment') || !isCurrentUserComment;
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment') || !isCurrentUserComment;
 	const comment = TicketCommentsHooksSelectors.selectCommentById(ticketId, commentId);
 
 	const disabledDeleteMessage = (hasMessage || images.length > 1) ? null : formatMessage({

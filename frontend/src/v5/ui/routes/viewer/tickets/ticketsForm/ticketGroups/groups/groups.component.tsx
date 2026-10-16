@@ -47,8 +47,8 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 	const overridesIndexes = overrides.map(({ index }) => index);
 	const state = getCollectionState(overridesIndexes);
 	const { containerOrFederation } = useContext(TicketContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
 	
 	const dispatch = useDispatch();
 

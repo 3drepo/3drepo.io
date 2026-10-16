@@ -113,8 +113,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
 
 	const formRef = useRef(null);
 

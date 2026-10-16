@@ -46,7 +46,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticket._id, 'edit.default');
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticket.type, 'edit.default');
 
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);

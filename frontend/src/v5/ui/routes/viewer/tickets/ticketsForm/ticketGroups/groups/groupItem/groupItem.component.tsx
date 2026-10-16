@@ -57,9 +57,9 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const { containerOrFederation } = useContext(TicketContext);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
 	const isHidden = groupType === 'hidden';

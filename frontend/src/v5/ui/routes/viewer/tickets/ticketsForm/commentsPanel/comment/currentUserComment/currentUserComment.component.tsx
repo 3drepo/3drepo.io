@@ -48,10 +48,10 @@ export const CurrentUserComment = ({
 }: CurrentUserCommentProps) => {
 	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
 	const { containerOrFederation } = useContext(TicketContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 
 	const [isEditMode, setIsEditMode] = useState(false);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'comment');
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment');
 	const [commentReply, setCommentReply] = useState(metadata);
 
 	useEffect(() => {

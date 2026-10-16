@@ -38,7 +38,8 @@ export const CommentsList = () => {
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'comment');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment');
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const commentsLength = comments.length;
 

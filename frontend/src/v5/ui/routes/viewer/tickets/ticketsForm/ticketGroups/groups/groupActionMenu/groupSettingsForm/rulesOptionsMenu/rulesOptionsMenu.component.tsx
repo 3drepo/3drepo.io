@@ -26,9 +26,9 @@ import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { useContext } from 'react';
 
 export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const { containerOrFederation } = useContext(TicketContext);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
 
 	return (
 		<Float>

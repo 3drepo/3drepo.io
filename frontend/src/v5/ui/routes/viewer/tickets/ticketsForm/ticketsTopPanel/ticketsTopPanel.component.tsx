@@ -49,11 +49,11 @@ export const TicketsTopPanel = ({
 	const { formState, getValues } = useFormContext();
 	const { containerOrFederation } = useContext(TicketContext);
 
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
-	const readOnlyDefault = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
-	const readOnlyStatus = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.status');
-	const readOnlyAssign = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.assignees');
+	const readOnlyDefault = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
+	const readOnlyStatus = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.status');
+	const readOnlyAssign = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.assignees');
 
 	const ref = useRef<HTMLTextAreaElement>(null);
 

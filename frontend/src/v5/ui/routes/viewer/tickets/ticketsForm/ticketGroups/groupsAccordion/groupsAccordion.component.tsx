@@ -39,9 +39,9 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		highlightedIndex,
 		clearHighlightedIndex,
 	} = useContext(TicketGroupsContext);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const { containerOrFederation } = useContext(TicketContext);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, ticketId, 'edit.default');
+	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
 	
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const indexes = indexedOverrides.map(({ index }) => index);
