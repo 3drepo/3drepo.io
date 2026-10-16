@@ -45,7 +45,7 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TabularViewContext, TabularViewContextComponent } from './tabularViewContext/tabularViewContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { selectTicketPropertyByName, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
+import { dispatch, getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { getAvailableColumnsForTemplate } from './tabularViewContext/tabularViewContext.helpers';
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
@@ -63,6 +63,7 @@ import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/t
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../../../../components/tickets/ticketsGroupBy.helper';
 import { ExpandIcon } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketDetailsCard.styles';
 import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
+import { JobsActions } from '@/v4/modules/jobs';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -156,12 +157,9 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
-	// useEffect(() => {
-	// 	TicketsCardActionsDispatchers.setReadOnly(readOnly);
-	// }, [readOnly]);
-
 	useEffect(() => {
 		if (templates.length) return;
+		dispatch(JobsActions.getMyJob(teamspace));
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, []);
 
