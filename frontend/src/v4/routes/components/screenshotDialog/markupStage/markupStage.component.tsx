@@ -276,13 +276,6 @@ const BaseMarkupStage = ({
 	}, [selectedObjectName]);
 
 	useEffect(() => {
-		if (pathname.includes(ROUTES.VIEWER)) {
-			viewer.pauseRendering();
-			return () => viewer.resumeRendering();
-		}
-	}, [pathname, viewer]);
-
-	useEffect(() => {
 		if (layerRef.current) {
 			clearCanvas();
 		}

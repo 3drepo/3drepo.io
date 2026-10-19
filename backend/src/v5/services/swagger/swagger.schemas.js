@@ -18,6 +18,7 @@ const { fieldOperators, valueOperators } = require('../../models/metadata.rules.
 const { presetModules, propTypes, statusTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
+const { idTypes } = require('../../models/metadata.constants');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
 
@@ -30,11 +31,69 @@ Schemas.securitySchemes = {
 	},
 };
 
+Schemas.schemas.idTypes = {
+	type: 'string',
+	enum: Object.values(idTypes),
+	description: 'The type of identifier used for the object',
+};
+
 const helpers = {
 	boolDef: (description, example) => ({ type: 'boolean', ...deleteIfUndefined({ description, example }) }),
 	numberDef: (description, example) => ({ type: 'number', ...deleteIfUndefined({ description, example }) }),
 	stringDef: (description, example, enumVal) => ({ type: 'string', ...deleteIfUndefined({ description, example, enum: enumVal }) }),
 	arrayDef: (description, items, example) => ({ type: 'array', ...deleteIfUndefined({ description, items, example }) }),
+};
+
+Schemas.schemas.clashEntry = {
+	type: 'object',
+	properties: {
+		a: {
+			type: 'object',
+			description: 'The first object in the clash pair',
+			properties: {
+				container: {
+					...helpers.stringDef('The container the object belongs to', 'ef0857b6-4cc7-4be1-b2d6-c032dce7806a'),
+					format: 'uuid',
+				},
+				idType: {
+					$ref: '#/components/schemas/idTypes',
+				},
+				id: {
+					type: 'string',
+					format: 'uuid',
+					description: 'The object identifier',
+				},
+			},
+		},
+		b: {
+			type: 'object',
+			description: 'The second object in the clash pair',
+			properties: {
+				container: {
+					...helpers.stringDef('The container the object belongs to', 'ef0857b6-4cc7-4be1-b2d6-c032dce7806a'),
+					format: 'uuid',
+				},
+				idType: {
+					$ref: '#/components/schemas/idTypes',
+				},
+				id: {
+					type: 'string',
+					format: 'uuid',
+					description: 'The object identifier',
+				},
+			},
+		},
+		index: helpers.stringDef('A normalized identifier for the clash pair',
+			'ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::1kYqvrv7r7Ee9Lf6DEVcpT-ef0857b6-4cc7-4be1-b2d6-c032dce7806a::IFC::2kYqvrv7r7Ee9Lf6DEVcpT'),
+		bbox: {
+			type: 'object',
+			description: 'The bounding box of the clash',
+			properties: {
+				min: helpers.arrayDef(undefined, helpers.numberDef(), [0, 0, 0]),
+				max: helpers.arrayDef(undefined, helpers.numberDef(), [1, 1, 1]),
+			},
+		},
+	},
 };
 
 Schemas.schemas.roles = {

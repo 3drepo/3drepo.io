@@ -28,11 +28,9 @@ const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
 const ISSUES_FILE_REF_EXT = ".issues.ref";
-const RISKS_FILE_REF_EXT = ".risks.ref";
 
 const ISSUES_RESOURCE_PROP = "issueIds";
-const RISKS_RESOURCE_PROP = "riskIds";
-const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
+const attachResourceProps = [ISSUES_RESOURCE_PROP];
 
 const extensionRe = /\.(\w+)$/;
 
@@ -216,7 +214,6 @@ FileRef.removeAllFilesFromModel = function (account, model) {
 	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + ISSUES_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model + RISKS_FILE_REF_EXT));
 
 	return Promise.all(promises);
 };
