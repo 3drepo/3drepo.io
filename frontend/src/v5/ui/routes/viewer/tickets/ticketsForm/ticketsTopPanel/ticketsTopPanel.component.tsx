@@ -51,9 +51,12 @@ export const TicketsTopPanel = ({
 
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
-	const readOnlyDefault = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
-	const readOnlyStatus = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasStatusEditPermissionForTemplate(containerOrFederation, templateId);
-	const readOnlyAssign = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasAssignPermissionForTemplate(containerOrFederation, templateId);
+	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
+	const canEditStatus = TemplatesPermissionsHooksSelectors.selectHasStatusEditPermissionForTemplate(containerOrFederation, templateId);
+	const canAssign = TemplatesPermissionsHooksSelectors.selectHasAssignPermissionForTemplate(containerOrFederation, templateId);
+	const readOnlyDefault = !isNewTicket && !canEditDefault;
+	const readOnlyStatus = !isNewTicket && !canEditStatus;
+	const readOnlyAssign = !isNewTicket && !canAssign;
 
 	const ref = useRef<HTMLTextAreaElement>(null);
 

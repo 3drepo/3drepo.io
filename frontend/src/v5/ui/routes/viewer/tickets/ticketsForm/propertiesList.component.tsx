@@ -40,9 +40,9 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { formState } = useFormContext();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const ticketIsReadOnly = !isNewTicket
-		|| !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, selectedTicketId);
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
+	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticketFromStore.type);
+	const ticketIsReadOnly = !isNewTicket && !canEditDefault;
 
 	if (!properties.length) return null;
 	return (
@@ -50,7 +50,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 			{properties.map(({
 				name,
 				type: basicType,
-				readOnly: disabled,
+				readOnly: propertyIsReadOnly,
 				readOnlyOnUI,
 				required,
 				values,
@@ -68,7 +68,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 							// @ts-ignore
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}
+							disabled={propertyIsReadOnly || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}
 							immutable={immutable}
 							required={required}
 							name={inputName}
