@@ -22,7 +22,7 @@ import { MentionItem, MentionMessage } from '../commentBox.styles';
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const getMatchingMentionItems = (query: string, users: string[]) => {
+const getMatchingMentionItems = (query: string, users: { name: string; id: string }[]) => {
 	if (!query) return users;
 
 	// eslint-disable-next-line security/detect-non-literal-regexp
@@ -30,9 +30,9 @@ const getMatchingMentionItems = (query: string, users: string[]) => {
 
 	return users
 		.map((item, index) => {
-			if (!matchingRegExp.test(item)) return null;
+			if (!matchingRegExp.test(item.name)) return null;
 
-			const lowerItem = item.toLowerCase();
+			const lowerItem = item.name.toLowerCase();
 			const lowerQuery = query.toLowerCase();
 			const positions: number[] = [];
 			let searchStart = 0;
@@ -60,17 +60,28 @@ const getMatchingMentionItems = (query: string, users: string[]) => {
 
 interface MentionsListComponentProps {
 	query: string;
-	onMention: (mention: string) => void;
+	onMention: ({ name, id }: { name: string; id: string }) => void;
 }
 
 export const MentionsListComponent = ({ query, onMention }: MentionsListComponentProps) => {
-	const users = ['Alice Smith', 'Bob Jones', 'Charlie Brown', 'David Wilson', 'Sanmont 3D', 'Mosment Taylor', 'Grace Davis', 'Hannah Moore', 'Ian Thomas', 'Julia Evans'];
+	const users = [
+		{ name: 'Alice Smith', id: '1' },
+		{ name: 'Bob Jones', id: '2' },
+		{ name: 'Charlie Brown', id: '3' },
+		{ name: 'David Wilson', id: '4' },
+		{ name: 'Sanmont 3D', id: '5' },
+		{ name: 'Mosment Taylor', id: '6' },
+		{ name: 'Grace Davis', id: '7' },
+		{ name: 'Hannah Moore', id: '8' },
+		{ name: 'Ian Thomas', id: '9' },
+		{ name: 'Julia Evans', id: '10' },
+	];
 
 
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const visibleItems = useMemo(
 		() => getMatchingMentionItems(query, users).slice(0, MAX_VISIBLE_MENTIONS),
-		[query],
+		[query, users],
 	);
 
 	useEffect(() => {
@@ -102,14 +113,14 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 			<List disablePadding>
 				{visibleItems.map((item, index) => (
 					<MentionItem
-						key={item}
+						key={item.id}
 						dense
 						selected={selectedIndex === index}
 						onMouseEnter={() => setSelectedIndex(index)}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => onMention(item)}
 					>
-						<ListItemText primary={item} />
+						<ListItemText>{item.name}</ListItemText>
 					</MentionItem>
 				))}
 			</List>

@@ -161,8 +161,6 @@ export const MessageInput = styled.div`
 
 	& [data-mention='true'] {
 		color: ${({ theme }) => theme.palette.primary.main};
-		border-radius: 3px;
-		padding: 1px 2px;
 	}
 `;
 
