@@ -22,6 +22,19 @@ import { MentionItem, MentionMessage } from '../commentBox.styles';
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+export const MENTION_USERS = [
+	{ name: 'Alice Smith', id: '1' },
+	{ name: 'Bob Jones', id: '2' },
+	{ name: 'Charlie Brown', id: '3' },
+	{ name: 'David Wilson', id: '4' },
+	{ name: 'Sanmont 3D', id: '5' },
+	{ name: 'Mosment Taylor', id: '6' },
+	{ name: 'Grace Davis', id: '7' },
+	{ name: 'Hannah Moore', id: '8' },
+	{ name: 'Ian Thomas', id: '9' },
+	{ name: 'Julia Evans', id: '10' },
+];
+
 const getMatchingMentionItems = (query: string, users: { name: string; id: string }[]) => {
 	if (!query) return users;
 
@@ -64,24 +77,10 @@ interface MentionsListComponentProps {
 }
 
 export const MentionsListComponent = ({ query, onMention }: MentionsListComponentProps) => {
-	const users = [
-		{ name: 'Alice Smith', id: '1' },
-		{ name: 'Bob Jones', id: '2' },
-		{ name: 'Charlie Brown', id: '3' },
-		{ name: 'David Wilson', id: '4' },
-		{ name: 'Sanmont 3D', id: '5' },
-		{ name: 'Mosment Taylor', id: '6' },
-		{ name: 'Grace Davis', id: '7' },
-		{ name: 'Hannah Moore', id: '8' },
-		{ name: 'Ian Thomas', id: '9' },
-		{ name: 'Julia Evans', id: '10' },
-	];
-
-
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const visibleItems = useMemo(
-		() => getMatchingMentionItems(query, users).slice(0, MAX_VISIBLE_MENTIONS),
-		[query, users],
+		() => getMatchingMentionItems(query, MENTION_USERS).slice(0, MAX_VISIBLE_MENTIONS),
+		[query],
 	);
 
 	useEffect(() => {

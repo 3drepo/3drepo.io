@@ -351,7 +351,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					ref={inputRef}
 					onPaste={handlePaste}
 				/>
-				<MentionsComponent editorRef={inputRef} />
+				<MentionsComponent
+					editorRef={inputRef}
+					message={desanitiseMessage(message)}
+					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
+				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
 					<FormattedMessage
 						id="customTicket.comments.dropFiles"
