@@ -17,11 +17,47 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Popper } from '../../ticketGroups/ticketGroups.styles';
-import { MentionsListComponent } from './mentionsList/mentionsList.component';
+import { MENTION_USERS, MentionsListComponent } from './mentionsList/mentionsList.component';
 import { VirtualElement } from '@popperjs/core';
 import { getCaretCharacterIndex, getSelectionTextOffset, restoreSelection } from './range.helpers';
 
-export const MentionsComponent = ({ editorRef }) => {
+const getMessageValue = (editor: HTMLElement) => {
+	const editorCopy = editor.cloneNode(true) as HTMLElement;
+	const mentions = editorCopy.querySelectorAll('[data-mention-id]') as NodeListOf<HTMLElement>;
+	mentions.forEach((mention) => {
+		mention.replaceWith(document.createTextNode(`@${mention.dataset.mentionId}`));
+	});
+	return editorCopy.innerText;
+};
+
+const renderMessage = (editor: HTMLElement, message: string) => {
+	editor.textContent = '';
+	const fragment = document.createDocumentFragment();
+	const mentionPattern = /@(\S+)/g;
+	let lastIndex = 0;
+	let match = mentionPattern.exec(message);
+
+	while (match) {
+		const mentionId = match[1];
+		const mention = MENTION_USERS.find(({ id }) => id === mentionId);
+		if (mention) {
+			fragment.append(message.slice(lastIndex, match.index));
+			const mentionElement = document.createElement('span');
+			mentionElement.dataset.mentionName = mention.name;
+			mentionElement.dataset.mentionId = mention.id;
+			mentionElement.dataset.mention = 'true';
+			mentionElement.textContent = mention.name;
+			fragment.append(mentionElement);
+			lastIndex = match.index + match[0].length;
+		}
+		match = mentionPattern.exec(message);
+	}
+
+	fragment.append(message.slice(lastIndex));
+	editor.append(fragment);
+};
+
+export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 	// Keep the range immediately before the query so selecting a mention can replace it without traversing editor nodes.
 	const mentionStartRangeRef = useRef<Range | null>(null);
 	const [mentionAnchor, setMentionAnchor] = useState<VirtualElement | null>(null);
@@ -67,6 +103,7 @@ export const MentionsComponent = ({ editorRef }) => {
 		selection.removeAllRanges();
 		selection.addRange(range);
 
+		onMessageChange(getMessageValue(editor));
 		closeMentionPopup();
 		editor.focus();
 	};    
@@ -102,9 +139,11 @@ export const MentionsComponent = ({ editorRef }) => {
 			restoreSelection(editor, startOffset, endOffset);
 		}
     
-		const messageValue = editor.innerText;
+		const messageValue = getMessageValue(editor);
+		onMessageChange(messageValue);
+		const editorText = editor.innerText;
 		const caretPosition = getCaretCharacterIndex(editor);
-		const textBeforeCaret = messageValue.slice(0, caretPosition);
+		const textBeforeCaret = editorText.slice(0, caretPosition);
 		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
 		const mentionStart = textBeforeCaret.lastIndexOf('@');
 		const tokenStart = textBeforeCaret.length - currentToken.length;
@@ -152,6 +191,9 @@ export const MentionsComponent = ({ editorRef }) => {
 		};
 	}, [editorRef.current, handleMessageKeyDown]);
 
+	useEffect(() => {
+		if (editorRef.current) renderMessage(editorRef.current, message);
+	}, [message]);
 
 	return (
 		<Popper
