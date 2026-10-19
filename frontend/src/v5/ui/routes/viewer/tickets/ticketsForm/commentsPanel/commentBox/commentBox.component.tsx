@@ -67,6 +67,7 @@ import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.c
 import { compact, isEqual } from 'lodash';
 import { selectUnsavedCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { getSelectionTextOffset, restoreSelection } from './range.helpers';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 interface EditCommentBoxProps {
@@ -91,7 +92,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const errorerImagesRef = useRef<string[]>([]);
-	
+
 	const { watch, reset, getValues, getFieldState, setValues, setValue, formState: { isDirty } } = useForm<{ message: string, images: string[] }>({
 		mode: 'all',
 		defaultValues: {
@@ -264,9 +265,38 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		mentionStartRangeRef.current = null;
 	};
 
-	const handleMessageInput = () => {
+	const handleMessageInput = (ev?) => {
 		const editor = inputRef.current;
 		if (!editor) return;
+
+		const mentions = Array.from(editor.querySelectorAll('[data-mention-id]')) as HTMLElement[];
+
+		if (ev?.nativeEvent.inputType.includes('delete')) {
+			mentions.forEach((mention ) => {
+				if (mention.innerText !== mention.dataset.mentionName) {
+					mention.remove();
+				}
+			});
+		} else {
+			const selection = window.getSelection();
+			const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+			const startOffset = currentRange
+				? getSelectionTextOffset(editor, currentRange.startContainer, currentRange.startOffset)
+				: editor.innerText.length;
+			const endOffset = currentRange
+				? getSelectionTextOffset(editor, currentRange.endContainer, currentRange.endOffset)
+				: startOffset;
+
+			mentions.forEach((mention ) => {
+				if (mention.innerText !== mention.dataset.mentionName) {
+					const mentionText = document.createTextNode(mention.innerText);
+					mention.replaceWith(mentionText);
+				}
+			});
+
+			restoreSelection(editor, startOffset, endOffset);
+		}
+
 		// Store plain text in the form while keeping styled mention spans in the editable DOM.
 		const messageValue = editor.innerText;
 		setValue('message', messageValue, { shouldDirty: true });
@@ -313,25 +343,27 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		}
 	};
 
-	const handleMention = (mention: string) => {
+	const handleMention = ({ name, id }: { name: string; id: string }) => {
 		const editor = inputRef.current;
 		if (!editor) return;
 		const selection = window.getSelection();
 		const mentionStartRange = mentionStartRangeRef.current;
 		if (!selection?.rangeCount || !mentionStartRange) return;
-		// Replace the stored @query range through the current caret with a styled mention label.
 		const range = mentionStartRange.cloneRange();
 		const caretRange = selection.getRangeAt(0);
 		range.setEnd(caretRange.startContainer, caretRange.startOffset);
 		range.deleteContents();
 		const mentionElement = document.createElement('span');
+		mentionElement.dataset.mentionName = name;
+		mentionElement.dataset.mentionId = id;
 		mentionElement.dataset.mention = 'true';
-		mentionElement.textContent = mention;
-		const trailingSpace = document.createTextNode(' ');
+		mentionElement.textContent = name;
 		range.insertNode(mentionElement);
+		const trailingSpace = document.createTextNode(' ');
 		mentionElement.after(trailingSpace);
-		range.setStartAfter(trailingSpace);
+		range.setStart(trailingSpace, trailingSpace.length);
 		range.collapse(true);
+
 		selection.removeAllRanges();
 		selection.addRange(range);
 
@@ -354,7 +386,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		range.collapse(true);
 		selection.removeAllRanges();
 		selection.addRange(range);
-		handleMessageInput();
 	};
 
 	const uploadScreenshot = async (image) => {
@@ -408,6 +439,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	}, [unsavedComment]);
 
 	const hasError = (index) => !!erroredImages[index];
+
 
 	return (
 		<Container
