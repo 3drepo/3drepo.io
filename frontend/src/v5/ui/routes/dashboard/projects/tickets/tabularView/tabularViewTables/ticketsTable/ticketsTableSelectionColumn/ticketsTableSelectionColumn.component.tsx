@@ -16,20 +16,20 @@
  */
 
 import { memo, useCallback, useContext, useEffect, useRef } from 'react';
+import { BulkEditCheckbox } from '@/v5/ui/components/shared/ticketsBulkEdit/bulkEditCheckbox.component';
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
-import { CheckboxHeaderCell, Checkbox, SelectionColumnContainer } from './ticketsTableSelectionColumn.styles';
+import { CheckboxHeaderCell, SelectionColumnContainer } from './ticketsTableSelectionColumn.styles';
 import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.styles';
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TabularViewContext } from '../../../tabularViewContext/tabularViewContext';
-import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
-import { formatMessage } from '@/v5/services/intl';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTable.constants';
 import { TemplatesPermissionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Checkbox } from '@components/shared/ticketsBulkEdit/bulkEditCheckbox.styles';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -42,20 +42,13 @@ type SelectionRowType = {
 	onCheck: (e: any, ticketId: string) => void;
 	selectedTicketId: string;
 };
-const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => {
-	const tooltipTitle = disabled ? formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' }) : '';
-	return (
-		<Row key={ticketId} $selected={selectedTicketId === ticketId}>
-			<CellContainer alwaysVisible>
-				<Tooltip title={tooltipTitle}>
-					<div>
-						<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} disabled={disabled} />
-					</div>
-				</Tooltip>
-			</CellContainer>
-		</Row>
-	);
-});
+const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => (
+	<Row key={ticketId} $selected={selectedTicketId === ticketId}>
+		<CellContainer alwaysVisible>
+			<BulkEditCheckbox checked={selected} onClick={(e) => onCheck(e, ticketId)} disabled={disabled} />
+		</CellContainer>
+	</Row>
+));
 
 export const TicketsTableSelectionColumn = ({ 
 	tickets,

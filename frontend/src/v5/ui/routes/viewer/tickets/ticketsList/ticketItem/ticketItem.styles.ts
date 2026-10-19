@@ -20,7 +20,7 @@ import { TextOverflow } from '@controls/textOverflow';
 import { Chip } from '@controls/chip/chip.component';
 import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
 import { CardListItem } from '@components/viewer/cards/card.styles';
-import { Checkbox } from '@mui/material';
+import { BulkEditCheckbox } from '@components/shared/ticketsBulkEdit/bulkEditCheckbox.component';
 
 export const FlexRow = styled.div`
 	display: flex;
@@ -113,10 +113,8 @@ export const Id = styled.div`
 	user-select: none;
 `;
 
-export const TicketCheckbox = styled(Checkbox)`
+export const TicketCheckbox = styled(BulkEditCheckbox)`
 	display: inline;
-	padding: 0;
 	top: 2px;
 	margin-right: 6px;
-	margin-left: 0;
 `;

@@ -31,7 +31,6 @@ import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.hel
 import { formatMessage } from '@/v5/services/intl';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
-import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { TextOverflow } from '@controls/textOverflow';
 
 type TicketItemProps = {
@@ -53,7 +52,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, ticket.type);
 	const editable = TemplatesPermissionsHooksSelectors.selectIsTemplateEditable(containerOrFederation, ticket.type);
-	const tooltipTitle = editable ? '' : formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' });
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
@@ -92,13 +90,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						{bulkModeOn && (
-							<Tooltip title={tooltipTitle}>
-								<div>
-									<TicketCheckbox checked={bulkSelection.has(ticket._id)} disabled={!editable} />
-								</div>
-							</Tooltip>
-						)}
+						{bulkModeOn && <TicketCheckbox checked={bulkSelection.has(ticket._id)} disabled={!editable} />}
 						<TextOverflow>
 							{ticket.title}
 						</TextOverflow>
