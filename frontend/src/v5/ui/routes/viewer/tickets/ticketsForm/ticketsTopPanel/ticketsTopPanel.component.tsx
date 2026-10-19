@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
@@ -51,9 +51,9 @@ export const TicketsTopPanel = ({
 
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
-	const readOnlyDefault = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
-	const readOnlyStatus = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.status');
-	const readOnlyAssign = !isNewTicket && !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.assignees');
+	const readOnlyDefault = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
+	const readOnlyStatus = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasStatusEditPermissionForTemplate(containerOrFederation, templateId);
+	const readOnlyAssign = !isNewTicket && !TemplatesPermissionsHooksSelectors.selectHasAssignPermissionForTemplate(containerOrFederation, templateId);
 
 	const ref = useRef<HTMLTextAreaElement>(null);
 

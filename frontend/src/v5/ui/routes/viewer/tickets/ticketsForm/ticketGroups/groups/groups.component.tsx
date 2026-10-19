@@ -24,7 +24,7 @@ import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { useContext } from 'react';
 import {
@@ -48,7 +48,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 	const state = getCollectionState(overridesIndexes);
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 	
 	const dispatch = useDispatch();
 

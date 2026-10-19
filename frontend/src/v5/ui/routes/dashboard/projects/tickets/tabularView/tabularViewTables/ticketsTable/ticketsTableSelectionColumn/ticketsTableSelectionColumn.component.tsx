@@ -29,7 +29,7 @@ import { TabularViewContext } from '../../../tabularViewContext/tabularViewConte
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTable.constants';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -65,7 +65,7 @@ export const TicketsTableSelectionColumn = ({
 	const ticketIds = tickets.map((t) => t._id);
 	const oldTicketsIds = useRef<string[]>(ticketIds);
 
-	const editableTicketIdsSet = TicketsHooksSelectors.selectEditableTicketIds(tickets);
+	const editableTicketIdsSet = TemplatesPermissionsHooksSelectors.selectEditableTicketIds(tickets);
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id) || !editableTicketIdsSet.has(_id)) && editableTicketIdsSet.size > 0;

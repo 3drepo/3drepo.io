@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
@@ -52,8 +52,8 @@ const TicketsActions = ({ groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
 	const [, setGroupByParam] = useSearchParam('groupBy');
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const canEditTicket = TicketsHooksSelectors.selectEditableTicketIds(tickets)?.size > 0;
-	const canCreateTicket = TicketsHooksSelectors.selectCreatableTemplates(containerOrFederation).length > 0;
+	const canEditTicket = TemplatesPermissionsHooksSelectors.selectEditableTicketIds(tickets)?.size > 0;
+	const canCreateTicket = TemplatesPermissionsHooksSelectors.selectCreatableTemplates(containerOrFederation).length > 0;
 
 	const bulkCheckboxTooltipMessage = !bulkModeOn ? 
 		formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' }) :

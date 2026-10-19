@@ -17,7 +17,7 @@
 
 /* eslint-disable no-param-reassign */
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -114,7 +114,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 
 	const formRef = useRef(null);
 

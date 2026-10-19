@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { get, isUndefined } from 'lodash';
@@ -40,7 +40,8 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { formState } = useFormContext();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const ticketIsReadOnly = !isNewTicket || !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, selectedTicketId, 'edit.default');
+	const ticketIsReadOnly = !isNewTicket
+		|| !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, selectedTicketId);
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
 
 	if (!properties.length) return null;

@@ -19,7 +19,7 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Float } from './rulesOptionsMenu.styles';
 import { EllipsisMenuItemDelete } from '../../../../../properties/ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -28,7 +28,7 @@ import { useContext } from 'react';
 export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 
 	return (
 		<Float>

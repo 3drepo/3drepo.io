@@ -20,7 +20,7 @@ import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketsCardHooksSelectors, TicketCommentsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
@@ -51,7 +51,7 @@ export const CurrentUserComment = ({
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 
 	const [isEditMode, setIsEditMode] = useState(false);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, templateId);
 	const [commentReply, setCommentReply] = useState(metadata);
 
 	useEffect(() => {

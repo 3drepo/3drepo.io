@@ -18,7 +18,7 @@
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
@@ -41,7 +41,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	} = useContext(TicketGroupsContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const { containerOrFederation } = useContext(TicketContext);
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'edit.default');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 	
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const indexes = indexedOverrides.map(({ index }) => index);

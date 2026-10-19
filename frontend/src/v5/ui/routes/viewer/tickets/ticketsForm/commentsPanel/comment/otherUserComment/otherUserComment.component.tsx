@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesHooksSelectors, TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
@@ -47,7 +47,7 @@ export const OtherUserComment = ({
 	const importedAuthorUser = getImportedUser(originalAuthor);
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
-	const readOnly = !TicketsHooksSelectors.selectHasPermissionForTemplate(containerOrFederation, templateId, 'comment');
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, templateId);
 
 	const getAuthorDisplayName = () => {
 		if (!isFirstOfBlock) return null;
