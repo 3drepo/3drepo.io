@@ -94,15 +94,3 @@ export const commentWithGroups = (groups) => (comment) => {
 	const state = createStateWithGroup(comment.view.state, groups);
 	return { ...comment, view: { ...comment.view, state } };
 };
-
-export const getCaretCharacterIndex = (element: HTMLElement): number => {
-	const selection = window.getSelection();
-	if (!selection?.rangeCount || !selection.anchorNode || !element.contains(selection.anchorNode)) {
-		return element.innerText.length;
-	}
-
-	const range = selection.getRangeAt(0).cloneRange();
-	range.selectNodeContents(element);
-	range.setEnd(selection.anchorNode, selection.anchorOffset);
-	return range.toString().length;
-};
