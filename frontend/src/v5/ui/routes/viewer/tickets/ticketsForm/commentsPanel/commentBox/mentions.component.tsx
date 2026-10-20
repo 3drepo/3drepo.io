@@ -17,9 +17,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Popper } from '@mui/material';
-import { MENTION_USERS, MentionsListComponent } from './mentionsList/mentionsList.component';
+import { MentionsListComponent } from './mentionsList/mentionsList.component';
 import { VirtualElement } from '@popperjs/core';
 import { getCaretCharacterIndex, getSelectionTextOffset, restoreSelection } from './range.helpers';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
@@ -30,7 +34,7 @@ const getMessageValue = (editor: HTMLElement) => {
 	return editorCopy.innerText;
 };
 
-const renderMessage = (editor: HTMLElement, message: string) => {
+const renderMessage = (editor: HTMLElement, message: string, users) => {
 	editor.textContent = '';
 	const fragment = document.createDocumentFragment();
 	const mentionPattern = /@(\S+)/g;
@@ -39,14 +43,14 @@ const renderMessage = (editor: HTMLElement, message: string) => {
 
 	while (match) {
 		const mentionId = match[1];
-		const mention = MENTION_USERS.find(({ id }) => id === mentionId);
+		const mention = users.find(({ user }) => user === mentionId);
 		if (mention) {
 			fragment.append(message.slice(lastIndex, match.index));
 			const mentionElement = document.createElement('span');
-			mentionElement.dataset.mentionName = mention.name;
-			mentionElement.dataset.mentionId = mention.id;
+			mentionElement.dataset.mentionName = getFullnameFromUser(mention);
+			mentionElement.dataset.mentionId = mention.user;
 			mentionElement.dataset.mention = 'true';
-			mentionElement.textContent = mention.name;
+			mentionElement.textContent = getFullnameFromUser(mention);
 			fragment.append(mentionElement);
 			lastIndex = match.index + match[0].length;
 		}
@@ -58,6 +62,8 @@ const renderMessage = (editor: HTMLElement, message: string) => {
 };
 
 export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
+	const { teamspace } = useParams<ViewerParams>();
+	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
 	// Keep the range immediately before the query so selecting a mention can replace it without traversing editor nodes.
 	const mentionStartRangeRef = useRef<Range | null>(null);
 	const [mentionAnchor, setMentionAnchor] = useState<VirtualElement | null>(null);
@@ -192,8 +198,8 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 	}, [editorRef.current, handleMessageKeyDown]);
 
 	useEffect(() => {
-		if (editorRef.current) renderMessage(editorRef.current, message);
-	}, [message]);
+		if (editorRef.current) renderMessage(editorRef.current, message, users);
+	}, [message, users]);
 
 	return (
 		<Popper
