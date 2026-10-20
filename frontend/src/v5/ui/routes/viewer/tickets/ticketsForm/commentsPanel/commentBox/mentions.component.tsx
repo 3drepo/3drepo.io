@@ -24,6 +24,7 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
+import { UNKNOWN_USER } from '@/v4/helpers/user.helpers';
 
 const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
@@ -37,23 +38,24 @@ const getMessageValue = (editor: HTMLElement) => {
 const renderMessage = (editor: HTMLElement, message: string, users) => {
 	editor.textContent = '';
 	const fragment = document.createDocumentFragment();
-	const mentionPattern = /@(\S+)/g;
+	const mentionPattern = /(^|[^\w@])@([^\s@]+)/g;
 	let lastIndex = 0;
 	let match = mentionPattern.exec(message);
 
 	while (match) {
-		const mentionId = match[1];
+		const mentionId = match[2];
 		const mention = users.find(({ user }) => user === mentionId);
-		if (mention) {
-			fragment.append(message.slice(lastIndex, match.index));
-			const mentionElement = document.createElement('span');
-			mentionElement.dataset.mentionName = getFullnameFromUser(mention);
-			mentionElement.dataset.mentionId = mention.user;
-			mentionElement.dataset.mention = 'true';
-			mentionElement.textContent = getFullnameFromUser(mention);
-			fragment.append(mentionElement);
-			lastIndex = match.index + match[0].length;
-		}
+		const mentionName = mention ? getFullnameFromUser(mention) : UNKNOWN_USER;
+		fragment.append(message.slice(lastIndex, match.index));
+		fragment.append(match[1]);
+		const mentionElement = document.createElement('span');
+		mentionElement.dataset.mentionName = mentionName;
+		mentionElement.dataset.mentionId = mentionId;
+		mentionElement.dataset.mention = 'true';
+		if (!mention) mentionElement.dataset.unknownMention = 'true';
+		mentionElement.textContent = mentionName;
+		fragment.append(mentionElement);
+		lastIndex = match.index + match[0].length;
 		match = mentionPattern.exec(message);
 	}
 
@@ -154,13 +156,16 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 		const mentionStart = textBeforeCaret.lastIndexOf('@');
 		const tokenStart = textBeforeCaret.length - currentToken.length;
 		const query = textBeforeCaret.slice(mentionStart + 1);
+		const mentionPrefix = textBeforeCaret[mentionStart - 1];
+		const isMention = textBeforeCaret[mentionStart] === '@'
+			&& (mentionStart === 0 || !/[\w@]/.test(mentionPrefix || ''));
     
-		if (mentionStart < tokenStart) {
+		if (!isMention || mentionStart < tokenStart) {
 			closeMentionPopup();
 			return;
 		}
     
-		if (textBeforeCaret[mentionStart] === '@' && !mentionAnchor) {
+		if (isMention && !mentionAnchor) {
 			const currentSelection = window.getSelection();
 			if (!currentSelection?.rangeCount) return;
 			const anchorRange = currentSelection.getRangeAt(0).cloneRange();
@@ -175,7 +180,7 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 				contextElement: editor,
 				getBoundingClientRect: () => anchorRange.getBoundingClientRect(),
 			});
-		} else if (textBeforeCaret[mentionStart] === '@') {
+		} else if (isMention) {
 			setMentionQuery(query);
 		}
 	};

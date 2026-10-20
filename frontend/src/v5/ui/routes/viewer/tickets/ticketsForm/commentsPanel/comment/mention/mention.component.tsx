@@ -44,6 +44,11 @@ const MentionText = styled.span`
 	cursor: pointer;
 `;
 
+const UnknownMentionText = styled.span`
+	color: ${({ theme }) => theme.palette.base.lighter};
+	font-style: italic;
+`;
+
 type MentionProps = {
 	userId: string;
 };
@@ -52,7 +57,7 @@ export const Mention = ({ userId }: MentionProps) => {
 	const { teamspace } = useParams<ViewerParams>();
 	const user = UsersHooksSelectors.selectUser(teamspace, userId);
 
-	if (!user || user.isNotTeamspaceMember) return <span>@{userId}</span>;
+	if (!user || user.isNotTeamspaceMember) return <UnknownMentionText>Unknown user</UnknownMentionText>;
 
 	return (
 		<HoverPopover anchor={() => <MentionText>{user.firstName} {user.lastName}</MentionText>}>

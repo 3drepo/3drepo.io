@@ -162,6 +162,11 @@ export const MessageInput = styled.div`
 	& [data-mention='true'] {
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
+
+	& [data-unknown-mention='true'] {
+		color: ${({ theme }) => theme.palette.base.lighter};
+		font-style: italic;
+	}
 `;
 
 export const MentionMessage = styled(Paper)`
