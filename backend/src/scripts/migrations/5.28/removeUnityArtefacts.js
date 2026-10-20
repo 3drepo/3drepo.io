@@ -18,6 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
+const { logger } = require(`${v5Path}/utils/logger`);
 const { dropCollection } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 
@@ -27,6 +28,7 @@ const processTeamspace = async (teamspace) => {
 	const collections = await getCollectionsEndsWith(teamspace, STASH_UNITY3D_REF);
 
 	for (const { name: collection } of collections) {
+		logger.logInfo(`\t- ${collection}`);
 		// eslint-disable-next-line no-await-in-loop
 		await removeFilesWithMeta(teamspace, `${collection}.ref`, {});
 		// eslint-disable-next-line no-await-in-loop
@@ -37,6 +39,7 @@ const processTeamspace = async (teamspace) => {
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
+		logger.logInfo(`- ${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspace);
 	}
