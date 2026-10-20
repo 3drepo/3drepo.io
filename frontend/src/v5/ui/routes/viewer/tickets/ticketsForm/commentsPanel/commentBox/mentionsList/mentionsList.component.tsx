@@ -24,31 +24,14 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
+import { ListItemContainer, Subtitle, Title, Titles } from '@controls/assigneesSelect/assigneesSelectMenu/assigneesSelectMenuItem/assigneesSelectMenuItem.styles';
 import styled from 'styled-components';
 
-const MentionRow = styled.div<{ $selected: boolean }>`
-	width: 100%;
-	height: 44px;
-	padding: 6px 12px;
-	box-sizing: border-box;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	cursor: pointer;
-	background-color: ${({ theme, $selected }) => $selected && theme.palette.tertiary.lightest};
-`;
-
-const MentionTitles = styled.div`
-	min-width: 0;
-`;
-
-const MentionTitle = styled.div`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-size: 14px;
-	line-height: 16px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+const MentionList = styled(List)`
+	&& {
+		padding: 0;
+		margin: 0;
+	}
 `;
 
 const MAX_VISIBLE_MENTIONS = 4;
@@ -137,22 +120,23 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 
 	return (
 		<MentionMessage>
-			<List disablePadding>
+			<MentionList disablePadding>
 				{visibleItems.map((item, index) => (
-					<MentionRow
+					<ListItemContainer
 						key={item.id}
-						$selected={selectedIndex === index}
+						selected={selectedIndex === index}
 						onMouseEnter={() => setSelectedIndex(index)}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => onMention(item)}
 					>
-						<UserCircle user={item} size="small" />
-						<MentionTitles>
-							<MentionTitle>{item.name}</MentionTitle>
-						</MentionTitles>
-					</MentionRow>
+						<UserCircle user={item} />
+						<Titles>
+							<Title>{item.name}</Title>
+							<Subtitle>{item.job}</Subtitle>
+						</Titles>
+					</ListItemContainer>
 				))}
-			</List>
+			</MentionList>
 		</MentionMessage>
 	);
 };

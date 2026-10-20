@@ -165,8 +165,8 @@ export const MessageInput = styled.div`
 `;
 
 export const MentionMessage = styled(Paper)`
-	width: 272px;
-	padding: 8px 0;
+	width: 264px;
+	padding: 0;
 	box-sizing: border-box;
 	border-radius: 4px;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
