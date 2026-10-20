@@ -22,7 +22,6 @@ const ResponseCodes = require("../response_codes");
 const utils = require("../utils");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
-const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const ACTIVITIES_FILE_REF_EXT = ".activities.ref";
 const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
@@ -166,10 +165,6 @@ FileRef.getTotalModelFileSize = function (account, model) {
 	);
 };
 
-FileRef.getUnityBundle = function (account, model, fileName) {
-	return _fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
-};
-
 FileRef.getSequenceActivitiesFile = function (account, model, fileName) {
 	return _fetchFile(account, model, ACTIVITIES_FILE_REF_EXT, fileName, false, false);
 };
@@ -216,7 +211,6 @@ FileRef.removeAllFilesFromModel = function (account, model) {
 	const promises = [];
 	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	promises.push(removeAllFiles(account, model + RESOURCES_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + STATE_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + ISSUES_FILE_REF_EXT));
