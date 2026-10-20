@@ -16,12 +16,38 @@
  */
 
 import ReactMarkdown from 'react-markdown';
+import { Children } from 'react';
 import { CommentMessage } from '../basicComment/basicComment.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
+import { Mention } from '../mention/mention.component';
+
+const MENTION_PATTERN = /@([^\s@]+)/g;
+
+const renderMentions = (value: string) => {
+	const content = [];
+	let lastIndex = 0;
+	let match = MENTION_PATTERN.exec(value);
+
+	while (match) {
+		content.push(value.slice(lastIndex, match.index));
+		content.push(<Mention key={`${match.index}-${match[1]}`} userId={match[1]} />);
+		lastIndex = match.index + match[0].length;
+		match = MENTION_PATTERN.exec(value);
+	}
+
+	content.push(value.slice(lastIndex));
+	return content;
+};
 
 const COMPONENTS = {
-	p: CommentMessage,
+	p: ({ children, ...props }) => (
+		<CommentMessage {...props}>
+			{Children.toArray(children).map((child) => (
+				typeof child === 'string' ? renderMentions(child) : child
+			))}
+		</CommentMessage>
+	),
 	img: ({ src }) => `![img](${src})`,
 	blockquote: QuotedMessage,
 } as any;
