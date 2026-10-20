@@ -13,22 +13,27 @@ The Docker build context lives in [`docker/3drepo.io/`](../../docker/3drepo.io).
 
 ## How to deploy
 
-There are two ways a deploy happens:
+There are three ways a deploy happens:
 
-- **Automatically** – every push (merge) to `master` or `staging` builds and
+- **Automatically**: every push (merge) to `master` or `staging` builds and
   deploys that branch. Nothing to do.
-- **On demand (per PR)** – comment **`/deploy`** on the pull request. Only users
+- **On demand (per PR)**: comment **`/deploy`** on the pull request. Only users
   with **write access or above** can do this. The instance comes up at
   `https://<branch-name>.dev.3drepo.io` (the branch name is lowercased and
-  non-alphanumeric characters become `-`, e.g. `ISSUE_1234` → `issue-1234`).
+  non-alphanumeric characters become `-`, e.g. `ISSUE_1234` -> `issue-1234`).
+- **To qa / dev (movable tags)**: move the relevant tag onto the commit you want
+  live and push it. The workflow runs from that tagged commit and deploys the
+  `www` release to the matching cluster, using that env's values from DevOps:
+    - `qa_deploy`  -> qa
+    - `dev_deploy` -> dev
 
 Fork PRs are refused, because deploying uses registry and cluster secrets.
 
 ## How to destroy
 
-- **Automatically** – closing/merging the PR tears its deployment down
+- **Automatically**: closing/merging the PR tears its deployment down
   ([`onPRClose.yml`](./onPRClose.yml) calls `destroy.yml` directly).
-- **On demand** – comment **`/destroy`** on the pull request.
+- **On demand**: comment **`/destroy`** on the pull request.
 
 `master` and `staging` are protected: the destroy workflow refuses to remove
 those releases even if asked.
@@ -36,14 +41,14 @@ those releases even if asked.
 ## Per-branch deploy config
 
 Because deploys are driven by `repository_dispatch`, GitHub always runs the
-**workflow definition from the default branch (`master`)** — so editing
+**workflow definition from the default branch (`master`)**, so editing
 `buildAndDeploy.yml` on a feature branch has no effect on a `/deploy`.
 
 Deployment config therefore lives in [`.github/deploy/config.env`](../deploy/config.env),
 which the deploy job reads from **your branch's** checkout. Edit it on your
 branch to tune that branch's deployment; the values show up in the PR diff for
-review. The file is required — a deploy fails if it's missing. You can set:
+review. The file is required, a deploy fails if it's missing. You can set:
 
-- `HELM_CHART_VERSION` – the chart version to deploy.
-- `CUSTOM_HELM_OVERRIDE` – extra comma-delimited `helm --set` overrides, e.g.
+- `HELM_CHART_VERSION`: the chart version to deploy.
+- `CUSTOM_HELM_OVERRIDE`: extra comma-delimited `helm --set` overrides, e.g.
   `config.APP_QUEUE_DNS=issue-xxx-rabbitmq,config.ADDITIONAL_CONFIG=hello`.

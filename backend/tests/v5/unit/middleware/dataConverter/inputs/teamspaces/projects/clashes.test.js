@@ -67,7 +67,7 @@ const { createResponseCode } = require('../../../../../../../../src/v5/utils/res
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus, CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require(`${src}/models/clashes.constants`);
 const { presetModules, statuses: templateDefaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -243,7 +243,7 @@ const testValidateNewPlanData = () => {
 			ProjectSettingsModel.modelsExistInProject.mockImplementation(
 				(t, p, modelIds) => Promise.resolve(modelIds.every(
 					(id) => recognisedContainer.includes(id) || recognisedFederation === id)
-							&& !modelIds.includes(containerNotInProject)));
+					&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, p, f, username) => Promise.resolve(username === knownUsername));
 			TicketSchema.validateTickets.mockImplementation((t, p, f, tem, updateData, options) => {
@@ -278,9 +278,13 @@ const testValidateNewPlanData = () => {
 				}
 
 				if (UUIDToString(templateId) === templateWithDeprecatedCloudClash) {
-					return Promise.resolve({ modules: [{ type: presetModules.CLOUD_CLASH,
-						deprecated: true,
-						properties: [] }] });
+					return Promise.resolve({
+						modules: [{
+							type: presetModules.CLOUD_CLASH,
+							deprecated: true,
+							properties: [],
+						}],
+					});
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
@@ -288,7 +292,7 @@ const testValidateNewPlanData = () => {
 			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
 			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
 
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const req = {
 				params: { teamspace, project },
 				body: data,
@@ -520,7 +524,7 @@ const testValidateUpdatePlanData = () => {
 			ProjectSettingsModel.modelsExistInProject.mockImplementation(
 				(t, pro, modelIds) => Promise.resolve(modelIds.every(
 					(id) => recognisedContainer.includes(id) || recognisedFederations.includes(id))
-							&& !modelIds.includes(containerNotInProject)));
+					&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, pro, f, username) => Promise.resolve(knownUsernames.includes(username)));
 			TicketSchema.validateTickets.mockImplementation((t, pro, f, tem, updateData, options) => {
@@ -579,9 +583,13 @@ const testValidateUpdatePlanData = () => {
 				}
 
 				if (UUIDToString(templateId) === templateWithDeprecatedCloudClash) {
-					return Promise.resolve({ modules: [{ type: presetModules.CLOUD_CLASH,
-						deprecated: true,
-						properties: [] }] });
+					return Promise.resolve({
+						modules: [{
+							type: presetModules.CLOUD_CLASH,
+							deprecated: true,
+							properties: [],
+						}],
+					});
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
@@ -589,7 +597,7 @@ const testValidateUpdatePlanData = () => {
 			ProjectsProcessor.getUsersWithAccess.mockResolvedValueOnce(users);
 			JobsModel.getJobsByUsers.mockResolvedValueOnce(jobs);
 
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const req = {
 				params: { teamspace, project, planId },
 				body: data,
@@ -619,7 +627,7 @@ const testValidateUpdatePlanData = () => {
 const testPlanExists = () => {
 	describe('Check if plan exists', () => {
 		test('should respond with error if plan does not exist', async () => {
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
@@ -640,7 +648,7 @@ const testPlanExists = () => {
 		});
 
 		test('next() should be called if the plan exists', async () => {
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const plan = generateRandomObject();
 			const req = {
 				params: {
@@ -666,7 +674,7 @@ const testPlanExists = () => {
 const testClashRunInPlan = () => {
 	describe('Check if clash run is in plan', () => {
 		test('should respond with error if the run is not in the plan', async () => {
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
@@ -692,7 +700,7 @@ const testClashRunInPlan = () => {
 		});
 
 		test('next() should be called if the run is in the plan', async () => {
-			const mockCB = jest.fn(() => {});
+			const mockCB = jest.fn(() => { });
 			const run = generateRandomObject();
 			const req = {
 				params: {
@@ -720,21 +728,83 @@ const testClashRunInPlan = () => {
 	});
 };
 
+const testClashRunCompleted = () => {
+	describe('Check if clash run is completed', () => {
+		const req = {
+			params: {
+				teamspace: generateRandomString(),
+				project: generateUUID(),
+				runId: generateUUID(),
+			},
+		};
+		const error = new Error(generateRandomString());
+		test('should call next if the clash run is completed', async () => {
+			const mockCB = jest.fn(() => { });
+
+			ClashRunsModel.getClashRunById.mockResolvedValueOnce({ status: clashRunStatus.COMPLETED });
+
+			await Clashes.clashRunCompleted(req, {}, mockCB);
+
+			expect(ClashRunsModel.getClashRunById).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getClashRunById).toHaveBeenCalledWith(
+				req.params.teamspace, req.params.project, req.params.runId,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('should respond with clashRunNotCompleted if the run is not completed', async () => {
+			const mockCB = jest.fn(() => { });
+
+			ClashRunsModel.getClashRunById.mockResolvedValueOnce({ status: clashRunStatus.RUNNING });
+
+			await Clashes.clashRunCompleted(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, createResponseCode(templates.clashRunNotCompleted));
+		});
+
+		test('should respond with the error if looking up the run fails', async () => {
+			const mockCB = jest.fn(() => { });
+
+			ClashRunsModel.getClashRunById.mockRejectedValueOnce(error);
+
+			await Clashes.clashRunCompleted(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
+		});
+
+		test('should respond with the error if next() rejects', async () => {
+			const mockCB = jest.fn().mockRejectedValueOnce(error);
+
+			ClashRunsModel.getClashRunById.mockResolvedValueOnce({ status: clashRunStatus.COMPLETED });
+
+			await Clashes.clashRunCompleted(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
+		});
+	});
+};
+
 const testPlanContainersHaveRevs = () => {
 	describe('planContainersHaveRevs', () => {
+		const teamspace = generateRandomString();
+		const containerA = generateRandomString();
+		const containerB = generateRandomString();
+		const mockCB = jest.fn(() => { });
+		const req = {
+			params: { teamspace },
+			planData: {
+				selectionA: [{ container: containerA }],
+				selectionB: [{ container: containerB }],
+			},
+		};
 		test('should assign latest revisions to selectionA and selectionB and call next()', async () => {
-			const teamspace = generateRandomString();
-			const containerA = generateRandomString();
-			const containerB = generateRandomString();
-			const mockCB = jest.fn(() => {});
-			const req = {
-				params: { teamspace },
-				planData: {
-					selectionA: [{ container: containerA }],
-					selectionB: [{ container: containerB }],
-				},
-			};
-
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
 			expect(ClashesProcessor.setLastRevForSelections).toHaveBeenCalledTimes(1);
@@ -746,18 +816,6 @@ const testPlanContainersHaveRevs = () => {
 		});
 
 		test('should respond with error if revisionNotFound error is thrown', async () => {
-			const mockCB = jest.fn(() => {});
-			const teamspace = generateRandomString();
-			const containerA = generateRandomString();
-			const containerB = generateRandomString();
-			const req = {
-				params: { teamspace },
-				planData: {
-					selectionA: { container: containerA },
-					selectionB: { container: containerB },
-				},
-			};
-
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
@@ -773,18 +831,6 @@ const testPlanContainersHaveRevs = () => {
 		});
 
 		test('should respond with error if another error is thrown', async () => {
-			const mockCB = jest.fn(() => {});
-			const teamspace = generateRandomString();
-			const containerA = generateRandomString();
-			const containerB = generateRandomString();
-			const req = {
-				params: { teamspace },
-				planData: {
-					selectionA: [{ container: containerA }],
-					selectionB: [{ container: containerB }],
-				},
-			};
-
 			const error = new Error(generateRandomString());
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(error);
 
@@ -801,16 +847,6 @@ const testPlanContainersHaveRevs = () => {
 		});
 
 		test('should respond with revision not found if a plan container has no revision', async () => {
-			const mockCB = jest.fn(() => {});
-			const teamspace = generateRandomString();
-			const req = {
-				params: { teamspace },
-				planData: {
-					selectionA: [{ container: generateRandomString() }],
-					selectionB: [{ container: generateRandomString() }],
-				},
-			};
-
 			ClashesProcessor.setLastRevForSelections.mockRejectedValueOnce(templates.revisionNotFound);
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
@@ -830,5 +866,6 @@ describe(determineTestGroup(__filename), () => {
 	testValidateUpdatePlanData();
 	testPlanExists();
 	testClashRunInPlan();
+	testClashRunCompleted();
 	testPlanContainersHaveRevs();
 });

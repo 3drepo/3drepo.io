@@ -98,6 +98,7 @@ ResponseCodes.templates = {
 	// Clashes related error
 	clashPlanNotFound: { message: 'Clash plan not found.', status: 404 },
 	clashRunNotFound: { message: 'Clash run not found.', status: 404 },
+	clashRunNotCompleted: { message: 'Clash run not completed.', status: 404 },
 
 	// endpoint decommissioned
 	endpointDecommissioned: { message: 'Endpoint no longer available.', status: 410 },
