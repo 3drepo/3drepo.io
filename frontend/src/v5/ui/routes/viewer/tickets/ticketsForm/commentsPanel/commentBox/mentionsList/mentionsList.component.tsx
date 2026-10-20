@@ -20,6 +20,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { MentionMessage } from '../commentBox.styles';
 import { UserCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.styles';
 import { IUser } from '@/v5/store/users/users.redux';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import styled from 'styled-components';
 
 const MentionRow = styled.div<{ $selected: boolean }>`
@@ -47,48 +51,12 @@ const MentionTitle = styled.div`
 	text-overflow: ellipsis;
 `;
 
-const MentionSubtitle = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 12px;
-	line-height: 14px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-`;
-
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 type MentionUser = IUser & { name: string, id: string };
 
-const createMentionUser = (id: string, name: string, job: string): MentionUser => {
-	const [firstName, ...lastNameParts] = name.split(' ');
-	return {
-		id,
-		name,
-		user: id,
-		firstName,
-		lastName: lastNameParts.join(' '),
-		job,
-		avatarUrl: '',
-		hasAvatar: false,
-	};
-};
-
-export const MENTION_USERS = [
-	createMentionUser('1', 'Alice Smith', 'Admin'),
-	createMentionUser('2', 'Bob Jones', 'Architect'),
-	createMentionUser('3', 'Charlie Brown', 'Main Contractor'),
-	createMentionUser('4', 'David Wilson', 'Engineer'),
-	createMentionUser('5', 'Sanmont 3D', 'Architect'),
-	createMentionUser('6', 'Mosment Taylor', 'Engineer'),
-	createMentionUser('7', 'Grace Davis', 'Engineer'),
-	createMentionUser('8', 'Hannah Moore', 'Engineer'),
-	createMentionUser('9', 'Ian Thomas', 'Engineer'),
-	createMentionUser('10', 'Julia Evans', 'Engineer'),
-];
-
-const getMatchingMentionItems = (query: string, users: { name: string; id: string }[]) => {
+const getMatchingMentionItems = (query: string, users: MentionUser[]): MentionUser[] => {
 	if (!query) return users;
 
 	// eslint-disable-next-line security/detect-non-literal-regexp
@@ -119,7 +87,7 @@ const getMatchingMentionItems = (query: string, users: { name: string; id: strin
 				score: gaps * 100 + positions[0],
 			};
 		})
-		.filter(Boolean)
+		.filter((item): item is { item: MentionUser, index: number, score: number } => !!item)
 		.sort((first, second) => first.score - second.score || first.index - second.index)
 		.map(({ item }) => item);
 };
@@ -130,10 +98,17 @@ interface MentionsListComponentProps {
 }
 
 export const MentionsListComponent = ({ query, onMention }: MentionsListComponentProps) => {
+	const { teamspace } = useParams<ViewerParams>();
+	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
+	const mentionUsers = users.map((user): MentionUser => ({
+		...user,
+		id: user.user,
+		name: getFullnameFromUser(user),
+	}));
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const visibleItems = useMemo(
-		() => getMatchingMentionItems(query, MENTION_USERS).slice(0, MAX_VISIBLE_MENTIONS),
-		[query],
+		() => getMatchingMentionItems(query, mentionUsers).slice(0, MAX_VISIBLE_MENTIONS),
+		[mentionUsers, query],
 	);
 
 	useEffect(() => {
@@ -174,7 +149,6 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 						<UserCircle user={item} size="small" />
 						<MentionTitles>
 							<MentionTitle>{item.name}</MentionTitle>
-							<MentionSubtitle>{item.job}</MentionSubtitle>
 						</MentionTitles>
 					</MentionRow>
 				))}

@@ -34,7 +34,9 @@
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
-import { MENTION_USERS } from '../../commentBox/mentionsList/mentionsList.component';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import styled from 'styled-components';
 
 const MentionText = styled.span`
@@ -47,9 +49,10 @@ type MentionProps = {
 };
 
 export const Mention = ({ userId }: MentionProps) => {
-	const user = MENTION_USERS.find(({ user: id }) => id === userId);
+	const { teamspace } = useParams<ViewerParams>();
+	const user = UsersHooksSelectors.selectUser(teamspace, userId);
 
-	if (!user) return <span>@{userId}</span>;
+	if (!user || user.isNotTeamspaceMember) return <span>@{userId}</span>;
 
 	return (
 		<HoverPopover anchor={() => <MentionText>{user.firstName} {user.lastName}</MentionText>}>
