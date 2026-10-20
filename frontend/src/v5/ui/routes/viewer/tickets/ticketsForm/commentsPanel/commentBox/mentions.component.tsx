@@ -199,7 +199,7 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 
 	useEffect(() => {
 		if (editorRef.current) renderMessage(editorRef.current, message, users);
-	}, [message, users]);
+	}, [message, users, editorRef.current]);
 
 	return (
 		<Popper

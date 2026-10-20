@@ -64,8 +64,8 @@ export const CurrentUserComment = ({
 		return (
 			<EditComment
 				commentId={_id}
-				message={desanitiseMessage(message)}
-				images={images}
+				message={desanitiseMessage(unsavedComment?.message ?? message)}
+				images={unsavedComment?.images ?? images}
 				commentReply={commentReply}
 				setCommentReply={setCommentReply}
 				view={view}
