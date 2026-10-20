@@ -283,15 +283,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	useEffect(() => { 
-		if (isEditMode) return;
+		if (isEditMode || unsavedComment) return;
 		resetCommentBox();
-	}, [ticketId, isEditMode]);
-
-	useEffect(() => {
-		if (inputRef.current && !inputRef.current.innerText) {
-			inputRef.current.textContent = desanitiseMessage(message);
-		}
-	}, [message]);
+	}, [ticketId, isEditMode, unsavedComment]);
 
 	useEffect(() => {
 		if (commentReply?.message || commentReply?.images?.length || commentReply?.view) {
@@ -314,7 +308,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	useEffect(() => {
 		if (unsavedComment) {
 			setValues(unsavedComment, { shouldDirty: true });
-			if (inputRef.current) inputRef.current.textContent = unsavedComment.message || '';
 			setErroredImages(unsavedComment.erroredImages || []);
 		}
 	}, [unsavedComment]);
@@ -353,7 +346,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				/>
 				<MentionsComponent
 					editorRef={inputRef}
-					message={desanitiseMessage(message)}
+					message={desanitiseMessage(unsavedComment?.message ?? message)}
 					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
