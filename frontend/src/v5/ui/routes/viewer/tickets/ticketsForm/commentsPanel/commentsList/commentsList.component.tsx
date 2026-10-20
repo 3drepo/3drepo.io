@@ -88,6 +88,10 @@ export const CommentsList = () => {
 			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
+
+
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(null) || {};
+
 	return (
 		<CommentsContainer>
 			<Comments>
@@ -125,7 +129,7 @@ export const CommentsList = () => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
+			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} {...unsavedComment} />}
 		</CommentsContainer>
 	);
 };

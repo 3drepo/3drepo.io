@@ -20,6 +20,12 @@ import styled from 'styled-components';
 export const OverflowContainer = styled.span`
 	word-break: break-word;
 	white-space: pre-wrap;
+    padding: 3px 0;
+
+	* {
+		margin: 0;
+		line-height: 1;
+	}
 `;
 
 
