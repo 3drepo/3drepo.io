@@ -16,6 +16,7 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
+const { basePropertyLabels, propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { getArrayDifference, getCommonElements } = require('../../../../../../../utils/helper/arrays');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
@@ -25,7 +26,6 @@ const { getJobsByUsers } = require('../../../../../../../models/jobs');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
-const { basePropertyLabels, propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 const { validateTickets } = require('../../../../../../../schemas/tickets');
@@ -269,33 +269,37 @@ const hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 			const userAndJobs = [user, ...userJobs];
 
 			const checkPerm = (permArray) => {
-				const hasPermission = getCommonElements(permArray, userAndJobs).length;
-				if (!hasPermission) {
-					throw createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+				if (permArray?.length) {
+					const hasPermission = getCommonElements(permArray, userAndJobs).length;
+					if (!hasPermission) {
+						throw createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+					}
 				}
 			};
 
 			let isAssignedModified;
 			let isStatusModified;
-			for (const ticket of ticketUpdates) {
-				if (ticket.properties[basePropertyLabels.ASSIGNEES] !== undefined) {
-					isAssignedModified = true;
+			let isDefaultPropModified;
+
+			for (const update of ticketUpdates) {
+				for (const [key, value] of Object.entries(update)) {
+					if (key === 'properties') {
+						for (const prop of Object.keys(value)) {
+							if (prop === basePropertyLabels.ASSIGNEES) isAssignedModified = true;
+							else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
+							else isDefaultPropModified = true;
+						}
+					} else {
+						isDefaultPropModified = true;
+					}
 				}
 
-				if (ticket.properties[basePropertyLabels.STATUS] !== undefined) {
-					isStatusModified = true;
-				}
+				if (isAssignedModified && isStatusModified && isDefaultPropModified) break;
 			}
 
-			if (isAssignedModified && assignPerms?.length) {
-				checkPerm(assignPerms);
-			}
-
-			if (isStatusModified && statusPerms?.length) {
-				checkPerm(statusPerms);
-			}
-
-			checkPerm(defaultPerms);
+			if (isAssignedModified) checkPerm(assignPerms ?? defaultPerms);
+			if (isStatusModified) checkPerm(statusPerms ?? defaultPerms);
+			if (isDefaultPropModified) checkPerm(defaultPerms);
 		}
 
 		await next();
