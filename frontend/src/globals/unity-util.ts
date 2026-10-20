@@ -2240,7 +2240,7 @@ export class UnityUtil {
 	 * @param revision - ID of revision
 	 */
 	public static offLoadModel(account: string, model: string, revision = 'head') {
-		const ns = `${account}.${model}${revision === 'head' ? '' : `.${revision}`}`;
+		const ns = `${account}.${model}${revision && revision !== 'head' ? `.${revision}` : '' }`;
 		UnityUtil.toUnity('UnloadModel', UnityUtil.LoadingState.MODEL_LOADED, ns);
 	}
 
