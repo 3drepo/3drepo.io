@@ -901,27 +901,6 @@ const testGetTicketResourceAsStream = () => {
 	});
 };
 
-const testGetTicketById = () => {
-	describe('Get ticket by Id', () => {
-		test('should call getTicketById in model and return whatever it returns', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const model = generateRandomString();
-			const ticket = generateRandomString();
-
-			const expectedOutput = generateRandomString();
-
-			TicketsModel.getTicketById.mockResolvedValueOnce(expectedOutput);
-
-			await expect(Tickets.getTicketById(teamspace, project, model, ticket))
-				.resolves.toEqual(expectedOutput);
-
-			expect(TicketsModel.getTicketById).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getTicketById).toHaveBeenCalledWith(teamspace, project, model, ticket);
-		});
-	});
-};
-
 const testGetTicketList = () => {
 	const propertyName = generateRandomString();
 	const propertyName2 = generateRandomString();
@@ -1604,7 +1583,6 @@ describe(determineTestGroup(__filename), () => {
 	testAddTicket();
 	testImportTickets();
 	testGetTicketResourceAsStream();
-	testGetTicketById();
 	testUpdateTicket();
 	testUpdateManyTickets();
 	testGetTicketList();

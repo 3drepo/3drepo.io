@@ -33,11 +33,10 @@ const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
-
-const { propTypesToValidator } = require('./validators');
-const { uniqueElements } = require('../../utils/helper/arrays');
 const { getJobs } = require('../../models/jobs');
 const { getUsersByQuery } = require('../../models/users');
+const { propTypesToValidator } = require('./validators');
+const { uniqueElements } = require('../../utils/helper/arrays');
 
 const TemplateSchema = {};
 

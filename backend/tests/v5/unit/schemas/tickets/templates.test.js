@@ -1411,14 +1411,14 @@ const testValidate = () => {
 		...complexTypesDefaultTest,
 
 	])('Validate ticket template', (desc, data, output) => {
-		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, () => {
-			const testCase = expect(() => TemplateSchema.validate(data));
-			if (output) testCase.not.toThrow();
-			else testCase.toThrow();
+		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const testCase = TemplateSchema.validate(data);
+			if (output) await expect(testCase).resolves.not.toThrow();
+			else await expect(testCase).rejects.toThrow();
 		});
 	});
 
-	test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
+	test('Any unknown properties should be stripped from the schema and necessary properties filled in', async () => {
 		const data = generateBasicSchema({
 			config: {
 				defaultView: true,
@@ -1454,12 +1454,12 @@ const testValidate = () => {
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
 		expectedData.config = { defaultView: true };
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
 	});
 
-	test('hiddenOnUI should be preserved when true and stripped when false', () => {
+	test('hiddenOnUI should be preserved when true and stripped when false', async () => {
 		const data = generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
@@ -1472,7 +1472,7 @@ const testValidate = () => {
 			}],
 		});
 
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output.properties[0].hiddenOnUI).toEqual(true);
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
@@ -1482,7 +1482,7 @@ const testValidate = () => {
 
 	describe('Test every built-in pin icon in direct and conditional mappings', () => {
 		defaultPinIconsNames.forEach((icon) => {
-			test(`should accept ${icon}`, () => {
+			test(`should accept ${icon}`, async () => {
 				const testIconTemplate = generateBasicSchema({
 					config: {
 						pin: {
@@ -1503,12 +1503,12 @@ const testValidate = () => {
 						}],
 				});
 
-				expect(() => TemplateSchema.validate(testIconTemplate)).not.toThrow();
+				await expect(TemplateSchema.validate(testIconTemplate)).resolves.not.toThrow();
 			});
 		});
 	});
 
-	test('Icon mapping default entries strip conditional value and icon fields', () => {
+	test('Icon mapping default entries strip conditional value and icon fields', async () => {
 		const data = generateBasicSchema({
 			config: {
 				pin: {
@@ -1528,7 +1528,7 @@ const testValidate = () => {
 			properties: [{ name: 'reference', type: propTypes.TEXT }],
 		});
 
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output.config.pin.icon.mapping).toEqual([
 			{ default: defaultPinIconsNames[0] },
