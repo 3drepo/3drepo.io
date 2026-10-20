@@ -51,7 +51,7 @@ const createTemplatePermissionSelector = (
 		return !isArray(permissionsList)
 			|| !isEmpty(intersection(
 				permissionsList,
-				[currentUser.username, currentUser.email, myJob],
+				[currentUser.username, currentUser.email, myJob._id],
 			));
 	},
 );

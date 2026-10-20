@@ -154,12 +154,12 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
+		dispatch(JobsActions.getMyJob(teamspace));
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
 	useEffect(() => {
 		if (templates.length) return;
-		dispatch(JobsActions.getMyJob(teamspace));
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, []);
 
