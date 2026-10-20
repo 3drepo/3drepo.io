@@ -22,7 +22,7 @@ import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
 import { Mention } from '../mention/mention.component';
 
-const MENTION_PATTERN = /@([^\s@]+)/g;
+const MENTION_PATTERN = /(^|[^\w@])@([^\s@]+)/g;
 
 const renderMentions = (value: string) => {
 	const content = [];
@@ -31,7 +31,8 @@ const renderMentions = (value: string) => {
 
 	while (match) {
 		content.push(value.slice(lastIndex, match.index));
-		content.push(<Mention key={`${match.index}-${match[1]}`} userId={match[1]} />);
+		content.push(match[1]);
+		content.push(<Mention key={`${match.index}-${match[2]}`} userId={match[2]} />);
 		lastIndex = match.index + match[0].length;
 		match = MENTION_PATTERN.exec(value);
 	}
