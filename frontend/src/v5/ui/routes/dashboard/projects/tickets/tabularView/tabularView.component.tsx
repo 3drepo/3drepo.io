@@ -16,8 +16,8 @@
  */
 
 import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketCommentsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath, useNavigate } from 'react-router-dom';
 import CloseTicketIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
@@ -27,7 +27,6 @@ import { SelectChangeEvent } from '@mui/material';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
-import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TabularViewTablesLayout } from './tabularViewTables/tabularViewTablesLayout.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
@@ -116,17 +115,8 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const ticketsByModelId = TicketsHooksSelectors.selectTicketsByModelIdDictionary();
 	const prevModelIdsRef = useRef<string[]>(containersAndFederations);
-
+	const newTicketButtonIsDisabled = !TemplatesPermissionsHooksSelectors.selectTemplateCanBeCreatedOnModels(modelsIds, template);
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
-
-	// 6319 todo can create template for multiple models
-	// const readOnly = isFed(containerOrFederation)
-	// 	? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
-	// 	: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-
-	const newTicketButtonIsDisabled = useMemo(() =>
-		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
-	[models, containerOrFederation]);
 
 	useEffect(() => {
 		if (!models.length) return;

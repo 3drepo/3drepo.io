@@ -41,7 +41,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
-	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticketFromStore.type);
+	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticketFromStore?.type);
 	const ticketIsReadOnly = !isNewTicket && !canEditDefault;
 
 	if (!properties.length) return null;

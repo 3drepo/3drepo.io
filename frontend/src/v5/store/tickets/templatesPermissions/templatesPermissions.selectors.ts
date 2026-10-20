@@ -73,11 +73,19 @@ export const selectHasAssignPermissionForTemplate =
 
 export const selectCreatableTemplates = createSelector(
 	(state) => state,
-	(state, modelId) => modelId,
+	(state, modelId: string) => modelId,
 	selectTemplates,
 	(state, modelId, templates) => templates.filter(
 		({ _id, deprecated }) => selectHasCreatePermissionForTemplate(state, modelId, _id) && !deprecated),
 );
+
+export const selectTemplateCanBeCreatedOnModels = createSelector(
+	(state) => state,
+	(state, modelIds: string[]) => modelIds,
+	(state, modelIds: string[], templateId) => templateId,
+	(state, modelIds, templateId) => modelIds.some((modelId) => selectHasCreatePermissionForTemplate(state, modelId, templateId)),
+);
+
 
 export const selectIsTemplateEditable = createSelector(
 	selectHasDefaultEditPermissionForTemplate,
