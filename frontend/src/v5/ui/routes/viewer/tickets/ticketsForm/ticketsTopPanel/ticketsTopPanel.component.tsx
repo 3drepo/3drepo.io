@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
@@ -49,7 +49,9 @@ export const TicketsTopPanel = ({
 	const { formState, getValues } = useFormContext();
 	const { containerOrFederation } = useContext(TicketContext);
 
-	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
+	const templateId = ticketFromStore?.type;
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 	const canEditStatus = TemplatesPermissionsHooksSelectors.selectHasStatusEditPermissionForTemplate(containerOrFederation, templateId);

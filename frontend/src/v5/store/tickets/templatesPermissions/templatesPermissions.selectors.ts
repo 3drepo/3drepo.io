@@ -25,18 +25,23 @@ import { selectCurrentUser } from '../../currentUser/currentUser.selectors';
 import { selectMyJob } from '@/v4/modules/jobs';
 import { isCommenterRole } from '../../store.helpers';
 import { ITemplate, ITicket } from '../tickets.types';
+import { selectCurrentProjectTemplateById } from '../../projects/projects.selectors';
 
 type TemplatePermissions = NonNullable<NonNullable<ITemplate['config']>['permissions']>;
 
 const createTemplatePermissionSelector = (
 	selectPermission: (permissions: TemplatePermissions) => string[] | undefined,
 ) => createSelector(
-	selectTemplateById,
 	selectContainerRole,
 	selectFederationRole,
 	selectCurrentUser,
 	selectMyJob,
-	(template, contRole, fedRole, currentUser, myJob) => {
+	// select template by model
+	selectTemplateById,
+	// select template by project
+	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
+	(contRole, fedRole, currentUser, myJob, modelTemplate, projectTemplate) => {
+		const template = modelTemplate ?? projectTemplate;
 		const modelRole = contRole || fedRole;
 		if (modelRole === Role.ADMIN) return true;
 		if (!isCommenterRole(modelRole)) return false;
