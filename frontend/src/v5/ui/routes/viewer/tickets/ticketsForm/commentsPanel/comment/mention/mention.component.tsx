@@ -34,7 +34,7 @@
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
-import { IUser } from '@/v5/store/users/users.redux';
+import { MENTION_USERS } from '../../commentBox/mentionsList/mentionsList.component';
 import styled from 'styled-components';
 
 const MentionText = styled.span`
@@ -46,21 +46,8 @@ type MentionProps = {
 	userId: string;
 };
 
-const USERS: IUser[] = [
-	{ user: '1', firstName: 'Alice', lastName: 'Smith', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '2', firstName: 'Bob', lastName: 'Jones', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '3', firstName: 'Charlie', lastName: 'Brown', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '4', firstName: 'David', lastName: 'Wilson', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '5', firstName: 'Sanmont', lastName: '3D', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '6', firstName: 'Mosment', lastName: 'Taylor', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '7', firstName: 'Grace', lastName: 'Davis', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '8', firstName: 'Hannah', lastName: 'Moore', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '9', firstName: 'Ian', lastName: 'Thomas', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-	{ user: '10', firstName: 'Julia', lastName: 'Evans', company: '3D Repo', job: 'Engineer', avatarUrl: '', hasAvatar: false },
-];
-
 export const Mention = ({ userId }: MentionProps) => {
-	const user = USERS.find(({ user: id }) => id === userId);
+	const user = MENTION_USERS.find(({ user: id }) => id === userId);
 
 	if (!user) return <span>@{userId}</span>;
 

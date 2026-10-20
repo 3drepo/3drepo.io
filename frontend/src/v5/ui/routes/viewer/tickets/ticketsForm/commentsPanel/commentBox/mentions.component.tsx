@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Popper } from '../../ticketGroups/ticketGroups.styles';
+import { Popper } from '@mui/material';
 import { MENTION_USERS, MentionsListComponent } from './mentionsList/mentionsList.component';
 import { VirtualElement } from '@popperjs/core';
 import { getCaretCharacterIndex, getSelectionTextOffset, restoreSelection } from './range.helpers';

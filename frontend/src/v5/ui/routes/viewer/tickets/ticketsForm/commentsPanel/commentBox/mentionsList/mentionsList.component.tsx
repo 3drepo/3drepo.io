@@ -15,24 +15,77 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { List, ListItemText } from '@mui/material';
+import { List } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
-import { MentionItem, MentionMessage } from '../commentBox.styles';
+import { MentionMessage } from '../commentBox.styles';
+import { UserCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.styles';
+import { IUser } from '@/v5/store/users/users.redux';
+import styled from 'styled-components';
+
+const MentionRow = styled.div<{ $selected: boolean }>`
+	width: 100%;
+	height: 44px;
+	padding: 6px 12px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	background-color: ${({ theme, $selected }) => $selected && theme.palette.tertiary.lightest};
+`;
+
+const MentionTitles = styled.div`
+	min-width: 0;
+`;
+
+const MentionTitle = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-size: 14px;
+	line-height: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+const MentionSubtitle = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 12px;
+	line-height: 14px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
 
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+type MentionUser = IUser & { name: string, id: string };
+
+const createMentionUser = (id: string, name: string, job: string): MentionUser => {
+	const [firstName, ...lastNameParts] = name.split(' ');
+	return {
+		id,
+		name,
+		user: id,
+		firstName,
+		lastName: lastNameParts.join(' '),
+		job,
+		avatarUrl: '',
+		hasAvatar: false,
+	};
+};
+
 export const MENTION_USERS = [
-	{ name: 'Alice Smith', id: '1' },
-	{ name: 'Bob Jones', id: '2' },
-	{ name: 'Charlie Brown', id: '3' },
-	{ name: 'David Wilson', id: '4' },
-	{ name: 'Sanmont 3D', id: '5' },
-	{ name: 'Mosment Taylor', id: '6' },
-	{ name: 'Grace Davis', id: '7' },
-	{ name: 'Hannah Moore', id: '8' },
-	{ name: 'Ian Thomas', id: '9' },
-	{ name: 'Julia Evans', id: '10' },
+	createMentionUser('1', 'Alice Smith', 'Admin'),
+	createMentionUser('2', 'Bob Jones', 'Architect'),
+	createMentionUser('3', 'Charlie Brown', 'Main Contractor'),
+	createMentionUser('4', 'David Wilson', 'Engineer'),
+	createMentionUser('5', 'Sanmont 3D', 'Architect'),
+	createMentionUser('6', 'Mosment Taylor', 'Engineer'),
+	createMentionUser('7', 'Grace Davis', 'Engineer'),
+	createMentionUser('8', 'Hannah Moore', 'Engineer'),
+	createMentionUser('9', 'Ian Thomas', 'Engineer'),
+	createMentionUser('10', 'Julia Evans', 'Engineer'),
 ];
 
 const getMatchingMentionItems = (query: string, users: { name: string; id: string }[]) => {
@@ -111,16 +164,19 @@ export const MentionsListComponent = ({ query, onMention }: MentionsListComponen
 		<MentionMessage>
 			<List disablePadding>
 				{visibleItems.map((item, index) => (
-					<MentionItem
+					<MentionRow
 						key={item.id}
-						dense
-						selected={selectedIndex === index}
+						$selected={selectedIndex === index}
 						onMouseEnter={() => setSelectedIndex(index)}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => onMention(item)}
 					>
-						<ListItemText>{item.name}</ListItemText>
-					</MentionItem>
+						<UserCircle user={item} size="small" />
+						<MentionTitles>
+							<MentionTitle>{item.name}</MentionTitle>
+							<MentionSubtitle>{item.job}</MentionSubtitle>
+						</MentionTitles>
+					</MentionRow>
 				))}
 			</List>
 		</MentionMessage>
