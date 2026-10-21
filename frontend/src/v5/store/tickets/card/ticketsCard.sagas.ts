@@ -19,7 +19,7 @@ import { put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AdditionalProperties, BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { ApplyFilterForTicketAction, FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
+import { ApplyFilterForTicketAction, ApplyFilterForTicketsAction, FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
 import { TicketsActions, TicketsTypes } from '../tickets.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -87,18 +87,24 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederat
 	}
 }
 
-export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederation, ticketId }: ApplyFilterForTicketAction) {
-	let ticket =  yield select(selectTicketByIdRaw, modelId, ticketId);
-
-	while (!ticket) { // If new ticket message wasnt attended yet wait until the ticket gets defined
-		yield take(TicketsTypes.UPSERT_TICKET_SUCCESS);
-		ticket =  yield select(selectTicketByIdRaw, modelId, ticketId);
+export function* applyFilterForTickets({ teamspace, projectId, modelId, isFederation, ticketIds }: ApplyFilterForTicketsAction) {
+	let tickets = [];
+	while (true) {
+		tickets = [];
+		for (const ticketId of ticketIds) {
+			tickets.push(yield select(selectTicketByIdRaw, modelId, ticketId));
+		}
+		if (tickets.every(Boolean)) break;
+		// A new ticket message may not have been processed yet
+		yield take([TicketsTypes.UPSERT_TICKET_SUCCESS, TicketsTypes.UPSERT_TICKETS_SUCCESS]);
 	}
-	
-	const { number, type } = ticket;
-	const { code } = yield select(selectTemplateById, modelId, type);
-	const ticketCode = code + ':' + number;
-	
+
+	const ticketCodes = [];
+	for (const { number, type } of tickets) {
+		const { code } = yield select(selectTemplateById, modelId, type);
+		ticketCodes.push(code + ':' + number);
+	}
+
 	const filters = [...yield select(selectCardFilters)];
 	filters.push({
 		module: '',
@@ -106,16 +112,22 @@ export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederat
 		type: 'ticketCode',
 		filter: {
 			operator: 'is',
-			values: [ticketCode],
+			values: ticketCodes,
 		},
 	});
 
-	const ticketWasIncluded = (yield apiFetchFilteredTickets(teamspace, projectId, modelId, isFederation, filters)).size > 0;
-	const ticketIds: Set<string> = new Set(yield select(selectFilteredTicketIds));
+	const includedIds: Set<string> = yield apiFetchFilteredTickets(teamspace, projectId, modelId, isFederation, filters);
+	const filteredIds: Set<string> = new Set(yield select(selectFilteredTicketIds));
 
-	if (ticketWasIncluded) ticketIds.add(ticketId);
-	else ticketIds.delete(ticketId);
-	yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
+	ticketIds.forEach((ticketId) => {
+		if (includedIds.has(ticketId)) filteredIds.add(ticketId);
+		else filteredIds.delete(ticketId);
+	});
+	yield put(TicketsCardActions.setFilteredTicketIds(filteredIds));
+}
+
+export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederation, ticketId }: ApplyFilterForTicketAction) {
+	yield* applyFilterForTickets(TicketsCardActions.applyFilterForTickets(teamspace, projectId, modelId, isFederation, [ticketId]));
 }
 
 
@@ -124,4 +136,5 @@ export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.FETCH_TICKETS_LIST, fetchTicketsList);
 	yield takeLatest(TicketsCardTypes.FETCH_FILTERED_TICKETS, fetchFilteredTickets);
 	yield takeEvery(TicketsCardTypes.APPLY_FILTER_FOR_TICKET, applyFilterForTicket);
+	yield takeEvery(TicketsCardTypes.APPLY_FILTER_FOR_TICKETS, applyFilterForTickets);
 }
