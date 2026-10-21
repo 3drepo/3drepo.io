@@ -369,6 +369,7 @@ const testValidateUpdateTicket = () => {
 		['ticket does not exist', generateRandomString(), false, templates.ticketNotFound],
 		['validation failed', undefined, false, createResponseCode(templates.invalidArguments, errMsg), true],
 		['validation succeeded', undefined, true],
+		['there is nothing to update', undefined, false, templates.ok, false, undefined, ticket],
 		['edit permissions are not configured', undefined, true, undefined, false, { }],
 		['edit default permissions are not configured', undefined, true, undefined, false, { assign: [generateRandomString()], status: [generateRandomString()] }],
 		['the user has default permission', undefined, true, undefined, false, { edit: { default: [user] } }],
@@ -411,7 +412,7 @@ const testValidateUpdateTicket = () => {
 				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
 				TicketSchema.validateTickets.mockImplementation(() => (validationFails
 					? Promise.reject(new Error(errMsg))
-					: Promise.resolve([{ newTicket: req.body }])));
+					: Promise.resolve([{ newTicket: update === ticket ? undefined : update }])));
 
 				await Tickets.validateUpdateTicket(req, res, fn);
 

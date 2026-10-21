@@ -22,9 +22,17 @@ const {
 	generateRandomString,
 	generateCustomStatusValues,
 } = require('../../../helper/dataGen');
-const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { supportedPatterns } = require(`${src}/schemas/tickets/templates.constants`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { statusTypes, statuses, DEFAULT_PIN_ICONS } = require(`${src}/schemas/tickets/templates.constants`);
+
+jest.mock('../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/users');
+const UsersModel = require(`${src}/models/users`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1398,6 +1406,22 @@ const testValidate = () => {
 		['module image list property type with default true', generateBasicSchema({ modules: [{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }] }), false],
 	];
 
+	const users = times(5, () => ({ user: generateRandomString(), customData: { email: generateRandomString() } }));
+	const jobs = times(5, () => ({ _id: generateRandomString() }));
+
+	const permissionTests = [
+		['permissions is an empty object', generateBasicSchema({ config: { permissions: { } } }), false],
+		['create permissions are populated', generateBasicSchema({ config: { permissions: { create: [users[0].user, jobs[0]._id] } } }), true],
+		['create permissions are populated with emails', generateBasicSchema({ config: { permissions: { create: [users[0].customData.email, users[1].customData.email] } } }), true, { config: { permissions: { create: [users[0].user, users[1].user] } }, modules: [], properties: [] }],
+		['create permissions are empty', generateBasicSchema({ config: { permissions: { create: [] } } }), false],
+		['view permissions are populated', generateBasicSchema({ config: { permissions: { view: [users[1].user, jobs[1]._id] } } }), true],
+		['view permissions are populated with emails', generateBasicSchema({ config: { permissions: { view: [users[1].customData.email, users[2].customData.email] } } }), true, { config: { permissions: { view: [users[1].user, users[2].user] } }, modules: [], properties: [] }],
+		['view permissions are empty', generateBasicSchema({ config: { permissions: { view: [] } } }), false],
+		['comment permissions are populated', generateBasicSchema({ config: { permissions: { comment: [users[2].user, jobs[2]._id] } } }), true],
+		['comment permissions are populated with emails', generateBasicSchema({ config: { permissions: { comment: [users[2].customData.email, users[3].customData.email] } } }), true, { config: { permissions: { comment: [users[2].user, users[3].user] } }, modules: [], properties: [] }],
+		['comment permissions are empty', generateBasicSchema({ config: { permissions: { comment: [] } } }), false],
+	];
+
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
@@ -1409,12 +1433,27 @@ const testValidate = () => {
 		...moduleSchemaTest,
 		...tabularColumnsTest,
 		...complexTypesDefaultTest,
+		...permissionTests,
+	])('Validate ticket template', (desc, data, success, expectedOutput) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
+		});
 
-	])('Validate ticket template', (desc, data, output) => {
-		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, async () => {
+		test(`Validation should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			UsersModel.getUsersByQuery.mockResolvedValue(users);
+			JobsModel.getJobs.mockResolvedValue(jobs);
+
 			const testCase = TemplateSchema.validate(data);
-			if (output) await expect(testCase).resolves.not.toThrow();
-			else await expect(testCase).rejects.toThrow();
+			if (success) {
+				if (expectedOutput !== undefined) {
+					await expect(testCase).resolves.toEqual(deleteIfUndefined({ ...data, ...expectedOutput }));
+				} else {
+					await expect(testCase).resolves.toBeDefined();
+				}
+			} else {
+				await expect(testCase).rejects.toThrow();
+			}
 		});
 	});
 
