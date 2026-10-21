@@ -367,7 +367,7 @@ export const theme = createTheme(
 				MuiAccordionSummary: {
 					defaultProps: {
 						// this messes up with existing accordion (WHY is that an accordion!???)
-						// in the viewer (issues/risks card)
+						// in the viewer (issues card)
 						expandIcon: createElement(ThinChevronIcon),
 					},
 				},

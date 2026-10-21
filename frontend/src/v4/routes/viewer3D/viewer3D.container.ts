@@ -17,7 +17,6 @@
 
 import { selectTicketPins } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.selectors';
@@ -26,9 +25,6 @@ import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectSlopeMeasurements, selectAreaMeasurements, selectLengthMeasurements } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
-import { selectHighlightedShapes as selectRisksHighlightedShapes,
-	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
-import { TreeActions } from '../../modules/tree';
 import { selectAllTransparencyOverrides, selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
@@ -38,7 +34,6 @@ const mapStateToProps = createStructuredSelector({
 	transparencies: selectAllTransparencyOverrides,
 	rightPanels: selectRightPanels,
 	issuePins: selectIssuePins,
-	riskPins: selectRiskPins,
 	measurementPins: selectMeasurementPins,
 	measurementsAngle: selectAngleMeasurements,
 	measurementsSlope: selectSlopeMeasurements,
@@ -50,13 +45,7 @@ const mapStateToProps = createStructuredSelector({
 	transformations: selectTransformations,
 	issuesShapes: selectIssuesShapes,
 	issuesHighlightedShapes: selectIssuesHighlightedShapes,
-	risksShapes: selectRisksShapes,
-	risksHighlightedShapes: selectRisksHighlightedShapes,
 	ticketPins: selectTicketPins
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange,
-}, dispatch);
-
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Viewer3D));
+export default withViewer(connect(mapStateToProps)(Viewer3D));

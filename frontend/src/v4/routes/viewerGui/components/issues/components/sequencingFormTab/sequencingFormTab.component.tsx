@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { FunctionComponent } from 'react';
 import { SequencingDates } from '../../../../../components/sequencingDates/sequencingDates.component';
-import { Content } from '../riskDetails/riskDetails.styles';
+import { Content } from '../issueDetails/issueDetails.styles';
 
 interface IProps {
 	active: boolean;

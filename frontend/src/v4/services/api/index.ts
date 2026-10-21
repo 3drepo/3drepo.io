@@ -24,7 +24,6 @@ export * from './projects';
 export * from './profile';
 export * from './models';
 export * from './notifications';
-export * from './risks';
 export * from './viewer';
 export * from './groups';
 export * from './meta';

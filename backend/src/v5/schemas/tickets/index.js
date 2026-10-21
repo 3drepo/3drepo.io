@@ -375,6 +375,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
 					screenshot: uuidString.nullable(),
+					camera: Yup.object({
+						zoomTo: groupCast,
+					}).nullable().default(undefined),
 					state: Yup.object({
 						[viewGroups.COLORED]: groupCast,
 						[viewGroups.HIDDEN]: groupCast,

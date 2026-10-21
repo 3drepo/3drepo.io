@@ -18,7 +18,6 @@
 import { uniqBy, values } from 'lodash';
 import { getAPIUrl } from '../services/api/default';
 import linkify from './linkify';
-import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 import { getUserFullName } from './user.helpers';
 
@@ -107,26 +106,8 @@ const convertActionCommentToText = (comment: IComment) => {
 			case 'category':
 				comment.action.propertyText = 'Category';
 				break;
-			case 'consequence':
-				comment.action.propertyText = 'Consequence';
-				if (!comment.action.to || !!Number(comment.action.to)) {
-					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
-				}
-				if (!comment.action.from || !!Number(comment.action.from)) {
-					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
-				}
-				break;
 			case 'element':
 				comment.action.propertyText = 'Element';
-				break;
-			case 'likelihood':
-				comment.action.propertyText = 'Likelihood';
-				if (!comment.action.to || !!Number(comment.action.to)) {
-					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
-				}
-				if (!comment.action.from || !!Number(comment.action.from)) {
-					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
-				}
 				break;
 			case 'location_desc':
 				comment.action.propertyText = 'Location';
@@ -144,44 +125,10 @@ const convertActionCommentToText = (comment: IComment) => {
 			case 'mitigation_type':
 				comment.action.propertyText = 'Treatment type';
 				break;
-			case 'mitigation_status':
-				comment.action.propertyText = 'Treatment status';
-				break;
 			case 'priority':
 				comment.action.propertyText = 'Priority';
 				comment.action.from = convertActionValueToText(comment.action.from);
 				comment.action.to = convertActionValueToText(comment.action.to);
-				break;
-			case 'residual_consequence':
-				comment.action.propertyText = 'Treated consequence';
-				if (!comment.action.to || !!Number(comment.action.to)) {
-					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
-				}
-				if (!comment.action.from || !!Number(comment.action.from)) {
-					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
-				}
-				break;
-			case 'residual_likelihood':
-				comment.action.propertyText = 'Treated likelihood';
-				if (!comment.action.to || !!Number(comment.action.to)) {
-					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
-				}
-				if (!comment.action.from || !!Number(comment.action.from)) {
-					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
-				}
-				break;
-			case 'residual_risk':
-				comment.action.propertyText = 'Residual risk';
-				text = comment.action.propertyText + ' updated by ' + author;
-				break;
-			case 'risk_factor':
-				comment.action.propertyText = 'Risk factor';
-				break;
-			case 'likelihood':
-				comment.action.propertyText = 'Likelihood';
-				break;
-			case 'safetibase_id':
-				comment.action.propertyText = 'Safetibase ID';
 				break;
 			case 'scope':
 				comment.action.propertyText = 'Construction scope';
@@ -299,7 +246,7 @@ export const transformCustomsLinksToMarkdown = (details: IDetails, comment: ICom
 	let text = comment.comment;
 
 	if (!text || (Boolean(comment.action)
-		&& !['issue_referenced', 'risk_referenced'].includes(comment.action?.property))) {
+		&& !('issue_referenced' === comment.action?.property))) {
 		return text;
 	}
 
@@ -310,7 +257,6 @@ export const transformCustomsLinksToMarkdown = (details: IDetails, comment: ICom
 
 	if (viewpointReferences) {
 		const { account: teamspace, model: projectId, _id: ticketId } = details;
-		const referenceType = type === 'risk' ? 'risks' : 'issues';
 
 		const uniqViewpointReferences = uniqBy([...viewpointReferences], 0);
 		uniqViewpointReferences.forEach(({ 0: viewpointReference }) => {
@@ -319,7 +265,7 @@ export const transformCustomsLinksToMarkdown = (details: IDetails, comment: ICom
 			text = text
 				.replace(referenceRegExp,
 					// eslint-disable-next-line max-len
-					`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/${referenceType}/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
+					`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/issues/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
 		});
 	}
 

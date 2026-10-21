@@ -31,7 +31,6 @@ import previewComments from './overrides/preview/previewComments.overrides';
 import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issues from './overrides/cards/issues/issues.overrides';
-import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
 import sharedStyles from './overrides/cards/sharedStyles/sharedStyles.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
 import newJobDialog from './overrides/newJobForm.overrides';
@@ -81,7 +80,6 @@ export const V4OverridesContainer = styled.div`
 	${views}
 	${measurements}
 	${issues}
-	${safetiBase}
 	${sequences}
 	${views}
 	${gis}

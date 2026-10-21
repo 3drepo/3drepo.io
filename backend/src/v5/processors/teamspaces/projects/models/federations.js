@@ -30,7 +30,6 @@ const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCountForMultipleModels } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRepoBundleInfo } = require('./commons/assets/bundles');
-const { getSuperMeshesInfo } = require('./containers');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 
@@ -118,14 +117,6 @@ Federations.getMD5Hash = (teamspace, containers) => Promise.all(
 	containers.map(({ container, revision }) => getModelMD5Hash(teamspace, container, revision)));
 
 Federations.getRepoBundleInfo = getRepoBundleInfo;
-
-Federations.getSuperMeshesInfo = async (teamspace, federation, revision, containers) => {
-	const supermeshData = await Promise.all(containers.map(async ({ container, revision: containerRev }) => {
-		const data = await getSuperMeshesInfo(teamspace, container, containerRev);
-		return { teamspace, model: container, superMeshes: data };
-	}));
-	return { subModels: supermeshData };
-};
 
 Federations.getMultipleFederationsStats = async (teamspace, project, federations) => {
 	const stats = {};

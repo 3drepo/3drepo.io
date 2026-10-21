@@ -255,12 +255,12 @@
 
 	// team space
 	define("PERM_ASSIGN_LICENCE", "assign_licence");
-	define("PERM_REVOKE_LICENCE","revoke_licence");
-	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
+	define("PERM_REVOKE_LICENCE", "revoke_licence");
+	define("PERM_TEAMSPACE_ADMIN", "teamspace_admin"); // have total control for projects and models under its teamspace
 	define("PERM_CREATE_PROJECT", "create_project");
-	define("PERM_CREATE_JOB","create_job");
-	define("PERM_DELETE_JOB","delete_job");
-	define("PERM_ASSIGN_JOB","assign_job");
+	define("PERM_CREATE_JOB", "create_job");
+	define("PERM_DELETE_JOB", "delete_job");
+	define("PERM_ASSIGN_JOB", "assign_job");
 	define("PERM_VIEW_PROJECTS", "view_projects"),
 
 	// project level permission
@@ -322,7 +322,7 @@
 	]);
 
 	// models
-	define("MODEL_PERM_LIST",[
+	define("MODEL_PERM_LIST", [
 		module.exports.PERM_CHANGE_MODEL_SETTINGS,
 		module.exports.PERM_UPLOAD_FILES,
 		module.exports.PERM_CREATE_ISSUE,
@@ -337,27 +337,27 @@
 	]);
 
 	define("MODEL_PERM_OBJ", {
-		PERM_CHANGE_MODEL_SETTINGS : module.exports.PERM_CHANGE_MODEL_SETTINGS,
-		PERM_UPLOAD_FILES : module.exports.PERM_UPLOAD_FILES,
-		PERM_CREATE_ISSUE : module.exports.PERM_CREATE_ISSUE,
-		PERM_COMMENT_ISSUE : module.exports.PERM_COMMENT_ISSUE,
-		PERM_VIEW_ISSUE : module.exports.PERM_VIEW_ISSUE,
-		PERM_VIEW_MODEL : module.exports.PERM_VIEW_MODEL,
-		PERM_DOWNLOAD_MODEL : module.exports.PERM_DOWNLOAD_MODEL,
-		PERM_EDIT_FEDERATION : module.exports.PERM_EDIT_FEDERATION,
-		PERM_DELETE_FEDERATION : module.exports.PERM_DELETE_FEDERATION,
-		PERM_DELETE_MODEL : module.exports.PERM_DELETE_MODEL,
-		PERM_MANAGE_MODEL_PERMISSION : module.exports.PERM_MANAGE_MODEL_PERMISSION
+		PERM_CHANGE_MODEL_SETTINGS: module.exports.PERM_CHANGE_MODEL_SETTINGS,
+		PERM_UPLOAD_FILES: module.exports.PERM_UPLOAD_FILES,
+		PERM_CREATE_ISSUE: module.exports.PERM_CREATE_ISSUE,
+		PERM_COMMENT_ISSUE: module.exports.PERM_COMMENT_ISSUE,
+		PERM_VIEW_ISSUE: module.exports.PERM_VIEW_ISSUE,
+		PERM_VIEW_MODEL: module.exports.PERM_VIEW_MODEL,
+		PERM_DOWNLOAD_MODEL: module.exports.PERM_DOWNLOAD_MODEL,
+		PERM_EDIT_FEDERATION: module.exports.PERM_EDIT_FEDERATION,
+		PERM_DELETE_FEDERATION: module.exports.PERM_DELETE_FEDERATION,
+		PERM_DELETE_MODEL: module.exports.PERM_DELETE_MODEL,
+		PERM_MANAGE_MODEL_PERMISSION: module.exports.PERM_MANAGE_MODEL_PERMISSION
 	});
 
 	define("IMPLIED_PERM", {
-		[module.exports.PERM_TEAMSPACE_ADMIN]:{
+		[module.exports.PERM_TEAMSPACE_ADMIN]: {
 			"account": module.exports.ACCOUNT_PERM_LIST,
 			"project": module.exports.PROJECT_PERM_LIST,
 			"model": module.exports.MODEL_PERM_LIST
 		},
 
-		[module.exports.PERM_VIEW_PROJECTS]:{
+		[module.exports.PERM_VIEW_PROJECTS]: {
 			"project": [module.exports.PERM_VIEW_ISSUE_ALL_MODELS, module.exports.PERM_VIEW_MODEL_ALL_MODELS],
 			"model": [module.exports.PERM_VIEW_MODEL, module.exports.PERM_VIEW_ISSUE]
 		},
@@ -428,7 +428,7 @@
 		module.exports.PERM_VIEW_MODEL
 	]);
 
-	define("COLLABORATOR_TEMPLATE_PERMISSIONS",[
+	define("COLLABORATOR_TEMPLATE_PERMISSIONS", [
 		module.exports.PERM_UPLOAD_FILES,
 		module.exports.PERM_CREATE_ISSUE,
 		module.exports.PERM_COMMENT_ISSUE,
@@ -438,7 +438,7 @@
 		module.exports.PERM_EDIT_FEDERATION
 	]);
 
-	define("ADMIN_TEMPLATE_PERMISSIONS",[
+	define("ADMIN_TEMPLATE_PERMISSIONS", [
 		module.exports.PERM_MANAGE_MODEL_PERMISSION
 	]);
 
@@ -478,8 +478,8 @@
 	//
 	// -----------------------------------------------------------------------------
 
-	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
-	define("FILENAME_REGEXP",  /[ *"/\\[\]:;|=,<>$]/g);
+	define("USERNAME_REGEXP", /^[a-zA-Z][\w]{1,19}$/);
+	define("FILENAME_REGEXP", /[ *"/\\[\]:;|=,<>$]/g);
 
 	// -----------------------------------------------------------------------------
 	//
@@ -537,52 +537,10 @@
 	// tickets
 	define("LONG_TEXT_CHAR_LIM", 1200);
 
-	// risks
-	define("RISK_FILTERS",{
-		"ids": {
-			"fieldName": "_id" ,
-			"type": "UUID"
-		},
-		"numbers": {
-			"fieldName": "number",
-			"type": "number"
-		},
-		"categories": {
-			"fieldName": "category"
-		},
-		"mitigationStatus": {
-			"fieldName": "mitigation_status"
-		},
-		"residualLikelihoods": {
-			"fieldName": "residual_likelihood",
-			"type": "number"
-		},
-		"residualConsequences": {
-			"fieldName": "residual_consequence",
-			"type": "number"
-		},
-		"consequences": {
-			"fieldName": "consequence",
-			"type": "number"
-		},
-		"likelihoods": {
-			"fieldName": "likelihood",
-			"type": "number"
-		},
-		"levelOfRisks": {
-			"fieldName": "levelOfRisks",
-			"type": "number"
-		},
-		"residualLevelOfRisks": {
-			"fieldName": "residualLevelOfRisks",
-			"type": "number"
-		}
-	});
-
 	// issues
-	define("ISSUE_FILTERS",{
+	define("ISSUE_FILTERS", {
 		"ids": {
-			"fieldName": "_id" ,
+			"fieldName": "_id",
 			"type": "UUID"
 		},
 		"numbers": {
@@ -598,16 +556,16 @@
 		"priorities": {
 			"fieldName": "priority"
 		},
-		"owners" : {
+		"owners": {
 			"fieldName": "owner"
 		},
-		"assignedRoles" : {
+		"assignedRoles": {
 			"fieldName": "assigned_roles",
 			"type": "array"
 		}
 	});
 
-	define("ISSUE_STATUS",{
+	define("ISSUE_STATUS", {
 		"OPEN": "open",
 		"IN_PROGRESS": "in progress",
 		"FOR_APPROVAL": "for approval",
@@ -615,29 +573,29 @@
 		"CLOSED": "closed"
 	});
 
-	define("MAIL_URLS",{
+	define("MAIL_URLS", {
 		"forgotPassword": data => `/password-change?username=${data.username}&token=${data.token}`,
 		"verify": data => `/register-verify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
 		"model": data => `/viewer/${data.model}`,
 		"signup": () => "/sign-up"
 	});
 
-	define("DEFAULT_OWNER_JOB",  "Admin");
+	define("DEFAULT_OWNER_JOB", "Admin");
 
-	define("DEFAULT_JOBS",[
+	define("DEFAULT_JOBS", [
 		{ _id: "Admin", "color": "#f7f7b2" },
 		{ _id: "Client", "color": "#a6cee3" },
-		{ _id: "Architect", "color": "#213f99"},
-		{ _id: "Structural Engineer", "color" : "#33a02c"},
-		{ _id: "MEP Engineer", "color": "#fb9a99"},
-		{ _id: "Project Manager", "color": "#e31a1c"},
-		{ _id: "Quantity Surveyor", "color": "#ff7f00"},
-		{ _id: "Asset Manager", "color" : "#ffff99"},
-		{ _id: "Main Contractor", "color": "#b15928"},
-		{ _id: "Supplier", "color": "#6a3d9a"}
+		{ _id: "Architect", "color": "#213f99" },
+		{ _id: "Structural Engineer", "color": "#33a02c" },
+		{ _id: "MEP Engineer", "color": "#fb9a99" },
+		{ _id: "Project Manager", "color": "#e31a1c" },
+		{ _id: "Quantity Surveyor", "color": "#ff7f00" },
+		{ _id: "Asset Manager", "color": "#ffff99" },
+		{ _id: "Main Contractor", "color": "#b15928" },
+		{ _id: "Supplier", "color": "#6a3d9a" }
 	]);
 
-	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "jpeg", "gif"]);
+	define("ACCEPTED_IMAGE_FORMATS", ["png", "jpg", "jpeg", "gif"]);
 
 	// -----------------------------------------------------------------------------
 	//
@@ -645,13 +603,13 @@
 	//
 	// -----------------------------------------------------------------------------
 	define("ACCEPTED_FILE_FORMATS", [
-		"x","obj","3ds","md3","md2","ply",
-		"mdl","ase","hmp","smd","mdc","md5",
-		"stl","lxo","nff","raw","off","ac",
-		"bvh","irrmesh","irr","q3d","q3s","b3d",
-		"dae","ter","csm","3d","lws","xml","ogex",
-		"ms3d","cob","scn","blend","pk3","ndo",
-		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
+		"x", "obj", "3ds", "md3", "md2", "ply",
+		"mdl", "ase", "hmp", "smd", "mdc", "md5",
+		"stl", "lxo", "nff", "raw", "off", "ac",
+		"bvh", "irrmesh", "irr", "q3d", "q3s", "b3d",
+		"dae", "ter", "csm", "3d", "lws", "xml", "ogex",
+		"ms3d", "cob", "scn", "blend", "pk3", "ndo",
+		"ifc", "xgl", "zgl", "fbx", "assbin", "bim", "dgn",
 		"rvt", "rfa", "spm", "dwg", "dxf", "nwd", "nwc"
 	]);
 	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));

@@ -26,7 +26,7 @@ import { Copy } from '../../../../../components/fontAwesomeIcon';
 import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { CommentForm } from '../../../commentForm';
 import { ContainedButton } from '../../../containedButton/containedButton.component';
-import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
+import { Container } from '../../../issues/components/issueDetails/issueDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { HorizontalView, MessagesList, MessageContainer, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';

@@ -16,18 +16,11 @@
  */
 import { css } from 'styled-components';
 import {
-	HorizontalView as HorizontalViewRisk,
-	MessageContainer as MessageContainerRisk,
-	PreviewDetails as PreviewDetailsRisk,
-	TabContent as TabContentRisks,
-	Content as ContentRisks,
-} from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import {
-	HorizontalView as HorizontalViewIssue,
-	MessageContainer as MessageContainerIssue,
-	PreviewDetails as PreviewDetailsIssue,
-	TabContent as TabContentIssues,
-	Content as ContentIssues,
+	HorizontalView,
+	MessageContainer,
+	PreviewDetails,
+	TabContent,
+	Content,
 } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerButton/openInViewerButton.styles';
 import { CollapsableContent, Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
@@ -68,16 +61,14 @@ const EditIssue = css`
 		}
 	}
 
-	${HorizontalViewIssue},
-	${HorizontalViewRisk} {
+	${HorizontalView} {
 
 		${CollapsableContent} {
 			margin-bottom: 0;
 		}
 
 		/* left panel */
-		${PreviewDetailsIssue}${PreviewDetailsIssue},
-		${PreviewDetailsRisk}${PreviewDetailsRisk} {
+		${PreviewDetails}${PreviewDetails} {
 			/* TODO - fix after new palette is released */
 			background-color: #f7f8fa;
 			min-height: 75vh;
@@ -117,8 +108,8 @@ const EditIssue = css`
 				margin-bottom: 10px;
 			}
 
-			${TabContentIssues}, ${TabContentRisks} {
-				${ContentIssues}, ${ContentRisks} {
+			${TabContent} {
+				${Content} {
 					height: fit-content;
 					padding: 0 16px;
 					margin-bottom: 0 0 16px;
@@ -128,7 +119,7 @@ const EditIssue = css`
 		}
 
 		/* right panel */
-		${MessageContainerIssue}, ${MessageContainerRisk} {
+		${MessageContainer} {
 			${CommentStyling}
 			${CommentListStyling}
 
@@ -190,9 +181,7 @@ const EditIssue = css`
 
 export default css`
 	#issues-card-save-button,
-	#issues-card-add-new-comment,
-	#risks-card-save-button,
-	#risks-card-add-new-comment {
+	#issues-card-add-new-comment {
 		${primaryButtonStyles}
 	}
 	${EditIssue}

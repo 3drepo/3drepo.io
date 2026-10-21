@@ -85,7 +85,6 @@ export const prepareMockStats = (overrides?: Partial<FederationStats>): Federati
 	containers: [groupedContainerMockFactory()],
 	tickets: {
 		issues: faker.datatype.number(),
-		risks: faker.datatype.number(),
 	},
 	category: faker.random.word(),
 	lastUpdated: faker.datatype.number(),

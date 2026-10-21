@@ -40,7 +40,7 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | string | null;
+export type PinType = 'issue' | 'bookmark' | 'ticket' | string | null;
 
 export interface IPin {
 	id: string;
@@ -1203,14 +1203,6 @@ export class ViewerService {
 	/**
 	 * Controlling
 	 */
-
-	public pauseRendering() {
-		UnityUtil.pauseRendering();
-	}
-
-	public resumeRendering() {
-		UnityUtil.resumeRendering();
-	}
 
 	public setModelCache = (cache: boolean) => {
 		if (cache) {
