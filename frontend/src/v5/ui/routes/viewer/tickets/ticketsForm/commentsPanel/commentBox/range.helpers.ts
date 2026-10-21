@@ -50,6 +50,38 @@ export const restoreSelection = (editor: HTMLElement, startOffset: number, endOf
 	selection.addRange(range);
 };
 
+export const restoreMessageSelection = (editor: HTMLElement, offset: number) => {
+	const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+	let node = walker.nextNode();
+	let remaining = offset;
+
+	while (node) {
+		const textLength = node.textContent?.length || 0;
+		const mention = (node.parentElement?.closest('[data-mention-id]') as HTMLElement | null);
+		const messageLength = mention ? `@${mention.dataset.mentionId}`.length : textLength;
+
+		if (remaining <= messageLength) {
+			const displayOffset = mention && remaining === messageLength
+				? textLength
+				: Math.min(remaining, textLength);
+			restoreSelection(editor, 0, 0);
+			const selection = window.getSelection();
+			if (!selection) return;
+			const range = document.createRange();
+			range.setStart(node, displayOffset);
+			range.collapse(true);
+			selection.removeAllRanges();
+			selection.addRange(range);
+			return;
+		}
+
+		remaining -= messageLength;
+		node = walker.nextNode();
+	}
+
+	restoreSelection(editor, editor.innerText.length, editor.innerText.length);
+};
+
 export const getCaretCharacterIndex = (element: HTMLElement): number => {
 	const selection = window.getSelection();
 	if (!selection?.rangeCount || !selection.anchorNode || !element.contains(selection.anchorNode)) {
@@ -61,4 +93,3 @@ export const getCaretCharacterIndex = (element: HTMLElement): number => {
 	range.setEnd(selection.anchorNode, selection.anchorOffset);
 	return range.toString().length;
 };
-

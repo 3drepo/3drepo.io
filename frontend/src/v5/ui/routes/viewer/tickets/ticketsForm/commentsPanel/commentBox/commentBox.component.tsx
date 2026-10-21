@@ -64,7 +64,8 @@ import { compact, isEqual } from 'lodash';
 import { selectUnsavedCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { ExpandableMessageInput } from './expandableMessageInput.component';
-import { MentionsComponent } from './mentions.component';
+import { getMessageValue, MentionsComponent } from './mentions.component';
+import { getCaretCharacterIndex, restoreMessageSelection } from './range.helpers';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 interface EditCommentBoxProps {
@@ -87,6 +88,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const isFederation = modelIsFederation(containerOrFederation);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
+	const [pastedMessage, setPastedMessage] = useState<string>();
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const errorerImagesRef = useRef<string[]>([]);
 
@@ -134,6 +136,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const resetCommentBox = () => {
 		reset();
 		if (inputRef.current) inputRef.current.textContent = '';
+		setPastedMessage(undefined);
 		setCommentReply(null);
 		setIsSubmittingMessage(false);
 		setViewpoint(null);
@@ -256,9 +259,12 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		event.preventDefault();
 		// Insert clipboard text only, preventing pasted HTML/styles from entering the editable.
 		const plainText = event.clipboardData.getData('text/plain');
+		const editor = inputRef.current;
+		if (!editor) return;
 		const selection = window.getSelection();
 		if (!selection?.rangeCount) return;
 		const range = selection.getRangeAt(0);
+		const caretPosition = getCaretCharacterIndex(editor);
 		range.deleteContents();
 		const textNode = document.createTextNode(plainText);
 		range.insertNode(textNode);
@@ -266,6 +272,13 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		range.collapse(true);
 		selection.removeAllRanges();
 		selection.addRange(range);
+		const messageValue = getMessageValue(editor);
+		setValue('message', messageValue, { shouldDirty: true });
+		setPastedMessage(messageValue);
+		requestAnimationFrame(() => {
+			const pastedCaretPosition = caretPosition + plainText.length;
+			if (inputRef.current) restoreMessageSelection(inputRef.current, pastedCaretPosition);
+		});
 	};
 
 	const uploadScreenshot = async (image) => {
@@ -336,7 +349,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				/>
 				<MentionsComponent
 					editorRef={inputRef}
-					message={desanitiseMessage(unsavedComment?.message ?? message)}
+					message={pastedMessage ?? desanitiseMessage(unsavedComment?.message ?? message)}
 					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>

@@ -26,7 +26,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { UNKNOWN_USER } from '@/v4/helpers/user.helpers';
 
-const getMessageValue = (editor: HTMLElement) => {
+export const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
 	const mentions = editorCopy.querySelectorAll('[data-mention-id]') as NodeListOf<HTMLElement>;
 	mentions.forEach((mention) => {
