@@ -364,6 +364,13 @@ const testValidateUpdateTicket = () => {
 		properties: { [basePropertyLabels.STATUS]: generateRandomString() },
 	};
 	const assignUpdate = { properties: { [basePropertyLabels.ASSIGNEES]: [generateRandomString()] } };
+	const allUpdate = {
+		title: generateRandomString(),
+		properties: {
+			[basePropertyLabels.STATUS]: generateRandomString(),
+			[basePropertyLabels.ASSIGNEES]: [generateRandomString()],
+		},
+	};
 
 	describe.each([
 		['ticket does not exist', generateRandomString(), false, templates.ticketNotFound],
@@ -382,6 +389,7 @@ const testValidateUpdateTicket = () => {
 		['the job of the user has edit permission for status update', undefined, true, undefined, false, { edit: { status: [userJob] } }, statusUpdate],
 		['the user has edit permission for assignes update', undefined, true, undefined, false, { edit: { assign: [user] } }, assignUpdate],
 		['the job of the user has edit permission for assignees update', undefined, true, undefined, false, { edit: { assign: [userJob] } }, assignUpdate],
+		['the user has all permissions (all updates)', undefined, true, undefined, false, { edit: { assign: [user], default: [user], status: [user] } }, allUpdate],
 		['neither the user nor their jobs has edit permission', undefined, false, permissionError, false, { edit: { default: [generateRandomString()] } }],
 		['neither the user nor their jobs has edit permission for status update', undefined, false, permissionError, false, { edit: { status: [generateRandomString()] } }, statusUpdate],
 		['neither the user nor their jobs has edit permission for assignees update', undefined, false, permissionError, false, { edit: { assign: [generateRandomString()] } }, assignUpdate],

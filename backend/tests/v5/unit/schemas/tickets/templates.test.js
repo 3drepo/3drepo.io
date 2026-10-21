@@ -1412,12 +1412,15 @@ const testValidate = () => {
 	const permissionTests = [
 		['permissions is an empty object', generateBasicSchema({ config: { permissions: { } } }), false],
 		['create permissions are populated', generateBasicSchema({ config: { permissions: { create: [users[0].user, jobs[0]._id] } } }), true],
+		['create permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { create: [generateRandomString()] } } }), false],
 		['create permissions are populated with emails', generateBasicSchema({ config: { permissions: { create: [users[0].customData.email, users[1].customData.email] } } }), true, { config: { permissions: { create: [users[0].user, users[1].user] } }, modules: [], properties: [] }],
 		['create permissions are empty', generateBasicSchema({ config: { permissions: { create: [] } } }), false],
 		['view permissions are populated', generateBasicSchema({ config: { permissions: { view: [users[1].user, jobs[1]._id] } } }), true],
+		['view permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { view: [generateRandomString()] } } }), false],
 		['view permissions are populated with emails', generateBasicSchema({ config: { permissions: { view: [users[1].customData.email, users[2].customData.email] } } }), true, { config: { permissions: { view: [users[1].user, users[2].user] } }, modules: [], properties: [] }],
 		['view permissions are empty', generateBasicSchema({ config: { permissions: { view: [] } } }), false],
 		['comment permissions are populated', generateBasicSchema({ config: { permissions: { comment: [users[2].user, jobs[2]._id] } } }), true],
+		['comment permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { comment: [generateRandomString()] } } }), false],
 		['comment permissions are populated with emails', generateBasicSchema({ config: { permissions: { comment: [users[2].customData.email, users[3].customData.email] } } }), true, { config: { permissions: { comment: [users[2].user, users[3].user] } }, modules: [], properties: [] }],
 		['comment permissions are empty', generateBasicSchema({ config: { permissions: { comment: [] } } }), false],
 	];
