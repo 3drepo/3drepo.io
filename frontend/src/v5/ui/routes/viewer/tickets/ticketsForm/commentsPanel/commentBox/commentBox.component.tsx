@@ -18,7 +18,6 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
-import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -41,7 +40,6 @@ import {
 	CharsCounter,
 	SendButton,
 	Container,
-	MessageInput,
 	DeleteButton,
 	CommentReplyContainer,
 	DragAndDrop,
@@ -65,6 +63,7 @@ import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.c
 import { compact, isEqual } from 'lodash';
 import { selectUnsavedCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { ExpandableMessageInput } from './expandableMessageInput.component';
 import { MentionsComponent } from './mentions.component';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
@@ -331,16 +330,8 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 						</DeleteButton>
 					</CommentReplyContainer>
 				)}
-				<MessageInput
-					contentEditable
-					role="textbox"
-					aria-multiline="true"
-					data-placeholder={formatMessage({
-						id: 'customTicket.comments.leaveAComment',
-						defaultMessage: 'Leave a comment',
-					})}
-					suppressContentEditableWarning
-					ref={inputRef}
+				<ExpandableMessageInput
+					editorRef={inputRef}
 					onPaste={handlePaste}
 				/>
 				<MentionsComponent
