@@ -142,10 +142,14 @@ export const ErroredImageMessages = styled.div`
 	margin: 0 0 4px 15px;
 `;
 
-export const MessageInput = styled.div`
+export const MessageInput = styled.div<{ $autoHeight?: boolean; $canCollapse?: boolean }>`
 	padding: 8px 15px 0;
-	min-height: 80px;
-	max-height: 160px;
+	box-sizing: border-box;
+	height: ${({ $autoHeight, $canCollapse }) => $autoHeight && $canCollapse ? 'auto' : '80px'};
+	max-height: ${({ $autoHeight, $canCollapse }) => $autoHeight && $canCollapse ? 'none' : '80px'};
+	transition: height 0.3s ease;
+	/* stylelint-disable-next-line */
+	interpolate-size: allow-keywords;
 	overflow-y: auto;
 	outline: none;
 	white-space: pre-wrap;
@@ -167,6 +171,15 @@ export const MessageInput = styled.div`
 		color: ${({ theme }) => theme.palette.base.lighter};
 		font-style: italic;
 	}
+`;
+
+export const ShowMoreButton = styled.button`
+	border: none;
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.base.main};
+	background-color: transparent;
+	padding: 0 15px;
+	${({ theme }) => theme.typography.label};
 `;
 
 export const MentionMessage = styled(Paper)`
