@@ -88,7 +88,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const isFederation = modelIsFederation(containerOrFederation);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
-	const [pastedMessage, setPastedMessage] = useState<string>();
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const errorerImagesRef = useRef<string[]>([]);
 
@@ -136,7 +135,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const resetCommentBox = () => {
 		reset();
 		if (inputRef.current) inputRef.current.textContent = '';
-		setPastedMessage(undefined);
 		setCommentReply(null);
 		setIsSubmittingMessage(false);
 		setViewpoint(null);
@@ -274,7 +272,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		selection.addRange(range);
 		const messageValue = getMessageValue(editor);
 		setValue('message', messageValue, { shouldDirty: true });
-		setPastedMessage(messageValue);
 		requestAnimationFrame(() => {
 			const pastedCaretPosition = caretPosition + plainText.length;
 			if (inputRef.current) restoreMessageSelection(inputRef.current, pastedCaretPosition);
@@ -346,10 +343,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				<ExpandableMessageInput
 					editorRef={inputRef}
 					onPaste={handlePaste}
+					message={message}
 				/>
 				<MentionsComponent
 					editorRef={inputRef}
-					message={pastedMessage ?? desanitiseMessage(unsavedComment?.message ?? message)}
+					message={message}
 					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>

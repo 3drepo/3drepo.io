@@ -25,15 +25,16 @@ const COMMENT_BOX_HEIGHT = 80;
 interface ExpandableMessageInputProps {
 	editorRef: RefObject<HTMLDivElement | null>,
 	onPaste: (event: ClipboardEvent<HTMLDivElement>) => void,
+	message: string,
 }
 
 export const ExpandableMessageInput = ({
 	editorRef,
 	onPaste,
+	message,
 }: ExpandableMessageInputProps) => {
 	const [autoHeight, setAutoHeight] = useState(false);
 	const [canCollapse, setCanCollapse] = useState(false);
-
 	const calculateCanCollapse = useCallback(() => {
 		if (!editorRef.current) return;
 		const newCanCollapse = editorRef.current.scrollHeight > COMMENT_BOX_HEIGHT;
@@ -44,7 +45,7 @@ export const ExpandableMessageInput = ({
 	useEffect(() => {
 		const frame = requestAnimationFrame(calculateCanCollapse);
 		return () => cancelAnimationFrame(frame);
-	}, [calculateCanCollapse]);
+	}, [calculateCanCollapse, message]);
 
 	return (
 		<>
@@ -65,7 +66,10 @@ export const ExpandableMessageInput = ({
 					calculateCanCollapse();
 				}}
 				onInput={calculateCanCollapse}
-			/>
+			>
+				{message}
+			</MessageInput>
+
 			{canCollapse && (
 				<ShowMoreButton
 					type="button"
