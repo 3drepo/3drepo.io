@@ -21,6 +21,7 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { UnknownMentionText, MentionText } from './mention.styles';
+import { FormattedMessage } from 'react-intl';
 
 type MentionProps = {
 	userId: string;
@@ -30,7 +31,7 @@ export const Mention = ({ userId }: MentionProps) => {
 	const { teamspace } = useParams<ViewerParams>();
 	const user = UsersHooksSelectors.selectUser(teamspace, userId);
 
-	if (!user || user.isNotTeamspaceMember) return <UnknownMentionText>Unknown user</UnknownMentionText>;
+	if (!user || user.isNotTeamspaceMember) return <UnknownMentionText><FormattedMessage id="unknown.user" defaultMessage="Unknown user" /></UnknownMentionText>;
 
 	return (
 		<HoverPopover anchor={() => <MentionText>{user.firstName} {user.lastName}</MentionText>}>
