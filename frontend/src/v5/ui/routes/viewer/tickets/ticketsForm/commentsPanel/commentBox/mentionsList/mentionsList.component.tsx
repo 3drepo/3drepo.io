@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { List } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { MentionMessage } from '../commentBox.styles';
 import { UserCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.styles';
@@ -25,15 +24,8 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { ListItemContainer, Subtitle, Title, Titles } from '@controls/assigneesSelect/assigneesSelectMenu/assigneesSelectMenuItem/assigneesSelectMenuItem.styles';
-import styled from 'styled-components';
-
-const MentionList = styled(List)`
-	&& {
-		padding: 0;
-		margin: 0;
-	}
-`;
-
+import { MentionList } from './mentionsList.styles';
+		
 const MAX_VISIBLE_MENTIONS = 4;
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

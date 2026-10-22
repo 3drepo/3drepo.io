@@ -20,17 +20,7 @@ import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import styled from 'styled-components';
-
-const MentionText = styled.span`
-	color: ${({ theme }) => theme.palette.primary.main};
-	cursor: pointer;
-`;
-
-const UnknownMentionText = styled.span`
-	color: ${({ theme }) => theme.palette.base.lighter};
-	font-style: italic;
-`;
+import { UnknownMentionText, MentionText } from './mention.styles';
 
 type MentionProps = {
 	userId: string;
