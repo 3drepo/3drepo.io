@@ -108,9 +108,10 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 
 	try {
+		const user = getUserFromSession(req.session);
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
-		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
+		req.tickets = await getTicketList(teamspace, project, model, user, req.listOptions);
 
 		await next();
 	} catch (err) {
@@ -415,7 +416,7 @@ const establishRoutes = (isFed) => {
 	 *                     type: string
 	 */
 	router.get('/templates/:template/properties/:property/values',
-		hasReadAccess, templateExists, validateTagProperty, getTagPropertyValues(isFed));
+		hasReadAccess, templateExists, hasTemplateViewPermission, validateTagProperty, getTagPropertyValues(isFed));
 
 	/**
 	 * @openapi
@@ -1037,7 +1038,7 @@ const establishRoutes = (isFed) => {
 	 *                             description: properties that were changed
 	 *
 	 */
-	router.get('/:ticket/history', hasReadAccess, checkTicketExists, getTicketHistory(isFed), serialiseTicketHistory);
+	router.get('/:ticket/history', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicketHistory(isFed), serialiseTicketHistory);
 
 	/**
 	 * @openapi
@@ -1097,7 +1098,7 @@ const establishRoutes = (isFed) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:ticket/resources/:resource', hasReadAccess, getTicketResource(isFed));
+	router.get('/:ticket/resources/:resource', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicketResource(isFed));
 
 	/**
 	 * @openapi

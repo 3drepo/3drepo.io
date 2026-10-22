@@ -65,7 +65,7 @@ const testValidateNewTicket = () => {
 	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
 	const errMsg = generateRandomString();
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have template permission to create this ticket');
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
 
 	describe.each([
 		['template is not provided', { body: {} }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
@@ -170,7 +170,7 @@ const testValidateImportTickets = () => {
 	const duplicateModuleUniqueProp = [];
 	const user = generateRandomString();
 	const userJob = generateRandomString();
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have template permission to create this ticket');
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
 
 	const goodTickets = times(5, () => generateTicket(template));
 
@@ -294,17 +294,19 @@ const testHasTemplateViewPermission = () => {
 	const user = generateRandomString();
 	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have template permission to view this ticket');
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have view permissions for this ticket');
 
 	describe.each([
-		['permissions are not configured', undefined, true],
-		['view permissions are not configured', { create: [generateRandomString()] }, true],
-		['the user has view permission', { view: [user] }, true],
-		['one of the user jobs has view permission', { view: [userJob] }, true],
-		['neither the user nor their jobs has view permission', { view: [generateRandomString()] }, false, permissionError],
-		['the view permission list is empty', { view: [] }, false, permissionError],
-		['the user only has create permission', { create: [user], view: [generateRandomString()] }, false, permissionError],
-	])('Has template view permission', (desc, permissions, success, expectedRes) => {
+		['permissions are undefined', { config: { permissions: undefined } }, true],
+		['config is undefined', { config: undefined }, true],
+		['templateData is undefined', undefined, true],
+		['view permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
+		['the user has view permission', { config: { permissions: { view: [user] } } }, true],
+		['one of the user jobs has view permission', { config: { permissions: { view: [userJob] } } }, true],
+		['neither the user nor their jobs has view permission', { config: { permissions: { view: [generateRandomString()] } } }, false, permissionError],
+		['the view permission list is empty', { config: { permissions: { view: [] } } }, false, permissionError],
+		['the user only has create permission', { config: { permissions: { create: [user], view: [generateRandomString()] } } }, false, permissionError],
+	])('Has template view permission', (desc, templateData, success, expectedRes) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
 			jest.clearAllMocks();
@@ -315,7 +317,7 @@ const testHasTemplateViewPermission = () => {
 				const req = {
 					params: { teamspace },
 					session: {},
-					templateData: { config: { permissions } },
+					templateData,
 				};
 				const res = {};
 				const fn = jest.fn();
@@ -334,7 +336,66 @@ const testHasTemplateViewPermission = () => {
 					expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
 				}
 
-				if (permissions?.view) {
+				if (templateData?.config?.permissions?.view) {
+					expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
+				} else {
+					expect(Sessions.getUserFromSession).not.toHaveBeenCalled();
+					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
+				}
+			},
+		);
+	});
+};
+
+const testHasTemplateCommentPermission = () => {
+	const user = generateRandomString();
+	const userJob = generateRandomString();
+	const teamspace = generateRandomString();
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have comment permissions for this ticket');
+
+	describe.each([
+		['permissions are undefined', { config: { permissions: undefined } }, true],
+		['config is undefined', { config: undefined }, true],
+		['templateData is undefined', undefined, true],
+		['comment permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
+		['the user has comment permission', { config: { permissions: { comment: [user] } } }, true],
+		['one of the user jobs has comment permission', { config: { permissions: { comment: [userJob] } } }, true],
+		['neither the user nor their jobs has comment permission', { config: { permissions: { comment: [generateRandomString()] } } }, false, permissionError],
+		['the comment permission list is empty', { config: { permissions: { comment: [] } } }, false, permissionError],
+		['the user only has create permission', { config: { permissions: { create: [user], comment: [generateRandomString()] } } }, false, permissionError],
+	])('Has template comment permission', (desc, templateData, success, expectedRes) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
+		});
+
+		test(`Should ${success ? 'succeed and call next()' : `fail and respond with ${expectedRes.code}`} if ${desc}`,
+			async () => {
+				const req = {
+					params: { teamspace },
+					session: {},
+					templateData,
+				};
+				const res = {};
+				const fn = jest.fn();
+
+				Sessions.getUserFromSession.mockReturnValue(user);
+				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
+
+				await Tickets.hasTemplateCommentPermission(req, res, fn);
+
+				if (success) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					expect(Responder.respond).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+				}
+
+				if (templateData?.config?.permissions?.comment) {
 					expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
 					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
 					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
@@ -357,7 +418,7 @@ const testValidateUpdateTicket = () => {
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const errMsg = generateRandomString();
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 	const standardUpdate = generateRandomObject();
 	const statusUpdate = {
 		type: generateRandomString(),
@@ -377,6 +438,7 @@ const testValidateUpdateTicket = () => {
 		['validation failed', undefined, false, createResponseCode(templates.invalidArguments, errMsg), true],
 		['validation succeeded', undefined, true],
 		['there is nothing to update', undefined, false, templates.ok, false, undefined, ticket],
+		['permissions are undefined', undefined, true, undefined, false],
 		['edit permissions are not configured', undefined, true, undefined, false, { }],
 		['edit default permissions are not configured', undefined, true, undefined, false, { assign: [generateRandomString()], status: [generateRandomString()] }],
 		['the user has default permission', undefined, true, undefined, false, { edit: { default: [user] } }],
@@ -472,7 +534,7 @@ const testValidateUpdateMultipleTickets = () => {
 	const existingTickets = [];
 	const duplicateUniqueProp = [];
 	const duplicateModuleUniqueProp = [];
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 
 	const goodTickets = times(5, () => {
 		const ticket = generateTicket(template);
@@ -666,6 +728,7 @@ describe(determineTestGroup(__filename), () => {
 
 	testValidateNewTicket();
 	testHasTemplateViewPermission();
+	testHasTemplateCommentPermission();
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();

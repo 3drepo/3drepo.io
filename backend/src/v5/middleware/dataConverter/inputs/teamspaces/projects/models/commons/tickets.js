@@ -222,7 +222,7 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 };
 
 const hasTemplatePermission = async (req, colName) => {
-	const { permissions } = req.templateData.config;
+	const permissions = req.templateData?.config?.permissions;
 
 	if (permissions?.[colName]) {
 		const user = getUserFromSession(req.session);
@@ -232,8 +232,17 @@ const hasTemplatePermission = async (req, colName) => {
 		const hasPermission = getCommonElements(permissions[colName], userAndJobs).length > 0;
 
 		if (!hasPermission) {
-			throw createResponseCode(templates.notAuthorized, `You do not have template permission to ${colName} this ticket`);
+			throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
 		}
+	}
+};
+
+TicketsMiddleware.hasTemplateCommentPermission = async (req, res, next) => {
+	try {
+		await hasTemplatePermission(req, 'comment');
+		await next();
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 
@@ -255,10 +264,9 @@ const hasTemplateCreatePermission = async (req, res, next) => {
 	}
 };
 
-const hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
+TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 	try {
-		const { permissions } = req.templateData.config;
-		const editPermissions = permissions?.edit;
+		const editPermissions = req.templateData.config.permissions?.edit;
 
 		if (editPermissions) {
 			const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
@@ -272,7 +280,7 @@ const hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 				if (permArray?.length) {
 					const hasPermission = getCommonElements(permArray, userAndJobs).length;
 					if (!hasPermission) {
-						throw createResponseCode(templates.notAuthorized, 'You do not have template permission to edit this ticket');
+						throw createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 					}
 				}
 			};
@@ -315,11 +323,11 @@ TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), c
 	hasTemplateCreatePermission, validateTicket(true)]);
 
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists,
-	hasTemplateEditPermission(false), validateTicket(false)]);
+	TicketsMiddleware.hasTemplateEditPermission(false), validateTicket(false)]);
 
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
-	checkAllTicketsExist, hasTemplateEditPermission(true), validateTicketImportData(false)]);
+	checkAllTicketsExist, TicketsMiddleware.hasTemplateEditPermission(true), validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

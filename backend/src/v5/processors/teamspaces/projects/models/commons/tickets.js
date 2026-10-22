@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getDistinctPropertyValues, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets, updateTicketsByQuery } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getDistinctPropertyValues, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, removeAllTicketsWithTemplates, updateTickets, updateTicketsByQuery } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -37,6 +37,7 @@ const { generateFullSchema } = require('../../../../../schemas/tickets/templates
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
+const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getModelById } = require('../../../../../models/modelSettings');
 const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
@@ -309,13 +310,10 @@ const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
 		queries.push({ type: { $in: temps.map(({ _id }) => _id) } });
 	}
 
-	return {
-		query: queries.length ? { $and: queries } : {},
-		ticketCodeQuery,
-	};
+	return { queries, ticketCodeQuery };
 };
 
-Tickets.getTicketList = async (teamspace, project, model,
+Tickets.getTicketList = async (teamspace, project, model, user,
 	{ filters = [], queryFilters = [], updatedSince, sortBy, sortDesc, limit, skip }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
@@ -349,15 +347,34 @@ Tickets.getTicketList = async (teamspace, project, model,
 	if (sortBy && propertyToFilterName(sortBy)) {
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
-	if (queryFilters.length) {
-		const queryInfo = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
 
-		return getTicketsByFilter(teamspace, project, model,
-			deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo }));
+	const userJobs = await getJobsByUsers(teamspace, [user]);
+	const templatesWithPermissions = await getTemplatesByQuery(teamspace, {
+		$or: [
+			{ 'config.permissions.view': { $in: [user, ...userJobs] } },
+			{ 'config.permissions.view': { $exists: false } },
+		],
+	});
+
+	if (!templatesWithPermissions.length) {
+		return [];
 	}
 
-	return getAllTickets(teamspace, project, model,
-		deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
+	const options = deleteIfUndefined({ projection, updatedSince, sort, limit, skip });
+
+	if (queryFilters.length) {
+		const { ticketCodeQuery, queries } = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
+
+		options.ticketCodeQuery = ticketCodeQuery;
+		options.query = {
+			$and: [
+				...queries,
+				{ type: { $in: templatesWithPermissions.map(({ _id }) => _id) } },
+			],
+		};
+	}
+
+	return getTicketsByFilter(teamspace, project, model, deleteIfUndefined(options));
 };
 
 Tickets.getTagPropertyValues = getDistinctPropertyValues;

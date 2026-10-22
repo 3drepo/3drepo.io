@@ -31,12 +31,6 @@ const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 jest.mock('../../../../../../../../../../src/v5/models/tickets.comments');
 const TicketComments = require(`${src}/models/tickets.comments`);
 
-jest.mock('../../../../../../../../../../src/v5/utils/sessions');
-const Sessions = require(`${src}/utils/sessions`);
-
-jest.mock('../../../../../../../../../../src/v5/models/jobs');
-const JobsModel = require(`${src}/models/jobs`);
-
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/tickets.comments');
 const CommentSchema = require(`${src}/schemas/tickets/tickets.comments`);
 
@@ -50,40 +44,23 @@ const Comments = require(`${src}/middleware/dataConverter/inputs/teamspaces/proj
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testValidateNewComment = () => {
-	const user = generateRandomString();
-	const userJob = generateRandomString();
-
 	describe.each([
-		['message is validated', true, false, { templateData: { config: { comments: true } } }, undefined, generateRandomString()],
-		['message is not validated', false, true, { templateData: { config: { comments: true } } }, templates.invalidArguments, generateRandomString()],
-		['template does not support comments', false, false, { templateData: { config: { } } }, templates.invalidArguments, 'This ticket does not support comments.'],
-		['comment permissions include user', true, false, { templateData: { config: { comments: true, permissions: { comment: [user] } } } }, undefined, generateRandomString()],
-		['comment permissions include job', true, false, { templateData: { config: { comments: true, permissions: { comment: [userJob] } } } }, undefined, generateRandomString()],
-		['comment permissions do not include user or job', false, false, { templateData: { config: { comments: true, permissions: { comment: [generateRandomString()] } } } }, templates.notAuthorized, 'You do not have template permission to create or edit comments on this ticket'],
-	])('Validate new comment', (desc, shouldPass, validationFail, extraArgs, error, message) => {
-		test(`${shouldPass ? 'should call next()' : `should respond with ${error.code}`} if ${desc}`, async () => {
-			const data = {
-				params: {},
-				body: { message: generateRandomString() },
-				session: generateRandomString(),
-				...extraArgs,
-			};
+		['message is validated', true, { templateData: { config: { comments: true } } }, generateRandomString()],
+		['message is not validated', false, { templateData: { config: { comments: true } } }, generateRandomString()],
+		['template does not support comments', false, { templateData: { config: { } } }, 'This ticket does not support comments.'],
+	])('Validate new comment', (desc, shouldPass, extraArgs, message) => {
+		test(`${shouldPass ? 'should call next()' : 'should respond with invalidArguments'} if ${desc}`, async () => {
+			const data = { params: {}, body: { message: generateRandomString() }, ...extraArgs };
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
 
-			if (extraArgs.templateData.config.permissions?.comment) {
-				Sessions.getUserFromSession.mockReturnValueOnce(user);
-				JobsModel.getJobsByUsers.mockResolvedValueOnce([userJob]);
-			}
-
 			if (shouldPass) {
 				CommentSchema.validateComment.mockResolvedValueOnce(message);
-			} else if (validationFail) {
+			} else {
 				CommentSchema.validateComment.mockRejectedValueOnce(new Error(message));
 			}
 
 			await Comments.validateNewComment(req, {}, mockCB);
-
 			if (shouldPass) {
 				expect(mockCB).toHaveBeenCalledTimes(1);
 				expect(req.body).toEqual(message);
@@ -91,14 +68,7 @@ const testValidateNewComment = () => {
 				expect(mockCB).not.toHaveBeenCalled();
 				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond).toHaveBeenCalledWith(req, {},
-					expect.objectContaining({ code: error.code, message }));
-			}
-
-			if (extraArgs.templateData.config.permissions?.comment) {
-				expect(Sessions.getUserFromSession).toHaveBeenCalledTimes(1);
-				expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
-				expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
-				expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(req.params.teamspace, [user]);
+					expect.objectContaining({ code: templates.invalidArguments.code, message }));
 			}
 		});
 	});
@@ -106,8 +76,6 @@ const testValidateNewComment = () => {
 
 const testValidateUpdateComment = () => {
 	describe('Validate update comment', () => {
-		const username = generateRandomString();
-		const userJob = generateRandomString();
 		const req = {
 			params: {
 				teamspace: generateRandomString(),
@@ -116,6 +84,7 @@ const testValidateUpdateComment = () => {
 				ticket: generateRandomString(),
 				comment: generateRandomString(),
 			},
+			session: { user: { username: generateRandomString() } },
 			templateData: { config: { comments: true } },
 		};
 
@@ -123,7 +92,7 @@ const testValidateUpdateComment = () => {
 		const existingRef2 = generateUUID();
 		const existingComment = {
 			message: generateRandomString(),
-			author: username,
+			author: req.session.user.username,
 			images: [existingRef],
 			history: [{ images: [existingRef2] }, { message: generateRandomString() }],
 		};
@@ -145,16 +114,11 @@ const testValidateUpdateComment = () => {
 			[{ ...req, body: { message: generateRandomString() } }, true, true, 'with a message'],
 			[{ ...req, body: { views: viewComment } }, true, true, 'with a view'],
 			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, true, 'with no actual changes', { ...existingComment, history: undefined }],
-			[{ ...req, body: { message: generateRandomString() }, templateData: { config: { comments: true, permissions: { comment: [username] } } } }, true, true, 'with permissions that include username'],
-			[{ ...req, body: { message: generateRandomString() }, templateData: { config: { comments: true, permissions: { comment: [userJob] } } } }, true, true, 'with permissions that user job'],
-			[{ ...req, body: { message: generateRandomString() }, templateData: { config: { comments: true, permissions: { comment: times(5, () => generateRandomString()) } } } }, false, true, 'with permissions do not include username or job', existingComment, templates.notAuthorized],
 		])('Check if req arguments for updating a comment are valid', (request, shouldPass, passValidation, desc, comment = existingComment, error = templates.invalidArguments) => {
 			afterEach(() => { jest.resetAllMocks(); });
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 				const mockCB = jest.fn();
 
-				Sessions.getUserFromSession.mockReturnValue(username);
-				JobsModel.getJobsByUsers.mockResolvedValueOnce([userJob]);
 				Tickets.getTicketById.mockResolvedValueOnce({ [generateRandomString()]: generateRandomString() });
 				TicketComments.getCommentById.mockResolvedValueOnce(comment);
 
