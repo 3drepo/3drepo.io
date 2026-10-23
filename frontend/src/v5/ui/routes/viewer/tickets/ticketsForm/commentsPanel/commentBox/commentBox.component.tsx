@@ -121,7 +121,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const replyIsUnchanged = isEqual(initialCommentReply, commentReply);
-	const messageIsUnchanged = !isDirty && viewIsUnchanged && replyIsUnchanged && !isEditMode;
+	const messageIsUnchanged = !isDirty && viewIsUnchanged && replyIsUnchanged &&  isEqual(message, newMessage);
 
 	// This array has the same length as the images array and keeps track of which images have errors.
 	// empty strings indicate images without error. (this approach was taken to remove complexity from the rest of the functions)
