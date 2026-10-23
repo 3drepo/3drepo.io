@@ -20,7 +20,7 @@ import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
@@ -61,8 +61,6 @@ import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
 import { compact, isEqual } from 'lodash';
-import { selectUnsavedCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
 import { ExpandableMessageInput } from './expandableMessageInput.component';
 import { getMessageValue, MentionsComponent } from './mentions.component';
 import { getCaretCharacterIndex, restoreMessageSelection } from './range.helpers';
@@ -103,7 +101,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const imagesToUpload = watch('images');
 
 	const setImagesToUpload = (newimages: string[]) => setValue('images', newimages, { shouldDirty: true });
-	const unsavedComment = selectUnsavedCommentById(getState(), commentId);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId);
 
 	// When updating a comment it can accept the existing ids or the dataurl, thats
 	// why we need a separate array for display purposes.
@@ -343,11 +341,11 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 				<ExpandableMessageInput
 					editorRef={inputRef}
 					onPaste={handlePaste}
-					message={message}
+					message={unsavedComment?.message || message}
 				/>
 				<MentionsComponent
 					editorRef={inputRef}
-					message={message}
+					message={unsavedComment?.message || message}
 					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>

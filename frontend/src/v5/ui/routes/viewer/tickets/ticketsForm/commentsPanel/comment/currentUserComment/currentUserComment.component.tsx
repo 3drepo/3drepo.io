@@ -45,12 +45,15 @@ export const CurrentUserComment = ({
 	onReply,
 	...props
 }: CurrentUserCommentProps) => {
-	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
-
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState(metadata);
 
+
+	// It uses the unsaved comment only to determine if the comment should be in edit mode here.
+	// That way the commentbox receives the original comment data and internally  the unsaved
+	// comment to know if it changed or not.
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
 	useEffect(() => {
 		if (unsavedComment) {
 			setIsEditMode(true);
@@ -64,8 +67,8 @@ export const CurrentUserComment = ({
 		return (
 			<EditComment
 				commentId={_id}
-				message={desanitiseMessage(unsavedComment?.message ?? message)}
-				images={unsavedComment?.images ?? images}
+				message={desanitiseMessage(message)}
+				images={images}
 				commentReply={commentReply}
 				setCommentReply={setCommentReply}
 				view={view}

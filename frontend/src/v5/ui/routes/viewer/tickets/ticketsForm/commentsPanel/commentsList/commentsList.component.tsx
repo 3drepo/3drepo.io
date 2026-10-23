@@ -89,9 +89,6 @@ export const CommentsList = () => {
 		);
 	}, [ticketId]);
 
-
-	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(null) || {};
-
 	return (
 		<CommentsContainer>
 			<Comments>
@@ -129,7 +126,7 @@ export const CommentsList = () => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} {...unsavedComment} />}
+			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
 		</CommentsContainer>
 	);
 };
