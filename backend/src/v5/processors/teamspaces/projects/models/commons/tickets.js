@@ -290,7 +290,7 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
+const getQueryInfo = async (teamspace, user, queryFilters) => {
 	const queries = [];
 	let templateQuery;
 	let ticketCodeQuery;
@@ -305,12 +305,21 @@ const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
 		}
 	});
 
-	if (templateQuery) {
-		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
-		queries.push({ type: { $in: temps.map(({ _id }) => _id) } });
-	}
+	const userJobs = await getJobsByUsers(teamspace, [user]);
+	const templatePermissionsQuery = {
+		$or: [
+			{ 'config.permissions.view': { $in: [user, ...userJobs] } },
+			{ 'config.permissions.view': { $exists: false } },
+		],
+	};
+	const templateQueryWithPermissions = templateQuery
+		? { $and: [templateQuery, templatePermissionsQuery] }
+		: templatePermissionsQuery;
 
-	return { queries, ticketCodeQuery };
+	const templates = await getTemplatesByQuery(teamspace, templateQueryWithPermissions, { _id: 1 });
+	queries.push({ type: { $in: templates.map(({ _id }) => _id) } });
+
+	return { query: { $and: queries }, ticketCodeQuery };
 };
 
 Tickets.getTicketList = async (teamspace, project, model, user,
@@ -340,39 +349,16 @@ Tickets.getTicketList = async (teamspace, project, model, user,
 		[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
 		[`modules.${SEQUENCING}.${seqProps.START_TIME}`]: 1,
 		[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
-
 	};
+
 	let sort;
 
 	if (sortBy && propertyToFilterName(sortBy)) {
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
-	const userJobs = await getJobsByUsers(teamspace, [user]);
-	const templatesWithPermissions = await getTemplatesByQuery(teamspace, {
-		$or: [
-			{ 'config.permissions.view': { $in: [user, ...userJobs] } },
-			{ 'config.permissions.view': { $exists: false } },
-		],
-	});
-
-	if (!templatesWithPermissions.length) {
-		return [];
-	}
-
-	const options = deleteIfUndefined({ projection, updatedSince, sort, limit, skip });
-
-	if (queryFilters.length) {
-		const { ticketCodeQuery, queries } = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
-
-		options.ticketCodeQuery = ticketCodeQuery;
-		options.query = {
-			$and: [
-				...queries,
-				{ type: { $in: templatesWithPermissions.map(({ _id }) => _id) } },
-			],
-		};
-	}
+	const queryInfo = await getQueryInfo(teamspace, user, queryFilters);
+	const options = deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo });
 
 	return getTicketsByFilter(teamspace, project, model, deleteIfUndefined(options));
 };
