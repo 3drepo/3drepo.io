@@ -217,7 +217,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
-		const color = current.color ? getGroupHexColor(current.color) : undefined;
+		const color = current.color ? getGroupHexColor(current.color.concat( Math.round(current.opacity * 255))) : undefined;
 		const v4Objects = convertToV4GroupNodes(current.group as Group);
 
 		return v4Objects.reduce((dict, objects) => {
