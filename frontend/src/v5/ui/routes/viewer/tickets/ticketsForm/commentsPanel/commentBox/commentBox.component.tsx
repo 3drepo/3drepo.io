@@ -18,10 +18,9 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import SendIcon from '@assets/icons/outlined/send_message-outlined.svg';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
-import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
@@ -41,7 +40,6 @@ import {
 	CharsCounter,
 	SendButton,
 	Container,
-	MessageInput,
 	DeleteButton,
 	CommentReplyContainer,
 	DragAndDrop,
@@ -63,8 +61,9 @@ import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
 import { compact, isEqual } from 'lodash';
-import { selectUnsavedCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
+import { ExpandableMessageInput } from './expandableMessageInput.component';
+import { getMessageValue, MentionsComponent } from './mentions.component';
+import { getCaretCharacterIndex, restoreMessageSelection } from './range.helpers';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 interface EditCommentBoxProps {
@@ -89,8 +88,8 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const [viewpoint, setViewpoint] = useState<Viewpoint>(existingView);
 	const errorerImagesRef = useRef<string[]>([]);
-	
-	const { watch, reset, control, getValues, getFieldState, setValues, setValue, formState: { isDirty } } = useForm<{ message: string, images: string[] }>({
+
+	const { watch, reset, getValues, getFieldState, setValues, setValue, formState: { isDirty } } = useForm<{ message: string, images: string[] }>({
 		mode: 'all',
 		defaultValues: {
 			message: desanitiseMessage(message),
@@ -102,7 +101,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const imagesToUpload = watch('images');
 
 	const setImagesToUpload = (newimages: string[]) => setValue('images', newimages, { shouldDirty: true });
-	const unsavedComment = selectUnsavedCommentById(getState(), commentId);
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(commentId);
 
 	// When updating a comment it can accept the existing ids or the dataurl, thats
 	// why we need a separate array for display purposes.
@@ -112,7 +111,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	});
 	
 	const containerRef = useRef<HTMLElement>(null);
-	const inputRef = useRef<any>(null);
+	const inputRef = useRef<HTMLDivElement>(null);
 	const isEditMode = !!commentId;
 
 	const initialCommentReply = useMemo(() => commentReply, [commentId]);
@@ -122,7 +121,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const replyIsUnchanged = isEqual(initialCommentReply, commentReply);
-	const messageIsUnchanged = !isDirty && viewIsUnchanged && replyIsUnchanged;
+	const messageIsUnchanged = !isDirty && viewIsUnchanged && replyIsUnchanged &&  isEqual(message, newMessage);
 
 	// This array has the same length as the images array and keeps track of which images have errors.
 	// empty strings indicate images without error. (this approach was taken to remove complexity from the rest of the functions)
@@ -133,6 +132,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 
 	const resetCommentBox = () => {
 		reset();
+		if (inputRef.current) inputRef.current.textContent = '';
 		setCommentReply(null);
 		setIsSubmittingMessage(false);
 		setViewpoint(null);
@@ -251,6 +251,31 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		openImagesDialog(imagesToUpload.length);
 	};
 
+	const handlePaste = (event) => {
+		event.preventDefault();
+		// Insert clipboard text only, preventing pasted HTML/styles from entering the editable.
+		const plainText = event.clipboardData.getData('text/plain');
+		const editor = inputRef.current;
+		if (!editor) return;
+		const selection = window.getSelection();
+		if (!selection?.rangeCount) return;
+		const range = selection.getRangeAt(0);
+		const caretPosition = getCaretCharacterIndex(editor);
+		range.deleteContents();
+		const textNode = document.createTextNode(plainText);
+		range.insertNode(textNode);
+		range.setStartAfter(textNode);
+		range.collapse(true);
+		selection.removeAllRanges();
+		selection.addRange(range);
+		const messageValue = getMessageValue(editor);
+		setValue('message', messageValue, { shouldDirty: true });
+		requestAnimationFrame(() => {
+			const pastedCaretPosition = caretPosition + plainText.length;
+			if (inputRef.current) restoreMessageSelection(inputRef.current, pastedCaretPosition);
+		});
+	};
+
 	const uploadScreenshot = async (image) => {
 		setImagesToUpload(imagesToUpload.concat(image));
 		openImagesDialog(imagesToUpload.length);
@@ -265,9 +290,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	};
 
 	useEffect(() => { 
-		if (isEditMode) return;
+		if (isEditMode || unsavedComment) return;
 		resetCommentBox();
-	}, [ticketId, isEditMode]);
+	}, [ticketId, isEditMode, unsavedComment]);
 
 	useEffect(() => {
 		if (commentReply?.message || commentReply?.images?.length || commentReply?.view) {
@@ -313,17 +338,15 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 						</DeleteButton>
 					</CommentReplyContainer>
 				)}
-				<MessageInput
-					name="message"
-					placeholder={formatMessage({
-						id: 'customTicket.comments.leaveAComment',
-						defaultMessage: 'Leave a comment',
-					})}
-					control={control}
-					inputProps={{
-						maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
-					}}
-					ref={inputRef}
+				<ExpandableMessageInput
+					editorRef={inputRef}
+					onPaste={handlePaste}
+					message={unsavedComment?.message || message}
+				/>
+				<MentionsComponent
+					editorRef={inputRef}
+					message={unsavedComment?.message || message}
+					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
 				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
 					<FormattedMessage
