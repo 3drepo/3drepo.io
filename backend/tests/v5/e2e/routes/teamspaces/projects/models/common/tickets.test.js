@@ -641,7 +641,7 @@ const testGetTicketResource = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, modelId: generateRandomString() }, false, modelNotFound],
 				[`the model is not a ${modelType}`, { ...baseRouteParams, modelId: wrongTypeModel._id }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.fileNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the resource does not exist', { ...baseRouteParams, resourceId: generateRandomString() }, false, templates.fileNotFound],
 				['given the correct resource id (default image)', { ...baseRouteParams, testDefaultImage: true }, true],
 				['the resource id is correct', baseRouteParams, true],

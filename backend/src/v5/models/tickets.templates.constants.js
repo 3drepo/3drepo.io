@@ -17,11 +17,10 @@
 
 const { presetModules, statusTypes } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
-const { validate } = require('../schemas/tickets/templates');
 
 const TemplateConsts = {};
 
-const defaultTemplates = [
+TemplateConsts.defaultTemplates = [
 	{
 		_id: stringToUUID('6d8bca8e-cb85-44f7-b04f-72d2954ddd67'),
 		name: 'Clash (Default template)',
@@ -41,12 +40,11 @@ const defaultTemplates = [
 				default: 'Active',
 			},
 		},
+		properties: [],
 		modules: [
-			{ type: presetModules.CLASH },
+			{ type: presetModules.CLASH, properties: [] },
 		],
 	},
 ];
-
-TemplateConsts.defaultTemplates = defaultTemplates.map(({ _id, ...template }) => ({ ...validate(template), _id }));
 
 module.exports = TemplateConsts;

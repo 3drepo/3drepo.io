@@ -30,6 +30,7 @@ const {
 	updateComment: updateFedComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const { canUpdateComment, validateNewComment, validateUpdateComment } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.comments');
+const { checkTicketExists, hasTemplateCommentPermission, hasTemplateViewPermission } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -40,7 +41,6 @@ const { serialiseComment, serialiseCommentList } = require('../../../../../middl
 
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
-const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -249,7 +249,7 @@ const establishRoutes = (isFed) => {
 	 *                   example: 1632821119000
 	 *                   description: (Imported comments only) returns the time when the comment was imported
 	 */
-	router.get('/:comment', hasReadAccess, checkTicketExists, getComment(isFed), serialiseComment);
+	router.get('/:comment', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getComment(isFed), serialiseComment);
 
 	/**
 	 * @openapi
@@ -366,7 +366,7 @@ const establishRoutes = (isFed) => {
 	 *                     example: 1632821119000
 	 *                     description: (Imported comments only) returns the time when the comment was imported
 	 */
-	router.get('', hasReadAccess, checkTicketExists, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
+	router.get('', hasReadAccess, checkTicketExists, hasTemplateViewPermission, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
 
 	/**
 	 * @openapi
@@ -433,7 +433,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully created
 	 */
-	router.post('', hasCommenterAccess, checkTicketExists, validateNewComment, createComment(isFed));
+	router.post('', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, validateNewComment, createComment(isFed));
 
 	/**
 	 * @openapi
@@ -506,7 +506,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully updated
 	 */
-	router.put('/:comment', hasCommenterAccess, checkTicketExists, validateUpdateComment, updateComment(isFed));
+	router.put('/:comment', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, validateUpdateComment, updateComment(isFed));
 
 	/**
 	 * @openapi
@@ -561,7 +561,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully deleted
 	 */
-	router.delete('/:comment', hasCommenterAccess, canUpdateComment, deleteComment(isFed));
+	router.delete('/:comment', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, canUpdateComment, deleteComment(isFed));
 
 	return router;
 };

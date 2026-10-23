@@ -51,7 +51,7 @@ const setupData = async (data) => {
 
 const checkData = async (teamspace, project, model, templates, tickets, shouldExist) => {
 	const existingTemplates = await getTemplateList(teamspace);
-	const allTickets = await getTicketList(teamspace, stringToUUID(project), model, {});
+	const allTickets = await getTicketList(teamspace, stringToUUID(project), model, teamspace, {});
 
 	if (shouldExist) {
 		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for CSH template
