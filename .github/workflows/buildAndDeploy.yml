@@ -265,9 +265,6 @@ jobs:
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
           PROMOTE: ${{ needs.metadata.outputs.promote }}
           PROD_VERSION: ${{ needs.metadata.outputs.prod_version }}
-          # Per-environment variable on the production-uk/ca/uae GitHub Environment
-          # (empty for non-prod, where this env var is unset).
-          PROD_KUBECONFIG_UID: ${{ vars.PROD_KUBECONFIG_UID }}
         run: |
           set -euo pipefail
 
@@ -286,20 +283,13 @@ jobs:
           fi
 
           # Target cluster kubeconfig from KSM (per environment), not a GitHub secret.
-          # Prod kubeconfigs live in their own KSM records (see TODO uids below).
           case "$ENVIRONMENT" in
-            qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;
-            dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;
-            uk|ca|uae)
-              # Prod kubeconfig UID comes from the per-env GitHub Environment
-              # variable (set alongside its reviewers), so it is scoped to the
-              # approved environment and needs no code change to rotate.
-              kcfg_uid="$PROD_KUBECONFIG_UID"
-              if [[ -z "$kcfg_uid" ]]; then
-                echo "::error::PROD_KUBECONFIG_UID is not set for environment '$ENVIRONMENT' (configure it on the production-$ENVIRONMENT GitHub Environment)." >&2
-                exit 1
-              fi ;;
-            *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;
+            qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;  # ci-kubeconfig-qa
+            dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;  # ci-kubeconfig-dev
+            uk)  kcfg_uid=rzRnzL72fmFNrTKKfVbyvw ;;  # ci-kubeconfig-uk  (Keeper prod folder)
+            ca)  kcfg_uid=WbQBfYi6XE8NOLfyOuM4PA ;;  # ci-kubeconfig-ca  (Keeper ca folder)
+            uae) kcfg_uid=9YGLNUzBhQHs4KHckr8WXA ;;  # ci-kubeconfig-uae (Keeper uae folder)
+            *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;  # ci-kubeconfig-staging
           esac
           ksm --ini-file "$HOME/.keeper/keeper.ini" secret notation "$kcfg_uid/field/password" | base64 -d > "$kubeconfig_file"
           export KUBECONFIG="$kubeconfig_file"
