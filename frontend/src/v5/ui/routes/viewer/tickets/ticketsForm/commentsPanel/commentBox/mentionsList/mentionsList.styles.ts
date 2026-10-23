@@ -19,8 +19,8 @@ import styled from 'styled-components';
 import { List } from '@mui/material';
 
 export const MentionList = styled(List)`
-    && {
-        padding: 0;
-        margin: 0;
-    }
+	&& {
+		padding: 0;
+		margin: 0;
+	}
 `;
