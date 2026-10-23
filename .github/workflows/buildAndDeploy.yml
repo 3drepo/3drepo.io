@@ -8,6 +8,12 @@ on:
     tags:
       - qa_deploy
       - dev_deploy
+      # Prod promote tags carry the release version: <env>_deploy-<version>,
+      # e.g. uk_deploy-5.26.4. They deploy an already-built, tested image by
+      # version (no rebuild) and are gated by a GitHub Environment approval.
+      - uk_deploy-*
+      - ca_deploy-*
+      - uae_deploy-*
   repository_dispatch:
     types:
       - deploy-command
@@ -17,7 +23,8 @@ permissions:
 
 concurrency:
   group: deploy-${{ github.event.client_payload.pull_request.number || github.ref_name }}
-  cancel-in-progress: true
+  # Never cancel an in-flight prod deploy; branch/qa/dev deploys stay cancellable.
+  cancel-in-progress: ${{ !startsWith(github.ref_name, 'uk_deploy') && !startsWith(github.ref_name, 'ca_deploy') && !startsWith(github.ref_name, 'uae_deploy') }}
 
 env:
   DOCKER_BUILDKIT: 1
@@ -41,6 +48,9 @@ jobs:
       release_name: ${{ steps.meta.outputs.release_name }}
       values_dir: ${{ steps.meta.outputs.values_dir }}
       values_file: ${{ steps.meta.outputs.values_file }}
+      promote: ${{ steps.meta.outputs.promote }}
+      prod_version: ${{ steps.meta.outputs.prod_version }}
+      gh_environment: ${{ steps.meta.outputs.gh_environment }}
     steps:
       - id: meta
         env:
@@ -72,10 +82,37 @@ jobs:
             commit_sha="$PR_HEAD_SHA"
           fi
 
-          if [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "qa_deploy" ]]; then
-            environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;  values_file=values.yaml
-          elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "dev_deploy" ]]; then
-            environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io; values_file=values.yaml
+          # Defaults (branch push / PR dispatch -> staging; rebuild from source).
+          promote=false
+          prod_version=""
+          gh_environment=""
+
+          if [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" ]]; then
+            case "$REF_NAME" in
+              qa_deploy)
+                environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;  values_file=values.yaml ;;
+              dev_deploy)
+                environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io; values_file=values.yaml ;;
+              uk_deploy-*|ca_deploy-*|uae_deploy-*)
+                # Prod: promote a release-versioned image onto the env's prod values.
+                env_prefix="${REF_NAME%%_deploy-*}"
+                prod_version="${REF_NAME#*_deploy-}"
+                promote=true
+                release_name=www
+                values_file=values.yaml
+                case "$env_prefix" in
+                  uk)  environment=uk;  values_dir=deployments/asite-prod/helm/3drepo.io; gh_environment=production-uk ;;
+                  ca)  environment=ca;  values_dir=deployments/asite-ca/helm/3drepo.io;   gh_environment=production-ca ;;
+                  uae) environment=uae; values_dir=deployments/asite-uae/helm/3drepo.io;  gh_environment=production-uae ;;
+                esac
+                if [[ -z "$prod_version" ]]; then
+                  echo "Prod deploy tag '$REF_NAME' is missing a version (expected <env>_deploy-<version>, e.g. uk_deploy-5.26.4)." >&2
+                  exit 1
+                fi ;;
+              *)
+                echo "Unrecognised deploy tag: $REF_NAME" >&2
+                exit 1 ;;
+            esac
           else
             environment=staging; release_name=""; values_dir=deployments/asite-stg/helm/3drepo.io; values_file=DefaultStgValues.yaml
           fi
@@ -89,6 +126,9 @@ jobs:
             echo "release_name=$release_name"
             echo "values_dir=$values_dir"
             echo "values_file=$values_file"
+            echo "promote=$promote"
+            echo "prod_version=$prod_version"
+            echo "gh_environment=$gh_environment"
           } >> "$GITHUB_OUTPUT"
 
   deriveReleaseName:
@@ -102,6 +142,9 @@ jobs:
     if: github.event_name == 'push' || github.event.action == 'deploy-command'
     needs: [metadata, deriveReleaseName]
     runs-on: ubuntu-24.04
+    # For prod promote tags this is production-uk/ca/uae, which require a reviewer
+    # to approve before the job runs. Empty for non-prod, so no gate there.
+    environment: ${{ needs.metadata.outputs.gh_environment }}
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -111,6 +154,8 @@ jobs:
           token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
 
       - name: Load deploy config
+        env:
+          PROMOTE: ${{ needs.metadata.outputs.promote }}
         run: |
           set -euo pipefail
           if [[ ! -f "$DEPLOY_CONFIG_FILE" ]]; then
@@ -121,12 +166,14 @@ jobs:
           # shellcheck disable=SC1090
           source "$DEPLOY_CONFIG_FILE"
           set +a
-          if [[ -z "${HELM_CHART_VERSION:-}" ]]; then
+          # Prod promotes by the tag's version, so HELM_CHART_VERSION is only
+          # required for the build-from-source (non-prod) path.
+          if [[ "$PROMOTE" != "true" && -z "${HELM_CHART_VERSION:-}" ]]; then
             echo "HELM_CHART_VERSION is not set in $DEPLOY_CONFIG_FILE" >&2
             exit 1
           fi
           {
-            echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+            echo "HELM_CHART_VERSION=${HELM_CHART_VERSION:-}"
             echo "CUSTOM_HELM_OVERRIDE=${CUSTOM_HELM_OVERRIDE:-}"
           } >> "$GITHUB_ENV"
 
@@ -135,7 +182,23 @@ jobs:
           echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
             -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
+      - name: Verify release image exists (prod promote)
+        if: needs.metadata.outputs.promote == 'true'
+        env:
+          PROD_VERSION: ${{ needs.metadata.outputs.prod_version }}
+        run: |
+          set -euo pipefail
+          image="${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$PROD_VERSION"
+          # Promote never rebuilds, so the tested image must already be on ACR
+          # (retagged by the release process). Fail clearly if it is not.
+          if ! docker manifest inspect "$image" >/dev/null 2>&1; then
+            echo "::error::Release image '$image' not found on the registry. Retag/push the release before deploying." >&2
+            exit 1
+          fi
+          echo "Found release image: $image"
+
       - name: Build Docker image
+        if: needs.metadata.outputs.promote != 'true'
         env:
           BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
@@ -148,6 +211,7 @@ jobs:
             .
 
       - name: Push Docker image
+        if: needs.metadata.outputs.promote != 'true'
         env:
           BRANCH_TAG: ${{ needs.deriveReleaseName.outputs.release_name }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
@@ -199,6 +263,8 @@ jobs:
           RELEASE_NAME: ${{ needs.metadata.outputs.release_name != '' && needs.metadata.outputs.release_name || needs.deriveReleaseName.outputs.release_name }}
           VALUES_PATH: devops/${{ needs.metadata.outputs.values_dir }}/${{ needs.metadata.outputs.values_file }}
           COMMIT_SHA: ${{ needs.metadata.outputs.commit_sha }}
+          PROMOTE: ${{ needs.metadata.outputs.promote }}
+          PROD_VERSION: ${{ needs.metadata.outputs.prod_version }}
         run: |
           set -euo pipefail
 
@@ -218,19 +284,32 @@ jobs:
 
           # Target cluster kubeconfig from KSM (per environment), not a GitHub secret.
           case "$ENVIRONMENT" in
-            qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;
-            dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;
-            *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;
+            qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;  # ci-kubeconfig-qa
+            dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;  # ci-kubeconfig-dev
+            uk)  kcfg_uid=rzRnzL72fmFNrTKKfVbyvw ;;  # ci-kubeconfig-uk  (Keeper prod folder)
+            ca)  kcfg_uid=WbQBfYi6XE8NOLfyOuM4PA ;;  # ci-kubeconfig-ca  (Keeper ca folder)
+            uae) kcfg_uid=9YGLNUzBhQHs4KHckr8WXA ;;  # ci-kubeconfig-uae (Keeper uae folder)
+            *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;  # ci-kubeconfig-staging
           esac
           ksm --ini-file "$HOME/.keeper/keeper.ini" secret notation "$kcfg_uid/field/password" | base64 -d > "$kubeconfig_file"
           export KUBECONFIG="$kubeconfig_file"
+
+          # Prod promotes an already-built release image+chart by version; non-prod
+          # builds from source and deploys the just-built image by commit sha.
+          if [[ "$PROMOTE" == "true" ]]; then
+            chart_version="$PROD_VERSION"
+            image_tag="$PROD_VERSION"
+          else
+            chart_version="$HELM_CHART_VERSION"
+            image_tag="$COMMIT_SHA"
+          fi
 
           # Temp file (not process substitution) so a ksm failure aborts before helm runs.
           ksm --ini-file "$HOME/.keeper/keeper.ini" interpolate --validate \
             "$VALUES_PATH" > "$values_file"
 
           helm_set_args=(
-            --set "image.tag=$COMMIT_SHA"
+            --set "image.tag=$image_tag"
             --set "branchName=$RELEASE_NAME"
           )
 
@@ -242,7 +321,7 @@ jobs:
           helm upgrade --install \
             "$RELEASE_NAME" \
             oci://${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io \
-            --version "$HELM_CHART_VERSION" \
+            --version "$chart_version" \
             --namespace default \
             -f "$values_file" \
             "${helm_set_args[@]}"
@@ -255,7 +334,7 @@ jobs:
           attempts=10
           sleep 90
           for attempt in $(seq 1 $attempts); do
-            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$COMMIT_SHA" --release-only --no-color 2>&1)"; then
+            if out="$(python3 "$chk" --context "$kctx" --release "$RELEASE_NAME" --expect-tag "$image_tag" --release-only --no-color 2>&1)"; then
               echo "$out"
               echo "post-deploy check passed (attempt $attempt/$attempts)"
               exit 0
