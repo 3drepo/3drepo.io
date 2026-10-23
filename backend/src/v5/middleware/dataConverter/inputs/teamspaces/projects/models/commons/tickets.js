@@ -266,6 +266,7 @@ const hasTemplateCreatePermission = async (req, res, next) => {
 
 TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 	try {
+		const nonEditableProps = ['_id', 'type'];
 		const editPermissions = req.templateData.config.permissions?.edit;
 
 		if (editPermissions) {
@@ -297,7 +298,7 @@ TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res
 							else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
 							else isDefaultPropModified = true;
 						}
-					} else {
+					} else if (!nonEditableProps.includes(key)) {
 						isDefaultPropModified = true;
 					}
 				}
