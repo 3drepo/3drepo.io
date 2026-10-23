@@ -41,13 +41,18 @@ const renderMentions = (value: string) => {
 	return content;
 };
 
+const renderTextChildren = (children) => Children.toArray(children).map((child) => (
+	typeof child === 'string' ? renderMentions(child) : child
+));
+
 const COMPONENTS = {
 	p: ({ children, ...props }) => (
 		<CommentMessage {...props}>
-			{Children.toArray(children).map((child) => (
-				typeof child === 'string' ? renderMentions(child) : child
-			))}
+			{renderTextChildren(children)}
 		</CommentMessage>
+	),
+	code: ({ children, ...props }) => (
+		<code {...props}>{renderTextChildren(children)}</code>
 	),
 	img: ({ src }) => `![img](${src})`,
 	blockquote: QuotedMessage,
