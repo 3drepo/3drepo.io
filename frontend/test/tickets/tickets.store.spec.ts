@@ -299,8 +299,6 @@ describe('Tickets: store', () => {
 		});
 	});
 
-
-
 	describe('settings', () => {
 		const riskCategories = mockRiskCategories();
 		it('should set and fetch the risk categories', () => {

@@ -19,12 +19,16 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Float } from './rulesOptionsMenu.styles';
 import { EllipsisMenuItemDelete } from '../../../../../properties/ticketImageContent/ticketImageAction/ticketImageAction.styles';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { useContext } from 'react';
 
 export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
-	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	const { containerOrFederation } = useContext(TicketContext);
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 
 	return (
 		<Float>
@@ -38,12 +42,12 @@ export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
 				<EllipsisMenuItem
 					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.paste" defaultMessage="Paste filters" />)}
 					onClick={onPaste}
-					hidden={!isAdmin}
+					hidden={readOnly}
 				/>
 				<EllipsisMenuItemDelete
 					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.clear" defaultMessage="Clear All" />)}
 					onClick={onClear}
-					hidden={!rules.length || !isAdmin}
+					hidden={!rules.length || readOnly}
 				/>
 			</EllipsisMenu>
 		</Float>

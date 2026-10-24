@@ -20,7 +20,7 @@ import { Comments, CreateCommentBox, EmptyCommentsBox, FillerRow, CommentsContai
 import { FormattedMessage } from 'react-intl';
 import { Comment } from '../comment/comment.component';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -33,12 +33,13 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketContext } from '../../../ticket.context';
 
 export const CommentsList = () => {
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, templateId);
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const commentsLength = comments.length;
 
