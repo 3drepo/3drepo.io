@@ -232,9 +232,9 @@ jobs:
           case "$ENVIRONMENT" in
             qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;  # ci-kubeconfig-qa
             dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;  # ci-kubeconfig-dev
-            uk)  kcfg_uid=rzRnzL72fmFNrTKKfVbyvw ;;  # ci-kubeconfig-uk  (Keeper prod folder)
-            ca)  kcfg_uid=WbQBfYi6XE8NOLfyOuM4PA ;;  # ci-kubeconfig-ca  (Keeper ca folder)
-            uae) kcfg_uid=9YGLNUzBhQHs4KHckr8WXA ;;  # ci-kubeconfig-uae (Keeper uae folder)
+            uk)  kcfg_uid=rzRnzL72fmFNrTKKfVbyvw ;;  # ci-kubeconfig-uk
+            ca)  kcfg_uid=WbQBfYi6XE8NOLfyOuM4PA ;;  # ci-kubeconfig-ca
+            uae) kcfg_uid=9YGLNUzBhQHs4KHckr8WXA ;;  # ci-kubeconfig-uae
             *)   kcfg_uid=d3-r_U6ARnrEJwIZm3P9LQ ;;  # ci-kubeconfig-staging
           esac
           ksm --ini-file "$HOME/.keeper/keeper.ini" secret notation "$kcfg_uid/field/password" | base64 -d > "$kubeconfig_file"
