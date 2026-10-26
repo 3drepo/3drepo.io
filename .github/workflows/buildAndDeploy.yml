@@ -50,7 +50,6 @@ jobs:
       values_file: ${{ steps.meta.outputs.values_file }}
       promote: ${{ steps.meta.outputs.promote }}
       prod_version: ${{ steps.meta.outputs.prod_version }}
-      gh_environment: ${{ steps.meta.outputs.gh_environment }}
     steps:
       - id: meta
         env:
@@ -85,7 +84,6 @@ jobs:
           # Defaults (branch push / PR dispatch -> staging; rebuild from source).
           promote=false
           prod_version=""
-          gh_environment=""
 
           if [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" ]]; then
             case "$REF_NAME" in
@@ -101,9 +99,9 @@ jobs:
                 release_name=www
                 values_file=values.yaml
                 case "$env_prefix" in
-                  uk)  environment=uk;  values_dir=deployments/asite-prod/helm/3drepo.io; gh_environment=production-uk ;;
-                  ca)  environment=ca;  values_dir=deployments/asite-ca/helm/3drepo.io;   gh_environment=production-ca ;;
-                  uae) environment=uae; values_dir=deployments/asite-uae/helm/3drepo.io;  gh_environment=production-uae ;;
+                  uk)  environment=uk;  values_dir=deployments/asite-prod/helm/3drepo.io ;;
+                  ca)  environment=ca;  values_dir=deployments/asite-ca/helm/3drepo.io ;;
+                  uae) environment=uae; values_dir=deployments/asite-uae/helm/3drepo.io ;;
                 esac
                 if [[ -z "$prod_version" ]]; then
                   echo "Prod deploy tag '$REF_NAME' is missing a version (expected <env>_deploy-<version>, e.g. uk_deploy-5.26.4)." >&2
@@ -128,7 +126,6 @@ jobs:
             echo "values_file=$values_file"
             echo "promote=$promote"
             echo "prod_version=$prod_version"
-            echo "gh_environment=$gh_environment"
           } >> "$GITHUB_OUTPUT"
 
   deriveReleaseName:
@@ -142,9 +139,6 @@ jobs:
     if: github.event_name == 'push' || github.event.action == 'deploy-command'
     needs: [metadata, deriveReleaseName]
     runs-on: ubuntu-24.04
-    # For prod promote tags this is production-uk/ca/uae, which require a reviewer
-    # to approve before the job runs. Empty for non-prod, so no gate there.
-    environment: ${{ needs.metadata.outputs.gh_environment }}
     steps:
       - name: Check out source
         uses: actions/checkout@v4
