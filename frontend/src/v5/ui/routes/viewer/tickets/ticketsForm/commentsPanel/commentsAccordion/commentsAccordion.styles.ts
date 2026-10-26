@@ -17,15 +17,11 @@
 
 import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
-import { Comments } from '../commentsList/commentsList.styles';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
 		.MuiAccordionDetails-root {
 			padding: 0;
-			${Comments} {
-				min-height: 400px;
-			}
 
 			& > :not(:first-child) {
 				margin-top: 0;

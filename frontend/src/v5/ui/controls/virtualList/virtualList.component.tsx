@@ -373,6 +373,7 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 					}} 
 				ref={containerRef as any}
 				className={className}
+				data-role="virtualList"
 			>
 				<div style={{ height: spacerStart } } id='startSpacer'/>
 				<div ref={itemsContainer as any}  className={itemsContainerClassName} >

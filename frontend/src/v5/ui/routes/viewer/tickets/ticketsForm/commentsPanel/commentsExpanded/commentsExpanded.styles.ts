@@ -16,10 +16,17 @@
  */
 
 import styled from 'styled-components';
+import { CommentsContainer } from '../commentsList/commentsList.styles';
 
 export const ExpandedContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	overflow-y: hidden;
+
+
+	${CommentsContainer} {
+		// this is to get the comments component to have the right height at 100% when expanded
+		overflow: hidden;
+	}
 `;
