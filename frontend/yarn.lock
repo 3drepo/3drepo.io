@@ -1492,10 +1492,10 @@
   resolved "https://registry.yarnpkg.com/@formatjs/fast-memoize/-/fast-memoize-3.1.7.tgz#5f79b3756e4bcb5faee47b3a2f01216e1212c9e4"
   integrity sha512-zXfhLpvA6T7+efdt9JLbBwZ00tT7NsBMDVnDu8rpHeNNv8KfRZAMo2gkG0k9lK/Nzc//3kJ9pImsfuJxk3KhUA==
 
-"@formatjs/icu-messageformat-parser@3.5.17":
-  version "3.5.17"
-  resolved "https://registry.yarnpkg.com/@formatjs/icu-messageformat-parser/-/icu-messageformat-parser-3.5.17.tgz#7ac90ff6dde99468cd0b4a3f55344ccf8ae2ed87"
-  integrity sha512-cN9jhVqT7u0K9tix43fhjoUwL0nazyW6zsNIXs2QdPADr+nurPfYyssUiMqcSCGlPcCiqnYVxgSn7zBSuI+5Bg==
+"@formatjs/icu-messageformat-parser@3.5.18":
+  version "3.5.18"
+  resolved "https://registry.yarnpkg.com/@formatjs/icu-messageformat-parser/-/icu-messageformat-parser-3.5.18.tgz#e843006e05eede2bbd71ac4c78c138fd274b19da"
+  integrity sha512-wX1efcL8d7K5QapOTRsP/OLTA/kpwe4LwqWyNxDNg5iRs8i9jJbCyxB5P8jc4KOW5oiLzz2DJr+BRY5xMV9+bA==
   dependencies:
     "@formatjs/icu-skeleton-parser" "2.1.11"
 
@@ -1504,14 +1504,14 @@
   resolved "https://registry.yarnpkg.com/@formatjs/icu-skeleton-parser/-/icu-skeleton-parser-2.1.11.tgz#09226edf55a18e3fea80304d2cc95aaeb0095436"
   integrity sha512-j8cUmOJzVgkHuS0QiQ6ga76UIoLOFSAMWhs7aZJztH3aAdCOAE6vpC8KVvFB4cU10ON0y2/5oOVmPJ43s2lTwA==
 
-"@formatjs/intl@4.1.19":
-  version "4.1.19"
-  resolved "https://registry.yarnpkg.com/@formatjs/intl/-/intl-4.1.19.tgz#29463bc50ebc159f8c4309d6bd739fc5c95e9aa4"
-  integrity sha512-bZMROATl+rzfL8wsDZ53i8XWHx5e6rVr8QlGT5GDvHImEUro4WE9pxUd2dobzmI3CtD+zkt/wkEdqcb+3CK8Fg==
+"@formatjs/intl@4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@formatjs/intl/-/intl-4.2.1.tgz#f8261d076eceb875bdfa9871c9c42415b2acbce9"
+  integrity sha512-GiL0cReencWQkhfJedNLMe0Aorb/wyTRJdi+hLgG9gsDPy4yw2N+EkMcijf5+oGKd5jde75tr5nujsPg78bUTw==
   dependencies:
     "@formatjs/fast-memoize" "3.1.7"
-    "@formatjs/icu-messageformat-parser" "3.5.17"
-    intl-messageformat "11.2.14"
+    "@formatjs/icu-messageformat-parser" "3.5.18"
+    intl-messageformat "11.2.15"
 
 "@fortawesome/fontawesome-common-types@7.2.0":
   version "7.2.0"
@@ -2461,12 +2461,12 @@
   dependencies:
     ts-dedent "^2.0.0"
 
-"@storybook/core@8.6.18":
-  version "8.6.18"
-  resolved "https://registry.yarnpkg.com/@storybook/core/-/core-8.6.18.tgz#0ddbec8421715b372419ae5dfefef3df5848386c"
-  integrity sha512-dRBP2TnX6fGdS0T2mXBHjkS/3Nlu1ra1huovZVFuM67CYMzrhM/3hX/zru1vWSC5rqY93ZaAhjMciPW4pK5mMQ==
+"@storybook/core@8.6.19":
+  version "8.6.19"
+  resolved "https://registry.yarnpkg.com/@storybook/core/-/core-8.6.19.tgz#20d912a8b65c2f292ff9e2bbfdd43025b0f833bd"
+  integrity sha512-o9TZn0YxSxjBOxkTlJWq9jFTZn53Wr83HNvX0k8YYxxA5evwt7kWubKs/RMTEIyXbsBKW7XUw7Cq9fLmhgJ3Bg==
   dependencies:
-    "@storybook/theming" "8.6.18"
+    "@storybook/theming" "8.6.19"
     better-opn "^3.0.2"
     browser-assert "^1.2.1"
     esbuild "^0.18.0 || ^0.19.0 || ^0.20.0 || ^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0 || ^0.25.0"
@@ -2593,6 +2593,11 @@
   version "8.6.18"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-8.6.18.tgz#18c66263868bfb00a419772b5460a5714c5e1181"
   integrity sha512-n6OEjEtHupa2PdTwWzRepr7cO8NkDd4rgF6BKLitRbujOspLxzMBEqdphs+QLcuiCIgf33SqmEA64QWnbSMhPw==
+
+"@storybook/theming@8.6.19":
+  version "8.6.19"
+  resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-8.6.19.tgz#0b4799fa7a7df9f14856f0df6380c9a2ce237365"
+  integrity sha512-IRbIk5klNSnSqBye/0FgkkyyIbJjzW+p1qaKGOYI+yKRktLCInypl9bh5YFkaPpr0m4lk7wY/GzS0uXPL1gS3g==
 
 "@testing-library/dom@10.4.0":
   version "10.4.0"
@@ -5811,9 +5816,9 @@ flatted@^3.2.9:
   integrity sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==
 
 follow-redirects@^1.16.0:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.16.0.tgz#28474a159d3b9d11ef62050a14ed60e4df6d61bc"
-  integrity sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.16.1.tgz#6e0efa40a727fb369b98dab15883ec34787d675e"
+  integrity sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg==
 
 font-awesome@4.7.0:
   version "4.7.0"
@@ -6503,13 +6508,13 @@ interpret@^2.2.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-2.2.0.tgz#1a78a0b5965c40a5416d007ad6f50ad27c417df9"
   integrity sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==
 
-intl-messageformat@11.2.14:
-  version "11.2.14"
-  resolved "https://registry.yarnpkg.com/intl-messageformat/-/intl-messageformat-11.2.14.tgz#610e4a21511d85dc06634424409d60bb1e9e441f"
-  integrity sha512-9f2VD1HFuxUvMw0RxsaP8WmMns6JRTnsNB/zghTFrp11ZktiXWwVDeZBPQchBKEmo+Gx/ZhxI7Qht7YglFD4PA==
+intl-messageformat@11.2.15:
+  version "11.2.15"
+  resolved "https://registry.yarnpkg.com/intl-messageformat/-/intl-messageformat-11.2.15.tgz#02c5e1db35fcad7bd2a694073061e862e4213353"
+  integrity sha512-W4VNytsXyWgW5lvVchmsb9xgA5rSKqoflu3/IQ9UCtB0z4R+Bx9MoEkwFT/+30RCl/KzUoH0QGGe9lppF5SuvQ==
   dependencies:
     "@formatjs/fast-memoize" "3.1.7"
-    "@formatjs/icu-messageformat-parser" "3.5.17"
+    "@formatjs/icu-messageformat-parser" "3.5.18"
 
 invariant@^2.2.1:
   version "2.2.4"
@@ -9101,14 +9106,14 @@ react-hook-form@7.76.1:
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.76.1.tgz#0ef905eae5c17e32b6edc2ac628921917e87aafa"
   integrity sha512-rYM7tPiWlu3nZchkR/ex7piyzui2vFPyaLnXnI/RnblB/L4qfMmyses8llJVtF1NpE9WBBsJlGtcSZzPCXW1qQ==
 
-react-intl@10.1.23:
-  version "10.1.23"
-  resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-10.1.23.tgz#a0b2414eaacb6cbadc9665cef9f311f1389a1075"
-  integrity sha512-ky6bkRTUAiymd2l+qOhv4eV46gOd4JuAry2qDgSA3mjk49BrmQMPRumtrLzpUYdvfg0+iq5iPjpBGHgM4XtMJg==
+react-intl@10.2.2:
+  version "10.2.2"
+  resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-10.2.2.tgz#4818a74be7f951576a02c829685273902c598d8f"
+  integrity sha512-LUzjoxGMbk9PWS4Kdr2QAYX8sqIuB3EKiFs6fi4kCgGAgWNlrYlq9ZLKxBg9Yeg9xeaFfeZ139FZ4Ub2w5L6SQ==
   dependencies:
-    "@formatjs/icu-messageformat-parser" "3.5.17"
-    "@formatjs/intl" "4.1.19"
-    intl-messageformat "11.2.14"
+    "@formatjs/icu-messageformat-parser" "3.5.18"
+    "@formatjs/intl" "4.2.1"
+    intl-messageformat "11.2.15"
 
 react-is@19.2.4, react-is@^19.2.3:
   version "19.2.4"
@@ -9245,10 +9250,10 @@ react-use-intercom@1.1.5:
   resolved "https://registry.yarnpkg.com/react-use-intercom/-/react-use-intercom-1.1.5.tgz#48200eb58e096eb7d7ffa500d1ffb1de249622ae"
   integrity sha512-TI6ssbCBkL29gM67ta+wVPoFGRIoaRHaBtPfGV1nMK7o4ia7+yMPc3YqGO4NKBj3q5+pRJE6LQ317QBh+bxBLw==
 
-react-virtuoso@4.18.12:
-  version "4.18.12"
-  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-4.18.12.tgz#5fa994dd70a2451235cf459a02c9936f9edda3a3"
-  integrity sha512-6c1SnRicSBfG+WnbhcyJUxzDHvvxD3vsux/EpcfVbgB7clyP1Od2r81TAGTgwbL7U2qP889RR4u+CH6WjgpW0g==
+react-virtuoso@4.18.15:
+  version "4.18.15"
+  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-4.18.15.tgz#5e0b6210d8a271d4faf3bcd8b46986dfadc636fb"
+  integrity sha512-YvmOV0PThfObKUzXbZvlCfIO04yvZ6gRXkSiib472qEypDyT2ZSfNtqHr1F7XY3UsHp43hJkDo8WiFq3irHQZA==
 
 react-window@1.8.9:
   version "1.8.9"
@@ -10051,12 +10056,12 @@ stop-iteration-iterator@^1.1.0:
     es-errors "^1.3.0"
     internal-slot "^1.1.0"
 
-storybook@8.6.18:
-  version "8.6.18"
-  resolved "https://registry.yarnpkg.com/storybook/-/storybook-8.6.18.tgz#2a635a4b0c99693f43ba21b8eb511c5cc513a807"
-  integrity sha512-p8seiSI6FiVY6P3V0pG+5v7c8pDMehMAFRWEhG5XqIBSQszzOjDnW2rNvm3odoLKfo3V3P6Cs6Hv9ILzymULyQ==
+storybook@8.6.19:
+  version "8.6.19"
+  resolved "https://registry.yarnpkg.com/storybook/-/storybook-8.6.19.tgz#75ddacc222037a5c933f0816fa1c4ba9fd6dfd85"
+  integrity sha512-m1kbDTwaF8mwx0VdarVCF9nAedbxsAylD5nmohfe0cWRLn2UZGOtk/JuayhNeSQAvOgVa8rzoN9UvbAt0jnuIg==
   dependencies:
-    "@storybook/core" "8.6.18"
+    "@storybook/core" "8.6.19"
 
 string-length@^4.0.1:
   version "4.0.2"
