@@ -22,7 +22,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-${{ github.event.client_payload.pull_request.number || github.ref_name }}
+  # Prod tags serialize per environment (a cluster never gets two concurrent
+  # deploys, even across different versions); branch/qa/dev keep per-ref grouping.
+  group: deploy-${{ github.event.client_payload.pull_request.number || (startsWith(github.ref_name, 'uk_deploy-') && 'prod-uk') || (startsWith(github.ref_name, 'ca_deploy-') && 'prod-ca') || (startsWith(github.ref_name, 'uae_deploy-') && 'prod-uae') || github.ref_name }}
   # Never cancel an in-flight prod deploy; branch/qa/dev deploys stay cancellable.
   cancel-in-progress: ${{ !startsWith(github.ref_name, 'uk_deploy') && !startsWith(github.ref_name, 'ca_deploy') && !startsWith(github.ref_name, 'uae_deploy') }}
 
@@ -176,20 +178,25 @@ jobs:
           echo "${{ secrets.REGISTRY_TOKEN }}" | docker login "${{ secrets.REGISTRY_LOGIN_SERVER }}" \
             -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
-      - name: Verify release image exists (prod promote)
+      - name: Verify release image and chart exist (prod promote)
         if: needs.metadata.outputs.promote == 'true'
         env:
           PROD_VERSION: ${{ needs.metadata.outputs.prod_version }}
         run: |
           set -euo pipefail
+          # Promote never rebuilds, so the tested image and chart must already be on
+          # ACR (retagged / chart-pushed by the release process). Fail clearly otherwise.
           image="${{ secrets.REGISTRY_LOGIN_SERVER }}/${IMAGE_REPOSITORY}:$PROD_VERSION"
-          # Promote never rebuilds, so the tested image must already be on ACR
-          # (retagged by the release process). Fail clearly if it is not.
           if ! docker manifest inspect "$image" >/dev/null 2>&1; then
             echo "::error::Release image '$image' not found on the registry. Retag/push the release before deploying." >&2
             exit 1
           fi
-          echo "Found release image: $image"
+          chart="${{ secrets.REGISTRY_LOGIN_SERVER }}/helm/io:$PROD_VERSION"
+          if ! docker manifest inspect "$chart" >/dev/null 2>&1; then
+            echo "::error::Release chart '$chart' not found on the registry. Push the chart before deploying." >&2
+            exit 1
+          fi
+          echo "Found release image and chart for $PROD_VERSION"
 
       - name: Build Docker image
         if: needs.metadata.outputs.promote != 'true'
