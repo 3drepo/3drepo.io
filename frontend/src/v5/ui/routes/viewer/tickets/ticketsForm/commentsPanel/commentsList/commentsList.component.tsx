@@ -16,7 +16,7 @@
  */
 
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { Comments, CreateCommentBox, EmptyCommentsBox, FillerRow, CommentsContainer, Table, TableBody, TableRow, VirtualisedList } from './commentsList.styles';
+import { Comments, CreateCommentBox, EmptyCommentsBox, CommentsContainer, TableRow, CommentsVirtualList } from './commentsList.styles';
 import { FormattedMessage } from 'react-intl';
 import { Comment } from '../comment/comment.component';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
@@ -88,41 +88,32 @@ export const CommentsList = () => {
 			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
+
+	
 	return (
 		<CommentsContainer>
 			<Comments>
-				{commentsLength ? (
-					<VirtualisedList
-						data={comments}
-						initialTopMostItemIndex={commentsLength - 1}
-						followOutput={() => true}
-						overscan={800}
-						components={{
-							Table,
-							// @ts-ignore
-							TableBody,
-							TableRow,
-							FillerRow,
-						}}
-						itemContent={(index, comment: ITicketComment) => (
-							<>
-								<Comment
-									{...comment}
-									key={comment._id}
-									onDelete={handleDeleteComment}
-									onReply={handleReplyToComment}
-									isFirstOfBlock={getCommentIsFirstOfBlock(index)}
-								/>
-								{index === commentsLength - 1 && (<Gap $height="5px" />)}
-							</>
-						)}
-					/>
-				) : (
+				{commentsLength === 0 && (
 					<EmptyCommentsBox>
 						<EmptyListMessage>
 							<FormattedMessage id="customTicket.comments.empty" defaultMessage="No comments" />
 						</EmptyListMessage>
 					</EmptyCommentsBox>
+				)}
+				{commentsLength > 0 && (
+					<CommentsVirtualList items={comments} itemHeight={80} ItemComponent={
+						(comment: ITicketComment, index) => (
+							<TableRow key={comment._id}>
+								<Comment
+									{...comment}
+									onDelete={handleDeleteComment}
+									onReply={handleReplyToComment}
+									isFirstOfBlock={getCommentIsFirstOfBlock(index)}
+								/>
+								{index === commentsLength - 1 && (<Gap $height="5px" />)}
+							</TableRow>
+						)
+					} />
 				)}
 			</Comments>
 			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
