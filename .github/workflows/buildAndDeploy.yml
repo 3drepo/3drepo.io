@@ -10,7 +10,7 @@ on:
       - dev_deploy
       # Prod promote tags carry the release version: <env>_deploy-<version>,
       # e.g. uk_deploy-5.26.4. They deploy an already-built, tested image by
-      # version (no rebuild) and are gated by a GitHub Environment approval.
+      # version (no rebuild). Access is gated by who can create the tag.
       - uk_deploy-*
       - ca_deploy-*
       - uae_deploy-*
