@@ -32,6 +32,8 @@ const {
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 
+const { statuses } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { serialiseTicketTemplate } = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
@@ -52,26 +54,35 @@ const TICKET_HISTORY_COL = 'tickets.logs';
 const generateBasicData = () => {
 	const users = {
 		tsAdmin: generateUserCredentials(),
+		tsAdmin2: generateUserCredentials(),
+		noTemplateAccess: generateUserCredentials(),
 		viewer: generateUserCredentials(),
 		noProjectAccess: generateUserCredentials(),
 		nobody: generateUserCredentials(),
 		projectAdmin: generateUserCredentials(),
 	};
 
+	const job = { _id: generateRandomString(), color: generateRandomString(), users: [] };
+
 	return {
 		users,
+		tsAdmin2: generateUserCredentials(),
+		noTemplateAccess: generateUserCredentials(),
 		teamspace: generateRandomString(),
 		project: generateRandomProject(),
 		con: generateRandomModel({ viewers: [users.viewer.user] }),
 		fed: generateRandomModel({ modelType: modelTypes.FEDERATION, viewers: [users.viewer.user] }),
+		job,
 	};
 };
 
-const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
-	const { tsAdmin, ...otherUsers } = users;
+const setupBasicData = async (users, teamspace, project, models, templatesToAdd, job) => {
+	const { tsAdmin, tsAdmin2, noTemplateAccess, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
-	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+	await ServiceHelper.db.createUser(tsAdmin2);
+	await ServiceHelper.db.createUser(noTemplateAccess);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user, tsAdmin2.user, noTemplateAccess.user]);
 
 	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
@@ -86,6 +97,7 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd)
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
 			[users.projectAdmin.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
+		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [tsAdmin2.user] }]),
 	]);
 };
 
@@ -156,10 +168,10 @@ const testGetAllTemplates = () => {
 
 const testGetTemplateDetails = () => {
 	describe('Get Template Details', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate();
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template], job);
 		});
 
 		const generateTestData = (isFed) => {
@@ -223,11 +235,12 @@ const testGetTemplateDetails = () => {
 
 const testGetTagPropertyValues = () => {
 	describe('Get tag property values', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const [rootTagProp, moduleName, moduleTagProp, emptyTagProp, textProp] = times(
 			5, () => generateRandomString());
 		const tagPropWithSlash = `${generateRandomString()}/${generateRandomString()}`;
-		const template = generateTemplate();
+		const template = generateTemplate(false, false, {
+			permissions: { view: [users.tsAdmin.user, users.viewer.user, job._id] } });
 		template.properties.push(
 			{ name: rootTagProp, type: propTypes.TAGS },
 			{ name: tagPropWithSlash, type: propTypes.TAGS },
@@ -256,7 +269,7 @@ const testGetTagPropertyValues = () => {
 		};
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template], job);
 			await Promise.all([con, fed].flatMap((model) => {
 				const tagValues = modelTagValues[model._id];
 				const ticketA = ServiceHelper.generateTicket(template);
@@ -308,6 +321,8 @@ const testGetTagPropertyValues = () => {
 					getRoute({ property: tagPropWithSlash }), [tagValues.encoded]],
 				['the admin has access and the property is a root tag property', true,
 					getRoute({ key: users.tsAdmin.apiKey }), tagValues.root],
+				['the user has no template permission', false, getRoute({ key: users.noTemplateAccess.apiKey }), templates.notAuthorized],
+				['the job of the user has template permission', true, getRoute({ property: emptyTagProp, key: users.tsAdmin2.apiKey }), []],
 			];
 		};
 
@@ -331,11 +346,13 @@ const testGetTagPropertyValues = () => {
 
 const testAddTicket = () => {
 	describe('Add ticket', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const oneOfJobsAndUsersPropName = generateRandomString();
 		const manyOfJobsAndUsersPropName = generateRandomString();
 		const uniquePropertyName = generateRandomString();
-		const template = generateTemplate();
+		const template = generateTemplate(false, false, {
+			permissions: { create: [users.tsAdmin.user, job._id] },
+		});
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
 
 		const conTicket = ServiceHelper.generateTicket(template);
@@ -412,7 +429,7 @@ const testAddTicket = () => {
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
-				[template, templateWithAllModulesAndPresetEnums, viewTemplate]);
+				[template, templateWithAllModulesAndPresetEnums, viewTemplate], job);
 			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
 			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicket);
 		});
@@ -461,6 +478,8 @@ const testAddTicket = () => {
 				['manyOf jobsAndUsers property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [manyOfJobsAndUsersPropName]: [users.tsAdmin.user, users.projectAdmin.user] } }],
 				['assignees property is populated with a user that has inadequate permissions', false, getRoute(), templates.invalidArguments, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user, users.tsAdmin.user] } }],
 				['assignees property is populated', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user, users.projectAdmin.user] } }],
+				['the user has no template permission', false, getRoute({ key: users.noTemplateAccess.apiKey }), templates.notAuthorized],
+				['the job of the user has template permission', true, getRoute({ key: users.tsAdmin2.apiKey })],
 			];
 		};
 
@@ -490,9 +509,10 @@ const testAddTicket = () => {
 
 const testImportTickets = () => {
 	describe('Import tickets', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const uniquePropertyName = generateRandomString();
-		const template = generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true,
+			permissions: { create: [users.tsAdmin.user, job._id] } });
 		const templateWithoutComments = generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
 		template.modules.push({
@@ -503,7 +523,7 @@ const testImportTickets = () => {
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
-				[template, templateWithoutComments]);
+				[template, templateWithoutComments], job);
 		});
 
 		const generateTestData = (isFed) => {
@@ -540,6 +560,8 @@ const testImportTickets = () => {
 				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
 				['the ticket data contains duplicate unique properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniquePropTicket }],
 				['the ticket data contains duplicate unique module properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniqueModulePropTicket }],
+				['the user has no template permission', false, getRoute({ key: users.noTemplateAccess.apiKey }), templates.notAuthorized],
+				['the job of the user has template permission', true, getRoute({ key: users.tsAdmin2.apiKey })],
 			];
 		};
 
@@ -580,11 +602,12 @@ const testImportTickets = () => {
 
 const testGetTicketResource = () => {
 	describe('Get ticket resource', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = {
 			...generateTemplate(),
 			config: {
 				defaultImage: true,
+				permissions: { view: [users.tsAdmin.user, job._id] },
 			},
 			properties: [{
 				name: generateRandomString(),
@@ -603,7 +626,7 @@ const testGetTicketResource = () => {
 				},
 			};
 
-			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template], job);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
@@ -645,6 +668,8 @@ const testGetTicketResource = () => {
 				['the resource does not exist', { ...baseRouteParams, resourceId: generateRandomString() }, false, templates.fileNotFound],
 				['given the correct resource id (default image)', { ...baseRouteParams, testDefaultImage: true }, true],
 				['the resource id is correct', baseRouteParams, true],
+				['the user has no template permission', { ...baseRouteParams, key: users.noTemplateAccess.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true],
 			];
 		};
 
@@ -680,9 +705,11 @@ const testGetTicket = () => {
 		const deprecatedPropName = generateRandomString();
 		const deprecatedModule = generateRandomString();
 		const moduleName = generateRandomString();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 
 		const templateToUse = {
 			...generateTemplate(),
+			config: { permissions: { view: [users.tsAdmin.user, job._id] } },
 			properties: [
 				{
 					name: generateRandomString(),
@@ -723,10 +750,8 @@ const testGetTicket = () => {
 			],
 		};
 
-		const { users, teamspace, project, con, fed } = generateBasicData();
-
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse]);
+			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse], job);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(templateToUse);
@@ -777,6 +802,8 @@ const testGetTicket = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['ticket id is valid', baseRouteParams, true, undefined, false],
 				['ticket id is valid (show deprecated)', baseRouteParams, true, undefined, true],
+				['the user has no template permission', { ...baseRouteParams, key: users.noTemplateAccess.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true, undefined, false],
 			];
 		};
 
@@ -833,9 +860,12 @@ const testGetTicketList = () => {
 
 		const templatesToUse = times(3, () => {
 			const template = generateTemplate();
+			template.config = { permissions: { view: [users.tsAdmin.user] } };
 			template.properties.push(commonTextProp);
 			return template;
 		});
+
+		templatesToUse[1].config.permissions.view.push(users.tsAdmin2.user);
 
 		const templateWithAllProps = templatesToUse[0];
 		templateWithAllProps.properties.push(textProp, longTextProp, numberProp, boolProp, dateProp,
@@ -1084,6 +1114,7 @@ const testGetTicketList = () => {
 				...booleanPropertyFilters,
 				['the model has tickets and skip is provided', { ...baseRouteParams, options: { skip: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(2)],
 				['the model has tickets and limit', { ...baseRouteParams, options: { limit: 2, sortBy: commonTextProp.name } }, true, model.tickets.sort((t1, t2) => String(t2.properties[commonTextProp.name]).localeCompare(t1.properties[commonTextProp.name])).slice(0, 2)],
+				['the user has permissions only for some templates', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true, model.tickets.filter((t) => t.type === templatesToUse[1]._id)],
 			];
 		};
 
@@ -1138,7 +1169,14 @@ const testUpdateTicket = () => {
 		const requiredImagePropName = generateRandomString();
 		const uniquePropName = generateRandomString();
 		const template = {
-			...generateTemplate(false, false, { issueProperties: true }),
+			...generateTemplate(false, false, {
+				issueProperties: true,
+				permissions: { edit: {
+					status: [users.tsAdmin.user, users.tsAdmin2.user],
+					assign: [users.tsAdmin.user, users.projectAdmin.user],
+					default: [users.tsAdmin.user, users.projectAdmin.user],
+				} },
+			}),
 			properties: [
 				{
 					name: jobsAndUsersPropName,
@@ -1275,6 +1313,12 @@ const testUpdateTicket = () => {
 				['jobsAndUsers property is updated', baseRouteParams, true, undefined, { title: generateRandomString(), properties: { [jobsAndUsersPropName]: users.tsAdmin.user } }],
 				['assignees property is updated with a user that has inadequate permissions', baseRouteParams, false, templates.invalidArguments, { title: generateRandomString(), properties: { [basePropertyLabels.ASSIGNEES]: [users.viewer.user] } }],
 				['assignees property is updated', baseRouteParams, true, undefined, { title: generateRandomString(), properties: { [jobsAndUsersPropName]: users.tsAdmin.user, [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
+				['assignees property is updated by a user that has inadequate template permissions', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized, { properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
+				['assignees property is updated by a user that has assign template permissions', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true, undefined, { properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } }],
+				['status property is updated by a user that has inadequate template permissions', { ...baseRouteParams, key: users.projectAdmin.apiKey }, false, templates.notAuthorized, { properties: { [basePropertyLabels.STATUS]: statuses.VOID } }],
+				['status property is updated by a user that has status template permissions', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true, undefined, { properties: { [basePropertyLabels.STATUS]: statuses.VOID } }],
+				['default property is updated by a user that has inadequate template permissions', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized, { title: generateRandomString() }],
+				['default property is updated by a user that has default template permissions', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true, undefined, { title: generateRandomString() }],
 			];
 		};
 
@@ -1333,7 +1377,15 @@ const testUpdateManyTickets = () => {
 	describe('Update many tickets', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const uniquePropertyName = generateRandomString();
-		const template = generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, {
+			comments: true,
+			issueProperties: true,
+			permissions: { edit: {
+				status: [users.tsAdmin.user, users.tsAdmin2.user],
+				assign: [users.tsAdmin.user, users.projectAdmin.user],
+				default: [users.tsAdmin.user, users.projectAdmin.user, users.tsAdmin2.user],
+			} },
+		});
 		const duplicateTemplate = generateTemplate();
 		duplicateTemplate.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
 		duplicateTemplate.modules.push({
@@ -1441,6 +1493,13 @@ const testUpdateManyTickets = () => {
 				['the ticket data conforms to the template', true, baseRouteParams, undefined, () => ({ title: generateRandomString() })],
 				['the ticket data contains just comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest1 }, undefined, () => ({ comments: times(10, ServiceHelper.generateImportedComment) })],
 				['the ticket data contains comments', true, { ...baseRouteParams, tickets: model.ticketsCommentTest2 }, undefined, () => ({ title: generateRandomString(), comments: times(10, ServiceHelper.generateImportedComment) })],
+
+				['assignees property is updated by a user that has inadequate template permissions', false, { ...baseRouteParams, key: users.tsAdmin2.apiKey }, templates.notAuthorized, () => ({ title: generateRandomString(), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } })],
+				['assignees property is updated by a user that has assign template permissions', true, { ...baseRouteParams, key: users.projectAdmin.apiKey }, undefined, () => ({ title: generateRandomString(), properties: { [basePropertyLabels.ASSIGNEES]: [users.tsAdmin.user] } })],
+				['status property is updated by a user that has inadequate template permissions', false, { ...baseRouteParams, key: users.projectAdmin.apiKey }, templates.notAuthorized, () => ({ title: generateRandomString(), properties: { [basePropertyLabels.STATUS]: statuses.VOID } })],
+				['status property is updated by a user that has status template permissions', true, { ...baseRouteParams, key: users.tsAdmin2.apiKey }, undefined, () => ({ title: generateRandomString(), properties: { [basePropertyLabels.STATUS]: statuses.VOID } })],
+				['default property is updated by a user that has default template permissions', true, { ...baseRouteParams, key: users.projectAdmin.apiKey }, undefined, () => ({ title: generateRandomString() })],
+
 			];
 		};
 
@@ -1479,7 +1538,6 @@ const testUpdateManyTickets = () => {
 						expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
 						expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
 							.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
-
 						const { comments, ...ticketUpdates } = payload.tickets[i];
 						const expectedUpdatedTicket = { ...cloneDeep(ticket), ...ticketUpdates };
 						expectedUpdatedTicket.number = updatedTicket.number;
@@ -1488,6 +1546,7 @@ const testUpdateManyTickets = () => {
 							[basePropertyLabels.UPDATED_AT]: updatedTicket.properties[basePropertyLabels.UPDATED_AT],
 							[basePropertyLabels.CREATED_AT]: updatedTicket.properties[basePropertyLabels.CREATED_AT],
 							[basePropertyLabels.STATUS]: updatedTicket.properties[basePropertyLabels.STATUS],
+							[basePropertyLabels.ASSIGNEES]: updatedTicket.properties[basePropertyLabels.ASSIGNEES],
 							[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
 							...(payloadChanges?.properties ?? {}),
 						};
@@ -1514,8 +1573,10 @@ const testUpdateManyTickets = () => {
 
 const testGetTicketHistory = () => {
 	describe('Get ticket history', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate();
+
+		template.config = { permissions: { view: [users.tsAdmin.user, job._id] } };
 
 		const moduleName = template.modules[1].name;
 		const modulePropName = template.modules[1].properties[0].name;
@@ -1560,7 +1621,7 @@ const testGetTicketHistory = () => {
 		};
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template], job);
 			await Promise.all([
 				ServiceHelper.db.createTicket(teamspace, project.id, con._id, conTicket),
 				ServiceHelper.db.createTicket(teamspace, project.id, fed._id, fedTicket),
@@ -1626,6 +1687,8 @@ const testGetTicketHistory = () => {
 				['the ticket does not exist', false, getHistoryRoute({ ticketId: generateRandomString() }), templates.ticketNotFound],
 				['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the user provides a ticket with updates', true, getHistoryRoute(), expectedLogs],
+				['the user has no template permission', false, getHistoryRoute({ key: users.noTemplateAccess.apiKey }), templates.notAuthorized],
+				['the job of the user has template permission', true, getHistoryRoute({ key: users.tsAdmin2.apiKey }), expectedLogs],
 			];
 		};
 
