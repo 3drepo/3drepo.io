@@ -26,8 +26,8 @@ const { disconnect } = require(`${src}/handler/db`);
 const RemoveTickets = require(`${utilScripts}/teamspaces/removeTickets`);
 
 const { getTemplateList } = require(`${src}/processors/teamspaces/settings.tickets`);
-const { getTicketList } = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { getTicketsByQuery } = require(`${src}/models/tickets`);
 
 const generateData = () => {
 	const model = generateRandomModel();
@@ -51,7 +51,7 @@ const setupData = async (data) => {
 
 const checkData = async (teamspace, project, model, templates, tickets, shouldExist) => {
 	const existingTemplates = await getTemplateList(teamspace);
-	const allTickets = await getTicketList(teamspace, stringToUUID(project), model, teamspace, {});
+	const allTickets = await getTicketsByQuery(teamspace, stringToUUID(project), model);
 
 	if (shouldExist) {
 		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for CSH template

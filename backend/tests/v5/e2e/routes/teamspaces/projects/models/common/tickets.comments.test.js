@@ -461,7 +461,7 @@ const testUpdateComment = () => {
 		};
 
 		describe.each(generateTestData(true))('Federations', runTest);
-		// describe.each(generateTestData())('Containers', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
