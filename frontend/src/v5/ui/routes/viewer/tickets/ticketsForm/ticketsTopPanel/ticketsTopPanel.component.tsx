@@ -16,14 +16,14 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useContext, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import { BaseProperties, IssueProperties } from '../../tickets.constants';
+import { BaseProperties, IssueProperties, TicketsCardViews } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
@@ -49,8 +49,17 @@ export const TicketsTopPanel = ({
 	const { formState, getValues } = useFormContext();
 	const { containerOrFederation } = useContext(TicketContext);
 
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
+	const templateId = ticketFromStore?.type;
+	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
+	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
+	const canEditStatus = TemplatesPermissionsHooksSelectors.selectHasStatusEditPermissionForTemplate(containerOrFederation, templateId);
+	const canAssign = TemplatesPermissionsHooksSelectors.selectHasAssignPermissionForTemplate(containerOrFederation, templateId);
+	const readOnlyDefault = !isNewTicket && !canEditDefault;
+	const readOnlyStatus = !isNewTicket && !canEditStatus;
+	const readOnlyAssign = !isNewTicket && !canAssign;
 
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const ref = useRef<HTMLTextAreaElement>(null);
 
 	const owner = getValues(`properties.${BaseProperties.OWNER}`);
@@ -73,7 +82,7 @@ export const TicketsTopPanel = ({
 				defaultValue={title}
 				formError={formState.errors[BaseProperties.TITLE]}
 				onBlur={onPropertyBlur}
-				disabled={readOnly}
+				disabled={readOnlyDefault}
 				ref={ref}
 			/>
 			{createdAt && (
@@ -92,18 +101,18 @@ export const TicketsTopPanel = ({
 						defaultMessage: 'Description',
 					})}
 					formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
-					disabled={readOnly}
+					disabled={readOnlyDefault}
 				/>
 				{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 			</DescriptionProperty>
 			<FlexContainer>
 				{hasIssueProperties ? (
-					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnlyDefault} />
 				) : (
-					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
+					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnlyStatus} />
 				)}
 			</FlexContainer>
-			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
+			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnlyAssign} />)}
 			<PropertiesList module="properties" properties={propertiesToInclude} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);

@@ -18,7 +18,7 @@
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
-import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { formatMessage } from '@/v5/services/intl';
 import { CommentImages } from '../commentImages/commentImages.component';
@@ -50,8 +50,9 @@ export const CommentNonMessageContent = ({
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly() || !isCurrentUserComment;
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, templateId) || !isCurrentUserComment;
 	const comment = TicketCommentsHooksSelectors.selectCommentById(ticketId, commentId);
 
 	const disabledDeleteMessage = (hasMessage || images.length > 1) ? null : formatMessage({

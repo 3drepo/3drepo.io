@@ -19,7 +19,6 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { connect } from 'react-redux';
-import { selectReadOnly } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	selectActiveGroupDetails,
@@ -42,7 +41,6 @@ const mapStateToProps = createStructuredSelector({
 	selectedNodes: selectSelectedNodes,
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
-	isReadOnly: selectReadOnly,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

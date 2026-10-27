@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router-dom';
 import { sortByName } from '@/v5/store/store.helpers';
@@ -27,7 +27,7 @@ import { formatMessage } from '@/v5/services/intl';
 
 export const NewTicketMenu = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectActiveTemplates(containerOrFederation);
+	const templates = TemplatesPermissionsHooksSelectors.selectCreatableTemplates(containerOrFederation);
 
 	const goToNewTicket = ({ _id }) => {
 		TicketsCardActionsDispatchers.setSelectedTemplate(_id);

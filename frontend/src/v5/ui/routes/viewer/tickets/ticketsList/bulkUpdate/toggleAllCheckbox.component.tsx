@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TemplatesPermissionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { useContext, useEffect } from 'react';
 import { AllTicketsCheckbox, AllTicketsCheckboxContainer } from './bulkUpdate.styles';
@@ -28,12 +28,13 @@ type ToggleAllCheckboxProps = {
 export const ToggleAllCheckbox = ({ $withFilters }: ToggleAllCheckboxProps) => {
 	const { bulkModeOn, selectedItems, addOrRemoveSelection } = useContext(TicketsBulkUpdateContext);
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const editableTicketsIds = TemplatesPermissionsHooksSelectors.selectEditableTicketIds(filteredTickets);
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const checked = filteredTickets.length === selectedItems.size && filteredTickets.length > 0;
-	const indeterminate = !checked && filteredTickets.some((t) => selectedItems.has(t._id));
+	const checked = editableTicketsIds.size === selectedItems.size && editableTicketsIds.size > 0;
+	const indeterminate = !checked && Array.from(editableTicketsIds).some((ticketId) => selectedItems.has(ticketId));
 
 	const toggleAllChecked = () => {
-		addOrRemoveSelection(filteredTickets.map((t) => t._id), checked);
+		addOrRemoveSelection(Array.from(editableTicketsIds), checked);
 	};
 
 	useEffect(() => {
@@ -47,7 +48,7 @@ export const ToggleAllCheckbox = ({ $withFilters }: ToggleAllCheckboxProps) => {
 
 	return (
 		<AllTicketsCheckboxContainer variant="label" $withFilters={$withFilters}>
-			<AllTicketsCheckbox checked={checked} indeterminate={indeterminate} disabled={filteredTickets.length == 0} onClick={toggleAllChecked}/>
+			<AllTicketsCheckbox checked={checked} indeterminate={indeterminate} disabled={editableTicketsIds.size === 0} onClick={toggleAllChecked}/>
 			<FormattedMessage id="viewer.cards.ticket.selectAll" defaultMessage="Select All" />
 		</AllTicketsCheckboxContainer>
 	);
