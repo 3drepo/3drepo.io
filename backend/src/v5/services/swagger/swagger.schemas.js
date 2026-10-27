@@ -188,6 +188,60 @@ const ticketTemplateConfigSchema = {
 				},
 			},
 		},
+		permissions: {
+			type: 'object',
+			description: 'Permissions configuration for the ticket template',
+			properties: {
+				create: {
+					type: 'array',
+					description: 'List of usernames or jobs with create permissions',
+					items: {
+						type: 'string',
+					},
+				},
+				view: {
+					type: 'array',
+					description: 'List of usernames or jobs with view permissions',
+					items: {
+						type: 'string',
+					},
+				},
+				comment: {
+					type: 'array',
+					description: 'List of usernames or jobs with comment permissions',
+					items: {
+						type: 'string',
+					},
+				},
+				edit: {
+					type: 'object',
+					description: 'Edit permission configuration for the ticket template',
+					properties: {
+						default: {
+							type: 'array',
+							description: 'List of usernames or jobs with default edit permissions',
+							items: {
+								type: 'string',
+							},
+						},
+						status: {
+							type: 'array',
+							description: 'List of usernames or jobs with status edit permissions',
+							items: {
+								type: 'string',
+							},
+						},
+						assign: {
+							type: 'array',
+							description: 'List of usernames or jobs with assign edit permissions',
+							items: {
+								type: 'string',
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 };
 
