@@ -76,9 +76,20 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 
 export const DragAndDrop = styled(DragAndDropBase as any).attrs({
 	$dashSize: 2,
-})<{ $hidden?: boolean }>`
+})<{ $hidden?: boolean, isDragActive?: boolean }>`
 	margin: 10px 15px;
 	width: calc(100% - 30px);
+    height: calc(100% - 20px);
+
+	top: 0px;
+    position: absolute;
+    display: block;
+    z-index: 23;
+
+	padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 	${DashedContainer} {
 		padding: 13px;

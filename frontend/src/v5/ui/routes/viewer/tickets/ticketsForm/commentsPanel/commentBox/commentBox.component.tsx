@@ -284,8 +284,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	const upload3DScreenshot = async () => uploadScreenshot(await ViewerService.getScreenshot());
 	const upload2DScreenshot = async () => uploadScreenshot(await DrawingViewerService.getScreenshot());
 
-	const handleDragLeave = ({ relatedTarget }) => {
-		if (containerRef.current.contains(relatedTarget) || !relatedTarget.parentElement) return;
+	const handleDragLeave = () => {
 		setIsDraggingFile(false);
 	};
 
@@ -324,7 +323,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	return (
 		<Container
 			onDragEnter={() => setIsDraggingFile(true)}
-			onDragLeave={handleDragLeave}
 			onDrop={() => setIsDraggingFile(false)}
 			ref={containerRef}
 			className={className}
@@ -348,7 +346,9 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					message={unsavedComment?.message || message}
 					onMessageChange={(value) => setValue('message', value, { shouldDirty: true })}
 				/>
-				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
+				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile} 
+					onDragLeave={handleDragLeave}
+				>
 					<FormattedMessage
 						id="customTicket.comments.dropFiles"
 						defaultMessage="Drop your files here"
