@@ -45,6 +45,20 @@ const defaultTemplates = [
 			{ type: presetModules.CLASH },
 		],
 	},
+	{
+		_id: stringToUUID('39fa1042-67a2-4097-ba55-82cfced25909'),
+		name: 'SafetiBase (Default template)',
+		code: 'SFB',
+		config: {
+			comments: true,
+			issueProperties: true,
+			defaultView: true,
+			pin: true,
+		},
+		modules: [
+			{ type: presetModules.SAFETIBASE },
+		],
+	},
 ];
 
 TemplateConsts.defaultTemplates = defaultTemplates.map(({ _id, ...template }) => ({ ...validate(template), _id }));
