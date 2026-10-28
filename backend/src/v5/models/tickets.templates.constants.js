@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modulePropertyLabels, presetModules, statusTypes } = require('../schemas/tickets/templates.constants');
+const { modulePropertyLabels, presetModules, riskLevels, statusTypes } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
 const { validate } = require('../schemas/tickets/templates');
 
@@ -62,16 +62,29 @@ const defaultTemplates = [
 					},
 					mapping: [
 						{
-							default: [r, g, b],
+							default: [52, 82, 255],
 						},
 						{
-							value: 'low',
-							color: [r, g, b],
+							value: riskLevels.VERY_LOW,
+							color: [0, 130, 65],
 						},
 						{
-							value: 'medium',
-							color: [r, g, b],
+							value: riskLevels.LOW,
+							color: [78, 178, 39],
 						},
+						{
+							value: riskLevels.MODERATE,
+							color: [240, 217, 46],
+						},
+						{
+							value: riskLevels.HIGH,
+							color: [255, 136, 0],
+						},
+						{
+							value: riskLevels.VERY_HIGH,
+							color: [240, 0, 0],
+						},
+
 					],
 				},
 			},
