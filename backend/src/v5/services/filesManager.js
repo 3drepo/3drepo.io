@@ -28,6 +28,7 @@ const {
 const CryptoJs = require('crypto-js');
 const { FileStorageTypes } = require('../utils/config.constants');
 const MimeTypes = require('../utils/helper/mimeTypes');
+const { UUIDToString } = require('../utils/helper/uuids');
 const config = require('../utils/config');
 const { fileMimeFromBuffer } = require('../utils/helper/typeCheck');
 const { getHandler } = require('../handler/fs');
@@ -206,7 +207,13 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 
 	const mimeType = DEFAULT_MIME_TYPE;
 
-	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
+	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: UUIDToString(id), mimeType });
+};
+
+// change name later
+FilesManager.addExternalFileReference = async (teamspace, collection, id, externalInfo) => {
+	const mimeType = DEFAULT_MIME_TYPE;
+	await insertRef(teamspace, collection, { ...externalInfo, _id: id, mimeType });
 };
 
 FilesManager.getMD5FileHash = async (teamspace, collection, filename) => {

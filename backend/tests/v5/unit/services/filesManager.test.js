@@ -551,6 +551,39 @@ const testStoreFileStream = () => {
 	});
 };
 
+const testAddExternalFileReference = () => {
+	describe('Add external file reference', () => {
+		test('should insert the external reference with the given ID and default mime type', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
+			const externalInfo = { _id: generateRandomString(), link: generateRandomString(), size: 123 };
+
+			await expect(FilesManager.addExternalFileReference(teamspace, collection, id, externalInfo))
+				.resolves.toBeUndefined();
+
+			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection, {
+				...externalInfo,
+				_id: id,
+				mimeType: DEFAULT_MIME_TYPE,
+			});
+		});
+
+		test('should propagate an error if inserting the external reference fails', async () => {
+			const error = new Error(generateRandomString());
+			FileRefs.insertRef.mockRejectedValueOnce(error);
+
+			await expect(FilesManager.addExternalFileReference(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+				{ link: generateRandomString() },
+			)).rejects.toBe(error);
+		});
+	});
+};
+
 const testFileExists = () => {
 	describe('Check whether a file exists or not', () => {
 		test('should return fs if config.defaultStorage is set to fs', async () => {
@@ -688,6 +721,7 @@ describe(determineTestGroup(__filename), () => {
 	testStoreFile();
 	testStoreFiles();
 	testStoreFileStream();
+	testAddExternalFileReference();
 	testFileExists();
 	testGetMD5FileHash();
 });

@@ -47,11 +47,12 @@ jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 jest.mock('../../../../../../../src/v5/models/fileRefs');
 
-jest.mock('../../../../../../../src/v5/handler/queue');
-const QueueHandler = require(`${src}/handler/queue`);
+jest.mock('../../../../../../../src/v5/services/modelProcessing');
+const ModelProcessing = require(`${src}/services/modelProcessing`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { logger } = require(`${src}/utils/logger`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
@@ -417,40 +418,90 @@ const testNewRevision = () => {
 	const fileCreated = path.join(modelFolder, 'toRemove.obj');
 	describe('New container revisions', () => {
 		const teamspace = 'teamspace';
+		const revisionProject = generateUUIDString();
 		const model = '123';
 		const data = {};
-		const file = { path: fileCreated, originalname: 'hello.obj' };
-		test('should execute successfully if queueModelUpload returns', async () => {
+		const file = { path: fileCreated, originalname: 'hello.obj', size: 1024 };
+
+		afterAll(() => fs.rm(fileCreated, { force: true }));
+
+		test('should process an uploaded file as an external model and remove it', async () => {
 			await fs.copyFile(objModel, fileCreated);
 			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
-			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+
+			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
+				.resolves.toBe(undefined);
+
+			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledTimes(1);
+			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+				teamspace, revisionProject, model, { units: 'm' }, file,
+			);
+			expect(ModelProcessing.processInternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
-			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
-		test('should not remove the file if readOnly is set to true', async () => {
+		test('should process a read-only file as an internal model without removing it', async () => {
 			await fs.copyFile(objModel, fileCreated);
 			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
-			await expect(Containers.newRevision(teamspace, model, data,
-				{ ...file, readOnly: true })).resolves.toBe(undefined);
+			const readOnlyFile = { ...file, readOnly: true };
+
+			await expect(Containers.newRevision(teamspace, revisionProject, model, data, readOnlyFile))
+				.resolves.toBe(undefined);
+
+			expect(ModelProcessing.processInternalModelUpload).toHaveBeenCalledTimes(1);
+			expect(ModelProcessing.processInternalModelUpload).toHaveBeenCalledWith(
+				teamspace, revisionProject, model, { units: 'm' }, readOnlyFile,
+			);
+			expect(ModelProcessing.processExternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(true);
-			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
-		test('v4 compatibility test', async () => {
+		test('should process an uploaded file when the container has no unit configured', async () => {
 			await fs.copyFile(objModel, fileCreated);
 			ModelSettings.getContainerById.mockResolvedValueOnce({});
-			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+
+			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
+				.resolves.toBe(undefined);
+
+			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+				teamspace, revisionProject, model, { units: undefined }, file,
+			);
+			expect(ModelProcessing.processInternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
-			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
-		test('should return whatever error queueModelUpload returns should it fail', async () => {
+		test('should remove the uploaded file if processing it fails', async () => {
+			await fs.copyFile(objModel, fileCreated);
 			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
-			await expect(Containers.newRevision(teamspace, model, data, file))
+			ModelProcessing.processExternalModelUpload.mockRejectedValueOnce(templates.queueInsertionFailed);
+
+			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
 				.rejects.toEqual(templates.queueInsertionFailed);
+
+			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+				teamspace, revisionProject, model, { units: 'm' }, file,
+			);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
-			expect(QueueHandler.queueMessage).not.toHaveBeenCalled();
+		});
+
+		test('should log an error if deleting the uploaded file fails', async () => {
+			const error = new Error('delete failed');
+			const removeSpy = jest.spyOn(fs, 'rm').mockRejectedValueOnce(error);
+			const logErrorSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
+			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
+
+			try {
+				await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
+					.resolves.toBe(undefined);
+
+				expect(logErrorSpy).toHaveBeenCalledWith('Failed to delete uploaded file: delete failed');
+				expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+					teamspace, revisionProject, model, { units: 'm' }, file,
+				);
+			} finally {
+				removeSpy.mockRestore();
+				logErrorSpy.mockRestore();
+			}
 		});
 	});
 };
