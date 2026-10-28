@@ -63,7 +63,7 @@ module.exports = {
             loader: 'esbuild-loader',
             exclude: /node_modules/,
             options: {
-              loader: 'ts',
+              loader: 'tsx',
               target: 'es2015',
               tsconfigRaw: require('../tsconfig.json'),
             },

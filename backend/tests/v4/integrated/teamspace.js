@@ -24,92 +24,80 @@ const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
-describe("Teamspace", function() {
+describe("Teamspace", function () {
 	let server;
 	let agent;
-	const timeout = 30000;
 	const noSubUser = {
 		user: "sub_noSub",
 		password: "password",
-		quota: {spaceLimit: 1, collaboratorLimit: 0, spaceUsed: 0}
-	};
-
-	const paypalUser = {
-		user: "sub_paypal",
-		password: "password",
-		quota: {spaceLimit: 20481, collaboratorLimit: 2, spaceUsed: 0}
+		quota: { spaceLimit: 1, collaboratorLimit: 0, spaceUsed: 0 }
 	};
 
 	const enterpriseUser = {
 		user: "sub_enterprise",
 		password: "password",
-		quota: {spaceLimit: 2049, collaboratorLimit: 5, spaceUsed: 0}
+		quota: { spaceLimit: 2049, collaboratorLimit: 5, spaceUsed: 0 }
 	};
 
 	const discretionaryUser = {
 		user: "sub_discretionary",
 		password: "password",
-		quota: {spaceLimit: 1025, collaboratorLimit: 10, spaceUsed: 0}
+		quota: { spaceLimit: 1025, collaboratorLimit: 10, spaceUsed: 0 }
 	};
 
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
 		key: "eef3a905644d9cdcea53cf60ebc344d7",
-		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0},
-		subscriptions : {
+		quota: { spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0 },
+		subscriptions: {
 			"basic": {
-			  "collaborators": 0,
-			  "data": 1
+				"collaborators": 0,
+				"data": 1
 			},
 			"paypal": [
-			  {
-				"expiryDate": "2118-07-29T10:29:39.000Z",
-				"quantity": 2,
-				"plan": "hundredQuidPlan"
-			  }
+				{
+					"expiryDate": "2118-07-29T10:29:39.000Z",
+					"quantity": 2,
+					"plan": "hundredQuidPlan"
+				}
 			],
 			"enterprise": {
-			  "collaborators": 2,
-			  "data": 1024,
-			  "expiryDate": "2118-07-29T10:29:39.000Z"
+				"collaborators": 2,
+				"data": 1024,
+				"expiryDate": "2118-07-29T10:29:39.000Z"
 			},
 			"discretionary": {
-			  "collaborators": "unlimited",
-			  "data": 2048,
-			  "expiryDate": "2118-08-29T10:29:39.000Z"
+				"collaborators": "unlimited",
+				"data": 2048,
+				"expiryDate": "2118-08-29T10:29:39.000Z"
 			}
-		  }
+		}
 	};
 
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
-		quota: {spaceLimit: 2049, collaboratorLimit: "unlimited", spaceUsed: 0},
+		quota: { spaceLimit: 2049, collaboratorLimit: "unlimited", spaceUsed: 0 },
 		key: "bfc07b68267ab54bfdeb891fe77187be"
 	};
 
 	const mixedUser3 = {
 		user: "sub_all3",
 		password: "password",
-		quota: {spaceLimit: 1025, collaboratorLimit: 2, spaceUsed: 0}
+		quota: { spaceLimit: 1025, collaboratorLimit: 2, spaceUsed: 0 }
 	};
 
 	const mixedUser4 = {
 		user: "sub_all4",
 		password: "password",
-		quota: {spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0}
+		quota: { spaceLimit: 3073, collaboratorLimit: "unlimited", spaceUsed: 0 }
 	};
 
 	const imsharedTeamspace = {
 		user: "imsharedTeamspace",
 		password: "imsharedTeamspace",
 		key: "c6e96d6ed8e95745fd9a222a82113a16"
-	};
-
-	const metaTestTeamspace = {
-		user: "metaTest",
-		password: "123456"
 	};
 
 	const impliedViewAllModelsTeamspace = {
@@ -122,9 +110,8 @@ describe("Teamspace", function() {
 	const collaboratorTeamspace = "teamSpace1";
 
 	const mitigationsFile = "/../statics/mitigations/mitigations1.csv";
-	const bigMitigationsFile = "/../statics/mitigations/big.csv";
 
-	beforeAll(async function() {
+	beforeAll(async function () {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, function () {
@@ -135,26 +122,26 @@ describe("Teamspace", function() {
 		});
 	});
 
-	afterAll(function(done) {
+	afterAll(function (done) {
 
-		server.close(function() {
+		server.close(function () {
 			console.log("API test server is closed");
 			done();
 		});
 
 	});
 
-	describe("user with no subscription", function(done) {
+	describe("user with no subscription", function (done) {
 		const user = noSubUser;
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have basic quota", function(done) {
+		it("should have basic quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
@@ -162,56 +149,56 @@ describe("Teamspace", function() {
 
 	});
 
-	describe("user with enterprise subscription", function(done) {
+	describe("user with enterprise subscription", function (done) {
 		const user = enterpriseUser;
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have basic & enterprise quota", function(done) {
+		it("should have basic & enterprise quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
 		});
 	});
 
-	describe("user with discretionary subscription", function(done) {
+	describe("user with discretionary subscription", function (done) {
 		const user = discretionaryUser;
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have basic & discretionary quota", function(done) {
+		it("should have basic & discretionary quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
 		});
 	});
 
-	describe("user with mixed subscription",  function() {
-		const user =  mixedUser1;
-		beforeAll(async function() {
+	describe("user with mixed subscription", function () {
+		const user = mixedUser1;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have the correct aggregated quota", async function() {
-			const {body} = await agent.get(`/${user.user}/quota`)
+		it("should have the correct aggregated quota", async function () {
+			const { body } = await agent.get(`/${user.user}/quota`)
 				.expect(200);
 
 			expect(body).toEqual(user.quota);
 		});
 
-		it("should be able to fetch suscriptions", async function() {
+		it("should be able to fetch subscriptions", async function () {
 			const { body } = await agent.get(`/${user.user}/subscriptions`)
 				.expect(200);
 
@@ -220,16 +207,16 @@ describe("Teamspace", function() {
 
 	});
 
-	describe("user with mixed subscription with expired subscriptions (1)", function(done) {
-		const user =  mixedUser2;
-		beforeAll(async function() {
+	describe("user with mixed subscription with expired subscriptions (1)", function (done) {
+		const user = mixedUser2;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
-		it("should have the correct aggregated quota", function(done) {
+		it("should have the correct aggregated quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
@@ -237,17 +224,17 @@ describe("Teamspace", function() {
 
 	});
 
-	describe("user with mixed subscription with expired subscriptions (2)", function(done) {
-		const user =  mixedUser3;
-		beforeAll(async function() {
+	describe("user with mixed subscription with expired subscriptions (2)", function (done) {
+		const user = mixedUser3;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have the correct aggregated quota", function(done) {
+		it("should have the correct aggregated quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
@@ -255,24 +242,24 @@ describe("Teamspace", function() {
 	});
 
 
-	describe("user with mixed subscription with expired subscriptions (3)", function(done) {
-		const user =  mixedUser4;
-		beforeAll(async function() {
+	describe("user with mixed subscription with expired subscriptions (3)", function (done) {
+		const user = mixedUser4;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should have the correct aggregated quota", function(done) {
+		it("should have the correct aggregated quota", function (done) {
 			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(user.quota);
 					done(err);
 				});
 		});
 	});
 
-	describe("Trying to get addOns information of a teamspace", function(done) {
+	describe("Trying to get addOns information of a teamspace", function (done) {
 		const expectedAddOns = {
 			vrEnabled: true,
 			srcEnabled: true,
@@ -283,39 +270,39 @@ describe("Teamspace", function() {
 				"risks"
 			]
 		}
-		it("as the teamspace owner should succeed", function(done) {
+		it("as the teamspace owner should succeed", function (done) {
 			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser1.key}`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(expectedAddOns);
 					done(err);
 				});
 		});
 
-		it("as a member of the teamspace should succeed", function(done) {
+		it("as a member of the teamspace should succeed", function (done) {
 			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser2.key}`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(expectedAddOns);
 					done(err);
 				});
 		});
-		it("as a non-member of the teamspace should fail", function(done) {
+		it("as a non-member of the teamspace should fail", function (done) {
 			agent.get(`/${mixedUser1.user}/addOns?key=${imsharedTeamspace.key}`)
-				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+				.expect(responseCodesV5.teamspaceNotFound.status, function (err, res) {
 					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 	});
 
-	describe("Member of a teamspace trying to get other members information", function(done) {
-		const user =  mixedUser4;
-		beforeAll(async function() {
+	describe("Member of a teamspace trying to get other members information", function (done) {
+		const user = mixedUser4;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should pass if the member exists", function(done) {
+		it("should pass if the member exists", function (done) {
 			const expectedInfo = {
 				user: mixedUser3.user,
 				firstName: "dflkgjfdgdf",
@@ -323,62 +310,62 @@ describe("Teamspace", function() {
 				company: "flskjdflksdj"
 			};
 			agent.get(`/${mixedUser1.user}/members/${mixedUser3.user}`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(expectedInfo);
 					done(err);
 				});
 		});
 
-		it("should pass if the member exists (with job)", function(done) {
+		it("should pass if the member exists (with job)", function (done) {
 			const expectedInfo = {
 				user: mixedUser1.user,
 				firstName: "dflkgjfdgdf",
 				lastName: "lkgjri",
 				company: "flskjdflksdj",
-				job: {_id: "jobB", color: "#9C9CD5"}
+				job: { _id: "jobB", color: "#9C9CD5" }
 			};
 			agent.get(`/${mixedUser1.user}/members/${mixedUser1.user}`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body).toEqual(expectedInfo);
 					done(err);
 				});
 		});
 
-		it("should fail if the member doesn't exist", function(done) {
+		it("should fail if the member doesn't exist", function (done) {
 			agent.get(`/${mixedUser1.user}/members/blah13214315246`)
-				.expect(404, function(err, res) {
+				.expect(404, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.USER_NOT_FOUND.value);
 					done(err);
 				});
 		});
 
-		it("should fail if the target user is not a member of the teamspace", function(done) {
+		it("should fail if the target user is not a member of the teamspace", function (done) {
 			agent.get(`/${mixedUser4.user}/members/${mixedUser1.user}`)
-				.expect(404, function(err, res) {
+				.expect(404, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.USER_NOT_FOUND.value);
 					done(err);
 				});
 		});
 
-		it("should fail if the target user is not a member of the teamspace", function(done) {
+		it("should fail if the target user is not a member of the teamspace", function (done) {
 			agent.get(`/${mixedUser4.user}/members/${mixedUser1.user}`)
-				.expect(404, function(err, res) {
+				.expect(404, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.USER_NOT_FOUND.value);
 					done(err);
 				});
 		});
 
-		it("should fail if the request user is not a member of the teamspace", function(done) {
+		it("should fail if the request user is not a member of the teamspace", function (done) {
 			agent.get(`/${mixedUser3.user}/members/${mixedUser1.user}`)
-				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+				.expect(responseCodesV5.teamspaceNotFound.status, function (err, res) {
 					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 
-		it("should fail if the teamspace does not exist", function(done) {
+		it("should fail if the teamspace does not exist", function (done) {
 			agent.get(`/blah30489723985723/members/${mixedUser1.user}`)
-				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+				.expect(responseCodesV5.teamspaceNotFound.status, function (err, res) {
 					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
@@ -400,13 +387,13 @@ describe("Teamspace", function() {
 		"Other Issue",
 		"Unknown"
 	];
-	const defaultTopicTypes =  [
+	const defaultTopicTypes = [
 		"For information",
 		"VR"
 	];
 
-	describe("Update teamspace settings", function(done) {
-		const user =  imsharedTeamspace;
+	describe("Update teamspace settings", function (done) {
+		const user = imsharedTeamspace;
 		const newRiskCategories = [
 			"New Cat 1",
 			"New Cat 2"
@@ -415,17 +402,17 @@ describe("Teamspace", function() {
 			"New Type 1",
 			"New Type 2"
 		];
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
 
-		it("set defaults should succeed", function(done) {
+		it("set defaults should succeed", function (done) {
 			agent.patch(`/${user.user}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(user.user);
 					expect(res.body.riskCategories).toEqual(defaultRiskCategories);
 					expect(res.body.topicTypes).toEqual(defaultTopicTypes);
@@ -433,37 +420,37 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("set defaults if user is not teamspace admin should fail", function(done) {
+		it("set defaults if user is not teamspace admin should fail", function (done) {
 			agent.patch(`/${collaboratorTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(401, function(err, res) {
+				.expect(401, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.NOT_AUTHORIZED.value);
 					done(err);
 				});
 		});
 
-		it("set defaults if user is not member of teamspace should fail", function(done) {
+		it("set defaults if user is not member of teamspace should fail", function (done) {
 			agent.patch(`/${notMemberOfTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(404, function(err, res) {
+				.expect(404, function (err, res) {
 					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 
-		it("set defaults if teamspace doesn't exist should fail", function(done) {
+		it("set defaults if teamspace doesn't exist should fail", function (done) {
 			agent.patch(`/${fakeTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(404, function(err, res) {
+				.expect(404, function (err, res) {
 					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 
-		it("with new topic types should succeed", function(done) {
+		it("with new topic types should succeed", function (done) {
 			agent.patch(`/${user.user}/settings`)
 				.send({ topicTypes: newTopicTypes })
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(user.user);
 					expect(res.body.riskCategories).toEqual(defaultRiskCategories);
 					expect(res.body.topicTypes).toEqual(newTopicTypes);
@@ -471,10 +458,10 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("with new risk categories should succeed", function(done) {
+		it("with new risk categories should succeed", function (done) {
 			agent.patch(`/${user.user}/settings`)
 				.send({ riskCategories: newRiskCategories })
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(user.user);
 					expect(res.body.riskCategories).toEqual(newRiskCategories);
 					expect(res.body.topicTypes).toEqual(newTopicTypes);
@@ -482,14 +469,14 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("with unexpected field should succeed", function(done) {
+		it("with unexpected field should succeed", function (done) {
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					topicTypes: defaultTopicTypes,
 					riskCategories: defaultRiskCategories,
 					unexpectedField: "abc"
 				})
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(user.user);
 					expect(res.body.riskCategories).toEqual(defaultRiskCategories);
 					expect(res.body.topicTypes).toEqual(defaultTopicTypes);
@@ -498,97 +485,97 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("with duplicate risk categories should fail", function(done) {
+		it("with duplicate risk categories should fail", function (done) {
 			const duplicateRiskCategories = defaultRiskCategories.concat(defaultRiskCategories);
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					riskCategories: duplicateRiskCategories
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.DUPLICATED_ENTRIES.value);
 					done(err);
 				});
 		});
 
-		it("with duplicate topic type should fail", function(done) {
+		it("with duplicate topic type should fail", function (done) {
 			const duplicateTopicTypes = defaultTopicTypes.concat(defaultTopicTypes);
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					topicTypes: duplicateTopicTypes
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.DUPLICATED_ENTRIES.value);
 					done(err);
 				});
 		});
 
-		it("with duplicate (case insensitive) categories should fail", function(done) {
+		it("with duplicate (case insensitive) categories should fail", function (done) {
 			const duplicateRiskCategoryLabels = ["dup 1", "DUP 1"];
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					riskCategories: duplicateRiskCategoryLabels
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.DUPLICATED_ENTRIES.value);
 					done(err);
 				});
 		});
 
-		it("with duplicate (case insensitive) topic type should fail", function(done) {
+		it("with duplicate (case insensitive) topic type should fail", function (done) {
 			const duplicateTopicTypeLabels = ["clone 2", "CLONE 2"];
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					topicTypes: duplicateTopicTypeLabels
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.DUPLICATED_ENTRIES.value);
 					done(err);
 				});
 		});
 
-		it("with non-string array categories should fail", function(done) {
+		it("with non-string array categories should fail", function (done) {
 			const nonStringRiskCategories = [1, 2, 3, 4, 5];
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					riskCategories: nonStringRiskCategories
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
-		it("with non-string array topic type should fail", function(done) {
-			const nonStringTopicTypes = [{"value":"value 1"}, {"value":"value 2"}];
+		it("with non-string array topic type should fail", function (done) {
+			const nonStringTopicTypes = [{ "value": "value 1" }, { "value": "value 2" }];
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					topicTypes: nonStringTopicTypes
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
-		it("with non-array categories should fail", function(done) {
-			const nonArrayRiskCategories = {"key":"value"};
+		it("with non-array categories should fail", function (done) {
+			const nonArrayRiskCategories = { "key": "value" };
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					riskCategories: nonArrayRiskCategories
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
-		it("with non-array topic type should fail", function(done) {
+		it("with non-array topic type should fail", function (done) {
 			const nonArrayTopicTypes = "invalid entry";
 			agent.patch(`/${user.user}/settings`)
 				.send({
 					topicTypes: nonArrayTopicTypes
 				})
-				.expect(400, function(err, res) {
+				.expect(400, function (err, res) {
 					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
@@ -596,17 +583,17 @@ describe("Teamspace", function() {
 
 	});
 
-	describe("Get teamspace settings", function(done) {
-		const user =  imsharedTeamspace;
-		beforeAll(async function() {
+	describe("Get teamspace settings", function (done) {
+		const user = imsharedTeamspace;
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should succeed", function(done) {
+		it("should succeed", function (done) {
 			agent.get(`/${user.user}/settings`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(user.user);
 					expect(res.body.riskCategories).toEqual(defaultRiskCategories);
 					expect(res.body.topicTypes).toEqual(defaultTopicTypes);
@@ -614,7 +601,7 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("if user is not teamspace admin should succeed", function(done) {
+		it("if user is not teamspace admin should succeed", function (done) {
 			const collaboratorTeamspaceTopicTypes = [
 				"GIS",
 				"Risk",
@@ -628,7 +615,7 @@ describe("Teamspace", function() {
 				"RFI"
 			];
 			agent.get(`/${collaboratorTeamspace}/settings`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(res.body._id).toBe(collaboratorTeamspace);
 					expect(res.body.riskCategories).toEqual(defaultRiskCategories);
 					expect(res.body.topicTypes).toEqual(collaboratorTeamspaceTopicTypes);
@@ -636,17 +623,17 @@ describe("Teamspace", function() {
 				});
 		});
 
-		it("if user is not member of teamspace should fail", function(done) {
+		it("if user is not member of teamspace should fail", function (done) {
 			agent.get(`/${notMemberOfTeamspace}/settings`)
-				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+				.expect(responseCodesV5.teamspaceNotFound.status, function (err, res) {
 					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 
-		it("if teamspace doesn't exist should fail", function(done) {
+		it("if teamspace doesn't exist should fail", function (done) {
 			agent.get(`/${fakeTeamspace}/settings`)
-				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+				.expect(responseCodesV5.teamspaceNotFound.status, function (err, res) {
 					expect(res.body.code).toBe(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
@@ -654,177 +641,39 @@ describe("Teamspace", function() {
 
 	});
 
-	describe("Download mitigations file", function(done) {
-		const user =  impliedViewAllModelsTeamspace;
+	describe("Download mitigations file", function (done) {
+		const user = impliedViewAllModelsTeamspace;
 
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("with user that doesn't have mitigations should fail", function(done) {
+		it("should return an endpoint decommissioned error", function (done) {
 			agent.get(`/${user.user}/settings/mitigations.csv`)
-				.expect(404, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.NO_MITIGATIONS_FOUND.value);
+				.expect(responseCodesV5.endpointDecommissioned.status, function (err, res) {
+					expect(res.body.message).toBe(responseCodesV5.endpointDecommissioned.message);
 					done(err);
 				});
 		});
 
 	});
 
-	describe("Download mitigations file", function(done) {
-		const user =  metaTestTeamspace;
+	describe("Upload mitigations file", function (done) {
+		const user = imsharedTeamspace;
 
-		beforeAll(async function() {
+		beforeAll(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(user.user, user.password);
 
 		});
 
-		it("should succeed", function(done) {
-			agent.get(`/${user.user}/settings/mitigations.csv`)
-				.expect(200, done);
-		});
-
-		it("if user is not teamspace admin should fail", function(done) {
-			agent.get(`/${collaboratorTeamspace}/settings/mitigations.csv`)
-				.expect(401, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.NOT_AUTHORIZED.value);
-					done(err);
-				});
-		});
-
-		it("if user is not member of teamspace should fail", function(done) {
-			agent.get(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
-				.expect(404, function(err, res) {
-					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
-					done(err);
-				});
-		});
-
-		it("if user doesn't exist should fail", function(done) {
-			agent.get(`/${fakeTeamspace}/settings/mitigations.csv`)
-				.expect(404, function(err, res) {
-					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
-					done(err);
-				});
-		});
-	});
-
-	describe("Upload mitigations file", function(done) {
-		const user =  imsharedTeamspace;
-		const notMitigationsFile = "/../statics/mitigations/notMitigations.zip";
-
-		beforeAll(async function() {
-			agent = SessionTracker(request(server));
-			await agent.login(user.user, user.password);
-
-		});
-
-		it("should succeed", function(done) {
+		it("should return an endpoint decommissioned error", function (done) {
 			agent.post(`/${user.user}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
-				.expect(200, done);
-		});
-
-		it("reupload mitigations should succeed", function(done) {
-			agent.post(`/${user.user}/settings/mitigations.csv`)
-				.attach("file", __dirname + mitigationsFile)
-				.expect(200, done);
-		});
-
-		it("number of mitigations should remain the same on reupload", function(done) {
-			let totalSuggestions;
-
-			async.series([
-				function(done) {
-					agent.post(`/${user.user}/mitigations`)
-						.send({})
-						.expect(200, function(err, res) {
-							totalSuggestions = res.body.length;
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.post(`/${user.user}/settings/mitigations.csv`)
-						.attach("file", __dirname + mitigationsFile)
-						.expect(200, function(err, res) {
-							return done(err);
-						});
-				},
-				function(done) {
-					agent.post(`/${user.user}/mitigations`)
-						.send({})
-						.expect(200, function(err, res) {
-							expect(res.body.length).toBe(totalSuggestions);
-							return done(err);
-						});
-				}
-			], done);
-		});
-
-		it("if user is not teamspace admin should fail", function(done) {
-			agent.post(`/${collaboratorTeamspace}/settings/mitigations.csv`)
-				.attach("file", __dirname + mitigationsFile)
-				.expect(401, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.NOT_AUTHORIZED.value);
-					done(err);
-				});
-		});
-
-		it("if user is not member of teamspace should fail", function(done) {
-			agent.post(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
-				.attach("file", __dirname + mitigationsFile)
-				.expect(404, function(err, res) {
-					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
-					done(err);
-				});
-		});
-
-		it("if teamspace doesn't exist should fail", function(done) {
-			agent.post(`/${fakeTeamspace}/settings/mitigations.csv`)
-				.attach("file", __dirname + mitigationsFile)
-				.expect(404, function(err, res) {
-					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
-					done(err);
-				});
-		});
-
-		it("non-CSV file should fail", function(done) {
-			agent.post(`/${user.user}/settings/mitigations.csv`)
-				.attach("file", __dirname + notMitigationsFile)
-				.expect(400, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
-					done(err);
-				});
-		});
-
-		it("file exceeding file size limit should fail", function(done) {
-			agent.post(`/${user.user}/settings/mitigations.csv`)
-				.attach("file", __dirname + bigMitigationsFile)
-				.expect(400, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.SIZE_LIMIT.value);
-					done(err);
-				});
-		});
-
-	});
-
-	describe("Upload mitigations file", function(done) {
-		const user = noSubUser;
-
-		beforeAll(async function() {
-			agent = SessionTracker(request(server));
-			await agent.login(user.user, user.password);
-
-		});
-
-		it("that exceeds teamspace quota should fail", function(done) {
-			agent.post(`/${user.user}/settings/mitigations.csv`)
-                                .attach("file", __dirname + bigMitigationsFile)
-				.expect(400, function(err, res) {
-					expect(res.body.value).toBe(responseCodes.SIZE_LIMIT_PAY.value);
+				.expect(responseCodesV5.endpointDecommissioned.status, function (err, res) {
+					expect(res.body.message).toBe(responseCodesV5.endpointDecommissioned.message);
 					done(err);
 				});
 		});

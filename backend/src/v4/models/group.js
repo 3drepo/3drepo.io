@@ -50,22 +50,21 @@ const fieldTypes = {
 	"color": "[object Array]",
 	"transformation": "[object Array]",
 	"issue_id": "[object Object]",
-	"risk_id": "[object Object]",
 	"sequence_id": "[object Object]",
 	"view_id": "[object Object]"
 };
 
 const embeddedObjectFields = {
-	"objects" : ["account", "model", "shared_ids", ...Object.values(idTypes)],
-	"rules" : ["name", "field", "operator", "values"]
+	"objects": ["account", "model", "shared_ids", ...Object.values(idTypes)],
+	"rules": ["name", "field", "operator", "values"]
 };
 
 function cleanEmbeddedObject(field, data) {
-	if(embeddedObjectFields[field]) {
-		const filtered =  data.map((entry) => {
-			const cleaned  = {};
+	if (embeddedObjectFields[field]) {
+		const filtered = data.map((entry) => {
+			const cleaned = {};
 			embeddedObjectFields[field].forEach((allowedField) => {
-				if(utils.hasField(entry, allowedField)) {
+				if (utils.hasField(entry, allowedField)) {
 					cleaned[allowedField] = entry[allowedField];
 				}
 			});
@@ -87,7 +86,6 @@ function cleanArray(obj, prop) {
 function clean(groupData) {
 	groupData._id = utils.uuidToString(groupData._id);
 	groupData.issue_id = groupData.issue_id && utils.uuidToString(groupData.issue_id);
-	groupData.risk_id = groupData.risk_id && utils.uuidToString(groupData.risk_id);
 	groupData.sequence_id = groupData.sequence_id && utils.uuidToString(groupData.sequence_id);
 	groupData.view_id = groupData.view_id && utils.uuidToString(groupData.view_id);
 
@@ -102,7 +100,7 @@ function clean(groupData) {
 	cleanArray(groupData, "rules");
 	cleanArray(groupData, "transformation");
 
-	if(groupData.objects) {
+	if (groupData.objects) {
 		groupData.objects = groupData.objects.filter((entry) => {
 
 			Object.values([...Object.values(idTypes), "shared_ids"]).forEach((idType) => {
@@ -116,7 +114,7 @@ function clean(groupData) {
 				return true;
 			}
 
-			return  getCommonElements(Object.keys(entry), Object.values(idTypes)).length;
+			return getCommonElements(Object.keys(entry), Object.values(idTypes)).length;
 		});
 	}
 
@@ -139,49 +137,49 @@ async function getObjectIds(account, model, branch, revId, groupData, convertSha
 
 async function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 
-	return Promise.all(groupData.objects.map(async({account, model:container, shared_ids, ...extIds}) => {
+	return Promise.all(groupData.objects.map(async ({ account, model: container, shared_ids, ...extIds }) => {
 
 		if (showIfcGuids) {
 			if (!shared_ids) {
 				// if we're storing other external Ids, just return empty array (not converting).
-				return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC] ?? []};
+				return { account, model: container, [idTypes.IFC]: extIds[idTypes.IFC] ?? [] };
 			}
-		} else if(shared_ids) {
-			return {account, model: container, shared_ids: convertSharedIDsToString ? shared_ids.map(utils.uuidToString) : shared_ids.map(utils.stringToUUID)};
+		} else if (shared_ids) {
+			return { account, model: container, shared_ids: convertSharedIDsToString ? shared_ids.map(utils.uuidToString) : shared_ids.map(utils.stringToUUID) };
 		}
 
 		// At this point, we're either trying to convert shared Ids to ifcGuids, or external ids to shared ids
-		const {_id: conRevId} = await getHistory(
+		const { _id: conRevId } = await getHistory(
 			account, container,
 			model === container ? branch : "master",
 			model === container && !branch ? revId : undefined,
-			{_id: 1}
+			{ _id: 1 }
 		);
 
-		if(shared_ids) {
+		if (shared_ids) {
 
 			const res = await sharedIdsToExternalIds(account, container, conRevId, shared_ids.map(utils.stringToUUID));
 
-			if(res) {
-				return {account, model: container, [res.key]: res.values};
+			if (res) {
+				return { account, model: container, [res.key]: res.values };
 			}
 
-			return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC]};
+			return { account, model: container, [idTypes.IFC]: extIds[idTypes.IFC] };
 		}
 
 		const idType = getCommonElements(Object.keys(extIds), Object.keys(idTypesToKeys))[0];
 		const metadata = await getMetadataWithMatchingData(account, container, conRevId,
 			idTypesToKeys[idType], extIds[idType], { parents: 1 });
 
-		if(metadata.length) {
-			const {_id: project}  = await findProjectByModelId(account, container, {_id: 1});
+		if (metadata.length) {
+			const { _id: project } = await findProjectByModelId(account, container, { _id: 1 });
 			const meshIds = await getMeshesWithParentIds(account, project, container, conRevId,
 				metadata.flatMap(({ parents }) => parents));
 
-			const meshNodes = await findNodes(account, container, undefined, conRevId, {_id: {$in: meshIds}}, {shared_id: 1});
-			return { account, model:container, shared_ids: meshNodes.map(({shared_id}) => convertSharedIDsToString ? utils.uuidToString(shared_id) : shared_id)};
+			const meshNodes = await findNodes(account, container, undefined, conRevId, { _id: { $in: meshIds } }, { shared_id: 1 });
+			return { account, model: container, shared_ids: meshNodes.map(({ shared_id }) => convertSharedIDsToString ? utils.uuidToString(shared_id) : shared_id) };
 		} else {
-			return { account, model:container, shared_ids: []};
+			return { account, model: container, shared_ids: [] };
 		}
 
 	}));
@@ -204,25 +202,25 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
-		if(!containerEntry.shared_ids) {
+		if (!containerEntry.shared_ids) {
 			return containerEntry;
 		}
 
 		try {
 
-			const {_id: conRevId} = await getHistory(
+			const { _id: conRevId } = await getHistory(
 				account, containerEntry.model,
 				model === containerEntry.model ? branch : "master",
 				model === containerEntry.model && !branch ? rId : undefined,
-				{_id: 1}
+				{ _id: 1 }
 			);
 
 			const sharedIds = containerEntry.shared_ids.map(utils.stringToUUID);
 
 			const externalIds = await sharedIdsToExternalIds(containerEntry.account, containerEntry.model, conRevId, sharedIds);
 
-			if(externalIds) {
-				return {account, model: containerEntry.model, [externalIds.key] : externalIds.values};
+			if (externalIds) {
+				return { account, model: containerEntry.model, [externalIds.key]: externalIds.values };
 			}
 		} catch {
 			// do nothing, just return the original container entry
@@ -254,9 +252,9 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 						}
 						break;
 					case "rules":
-						try{
+						try {
 							newGroup.rules = validateRules(data.rules);
-						} catch{
+						} catch {
 							typeCorrect = false;
 						}
 
@@ -332,11 +330,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query.issue_id = { $exists: false };
 	}
 
-	// If we want groups that aren't from risks
-	if (queryParams.noRisks) {
-		query.risk_id = { $exists: false };
-	}
-
 	// If we want groups that aren't from sequences
 	if (queryParams.noSequences) {
 		query.sequence_id = { $exists: false };
@@ -352,7 +345,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 		query.$or = [
 			{
-				createdAt: { $gte: new Date(updatedSince) },  updatedAt: { $exists: false}
+				createdAt: { $gte: new Date(updatedSince) }, updatedAt: { $exists: false }
 			},
 			{
 				updatedAt: { $gte: updatedSince }
@@ -361,7 +354,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	}
 
 	if (ids) {
-		query._id = {$in: utils.stringsToUUIDs(ids)};
+		query._id = { $in: utils.stringsToUUIDs(ids) };
 	}
 	const submodels = new Set();
 	const [groups, modelRev] = await Promise.all([
@@ -370,12 +363,12 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 	]);
 
-	if(modelRev) {
+	if (modelRev) {
 		await getSubModels(account, model, branch, revId, async (ts, subModel) => {
-			const revNode = await findLatest(ts, subModel, {_id: 1});
+			const revNode = await findLatest(ts, subModel, { _id: 1 });
 
-			if(revNode) {
-				submodels.add({model: subModel, revId: revNode._id});
+			if (revNode) {
+				submodels.add({ model: subModel, revId: revNode._id });
 				await prepareCache(ts, subModel, revNode._id);
 			}
 
@@ -383,16 +376,16 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	}
 
 	let models = [];
-	if(submodels.size) {
+	if (submodels.size) {
 		models = Array.from(submodels);
-	} else if(modelRev) {
+	} else if (modelRev) {
 		await prepareCache(account, model, modelRev._id);
-		models = [{model, revId: modelRev._id}];
+		models = [{ model, revId: modelRev._id }];
 	}
 
 	return Promise.all(groups.map(async group => {
 		try {
-			const sharedIdObjects = await Promise.all(models.map(({model: container, revId: conRevId}) =>
+			const sharedIdObjects = await Promise.all(models.map(({ model: container, revId: conRevId }) =>
 				getObjectIds(account, container, undefined, conRevId, group, true, showIfcGuids)));
 			group.objects = sharedIdObjects.flat();
 
@@ -419,9 +412,9 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
 					case "rules":
-						try{
+						try {
 							toUpdate.rules = validateRules(data.rules);
-						} catch{
+						} catch {
 							typeCorrect = false;
 							toUnset.objects = 1;
 							group.objects = undefined;
@@ -451,7 +444,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			toUpdate.updatedBy = user;
 			toUpdate.updatedAt = Date.now();
 
-			const updateBson = {$set: toUpdate};
+			const updateBson = { $set: toUpdate };
 
 			if (Object.keys(toUnset).length > 0) {
 				updateBson.$unset = toUnset;

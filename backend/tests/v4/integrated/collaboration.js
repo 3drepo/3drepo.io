@@ -109,7 +109,7 @@ describe('Sharing/Unsharing a model', () => {
 						});
 				},
 				function ableToViewModel(done) {
-					viewerAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+					viewerAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 						.expect(200, done);
 				},
 			], done);
@@ -189,7 +189,7 @@ describe('Sharing/Unsharing a model', () => {
 							});
 					},
 					function notAbleToViewModel(done) {
-						viewerAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+						viewerAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 							.expect(401, (err, res) => {
 								done(err);
 							});
@@ -232,7 +232,7 @@ describe('Sharing/Unsharing a model', () => {
 						});
 				},
 				function ableToViewModel(done) {
-					commenterAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+					commenterAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 						.expect(200, done);
 				},
 			], done);
@@ -335,7 +335,7 @@ describe('Sharing/Unsharing a model', () => {
 							});
 					},
 					function notAbleToViewModel(done) {
-						commenterAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+						commenterAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 							.expect(401, (err, res) => {
 								done(err);
 							});
@@ -378,7 +378,7 @@ describe('Sharing/Unsharing a model', () => {
 						});
 				},
 				function ableToViewModel(done) {
-					collaboratorAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+					collaboratorAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 						.expect(200, done);
 				},
 			], done);
@@ -482,7 +482,7 @@ describe('Sharing/Unsharing a model', () => {
 							});
 					},
 					function notAbleToViewModel(done) {
-						collaboratorAgent.get(`/${username}/${model}/revision/master/head/unityAssets.json`)
+						collaboratorAgent.get(`/${username}/${model}/revision/master/head/repoAssets.json`)
 							.expect(401, (err, res) => {
 								done(err);
 							});

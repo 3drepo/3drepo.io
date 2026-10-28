@@ -192,7 +192,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty }: TicketGroupsP
 
 	useEffect(() => {
 		if (!isLoading || !hasClearedOverrides) return;
-		TicketsCardActionsDispatchers.setOverrides({ overrides: {}, transparencies: {} });
 		setIsLoading(false);
 	}, [hasClearedOverrides]);
 
