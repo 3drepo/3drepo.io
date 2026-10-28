@@ -15,4 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
+
+export const ItemContainer = styled.li<{ selected?: boolean }>`
+	width: 1000px;
+	height: 80px;
+
+	padding: 0 29px;
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	list-style: none;
+	cursor: pointer;
+
+	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const ChangeValue = styled(TextOverflow)`
+	font-weight: bold;
+	padding: 0 3px;
+`;

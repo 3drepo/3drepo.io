@@ -25,11 +25,13 @@ import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
 import { useEffect } from 'react';
 import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.component';
+import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
+import { FormattedMessage } from 'react-intl';
 
-export const TicketHistoryDialog = ({ onClickClose, open, title, ticketId, teamspace, project, containerOrFederation, ...props }) => {
+export const TicketHistoryDialog = ({ onClickClose, open, ticketId, teamspace, project, containerOrFederation }) => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticketId);
-
+	console.log('@@ ticketHistory', ticketHistory);
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticketId, isFederation);
 	}, [ticketId]);
@@ -49,6 +51,23 @@ export const TicketHistoryDialog = ({ onClickClose, open, title, ticketId, teams
 					}, { ticketName: 'placeholder' })}
 				/>
 				<ModalBody>
+					<Header onSortingChange={() => {}}>
+						<Label minWidth={122}>
+							<FormattedMessage id="ticketHistoryDialog.list.header.date" defaultMessage="Date" />
+						</Label>
+						<Label width={352}>
+							<FormattedMessage id="ticketHistoryDialog.list.header.user" defaultMessage="User" />
+						</Label>
+						<Label width={222}>
+							<FormattedMessage id="ticketHistoryDialog.list.header.action" defaultMessage="Action" />
+						</Label>
+						<Label width={297}>
+							<FormattedMessage id="ticketHistoryDialog.list.header.property" defaultMessage="Property" />
+						</Label>
+						<Label width={297}>
+							<FormattedMessage id="ticketHistoryDialog.list.header.details" defaultMessage="Details" />
+						</Label>
+					</Header>
 					{ticketHistory?.map((historyItem) => (
 						<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
 					))}

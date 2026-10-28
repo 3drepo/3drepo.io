@@ -18,16 +18,49 @@
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
+import { ChangeValue, ItemContainer } from '../ticketHistoryDialog.styles';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Row } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableRow/ticketsTableRow.styles';
+
+const ChangesTable = ({ changes }) => {
+	const { properties = {}, ...topLevelChanges } = changes;
+
+	const rows = [
+		...Object.entries(topLevelChanges),
+		...Object.entries(properties),
+	].map(([propertyName, change]) => ({
+		propertyName,
+		change,
+	}));
+	console.log('@@ rows', rows);
+	return (
+		rows.map(({ propertyName, change }) => (
+			<Row key={propertyName}>
+				<FixedOrGrowContainer>{propertyName}</FixedOrGrowContainer>
+				<FixedOrGrowContainer>Changed from <ChangeValue>{change?.from ?? ''}</ChangeValue> to <ChangeValue>{change?.to ?? ''}</ChangeValue></FixedOrGrowContainer>
+			</Row>
+		))
+	);
+};
+
+
 
 export const TicketHistoryItem = ({ author, timestamp, changes }) => {
 	const formattedTimestamp = new Date(timestamp).toLocaleString();
 	const user = UsersHooksSelectors.selectUser(author);
 	const fullname = getFullnameFromUser(user);
+	console.log('@@ ticketHistoryItem', { author, timestamp, changes });
 	return (
-		<div>
-			<AssigneeCircle assignee={author} />
-			<p>{fullname}</p>
-			<p>{formattedTimestamp}</p>
-		</div>
+		<ItemContainer>
+			<FixedOrGrowContainer>{formattedTimestamp}</FixedOrGrowContainer>
+			<FixedOrGrowContainer>
+				<AssigneeCircle assignee={author} />
+				{fullname}
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer>Update</FixedOrGrowContainer>
+			<FixedOrGrowContainer>
+				<ChangesTable changes={changes} />
+			</FixedOrGrowContainer>
+		</ItemContainer>
 	);
 };
