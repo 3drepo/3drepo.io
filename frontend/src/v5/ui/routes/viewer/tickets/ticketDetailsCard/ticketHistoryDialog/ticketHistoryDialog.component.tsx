@@ -15,14 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
 import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
+import { useEffect } from 'react';
 
-export const TicketHistoryDialog = ({ onClickClose, open, title, ...props }) => {
-	console.log('@@@--- Open modal', props);
+export const TicketHistoryDialog = ({ onClickClose, open, title, ticketId, teamspace, project, containerOrFederation, ...props }) => {
+	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticketId);
+
+	useEffect(() => {
+		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticketId, isFederation);
+	}, [ticketId]);
+
 	return (
 		<Modal open={open} onClose={onClickClose}>
 			<Form>

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate, NewTicket, Group } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, NewTicket, Group, ITicketHistory } from '@/v5/store/tickets/tickets.types';
 import api from './default';
 
 export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
@@ -277,6 +277,17 @@ export const fetchTagsValues = async (
 	return data;
 };
 
+export const fetchTicketHistory = async (
+	teamspace: string,
+	project: string,
+	model: string,
+	ticket: string,
+	type: string,
+): Promise<FetchTicketHistoryResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/${ticket}/history`);
+	return data;
+};
+
 /**
  * Types
  */
@@ -284,3 +295,4 @@ type FetchTemplatesResponse = { templates: ITemplate[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };
 type FetchTagsValuesResponse = { values: string[] };
+type FetchTicketHistoryResponse = { history: ITicketHistory[] }; // TODO 6329 replace type

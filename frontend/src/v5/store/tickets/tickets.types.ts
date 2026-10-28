@@ -228,3 +228,9 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict,
 };
+
+export type ITicketHistory = {
+	author: string;
+	timestamp: string;
+	changes: any;
+};
