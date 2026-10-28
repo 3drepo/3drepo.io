@@ -284,8 +284,8 @@ export const fetchTicketHistory = async (
 	ticket: string,
 	type: string,
 ): Promise<FetchTicketHistoryResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/${ticket}/history`);
-	return data;
+	const { data: { history } } = await api.get(`teamspaces/${teamspace}/projects/${project}/${type}/${model}/tickets/${ticket}/history`);
+	return history;
 };
 
 /**
@@ -295,4 +295,4 @@ type FetchTemplatesResponse = { templates: ITemplate[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };
 type FetchTagsValuesResponse = { values: string[] };
-type FetchTicketHistoryResponse = { history: ITicketHistory[] }; // TODO 6329 replace type
+type FetchTicketHistoryResponse = { history: ITicketHistory[] };

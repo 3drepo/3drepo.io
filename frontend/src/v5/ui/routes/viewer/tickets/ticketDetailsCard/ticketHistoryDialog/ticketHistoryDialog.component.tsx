@@ -24,6 +24,7 @@ import { Form } from '@controls/formModal/formModal.styles';
 import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
 import { useEffect } from 'react';
+import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.component';
 
 export const TicketHistoryDialog = ({ onClickClose, open, title, ticketId, teamspace, project, containerOrFederation, ...props }) => {
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -48,7 +49,9 @@ export const TicketHistoryDialog = ({ onClickClose, open, title, ticketId, teams
 					}, { ticketName: 'placeholder' })}
 				/>
 				<ModalBody>
-					History
+					{ticketHistory?.map((historyItem) => (
+						<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
+					))}
 				</ModalBody>
 			</Form>
 		</Modal>
