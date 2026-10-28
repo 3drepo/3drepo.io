@@ -261,12 +261,15 @@ const queueModelImport = async (
 	}
 };
 
+const sanitizeFileName = (fileName) => fileName.replace(/[ *"/\\[\]:;|=,<>$.]/g, '_');
+
 ModelProcessing.processExternalModelUpload = async (teamspace, project, container, data, file) => {
 	const format = Path.extname(file.originalname).toLowerCase();
-	const fileId = generateUUID();
 	const { owner, ...revData } = data;
+	const fileNameSanitised = sanitizeFileName(file.originalname);
+	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
 	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
-		{ ...revData, author: owner, format, rFile: [UUIDToString(fileId)] });
+		{ ...revData, author: owner, format, rFile: [fileId] });
 
 	const fileMeta = { name: file.originalname, rev_id: UUIDToString(rev_id), project, model: container };
 
@@ -277,12 +280,14 @@ ModelProcessing.processExternalModelUpload = async (teamspace, project, containe
 		await queueModelImport(teamspace, container, UUIDToString(rev_id), data, { format, size: file.size });
 	} catch (error) {
 		await removeFile(teamspace, collection, fileId);
+
 		throw error;
 	}
 };
 
 ModelProcessing.processInternalModelUpload = async (teamspace, project, container, data, file) => {
-	const fileId = generateUUIDString();
+	const fileNameSanitised = sanitizeFileName(file.originalname);
+	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
 	const { owner, ...revData } = data;
 	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
 		{ ...revData, author: owner, rFile: [fileId] });
