@@ -68,7 +68,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, ticketId, teamspace, p
 							<FormattedMessage id="ticketHistoryDialog.list.header.details" defaultMessage="Details" />
 						</Label>
 					</Header>
-					{ticketHistory?.map((historyItem) => (
+					{ticketHistory?.toReversed().map((historyItem) => (
 						<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
 					))}
 				</ModalBody>
