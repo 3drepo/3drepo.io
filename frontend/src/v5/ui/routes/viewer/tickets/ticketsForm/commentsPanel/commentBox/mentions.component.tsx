@@ -26,6 +26,24 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { UNKNOWN_USER } from '@/v4/helpers/user.helpers';
 
+const ZERO_WIDTH_SPACE = '\u200B';
+
+const createMentionElement = (name: string, id: string, isUnknown = false) => {
+	const mentionElement = document.createElement('span');
+	mentionElement.dataset.mention = 'true';
+	mentionElement.dataset.mentionName =  ZERO_WIDTH_SPACE + name + ZERO_WIDTH_SPACE;
+	mentionElement.dataset.mentionId = id;
+	mentionElement.dataset.mention = 'true';
+	mentionElement.appendChild(document.createTextNode(ZERO_WIDTH_SPACE));
+
+	if (isUnknown) mentionElement.dataset.unknownMention = 'true';
+	const mentionName = document.createElement('span');
+	mentionName.textContent = name;
+	mentionElement.appendChild(mentionName);
+	mentionElement.appendChild(document.createTextNode(ZERO_WIDTH_SPACE));
+	return mentionElement;
+};
+
 export const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
 	const mentions = editorCopy.querySelectorAll('[data-mention-id]') as NodeListOf<HTMLElement>;
@@ -48,13 +66,7 @@ const renderMessage = (editor: HTMLElement, message: string, users) => {
 		const mentionName = mention ? getFullnameFromUser(mention) : UNKNOWN_USER;
 		fragment.append(message.slice(lastIndex, match.index));
 		fragment.append(match[1]);
-		const mentionElement = document.createElement('span');
-		mentionElement.dataset.mentionName = mentionName;
-		mentionElement.dataset.mentionId = mentionId;
-		mentionElement.dataset.mention = 'true';
-		if (!mention) mentionElement.dataset.unknownMention = 'true';
-		mentionElement.textContent = mentionName;
-		fragment.append(mentionElement);
+		fragment.append(createMentionElement(mentionName, mentionId, !mention));
 		lastIndex = match.index + match[0].length;
 		match = mentionPattern.exec(message);
 	}
@@ -97,13 +109,9 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 		const caretRange = selection.getRangeAt(0);
 		range.setEnd(caretRange.startContainer, caretRange.startOffset);
 		range.deleteContents();
-		const mentionElement = document.createElement('span');
-		mentionElement.dataset.mentionName = name;
-		mentionElement.dataset.mentionId = id;
-		mentionElement.dataset.mention = 'true';
-		mentionElement.textContent = name;
+		const mentionElement = createMentionElement(name, id);
 		range.insertNode(mentionElement);
-		const trailingSpace = document.createTextNode(' ');
+		const trailingSpace = document.createTextNode('\u0020');
 		mentionElement.after(trailingSpace);
 		range.setStart(trailingSpace, trailingSpace.length);
 		range.collapse(true);

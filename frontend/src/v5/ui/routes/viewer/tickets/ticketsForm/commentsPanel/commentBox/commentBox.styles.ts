@@ -174,11 +174,11 @@ export const MessageInput = styled.div<{ $autoHeight?: boolean; $canCollapse?: b
 		pointer-events: none;
 	}
 
-	& [data-mention='true'] {
+	& [data-mention='true'] > span {
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
 
-	& [data-unknown-mention='true'] {
+	& [data-unknown-mention='true'] > span {
 		color: ${({ theme }) => theme.palette.base.lighter};
 		font-style: italic;
 	}
