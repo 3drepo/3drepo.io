@@ -221,48 +221,31 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 	}
 };
 
-const hasTemplatePermission = async (req, colName) => {
-	const permissions = req.templateData?.config?.permissions;
+const hasTemplatePermission = (colName) => async (req, res, next) => {
+	try {
+		const permissions = req.templateData?.config?.permissions?.[colName];
+		if (permissions) {
+			const user = getUserFromSession(req.session);
+			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
+			const userAndJobs = [user, ...userJobs];
 
-	if (permissions?.[colName]) {
-		const user = getUserFromSession(req.session);
-		const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
-		const userAndJobs = [user, ...userJobs];
+			const hasPermission = getCommonElements(permissions, userAndJobs).length > 0;
 
-		const hasPermission = getCommonElements(permissions[colName], userAndJobs).length > 0;
-
-		if (!hasPermission) {
-			throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
+			if (!hasPermission) {
+				throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
+			}
 		}
-	}
-};
-
-TicketsMiddleware.hasTemplateCommentPermission = async (req, res, next) => {
-	try {
-		await hasTemplatePermission(req, 'comment');
 		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
 
-TicketsMiddleware.hasTemplateViewPermission = async (req, res, next) => {
-	try {
-		await hasTemplatePermission(req, 'view');
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
+const hasTemplateCreatePermission = hasTemplatePermission('create');
 
-const hasTemplateCreatePermission = async (req, res, next) => {
-	try {
-		await hasTemplatePermission(req, 'create');
-		await next();
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
+TicketsMiddleware.hasTemplateCommentPermission = hasTemplatePermission('comment');
+
+TicketsMiddleware.hasTemplateViewPermission = hasTemplatePermission('view');
 
 TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 	try {
