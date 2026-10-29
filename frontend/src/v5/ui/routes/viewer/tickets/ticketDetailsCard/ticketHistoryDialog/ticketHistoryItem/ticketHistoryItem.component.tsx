@@ -23,7 +23,8 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Row } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableRow/ticketsTableRow.styles';
 import { difference, get, has } from 'lodash';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { isDateType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { isDateType, isSelectType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { FormattedMessage } from 'react-intl';
 
 const getChangedPaths = (changes: any, prefix = ''): string[] =>
 	Object.entries(changes).flatMap(([key, value]) => {
@@ -41,9 +42,13 @@ const getChangedPaths = (changes: any, prefix = ''): string[] =>
 const Detail = ({ propertyName, change }) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const propertyDef = findPropertyDefinition(template, propertyName);
-	console.log('@@- propertyDef', propertyDef);
-
 	const { from, to } = change;
+	const emptyValue = [from, to].findIndex((value) => !value?.length);
+	const wasDeleted = emptyValue === 1;
+	const wasAdded = emptyValue === 0;
+	const wasChanged = !wasDeleted && !wasAdded;
+
+	console.log('@@- propertyDef', propertyDef);
 	if (propertyDef.type === 'jobsAndUsers') {
 	}
 	if (isDateType(propertyDef.type)) {
@@ -51,6 +56,7 @@ const Detail = ({ propertyName, change }) => {
 	if (propertyDef.type === 'coords') {
 	}
 	if (propertyDef.type === 'view') {
+		return <>Object TODO</>
 	}
 	if (['imageList', 'image'].includes(propertyDef.type)) {
 	}
@@ -60,22 +66,34 @@ const Detail = ({ propertyName, change }) => {
 		const removed = difference(from, to);
 		const added = difference(to, from);
 		return (
-			<FixedOrGrowContainer>
-				{removed.length > 0 && <span>Removed <ChangeValue>{removed.join(', ')}</ChangeValue></span>}
-				{added.length > 0 && <span>Added <ChangeValue>{added.join(', ')}</ChangeValue></span>}
-			</FixedOrGrowContainer>
+			<>
+				{removed.length > 0 && <FormattedMessage id="ticketHistory.select.removed" defaultMessage="Removed {removed}" values={{ removed: <ChangeValue>{removed.join(', ')}</ChangeValue> }} />}
+				{added.length > 0 && <FormattedMessage id="ticketHistory.select.added" defaultMessage="Added {added}" values={{ added: <ChangeValue>{added.join(', ')}</ChangeValue> }} />}
+			</>
 		);
 	}
-
-	const emptyValue = [from, to].findIndex((value) => !value?.length);
-	switch (emptyValue) {
-		case 0: // value changed from empty
-			return <FixedOrGrowContainer>Set to <ChangeValue>{to}</ChangeValue></FixedOrGrowContainer>;
-		case 1: // value deleted
-			return <FixedOrGrowContainer>Deleted <ChangeValue>{from}</ChangeValue></FixedOrGrowContainer>;
-		default: // value changed
-			return <FixedOrGrowContainer>Changed from <ChangeValue>{from}</ChangeValue> to <ChangeValue>{to}</ChangeValue></FixedOrGrowContainer>;
+	if (isTextType(propertyDef.type)) {
+		if (wasAdded) {
+			return <FormattedMessage
+				id="ticketHistory.default.setTo"
+				defaultMessage="Set to {to}" values={{ to: <ChangeValue>{to}</ChangeValue> }} />;
+		} else if (wasDeleted) {
+			return <FormattedMessage
+				id="ticketHistory.default.deleted"
+				defaultMessage="Deleted {from}" values={{ from: <ChangeValue>{from}</ChangeValue> }} />;
+		} else if (wasChanged) {
+			return <FormattedMessage
+				id="ticketHistory.default.setTo"
+				defaultMessage="Changed from {from} to {to}" values={{ from: <ChangeValue>{from}</ChangeValue>, to: <ChangeValue>{to}</ChangeValue> }} />;
+		}
 	}
+	return (
+		<div style={{ color: 'red', fontWeight: 'bold' }}>
+			<FormattedMessage
+				id="ticketHistory.unhandledType"
+				defaultMessage="Unhandled property type: {type}" values={{ type: propertyDef.type }} />
+		</div>
+	);
 };
 
 const ChangesTable = ({ changes }) => {
@@ -85,7 +103,9 @@ const ChangesTable = ({ changes }) => {
 		paths.map((propertyName) => (
 			<Row key={propertyName}>
 				<FixedOrGrowContainer>{propertyName}</FixedOrGrowContainer>
-				<Detail propertyName={propertyName} change={get(changes, propertyName)} />
+				<FixedOrGrowContainer>
+					<Detail propertyName={propertyName} change={get(changes, propertyName)} />
+				</FixedOrGrowContainer>
 			</Row>
 		))
 	);
