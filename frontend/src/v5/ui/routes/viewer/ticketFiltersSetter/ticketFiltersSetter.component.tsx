@@ -123,9 +123,9 @@ export const TicketFiltersSetter = () => {
 
 		if (ticketCodes.length || urlFiltersRaw?.length) {
 			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
+			setTicketSearchParam();
 		}
-
-		setTicketSearchParam();
+		
 	}, [JSON.stringify({ templatesLength: templates.length, jobsAndUsers, riskCategories })]); 
 
 	return <></>;
