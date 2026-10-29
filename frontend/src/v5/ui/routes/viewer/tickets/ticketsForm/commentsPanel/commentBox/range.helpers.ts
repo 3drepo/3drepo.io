@@ -93,3 +93,25 @@ export const getCaretCharacterIndex = (element: HTMLElement): number => {
 	range.setEnd(selection.anchorNode, selection.anchorOffset);
 	return range.toString().length;
 };
+
+export const lastRangeForString = (root: HTMLElement, searchString: string): Range | null => {
+	const atIndex = root.innerText.lastIndexOf(searchString);
+	if (atIndex === -1) return null;
+
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+	let node = walker.nextNode();
+	let lastRange: Range | null = null;
+	while (node) {
+		const text = node.textContent || '';
+		let index = text.lastIndexOf(searchString);
+		if (index !== -1) {
+			const range = document.createRange();
+			range.setStart(node, index);
+			range.setEnd(node, index + searchString.length);
+			lastRange = range;
+		}
+		node = walker.nextNode();
+	}
+
+	return lastRange;
+};

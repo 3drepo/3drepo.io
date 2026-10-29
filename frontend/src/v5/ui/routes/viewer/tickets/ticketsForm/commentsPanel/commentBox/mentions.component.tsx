@@ -19,30 +19,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Popper } from '@mui/material';
 import { MentionsListComponent } from './mentionsList/mentionsList.component';
 import { VirtualElement } from '@popperjs/core';
-import { getCaretCharacterIndex, getSelectionTextOffset, restoreSelection } from './range.helpers';
+import { getCaretCharacterIndex, getSelectionTextOffset, lastRangeForString, restoreSelection } from './range.helpers';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { UNKNOWN_USER } from '@/v4/helpers/user.helpers';
-
-const ZERO_WIDTH_SPACE = '\u200B';
-
-const createMentionElement = (name: string, id: string, isUnknown = false) => {
-	const mentionElement = document.createElement('span');
-	mentionElement.dataset.mention = 'true';
-	mentionElement.dataset.mentionName =  ZERO_WIDTH_SPACE + name + ZERO_WIDTH_SPACE;
-	mentionElement.dataset.mentionId = id;
-	mentionElement.dataset.mention = 'true';
-	mentionElement.appendChild(document.createTextNode(ZERO_WIDTH_SPACE));
-
-	if (isUnknown) mentionElement.dataset.unknownMention = 'true';
-	const mentionName = document.createElement('span');
-	mentionName.textContent = name;
-	mentionElement.appendChild(mentionName);
-	mentionElement.appendChild(document.createTextNode(ZERO_WIDTH_SPACE));
-	return mentionElement;
-};
+import { createMentionElement, undoMentionElements } from './mentionsHelper';
 
 export const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
@@ -115,14 +98,11 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 		mentionElement.after(trailingSpace);
 		range.setStart(trailingSpace, trailingSpace.length);
 		range.collapse(true);
-
 		selection.removeAllRanges();
 		selection.addRange(range);
-
-		onMessageChange(getMessageValue(editor));
 		closeMentionPopup();
 		editor.focus();
-	};    
+	};
 
 	const handleMessageInput = (ev?) => {
 		const editor = editorRef.current;
@@ -145,51 +125,38 @@ export const MentionsComponent = ({ editorRef, message, onMessageChange }) => {
 			const endOffset = currentRange
 				? getSelectionTextOffset(editor, currentRange.endContainer, currentRange.endOffset)
 				: startOffset;
-    
-			mentions.forEach((mention) => {
-				if (mention.innerText !== mention.dataset.mentionName) {
-					mention.replaceWith(document.createTextNode(mention.innerText));
-				}
-			});
-    
+
+			undoMentionElements(editor);
 			restoreSelection(editor, startOffset, endOffset);
 		}
     
 		const messageValue = getMessageValue(editor);
 		onMessageChange(messageValue);
+
 		const editorText = editor.innerText;
 		const caretPosition = getCaretCharacterIndex(editor);
 		const textBeforeCaret = editorText.slice(0, caretPosition);
-		const currentToken = textBeforeCaret.split(/\s/).pop() || '';
 		const mentionStart = textBeforeCaret.lastIndexOf('@');
-		const tokenStart = textBeforeCaret.length - currentToken.length;
 		const query = textBeforeCaret.slice(mentionStart + 1);
 		const mentionPrefix = textBeforeCaret[mentionStart - 1];
 		const isMention = textBeforeCaret[mentionStart] === '@'
 			&& (mentionStart === 0 || !/[\w@]/.test(mentionPrefix || ''));
     
-		if (!isMention || mentionStart < tokenStart) {
+		if (!isMention ) {
 			closeMentionPopup();
 			return;
 		}
-    
-		if (isMention && !mentionAnchor) {
-			const currentSelection = window.getSelection();
-			if (!currentSelection?.rangeCount) return;
-			const anchorRange = currentSelection.getRangeAt(0).cloneRange();
-			const mentionStartRange = anchorRange.cloneRange();
-			if (mentionStartRange.startContainer.nodeType === Node.TEXT_NODE && mentionStartRange.startOffset > 0) {
-				mentionStartRange.setStart(mentionStartRange.startContainer, mentionStartRange.startOffset - 1);
-				mentionStartRange.collapse(true);
-				mentionStartRangeRef.current = mentionStartRange;
-			}
-			setMentionQuery(query);
+
+		setMentionQuery(query);
+
+		if (!mentionAnchor) {
+			const anchorRange = lastRangeForString(editor, '@');
 			setMentionAnchor({
 				contextElement: editor,
 				getBoundingClientRect: () => anchorRange.getBoundingClientRect(),
 			});
-		} else if (isMention) {
-			setMentionQuery(query);
+
+			mentionStartRangeRef.current = anchorRange;
 		}
 	};
 
