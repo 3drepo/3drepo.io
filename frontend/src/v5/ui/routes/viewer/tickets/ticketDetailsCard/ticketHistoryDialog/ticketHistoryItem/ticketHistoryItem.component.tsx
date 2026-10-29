@@ -54,6 +54,19 @@ const Detail = ({ propertyName, change }) => {
 	if (isDateType(propertyDef.type)) {
 	}
 	if (propertyDef.type === 'coords') {
+		if (wasAdded) {
+			return <FormattedMessage
+				id="ticketHistory.coords.setTo"
+				defaultMessage="Pin set"/>;
+		} else if (wasDeleted) {
+			return <FormattedMessage
+				id="ticketHistory.coords.deleted"
+				defaultMessage="Deleted pin" />;
+		} else if (wasChanged) {
+			return <FormattedMessage
+				id="ticketHistory.coords.setTo"
+				defaultMessage="Changed pin location"/>;
+		}
 	}
 	if (propertyDef.type === 'view') {
 		return <>Object TODO</>
