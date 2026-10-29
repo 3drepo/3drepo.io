@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect, useState } from 'react';
 import { DashedContainer, DropArea } from './dragAndDrop.styles';
 import { useDropzone } from 'react-dropzone';
 
@@ -24,11 +25,23 @@ interface IDragAndDrop {
 	children?: any;
 	accept?: string;
 	hidden?: boolean;
+	onDragLeave?: () => void;
 }
 
-export const DragAndDrop = ({ children, onDrop, hidden, accept, className, ...props }: IDragAndDrop) => {
+export const DragAndDrop = ({ children, onDrop, onDragLeave, hidden, accept, className, ...props }: IDragAndDrop) => {
 	const { getRootProps, isDragActive } = useDropzone({ onDrop, accept, noClick: true });
+	const [wasDragActive, setWasDragActive] = useState(isDragActive);
+
+	useEffect(() => {
+		if (!isDragActive && wasDragActive && onDragLeave) {
+			onDragLeave();
+		}
+
+		setWasDragActive(isDragActive);
+	}, [isDragActive, wasDragActive]);
+
 	if (hidden) return null;
+
 	return (
 		<DropArea {...props} {...getRootProps()}>
 			<DashedContainer className={className} $isDragActive={isDragActive}>
