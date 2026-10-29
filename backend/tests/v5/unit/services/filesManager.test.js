@@ -311,10 +311,12 @@ const testGetFileAsStream = () => {
 		});
 
 		test('should include the filename if it is part of the ref entry', async () => {
-			const fileEntry = { size: 100,
+			const fileEntry = {
+				size: 100,
 				type: FileStorageTypes.FS,
 				link: generateRandomString(),
-				name: generateRandomString() };
+				name: generateRandomString(),
+			};
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
 			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
@@ -324,10 +326,12 @@ const testGetFileAsStream = () => {
 			const fileName = generateRandomString();
 
 			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream,
+				.resolves.toEqual({
+					readStream,
 					size: fileEntry.size,
 					mimeType: DEFAULT_MIME_TYPE,
-					filename: fileEntry.name });
+					filename: fileEntry.name,
+				});
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
@@ -567,6 +571,7 @@ const testAddExternalFileReference = () => {
 				...externalInfo,
 				_id: id,
 				mimeType: DEFAULT_MIME_TYPE,
+				type: FileStorageTypes.EXTERNAL_FS,
 			});
 		});
 
@@ -620,9 +625,11 @@ const testRemoveFilesWithMeta = () => {
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
 		test('!Should remove all files that satisfy the query', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+			const expectedRefs = times(3, () => ({
+				_id: generateRandomString(),
 				type: FileStorageTypes.FS,
-				link: generateRandomString() }));
+				link: generateRandomString(),
+			}));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
@@ -650,9 +657,11 @@ const testRemoveFilesWithMeta = () => {
 		});
 
 		test('Should manage non file refs properly', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+			const expectedRefs = times(3, () => ({
+				_id: generateRandomString(),
 				type: FileStorageTypes.FS,
-				link: generateRandomString() }));
+				link: generateRandomString(),
+			}));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });

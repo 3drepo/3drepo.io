@@ -53,11 +53,11 @@ FilesManager.fileExists = async (teamspace, collection, filename) => {
 
 const removeFilesByStorageType = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
-		case FileStorageTypes.FS:
-			return fsHandler.removeFiles(links);
-		default:
-			logger.logError(`Unrecognised external service: ${storageType}`);
-			return Promise.reject(templates.fileNotFound);
+	case FileStorageTypes.FS:
+		return fsHandler.removeFiles(links);
+	default:
+		logger.logError(`Unrecognised external service: ${storageType}`);
+		return Promise.reject(templates.fileNotFound);
 	}
 };
 
@@ -122,12 +122,12 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 	const { type, link } = await getRefEntry(teamspace, collection, fileName);
 
 	switch (type) {
-		case FileStorageTypes.FS:
-			return fsHandler.getFile(link);
+	case FileStorageTypes.FS:
+		return fsHandler.getFile(link);
 
-		default:
-			logger.logError(`Unrecognised external service: ${type}`);
-			throw templates.fileNotFound;
+	default:
+		logger.logError(`Unrecognised external service: ${type}`);
+		throw templates.fileNotFound;
 	}
 };
 
@@ -136,13 +136,13 @@ const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 	let readStream;
 
 	switch (type) {
-		case FileStorageTypes.FS:
-			readStream = await fsHandler.getFileStream(link, chunkInfo);
-			break;
+	case FileStorageTypes.FS:
+		readStream = await fsHandler.getFileStream(link, chunkInfo);
+		break;
 
-		default:
-			logger.logError(`Unrecognised external service: ${type}`);
-			throw templates.fileNotFound;
+	default:
+		logger.logError(`Unrecognised external service: ${type}`);
+		throw templates.fileNotFound;
 	}
 	return { readStream, size, mimeType: mimeType ?? DEFAULT_MIME_TYPE, encoding, filename };
 };
@@ -175,12 +175,12 @@ FilesManager.storeFiles = async (teamspace, collection, dataEntry) => {
 		]);
 		let refInfo;
 		switch (config.defaultStorage) {
-			case FileStorageTypes.FS:
-				refInfo = await fsHandler.storeFile(data);
-				break;
-			default:
-				logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
-				throw templates.unknown;
+		case FileStorageTypes.FS:
+			refInfo = await fsHandler.storeFile(data);
+			break;
+		default:
+			logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
+			throw templates.unknown;
 		}
 		return { ...meta, ...refInfo, _id: id, mimeType: mimeType || DEFAULT_MIME_TYPE };
 	}));
@@ -196,13 +196,13 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 	let refInfo;
 
 	switch (config.defaultStorage) {
-		case FileStorageTypes.FS:
-			refInfo = await fsHandler.storeFileStream(dataStream);
-			break;
+	case FileStorageTypes.FS:
+		refInfo = await fsHandler.storeFileStream(dataStream);
+		break;
 
-		default:
-			logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
-			throw templates.unknown;
+	default:
+		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
+		throw templates.unknown;
 	}
 
 	const mimeType = DEFAULT_MIME_TYPE;
