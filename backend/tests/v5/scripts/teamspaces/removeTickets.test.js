@@ -54,7 +54,7 @@ const checkData = async (teamspace, project, model, templates, tickets, shouldEx
 	const allTickets = await getTicketList(teamspace, stringToUUID(project), model, {});
 
 	if (shouldExist) {
-		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for CSH template
+		expect(existingTemplates.length).toBe(templates.length + 2); // +2 for CSH and SFB template
 		templates.forEach((template) => {
 			expect(existingTemplates.some((t) => UUIDToString(t._id) === template._id)).toBe(true);
 		});
