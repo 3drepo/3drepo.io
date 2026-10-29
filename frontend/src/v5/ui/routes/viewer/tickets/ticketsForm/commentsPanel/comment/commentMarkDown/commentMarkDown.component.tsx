@@ -21,8 +21,7 @@ import { CommentMessage } from '../basicComment/basicComment.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
 import { Mention } from '../mention/mention.component';
-
-const MENTION_PATTERN = /(^|[^\w@])@([^\s@]+)/g;
+import { MENTION_PATTERN } from '../../commentBox/mentionsHelper';
 
 const renderMentions = (value: string) => {
 	const content = [];

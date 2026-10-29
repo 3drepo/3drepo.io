@@ -16,6 +16,7 @@
  */
 const ZERO_WIDTH_SPACE = '\u200B';
 
+export const MENTION_PATTERN = /(^|[^\w{])\{m::([^\s{}]+)\}/g;
 
 export const createMentionElement = (name: string, id: string, isUnknown = false) => {
 	const mentionElement = document.createElement('span');

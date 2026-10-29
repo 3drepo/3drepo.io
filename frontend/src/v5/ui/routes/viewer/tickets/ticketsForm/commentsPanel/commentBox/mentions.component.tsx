@@ -25,13 +25,13 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { UNKNOWN_USER } from '@/v4/helpers/user.helpers';
-import { createMentionElement, undoMentionElements } from './mentionsHelper';
+import { createMentionElement, MENTION_PATTERN, undoMentionElements } from './mentionsHelper';
 
 export const getMessageValue = (editor: HTMLElement) => {
 	const editorCopy = editor.cloneNode(true) as HTMLElement;
 	const mentions = editorCopy.querySelectorAll('[data-mention-id]') as NodeListOf<HTMLElement>;
 	mentions.forEach((mention) => {
-		mention.replaceWith(document.createTextNode(`@${mention.dataset.mentionId}`));
+		mention.replaceWith(document.createTextNode(`{m::${mention.dataset.mentionId}}`));
 	});
 	return editorCopy.innerText;
 };
@@ -39,9 +39,8 @@ export const getMessageValue = (editor: HTMLElement) => {
 const renderMessage = (editor: HTMLElement, message: string, users) => {
 	editor.textContent = '';
 	const fragment = document.createDocumentFragment();
-	const mentionPattern = /(^|[^\w@])@([^\s@]+)/g;
 	let lastIndex = 0;
-	let match = mentionPattern.exec(message);
+	let match = MENTION_PATTERN.exec(message);
 
 	while (match) {
 		const mentionId = match[2];
@@ -51,7 +50,7 @@ const renderMessage = (editor: HTMLElement, message: string, users) => {
 		fragment.append(match[1]);
 		fragment.append(createMentionElement(mentionName, mentionId, !mention));
 		lastIndex = match.index + match[0].length;
-		match = mentionPattern.exec(message);
+		match = MENTION_PATTERN.exec(message);
 	}
 
 	fragment.append(message.slice(lastIndex));
