@@ -98,7 +98,7 @@ export const TicketDetailsCard = () => {
 	};
 
 	const openTicketHistory = () => {
-		DialogsActionsDispatchers.open(TicketHistoryDialog, { ticketId, teamspace, project, containerOrFederation });
+		DialogsActionsDispatchers.open(TicketHistoryDialog, { containerOrFederation });
 	};
 
 	const goBack = () => {

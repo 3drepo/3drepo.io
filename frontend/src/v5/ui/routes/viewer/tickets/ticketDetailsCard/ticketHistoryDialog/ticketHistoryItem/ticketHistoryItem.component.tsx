@@ -15,29 +15,77 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
 import { ChangeValue, ItemContainer } from '../ticketHistoryDialog.styles';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Row } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableRow/ticketsTableRow.styles';
+import { difference, get, has } from 'lodash';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { isDateType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+
+const getChangedPaths = (changes: any, prefix = ''): string[] =>
+	Object.entries(changes).flatMap(([key, value]) => {
+		const path = prefix ? `${prefix}.${key}` : key;
+
+		if (typeof value !== 'object' || value === null) return [];
+
+		if (has(value, 'from') && has(value, 'to')) {
+			return [path];
+		}
+
+		return getChangedPaths(value, path);
+	});
+
+const Detail = ({ propertyName, change }) => {
+	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
+	const propertyDef = findPropertyDefinition(template, propertyName);
+	console.log('@@- propertyDef', propertyDef);
+
+	const { from, to } = change;
+	if (propertyDef.type === 'jobsAndUsers') {
+	}
+	if (isDateType(propertyDef.type)) {
+	}
+	if (propertyDef.type === 'coords') {
+	}
+	if (propertyDef.type === 'view') {
+	}
+	if (['imageList', 'image'].includes(propertyDef.type)) {
+	}
+	if (isSelectType(propertyDef.type)) {
+		if (propertyDef.values === 'jobsAndUsers') {
+		}
+		const removed = difference(from, to);
+		const added = difference(to, from);
+		return (
+			<FixedOrGrowContainer>
+				{removed.length > 0 && <span>Removed <ChangeValue>{removed.join(', ')}</ChangeValue></span>}
+				{added.length > 0 && <span>Added <ChangeValue>{added.join(', ')}</ChangeValue></span>}
+			</FixedOrGrowContainer>
+		);
+	}
+
+	const emptyValue = [from, to].findIndex((value) => !value?.length);
+	switch (emptyValue) {
+		case 0: // value changed from empty
+			return <FixedOrGrowContainer>Set to <ChangeValue>{to}</ChangeValue></FixedOrGrowContainer>;
+		case 1: // value deleted
+			return <FixedOrGrowContainer>Deleted <ChangeValue>{from}</ChangeValue></FixedOrGrowContainer>;
+		default: // value changed
+			return <FixedOrGrowContainer>Changed from <ChangeValue>{from}</ChangeValue> to <ChangeValue>{to}</ChangeValue></FixedOrGrowContainer>;
+	}
+};
 
 const ChangesTable = ({ changes }) => {
-	const { properties = {}, ...topLevelChanges } = changes;
-
-	const rows = [
-		...Object.entries(topLevelChanges),
-		...Object.entries(properties),
-	].map(([propertyName, change]) => ({
-		propertyName,
-		change,
-	}));
-	console.log('@@ rows', rows);
+	const paths = getChangedPaths(changes);
+	console.log('@@ paths', paths);
 	return (
-		rows.map(({ propertyName, change }) => (
+		paths.map((propertyName) => (
 			<Row key={propertyName}>
 				<FixedOrGrowContainer>{propertyName}</FixedOrGrowContainer>
-				<FixedOrGrowContainer>Changed from <ChangeValue>{change?.from ?? ''}</ChangeValue> to <ChangeValue>{change?.to ?? ''}</ChangeValue></FixedOrGrowContainer>
+				<Detail propertyName={propertyName} change={get(changes, propertyName)} />
 			</Row>
 		))
 	);
@@ -49,7 +97,6 @@ export const TicketHistoryItem = ({ author, timestamp, changes }) => {
 	const formattedTimestamp = new Date(timestamp).toLocaleString();
 	const user = UsersHooksSelectors.selectUser(author);
 	const fullname = getFullnameFromUser(user);
-	console.log('@@ ticketHistoryItem', { author, timestamp, changes });
 	return (
 		<ItemContainer>
 			<FixedOrGrowContainer>{formattedTimestamp}</FixedOrGrowContainer>

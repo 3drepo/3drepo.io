@@ -17,7 +17,7 @@
 
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
@@ -28,13 +28,16 @@ import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.compone
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 
-export const TicketHistoryDialog = ({ onClickClose, open, ticketId, teamspace, project, containerOrFederation }) => {
+export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }) => {
+	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticketId);
-	console.log('@@ ticketHistory', ticketHistory);
+	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticket._id);
+	
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticketId, isFederation);
-	}, [ticketId]);
+		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticket._id, isFederation);
+	}, [ticket._id]);
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
