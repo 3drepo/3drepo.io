@@ -64,6 +64,7 @@ import { compact, isEqual } from 'lodash';
 import { ExpandableMessageInput } from './expandableMessageInput.component';
 import { getMessageValue, MentionsComponent } from './mentions.component';
 import { getCaretCharacterIndex, restoreMessageSelection } from './range.helpers';
+import { undoMentionElements } from './mentionsHelper';
 
 type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 interface EditCommentBoxProps {
@@ -268,6 +269,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		range.collapse(true);
 		selection.removeAllRanges();
 		selection.addRange(range);
+		undoMentionElements(editor);
 		const messageValue = getMessageValue(editor);
 		setValue('message', messageValue, { shouldDirty: true });
 		requestAnimationFrame(() => {
