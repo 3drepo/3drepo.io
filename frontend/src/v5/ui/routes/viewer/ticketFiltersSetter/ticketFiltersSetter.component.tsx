@@ -29,7 +29,7 @@ import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFro
 import { isEmpty, isEqual } from 'lodash';
 import { deserializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 
-const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
+const TICKET_CODE_REGEX = /^.{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
