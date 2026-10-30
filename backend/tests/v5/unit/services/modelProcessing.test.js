@@ -181,7 +181,7 @@ const testProcessExternalModelUpload = () => {
 
 		test('Should log a cleanup error if removing the import file fails', async () => {
 			const cleanupError = new Error('cleanup failed');
-			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => {});
+			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => { });
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const container = generateRandomString();
@@ -318,7 +318,7 @@ const testProcessInternalModelUpload = () => {
 
 		test('Should log a cleanup error if removing the import file fails', async () => {
 			const cleanupError = new Error('cleanup failed');
-			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => {});
+			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => { });
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const container = generateRandomString();
@@ -729,7 +729,7 @@ const testContainerGetFileName = () => {
 			const corId = generateUUIDString();
 			const fileName = `${generateRandomString()}.obj`;
 			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
-			await writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+			await writeFile(filePath, JSON.stringify({ fileName }));
 
 			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
 		});
@@ -800,7 +800,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 
-			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => { });
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
@@ -817,7 +817,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 
-			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => { });
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
