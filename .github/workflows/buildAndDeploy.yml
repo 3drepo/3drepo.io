@@ -8,6 +8,7 @@ on:
     tags:
       - qa_deploy
       - dev_deploy
+      - sandbox_deploy
       # Prod deploys work exactly like qa/dev: move the tag to the commit you want
       # live. The image is built from that commit and the chart comes from
       # HELM_CHART_VERSION in .github/deploy/config.env (no per-release chart bump).
@@ -82,6 +83,8 @@ jobs:
             environment=qa;  release_name=www; values_dir=deployments/asite-qa/helm/3drepo.io;   values_file=values.yaml
           elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "dev_deploy" ]]; then
             environment=dev; release_name=www; values_dir=deployments/asite-dev/helm/3drepo.io;  values_file=values.yaml
+          elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "sandbox_deploy" ]]; then
+            environment=sandbox; release_name=www; values_dir=deployments/asite-sandbox/helm/3drepo.io; values_file=values.yaml
           elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "uk_deploy" ]]; then
             environment=uk;  release_name=www; values_dir=deployments/asite-prod/helm/3drepo.io; values_file=values.yaml
           elif [[ "$EVENT_NAME" == "push" && "$REF_TYPE" == "tag" && "$REF_NAME" == "ca_deploy" ]]; then
@@ -232,6 +235,7 @@ jobs:
           case "$ENVIRONMENT" in
             qa)  kcfg_uid=cB6kUbMbgSovRGpQ10lQ5w ;;  # ci-kubeconfig-qa
             dev) kcfg_uid=C93As_06lV79XkjXeKoMQQ ;;  # ci-kubeconfig-dev
+            sandbox) kcfg_uid=97b3uxZ2HsehXN9kAOf-GQ ;;  # ci-kubeconfig-sandbox
             uk)  kcfg_uid=rzRnzL72fmFNrTKKfVbyvw ;;  # ci-kubeconfig-uk
             ca)  kcfg_uid=WbQBfYi6XE8NOLfyOuM4PA ;;  # ci-kubeconfig-ca
             uae) kcfg_uid=9YGLNUzBhQHs4KHckr8WXA ;;  # ci-kubeconfig-uae
