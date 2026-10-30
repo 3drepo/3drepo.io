@@ -16,7 +16,7 @@
  */
 
 const { determineTestGroup } = require('../../helper/utils');
-const { src, modelFolder, objModel } = require('../../helper/path');
+const { src, objModel } = require('../../helper/path');
 const {
 	generateUUIDString,
 	generateRandomString,
@@ -46,10 +46,15 @@ const { createWriteStream } = require('fs');
 
 jest.mock('fs/promises', () => {
 	const actualFs = jest.requireActual('fs/promises');
-	return { ...actualFs, stat: jest.fn(actualFs.stat), access: jest.fn(actualFs.access) };
+	return {
+		...actualFs,
+		rm: jest.fn(actualFs.rm),
+		stat: jest.fn(actualFs.stat),
+		access: jest.fn(actualFs.access),
+	};
 });
 
-const { access, stat, copyFile, rm, mkdir, writeFile } = require('fs/promises');
+const { access, stat, rm, mkdir, writeFile } = require('fs/promises');
 
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -62,6 +67,7 @@ const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const Logger = require(`${src}/utils/logger`);
 
 const ModelProcessing = require(`${src}/services/modelProcessing`);
 
@@ -70,45 +76,282 @@ Queue.queueMessage.mockResolvedValue();
 
 const publishFn = EventsManager.publish.mockImplementation(() => { });
 
-const testQueueModelUpload = () => {
-	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
-	describe('queue model upload', () => {
-		const teamspace = generateRandomString();
-		const container = generateRandomString();
-		const data = { tag: '123', owner: '123' };
-		const file = { originalname: 'test.obj', path: fileCreated };
+const cleanupModelImportFiles = async (revId) => {
+	const importPath = path.join(config.cn_queue.shared_storage, revId);
+	await Promise.all([
+		rm(importPath, { recursive: true, force: true }),
+		rm(`${importPath}.json`, { force: true }),
+	]);
+};
 
-		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			await expect(ModelProcessing.queueModelUpload(
-				teamspace, container, data, file,
-			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
+const testProcessExternalModelUpload = () => {
+	describe('Process external model upload', () => {
+		let revId;
+
+		afterEach(async () => {
+			if (revId) {
+				await cleanupModelImportFiles(UUIDToString(revId));
+				revId = undefined;
+			}
 		});
 
-		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			await copyFile(objModel, fileCreated);
+		test('Should store the file and put a message on the queue', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const owner = generateRandomString();
+			const revInfo = {
+				owner,
+				tag: generateRandomString(),
+				timezone: generateRandomString(),
+				units: generateRandomString(),
+				lod: generateRandomString(),
+				importAnimations: true,
+			};
+			const file = { originalname: `${generateRandomString()}.OBJ`, path: objModel, size: 1024 };
+			revId = generateUUID();
 
-			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+			Revisions.addRevision.mockResolvedValueOnce(revId);
 
-			await expect(ModelProcessing.queueModelUpload(
-				teamspace, container, data, file,
-			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
-		});
+			await ModelProcessing.processExternalModelUpload(teamspace, project, container, revInfo, file);
 
-		test('should succeed with job inserted into the queue', async () => {
-			await copyFile(objModel, fileCreated);
-			await expect(ModelProcessing.queueModelUpload(teamspace, container, data, file)).resolves.toBeUndefined();
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, container, modelTypes.CONTAINER, {
+				tag: revInfo.tag,
+				timezone: revInfo.timezone,
+				units: revInfo.units,
+				lod: revInfo.lod,
+				importAnimations: revInfo.importAnimations,
+				author: owner,
+				format: '.obj',
+				rFile: [expect.any(String)],
+			});
+
+			const fileId = FilesManager.storeFileStream.mock.calls[0][2];
+			expect(Revisions.addRevision.mock.calls[0][4].rFile).toEqual([UUIDToString(fileId)]);
+			expect(FilesManager.storeFileStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFileStream).toHaveBeenCalledWith(
+				teamspace,
+				`${container}.history`,
+				fileId,
+				expect.anything(),
+				{ name: file.originalname, rev_id: UUIDToString(revId), project, model: container },
+			);
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
-
-			const corId = Queue.queueMessage.mock.calls[0][1];
-
+			expect(Queue.queueMessage).toHaveBeenCalledWith(
+				config.cn_queue.model_queue,
+				UUIDToString(revId),
+				`import $SHARED_SPACE/${UUIDToString(revId)}.json`,
+			);
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
-				{ teamspace, model: container, modelType: modelTypes.CONTAINER, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
+				teamspace,
+				model: container,
+				modelType: modelTypes.CONTAINER,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
+			});
+		});
+
+		test('Should remove the stored file if queueing the import fails', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const revInfo = { owner: generateRandomString() };
+			const file = { originalname: `${generateRandomString()}.obj`, path: objModel, size: 512 };
+			revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+
+			await expect(ModelProcessing.processExternalModelUpload(teamspace, project, container, revInfo, file))
+				.rejects.toEqual(templates.queueConnectionError);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFileStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFile).toHaveBeenCalledWith(
+				teamspace,
+				`${container}.history`,
+				FilesManager.storeFileStream.mock.calls[0][2],
+			);
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(publishFn).not.toHaveBeenCalled();
+		});
+
+		test('Should log a cleanup error if removing the import file fails', async () => {
+			const cleanupError = new Error('cleanup failed');
+			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => { });
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const file = { originalname: `${generateRandomString()}.obj`, path: objModel, size: 512 };
+			revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+			Queue.queueMessage.mockRejectedValueOnce(new Error('queue failed'));
+			rm.mockRejectedValueOnce(cleanupError);
+
+			try {
+				await expect(ModelProcessing.processExternalModelUpload(
+					teamspace, project, container, { owner: generateRandomString() }, file,
+				)).rejects.toEqual(templates.queueInsertionFailed);
+
+				expect(rm).toHaveBeenCalledWith(
+					`${config.cn_queue.shared_storage}/${UUIDToString(revId)}.json`,
+				);
+				expect(logErrorSpy).toHaveBeenCalledWith(
+					`Failed to remove files (clean up on failure : ${cleanupError}`,
+					undefined,
+					Logger.labels.modelProcessing,
+				);
+			} finally {
+				logErrorSpy.mockRestore();
+			}
 		});
 	});
+};
 
-	afterAll(() => rm(fileCreated).catch(() => {}));
+const testProcessInternalModelUpload = () => {
+	describe('Process internal model upload', () => {
+		let revId;
+
+		afterEach(async () => {
+			if (revId) {
+				await cleanupModelImportFiles(UUIDToString(revId));
+				revId = undefined;
+			}
+		});
+
+		test('Should reference the file and put a message on the queue', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const owner = generateRandomString();
+			const revInfo = {
+				owner,
+				tag: generateRandomString(),
+				timezone: generateRandomString(),
+				units: generateRandomString(),
+				lod: generateRandomString(),
+				importAnimations: true,
+			};
+			const file = {
+				originalname: `${generateRandomString()}.ifc`,
+				path: generateRandomString(),
+				format: '.ifc',
+				size: 2048,
+			};
+			revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+
+			await ModelProcessing.processInternalModelUpload(teamspace, project, container, revInfo, file);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, container, modelTypes.CONTAINER, {
+				tag: revInfo.tag,
+				timezone: revInfo.timezone,
+				units: revInfo.units,
+				lod: revInfo.lod,
+				importAnimations: revInfo.importAnimations,
+				author: owner,
+				rFile: [expect.any(String)],
+			});
+
+			const fileId = Revisions.addRevision.mock.calls[0][4].rFile[0];
+			expect(FilesManager.addExternalFileReference).toHaveBeenCalledTimes(1);
+			expect(FilesManager.addExternalFileReference).toHaveBeenCalledWith(
+				teamspace,
+				`${container}.history.ref`,
+				fileId,
+				{
+					_id: fileId,
+					name: file.originalname,
+					rev_id: UUIDToString(revId),
+					project,
+					model: container,
+					link: file.path,
+					size: file.size,
+				},
+			);
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(
+				config.cn_queue.model_queue,
+				UUIDToString(revId),
+				`import $SHARED_SPACE/${UUIDToString(revId)}.json`,
+			);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
+				teamspace,
+				model: container,
+				modelType: modelTypes.CONTAINER,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
+			});
+		});
+
+		test('Should fail if queueing the import fails', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const revInfo = { owner: generateRandomString() };
+			const file = {
+				originalname: `${generateRandomString()}.ifc`,
+				path: generateRandomString(),
+				format: '.ifc',
+				size: 2048,
+			};
+			revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+
+			await expect(ModelProcessing.processInternalModelUpload(teamspace, project, container, revInfo, file))
+				.rejects.toEqual(templates.queueConnectionError);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(FilesManager.addExternalFileReference).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(publishFn).not.toHaveBeenCalled();
+		});
+
+		test('Should log a cleanup error if removing the import file fails', async () => {
+			const cleanupError = new Error('cleanup failed');
+			const logErrorSpy = jest.spyOn(Logger.logger, 'logError').mockImplementation(() => { });
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const container = generateRandomString();
+			const file = {
+				originalname: `${generateRandomString()}.ifc`,
+				path: generateRandomString(),
+				format: '.ifc',
+				size: 2048,
+			};
+			revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+			Queue.queueMessage.mockRejectedValueOnce(new Error('queue failed'));
+			rm.mockRejectedValueOnce(cleanupError);
+
+			try {
+				await expect(ModelProcessing.processInternalModelUpload(
+					teamspace, project, container, { owner: generateRandomString() }, file,
+				)).rejects.toEqual(templates.queueInsertionFailed);
+
+				expect(rm).toHaveBeenCalledWith(
+					`${config.cn_queue.shared_storage}/${UUIDToString(revId)}.json`,
+				);
+				expect(logErrorSpy).toHaveBeenCalledWith(
+					`Failed to remove files (clean up on failure : ${cleanupError}`,
+					undefined,
+					Logger.labels.modelProcessing,
+				);
+			} finally {
+				logErrorSpy.mockRestore();
+			}
+		});
+	});
 };
 
 const testCallbackQueueConsumer = () => {
@@ -486,7 +729,7 @@ const testContainerGetFileName = () => {
 			const corId = generateUUIDString();
 			const fileName = `${generateRandomString()}.obj`;
 			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
-			await writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+			await writeFile(filePath, JSON.stringify({ fileName }));
 
 			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
 		});
@@ -557,7 +800,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 
-			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => { });
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
@@ -574,7 +817,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 
-			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => { });
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
@@ -648,7 +891,8 @@ const testInit = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testQueueModelUpload();
+	testProcessExternalModelUpload();
+	testProcessInternalModelUpload();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
 	testContainerGetFileName();

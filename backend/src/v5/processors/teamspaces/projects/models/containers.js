@@ -19,6 +19,7 @@ const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./comm
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { processExternalModelUpload, processInternalModelUpload } = require('../../../../services/modelProcessing');
 
 const BundleAssets = require('./commons/assets/bundles');
 const Comments = require('./commons/tickets.comments');
@@ -35,7 +36,6 @@ const { getProjectById } = require('../../../../models/projectSettings');
 
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
@@ -68,15 +68,19 @@ Containers.getRevisions = async (teamspace, project, container, showVoid) => {
 	});
 };
 
-Containers.newRevision = async (teamspace, container, data, file) => {
+Containers.newRevision = async (teamspace, project, container, data, file) => {
 	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
-	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(async () => {
-		if (!file.readOnly) {
+	if (!file.readOnly) {
+		try {
+			await processExternalModelUpload(teamspace, project, container, { ...data, units }, file);
+		} finally {
 			await fs.rm(file.path).catch((e) => {
 				logger.logError(`Failed to delete uploaded file: ${e.message}`);
 			});
 		}
-	});
+	} else {
+		await processInternalModelUpload(teamspace, project, container, { ...data, units }, file);
+	}
 };
 
 Containers.updateRevisionStatus = (teamspace, project, container, revision, status) => updateRevisionStatus(

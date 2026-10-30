@@ -16,9 +16,10 @@
  */
 
 const { UUIDToString, generateUUID, generateUUIDString, stringToUUID } = require('../utils/helper/uuids');
-const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { access, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { addExternalFileReference, removeFile, storeFile, storeFileStream } = require('./filesManager');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
+const { constants, createReadStream, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -34,7 +35,6 @@ const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
 const logger = require('../utils/logger').logWithLabel(processingLabel);
-const { storeFile } = require('./filesManager');
 
 const ModelProcessing = {};
 
@@ -46,6 +46,8 @@ const {
 	shared_storage: sharedDir,
 	clash_queue: clashq,
 } = queueConfig;
+
+const collectionName = (container) => `${container}.history`;
 
 const resolveSharedPath = (filePath) => {
 	if (typeof filePath !== 'string') return undefined;
@@ -103,19 +105,23 @@ const onCallbackQMsg = ({ content, properties }) => {
 		const modelType = container ? modelTypes.CONTAINER : modelTypes.DRAWING;
 
 		if (status) {
-			publish(events.QUEUED_TASK_UPDATE, { teamspace,
+			publish(events.QUEUED_TASK_UPDATE, {
+				teamspace,
 				model: container || drawing,
 				modelType,
 				corId: properties.correlationId,
-				status });
+				status,
+			});
 		} else {
-			publish(events.QUEUED_TASK_COMPLETED, { teamspace,
+			publish(events.QUEUED_TASK_COMPLETED, {
+				teamspace,
 				model: container || drawing,
 				modelType,
 				corId: properties.correlationId,
 				user,
 				value,
-				message });
+				message,
+			});
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
@@ -148,18 +154,22 @@ const queueDrawingUpload = async (teamspace, project, drawing, revId, data, file
 
 		await queueMessage(drawingq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+		publish(events.QUEUED_TASK_UPDATE, {
+			teamspace,
 			model: drawing,
 			modelType: modelTypes.DRAWING,
 			corId: revId,
-			status: processStatuses.QUEUED });
+			status: processStatuses.QUEUED,
+		});
 	} catch (err) {
 		logger.logError('Failed to queue drawing task', err.message);
-		publish(events.QUEUED_TASK_COMPLETED, { teamspace,
+		publish(events.QUEUED_TASK_COMPLETED, {
+			teamspace,
 			model: drawing,
 			modelType: modelTypes.DRAWING,
 			corId: revId,
-			value: 4 });
+			value: 4,
+		});
 	}
 };
 
@@ -186,52 +196,58 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, drawing, revIn
 		const queueMeta = { format, size: file.buffer.length, owner };
 		await queueDrawingUpload(teamspace, project, drawing, UUIDToString(rev_id), queueMeta, file.buffer);
 	} else {
-		publish(events.QUEUED_TASK_COMPLETED, { teamspace,
+		publish(events.QUEUED_TASK_COMPLETED, {
+			teamspace,
 			model: drawing,
 			modelType: modelTypes.DRAWING,
 			corId: UUIDToString(rev_id),
 			value: 0,
-			user: owner });
+			user: owner,
+		});
 	}
 };
 
-ModelProcessing.queueModelUpload = async (teamspace, container, data, { originalname, path }) => {
-	const revId = generateUUIDString();
-	const fileNameSanitised = originalname.replace(/[ *"/\\[\]:;|=,<>$]/g, '_');
-	const fileLoc = `${revId}/${fileNameSanitised}`;
-
+const queueModelImport = async (
+	teamspace,
+	container,
+	revId,
+	{ owner: user, timezone, units, lod, importAnimations },
+	{ format, size, fileName }) => {
+	const pathToRevFolder = Path.join(sharedDir, revId);
 	try {
 		const json = {
-			...data,
-			file: `${SHARED_SPACE_TAG}/${fileLoc}`,
 			teamspace,
 			container,
 			revId,
+			owner: user,
+			timezone,
+			units,
+			lod,
+			importAnimations,
+			format,
+			size,
+			fileName,
 		};
 
-		await mkdir(`${sharedDir}/${revId}`);
+		// why is this needed?
+		await mkdir(pathToRevFolder);
 
-		await Promise.all(
-			[
-				copyFile(path, `${sharedDir}/${fileLoc}`),
-				writeFile(`${sharedDir}/${revId}.json`, JSON.stringify(json)),
+		await writeFile(`${pathToRevFolder}.json`, JSON.stringify(json));
 
-			],
-		);
-
-		const msg = `import -f ${SHARED_SPACE_TAG}/${revId}.json`;
+		const msg = `import ${SHARED_SPACE_TAG}/${revId}.json`;
 
 		await queueMessage(modelq, revId, msg);
 
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
+		publish(events.QUEUED_TASK_UPDATE, {
+			teamspace,
 			model: container,
 			modelType: modelTypes.CONTAINER,
 			corId: revId,
-			status: processStatuses.QUEUED });
+			status: processStatuses.QUEUED,
+		});
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
-			rm(`${sharedDir}/${fileLoc}`),
 			rm(`${sharedDir}/${revId}.json`),
 		]).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
@@ -246,11 +262,71 @@ ModelProcessing.queueModelUpload = async (teamspace, container, data, { original
 	}
 };
 
+const sanitizeFileName = (fileName) => fileName.replace(/[ *"/\\[\]:;|=,<>$.]/g, '_');
+
+ModelProcessing.processExternalModelUpload = async (teamspace, project, container, data, file) => {
+	const format = Path.extname(file.originalname).toLowerCase();
+	const { owner, ...revData } = data;
+	const fileNameSanitised = sanitizeFileName(file.originalname);
+	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
+	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
+		{ ...revData, author: owner, format, rFile: [fileId] });
+
+	const fileMeta = { name: file.originalname, rev_id: UUIDToString(rev_id), project, model: container };
+
+	const collection = collectionName(container);
+	try {
+		await storeFileStream(teamspace, collection, fileId, createReadStream(file.path), fileMeta);
+
+		await queueModelImport(
+			teamspace,
+			container,
+			UUIDToString(rev_id),
+			data,
+			{ format, size: file.size, fileName: fileNameSanitised },
+		);
+	} catch (error) {
+		await removeFile(teamspace, collection, fileId);
+
+		throw error;
+	}
+};
+
+ModelProcessing.processInternalModelUpload = async (teamspace, project, container, data, file) => {
+	const fileNameSanitised = sanitizeFileName(file.originalname);
+	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
+	const { owner, ...revData } = data;
+	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
+		{ ...revData, author: owner, rFile: [fileId] });
+
+	const collection = collectionName(container);
+
+	const refInfo = {
+		_id: fileId,
+		name: file.originalname,
+		rev_id: UUIDToString(rev_id),
+		project,
+		model: container,
+		link: file.path,
+		size: file.size,
+	};
+
+	await addExternalFileReference(teamspace, `${collection}.ref`, fileId, refInfo);
+
+	await queueModelImport(
+		teamspace,
+		container,
+		UUIDToString(rev_id),
+		data,
+		{ format: file.format, size: file.size, fileName: fileNameSanitised },
+	);
+};
+
 ModelProcessing.getContainerFileName = (corId) => {
 	try {
 		const filePath = Path.join(sharedDir, `${corId}.json`);
 		const jsonFile = JSON.parse(readFileSync(filePath).toString());
-		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		const { fileName } = jsonFile;
 		return fileName;
 	} catch (error) {
 		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
