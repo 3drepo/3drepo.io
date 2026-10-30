@@ -18,7 +18,7 @@ import { isEqual } from 'lodash';
 import { useRef, useState, useEffect, createContext, useContext, createRef, JSX } from 'react';
 
 export type VListHandle = {
-	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
+	gotoIndex: (index: number, scroller?: Element, asTopItem?: boolean) => Promise<any>;
 	getOffsetToIndex: (index: number) => number;
 	isItemWithIndexShowing: (index: number, scroller?: Element) => boolean;
 };
@@ -315,10 +315,10 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 		return getHeightByIndex(index, itemsHeight.current, itemHeight);
 	};
 
-	const gotoIndex = async (index, scroller?:Element) => {
+	const gotoIndex = async (index, scroller?:Element, asTopItem?: boolean) => {
 		const scrollingElement = scroller || containerRef.current.parentElement;
 
-		if ( !isItemWithIndexShowing(index, scrollingElement)) {
+		if ( !isItemWithIndexShowing(index, scrollingElement) || asTopItem) {
 			scrollingElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
 		} 
 
