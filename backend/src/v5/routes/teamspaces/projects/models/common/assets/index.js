@@ -91,7 +91,7 @@ const getPointCloudOctree = async (req, res) => {
 		return;
 	}
 
-	if (Number.isNaN(offset) || Number.isNaN(size)) {
+	if (Number.isNaN(+offset) || Number.isNaN(+size)) {
 		respond(req, res, templates.invalidArguments);
 		return;
 	}
@@ -124,7 +124,7 @@ const getPointCloudHierarchy = async (req, res) => {
 		return;
 	}
 
-	if (Number.isNaN(offset) || Number.isNaN(size)) {
+	if (Number.isNaN(+offset) || Number.isNaN(+size)) {
 		respond(req, res, templates.invalidArguments);
 		return;
 	}
