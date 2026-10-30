@@ -27,6 +27,7 @@ import { useEffect } from 'react';
 import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.component';
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
+import { ColumnWidths } from './ticketHistory.helpers';
 
 export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }) => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -40,7 +41,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 	}, [ticket._id]);
 
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={onClickClose} maxWidth="xl">
 			<Form>
 				<ModalHeader
 					onClickClose={onClickClose}
@@ -55,19 +56,19 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 				/>
 				<ModalBody>
 					<Header onSortingChange={() => {}}>
-						<Label minWidth={122}>
+						<Label width={ColumnWidths.Timestamp}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.date" defaultMessage="Date" />
 						</Label>
-						<Label width={352}>
+						<Label width={ColumnWidths.Author}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.user" defaultMessage="User" />
 						</Label>
-						<Label width={222}>
+						<Label width={ColumnWidths.ActionType}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.action" defaultMessage="Action" />
 						</Label>
-						<Label width={297}>
+						<Label width={ColumnWidths.ChangePropertyName}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.property" defaultMessage="Property" />
 						</Label>
-						<Label width={297}>
+						<Label minWidth={ColumnWidths.ChangeDetails}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.details" defaultMessage="Details" />
 						</Label>
 					</Header>

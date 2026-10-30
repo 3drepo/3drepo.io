@@ -18,9 +18,7 @@ import { ChangeDetail } from './changeDetail.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
-import { ItemContainer } from '../ticketHistoryDialog.styles';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Row } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableRow/ticketsTableRow.styles';
+import { ItemContainer, ChangeRow, ChangePropertyName, DetailContainer, Author, Timestamp, ActionType } from '../ticketHistoryDialog.styles';
 import { get, has } from 'lodash';
 
 const getChangedPaths = (changes: any, prefix = ''): string[] =>
@@ -43,12 +41,12 @@ const ChangesTable = ({ changes }) => {
 	console.log('@@ paths', paths);
 	return (
 		paths.map((propertyName) => (
-			<Row key={propertyName}>
-				<FixedOrGrowContainer>{propertyName}</FixedOrGrowContainer>
-				<FixedOrGrowContainer>
+			<ChangeRow key={propertyName}>
+				<ChangePropertyName>{propertyName}</ChangePropertyName>
+				<DetailContainer>
 					<ChangeDetail propertyName={propertyName} change={get(changes, propertyName)} />
-				</FixedOrGrowContainer>
-			</Row>
+				</DetailContainer>
+			</ChangeRow>
 		))
 	);
 };
@@ -61,15 +59,13 @@ export const TicketHistoryItem = ({ author, timestamp, changes }) => {
 	const fullname = getFullnameFromUser(user);
 	return (
 		<ItemContainer>
-			<FixedOrGrowContainer>{formattedTimestamp}</FixedOrGrowContainer>
-			<FixedOrGrowContainer>
+			<Timestamp>{formattedTimestamp}</Timestamp>
+			<Author>
 				<AssigneeCircle assignee={author} />
 				{fullname}
-			</FixedOrGrowContainer>
-			<FixedOrGrowContainer>Update</FixedOrGrowContainer>
-			<FixedOrGrowContainer>
-				<ChangesTable changes={changes} />
-			</FixedOrGrowContainer>
+			</Author>
+			<ActionType>Update</ActionType>
+			<ChangesTable changes={changes} />
 		</ItemContainer>
 	);
 };

@@ -17,9 +17,10 @@
 
 import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
+import { ColumnWidths } from './ticketHistory.helpers';
 
 export const ItemContainer = styled.li<{ selected?: boolean }>`
-	width: 1000px;
+	width: 100%;
 	height: 80px;
 
 	padding: 0 29px;
@@ -33,9 +34,34 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 
 	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
+
+export const Timestamp = styled.div`
+	width: ${ColumnWidths.Timestamp}px;
+`;
+export const Author = styled.div`
+	width: ${ColumnWidths.Author}px;
+`;
+export const ActionType = styled.div`
+	width: ${ColumnWidths.ActionType}px;
+`;
+
+export const ChangeRow = styled.div`
+	display: grid;
+	grid-template-columns: ${ColumnWidths.ChangePropertyName}px ${ColumnWidths.ChangeDetails}px;
+`;
+export const ChangePropertyName = styled.div`
+	font-weight: bold;
+`;
+
+export const DetailContainer = styled.div`
+	display: inline-flex;
+`;
+
 
 export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
 	padding: 0 3px;
+	flex-grow: 0;
 `;
