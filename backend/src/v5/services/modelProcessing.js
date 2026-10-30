@@ -212,20 +212,21 @@ const queueModelImport = async (
 	container,
 	revId,
 	{ owner: user, timezone, units, lod, importAnimations },
-	{ format, size }) => {
+	{ format, size, fileName }) => {
 	const pathToRevFolder = Path.join(sharedDir, revId);
 	try {
 		const json = {
 			teamspace,
 			container,
 			revId,
-			user,
+			owner: user,
 			timezone,
 			units,
 			lod,
 			importAnimations,
 			format,
 			size,
+			fileName,
 		};
 
 		// why is this needed?
@@ -277,7 +278,13 @@ ModelProcessing.processExternalModelUpload = async (teamspace, project, containe
 	try {
 		await storeFileStream(teamspace, collection, fileId, createReadStream(file.path), fileMeta);
 
-		await queueModelImport(teamspace, container, UUIDToString(rev_id), data, { format, size: file.size });
+		await queueModelImport(
+			teamspace,
+			container,
+			UUIDToString(rev_id),
+			data,
+			{ format, size: file.size, fileName: fileNameSanitised },
+		);
 	} catch (error) {
 		await removeFile(teamspace, collection, fileId);
 
@@ -306,14 +313,20 @@ ModelProcessing.processInternalModelUpload = async (teamspace, project, containe
 
 	await addExternalFileReference(teamspace, `${collection}.ref`, fileId, refInfo);
 
-	await queueModelImport(teamspace, container, UUIDToString(rev_id), data, { format: file.format, size: file.size });
+	await queueModelImport(
+		teamspace,
+		container,
+		UUIDToString(rev_id),
+		data,
+		{ format: file.format, size: file.size, fileName: fileNameSanitised },
+	);
 };
 
 ModelProcessing.getContainerFileName = (corId) => {
 	try {
 		const filePath = Path.join(sharedDir, `${corId}.json`);
 		const jsonFile = JSON.parse(readFileSync(filePath).toString());
-		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		const { fileName } = jsonFile;
 		return fileName;
 	} catch (error) {
 		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
