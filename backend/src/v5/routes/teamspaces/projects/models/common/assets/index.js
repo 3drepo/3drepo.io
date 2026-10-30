@@ -32,6 +32,7 @@ const { getAssetProperties: getFederationAssetProperties } = require('../../../.
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { getPointCloudOctreeData, getPointCloudHierarchyData } = require('../../../../../../processors/teamspaces/projects/models/commons/assets/pointClouds');
 
 const getTree = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
@@ -74,6 +75,60 @@ const getTexture = async (req, res) => {
 	try {
 		const { readStream, size, mimeType } = await getTextureData(teamspace, project, container, textureId);
 		writeStreamRespond(req, res, templates.ok, readStream, { mimeType, fileSize: size });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getPointCloudOctree = async (req, res) => {
+	const { teamspace, container, revision } = req.params;
+
+    // Get offset and size from query parameters
+    const { offset, size } = req.query;
+    if(!offset || !size) {
+        respond(req, res, templates.invalidArguments);
+        return;
+    }
+
+	if(isNaN(offset) || isNaN(size)) {
+        respond(req, res, templates.invalidArguments);
+        return;
+    }
+
+	const offsetNum = Number(offset);
+	const sizeNum = Number(size);
+
+	try {
+		const { readStream, streamSize, mimeType, encoding } = await getPointCloudOctreeData(teamspace, container, revision, offsetNum, sizeNum);
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: streamSize });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getPointCloudHierarchy = async (req, res) => {
+	const { teamspace, container, revision } = req.params;
+
+    // Get offset and size from query parameters
+    const { offset, size } = req.query;
+    if(!offset || !size) {
+        respond(req, res, templates.invalidArguments);
+        return;
+    }
+
+    if(isNaN(offset) || isNaN(size)) {
+        respond(req, res, templates.invalidArguments);
+        return;
+    }
+
+    const offsetNum = Number(offset);
+    const sizeNum = Number(size);
+
+	try {
+		const { readStream, streamSize, mimeType, encoding } = await getPointCloudHierarchyData(teamspace, container, revision, offsetNum, sizeNum);
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: streamSize });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -299,6 +354,120 @@ const establishRoutes = (modelType, isInternal) => {
          */
 
 		router.get('/textures/:textureId', hasReadAccessToModel[modelType], getTexture);
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/pointClouds/octree/:
+		 *   get:
+		 *     description: Returns point cloud octree data for a given container. Optionally accepts a revision ID (`revId`). If `revId` is not provided, data for the the latest revision is returned.
+		 *     tags: [v:internal, v:external, ViewerAssets]
+		 *     operationId: getPointCloudOctree
+		 *     parameters:
+		 *       - name: teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: container
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: revId
+		 *         in: query
+		 *         required: false
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: start
+		 *         description: Start byte of the octree data section
+		 *         in: query
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: size
+		 *         description: Size of the octree data section in bytes
+		 *         in: query
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: Point cloud octree binary data
+		 *         content:
+		 *           application/octet-stream:
+		 *             schema:
+		 *               type: string
+		 *               format: binary
+		 */
+
+		router.get('/pointClouds/octree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getPointCloudOctree);
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/pointClouds/hierarchy/:
+		 *   get:
+		 *     description: Returns point cloud octree data for a given container. Optionally accepts a revision ID (`revId`). If `revId` is not provided, data for the the latest revision is returned.
+		 *     tags: [v:internal, v:external, ViewerAssets]
+		 *     operationId: getPointCloudHierarchy
+		 *     parameters:
+		 *       - name: teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: container
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: revId
+		 *         in: query
+		 *         required: false
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: start
+		 *         description: Start byte of the hierarchy data section
+		 *         in: query
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: size
+		 *         description: Size of the hierarchy data section in bytes
+		 *         in: query
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: Point cloud hierarchy binary data
+		 *         content:
+		 *           application/octet-stream:
+		 *             schema:
+		 *               type: string
+		 *               format: binary
+		 */
+
+		router.get('/pointClouds/hierarchy', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getPointCloudHierarchy);
 	}
 
 	/**
