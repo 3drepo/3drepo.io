@@ -50,7 +50,7 @@ jobs:
         run: cd backend ; yarn test:v5
   run-backend-tests-v4:
     name: Run Backend tests (V4)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     services:
       rabbitmq:
         image: rabbitmq:3.10.5-management
@@ -85,7 +85,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
         with:
-          mongodb-version: 8.0.35
+          mongodb-version: 8.0.34
           mongodb-username: admintesting
           mongodb-password: admintesting
 
