@@ -39,7 +39,7 @@ const testGetPointCloudOctreeData = () => {
 		const container = generateRandomString();
 		const revision = generateUUID();
 		const offset = 123;
-		const size = 456
+		const size = 456;
 
 		test('should return what getFileAsStream returns', async () => {
 			const mockResult = generateRandomObject();
@@ -64,8 +64,8 @@ const testGetPointCloudOctreeData = () => {
 				expectedSectionInfo,
 			);
 		});
-	})
-}
+	});
+};
 
 const testGetPointCloudHierarchyData = () => {
 	describe('getPointCloudHierarchyData', () => {
@@ -73,7 +73,7 @@ const testGetPointCloudHierarchyData = () => {
 		const container = generateRandomString();
 		const revision = generateUUID();
 		const offset = 123;
-		const size = 456
+		const size = 456;
 
 		test('should return what getFileAsStream returns', async () => {
 			const mockResult = generateRandomObject();
@@ -98,8 +98,8 @@ const testGetPointCloudHierarchyData = () => {
 				expectedSectionInfo,
 			);
 		});
-	})
-}
+	});
+};
 
 describe(determineTestGroup(__filename), () => {
 	testGetPointCloudOctreeData();

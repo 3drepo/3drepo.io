@@ -20,6 +20,7 @@ const {
 	getTree: getContainerTree,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const { getMeshData, getTexture: getTextureData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
+const { getPointCloudHierarchyData, getPointCloudOctreeData } = require('../../../../../../processors/teamspaces/projects/models/commons/assets/pointClouds');
 const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
@@ -32,7 +33,6 @@ const { getAssetProperties: getFederationAssetProperties } = require('../../../.
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
-const { getPointCloudOctreeData, getPointCloudHierarchyData } = require('../../../../../../processors/teamspaces/projects/models/commons/assets/pointClouds');
 
 const getTree = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
@@ -84,23 +84,29 @@ const getTexture = async (req, res) => {
 const getPointCloudOctree = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
-    // Get offset and size from query parameters
-    const { offset, size } = req.query;
-    if(!offset || !size) {
-        respond(req, res, templates.invalidArguments);
-        return;
-    }
+	// Get offset and size from query parameters
+	const { offset, size } = req.query;
+	if (!offset || !size) {
+		respond(req, res, templates.invalidArguments);
+		return;
+	}
 
-	if(isNaN(offset) || isNaN(size)) {
-        respond(req, res, templates.invalidArguments);
-        return;
-    }
+	if (Number.isNaN(offset) || Number.isNaN(size)) {
+		respond(req, res, templates.invalidArguments);
+		return;
+	}
 
 	const offsetNum = Number(offset);
 	const sizeNum = Number(size);
 
 	try {
-		const { readStream, streamSize, mimeType, encoding } = await getPointCloudOctreeData(teamspace, container, revision, offsetNum, sizeNum);
+		const { readStream, streamSize, mimeType, encoding } = await getPointCloudOctreeData(
+			teamspace,
+			container,
+			revision,
+			offsetNum,
+			sizeNum,
+		);
 		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: streamSize });
 	} catch (err) {
 		// istanbul ignore next
@@ -111,23 +117,29 @@ const getPointCloudOctree = async (req, res) => {
 const getPointCloudHierarchy = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
-    // Get offset and size from query parameters
-    const { offset, size } = req.query;
-    if(!offset || !size) {
-        respond(req, res, templates.invalidArguments);
-        return;
-    }
+	// Get offset and size from query parameters
+	const { offset, size } = req.query;
+	if (!offset || !size) {
+		respond(req, res, templates.invalidArguments);
+		return;
+	}
 
-    if(isNaN(offset) || isNaN(size)) {
-        respond(req, res, templates.invalidArguments);
-        return;
-    }
+	if (Number.isNaN(offset) || Number.isNaN(size)) {
+		respond(req, res, templates.invalidArguments);
+		return;
+	}
 
-    const offsetNum = Number(offset);
-    const sizeNum = Number(size);
+	const offsetNum = Number(offset);
+	const sizeNum = Number(size);
 
 	try {
-		const { readStream, streamSize, mimeType, encoding } = await getPointCloudHierarchyData(teamspace, container, revision, offsetNum, sizeNum);
+		const { readStream, streamSize, mimeType, encoding } = await getPointCloudHierarchyData(
+			teamspace,
+			container,
+			revision,
+			offsetNum,
+			sizeNum,
+		);
 		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: streamSize });
 	} catch (err) {
 		// istanbul ignore next
@@ -147,211 +159,211 @@ const establishRoutes = (modelType, isInternal) => {
 		// istanbul ignore next
 		if (modelType === modelTypes.CONTAINER) {
 			/**
-            * @openapi
-            * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/tree:
-            *   get:
-            *     description: Returns the full tree for the container
-            *     tags: [v:internal, ViewerAssets]
-            *     operationId: getTree
-            *     parameters:
-            *       - name: teamspace
-            *         description: Name of teamspace
-            *         in: path
-            *         required: true
-            *         schema:
-            *           type: string
-            *       - name: project
-            *         description: Project ID
-            *         in: path
-            *         required: true
-            *         schema:
-            *           type: string
-            *           format: uuid
-            *       - name: container
-            *         description: Container ID
-            *         in: path
-            *         required: true
-            *         schema:
-            *           type: string
-            *           format: uuid
-            *       - name: revId
-            *         description: Revision ID
-            *         in: query
-            *         required: false
-            *         schema:
-            *           type: string
-            *           format: uuid
-            *     responses:
-            *       401:
-            *         $ref: "#/components/responses/notLoggedIn"
-            *       200:
-            *         description: returns the full tree for the container
-            *         content:
-            *           application/json:
-            *             example:
-            *               mainTree:
-            *                 nodes:
-            *                   account: "teamSpace1"
-            *                   project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-            *                   type: "transformation"
-            *                   name: "RootNode"
-            *                   path: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
-            *                   _id: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
-            *                   shared_id: "4dd46b6f-099e-42cd-b045-6460200e7995"
-            *                   children:
-            *                     - account: "teamSpace1"
-            *                       project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-            *                       type: "transformation"
-            *                       name: "Foliiferous Tree H64_2"
-            *                       path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f"
-            *                       _id: "33fe7c13-17a4-43d6-af03-ceae6880322f"
-            *                       shared_id: "b69a8384-c29d-4954-9efa-4c7bc14f1d3d"
-            *                       children:
-            *                         - account: "teamSpace1"
-            *                           project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-            *                           type: "mesh"
-            *                           name: "Foliiferous Tree H64"
-            *                           path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f__ce413e99-8469-4ed0-86e3-ff50bf4fed89"
-            *                           _id: "ce413e99-8469-4ed0-86e3-ff50bf4fed89"
-            *                           shared_id: "a876e59a-8cda-4d61-b438-c74ce7b8855d"
-            *                           toggleState: "visible"
-            *                       toggleState: "visible"
-            *                   toggleState: "visible"
-            *                 idToName:
-            *                   ce413e99-8469-4ed0-86e3-ff50bf4fed89: "Foliiferous Tree H64"
-            *                   33fe7c13-17a4-43d6-af03-ceae6880322f: "Foliiferous Tree H64_2"
-            *                   73a41cea-4c6b-47ed-936b-3f5641aecb52: "RootNode"
-            *               subTrees: []
-            */
+			* @openapi
+			* /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/tree:
+			*   get:
+			*     description: Returns the full tree for the container
+			*     tags: [v:internal, ViewerAssets]
+			*     operationId: getTree
+			*     parameters:
+			*       - name: teamspace
+			*         description: Name of teamspace
+			*         in: path
+			*         required: true
+			*         schema:
+			*           type: string
+			*       - name: project
+			*         description: Project ID
+			*         in: path
+			*         required: true
+			*         schema:
+			*           type: string
+			*           format: uuid
+			*       - name: container
+			*         description: Container ID
+			*         in: path
+			*         required: true
+			*         schema:
+			*           type: string
+			*           format: uuid
+			*       - name: revId
+			*         description: Revision ID
+			*         in: query
+			*         required: false
+			*         schema:
+			*           type: string
+			*           format: uuid
+			*     responses:
+			*       401:
+			*         $ref: "#/components/responses/notLoggedIn"
+			*       200:
+			*         description: returns the full tree for the container
+			*         content:
+			*           application/json:
+			*             example:
+			*               mainTree:
+			*                 nodes:
+			*                   account: "teamSpace1"
+			*                   project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
+			*                   type: "transformation"
+			*                   name: "RootNode"
+			*                   path: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
+			*                   _id: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
+			*                   shared_id: "4dd46b6f-099e-42cd-b045-6460200e7995"
+			*                   children:
+			*                     - account: "teamSpace1"
+			*                       project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
+			*                       type: "transformation"
+			*                       name: "Foliiferous Tree H64_2"
+			*                       path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f"
+			*                       _id: "33fe7c13-17a4-43d6-af03-ceae6880322f"
+			*                       shared_id: "b69a8384-c29d-4954-9efa-4c7bc14f1d3d"
+			*                       children:
+			*                         - account: "teamSpace1"
+			*                           project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
+			*                           type: "mesh"
+			*                           name: "Foliiferous Tree H64"
+			*                           path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f__ce413e99-8469-4ed0-86e3-ff50bf4fed89"
+			*                           _id: "ce413e99-8469-4ed0-86e3-ff50bf4fed89"
+			*                           shared_id: "a876e59a-8cda-4d61-b438-c74ce7b8855d"
+			*                           toggleState: "visible"
+			*                       toggleState: "visible"
+			*                   toggleState: "visible"
+			*                 idToName:
+			*                   ce413e99-8469-4ed0-86e3-ff50bf4fed89: "Foliiferous Tree H64"
+			*                   33fe7c13-17a4-43d6-af03-ceae6880322f: "Foliiferous Tree H64_2"
+			*                   73a41cea-4c6b-47ed-936b-3f5641aecb52: "RootNode"
+			*               subTrees: []
+			*/
 			router.get('/tree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getTree);
 		}
 	}
 
 	if (modelTypes.CONTAINER === modelType) {
 		/**
-         * @openapi
-         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
-         *   get:
-         *     description: Returns mesh geometry data
-         *     tags: [v:internal, v:external, ViewerAssets]
-         *     operationId: getMesh
-         *     parameters:
-         *       - name: teamspace
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *       - name: project
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *       - name: container
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *       - name: meshId
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *     responses:
-         *       401:
-         *         $ref: "#/components/responses/notLoggedIn"
-         *       200:
-         *         description: Mesh geometry data
-         *         content:
-         *           application/json:
-         *             schema:
-         *               type: object
-         *               properties:
-         *                 matrix:
-         *                   description: 4x4 transformation matrix
-         *                   type: array
-         *                   example:
-         *                     - [1, 0, 0, 0]
-         *                     - [0, 1, 0, 0]
-         *                     - [0, 0, 1, 0]
-         *                     - [0, 0, 0, 1]
-         *                   items:
-         *                     type: array
-         *                     items:
-         *                       type: number
-         *                 vertices:
-         *                   description: Vertex positions
-         *                   type: array
-         *                   example:
-         *                     - [0.0, 0.0, 0.0]
-         *                     - [1.0, 0.0, 0.0]
-         *                     - [0.0, 1.0, 0.0]
-         *                   items:
-         *                     type: array
-         *                     items:
-         *                       type: number
-         *                 faces:
-         *                   description: Triangulated faces, or lines if primitive type is 2
-         *                   type: array
-         *                   example:
-         *                     - [0, 1, 2]
-         *                   items:
-         *                     type: array
-         *                     items:
-         *                       type: integer
-         *                 primitive:
-         *                   description: Geometry type (2 = line, 3 = mesh)
-         *                   type: integer
-         *                   enum: [2, 3]
-         *                   example: 3
-         */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
+		 *   get:
+		 *     description: Returns mesh geometry data
+		 *     tags: [v:internal, v:external, ViewerAssets]
+		 *     operationId: getMesh
+		 *     parameters:
+		 *       - name: teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: container
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: meshId
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: Mesh geometry data
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 matrix:
+		 *                   description: 4x4 transformation matrix
+		 *                   type: array
+		 *                   example:
+		 *                     - [1, 0, 0, 0]
+		 *                     - [0, 1, 0, 0]
+		 *                     - [0, 0, 1, 0]
+		 *                     - [0, 0, 0, 1]
+		 *                   items:
+		 *                     type: array
+		 *                     items:
+		 *                       type: number
+		 *                 vertices:
+		 *                   description: Vertex positions
+		 *                   type: array
+		 *                   example:
+		 *                     - [0.0, 0.0, 0.0]
+		 *                     - [1.0, 0.0, 0.0]
+		 *                     - [0.0, 1.0, 0.0]
+		 *                   items:
+		 *                     type: array
+		 *                     items:
+		 *                       type: number
+		 *                 faces:
+		 *                   description: Triangulated faces, or lines if primitive type is 2
+		 *                   type: array
+		 *                   example:
+		 *                     - [0, 1, 2]
+		 *                   items:
+		 *                     type: array
+		 *                     items:
+		 *                       type: integer
+		 *                 primitive:
+		 *                   description: Geometry type (2 = line, 3 = mesh)
+		 *                   type: integer
+		 *                   enum: [2, 3]
+		 *                   example: 3
+		 */
 
 		router.get('/meshes/:meshId', hasReadAccessToModel[modelType], getMesh);
 
 		/**
-         * @openapi
-         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/textures/{textureId}:
-         *   get:
-         *     description: Returns texture binary data
-         *     tags: [v:internal, v:external, ViewerAssets]
-         *     operationId: getTexture
-         *     parameters:
-         *       - name: teamspace
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *       - name: project
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *       - name: container
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *       - name: textureId
-         *         in: path
-         *         required: true
-         *         schema:
-         *           type: string
-         *           format: uuid
-         *     responses:
-         *       401:
-         *         $ref: "#/components/responses/notLoggedIn"
-         *       200:
-         *         description: Texture binary data
-         *         content:
-         *           image/png:
-         *             schema:
-         *               type: string
-         *               format: binary
-         */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/textures/{textureId}:
+		 *   get:
+		 *     description: Returns texture binary data
+		 *     tags: [v:internal, v:external, ViewerAssets]
+		 *     operationId: getTexture
+		 *     parameters:
+		 *       - name: teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: container
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: textureId
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: Texture binary data
+		 *         content:
+		 *           image/png:
+		 *             schema:
+		 *               type: string
+		 *               format: binary
+		 */
 
 		router.get('/textures/:textureId', hasReadAccessToModel[modelType], getTexture);
 

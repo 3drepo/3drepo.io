@@ -24,26 +24,24 @@ const STASH_POINTCLOUD_EXT = '.stash.pointclouds';
 const STASH_POINTCLOUD_OCTREE_FILE = 'octree.bin';
 const STASH_POINTCLOUD_HIERARCHY_FILE = 'hierarchy.bin';
 
-PointCloudAssets.getPointCloudOctreeData = async (teamspace, container, revision, offset, size) => {
-	
-    const sectionInfo = {
-        start: offset,
-        end: offset + size - 1, // - 1 because end is inclusive
-    };
+PointCloudAssets.getPointCloudOctreeData = (teamspace, container, revision, offset, size) => {
+	const sectionInfo = {
+		start: offset,
+		end: offset + size - 1, // - 1 because end is inclusive
+	};
 
-    const fileName = `${UUIDToString(revision)}/${STASH_POINTCLOUD_OCTREE_FILE}`;
+	const fileName = `${UUIDToString(revision)}/${STASH_POINTCLOUD_OCTREE_FILE}`;
 
 	return getFileAsStream(teamspace, `${container}${STASH_POINTCLOUD_EXT}`, fileName, sectionInfo);
 };
 
-PointCloudAssets.getPointCloudHierarchyData = async (teamspace, container, revision, offset, size) => {
-	
+PointCloudAssets.getPointCloudHierarchyData = (teamspace, container, revision, offset, size) => {
 	const sectionInfo = {
-        start: offset,
-        end: offset + size - 1, // - 1 because end is inclusive
-    };
+		start: offset,
+		end: offset + size - 1, // - 1 because end is inclusive
+	};
 
-    const fileName = `${UUIDToString(revision)}/${STASH_POINTCLOUD_HIERARCHY_FILE}`;
+	const fileName = `${UUIDToString(revision)}/${STASH_POINTCLOUD_HIERARCHY_FILE}`;
 
 	return getFileAsStream(teamspace, `${container}${STASH_POINTCLOUD_EXT}`, fileName, sectionInfo);
 };
