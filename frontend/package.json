@@ -46,7 +46,7 @@
 		"@fortawesome/fontawesome-svg-core": "7.2.0",
 		"@fortawesome/free-solid-svg-icons": "7.2.0",
 		"@fortawesome/react-fontawesome": "3.3.1",
-		"@hookform/resolvers": "2.8.5",
+		"@hookform/resolvers": "2.9.11",
 		"@hotjar/browser": "1.0.9",
 		"@mui/icons-material": "7.3.9",
 		"@mui/lab": "7.0.1-beta.23",
