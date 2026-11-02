@@ -26,6 +26,7 @@ const { getJobsByUsers } = require('../../../../../../../models/jobs');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
+const { permissionTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 const { validateTickets } = require('../../../../../../../schemas/tickets');
@@ -241,11 +242,11 @@ const hasTemplatePermission = (colName) => async (req, res, next) => {
 	}
 };
 
-const hasTemplateCreatePermission = hasTemplatePermission('create');
+const hasTemplateCreatePermission = hasTemplatePermission(permissionTypes.CREATE);
 
-TicketsMiddleware.hasTemplateCommentPermission = hasTemplatePermission('comment');
+TicketsMiddleware.hasTemplateCommentPermission = hasTemplatePermission(permissionTypes.COMMENT);
 
-TicketsMiddleware.hasTemplateViewPermission = hasTemplatePermission('view');
+TicketsMiddleware.hasTemplateViewPermission = hasTemplatePermission(permissionTypes.VIEW);
 
 TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 	try {
@@ -260,6 +261,18 @@ TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res
 			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
 			const userAndJobs = [user, ...userJobs];
 
+			let isAssignedModified;
+			let isStatusModified;
+			let isDefaultPropModified;
+
+			const checkProperties = (value) => {
+				for (const prop of Object.keys(value)) {
+					if (prop === basePropertyLabels.ASSIGNEES) isAssignedModified = true;
+					else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
+					else isDefaultPropModified = true;
+				}
+			};
+
 			const checkPerm = (permArray) => {
 				if (permArray?.length) {
 					const hasPermission = getCommonElements(permArray, userAndJobs).length;
@@ -269,18 +282,10 @@ TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res
 				}
 			};
 
-			let isAssignedModified;
-			let isStatusModified;
-			let isDefaultPropModified;
-
 			for (const update of ticketUpdates) {
 				for (const [key, value] of Object.entries(update)) {
 					if (key === 'properties') {
-						for (const prop of Object.keys(value)) {
-							if (prop === basePropertyLabels.ASSIGNEES) isAssignedModified = true;
-							else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
-							else isDefaultPropModified = true;
-						}
+						checkProperties(value);
 					} else if (!nonEditableProps.includes(key)) {
 						isDefaultPropModified = true;
 					}

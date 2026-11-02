@@ -280,4 +280,11 @@ const getDefaultPinIconNames = () => {
 
 TemplateConstants.DEFAULT_PIN_ICONS = getDefaultPinIconNames();
 
+TemplateConstants.permissionTypes = {
+	VIEW: 'view',
+	CREATE: 'create',
+	EDIT: 'edit',
+	COMMENT: 'comment',
+};
+
 module.exports = TemplateConstants;
