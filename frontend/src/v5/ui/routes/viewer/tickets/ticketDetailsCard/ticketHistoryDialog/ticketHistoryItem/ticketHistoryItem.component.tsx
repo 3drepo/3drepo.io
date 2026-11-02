@@ -53,11 +53,19 @@ const ChangesTable = ({ changes }) => {
 
 
 
-export const TicketHistoryItem = ({ author, timestamp, changes }) => {
+export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
 	const formattedTimestamp = new Date(timestamp).toLocaleString();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const fullname = getFullnameFromUser(user);
+	if (imported)  return (
+		<ItemContainer>
+			<Timestamp>{formattedTimestamp}</Timestamp>
+			<Author />
+			<ActionType>Import</ActionType>
+		</ItemContainer>
+	); 
+
 	return (
 		<ItemContainer>
 			<Timestamp>{formattedTimestamp}</Timestamp>

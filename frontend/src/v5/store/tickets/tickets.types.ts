@@ -232,5 +232,6 @@ export type OverridesDicts = {
 export type ITicketHistory = {
 	author: string;
 	timestamp: string;
-	changes: any;
+	changes?: any;
+	imported?: any;
 };
