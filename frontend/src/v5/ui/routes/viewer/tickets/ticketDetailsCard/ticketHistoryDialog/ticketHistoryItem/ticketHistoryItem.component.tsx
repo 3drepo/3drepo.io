@@ -20,6 +20,7 @@ import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
 import { ItemContainer, ChangeRow, ChangePropertyName, DetailContainer, Author, Timestamp, ActionType } from '../ticketHistoryDialog.styles';
 import { get, has } from 'lodash';
+import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 
 const getChangedPaths = (changes: any, prefix = ''): string[] =>
 	Object.entries(changes).flatMap(([key, value]) => {
@@ -34,16 +35,13 @@ const getChangedPaths = (changes: any, prefix = ''): string[] =>
 		return getChangedPaths(value, path);
 	});
 
-
-
 const ChangesTable = ({ changes }) => {
 	const paths = getChangedPaths(changes);
-	console.log('@@ paths', paths);
 	return (
 		<div>
 			{paths.map((propertyName) => (
 				<ChangeRow key={propertyName}>
-					<ChangePropertyName>{propertyName}</ChangePropertyName>
+					<ChangePropertyName>{getPropertyLabel(propertyName)}</ChangePropertyName>
 					<DetailContainer>
 						<ChangeDetail propertyName={propertyName} change={get(changes, propertyName)} />
 					</DetailContainer>
