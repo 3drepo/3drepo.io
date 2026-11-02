@@ -19,7 +19,7 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { isDateType, isSelectType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { difference } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { ChangeValue } from '../ticketHistoryDialog.styles';
+import { formatDate, formatTime } from '@/v5/services/intl';
 
 
 export const ChangeDetail = ({ propertyName, change }) => {
@@ -35,6 +35,40 @@ export const ChangeDetail = ({ propertyName, change }) => {
 	if (propertyDef.type === 'jobsAndUsers') {
 	}
 	if (isDateType(propertyDef.type)) {
+		const formattedDates = [from, to].map((date) => date ? formatDate(date) : '');
+		const formattedTimes = [from, to].map((date) => date ? formatTime(date) : '');
+		if (wasAdded) {
+			return <FormattedMessage
+				id="ticketHistory.date.setTo"
+				defaultMessage="Set to {date} {time}"
+				values={{ date: <ChangeValue>{formattedDates[1]}</ChangeValue>, time: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
+			/>;
+		} else if (wasDeleted) {
+			return <FormattedMessage
+				id="ticketHistory.date.deleted"
+				defaultMessage="Deleted {date} {time}"
+				values={{ date: <ChangeValue>{formattedDates[0]}</ChangeValue>, time: <ChangeValue>{formattedTimes[0]}</ChangeValue> }}
+			/>;
+		} else if (wasChanged) {
+			if (formattedDates[0] === formattedDates[1]) {
+				return <FormattedMessage
+					id="ticketHistory.date.timeChanged"
+					defaultMessage="Changed time from {from} to {to}"
+					values={{ from: <ChangeValue>{formattedTimes[0]}</ChangeValue>, to: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
+				/>;
+			} else {
+				return <FormattedMessage
+					id="ticketHistory.date.changed"
+					defaultMessage="Changed from {fromDate} {fromTime} to {toDate} {toTime}"
+					values={{
+						fromDate: <ChangeValue>{formattedDates[0]}</ChangeValue>,
+						fromTime: <ChangeValue>{formattedTimes[0]}</ChangeValue>,
+						toDate: <ChangeValue>{formattedDates[1]}</ChangeValue>,
+						toTime: <ChangeValue>{formattedTimes[1]}</ChangeValue>
+					}}
+				/>;
+			}
+		}
 	}
 	if (propertyDef.type === 'coords') {
 		if (wasAdded) {
@@ -68,19 +102,19 @@ export const ChangeDetail = ({ propertyName, change }) => {
 			</>
 		);
 	}
-	if (isTextType(propertyDef.type)) {
+	if (isTextType(propertyDef.type) || propertyDef.type === 'number' || propertyDef.type === 'boolean') {
 		if (wasAdded) {
 			return <FormattedMessage
 				id="ticketHistory.default.setTo"
-				defaultMessage="Set to {to}" values={{ to: <ChangeValue>{to}</ChangeValue> }} />;
+				defaultMessage="Set to {to}" values={{ to: <ChangeValue>{to.toString()}</ChangeValue> }} />;
 		} else if (wasDeleted) {
 			return <FormattedMessage
 				id="ticketHistory.default.deleted"
-				defaultMessage="Deleted {from}" values={{ from: <ChangeValue>{from}</ChangeValue> }} />;
+				defaultMessage="Deleted {from}" values={{ from: <ChangeValue>{from.toString()}</ChangeValue> }} />;
 		} else if (wasChanged) {
 			return <FormattedMessage
 				id="ticketHistory.default.setTo"
-				defaultMessage="Changed from {from} to {to}" values={{ from: <ChangeValue>{from}</ChangeValue>, to: <ChangeValue>{to}</ChangeValue> }} />;
+				defaultMessage="Changed from {from} to {to}" values={{ from: <ChangeValue>{from.toString()}</ChangeValue>, to: <ChangeValue>{to.toString()}</ChangeValue> }} />;
 		}
 	}
 	return (
