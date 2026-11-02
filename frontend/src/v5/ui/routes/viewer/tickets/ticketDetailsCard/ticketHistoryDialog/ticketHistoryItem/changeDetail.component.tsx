@@ -19,6 +19,7 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { isDateType, isSelectType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { difference } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { ChangeValue, ErrorMessage } from '../ticketHistoryDialog.styles';
 import { formatDate, formatTime } from '@/v5/services/intl';
 
 
@@ -32,7 +33,14 @@ export const ChangeDetail = ({ propertyName, change }) => {
 	const wasChanged = !wasDeleted && !wasAdded;
 
 	console.log('@@- propertyDef', propertyDef);
-	if (propertyDef.type === 'jobsAndUsers') {
+	if (!propertyDef?.type) {
+		return (
+			<ErrorMessage>
+				<FormattedMessage
+					id="ticketHistory.missingType"
+					defaultMessage="Missing property type for {propertyName}" values={{ propertyName }} />
+			</ErrorMessage>
+		);
 	}
 	if (isDateType(propertyDef.type)) {
 		const formattedDates = [from, to].map((date) => date ? formatDate(date) : '');
@@ -118,10 +126,10 @@ export const ChangeDetail = ({ propertyName, change }) => {
 		}
 	}
 	return (
-		<div style={{ color: 'red', fontWeight: 'bold' }}>
+		<ErrorMessage>
 			<FormattedMessage
 				id="ticketHistory.unhandledType"
 				defaultMessage="Unhandled property type: {type}" values={{ type: propertyDef.type }} />
-		</div>
+		</ErrorMessage>
 	);
 };

@@ -63,6 +63,10 @@ export const DetailContainer = styled.div`
 	display: inline-flex;
 `;
 
+export const ErrorMessage = styled.span`
+	font-weight: bold;
+	color: ${({ theme }) => theme.palette.error.main};
+`;
 
 export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
