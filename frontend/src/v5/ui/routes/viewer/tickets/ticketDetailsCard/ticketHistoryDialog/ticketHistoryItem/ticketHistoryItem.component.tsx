@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ChangeDetail } from './changeDetail.component';
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
 import { ItemContainer, ChangeRow, ChangePropertyName, DetailContainer, Author, Timestamp, ActionType } from '../ticketHistoryDialog.styles';
@@ -55,7 +55,8 @@ const ChangesTable = ({ changes }) => {
 
 export const TicketHistoryItem = ({ author, timestamp, changes }) => {
 	const formattedTimestamp = new Date(timestamp).toLocaleString();
-	const user = UsersHooksSelectors.selectUser(author);
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const fullname = getFullnameFromUser(user);
 	return (
 		<ItemContainer>

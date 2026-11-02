@@ -42,7 +42,12 @@ export const Timestamp = styled.div`
 `;
 export const Author = styled.div`
 	width: ${ColumnWidths.Author}px;
+	display: inline-flex;
+    gap: 5px;
+	align-items: center;
+	font-size: 15px;
 `;
+
 export const ActionType = styled.div`
 	width: ${ColumnWidths.ActionType}px;
 `;
@@ -51,6 +56,7 @@ export const ChangeRow = styled.div`
 	display: grid;
 	grid-template-columns: ${ColumnWidths.ChangePropertyName}px ${ColumnWidths.ChangeDetails}px;
 `;
+
 export const ChangePropertyName = styled.div`
 	font-weight: bold;
 `;

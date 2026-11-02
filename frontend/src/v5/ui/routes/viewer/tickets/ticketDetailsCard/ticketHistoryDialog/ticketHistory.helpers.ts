@@ -16,8 +16,8 @@
  */
 
 export const ColumnWidths = {
-	Timestamp: 144,
-	Author: 166,
+	Timestamp: 154,
+	Author: 176,
 	ActionType: 90,
 	ChangePropertyName: 250,
 	ChangeDetails: 400,
