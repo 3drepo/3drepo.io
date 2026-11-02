@@ -40,14 +40,16 @@ const ChangesTable = ({ changes }) => {
 	const paths = getChangedPaths(changes);
 	console.log('@@ paths', paths);
 	return (
-		paths.map((propertyName) => (
-			<ChangeRow key={propertyName}>
-				<ChangePropertyName>{propertyName}</ChangePropertyName>
-				<DetailContainer>
-					<ChangeDetail propertyName={propertyName} change={get(changes, propertyName)} />
-				</DetailContainer>
-			</ChangeRow>
-		))
+		<div>
+			{paths.map((propertyName) => (
+				<ChangeRow key={propertyName}>
+					<ChangePropertyName>{propertyName}</ChangePropertyName>
+					<DetailContainer>
+						<ChangeDetail propertyName={propertyName} change={get(changes, propertyName)} />
+					</DetailContainer>
+				</ChangeRow>
+			))}
+		</div>
 	);
 };
 

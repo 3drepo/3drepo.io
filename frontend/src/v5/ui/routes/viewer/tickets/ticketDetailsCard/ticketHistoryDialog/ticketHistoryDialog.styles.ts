@@ -21,10 +21,8 @@ import { ColumnWidths } from './ticketHistory.helpers';
 
 export const ItemContainer = styled.li<{ selected?: boolean }>`
 	width: 100%;
-	height: 80px;
-
-	padding: 0 29px;
-
+	min-height: 80px;
+	padding: 15px 29px;
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -34,7 +32,7 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 
 	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const Timestamp = styled.div`
@@ -70,4 +68,5 @@ export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
 	padding: 0 3px;
 	flex-grow: 0;
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
