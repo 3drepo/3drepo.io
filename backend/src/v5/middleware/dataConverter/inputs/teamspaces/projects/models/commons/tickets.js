@@ -26,6 +26,7 @@ const { getJobsByUsers } = require('../../../../../../../models/jobs');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
+const { isTeamspaceAdmin } = require('../../../../../../../utils/permissions');
 const { permissionTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
@@ -224,9 +225,10 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 
 const hasTemplatePermission = (colName) => async (req, res, next) => {
 	try {
+		const user = getUserFromSession(req.session);
+		const isAdmin = await isTeamspaceAdmin(req.params.teamspace, user);
 		const permissions = req.templateData?.config?.permissions?.[colName];
-		if (permissions) {
-			const user = getUserFromSession(req.session);
+		if (permissions && !isAdmin) {
 			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
 			const userAndJobs = [user, ...userJobs];
 
@@ -252,12 +254,13 @@ TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res
 	try {
 		const nonEditableProps = ['_id', 'type'];
 		const editPermissions = req.templateData.config.permissions?.edit;
+		const user = getUserFromSession(req.session);
+		const isAdmin = await isTeamspaceAdmin(req.params.teamspace, user);
 
-		if (editPermissions) {
+		if (editPermissions && !isAdmin) {
 			const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
 			const { assign: assignPerms, status: statusPerms, default: defaultPerms } = editPermissions;
 
-			const user = getUserFromSession(req.session);
 			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
 			const userAndJobs = [user, ...userJobs];
 

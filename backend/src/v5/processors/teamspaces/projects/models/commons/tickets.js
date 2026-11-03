@@ -41,6 +41,7 @@ const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getModelById } = require('../../../../../models/modelSettings');
 const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
+const { isTeamspaceAdmin } = require('../../../../../utils/permissions');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
@@ -306,7 +307,8 @@ const getQueryInfo = async (teamspace, user, queryFilters) => {
 	});
 
 	const userJobs = await getJobsByUsers(teamspace, [user]);
-	const templatePermissionsQuery = {
+	const isAdmin = await isTeamspaceAdmin(teamspace, user);
+	const templatePermissionsQuery = isAdmin ? {} : {
 		$or: [
 			{ 'config.permissions.view': { $in: [user, ...userJobs] } },
 			{ 'config.permissions.view': { $exists: false } },
