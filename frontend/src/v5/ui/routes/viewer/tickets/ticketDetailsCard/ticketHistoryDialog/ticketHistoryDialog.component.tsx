@@ -28,6 +28,7 @@ import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.compone
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { ColumnWidths } from './ticketHistory.helpers';
+import { TicketHistoryTable } from './ticketHistoryDialog.styles';
 
 export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }) => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -72,9 +73,11 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 							<FormattedMessage id="ticketHistoryDialog.list.header.details" defaultMessage="Details" />
 						</Label>
 					</Header>
-					{ticketHistory?.toReversed().map((historyItem) => (
-						<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
-					))}
+					<TicketHistoryTable>
+						{ticketHistory?.toReversed().map((historyItem) => (
+							<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
+						))}
+					</TicketHistoryTable>
 				</ModalBody>
 			</Form>
 		</Modal>

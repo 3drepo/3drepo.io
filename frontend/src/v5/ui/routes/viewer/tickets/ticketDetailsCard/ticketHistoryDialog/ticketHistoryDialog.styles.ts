@@ -19,6 +19,11 @@ import styled from 'styled-components';
 import { ColumnWidths } from './ticketHistory.helpers';
 import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 
+export const TicketHistoryTable = styled.div`
+	border-radius: 10px;
+	overflow: hidden;
+`;
+
 export const ItemContainer = styled.li<{ selected?: boolean }>`
 	width: 100%;
 	min-height: 80px;
@@ -28,7 +33,6 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 	align-items: center;
 	box-sizing: border-box;
 	list-style: none;
-	cursor: pointer;
 
 	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
