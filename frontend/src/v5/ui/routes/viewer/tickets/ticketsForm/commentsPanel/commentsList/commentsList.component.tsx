@@ -88,6 +88,7 @@ export const CommentsList = () => {
 			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
 		);
 	}, [ticketId]);
+
 	return (
 		<CommentsContainer>
 			<Comments>
