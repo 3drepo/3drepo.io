@@ -104,8 +104,8 @@ describe('viewpoint helpers', () => {
 
 		expect(result).toEqual({
 			overrides: {
-				[meshB.shared_id]: '#B6BCC1',
-				[meshC.shared_id]: '#B6BCC1',
+				[meshB.shared_id]: '#B6BCC105',
+				[meshC.shared_id]: '#B6BCC105',
 			},
 			transparencies: {
 				[meshB.shared_id]: 0.02,

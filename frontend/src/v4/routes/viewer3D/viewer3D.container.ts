@@ -25,13 +25,12 @@ import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins, selectAngleMeasurements, selectSlopeMeasurements, selectAreaMeasurements, selectLengthMeasurements } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
-import { selectAllTransparencyOverrides, selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
+import { selectColorOverrides, selectRightPanels } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { Viewer3D } from './viewer3D.component';
 
 const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
-	transparencies: selectAllTransparencyOverrides,
 	rightPanels: selectRightPanels,
 	issuePins: selectIssuePins,
 	measurementPins: selectMeasurementPins,

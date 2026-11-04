@@ -157,7 +157,3 @@ export const selectOverridesDict = createSelector(
 export const selectOverrides = createSelector(
 	selectOverridesDict, (overrides): ColorOverrides => overrides.colors
 );
-
-export const selectTransparencies = createSelector(
-	selectOverridesDict, (overrides) => overrides.transparencies
-);

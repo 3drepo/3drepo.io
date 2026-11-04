@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_RUNS_COL, clashRunStatus } = require('./clashes.constants');
+const { CLASH_RUNS_COL, clashRunStatus, terminalClashRunStatuses } = require('./clashes.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -56,7 +56,17 @@ ClashRuns.createClashRun = async (teamspace, project, plan, user) => {
 };
 
 const updateClashRun = async (teamspace, project, runId, setUpdate) => {
-	await db.updateOne(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+	const query = {
+		project,
+		_id: runId,
+	};
+
+	// Interim updates must not overwrite a terminal state if callbacks arrive out of order.
+	if (setUpdate.status && !terminalClashRunStatuses.includes(setUpdate.status)) {
+		query.status = { $nin: terminalClashRunStatuses };
+	}
+
+	await db.updateOne(teamspace, CLASH_RUNS_COL, query,
 		{ $set: { ...setUpdate, updatedAt: new Date() } });
 };
 

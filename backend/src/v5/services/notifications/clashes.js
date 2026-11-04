@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { clashRunStatus, terminalClashRunStatuses } = require('../../models/clashes.constants');
 const {
 	insertClashAbortedNotifications,
 	insertClashFailedNotifications,
 	insertClashSucceededNotifications,
 } = require('../../models/notifications');
-const { clashRunStatus } = require('../../models/clashes.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClashRunById } = require('../../models/clashes.runs');
 const { getCommonElements } = require('../../utils/helper/arrays');
@@ -35,10 +35,7 @@ const ClashesNotifications = {};
 
 const clashRunStatusUpdated = async (teamspace, project, runId, status, results) => {
 	try {
-		const isFinalStatus = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED]
-			.includes(status);
-
-		if (!isFinalStatus) return;
+		if (!terminalClashRunStatuses.includes(status)) return;
 
 		const { plan: { _id: planId }, triggeredAt } = await getClashRunById(teamspace,
 			project, runId, { plan: 1, triggeredAt: 1 });

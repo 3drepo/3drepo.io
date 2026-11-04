@@ -35,13 +35,13 @@ const { disconnect } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
+const { CLASH_RUNS_COL, clashRunStatus, terminalClashRunStatuses } = require(`${src}/models/clashes.constants`);
 
 const ResetProcessingFlags = require(`${utilScripts}/modelProcessing/resetProcessingFlags`);
 
 const modelStates = ['ok', 'failed', 'processing', 'queued'];
 const clashRunStates = Object.values(clashRunStatus);
-const terminalClashRunStates = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED];
+const terminalClashRunStates = terminalClashRunStatuses;
 const manualCancellationReason = 'Cancelled manually';
 const resetTypes = {
 	MODELS: 'models',
@@ -56,7 +56,13 @@ const setupData = () => {
 
 		const models = await Promise.all(times(modelStates.length, async (n) => {
 			const { _id, name, properties } = generateRandomModel({
-				properties: deleteIfUndefined({ status: modelStates[n] }),
+				properties: deleteIfUndefined({
+					status: modelStates[n],
+					...(!['ok', 'failed'].includes(modelStates[n]) ? {
+						corID: generateRandomString(),
+						lastProcessingUpdate: new Date(),
+					} : {}),
+				}),
 			});
 			await createModel(teamspace, _id, name, properties);
 			return _id;
@@ -202,6 +208,12 @@ const runTest = () => {
 		test('Should only process models if type is defined', async () => {
 			await ResetProcessingFlags.run(data[0].teamspace, undefined, resetTypes.MODELS);
 			await checkAllProcessingStatuses(data, ({ models }, ind) => (ind === 0 ? { resetModelIds: models } : {}));
+
+			const resetModels = await findModels(data[0].teamspace,
+				{ _id: { $in: data[0].models } }, { _id: 1, corID: 1, lastProcessingUpdate: 1 });
+			expect(resetModels).toEqual(expect.arrayContaining(
+				data[0].models.map((_id) => ({ _id })),
+			));
 		});
 
 		test('Should only process drawings if type is defined', async () => {

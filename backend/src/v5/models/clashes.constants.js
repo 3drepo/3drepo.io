@@ -51,4 +51,10 @@ ClashesConstants.clashRunStatus = {
 	ABORTED: 'aborted',
 };
 
+ClashesConstants.terminalClashRunStatuses = [
+	ClashesConstants.clashRunStatus.COMPLETED,
+	ClashesConstants.clashRunStatus.FAILED,
+	ClashesConstants.clashRunStatus.ABORTED,
+];
+
 module.exports = ClashesConstants;

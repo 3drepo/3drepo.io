@@ -28,8 +28,8 @@ const {
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
-const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
-const { clashRunStatus } = require(`${src}/models/clashes.constants`);
+const { modelTypes, processStatuses, terminalProcessStatuses } = require(`${src}/models/modelSettings.constants`);
+const { clashRunStatus, terminalClashRunStatuses } = require(`${src}/models/clashes.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { disconnect } = require(`${src}/handler/db`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -42,7 +42,8 @@ const Path = require('path');
 
 const modelStates = Object.values(processStatuses);
 const clashRunStates = Object.values(clashRunStatus);
-const terminalClashRunStates = [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED];
+const terminalProcessStates = terminalProcessStatuses;
+const terminalClashRunStates = terminalClashRunStatuses;
 
 const recentDate = new Date((new Date()) - 36 * 60 * 60 * 1000);
 
@@ -51,7 +52,11 @@ const setupData = () => {
 		const teamspace = generateRandomString();
 		const models = await Promise.all(times(modelStates.length, async (n) => {
 			const { _id, name, properties } = generateRandomModel({
-				properties: deleteIfUndefined({ status: modelStates[n], timestamp: recentDate }),
+				properties: deleteIfUndefined({
+					status: modelStates[n],
+					timestamp: recentDate,
+					lastProcessingUpdate: recentDate,
+				}),
 			});
 			await createModel(teamspace, _id, name, properties);
 			return { model: _id, status: modelStates[n] };
@@ -82,10 +87,10 @@ const checkMail = (data, filteredTeamspace) => {
 	const expectedZombieEntries = data.reduce((acc, { teamspace, models, drawings, clashRuns }) => {
 		if (!filteredTeamspace || teamspace === filteredTeamspace) {
 			acc.models.push(...models
-				.filter(({ status }) => status !== processStatuses.OK && status !== processStatuses.FAILED)
+				.filter(({ status }) => !terminalProcessStates.includes(status))
 				.map(({ model, status }) => ({ teamspace, id: model, status, timestamp: recentDate })));
 			acc.drawings.push(...drawings
-				.filter(({ status }) => status !== processStatuses.OK && status !== processStatuses.FAILED)
+				.filter(({ status }) => !terminalProcessStates.includes(status))
 				.map(({ drawing, status }) => ({ teamspace, id: drawing, status, timestamp: recentDate })));
 			acc.clashRuns.push(...clashRuns
 				.filter(({ status }) => !terminalClashRunStates.includes(status))

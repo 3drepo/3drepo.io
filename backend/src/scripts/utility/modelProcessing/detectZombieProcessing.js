@@ -26,9 +26,9 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../utils');
 
 const { find } = require(`${v5Path}/handler/db`);
-const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { SETTINGS_COL, terminalProcessStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
-const { CLASH_RUNS_COL, clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
+const { CLASH_RUNS_COL, terminalClashRunStatuses } = require(`${v5Path}/models/clashes.constants`);
 const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
 const { templates: emailTemplates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
@@ -38,23 +38,28 @@ let TIME_LIMIT = 24 * 60 * 60 * 1000; // hours * 1 hour in ms
 
 const processTeamspace = async (teamspace, results) => {
 	const expiredTimestamp = new Date(new Date() - TIME_LIMIT);
-	const zombieQuery = {
-		status: { $exists: true, $not: { $regex: `(${processStatuses.OK})|(${processStatuses.FAILED})` } },
+	const zombieDrawingQuery = {
+		status: { $exists: true, $nin: terminalProcessStatuses },
 		timestamp: { $lt: expiredTimestamp },
 	};
+	const zombieModelQuery = {
+		status: { $exists: true, $nin: terminalProcessStatuses },
+		lastProcessingUpdate: { $lt: expiredTimestamp },
+	};
 	const zombieClashRunQuery = {
-		status: { $exists: true, $nin: [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED] },
+		status: { $exists: true, $nin: terminalClashRunStatuses },
 		updatedAt: { $lt: expiredTimestamp },
 	};
 
 	logger.logInfo(`\t-${teamspace}`);
 
-	const zombieModels = await find(teamspace, SETTINGS_COL, zombieQuery, { status: 1, timestamp: 1 });
-	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieQuery, { status: 1, timestamp: 1 });
+	const zombieModels = await find(teamspace, SETTINGS_COL, zombieModelQuery,
+		{ status: 1, lastProcessingUpdate: 1 });
+	const zombieDrawings = await find(teamspace, DRAWINGS_HISTORY_COL, zombieDrawingQuery, { status: 1, timestamp: 1 });
 	const zombieClashRuns = await find(teamspace, CLASH_RUNS_COL, zombieClashRunQuery, { status: 1, updatedAt: 1 });
 
-	results.models.push(...zombieModels.map(({ _id: id, status, timestamp }) => ({
-		teamspace, id, status, timestamp,
+	results.models.push(...zombieModels.map(({ _id: id, status, lastProcessingUpdate }) => ({
+		teamspace, id, status, timestamp: lastProcessingUpdate,
 	})));
 	results.drawings.push(...zombieDrawings.map(({ _id: id, status, timestamp }) => ({
 		teamspace,

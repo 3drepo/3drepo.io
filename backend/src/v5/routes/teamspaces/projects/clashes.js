@@ -16,12 +16,14 @@
  */
 
 const {
+	clashRunCompleted,
 	clashRunInPlan,
 	planContainersHaveRevs,
 	planExists,
 	validateNewPlanData,
 	validateUpdatePlanData,
 } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
+const { respond, writeStreamRespond } = require('../../../utils/responder');
 const {
 	serialiseClashPlan,
 	serialiseClashPlans,
@@ -33,7 +35,6 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { isAdminToProject } = require('../../../middleware/permissions');
-const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
@@ -120,6 +121,17 @@ const getRuns = async (req, res, next) => {
 			plan: 0,
 		});
 		next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getDetailedRunReport = async (req, res) => {
+	const { teamspace, runId } = req.params;
+	try {
+		const { readStream, size, encoding } = await Clashes.getDetailedRunReport(teamspace, runId);
+		writeStreamRespond(req, res, templates.ok, readStream, { fileSize: size, encoding, mimeType: 'application/json' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -859,6 +871,70 @@ const establishRoutes = () => {
 	 *         description: Returns the clash test run, including the copied clash config snapshot used for the run
 	 */
 	router.get('/:planId/runs/:runId', isAdminToProject, planExists, clashRunInPlan, serialiseClashRun);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs/{runId}/report:
+	 *   get:
+	 *     description: Returns the full clash report for a completed run as the JSON file.
+	 *     tags: [v:external, Clashes]
+	 *     operationId: getClashTestRunReport
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: planId
+	 *         description: ID of plan
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: runId
+	 *         description: ID of run
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/clashRunNotFound"
+	 *       200:
+	 *         description: Returns the full clash report
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 new:
+	 *                   type: array
+	 *                   description: Clashes that are new in this run
+	 *                   items:
+	 *                     $ref: '#/components/schemas/clashEntry'
+	 *                 active:
+	 *                   type: array
+	 *                   description: Clashes that were also present in the previous completed run
+	 *                   items:
+	 *                     $ref: '#/components/schemas/clashEntry'
+	 *                 resolved:
+	 *                   type: array
+	 *                   description: Clashes that were present in the previous completed run but are no longer detected
+	 *                   items:
+	 *                     $ref: '#/components/schemas/clashEntry'
+	 */
+	router.get('/:planId/runs/:runId/report', isAdminToProject, planExists, clashRunInPlan, clashRunCompleted, getDetailedRunReport);
 
 	/**
 	 * @openapi

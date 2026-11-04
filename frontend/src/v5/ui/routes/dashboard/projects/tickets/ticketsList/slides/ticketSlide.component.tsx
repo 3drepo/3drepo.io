@@ -19,7 +19,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
 import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, normalizeTicketAssignees, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { selectTicketById } from '@/v5/store/tickets/tickets.selectors';

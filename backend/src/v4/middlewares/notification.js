@@ -76,10 +76,10 @@ module.exports = {
 		const username = req.session.user.username;
 		const teamspace = req.params.account;
 		const modelId = req.params.model;
-		const _id = req.params.issueId || req.params.riskId;
+		const _id = req.params.issueId;
 		const { type, userRefs } = req.userReferences;
 
-		if(userRefs) {
+		if (userRefs) {
 			Promise.all(
 				userRefs.map((user) =>
 					notification.insertUserReferencedNotification(username, teamspace, modelId, type, _id, user)

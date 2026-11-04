@@ -94,10 +94,6 @@ export const hexToRgb = (color) => {
 	if (!color || isArray(color)) return color;
 
 	const rgbcolor = muiHexToRgb(color).match(rgbaValuesRE)[1].split(',').map(Number);
-	if (rgbcolor.length === 4 ) {
-		rgbcolor[3] = (rgbcolor[3] ?? 1) * 255;
-	}
-
 	return rgbcolor;
 };
 
@@ -105,7 +101,7 @@ export const hexGroupColorToRgb = ({ opacity, color }: HexGroupColor): RgbGroupC
 	opacity,
 	color: hexToRgb(color) as any,
 });
-export const hexToGLColor = (hex) => hexToRgb(hex).map((v) =>  v / 255);
+export const hexToGLColor = (hex) => hexToRgb(hex).map((v, i) =>  i === 3 ? v : v / 255);
 export const hexToDecimal = (hex) => parseInt(hex, 16);
 // GL Converters
 export const GLToHexColor = (glColors) => '#' + glColors.map((c) => componentToHex( Math.round(c * 255))).join('');

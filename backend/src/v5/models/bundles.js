@@ -21,16 +21,10 @@ const { templates } = require('../utils/responseCodes');
 const Bundle = {};
 
 const REPO_BUNDLE_COLLECTION = 'stash.repobundles';
-const UNITY_BUNDLE_COLLECTION = 'stash.unity3d';
 
 Bundle.getAssetList = async (teamspace, container, revision) => {
 	const repobundle = await findOne(teamspace, `${container}.${REPO_BUNDLE_COLLECTION}`, { _id: revision }, { _id: 0 });
 	if (repobundle) return repobundle;
-
-	// legacy fallback - if repobundle list is not found, check for unity3d asset list
-	const unityBundle = await findOne(teamspace, `${container}.${UNITY_BUNDLE_COLLECTION}`, { _id: revision }, { _id: 0 });
-
-	if (unityBundle) return unityBundle;
 
 	throw templates.fileNotFound;
 };

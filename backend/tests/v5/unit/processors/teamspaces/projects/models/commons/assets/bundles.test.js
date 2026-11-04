@@ -33,9 +33,7 @@ const FilesManager = require(`${src}/services/filesManager`);
 const bundlesAssets = require(`${src}/processors/teamspaces/projects/models/commons/assets/bundles`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
-const STASH_UNITY3D_EXT = '.stash.unity3d';
 const STASH_REPOBUNDLES_EXT = '.stash.repobundles';
-const UNITY3D_NAME_EXT = '.unity3d';
 
 const testGetRepoBundleInfo = () => {
 	describe('getRepoBundleInfo', () => {
@@ -75,25 +73,6 @@ const testGetRepoBundleInfo = () => {
 	});
 };
 
-const testGetUnityBundle = () => {
-	describe('getUnityBundle', () => {
-		const teamspace = generateRandomString();
-		const container = generateRandomString();
-		const bundleId = generateUUID();
-
-		test('should return what getFileAsStream returns', async () => {
-			const mockResult = generateRandomObject();
-			FilesManager.getFileAsStream.mockResolvedValueOnce(mockResult);
-
-			await expect(bundlesAssets.getUnityBundle(teamspace, container, bundleId))
-				.resolves.toEqual(mockResult);
-
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}${STASH_UNITY3D_EXT}`, `${UUIDToString(bundleId)}${UNITY3D_NAME_EXT}`);
-		});
-	});
-};
-
 const testGetRepoBundle = () => {
 	describe('getRepoBundle', () => {
 		const teamspace = generateRandomString();
@@ -115,6 +94,5 @@ const testGetRepoBundle = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetRepoBundleInfo();
-	testGetUnityBundle();
 	testGetRepoBundle();
 });

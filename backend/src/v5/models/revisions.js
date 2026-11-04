@@ -191,7 +191,19 @@ Revisions.addDrawingThumbnailRef = async (teamspace, project, model, revId, ref)
 };
 
 Revisions.updateProcessingStatus = async (teamspace, project, model, modelType, revision, status) => {
-	await updateRevision(teamspace, model, modelType, revision, { status });
+	const res = await db.findOneAndUpdate(teamspace, collectionName(modelType, model),
+		{
+			$and: [
+				{ $or: [{ _id: revision }, { tag: revision }] },
+				{ incomplete: true },
+			],
+		},
+		{ $set: { status } },
+		{ projection: { _id: 1 } });
+
+	if (!res) {
+		throw templates.revisionNotFound;
+	}
 
 	// to be inline with 3D, we need to trigger the model settings update
 	publish(events.MODEL_SETTINGS_UPDATE, {

@@ -460,7 +460,8 @@ const testUpdateProcessingStatus = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ $and: [{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { incomplete: true }] },
+				{ $set: { status } },
 				{ projection: { _id: 1 } },
 			);
 
@@ -478,7 +479,8 @@ const testUpdateProcessingStatus = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
-				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ $and: [{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { incomplete: true }] },
+				{ $set: { status } },
 				{ projection: { _id: 1 } },
 			);
 

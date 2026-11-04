@@ -30,7 +30,6 @@ const Federations = require(`${src}/processors/teamspaces/projects/models/federa
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/containers');
-const ContainersProcessor = require(`${src}/processors/teamspaces/projects/models/containers`);
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
 const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
@@ -272,50 +271,6 @@ const testGetMD5Hash = () => {
 	});
 };
 
-const testGetSuperMeshesInfo = () => {
-	describe('Get super meshes info for federation', () => {
-		const teamspace = generateRandomString();
-		const federationId = generateRandomString();
-		const revisionId = generateRandomString();
-
-		test('when federation has containers', async () => {
-			const containers = times(3, () => ({
-				container: generateRandomString(), revision: generateRandomString(),
-			}));
-			const superMeshInfoMock = times(3, () => generateRandomObject());
-
-			superMeshInfoMock.forEach((info) => {
-				ContainersProcessor.getSuperMeshesInfo.mockResolvedValueOnce(info);
-			});
-
-			const expectedData = superMeshInfoMock.map((info, index) => ({
-				teamspace,
-				model: containers[index].container,
-				superMeshes: info,
-			}));
-
-			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, containers))
-				.resolves.toEqual({ subModels: expectedData });
-
-			expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledTimes(containers.length);
-			containers.forEach(({ container: model, revision }) => {
-				expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledWith(
-					teamspace,
-					model,
-					revision,
-				);
-			});
-		});
-
-		test('when federation has no containers', async () => {
-			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, []))
-				.resolves.toEqual({ subModels: [] });
-
-			expect(ContainersProcessor.getSuperMeshesInfo).not.toHaveBeenCalled();
-		});
-	});
-};
-
 const testGetMultipleFederationsStats = () => {
 	describe('Get multiple federation stats', () => {
 		const teamspace = generateRandomString();
@@ -416,6 +371,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetFederationStats();
 	testGetSettings();
 	testGetMD5Hash();
-	testGetSuperMeshesInfo();
 	testGetMultipleFederationsStats();
 });

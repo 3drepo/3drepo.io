@@ -165,10 +165,6 @@ export const selectOverrides = createSelector(
 	selectOverridesDict, (overrides): ColorOverrides => overrides?.colors || {}
 );
 
-export const selectTransparencies = createSelector(
-	selectOverridesDict, (overrides) => overrides?.transparencies || {}
-);
-
 export const selectInitialView =  createSelector(
 	selectViewpointsDomain, selectQueryParams,  selectDefaultView, selectActiveIssue,
 		({viewpointsMap}, {viewId},  defaultView, activeIssue) => {

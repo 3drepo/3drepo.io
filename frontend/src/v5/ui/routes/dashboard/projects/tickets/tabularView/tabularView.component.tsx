@@ -25,7 +25,7 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { CircleButton } from '@controls/circleButton';
 import { SelectChangeEvent } from '@mui/material';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { TabularViewTablesLayout } from './tabularViewTables/tabularViewTablesLayout.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';

@@ -17,13 +17,20 @@
 
 import { getState } from '@/v5/helpers/redux.helpers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeWatchPropertiesNewTicket, enableRealtimeWatchPropertiesUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
+import {
+	enableRealtimeWatchPropertiesNewTicket,
+	enableRealtimeWatchPropertiesUpdateTicket,
+	UPDATE_TICKETS_BATCH_INTERVAL,
+	UPDATE_TICKETS_BATCH_SIZE,
+} from '@/v5/services/realtime/ticketTable.events';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { apiFetchFilteredTickets } from '@/v5/store/tickets/card/ticketsCard.sagas';
 import { selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { getTicketFilterFromCodes, getTemplateFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { useEffect } from 'react';
+import { debounce } from 'lodash';
+import { useEffect, useRef } from 'react';
 
 
 const toTicketPath = (filter:TicketFilter) => {
@@ -38,28 +45,49 @@ export const useRealtimeFiltering = (
 	callback: (ticketId:string, included: boolean) => void,
 ) => {
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const properties = filters?.map(toTicketPath);
-
-	const onNewORUpdate = async (t, p, m, f, ticket) => {
-		const { number, _id: ticketId } =  selectTicketByIdRaw(getState(), m, ticket._id);
-		const templateCode = template.code;
-		const ticketCode = templateCode + ':' + number;
-		const allFilters = [...filters, getTicketFilterFromCodes([ticketCode]), getTemplateFilter(templateCode)];
-		const res = await apiFetchFilteredTickets(t, p, m, f, allFilters);
-		callback(ticketId, res.has(ticketId));
-	};
+	const callbackRef = useRef(callback);
+	const templateCode = template?.code;
+	useEffect(() => {
+		callbackRef.current = callback;
+	}, [callback]);
 
 	useEffect(() => {
-		const subscriptions = containersAndFederations.map((modelId) => 
-			enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFed(modelId), properties, onNewORUpdate),
-		);
-		return combineSubscriptions(...subscriptions);
-	}, [teamspace, project, containersAndFederations, isFed, properties, onNewORUpdate]);
+		const properties = filters?.map(toTicketPath);
+		let active = true;
+		const subscriptions = containersAndFederations.map((modelId) => {
+			const isFederation = isFed(modelId);
+			let queuedTickets: string[] = [];
+			const debouncedApplyFilters = debounce(async () => {
+				if (!queuedTickets.length) return;
 
-	useEffect(() => {
-		const subscriptions = containersAndFederations.map((modelId) => 
-			enableRealtimeWatchPropertiesNewTicket(teamspace, project, modelId, isFed(modelId), onNewORUpdate),
-		);
-		return combineSubscriptions(...subscriptions);
-	}, [teamspace, project, containersAndFederations, isFed, properties, onNewORUpdate]);
+				const ticketIds = queuedTickets;
+				queuedTickets = [];
+				const ticketCodes = ticketIds.map((ticketId) => {
+					const { number } = selectTicketByIdRaw(getState(), modelId, ticketId);
+					return templateCode + ':' + number;
+				});
+				const allFilters = [...filters, getTicketFilterFromCodes(ticketCodes), getTemplateFilter(templateCode)];
+				const res = await apiFetchFilteredTickets(teamspace, project, modelId, isFederation, allFilters);
+				if (active) ticketIds.forEach((ticketId) => callbackRef.current(ticketId, res.has(ticketId)));
+			}, UPDATE_TICKETS_BATCH_INTERVAL);
+
+			const onNewOrUpdate = (t, p, m, f, ticket: Partial<ITicket>) => {
+				queuedTickets.push(ticket._id);
+				debouncedApplyFilters();
+				if (queuedTickets.length >= UPDATE_TICKETS_BATCH_SIZE) {
+					debouncedApplyFilters.flush();
+				}
+			};
+
+			return combineSubscriptions(
+				enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFederation, properties, onNewOrUpdate),
+				enableRealtimeWatchPropertiesNewTicket(teamspace, project, modelId, isFederation, onNewOrUpdate),
+				() => debouncedApplyFilters.cancel(),
+			);
+		});
+		return () => {
+			active = false;
+			combineSubscriptions(...subscriptions)();
+		};
+	}, [teamspace, project, containersAndFederations, isFed, templateCode, filters]);
 };

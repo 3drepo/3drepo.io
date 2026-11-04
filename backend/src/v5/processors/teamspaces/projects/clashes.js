@@ -283,8 +283,10 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 		await sendClashRunToQueue(teamspace, project, runId, context);
 	} else {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.ABORTED,
-			{ error: {
-				reason: 'The defined selections do not yield any candidates to execute a clash run.' },
+			{
+				error: {
+					reason: 'The defined selections do not yield any candidates to execute a clash run.',
+				},
 			});
 	}
 
@@ -441,11 +443,13 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 	await storeFile(teamspace, CLASH_RUNS_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
 	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,
-		{ stats: {
-			new: categorizedClashes.new.length,
-			active: categorizedClashes.active.length,
-			resolved: categorizedClashes.resolved.length,
-		} });
+		{
+			stats: {
+				new: categorizedClashes.new.length,
+				active: categorizedClashes.active.length,
+				resolved: categorizedClashes.resolved.length,
+			},
+		});
 	publish(events.CLASH_RUN_RESULTS_PROCESSED, {
 		teamspace,
 		project,
@@ -467,5 +471,7 @@ Clashes.setLastRevForSelections = async (teamspace, selectionA, selectionB) => {
 		selectionObj.revision = rev;
 	}));
 };
+
+Clashes.getDetailedRunReport = (teamspace, runId) => getFileAsStream(teamspace, CLASH_RUNS_COL, runId);
 
 module.exports = Clashes;

@@ -104,8 +104,12 @@ const testUpdateRunStatus = () => {
 
 			const { updatedAt } = updateFn.mock.calls[0][3].$set;
 			expect(updateFn).toHaveBeenCalledTimes(1);
-			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { project, _id: runId },
-				{ $set: { status: clashRunStatus.QUEUED, updatedAt } });
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, {
+				project,
+				_id: runId,
+				status: { $nin: [clashRunStatus.COMPLETED, clashRunStatus.FAILED, clashRunStatus.ABORTED] },
+			},
+			{ $set: { status: clashRunStatus.QUEUED, updatedAt } });
 		});
 
 		test('should complete a clash run', async () => {

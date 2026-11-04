@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2025 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Scene = {};
-const db = require('../handler/db');
+import styled from 'styled-components';
+import { List } from '@mui/material';
 
-const STASH_EXT = '.stash.3drepo';
-
-Scene.getSuperMeshesInRevision = (teamspace, model, revision, projection) => db.find(
-	teamspace, `${model}${STASH_EXT}`, { rev_id: revision, type: 'mesh' }, projection);
-
-module.exports = Scene;
+export const MentionList = styled(List)`
+	&& {
+		padding: 0;
+		margin: 0;
+	}
+`;

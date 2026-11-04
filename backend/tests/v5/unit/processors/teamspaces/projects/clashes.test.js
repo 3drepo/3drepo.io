@@ -363,7 +363,8 @@ const testCreateRun = () => {
 		selfIntersectionsCheck: false,
 		trigger: [generateRandomString()],
 		selectionA: [{ container: generateRandomString(), revision: generateUUID() }],
-		selectionB: [{ container: generateRandomString(),
+		selectionB: [{
+			container: generateRandomString(),
 			revision: generateUUID(),
 			rules: [generateRandomObject()],
 		}],
@@ -1269,8 +1270,8 @@ const testSetLastRevForSelections = () => {
 			const lastRevisionA = generateUUID();
 			const lastRevisionB = generateUUID();
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionA });
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
@@ -1298,9 +1299,9 @@ const testSetLastRevForSelections = () => {
 			const selectionB = [{ container: generateRandomString() }];
 			const revisions = times(3, () => generateUUID());
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			revisions.forEach((revision) => RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision }));
 
 			await Clashes.setLastRevForSelections(teamspace, selectionA, selectionB);
@@ -1323,7 +1324,7 @@ const testSetLastRevForSelections = () => {
 			const lastRevisionB = generateUUID();
 
 			ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.containerNotFound);
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
 			await expect(Clashes.setLastRevForSelections(teamspace, selectionA, selectionB))
@@ -1346,8 +1347,8 @@ const testSetLastRevForSelections = () => {
 			const selectionB = [{ container: generateRandomString() }];
 			const lastRevisionB = generateUUID();
 
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
-			ModelSettingsModel.getContainerById.mockResolvedValueOnce({ });
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
+			ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
 			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: lastRevisionB });
 
@@ -1369,6 +1370,20 @@ const testSetLastRevForSelections = () => {
 	});
 };
 
+const testGetDetailedRunReport = () => {
+	describe('Get Detailed Run Report', () => {
+		const teamspace = generateRandomString();
+		const runId = generateRandomString();
+
+		test('should call getFileAsStream with the teamspace, collection and run ID', () => {
+			Clashes.getDetailedRunReport(teamspace, runId);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace, CLASH_RUNS_COL, runId);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
@@ -1380,4 +1395,5 @@ describe(determineTestGroup(__filename), () => {
 	testCreateRun();
 	testProcessClashResults();
 	testSetLastRevForSelections();
+	testGetDetailedRunReport();
 });
