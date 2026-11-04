@@ -140,6 +140,12 @@ const containerSettings = {
 			timestamp: new Date(),
 		},
 	},
+	container5: {
+		_id: 5,
+		name: 'container 5',
+		type: 'type 2',
+		status: 'ok',
+	},
 };
 
 const user1Favourites = [1];
@@ -419,7 +425,7 @@ const testNewRevision = () => {
 	describe('New container revisions', () => {
 		const teamspace = 'teamspace';
 		const revisionProject = generateUUIDString();
-		const model = '123';
+		const model = 'container1';
 		const data = {};
 		const file = { path: fileCreated, originalname: 'hello.obj', size: 1024 };
 
@@ -427,58 +433,51 @@ const testNewRevision = () => {
 
 		test('should process an uploaded file as an external model and remove it', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
-
 			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
 				.resolves.toBe(undefined);
 
-			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledTimes(1);
-			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledTimes(1);
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledWith(
 				teamspace, revisionProject, model, { units: 'm' }, file,
 			);
-			expect(ModelProcessing.processInternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
 		});
 
 		test('should process a read-only file as an internal model without removing it', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
 			const readOnlyFile = { ...file, readOnly: true };
 
 			await expect(Containers.newRevision(teamspace, revisionProject, model, data, readOnlyFile))
 				.resolves.toBe(undefined);
 
-			expect(ModelProcessing.processInternalModelUpload).toHaveBeenCalledTimes(1);
-			expect(ModelProcessing.processInternalModelUpload).toHaveBeenCalledWith(
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledTimes(1);
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledWith(
 				teamspace, revisionProject, model, { units: 'm' }, readOnlyFile,
 			);
-			expect(ModelProcessing.processExternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(true);
 		});
 
 		test('should process an uploaded file when the container has no unit configured', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			ModelSettings.getContainerById.mockResolvedValueOnce({});
+			const containerWithoutUnit = 'container5';
 
-			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
+			await expect(Containers.newRevision(teamspace, revisionProject, containerWithoutUnit, data, file))
 				.resolves.toBe(undefined);
 
-			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
-				teamspace, revisionProject, model, { units: undefined }, file,
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledWith(
+				teamspace, revisionProject, containerWithoutUnit, { units: undefined }, file,
 			);
-			expect(ModelProcessing.processInternalModelUpload).not.toHaveBeenCalled();
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
 		});
 
 		test('should remove the uploaded file if processing it fails', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
-			ModelProcessing.processExternalModelUpload.mockRejectedValueOnce(templates.queueInsertionFailed);
+			ModelProcessing.queueModelUpload.mockRejectedValueOnce(templates.queueInsertionFailed);
 
 			await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
 				.rejects.toEqual(templates.queueInsertionFailed);
 
-			expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+			expect(ModelProcessing.queueModelUpload).toHaveBeenCalledWith(
 				teamspace, revisionProject, model, { units: 'm' }, file,
 			);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
@@ -487,15 +486,14 @@ const testNewRevision = () => {
 		test('should log an error if deleting the uploaded file fails', async () => {
 			const error = new Error('delete failed');
 			const removeSpy = jest.spyOn(fs, 'rm').mockRejectedValueOnce(error);
-			const logErrorSpy = jest.spyOn(logger, 'logError').mockImplementation(() => {});
-			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
+			const logErrorSpy = jest.spyOn(logger, 'logError').mockImplementation(() => { });
 
 			try {
 				await expect(Containers.newRevision(teamspace, revisionProject, model, data, file))
 					.resolves.toBe(undefined);
 
 				expect(logErrorSpy).toHaveBeenCalledWith('Failed to delete uploaded file: delete failed');
-				expect(ModelProcessing.processExternalModelUpload).toHaveBeenCalledWith(
+				expect(ModelProcessing.queueModelUpload).toHaveBeenCalledWith(
 					teamspace, revisionProject, model, { units: 'm' }, file,
 				);
 			} finally {

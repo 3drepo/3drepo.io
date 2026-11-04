@@ -84,8 +84,8 @@ const cleanupModelImportFiles = async (revId) => {
 	]);
 };
 
-const testProcessExternalModelUpload = () => {
-	describe('Process external model upload', () => {
+const testQueueModelUpload = () => {
+	describe('Queue process model upload', () => {
 		let revId;
 
 		afterEach(async () => {
@@ -113,7 +113,7 @@ const testProcessExternalModelUpload = () => {
 
 			Revisions.addRevision.mockResolvedValueOnce(revId);
 
-			await ModelProcessing.processExternalModelUpload(teamspace, project, container, revInfo, file);
+			await ModelProcessing.queueModelUpload(teamspace, project, container, revInfo, file, file.readOnly);
 
 			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
 			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, container, modelTypes.CONTAINER, {
@@ -165,7 +165,9 @@ const testProcessExternalModelUpload = () => {
 			Revisions.addRevision.mockResolvedValueOnce(revId);
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
-			await expect(ModelProcessing.processExternalModelUpload(teamspace, project, container, revInfo, file))
+			await expect(ModelProcessing.queueModelUpload(
+				teamspace, project, container, revInfo, file, file.readOnly,
+			))
 				.rejects.toEqual(templates.queueConnectionError);
 
 			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
@@ -193,8 +195,8 @@ const testProcessExternalModelUpload = () => {
 			rm.mockRejectedValueOnce(cleanupError);
 
 			try {
-				await expect(ModelProcessing.processExternalModelUpload(
-					teamspace, project, container, { owner: generateRandomString() }, file,
+				await expect(ModelProcessing.queueModelUpload(
+					teamspace, project, container, { owner: generateRandomString() }, file, file.readOnly,
 				)).rejects.toEqual(templates.queueInsertionFailed);
 
 				expect(rm).toHaveBeenCalledWith(
@@ -209,20 +211,6 @@ const testProcessExternalModelUpload = () => {
 				logErrorSpy.mockRestore();
 			}
 		});
-	});
-};
-
-const testProcessInternalModelUpload = () => {
-	describe('Process internal model upload', () => {
-		let revId;
-
-		afterEach(async () => {
-			if (revId) {
-				await cleanupModelImportFiles(UUIDToString(revId));
-				revId = undefined;
-			}
-		});
-
 		test('Should reference the file and put a message on the queue', async () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
@@ -241,12 +229,13 @@ const testProcessInternalModelUpload = () => {
 				path: generateRandomString(),
 				format: '.ifc',
 				size: 2048,
+				readOnly: true,
 			};
 			revId = generateUUID();
 
 			Revisions.addRevision.mockResolvedValueOnce(revId);
 
-			await ModelProcessing.processInternalModelUpload(teamspace, project, container, revInfo, file);
+			await ModelProcessing.queueModelUpload(teamspace, project, container, revInfo, file, file.readOnly);
 
 			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
 			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, container, modelTypes.CONTAINER, {
@@ -256,6 +245,7 @@ const testProcessInternalModelUpload = () => {
 				lod: revInfo.lod,
 				importAnimations: revInfo.importAnimations,
 				author: owner,
+				format: '.ifc',
 				rFile: [expect.any(String)],
 			});
 
@@ -301,13 +291,16 @@ const testProcessInternalModelUpload = () => {
 				path: generateRandomString(),
 				format: '.ifc',
 				size: 2048,
+				readOnly: true,
 			};
 			revId = generateUUID();
 
 			Revisions.addRevision.mockResolvedValueOnce(revId);
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
-			await expect(ModelProcessing.processInternalModelUpload(teamspace, project, container, revInfo, file))
+			await expect(ModelProcessing.queueModelUpload(
+				teamspace, project, container, revInfo, file, file.readOnly,
+			))
 				.rejects.toEqual(templates.queueConnectionError);
 
 			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
@@ -327,6 +320,7 @@ const testProcessInternalModelUpload = () => {
 				path: generateRandomString(),
 				format: '.ifc',
 				size: 2048,
+				readOnly: true,
 			};
 			revId = generateUUID();
 
@@ -335,8 +329,8 @@ const testProcessInternalModelUpload = () => {
 			rm.mockRejectedValueOnce(cleanupError);
 
 			try {
-				await expect(ModelProcessing.processInternalModelUpload(
-					teamspace, project, container, { owner: generateRandomString() }, file,
+				await expect(ModelProcessing.queueModelUpload(
+					teamspace, project, container, { owner: generateRandomString() }, file, file.readOnly,
 				)).rejects.toEqual(templates.queueInsertionFailed);
 
 				expect(rm).toHaveBeenCalledWith(
@@ -891,8 +885,7 @@ const testInit = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testProcessExternalModelUpload();
-	testProcessInternalModelUpload();
+	testQueueModelUpload();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
 	testContainerGetFileName();

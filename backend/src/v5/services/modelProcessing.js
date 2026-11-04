@@ -207,48 +207,73 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, drawing, revIn
 	}
 };
 
-const queueModelImport = async (
+const sanitizeFileName = (fileName) => fileName.replace(/[ *"/\\[\]:;|=,<>$.]/g, '_');
+
+ModelProcessing.queueModelUpload = async (
 	teamspace,
+	project,
 	container,
-	revId,
-	{ owner: user, timezone, units, lod, importAnimations },
-	{ format, size, fileName }) => {
-	const pathToRevFolder = Path.join(sharedDir, revId);
+	{ owner, ...revData },
+	{ format: fileFormat, size, originalname, path, readOnly }) => {
+	const format = fileFormat || Path.extname(originalname).toLowerCase();
+	const fileNameSanitised = sanitizeFileName(originalname);
+	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
+	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
+		{ ...revData, author: owner, format, rFile: [fileId] });
+	const collection = collectionName(container);
+	const pathToRevFolder = Path.join(sharedDir, UUIDToString(rev_id));
+
 	try {
+		if (readOnly) {
+			const refInfo = {
+				_id: fileId,
+				name: originalname,
+				rev_id: UUIDToString(rev_id),
+				project,
+				model: container,
+				link: path,
+				size,
+			};
+			await addExternalFileReference(teamspace, `${collection}.ref`, fileId, refInfo);
+		} else {
+			const fileMeta = { name: originalname, rev_id: UUIDToString(rev_id), project, model: container };
+			await storeFileStream(teamspace, collection, fileId, createReadStream(path), fileMeta);
+		}
+
 		const json = {
 			teamspace,
 			container,
-			revId,
-			owner: user,
-			timezone,
-			units,
-			lod,
-			importAnimations,
+			revId: UUIDToString(rev_id),
+			owner,
+			timezone: revData.timezone,
+			units: revData.units,
+			lod: revData.lod,
+			importAnimations: revData.importAnimations,
 			format,
 			size,
-			fileName,
+			fileName: originalname,
 		};
 
-		// why is this needed?
 		await mkdir(pathToRevFolder);
 
 		await writeFile(`${pathToRevFolder}.json`, JSON.stringify(json));
 
-		const msg = `import ${SHARED_SPACE_TAG}/${revId}.json`;
+		const msg = `import ${SHARED_SPACE_TAG}/${UUIDToString(rev_id)}.json`;
 
-		await queueMessage(modelq, revId, msg);
+		await queueMessage(modelq, UUIDToString(rev_id), msg);
 
 		publish(events.QUEUED_TASK_UPDATE, {
 			teamspace,
 			model: container,
 			modelType: modelTypes.CONTAINER,
-			corId: revId,
+			corId: UUIDToString(rev_id),
 			status: processStatuses.QUEUED,
 		});
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
-			rm(`${sharedDir}/${revId}.json`),
+			rm(`${sharedDir}/${UUIDToString(rev_id)}.json`),
+			removeFile(teamspace, collection, fileId),
 		]).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
 		});
@@ -260,66 +285,6 @@ const queueModelImport = async (
 		logger.logError('Failed to queue model job', err?.message);
 		throw templates.queueInsertionFailed;
 	}
-};
-
-const sanitizeFileName = (fileName) => fileName.replace(/[ *"/\\[\]:;|=,<>$.]/g, '_');
-
-ModelProcessing.processExternalModelUpload = async (teamspace, project, container, data, file) => {
-	const format = Path.extname(file.originalname).toLowerCase();
-	const { owner, ...revData } = data;
-	const fileNameSanitised = sanitizeFileName(file.originalname);
-	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
-	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
-		{ ...revData, author: owner, format, rFile: [fileId] });
-
-	const fileMeta = { name: file.originalname, rev_id: UUIDToString(rev_id), project, model: container };
-
-	const collection = collectionName(container);
-	try {
-		await storeFileStream(teamspace, collection, fileId, createReadStream(file.path), fileMeta);
-
-		await queueModelImport(
-			teamspace,
-			container,
-			UUIDToString(rev_id),
-			data,
-			{ format, size: file.size, fileName: fileNameSanitised },
-		);
-	} catch (error) {
-		await removeFile(teamspace, collection, fileId);
-
-		throw error;
-	}
-};
-
-ModelProcessing.processInternalModelUpload = async (teamspace, project, container, data, file) => {
-	const fileNameSanitised = sanitizeFileName(file.originalname);
-	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
-	const { owner, ...revData } = data;
-	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
-		{ ...revData, author: owner, rFile: [fileId] });
-
-	const collection = collectionName(container);
-
-	const refInfo = {
-		_id: fileId,
-		name: file.originalname,
-		rev_id: UUIDToString(rev_id),
-		project,
-		model: container,
-		link: file.path,
-		size: file.size,
-	};
-
-	await addExternalFileReference(teamspace, `${collection}.ref`, fileId, refInfo);
-
-	await queueModelImport(
-		teamspace,
-		container,
-		UUIDToString(rev_id),
-		data,
-		{ format: file.format, size: file.size, fileName: fileNameSanitised },
-	);
 };
 
 ModelProcessing.getContainerFileName = (corId) => {
