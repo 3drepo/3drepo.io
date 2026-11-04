@@ -16,12 +16,12 @@
  */
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { isDateType, isSelectType, isTextType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
-import { difference } from 'lodash';
+import { isDateType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ChangeValue, ErrorMessage } from '../ticketHistoryDialog.styles';
 import { formatDate, formatTime } from '@/v5/services/intl';
-
+import { isArrayChange, isSimpleChange } from '../ticketHistory.helpers';
 
 export const ChangeDetail = ({ propertyName, change }) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
@@ -42,75 +42,60 @@ export const ChangeDetail = ({ propertyName, change }) => {
 			</ErrorMessage>
 		);
 	}
-	if (isDateType(propertyDef.type)) {
-		const formattedDates = [from, to].map((date) => date ? formatDate(date) : '');
-		const formattedTimes = [from, to].map((date) => date ? formatTime(date) : '');
-		if (wasAdded) {
-			return <FormattedMessage
-				id="ticketHistory.date.setTo"
-				defaultMessage="Set to {date} {time}"
-				values={{ date: <ChangeValue>{formattedDates[1]}</ChangeValue>, time: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
-			/>;
-		} else if (wasDeleted) {
-			return <FormattedMessage
-				id="ticketHistory.date.deleted"
-				defaultMessage="Deleted {date} {time}"
-				values={{ date: <ChangeValue>{formattedDates[0]}</ChangeValue>, time: <ChangeValue>{formattedTimes[0]}</ChangeValue> }}
-			/>;
-		} else if (wasChanged) {
-			if (formattedDates[0] === formattedDates[1]) {
+	if (isSimpleChange(propertyDef.type)) {
+		if (isDateType(propertyDef.type)) {
+			const formattedDates = [from, to].map((date) => date ? formatDate(date) : '');
+			const formattedTimes = [from, to].map((date) => date ? formatTime(date) : '');
+			if (wasAdded) {
 				return <FormattedMessage
-					id="ticketHistory.date.timeChanged"
-					defaultMessage="Changed time from {from} to {to}"
-					values={{ from: <ChangeValue>{formattedTimes[0]}</ChangeValue>, to: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
+					id="ticketHistory.date.setTo"
+					defaultMessage="Set to {date} {time}"
+					values={{ date: <ChangeValue>{formattedDates[1]}</ChangeValue>, time: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
 				/>;
-			} else {
+			} else if (wasDeleted) {
 				return <FormattedMessage
-					id="ticketHistory.date.changed"
-					defaultMessage="Changed from {fromDate} {fromTime} to {toDate} {toTime}"
-					values={{
-						fromDate: <ChangeValue>{formattedDates[0]}</ChangeValue>,
-						fromTime: <ChangeValue>{formattedTimes[0]}</ChangeValue>,
-						toDate: <ChangeValue>{formattedDates[1]}</ChangeValue>,
-						toTime: <ChangeValue>{formattedTimes[1]}</ChangeValue>
-					}}
+					id="ticketHistory.date.deleted"
+					defaultMessage="Deleted {date} {time}"
+					values={{ date: <ChangeValue>{formattedDates[0]}</ChangeValue>, time: <ChangeValue>{formattedTimes[0]}</ChangeValue> }}
 				/>;
+			} else if (wasChanged) {
+				if (formattedDates[0] === formattedDates[1]) {
+					return <FormattedMessage
+						id="ticketHistory.date.timeChanged"
+						defaultMessage="Changed time from {from} to {to}"
+						values={{ from: <ChangeValue>{formattedTimes[0]}</ChangeValue>, to: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
+					/>;
+				} else {
+					return <FormattedMessage
+						id="ticketHistory.date.changed"
+						defaultMessage="Changed from {fromDate} {fromTime} to {toDate} {toTime}"
+						values={{
+							fromDate: <ChangeValue>{formattedDates[0]}</ChangeValue>,
+							fromTime: <ChangeValue>{formattedTimes[0]}</ChangeValue>,
+							toDate: <ChangeValue>{formattedDates[1]}</ChangeValue>,
+							toTime: <ChangeValue>{formattedTimes[1]}</ChangeValue>,
+						}}
+					/>;
+				}
 			}
 		}
-	}
-	if (propertyDef.type === 'coords') {
-		if (wasAdded) {
-			return <FormattedMessage
-				id="ticketHistory.coords.setTo"
-				defaultMessage="Pin set"/>;
-		} else if (wasDeleted) {
-			return <FormattedMessage
-				id="ticketHistory.coords.deleted"
-				defaultMessage="Deleted pin" />;
-		} else if (wasChanged) {
-			return <FormattedMessage
-				id="ticketHistory.coords.setTo"
-				defaultMessage="Changed pin location"/>;
+		if (propertyDef.type === 'coords') {
+			if (wasAdded) {
+				return <FormattedMessage
+					id="ticketHistory.coords.setTo"
+					defaultMessage="Pin set"/>;
+			} else if (wasDeleted) {
+				return <FormattedMessage
+					id="ticketHistory.coords.deleted"
+					defaultMessage="Deleted pin" />;
+			} else if (wasChanged) {
+				return <FormattedMessage
+					id="ticketHistory.coords.setTo"
+					defaultMessage="Changed pin location"/>;
+			}
 		}
-	}
-	if (propertyDef.type === 'view') {
-		return <>Object TODO</>
-	}
-	if (['imageList', 'image'].includes(propertyDef.type)) {
-	}
-	if (isSelectType(propertyDef.type)) {
-		if (propertyDef.values === 'jobsAndUsers') {
-		}
-		const removed = difference(from, to);
-		const added = difference(to, from);
-		return (
-			<>
-				{removed.length > 0 && <FormattedMessage id="ticketHistory.select.removed" defaultMessage="Removed {removed}" values={{ removed: <ChangeValue>{removed.join(', ')}</ChangeValue> }} />}
-				{added.length > 0 && <FormattedMessage id="ticketHistory.select.added" defaultMessage="Added {added}" values={{ added: <ChangeValue>{added.join(', ')}</ChangeValue> }} />}
-			</>
-		);
-	}
-	if (isTextType(propertyDef.type) || propertyDef.type === 'number' || propertyDef.type === 'boolean') {
+
+		// Default handling for simple changes (text, number, boolean, etc.)
 		if (wasAdded) {
 			return <FormattedMessage
 				id="ticketHistory.default.setTo"
@@ -125,6 +110,21 @@ export const ChangeDetail = ({ propertyName, change }) => {
 				defaultMessage="Changed from {from} to {to}" values={{ from: <ChangeValue>{from.toString()}</ChangeValue>, to: <ChangeValue>{to.toString()}</ChangeValue> }} />;
 		}
 	}
+	if (isArrayChange(propertyDef.type)) {
+		if (propertyDef.values === 'imageList') {
+		}
+		if (propertyDef.values === 'jobsAndUsers') {
+		}
+		const removed = difference(from, to);
+		const added = difference(to, from);
+		return (
+			<>
+				{removed.length > 0 && <FormattedMessage id="ticketHistory.select.removed" defaultMessage="Removed {removed}" values={{ removed: <ChangeValue>{removed.join(', ')}</ChangeValue> }} />}
+				{added.length > 0 && <FormattedMessage id="ticketHistory.select.added" defaultMessage="Added {added}" values={{ added: <ChangeValue>{added.join(', ')}</ChangeValue> }} />}
+			</>
+		);
+	}
+	
 	return (
 		<ErrorMessage>
 			<FormattedMessage

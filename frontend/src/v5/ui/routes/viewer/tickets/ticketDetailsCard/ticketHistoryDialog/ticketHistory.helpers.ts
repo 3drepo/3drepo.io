@@ -22,3 +22,11 @@ export const ColumnWidths = {
 	ChangePropertyName: 250,
 	ChangeDetails: 400,
 };
+
+
+// Consists of only one value.
+export const isSimpleChange = (type: string) => ['date', 'pastDate', 'sequencing', 'text', 'longText', 'number', 'boolean', 'coords', 'image', 'oneOf'].includes(type);
+// Value is an array so can consist of removals and additions
+export const isArrayChange = (type: string) => ['manyOf', 'tags', 'imageList'].includes(type);
+// Value is an object so can consist of nested changes
+export const isObjectChange = (type: string) => ['view'].includes(type);
