@@ -39,7 +39,9 @@ const generateBasicData = () => ({
 	users: {
 		tsAdmin: generateUserCredentials(),
 		tsAdmin2: generateUserCredentials(),
-		noTemplatePerms: generateUserCredentials(),
+		projectAdmin: generateUserCredentials(),
+		noTemplatePerm: generateUserCredentials(),
+		templatePerm: generateUserCredentials(),
 		viewer: generateUserCredentials(),
 		noProjectAccess: generateUserCredentials(),
 		nobody: generateUserCredentials(),
@@ -52,13 +54,13 @@ const generateBasicData = () => ({
 });
 
 const setupBasicData = async (users, teamspace, project, models, job) => {
-	const { tsAdmin, tsAdmin2, noTemplatePerms, ...otherUsers } = users;
+	const { tsAdmin, tsAdmin2, ...otherUsers } = users;
 
-	await Promise.all([tsAdmin, tsAdmin2, noTemplatePerms]
+	await Promise.all([tsAdmin, tsAdmin2]
 		.map((user) => ServiceHelper.db.createUser(user)));
 
 	await ServiceHelper.db.createTeamspace(teamspace,
-		[tsAdmin.user, tsAdmin2.user, noTemplatePerms.user]);
+		[tsAdmin.user, tsAdmin2.user]);
 
 	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
@@ -71,8 +73,9 @@ const setupBasicData = async (users, teamspace, project, models, job) => {
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [tsAdmin2.user] }]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
+			[users.projectAdmin.user, users.templatePerm.user, users.noTemplatePerm.user]),
+		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [users.projectAdmin.user] }]),
 	]);
 };
 
@@ -81,7 +84,7 @@ const testGetComment = () => {
 		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate(false, false, {
 			comments: true,
-			permissions: { view: [users.tsAdmin.user, job._id] },
+			permissions: { view: [users.templatePerm.user, job._id] },
 		});
 
 		beforeAll(async () => {
@@ -125,8 +128,9 @@ const testGetComment = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
-				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerms.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true],
+				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, true],
 			];
 		};
 
@@ -166,7 +170,7 @@ const testGetCommentsList = () => {
 
 		const template = generateTemplate(false, false, {
 			comments: true,
-			permissions: { view: [users.tsAdmin.user, job._id] },
+			permissions: { view: [users.templatePerm.user, job._id] },
 		});
 
 		beforeAll(async () => {
@@ -224,8 +228,9 @@ const testGetCommentsList = () => {
 				['the ticket id is valid and updatedSince is specified to a future date', { ...baseRouteParams, options: { updatedSince: Date.now() + 10000 } }, true, []],
 				['the ticket id is valid and comments are sorted by updated date in ascending order', { ...baseRouteParams, options: { sortBy: 'updatedAt', sortDesc: false }, orderChecker: orderCheck('updatedAt', false) }, true],
 				['the ticket id is valid and comments are sorted by updated date in descending order', { ...baseRouteParams, options: { sortBy: 'updatedAt', sortDesc: true }, orderChecker: orderCheck('updatedAt', true) }, true],
-				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerms.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true],
+				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, true],
 			];
 		};
 
@@ -282,7 +287,7 @@ const testCreateComment = () => {
 	describe('Create comment', () => {
 		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate(false, false, { comments: true,
-			permissions: { comment: [users.tsAdmin.user, job._id] } });
+			permissions: { comment: [users.templatePerm.user, job._id] } });
 		const comment = ServiceHelper.generateComment();
 
 		const noCommentTemplate = generateTemplate(false, false, { comments: false });
@@ -329,8 +334,9 @@ const testCreateComment = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the ticket does not allow comments', { ...baseRouteParams, allowComments: false }, false, templates.invalidArguments],
 				['the ticket id is valid', baseRouteParams, true],
-				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerms.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permissions', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true],
+				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permissions', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+				['the user has template permissions', { ...baseRouteParams, key: users.templatePerm.apiKey }, true],
 			];
 		};
 
@@ -366,7 +372,7 @@ const testUpdateComment = () => {
 	describe('Update comment', () => {
 		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate(false, false, { comments: true,
-			permissions: { comment: [users.tsAdmin.user, job._id] } });
+			permissions: { comment: [users.templatePerm.user, job._id] } });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed], job);
@@ -385,7 +391,7 @@ const testUpdateComment = () => {
 				const commentRes = await agent.post(addCommentRoute(model._id, ticket._id, users.tsAdmin))
 					.send(comment);
 				comment._id = commentRes.body._id;
-				const commentRes2 = await agent.post(addCommentRoute(model._id, ticket._id, users.tsAdmin2))
+				const commentRes2 = await agent.post(addCommentRoute(model._id, ticket._id, users.templatePerm))
 					.send(comment2);
 				comment2._id = commentRes2.body._id;
 
@@ -414,8 +420,8 @@ const testUpdateComment = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
-				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerms.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permissions', { ...baseRouteParams, key: users.tsAdmin2.apiKey, commentIndex: 1 }, true],
+				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permissions', { ...baseRouteParams, key: users.templatePerm.apiKey, commentIndex: 1 }, true],
 			];
 		};
 
@@ -469,7 +475,7 @@ const testDeleteComment = () => {
 	describe('Delete comment', () => {
 		const { users, teamspace, project, con, fed, job } = generateBasicData();
 		const template = generateTemplate(false, false, { comments: true,
-			permissions: { comment: [users.tsAdmin.user, job._id] },
+			permissions: { comment: [users.templatePerm.user, job._id] },
 		});
 
 		beforeAll(async () => {
@@ -483,12 +489,14 @@ const testDeleteComment = () => {
 
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
-				const addCommentRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}/comments?key=${users.tsAdmin.apiKey}`;
+				const addCommentRoute = (modelId, ticketId, user) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}/comments?key=${user.apiKey}`;
 				const ticketRes = await agent.post(addTicketRoute(model._id)).send(ticket);
 				ticket._id = ticketRes.body._id;
-				const commentRes = await agent.post(addCommentRoute(model._id, ticket._id)).send(comment);
+				const commentRes = await agent.post(addCommentRoute(model._id, ticket._id,
+					users.templatePerm)).send(comment);
 				comment._id = commentRes.body._id;
-				const comment2Res = await agent.post(addCommentRoute(model._id, ticket._id)).send(comment2);
+				const comment2Res = await agent.post(addCommentRoute(model._id, ticket._id,
+					users.projectAdmin)).send(comment2);
 				comment2._id = comment2Res.body._id;
 				// eslint-disable-next-line no-param-reassign
 				model.ticket = ticket;
@@ -502,7 +510,7 @@ const testDeleteComment = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const { modelNotFound } = templates;
-			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
+			const baseRouteParams = { key: users.templatePerm.apiKey, projectId: project.id, model, modelType };
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -515,8 +523,8 @@ const testDeleteComment = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
-				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerms.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permissions', { ...baseRouteParams, commentIndex: 1 }, true],
+				['the user has no template permissions', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permissions', { ...baseRouteParams, key: users.projectAdmin.apiKey, commentIndex: 1 }, true],
 			];
 		};
 
@@ -540,7 +548,7 @@ const testDeleteComment = () => {
 					const expectedComment = {
 						...comment,
 						deleted: true,
-						author: users.tsAdmin.user,
+						author: deletedComment.author,
 						createdAt: deletedComment.createdAt,
 						updatedAt: deletedComment.updatedAt,
 						history: [{
