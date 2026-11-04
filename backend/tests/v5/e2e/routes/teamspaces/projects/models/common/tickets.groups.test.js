@@ -50,15 +50,20 @@ const generateBasicData = () => {
 		tsAdmin: generateUserCredentials(),
 		tsAdmin2: generateUserCredentials(),
 		viewer: generateUserCredentials(),
+		projectAdmin: generateUserCredentials(),
 		noProjectAccess: generateUserCredentials(),
-		noTemplateAccess: generateUserCredentials(),
+		templatePerm: generateUserCredentials(),
+		noTemplatePerm: generateUserCredentials(),
 		nobody: generateUserCredentials(),
 	};
 
 	const job = { _id: generateRandomString(), color: generateRandomString(), users: [] };
 
 	const template = generateTemplate(false, true,
-		{ permissions: { view: [users.tsAdmin.user, job._id], edit: { default: [users.tsAdmin.user, job._id] } } });
+		{ permissions: {
+			view: [users.templatePerm.user, job._id],
+			edit: { default: [users.templatePerm.user, job._id] } },
+		});
 
 	const con = generateRandomModel();
 	const fed = generateRandomModel({ modelType: modelTypes.FEDERATION,
@@ -80,14 +85,13 @@ const generateBasicData = () => {
 
 const setupBasicData = async ({ users, teamspace, project, fed, con, template, ticket, job }) => {
 	const models = [fed, con];
-	const { tsAdmin, tsAdmin2, noTemplateAccess, ...otherUsers } = users;
+	const { tsAdmin, tsAdmin2, ...otherUsers } = users;
 
 	await Promise.all([
 		ServiceHelper.db.createUser(tsAdmin),
 		ServiceHelper.db.createUser(tsAdmin2),
-		ServiceHelper.db.createUser(noTemplateAccess),
 	]);
-	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user, tsAdmin2.user, noTemplateAccess.user]);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user, tsAdmin2.user]);
 
 	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
@@ -99,9 +103,10 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
+			[users.projectAdmin.user, users.noTemplatePerm.user, users.templatePerm.user]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
-		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [tsAdmin2.user] }]),
+		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [users.projectAdmin.user] }]),
 	]);
 
 	/* eslint-disable no-param-reassign */
@@ -315,8 +320,9 @@ const testGetGroup = () => {
 				['the group id is valid with unfound RVT IDs should return empty array', { ...baseRouteParams, groupName: 'groupWithRvtIdsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
 				['the smart group id is valid', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids' }, true],
 				['the smart group id is valid (returning IFC Guids)', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids', convertIds: false }, true],
-				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplateAccess.apiKey }, false, templates.notAuthorized],
-				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, true],
+				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, true],
 			];
 		};
 
@@ -387,8 +393,9 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
-				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplateAccess.apiKey }, payload, false, templates.notAuthorized],
-				['the job of the user has template permission', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, payload, true],
+				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, payload, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, payload, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, payload, true],
 				['the payload has excludeDefinedObjects', { ...baseRouteParams, checkOutput: false }, { excludeDefinedObjects: true }, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id, [idTypes.IFC]: [generateRandomIfcGuid()] },
