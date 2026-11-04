@@ -63,6 +63,9 @@ const LogsModel = require(`${src}/models/tickets.logs`);
 jest.mock('../../../../../../../../src/v5/models/tickets.comments');
 const CommentsModel = require(`${src}/models/tickets.comments`);
 
+jest.mock('../../../../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
+
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -1089,6 +1092,17 @@ const testGetTicketList = () => {
 				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
 			],
 		}],
+		['template filter but user is teamspace admin', [], {}, undefined, {}, {
+			tsAdmin: true,
+			templateQueryVal: propertyValue,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.IS, value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQueries: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+			],
+		}],
 		['ticket code filter', [], {}, undefined, {}, {
 			queryFilters: [
 				{
@@ -1114,13 +1128,14 @@ const testGetTicketList = () => {
 			],
 			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
 		}],
-	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc, limit, skip } = {}, { queryFilters, expectedQueries, ticketCodeQuery, templateQueryVal } = {}) => {
+	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc, limit, skip } = {}, { queryFilters, expectedQueries, ticketCodeQuery, templateQueryVal, tsAdmin } = {}) => {
 		test(`Should call getTicketsByFilter in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const expectedOutput = generateRandomString();
 
+			Permissions.isTeamspaceAdmin.mockResolvedValueOnce(!!tsAdmin);
 			JobsModel.getJobsByUsers.mockResolvedValueOnce(userJobs);
 			TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(ticketTemplates);
 			TicketsModel.getTicketsByFilter.mockResolvedValueOnce(expectedOutput);
@@ -1162,12 +1177,13 @@ const testGetTicketList = () => {
 			expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
 			expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
 
-			const templatePermissionsQuery = {
+			const templatePermissionsQuery = tsAdmin ? {} : {
 				$or: [
 					{ 'config.permissions.view': { $in: [user, ...userJobs] } },
 					{ 'config.permissions.view': { $exists: false } },
 				],
 			};
+
 			const templateQueryWithPermissions = templateQueryVal
 				? { $and: [{ code: { $in: [templateQueryVal] } }, templatePermissionsQuery] }
 				: templatePermissionsQuery;
