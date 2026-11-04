@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { ColumnWidths } from './ticketHistory.helpers';
+import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 
 export const ItemContainer = styled.li<{ selected?: boolean }>`
 	width: 100%;
@@ -47,4 +48,17 @@ export const Author = styled.div`
 
 export const ActionType = styled.div`
 	width: ${ColumnWidths.ActionType}px;
+`;
+
+export const UpdateChip = styled(ChipContainer)`
+	color: ${({ theme }) => theme.palette.tertiary.mid};
+	border-color: ${({ theme }) => theme.palette.tertiary.mid};
+	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	pointer-events: none;
+`;
+
+export const ImportChip = styled(UpdateChip)`
+	color: ${({ theme }) => theme.palette.success.dark};
+	border-color: ${({ theme }) => theme.palette.success.dark};
+	background-color: ${({ theme }) => theme.palette.success.lightest};
 `;

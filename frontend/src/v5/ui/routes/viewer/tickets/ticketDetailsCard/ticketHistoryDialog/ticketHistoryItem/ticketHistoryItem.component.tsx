@@ -17,8 +17,9 @@
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
-import { ItemContainer, Author, Timestamp, ActionType } from '../ticketHistoryDialog.styles';
+import { ItemContainer, Author, Timestamp, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
 import { ChangesTable } from './changesTable/changesTable.component';
+import { FormattedMessage } from 'react-intl';
 
 export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
 	const formattedTimestamp = new Date(timestamp).toLocaleString();
@@ -29,7 +30,11 @@ export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
 		<ItemContainer>
 			<Timestamp>{formattedTimestamp}</Timestamp>
 			<Author />
-			<ActionType>Import</ActionType>
+			<ActionType>
+				<ImportChip>
+					<FormattedMessage id="ticketHistoryDialog.listItem.import" defaultMessage="Import" />
+				</ImportChip>
+			</ActionType>
 		</ItemContainer>
 	); 
 
@@ -40,7 +45,11 @@ export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
 				<AssigneeCircle assignee={author} />
 				{fullname}
 			</Author>
-			<ActionType>Update</ActionType>
+			<ActionType>
+				<UpdateChip>
+					<FormattedMessage id="ticketHistoryDialog.listItem.update" defaultMessage="Update" />
+				</UpdateChip>
+			</ActionType>
 			<ChangesTable changes={changes} />
 		</ItemContainer>
 	);
