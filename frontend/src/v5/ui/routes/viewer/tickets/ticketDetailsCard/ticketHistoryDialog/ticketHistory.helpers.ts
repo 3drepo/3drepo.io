@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { has } from 'lodash';
+
 export const ColumnWidths = {
 	Timestamp: 154,
 	Author: 176,
@@ -30,3 +32,16 @@ export const isSimpleChange = (type: string) => ['date', 'pastDate', 'sequencing
 export const isArrayChange = (type: string) => ['manyOf', 'tags', 'imageList'].includes(type);
 // Value is an object so can consist of nested changes
 export const isObjectChange = (type: string) => ['view'].includes(type);
+
+export const getPathsOfChanges = (changes: any, prefix = ''): string[] =>
+	Object.entries(changes).flatMap(([key, value]) => {
+		const path = prefix ? `${prefix}.${key}` : key;
+
+		if (typeof value !== 'object' || value === null) return [];
+
+		if (has(value, 'from') && has(value, 'to')) {
+			return [path];
+		}
+
+		return getPathsOfChanges(value, path);
+	});

@@ -19,20 +19,19 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { isDateType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { ChangeValue, ErrorMessage } from '../ticketHistoryDialog.styles';
+import { ChangeValue, ErrorMessage } from './changesTable.styles';
 import { formatDate, formatTime } from '@/v5/services/intl';
-import { isArrayChange, isSimpleChange } from '../ticketHistory.helpers';
+import { isArrayChange, isSimpleChange } from '../../ticketHistory.helpers';
 
 export const ChangeDetail = ({ propertyName, change }) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const propertyDef = findPropertyDefinition(template, propertyName);
 	const { from, to } = change;
-	const emptyValue = [from, to].findIndex((value) => !value?.length);
+	const emptyValue = [from, to].findIndex((value) => isNull(value));
 	const wasDeleted = emptyValue === 1;
 	const wasAdded = emptyValue === 0;
 	const wasChanged = !wasDeleted && !wasAdded;
 
-	console.log('@@- propertyDef', propertyDef);
 	if (!propertyDef?.type) {
 		return (
 			<ErrorMessage>

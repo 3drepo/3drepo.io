@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 import { ColumnWidths } from './ticketHistory.helpers';
 
@@ -48,29 +47,4 @@ export const Author = styled.div`
 
 export const ActionType = styled.div`
 	width: ${ColumnWidths.ActionType}px;
-`;
-
-export const ChangeRow = styled.div`
-	display: grid;
-	grid-template-columns: ${ColumnWidths.ChangePropertyName}px ${ColumnWidths.ChangeDetails}px;
-`;
-
-export const ChangePropertyName = styled.div`
-	font-weight: bold;
-`;
-
-export const DetailContainer = styled.div`
-	display: inline-flex;
-`;
-
-export const ErrorMessage = styled.span`
-	font-weight: bold;
-	color: ${({ theme }) => theme.palette.error.main};
-`;
-
-export const ChangeValue = styled(TextOverflow)`
-	font-weight: bold;
-	padding: 0 3px;
-	flex-grow: 0;
-	color: ${({ theme }) => theme.palette.secondary.main};
 `;
