@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { TableVirtuoso } from 'react-virtuoso';
 import styled from 'styled-components';
 import { CommentBox } from '../commentBox/commentBox.component';
 import { isFirefox } from '@/v4/styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 export const Comments = styled.div`
-	height: 100%;
+	overflow-y: auto;
 `;
 
 export const CreateCommentBox = styled(CommentBox)`
@@ -29,18 +28,10 @@ export const CreateCommentBox = styled(CommentBox)`
 	border-top-width: 1px;
 `;
 
-
 export const CommentsContainer = styled.div`
 	height: 100%;
 	display: grid;
 	grid-template-rows: 1fr;
-`;
-
-export const VirtualisedList = styled(TableVirtuoso as any).attrs({
-	style: { overflowY: 'scroll' },
-})`
-	box-sizing: border-box;
-	overflow-x: hidden;
 `;
 
 export const EmptyCommentsBox = styled.div`
@@ -67,4 +58,10 @@ export const TableRow = styled.div`
 
 export const FillerRow = styled.div<{ height: number }>`
 	height: ${({ height }) => height}px;
+`;
+
+export const CommentsVirtualList = styled(VirtualList)`
+	width: 100%;
+	// padding-left: 14px;
+	// ${isFirefox('padding-right: 14px;')}
 `;

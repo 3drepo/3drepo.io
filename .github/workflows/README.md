@@ -24,8 +24,9 @@ There are three ways a deploy happens:
 - **To qa / dev (movable tags)**: move the relevant tag onto the commit you want
   live and push it. The workflow runs from that tagged commit and deploys the
   `www` release to the matching cluster, using that env's values from DevOps:
-    - `qa_deploy`  -> qa
-    - `dev_deploy` -> dev
+    - `qa_deploy`      -> qa
+    - `dev_deploy`     -> dev
+    - `sandbox_deploy` -> sandbox
 
 Fork PRs are refused, because deploying uses registry and cluster secrets.
 
