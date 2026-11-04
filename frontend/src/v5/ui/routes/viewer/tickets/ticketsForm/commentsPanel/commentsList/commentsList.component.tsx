@@ -96,7 +96,7 @@ export const CommentsList = () => {
 	const tableHandle = useRef<VListHandle>(null);
 
 	useEffect(() => {
-		if (!comments || comments.length === 0 || !tableHandle.current || commentToShow == null) return;
+		if (!comments || comments.length === 0 || !tableHandle.current || !commentToShow) return;
 		if (!isExpanded) {
 			TicketsCardActionsDispatchers.setIsExpandedTicketView(true);
 			return;
