@@ -20,8 +20,18 @@ import { isDateType } from '@components/viewer/cards/cardFilters/cardFilters.hel
 import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ChangeValue, ErrorMessage } from './changesTable.styles';
-import { formatDate, formatTime } from '@/v5/services/intl';
-import { isArrayChange, isSimpleChange } from '../../ticketHistory.helpers';
+import { isArrayChange, isDescribableChange } from '../../ticketHistory.helpers';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+
+const parseValueOfType = (value, type) => {
+	if (isDateType(type)) {
+		return formatDateTime(value);
+	}
+	if (type === 'coords') {
+		return null;
+	}
+	return value?.toString() ?? '';
+};
 
 export const ChangeDetail = ({ propertyName, change }) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
@@ -36,98 +46,69 @@ export const ChangeDetail = ({ propertyName, change }) => {
 		return (
 			<ErrorMessage>
 				<FormattedMessage
-					id="ticketHistory.missingType"
+					id="ticketHistory.changesTable.missingType"
 					defaultMessage="Missing property type for {propertyName}" values={{ propertyName }} />
 			</ErrorMessage>
 		);
 	}
-	if (isSimpleChange(propertyDef.type)) {
-		if (isDateType(propertyDef.type)) {
-			const formattedDates = [from, to].map((date) => date ? formatDate(date) : '');
-			const formattedTimes = [from, to].map((date) => date ? formatTime(date) : '');
-			if (wasAdded) {
-				return <FormattedMessage
-					id="ticketHistory.date.setTo"
-					defaultMessage="Set to {date} {time}"
-					values={{ date: <ChangeValue>{formattedDates[1]}</ChangeValue>, time: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
-				/>;
-			} else if (wasDeleted) {
-				return <FormattedMessage
-					id="ticketHistory.date.deleted"
-					defaultMessage="Deleted {date} {time}"
-					values={{ date: <ChangeValue>{formattedDates[0]}</ChangeValue>, time: <ChangeValue>{formattedTimes[0]}</ChangeValue> }}
-				/>;
-			} else if (wasChanged) {
-				if (formattedDates[0] === formattedDates[1]) {
-					return <FormattedMessage
-						id="ticketHistory.date.timeChanged"
-						defaultMessage="Changed time from {from} to {to}"
-						values={{ from: <ChangeValue>{formattedTimes[0]}</ChangeValue>, to: <ChangeValue>{formattedTimes[1]}</ChangeValue> }}
-					/>;
-				} else {
-					return <FormattedMessage
-						id="ticketHistory.date.changed"
-						defaultMessage="Changed from {fromDate} {fromTime} to {toDate} {toTime}"
-						values={{
-							fromDate: <ChangeValue>{formattedDates[0]}</ChangeValue>,
-							fromTime: <ChangeValue>{formattedTimes[0]}</ChangeValue>,
-							toDate: <ChangeValue>{formattedDates[1]}</ChangeValue>,
-							toTime: <ChangeValue>{formattedTimes[1]}</ChangeValue>,
-						}}
-					/>;
-				}
-			}
-		}
-		if (propertyDef.type === 'coords') {
-			if (wasAdded) {
-				return <FormattedMessage
-					id="ticketHistory.coords.setTo"
-					defaultMessage="Pin set"/>;
-			} else if (wasDeleted) {
-				return <FormattedMessage
-					id="ticketHistory.coords.deleted"
-					defaultMessage="Deleted pin" />;
-			} else if (wasChanged) {
-				return <FormattedMessage
-					id="ticketHistory.coords.setTo"
-					defaultMessage="Changed pin location"/>;
-			}
-		}
 
-		// Default handling for simple changes (text, number, boolean, etc.)
-		if (wasAdded) {
-			return <FormattedMessage
-				id="ticketHistory.default.setTo"
-				defaultMessage="Set to {to}" values={{ to: <ChangeValue>{to.toString()}</ChangeValue> }} />;
-		} else if (wasDeleted) {
-			return <FormattedMessage
-				id="ticketHistory.default.deleted"
-				defaultMessage="Deleted {from}" values={{ from: <ChangeValue>{from.toString()}</ChangeValue> }} />;
-		} else if (wasChanged) {
-			return <FormattedMessage
-				id="ticketHistory.default.setTo"
-				defaultMessage="Changed from {from} to {to}" values={{ from: <ChangeValue>{from.toString()}</ChangeValue>, to: <ChangeValue>{to.toString()}</ChangeValue> }} />;
-		}
+	// view type has nested changes, so it is treated separately
+	if (propertyDef?.type === 'view') {
+
 	}
-	if (isArrayChange(propertyDef.type)) {
-		if (propertyDef.values === 'imageList') {
+
+	if (wasDeleted) {
+		if (isDescribableChange(propertyDef.type)) {
+			return <FormattedMessage
+				id="ticketHistory.changesTable.deleted.specific"
+				defaultMessage="Deleted {from}" values={{ from: <ChangeValue>{parseValueOfType(from, propertyDef.type)}</ChangeValue> }} />;
 		}
-		if (propertyDef.values === 'jobsAndUsers') {
+		// If value is complex return a generic deleted message
+		return <FormattedMessage
+			id="ticketHistory.changesTable.deleted.generic"
+			defaultMessage="Deleted" />;
+	} else if (wasAdded) {
+		if (isDescribableChange(propertyDef.type)) {
+			return <FormattedMessage
+				id="ticketHistory.changesTable.set.specific"
+				defaultMessage="Set to {to}" values={{ to: <ChangeValue>{parseValueOfType(to, propertyDef.type)}</ChangeValue> }} />;
 		}
-		const removed = difference(from, to);
-		const added = difference(to, from);
-		return (
-			<>
-				{removed.length > 0 && <FormattedMessage id="ticketHistory.select.removed" defaultMessage="Removed {removed}" values={{ removed: <ChangeValue>{removed.join(', ')}</ChangeValue> }} />}
-				{added.length > 0 && <FormattedMessage id="ticketHistory.select.added" defaultMessage="Added {added}" values={{ added: <ChangeValue>{added.join(', ')}</ChangeValue> }} />}
-			</>
-		);
+		// If value is complex return a generic set message
+		return <FormattedMessage
+			id="ticketHistory.changesTable.set.generic"
+			defaultMessage="Value set" />;
+	} else if (wasChanged) {
+		if (isDescribableChange(propertyDef.type)) {
+			if (isArrayChange(propertyDef.type)) {
+				const removed = difference(from, to).map((item) => parseValueOfType(item, propertyDef.type));
+				const added = difference(to, from).map((item) => parseValueOfType(item, propertyDef.type));
+				return (
+					<>
+						{removed.length > 0 && <FormattedMessage id="ticketHistory.changesTable.array.removed" defaultMessage="Removed {removed}" values={{ removed: <ChangeValue>{removed.join(', ')}</ChangeValue> }} />}
+						{added.length > 0 && <FormattedMessage id="ticketHistory.changesTable.array.added" defaultMessage="Added {added}" values={{ added: <ChangeValue>{added.join(', ')}</ChangeValue> }} />}
+					</>
+				);
+			}
+			
+			return <FormattedMessage
+				id="ticketHistory.changesTable.changed.specific"
+				defaultMessage="Changed from {from} to {to}"
+				values={{
+					from: <ChangeValue>{parseValueOfType(from, propertyDef.type)}</ChangeValue>,
+					to: <ChangeValue>{parseValueOfType(to, propertyDef.type)}</ChangeValue>,
+				}}
+			/>;
+		}
+		// If value is complex return a generic change message
+		return <FormattedMessage
+			id="ticketHistory.changesTable.change.generic"
+			defaultMessage="Value changed" />;
 	}
 	
 	return (
 		<ErrorMessage>
 			<FormattedMessage
-				id="ticketHistory.unhandledType"
+				id="ticketHistory.changesTable.unhandledType"
 				defaultMessage="Unhandled property type: {type}" values={{ type: propertyDef.type }} />
 		</ErrorMessage>
 	);
