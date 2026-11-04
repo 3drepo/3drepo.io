@@ -46,6 +46,7 @@ import { formatMessage } from '@/v5/services/intl';
 enum IndexChange {
 	PREV = -1,
 	NEXT = 1,
+	SAME = 0,
 }
 
 export const TicketDetailsCard = () => {
@@ -87,6 +88,7 @@ export const TicketDetailsCard = () => {
 	const changeTicketIndex = (delta: IndexChange) => {
 		const updatedId = ticketsIds[getUpdatedIndex(delta)];
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
+		TicketCommentsActionsDispatchers.resetUnsavedComments();
 	};
 
 	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
@@ -98,6 +100,11 @@ export const TicketDetailsCard = () => {
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+
+		// Because there's an animation or transition when going back, 
+		// we delay the reset of unsaved comments to avoid being overridden by the unmount in commentbox.
+		setTimeout(() => TicketCommentsActionsDispatchers.resetUnsavedComments(), 50);
+
 		if (!ticketWasRemoved) return;
 		if (
 			initialIndex.current < listLength
@@ -171,11 +178,6 @@ export const TicketDetailsCard = () => {
 	useEffect(() => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
-
-
-	useEffect(() => {
-		TicketCommentsActionsDispatchers.resetUnsavedComments();
-	}, [ticketId]);
 
 	useEffect(() => () => {
 		onBlurHandler();

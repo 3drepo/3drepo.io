@@ -17,12 +17,11 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
-import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaExpandable.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
 import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
+import { ListItemButton, Paper } from '@mui/material';
 
 export const Container = styled.section`
 	display: flex;
@@ -77,9 +76,17 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 
 export const DragAndDrop = styled(DragAndDropBase as any).attrs({
 	$dashSize: 2,
-})<{ $hidden?: boolean }>`
+})<{ $hidden?: boolean, isDragActive?: boolean }>`
 	margin: 10px 15px;
 	width: calc(100% - 30px);
+	height: calc(100% - 20px);
+	top: 0;
+	position: absolute;
+	z-index: 23;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
 	${DashedContainer} {
 		padding: 13px;
@@ -143,19 +150,64 @@ export const ErroredImageMessages = styled.div`
 	margin: 0 0 4px 15px;
 `;
 
-export const MessageInput = styled(FormTextAreaExpandable)`
+export const MessageInput = styled.div<{ $autoHeight?: boolean; $canCollapse?: boolean }>`
 	padding: 8px 15px 0;
-	overflow: hidden;
+	box-sizing: border-box;
+	height: ${({ $autoHeight, $canCollapse }) => $autoHeight && $canCollapse ? 'auto' : '80px'};
+	max-height: ${({ $autoHeight, $canCollapse }) => $autoHeight && $canCollapse ? 'none' : '80px'};
+	transition: height 0.3s ease;
+	/* stylelint-disable-next-line */
+	interpolate-size: allow-keywords;
+	overflow-y: auto;
+	outline: none;
+	white-space: pre-wrap;
+	word-break: break-word;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	line-height: 16px;
 
-	.MuiInputBase-multiline {
-		padding: 0;
-		line-height: 16px;
+	&:empty:before {
+		content: attr(data-placeholder);
+		color: ${({ theme }) => theme.palette.base.lighter};
+		pointer-events: none;
 	}
 
-	${TextAreaContainer} {
-		overflow-y: scroll;
-		border: none;
-		box-shadow: none;
+	& [data-mention='true'] > span {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
+
+	& [data-unknown-mention='true'] > span {
+		color: ${({ theme }) => theme.palette.base.lighter};
+		font-style: italic;
+	}
+`;
+
+export const ShowMoreButton = styled.button`
+	border: none;
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.base.main};
+	background-color: transparent;
+	padding: 0 15px;
+	${({ theme }) => theme.typography.label};
+`;
+
+export const MentionMessage = styled(Paper)`
+	width: 264px;
+	padding: 0;
+	box-sizing: border-box;
+	border-radius: 4px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const MentionItem = styled(ListItemButton)`
+	&&:hover {
+		background-color: transparent;
+	}
+
+	&&.Mui-selected,
+	&&.Mui-selected:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
 `;
 
