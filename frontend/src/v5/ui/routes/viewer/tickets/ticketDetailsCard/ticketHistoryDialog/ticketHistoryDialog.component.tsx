@@ -52,7 +52,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 					subtitle={formatMessage({
 						id: 'ticketHistoryDialog.subtitle',
 						defaultMessage: 'Change history for {ticketName}',
-					}, { ticketName: 'placeholder' })}
+					}, { ticketName: ticket?.title ?? '' })}
 				/>
 				<ModalBody>
 					<Header onSortingChange={() => {}}>
