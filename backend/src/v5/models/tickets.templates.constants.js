@@ -15,36 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modulePropertyLabels, presetModules, riskLevels, statusTypes } = require('../schemas/tickets/templates.constants');
+const { modulePropertyLabels, presetModules, riskLevels } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
 const { validate } = require('../schemas/tickets/templates');
 
 const TemplateConsts = {};
 
 const defaultTemplates = [
-	{
-		_id: stringToUUID('6d8bca8e-cb85-44f7-b04f-72d2954ddd67'),
-		name: 'Clash (Default template)',
-		code: 'CSH',
-		config: {
-			comments: true,
-			issueProperties: true,
-			defaultView: true,
-			pin: true,
-			status: {
-				values: [
-					{ name: 'Active', type: statusTypes.OPEN },
-					{ name: 'Reviewed', type: statusTypes.REVIEW },
-					{ name: 'Approved', type: statusTypes.REVIEW },
-					{ name: 'Resolved', type: statusTypes.DONE },
-				],
-				default: 'Active',
-			},
-		},
-		modules: [
-			{ type: presetModules.CLASH },
-		],
-	},
 	{
 		_id: stringToUUID('39fa1042-67a2-4097-ba55-82cfced25909'),
 		name: 'SafetiBase (Default template)',
