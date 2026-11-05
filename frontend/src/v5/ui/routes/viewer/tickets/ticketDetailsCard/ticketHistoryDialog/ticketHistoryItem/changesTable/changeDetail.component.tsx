@@ -41,8 +41,9 @@ export const ChangeDetail = ({ propertyName, change }) => {
 	const wasDeleted = emptyValue === 1;
 	const wasAdded = emptyValue === 0;
 	const wasChanged = !wasDeleted && !wasAdded;
+	const isTitleChange = propertyName === 'title'; // title lacks a type
 
-	if (!propertyDef?.type) {
+	if (!propertyDef?.type && !isTitleChange) {
 		return (
 			<ErrorMessage>
 				<FormattedMessage
@@ -50,11 +51,6 @@ export const ChangeDetail = ({ propertyName, change }) => {
 					defaultMessage="Missing property type for {propertyName}" values={{ propertyName }} />
 			</ErrorMessage>
 		);
-	}
-
-	// view type has nested changes, so it is treated separately
-	if (propertyDef?.type === 'view') {
-
 	}
 
 	if (wasDeleted) {
@@ -78,8 +74,8 @@ export const ChangeDetail = ({ propertyName, change }) => {
 			id="ticketHistory.changesTable.set.generic"
 			defaultMessage="Value set" />;
 	} else if (wasChanged) {
-		if (isDescribableChange(propertyDef.type)) {
-			if (isArrayChange(propertyDef.type)) {
+		if (isDescribableChange(propertyDef?.type) || isTitleChange) {
+			if (isArrayChange(propertyDef?.type)) {
 				const removed = difference(from, to).map((item) => parseValueOfType(item, propertyDef.type));
 				const added = difference(to, from).map((item) => parseValueOfType(item, propertyDef.type));
 				return (
@@ -94,8 +90,8 @@ export const ChangeDetail = ({ propertyName, change }) => {
 				id="ticketHistory.changesTable.changed.specific"
 				defaultMessage="Changed from {from} to {to}"
 				values={{
-					from: <ChangeValue>{parseValueOfType(from, propertyDef.type)}</ChangeValue>,
-					to: <ChangeValue>{parseValueOfType(to, propertyDef.type)}</ChangeValue>,
+					from: <ChangeValue>{parseValueOfType(from, propertyDef?.type)}</ChangeValue>,
+					to: <ChangeValue>{parseValueOfType(to, propertyDef?.type)}</ChangeValue>,
 				}}
 			/>;
 		}
