@@ -34,3 +34,6 @@ yarn test
 ## Practical tips
 - Prefer `src/v5` unless the task explicitly targets legacy v4 behavior.
 - For most changes, start with targeted Jest coverage near the changed area before broad validation.
+- When styling a component using styled components is prefered.
+- The name of the file which a created component should reside should be componentName.component.tsx (componentName in camelCase).
+- The styling of a component and its part should be in componentName.styles.ts  
