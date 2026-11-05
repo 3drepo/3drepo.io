@@ -18,6 +18,11 @@
 import styled from 'styled-components';
 import { ColumnWidths } from './ticketHistory.helpers';
 import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
+import { ModalBody as BaseModalBody } from '@controls/formModal/modalBody/modalBody.styles';
+
+export const ModalBody = styled(BaseModalBody)`
+	min-width: 1212px;
+`;
 
 export const TicketHistoryTable = styled.div`
 	border-radius: 10px;

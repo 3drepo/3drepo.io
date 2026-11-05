@@ -21,14 +21,13 @@ import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsCardHooksSelec
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
-import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
 import { useEffect } from 'react';
 import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.component';
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { ColumnWidths } from './ticketHistory.helpers';
-import { TicketHistoryTable } from './ticketHistoryDialog.styles';
+import { TicketHistoryTable, ModalBody } from './ticketHistoryDialog.styles';
 
 export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }) => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -42,7 +41,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 	}, [ticket._id]);
 
 	return (
-		<Modal open={open} onClose={onClickClose} maxWidth="xl">
+		<Modal open={open} onClose={onClickClose} maxWidth="xl" fullWidth>
 			<Form>
 				<ModalHeader
 					onClickClose={onClickClose}
