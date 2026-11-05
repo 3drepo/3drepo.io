@@ -17,18 +17,33 @@
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
-import { ItemContainer, Author, Timestamp, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
+import { ItemContainer, Author, TimestampContainer, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
 import { ChangesTable } from './changesTable/changesTable.component';
 import { FormattedMessage } from 'react-intl';
+import { formatDate, formatTime } from '@/v5/services/intl';
+
+const Timestamp = ({ timestamp }) => {
+	const formattedDate = formatDate(timestamp);
+	const formattedTime = formatTime(timestamp);
+	return (
+		<TimestampContainer>
+			<div>
+				{formattedDate}
+			</div>
+			<div>
+				{formattedTime}
+			</div>
+		</TimestampContainer>
+	);
+};
 
 export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
-	const formattedTimestamp = new Date(timestamp).toLocaleString();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const fullname = getFullnameFromUser(user);
 	if (imported)  return (
 		<ItemContainer>
-			<Timestamp>{formattedTimestamp}</Timestamp>
+			<Timestamp timestamp={timestamp} />
 			<Author />
 			<ActionType>
 				<ImportChip>
@@ -40,7 +55,7 @@ export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
 
 	return (
 		<ItemContainer>
-			<Timestamp>{formattedTimestamp}</Timestamp>
+			<Timestamp timestamp={timestamp} />
 			<Author>
 				<AssigneeCircle assignee={author} />
 				{fullname}

@@ -39,7 +39,7 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const Timestamp = styled.div`
+export const TimestampContainer = styled.div`
 	width: ${ColumnWidths.Timestamp}px;
 `;
 export const Author = styled.div`
