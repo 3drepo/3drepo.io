@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const createClashTemplate = require('./createClashTemplate');
 const createTicketCounters = require('./createTicketCounters');
 
 const scripts = [
-	{ script: createClashTemplate, desc: 'Insert default clash template to all existing teamspaces' },
 	{ script: createTicketCounters, desc: 'Establish ticket counters for templates with existing tickets' },
 ];
 
