@@ -27,7 +27,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
 import { isEmpty, isEqual } from 'lodash';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
 import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldValues.component';
@@ -46,17 +45,17 @@ const DEFAULT_RULE: IGroupRule = {
 };
 
 type IGroupRules = {
-	containerOrFederation: string;
 	rule?: IGroupRule;
 	existingRules: IGroupRule[];
 	// An object that includes the fields to change as soon as the form is initiated to
 	// mark them as dirty 
 	unsavedState?: IGroupRule;
+	readOnly?: boolean;
 	onSubmit?: (rule: IGroupRule) => void;
 	onClose?: (currentFormValues: IGroupRule) => void;
 };
 
-export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], containerOrFederation, unsavedState }: IGroupRules) => {
+export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], unsavedState, readOnly }: IGroupRules) => {
 	const defaultValues = groupRuleToFormRule(rule ?? DEFAULT_RULE);
 
 	const formData = useForm<IFormRule>({
@@ -66,10 +65,6 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 		shouldUnregister: true,
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
-
-	const isCommenterContainer = ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	const isCommenterFederation = FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	const isReadOnly = !(isCommenterContainer || isCommenterFederation); // Cannot use tickets redux state readOnly because groups card also uses this
 
 	const {
 		formState: { isValid, errors },
@@ -125,13 +120,13 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 						name="name"
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
-						disabled={isReadOnly}
+						disabled={readOnly}
 						onChange={() => trigger('name')}
 					/>
-					<RuleFieldOperator disabled={isReadOnly} />
-					<RuleFieldValues disabled={isReadOnly} />
-					<RuleOperator disabled={isReadOnly} />
-					<RuleValues disabled={isReadOnly} />
+					<RuleFieldOperator disabled={readOnly} />
+					<RuleFieldValues disabled={readOnly} />
+					<RuleOperator disabled={readOnly} />
+					<RuleValues disabled={readOnly} />
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
@@ -144,7 +139,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 							variant="contained"
 							color="primary"
 							fullWidth={false}
-							disabled={isReadOnly || !isValid || !getIsDirty()}
+							disabled={readOnly || !isValid || !getIsDirty()}
 						>
 							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
