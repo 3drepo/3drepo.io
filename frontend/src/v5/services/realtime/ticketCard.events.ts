@@ -27,15 +27,19 @@ import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { fetchTicketGroup } from '../api/tickets';
 
-const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
+const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision: string) => {
+
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
 	// Debounce smaller batches and flush immediately when the batch reaches its size limit
 	const debouncedApplyUpdates = debounce(() => {
 		if (!queuedTickets.length) return;
-
 		const tickets = queuedTickets.map(addUpdatedAtTime);
 		TicketsActionsDispatchers.upsertTicketsSuccess(containerOrFederation, tickets);
+		
+		// When there's a new group it needs to be fetched because it doesnt go through updateticketgroup 
+		tickets.forEach((ticket) => TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision));
+		
 		TicketsCardActionsDispatchers.applyFilterForTickets(teamspace, project, containerOrFederation, isFed, tickets.map(( ticket ) => ticket._id));
 		queuedTickets = [];
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
@@ -90,7 +94,7 @@ export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: stri
 export const enableRealtimeTickets = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision?: string) => 
 	combineSubscriptions(
 		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation),
+		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
 	);
