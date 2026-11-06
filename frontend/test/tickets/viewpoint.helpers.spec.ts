@@ -140,4 +140,24 @@ describe('viewpoint helpers', () => {
 			transparencies: { [meshA.shared_id]: 1 },
 		});
 	});
+
+	it('converts camera zoom targets to viewer entries', () => {
+		const zoomTo = [{ container: modelA, _ids: [meshA._id] }];
+
+		const result = viewpointV5ToV4({
+			camera: {
+				type: 'perspective',
+				position: [0, 0, 0],
+				forward: [0, 0, 1],
+				up: [0, 1, 0],
+				zoomTo,
+			},
+		});
+
+		expect(result.viewpoint.zoomTo).toEqual([{
+			modelId: modelA,
+			teamspace,
+			meshes: [meshA._id],
+		}]);
+	});
 });
