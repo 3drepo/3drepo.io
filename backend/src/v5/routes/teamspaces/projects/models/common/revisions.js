@@ -95,7 +95,7 @@ const createNewRevision = (modelType) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 
 	const fn = {
-		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, model,
+		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, project, model,
 			req.body, file),
 		[modelTypes.DRAWING]: () => Drawings.newRevision(teamspace, project, model,
 			req.body, file),

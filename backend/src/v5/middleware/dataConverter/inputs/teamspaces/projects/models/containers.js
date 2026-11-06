@@ -56,7 +56,7 @@ Containers.canDeleteContainer = async (req, res, next) => {
 			'subModels._id': container,
 		};
 
-		const fed = await getModelByQuery(teamspace, query, { _id: 1, name: 1 }).catch(() => {});
+		const fed = await getModelByQuery(teamspace, query, { _id: 1, name: 1 }).catch(() => { });
 		if (fed) {
 			respond(req, res, createResponseCode(templates.containerIsSubModel, `Container is an active sub model of ${fed.name}(${fed._id})`));
 		} else {
@@ -128,10 +128,11 @@ const checkFileFromPath = async (req, res, next) => {
 		if (!req.body.file) throw new Error('File is required');
 		const fsHandler = FSHandler.getHandler(FileStorageTypes.EXTERNAL_FS);
 		const { path, size } = await fsHandler.getFileInfo(req.body.file);
-		const file = { path, size, originalname: basename(path), readOnly: true };
 
 		// get file extension from original file name
 		const ext = extname(path).toLowerCase();
+
+		const file = { path, size, originalname: basename(path), readOnly: true, format: ext };
 
 		if (!ext || !ACCEPTED_CONTAINER_EXT.includes(ext)) {
 			throw templates.unsupportedFileFormat;
