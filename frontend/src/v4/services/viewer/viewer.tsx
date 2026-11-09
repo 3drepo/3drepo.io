@@ -160,7 +160,7 @@ export class ViewerService {
 			(async () => {
 				await this.initUnity({
 					getAPI: {
-						hostNames: clientConfigService.apiUrls.all
+						hostNames: [clientConfigService.apiURL]
 					},
 					showAll: true
 				});

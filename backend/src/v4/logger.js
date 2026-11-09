@@ -16,8 +16,9 @@
  */
 "use strict";
 
-const config = require("./config.js");
 const winston = require("winston");
+const { v5Path } = require("../interop");
+const { getLogConfig } = require(`${v5Path}/utils/config`);
 require("winston-daily-rotate-file");
 
 const SystemLogger = {};
@@ -26,10 +27,12 @@ const stringFormat = ({ level, message, label, timestamp, stack }) => `${timesta
 
 const logger = createLogger();
 
+const logConfig = getLogConfig();
+
 SystemLogger.formatResponseMsg = (
 	resData
 ) => {
-	if (config.logfile.jsonOutput) {
+	if (logConfig.jsonOutput) {
 		return JSON.stringify(resData);
 	} else {
 		const {
@@ -48,34 +51,23 @@ SystemLogger.formatResponseMsg = (
 function createLogger() {
 	const transporters = [];
 
-	if (config.logfile.logDirectory) {
-		transporters.push(
-			new winston.transports.DailyRotateFile({
-				filename: config.logfile.logDirectory + "/io-%DATE%.log",
-				datePattern: "YYYY-MM-DD",
-				timestamp: true,
-				level: config.logfile.file_level
-			})
-		);
-	}
-
-	if (config.logfile.silent === undefined || config.logfile.silent === false) {
+	if (logConfig.silent === undefined || logConfig.silent === false) {
 		transporters.push(new winston.transports.Console({
 			timestamp: true,
 			colorize: true,
-			level: config.logfile.console_level
+			level: logConfig.consoleLevel
 		}));
 	}
 
 	let format;
-	if (!config.logfile.jsonOutput) {
+	if (!logConfig.jsonOutput) {
 		format = winston.format.combine(
 			winston.format.errors({stack: true}),
 			winston.format.timestamp(),
 			winston.format.align(),
 			winston.format.printf(stringFormat)
 		);
-		if (!config.logfile.noColors) {
+		if (!logConfig.noColors) {
 			format = winston.format.combine(
 				winston.format.colorize(),
 				format

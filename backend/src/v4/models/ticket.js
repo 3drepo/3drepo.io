@@ -38,10 +38,12 @@ const { systemLogger } = require("../logger.js");
 const Comment = require("./comment");
 const Shapes = require("./shapes");
 const FileRef = require("./fileRef");
-const config = require("../config.js");
 const extensionRe = /\.(\w+)$/;
 const AccountPermissions = require("./accountPermissions");
 const { cleanViewpoint } = require("./viewpoint");
+
+const { v5Path } = require("../../interop");
+const { getDataLimits } = require(`${v5Path}/utils/config`);
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -679,22 +681,6 @@ class Ticket extends View {
 		return tickets;
 	}
 
-	async getReport(account, model, rid, filters, res, reportGen) {
-		const projection = {
-			extras: 0,
-			"viewpoints.extras": 0,
-			"viewpoints.scribble": 0,
-			"viewpoints.screenshot.content": 0,
-			"viewpoints.screenshot.resizedContent": 0,
-			"thumbnail.content": 0
-		};
-
-		const branch = rid ? null : "master";
-		const tickets = await this.findByModelName(account, model, branch, rid, undefined, projection, filters, false);
-		reportGen.addEntries(tickets);
-		return reportGen.generateReport(res);
-	}
-
 	async addComment(account, model, id, user, data, sessionId) {
 		// 1. creates a comment and gets the result ( comment + references)
 		const commentResult = await Comment.addComment(account, model, this.collName, id, user, data,
@@ -767,7 +753,10 @@ class Ticket extends View {
 		if (!(await User.hasSufficientQuota(account, spaceToBeUsed))) {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}
-		if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
+
+		const { resourceUploadSize } = getDataLimits();
+
+		if (!files.every(f => f.size < resourceUploadSize)) {
 			throw responseCodes.SIZE_LIMIT;
 		}
 

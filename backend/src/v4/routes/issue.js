@@ -353,17 +353,6 @@ router.get("/revision/:rid/issues.bcfzip", issuesMiddleware.canView, getIssuesBC
 router.post("/revision/:rid/issues.bcfzip", issuesMiddleware.canCreate, importBCF);
 
 /**
- * @api {get} /:teamspace/:model/issues.html Issues response into as HTML
- * @apiName renderIssuesHTML
- * @apiGroup Issues
- *
- * @apiUse Issues
- *
- * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
- */
-router.get("/issues.html", issuesMiddleware.canView, renderIssuesHTML);
-
-/**
  * @api {get} /:teamspace/:model/revision/:revId/issues.html Issues response into as HTML by revision ID
  * @apiName  renderIssuesHTMLRid
  * @apiGroup Issues
@@ -1017,16 +1006,6 @@ function findIssue(req, res, next) {
 	Issue.findByUID(account, model, issueId).then(issue => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function renderIssuesHTML(req, res, next) {
-	const place = utils.APIInfo(req);
-	const {account, model, rid} = req.params;
-	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
-
-	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

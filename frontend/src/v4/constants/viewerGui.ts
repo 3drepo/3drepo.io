@@ -27,7 +27,6 @@ import MeasureIcon from '@assets/icons/outlined/measure-outlined.svg';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import DrawingsIcon from '@assets/icons/outlined/drawings-outlined.svg';
 
-import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
@@ -101,8 +100,7 @@ export const getViewerLeftPanels = (issuesEnabled) =>  {
 		VIEWER_PANELS.SEQUENCES,
 		VIEWER_PANELS.MEASUREMENTS,
 		VIEWER_PANELS.DRAWINGS,
-	].filter((panel) =>
-	(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES))
+	];
 
 	if (issuesEnabled) {
 		leftPanels.unshift(VIEWER_PANELS.ISSUES);

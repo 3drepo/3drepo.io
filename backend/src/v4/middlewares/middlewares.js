@@ -23,7 +23,6 @@ const C				= require("../constants");
 const { findModelSettingById } = require("../models/modelSetting");
 const User = require("../models/user");
 const utils = require("../utils");
-const config = require("../config");
 const { formatV5NewModelParams } = require("./formatV5NewModelParams");
 
 const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
@@ -32,6 +31,7 @@ const checkMultiplePermissions = require("./checkPermissions").checkMultiplePerm
 const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
+const { getDataLimits, getHereKey } = require(`${v5Path}/utils/config`);
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
 const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
@@ -73,7 +73,8 @@ function freeSpace(account) {
 }
 
 async function checkSufficientSpace(account, size) {
-	if (size > config.uploadSizeLimit) {
+	const dataLimits = getDataLimits();
+	if (size > dataLimits.modelUploadSize) {
 		throw responseCodes.SIZE_LIMIT;
 	}
 
@@ -131,7 +132,7 @@ function canCreateModel(req, res, next) {
 function isHereEnabled(req, res, next) {
 	const teamspace = req.params.account;
 
-	if (config.here && config.here.apiKey) {
+	if (getHereKey()) {
 		return User.isHereEnabled(teamspace).then((hereEnabled) => {
 			if (hereEnabled) {
 				next();

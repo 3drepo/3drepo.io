@@ -24,20 +24,15 @@ const getSubdomain = () => {
 };
 
 export class ClientConfigService {
-	public responseCodes;
 	public countries;
 	public units;
 	public acceptedFormat;
-	public apiUrl;
-	public GET_API;
-	public POST_API;
+	public apiURL;
 	public VERSION;
 	public userNotice;
 	public resourceUploadSizeLimit;
 	public login_check_interval;
-	public gtm;
 	public userId;
-	public development;
 	public sequencesEnabled;
 	public presenterEnabled;
 	public captcha_client_key;
@@ -54,14 +49,9 @@ export class ClientConfigService {
 	// avatarSizeLimit are sent
 	public imageSizeLimit;
 	public imageExtensions;
-	public apiUrls;
-	public hotjar;
 	private chatHost;
 	private chatPath;
 	private chatReconnectionAttempts;
-	private apiAlgorithm;
-	private MAP_API;
-	private C;
 	private customLogins;
 	private maintenanceMode;
 
@@ -80,15 +70,10 @@ export class ClientConfigService {
 			this.avatarSizeLimit = this.imageSizeLimit;
 		}
 
-		this.apiAlgorithm = this.createRoundRobinAlgorithm();
-		this.apiUrls = this.apiAlgorithm.apiUrls;
-		this.apiUrl = this.apiAlgorithm.apiUrl.bind(this.apiAlgorithm);
+	}
 
-		const C = this.C;
-
-		this.GET_API = C.GET_API;
-		this.POST_API = (this.apiUrls[C.POST_API]) ? C.POST_API : this.GET_API;
-		this.MAP_API = (this.apiUrls[C.MAP_API]) ? C.MAP_API : this.GET_API;
+	public apiUrl(path) {
+		return `${this.apiURL}/${path.replace(/^\//, '')}`;
 	}
 
 	public get isMaintenanceEnabled() {
@@ -105,30 +90,6 @@ export class ClientConfigService {
 			path: this.chatPath,
 			reconnectionAttempts: this.chatReconnectionAttempts || Infinity
 		};
-	}
-
-	public createRoundRobinAlgorithm() {
-
-		const roundRobin: any = {
-			apiUrls : this.apiUrls,
-			apiUrlCounter: {}
-		};
-
-		roundRobin.apiUrl = function(type, path) {
-			const typeFunctions = this.apiUrls[type];
-			const functionIndex = this.apiUrlCounter[type] % Object.keys(typeFunctions).length;
-
-			this.apiUrlCounter[type] += 1;
-			return this.apiUrls[type][functionIndex] + '/' + path.replace(/^\//, '');
-		};
-
-		for (const k in this.apiUrls) {
-			if (this.apiUrls.hasOwnProperty(k)) {
-				roundRobin.apiUrlCounter[k] = 0;
-			}
-		}
-
-		return roundRobin;
 	}
 
 	public getCustomLogoPath() {

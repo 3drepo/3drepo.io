@@ -18,7 +18,6 @@
 "use strict";
 (() => {
 
-	const { uploadSizeLimit } = require("./config.js");
 	const utils = require("./utils.js");
 
 	function define(name, value) {
@@ -612,7 +611,6 @@
 		"ifc", "xgl", "zgl", "fbx", "assbin", "bim", "dgn",
 		"rvt", "rfa", "spm", "dwg", "dxf", "nwd", "nwc"
 	]);
-	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
 	define("CONTENT_LENGTH_HEADER", "content-length");
 	define("MS_TRANSFER_MODE_HEADER", "x-ms-transfer-mode");
 	define("MS_CONTENT_LENGTH_HEADER", "x-ms-content-length");

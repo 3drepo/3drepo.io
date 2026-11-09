@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { AxiosResponse } from 'axios';
-import { clientConfigService } from '@/v4/services/clientConfig';
+
 import api, { generateV5ApiUrl } from './default';
 import { Calibration } from '@/v5/store/drawings/drawings.types';
 
@@ -45,7 +45,6 @@ export const createRevision = async (
 export const getRevisionFileUrl = (teamspace: string, projectId: string, drawingId: string, revision: string) => (
 	generateV5ApiUrl(
 		`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/revisions/${revision}/files/original`,
-		clientConfigService.GET_API,
 	)
 );
 

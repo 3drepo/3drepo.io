@@ -25,6 +25,7 @@ const { createNewUserRecord } = require('../../../../../../processors/users');
 const { generateUUIDString } = require('../../../../../../utils/helper/uuids');
 const { getModelById } = require('../../../../../../models/modelSettings');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
+const { getModelFileExtensions } = require('../../../../../../utils/config');
 const { getUserByEmail } = require('../../../../../../models/users');
 const { getUserFromSession } = require('../../../../../../utils/sessions');
 const { isTagUnique } = require('../../../../../../models/revisions');
@@ -37,16 +38,7 @@ const { types: yupTypes } = require('../../../../../../utils/helper/yup');
 
 const Containers = {};
 
-const ACCEPTED_CONTAINER_EXT = [
-	'.x', '.obj', '.3ds', '.md3', '.md2', '.ply',
-	'.mdl', '.ase', '.hmp', '.smd', '.mdc', '.md5',
-	'.stl', '.lxo', '.nff', '.raw', '.off', '.ac',
-	'.bvh', '.irrmesh', '.irr', '.q3d', '.q3s', '.b3d',
-	'.dae', '.ter', '.csm', '.3d', '.lws', '.xml', '.ogex',
-	'.ms3d', '.cob', '.scn', '.blend', '.pk3', '.ndo',
-	'.ifc', '.xgl', '.zgl', '.fbx', '.assbin', '.bim', '.dgn',
-	'.rvt', '.rfa', '.spm', '.dwg', '.dxf', '.nwd', '.nwc',
-];
+const acceptedContainerExtensions = getModelFileExtensions();
 
 Containers.canDeleteContainer = async (req, res, next) => {
 	try {
@@ -133,7 +125,7 @@ const checkFileFromPath = async (req, res, next) => {
 		// get file extension from original file name
 		const ext = extname(path).toLowerCase();
 
-		if (!ext || !ACCEPTED_CONTAINER_EXT.includes(ext)) {
+		if (!ext || !acceptedContainerExtensions.includes(ext)) {
 			throw templates.unsupportedFileFormat;
 		}
 
@@ -148,6 +140,6 @@ const checkFileFromPath = async (req, res, next) => {
 
 Containers.validateNewRevisionData = (internal) => (internal
 	? validateMany([checkFileFromPath, checkQuotaIsSufficient, validateRevisionUpload(internal)])
-	: validateMany([singleFileUpload('file', fileFilter(ACCEPTED_CONTAINER_EXT)), checkQuotaIsSufficient, validateRevisionUpload(internal)]));
+	: validateMany([singleFileUpload('file', fileFilter(acceptedContainerExtensions)), checkQuotaIsSufficient, validateRevisionUpload(internal)]));
 
 module.exports = Containers;

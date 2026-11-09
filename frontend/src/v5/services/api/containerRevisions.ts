@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { AxiosResponse } from 'axios';
-import { clientConfigService } from '@/v4/services/clientConfig';
+
 import api, { generateV5ApiUrl } from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
@@ -42,6 +42,5 @@ export const createRevision = (
 export const getRevisionFileUrl = (teamspace: string, projectId: string, containerId: string, revision: string) => (
 	generateV5ApiUrl(
 		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`,
-		clientConfigService.GET_API,
 	)
 );

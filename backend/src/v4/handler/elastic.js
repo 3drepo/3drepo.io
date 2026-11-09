@@ -19,10 +19,9 @@
 const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
-const { host } = require("../config");
-const elasticConfig = require("../config").elastic;
-const repoLicense = require("../config").repoLicense;
 const { v5Path } = require("../../interop");
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
+const { getElasticConfig, getServerConfig, getRepoLicense } = require(`${v5Path}/utils/config`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 
@@ -78,6 +77,7 @@ const indicesMappings = [
 ];
 
 const createElasticClient = async () => {
+	const elasticConfig = getElasticConfig();
 	if(!elasticConfig) {
 		return;
 	}
@@ -119,13 +119,13 @@ Elastic.createElasticRecord = async (index, body, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
-			const { namespace } = elasticConfig;
-			if (namespace) {
-				body.namespace = namespace;
-			}
-			if (host) {
-				body.host = host;
-			}
+			const { namespace } = getElasticConfig();
+			const { host } = getServerConfig();
+
+			body = deleteIfUndefined({ ...body,
+				namespace, host
+			});
+
 			await elasticClient.create({
 				index,
 				id,
@@ -156,7 +156,7 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"OS.Name" : loginRecord.os.name,
 		"OS.Version" : loginRecord.os.version,
 		"Device" : loginRecord.device,
-		"licenseKey": repoLicense
+		"licenseKey": getRepoLicense()
 	};
 
 	await Elastic.createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);

@@ -20,30 +20,30 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 
 axios.defaults.withCredentials = true;
 
-export const generateV5ApiUrl = (url: string, requestMethod: string): string => encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
+export const generateV5ApiUrl = (url: string): string => encodeURI(clientConfigService.apiUrl(`v5/${url}`));
 
 const getRequest = (url, ...options) => {
-	const requestUrl = generateV5ApiUrl(url, clientConfigService.GET_API);
+	const requestUrl = generateV5ApiUrl(url);
 	return axios.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
-	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
+	const requestUrl = generateV5ApiUrl(url);
 	return axios.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
-	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
+	const requestUrl = generateV5ApiUrl(url);
 	return axios.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, data?) => {
-	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
+	const requestUrl = generateV5ApiUrl(url);
 	return axios.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {
-	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
+	const requestUrl = generateV5ApiUrl(url);
 	return axios.patch(requestUrl, ...options);
 };
 
@@ -51,11 +51,10 @@ export const setSocketIdHeader = (socketId) => {
 	axios.defaults.headers['x-socket-id'] = socketId;
 };
 
-export const getUrl = (path) => generateV5ApiUrl(path, clientConfigService.GET_API);
+export const getUrl = (path) => generateV5ApiUrl(path);
 
 export const isApiUrl = (url) => {
-	const apiUrl = clientConfigService.apiUrl('all', '');
-	return url.includes(apiUrl);
+	return url.includes(clientConfigService.apiURL);
 };
 
 export default {

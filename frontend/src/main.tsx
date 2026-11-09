@@ -41,8 +41,6 @@ import configAxios from './v4/services/api/config-axios';
 import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { initializeGoogleTagManager } from './v5/services/googleTagManager';
-import { initializeHotjar } from './v5/services/hotjar';
 import { dispatch } from './v5/helpers/redux.helpers';
 import { AUTH_PATH as V5_AUTH_PATH } from './v5/ui/routes/routes.constants';
 import { RouteTitle } from './v5/services/routing/routeTitle.component';
@@ -55,10 +53,6 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
-
-initializeHotjar();
-
-initializeGoogleTagManager();
 
 // Injecting the instance of socket from v5 into v4
 setSocket(getSocket());

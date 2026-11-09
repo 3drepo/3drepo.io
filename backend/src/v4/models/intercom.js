@@ -17,37 +17,36 @@
 
 "use strict";
 const crypto = require("crypto");
-const { intercom } = require("../config");
-const { get } = require("lodash");
 const axios = require("axios");
-const accessToken = get(intercom, "accessToken");
-const secretKey = get(intercom, "secretKey");
 const { v5Path } = require("../../interop");
+const { getInterComConfig } = require(`${v5Path}/utils/config`);
 const { systemLogger } = require("../logger");
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 
 const headers = {
-	"Authorization": `Bearer ${accessToken}`,
+	"Authorization": `Bearer ${intercomConfig.accessToken}`,
 	"Content-Type": "application/json"
 };
+
+const intercomConfig = getInterComConfig();
 
 const getEndpoint = (endpoint) => `https://api.intercom.io/${endpoint}`;
 
 const Intercom = {};
 
 Intercom.setIntercomHash = (userProfile) => {
-	if (!secretKey) {
+	if (!intercomConfig.secretKey) {
 		return;
 	}
 
-	userProfile.intercomHash = crypto.createHmac("sha256", secretKey)
+	userProfile.intercomHash = crypto.createHmac("sha256", intercomConfig.secretKey)
 		.update(userProfile.email)
 		.digest("hex");
 };
 
 Intercom.createContact = async (external_id, name, email, subscribed, company, createdAt) => {
-	if (!accessToken) {
+	if (!intercomConfig.accessToken) {
 		return;
 	}
 
@@ -71,7 +70,7 @@ Intercom.createContact = async (external_id, name, email, subscribed, company, c
 };
 
 Intercom.submitLoginLockoutEvent = async (email) => {
-	if (!accessToken) {
+	if (!intercomConfig.accessToken) {
 		return;
 	}
 

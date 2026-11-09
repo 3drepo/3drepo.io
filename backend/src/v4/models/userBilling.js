@@ -17,7 +17,6 @@
 
 "use strict";
 
-const config = require("../config");
 const {v5Path} = require("../../interop");
 const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
 const { getQuotaInfo } = require(`${v5Path}/utils/quota`);
@@ -26,7 +25,7 @@ const UserBilling = {};
 
 UserBilling.getSubscriptions = async (teamspace) => {
 	const subscriptions = await TeamspaceModelV5.getSubscriptions(teamspace);
-	return { basic: config.subscriptions.basic, ...subscriptions };
+	return subscriptions;
 };
 
 UserBilling.getSubscriptionLimits = async (teamspace) => {

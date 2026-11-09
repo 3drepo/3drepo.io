@@ -252,12 +252,6 @@ class Issue extends Ticket {
 		}
 	}
 
-	async getIssuesReport(account, model, rid, filters, res) {
-		const { _id: projectId } = await findProjectByModelId(account, model, { _id: 1 });
-		const reportGen = require("../models/report").newIssuesReport(account, utils.uuidToString(projectId), model, rid);
-		return super.getReport(account, model, rid, filters, res, reportGen);
-	}
-
 	isIssueBeingClosed(oldIssue, newIssue) {
 		return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
 	}

@@ -19,97 +19,49 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
-const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const serialize = require("serialize-javascript");
 const _ = require("lodash");
-const addressMeta = require("../models/addressMeta");
-const units = require("../models/unit");
-const History = require("../models/history");
-const ModelHelper = require("../models/helper/model");
-const User = require("../models/user");
-const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
+
 const utils = require("../utils");
+const {v5Path} = require("../../interop.js");
+const {
+	isMaintenanceMode, isDevelopmentMode, getInterComConfig,
+	getDataLimits, getApryseLicense, getAppVersion,
+	getChatConfig, getImageExtensions,
+	getModelFileExtensions, getCountriesListing
+} = require(`${v5Path}/utils/config.js`);
 
-const config = require("../config");
+function createClientConfig() {
 
-function createClientConfig(serverConfig, req) {
-
-	// TODO: Replace with user based plugin selection
-	let pluginStructure = {};
-
-	// If the serverConfig has a plugin structure, use that
-	// else just use the default
-	if (serverConfig.pluginStructure) {
-		pluginStructure = require("../../" + serverConfig.pluginStructure);
-	} else {
-		pluginStructure = DEFAULT_PLUGIN_STRUCTURE;
-	}
+	const intercomConfig = getInterComConfig();
+	const dataLimits = getDataLimits();
+	const chatConfig = getChatConfig();
 
 	const clientConfig = {
-		"maintenanceMode": config.maintenanceMode,
-		"ui": {},
-		"uistate": {},
-		"structure": pluginStructure,
-		"frontendPug": [],
-		"development" : config.development,
-		"gtm": config.gtm,
-		"intercomLicense" : _.get(config, "intercom.license"),
-		"apryseLicense": _.get(config, "apryse.licenseKey"),
-		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
-		"sequencesEnabled": true,
-		"presenterEnabled": true,
-		"loginPolicy": config.loginPolicy
+		maintenanceMode: isMaintenanceMode(),
+		development : isDevelopmentMode(),
+		intercomLicense : intercomConfig.license,
+		apryseLicense: getApryseLicense(),
+		resourceUploadSizeLimit : dataLimits.resourceUploadSize,
+		uploadSizeLimit: dataLimits.modelUploadSize,
+		imageSizeLimit: dataLimits.imageSizeLimit,
+		chatHost: chatConfig.host,
+		chatPath: chatConfig.path,
+		chatReconnectionAttempts: chatConfig.reconnectionAttempts,
+		VERSION: getAppVersion(),
+		imageExtensions: getImageExtensions(),
+		acceptedFormat: getModelFileExtensions(),
+		countries: getCountriesListing()
+
 	};
 
-	if (req) {
-		clientConfig.userId = _.get(req, "session.user.username");
-	}
-
-	clientConfig.apiUrls = config.apiUrls;
-
-	clientConfig.hotjar = config.hotjar;
-
-	clientConfig.C = {
-		GET_API : C.GET_API,
-		POST_API : C.POST_API,
-		MAP_API : C.MAP_API
-	};
-
-	if (config.chat_server) {
-		clientConfig.chatHost = config.chat_server.chat_host;
-		clientConfig.chatPath = "/" + config.chat_server.subdirectory;
-	}
-
-	clientConfig.chatReconnectionAttempts = config.chat_reconnection_attempts;
-
-	clientConfig.VERSION = config.version;
-
-	clientConfig.return_path = "/";
-
-	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
-	clientConfig.imageSizeLimit = config.fileUploads.imageSizeLimit;
-	clientConfig.imageExtensions = config.fileUploads.imageExtensions;
-	clientConfig.countries = addressMeta.countries;
-	clientConfig.euCountriesCode = addressMeta.euCountriesCode;
-	clientConfig.usStates = addressMeta.usStates;
-	clientConfig.units = units;
-	clientConfig.tagRegExp = History.tagRegExp;
-	clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
-	clientConfig.fileNameRegExp = C.FILENAME_REGEXP;
-	clientConfig.usernameRegExp = User.usernameRegExp;
-	clientConfig.acceptedFormat = C.ACCEPTED_FILE_FORMATS;
-
-	clientConfig.responseCodes = _.each(responseCodes.codesMap);
-
-	clientConfig.permissions = C.MODEL_PERM_OBJ;
-
-	clientConfig.impliedPermission = C.IMPLIED_PERM;
+	clientConfig.apiURL = config.apiUrls.all[0];
 
 	return clientConfig;
 }
 
-const clientConfig = createClientConfig(config);
+const clientConfig = createClientConfig();
 
 router.get("/version.json", function (req, res) {
 	return res.json({"VERSION": clientConfig.VERSION });

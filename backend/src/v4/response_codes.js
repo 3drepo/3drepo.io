@@ -17,13 +17,14 @@
 
 "use strict";
 
+const { v5Path } = require("../interop");
+const { getDataLimits, getCachePolicy } = require(`${v5Path}/utils/config.js`);
+
 (() => {
 
 	const _ = require("lodash");
-	const config = require("./config");
 	const { systemLogger, logLabels } = require("./logger.js");
 	const utils = require("./utils");
-	const { v5Path } = require("../interop");
 	const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants.js`);
 	const { createActivityRecord } = require(`${v5Path}/services/elastic`);
 	const { escapeXSS } = require(`${v5Path}/utils/helper/strings.js`);
@@ -32,6 +33,9 @@
 	 * List of response and error codes
 	 * @type {Object}
 	 */
+
+	const dataLimits = getDataLimits();
+	const cachePolicy = getCachePolicy();
 
 	const codesMap = {
 		OK: { message: "OK", status: 200 },
@@ -221,7 +225,7 @@
 		MODEL_IS_A_SUBMODEL: { message: "Model cannot be deleted as it is currently a sub model of another federation", status: 400 },
 		SUBMODEL_IS_MISSING: { message: "subModels field is missing in request body", status: 400 },
 
-		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.imageSizeLimit / 1024 / 1024} MB` },
+		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${dataLimits.imageSizeLimit / 1024 / 1024} MB` },
 		INVALID_USERNAME: { message: "Invalid username", status: 400 },
 		FILE_NO_EXT: { message: "Filename must have extension", status: 400 },
 
@@ -447,7 +451,7 @@
 		} else {
 
 			if (cache) {
-				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || cachePolicy.maxAge}`);
 			}
 
 			if (customHeaders) {

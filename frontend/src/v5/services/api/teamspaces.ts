@@ -17,7 +17,7 @@
 
 import { AddOns } from '@/v5/store/store.types';
 import api, { generateV5ApiUrl } from './default';
-import { clientConfigService } from '@/v4/services/clientConfig';
+
 import { compact } from 'lodash';
 
 export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
@@ -36,6 +36,5 @@ export const getActivityLogURL = (teamspace: string, from: Date, to: Date): stri
 
 	return generateV5ApiUrl(
 		`teamspaces/${teamspace}/settings/activities/archive?${rangeQuery}`,
-		clientConfigService.GET_API,
 	);
 };

@@ -23,7 +23,6 @@ const router = express.Router({ mergeParams: true });
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const middlewares = require("../middlewares/middlewares");
-const config = require("../config");
 const utils = require("../utils");
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
@@ -32,6 +31,9 @@ const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
+const { getDataLimits } = require(`${v5Path}/utils/config`);
+
+const dataLimits = getDataLimits();
 
 /**
  * @api {get} /version Application version
@@ -321,7 +323,7 @@ function uploadAvatar(req, res, next) {
 			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
-		if (size > config.imageSizeLimit) {
+		if (size > dataLimits.imageSizeLimit) {
 			return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
 		}
 

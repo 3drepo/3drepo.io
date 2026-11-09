@@ -16,32 +16,31 @@
  */
 
 import axios from 'axios';
-import { memoize } from 'lodash';
 
 import { clientConfigService } from '../clientConfig';
 
 const getRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
+	const requestUrl = encodeURI(clientConfigService.apiUrl(url));
 	return axios.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
+	const requestUrl = encodeURI(clientConfigService.apiUrl(url));
 	return axios.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
+	const requestUrl = encodeURI(clientConfigService.apiUrl(url));
 	return axios.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, data?) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
+	const requestUrl = encodeURI(clientConfigService.apiUrl(url));
 	return axios.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
+	const requestUrl = encodeURI(clientConfigService.apiUrl(url));
 	return axios.patch(requestUrl, ...options);
 };
 
@@ -58,9 +57,5 @@ export const setSocketIdHeader = (socketId) => {
 };
 
 export const getAPIUrl = (url: string) => {
-	return url.startsWith(`data:image`) ? url : encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
+	return url.startsWith(`data:image`) ? url : encodeURI(clientConfigService.apiUrl(url));
 };
-
-export const getResponseCode = memoize((errorToFind) => {
-	return Object.keys(clientConfigService.responseCodes).indexOf(errorToFind);
-});

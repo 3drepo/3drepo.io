@@ -49,7 +49,7 @@ export const splitString = (text: string = '', limit: number = MAX_URL_LENGTH, b
 };
 
 export const splitValuesIfNecessary = (path, argumentIndication) => {
-	const request = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, path));
+	const request = encodeURI(clientConfigService.apiUrl(path));
 	const requestParts = request.split(argumentIndication);
 
 	if (request.length < MAX_URL_LENGTH) {

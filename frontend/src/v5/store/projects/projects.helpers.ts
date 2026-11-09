@@ -22,7 +22,7 @@ import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 export const DEFAULT_PROJECT_IMAGE = 'assets/images/default_background.png';
 
 export const getProjectImgSrc = (teamspace: string, project: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/projects/${project}/image`, clientConfigService.GET_API)
+	generateV5ApiUrl(`teamspaces/${teamspace}/projects/${project}/image`)
 );
 
 export const projectImageFileIsTooBig = (file): boolean => (file.size > clientConfigService.projectImageSizeLimit);

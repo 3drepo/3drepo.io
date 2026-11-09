@@ -25,7 +25,7 @@ export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.sv
 export const getTeamspaceImgSrc = (teamspace: string) => {
 	const { username, avatarUrl } = CurrentUserHooksSelectors.selectCurrentUser();
 	const isPersonalTeamspace = teamspace === username;
-	return isPersonalTeamspace ? avatarUrl : generateV5ApiUrl(`teamspaces/${teamspace}/avatar`, clientConfigService.GET_API);
+	return isPersonalTeamspace ? avatarUrl : generateV5ApiUrl(`teamspaces/${teamspace}/avatar`);
 };
 
 export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';

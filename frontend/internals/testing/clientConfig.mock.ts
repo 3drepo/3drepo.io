@@ -8,13 +8,5 @@ export default {
 		public_port: 80,
 		public_protocol: 'http'
 	}],
-	C: {
-		GET_API: 'all',
-		MAP_API: 'map',
-		POST_API: 'post'
-	},
-	apiUrl: (type, path) => `${apiPath}/${path}`,
-	apiUrls: {
-		all: [apiPath]
-	}
+	apiURL: apiPath
 };

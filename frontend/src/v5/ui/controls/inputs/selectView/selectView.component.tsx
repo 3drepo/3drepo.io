@@ -18,7 +18,6 @@
 import { View } from '@/v5/store/store.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { clientConfigService } from '@/v4/services/clientConfig';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, Select } from './selectView.styles';
@@ -32,7 +31,6 @@ const getThumbnailBasicPath = (
 	const pathSegment = isContainer ? 'containers' : 'federations';
 	return (viewId: string) => generateV5ApiUrl(
 		`teamspaces/${teamspace}/projects/${projectId}/${pathSegment}/${containerOrFederationId}/views/${viewId}/thumbnail`,
-		clientConfigService.GET_API,
 	);
 };
 
