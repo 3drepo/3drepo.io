@@ -3407,6 +3407,21 @@ export class UnityUtil {
 
 	/**
 	 * @hidden
+	 * Overrides the internal clock of the viewer so that each frame takes the
+	 * same amount of simulation time. This will detach the viewer from wall
+	 * clock time so it may appear to run faster or slower. Use this to get
+	 * deterministic behaviour from any feature that uses delta-time for the
+	 * purposes of things like automated tests and offline captures.
+	 * @param fps A specific framerate the viewer will run at. It will behave
+	 * as if the interval of each requestAnimationFrame is exactly 1/fps.
+	 * Setting the fps to 0 will reset it.
+	 */
+	static setCaptureFramerate(fps: number) {
+		UnityUtil.toUnity('SetCaptureFramerate', UnityUtil.LoadingState.VIEWER_READY, fps);
+	}
+
+	/**
+	 * @hidden
 	 */
 	static resetDrawOrder() {
 		UnityUtil.toUnity('ResetDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
