@@ -417,12 +417,13 @@ const establishRoutes = (modelType, isInternal) => {
 	 *       content:
 	 *         application/json:
 	 *           schema:
+	 *             type: object
 	 *             properties:
 	 *               void:
 	 *                 description: The new status value
 	 *                 type: boolean
 	 *             required:
-	 *               - status
+	 *               - void
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -673,6 +674,11 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         $ref: "#/components/responses/notLoggedIn"
 		 *       200:
 		 *         description: returns svg/raster image of the image
+		 *         content:
+		 *           image/*:
+		 *             schema:
+		 *               type: string
+		 *               format: binary
 		 */
 			router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
 		}

@@ -122,56 +122,34 @@ const establishRoutes = (isInternal) => {
 		*         description: returns all metadata entries within the revision
 		*         content:
 		*           application/json:
+		*             schema:
+		*               type: array
+		*               items:
+		*                 type: object
+		*                 properties:
+		*                   _id:
+		*                     type: string
+		*                     format: uuid
+		*                   metadata:
+		*                     type: object
+		*                     additionalProperties: true
+		*                   parents:
+		*                     type: array
+		*                     items:
+		*                       type: string
+		*                       format: uuid
 		*             example:
-		*               "data": [
-		*                  {
-		*                     "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
-		*                     "metadata": {
-		*                        "IFC Type": "IfcBuilding",
-		*                        "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A",
-		*                        "BuildingID": "n/a",
-		*                        "IsPermanentID": "True",
-		*                        "OccupancyType": "Private dwelling",
-		*                        "IsLandmarked": "True",
-		*                        "NumberOfStoreys": 2
-		*                     },
-		*                     "parents": [
-		*                        "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
-		*                     ]
-		*                  },
-		*                  {
-		*                     "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
-		*                     "metadata": {
-		*                        "IFC Type": "IfcSite",
-		*                        "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
-		*                     },
-		*                     "parents": [
-		*                        "48359ad0-9b6d-44ed-ae93-47e2ec69ea88"
-		*                     ]
-		*                  },
-		*                  {
-		*                     "_id": "b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963",
-		*                     "metadata": {
-		*                        "IFC Type": "IfcBuildingElementProxy",
-		*                        "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
-		*                        "Reference": "LegoRoundTree"
-		*                     },
-		*                     "parents": [
-		*                        "2bf2a864-5cb0-41ba-85a8-c2cffc3da06d"
-		*                     ]
-		*                  },
-		*                  {
-		*                     "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
-		*                     "metadata": {
-		*                        "IFC Type": "IfcBuildingStorey",
-		*                        "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
-		*                        "AboveGround": "False"
-		*                     },
-		*                     "parents": [
-		*                        "323a9900-ece1-4857-8980-ec96ffc7f681"
-		*                     ]
-		*                  }
-		*               ]
+		*               - "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b"
+		*                 "metadata":
+		*                   "IFC Type": "IfcBuilding"
+		*                   "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A"
+		*                   "BuildingID": "n/a"
+		*                   "IsPermanentID": "True"
+		*                   "OccupancyType": "Private dwelling"
+		*                   "IsLandmarked": "True"
+		*                   "NumberOfStoreys": 2
+		*                 "parents":
+		*                   - "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
 		*/
 		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata, formatMetadataArray);
 	}
@@ -338,7 +316,7 @@ const establishRoutes = (isInternal) => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Returns the requested metadata entry. If the metadata ID is not found in the revision, the response contains an empty array.
+	 *         description: Returns the requested metadata entry.
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -350,6 +328,11 @@ const establishRoutes = (isInternal) => {
 	 *                 metadata:
 	 *                   type: object
 	 *                   additionalProperties: true
+	 *                 parents:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
 	 *             examples:
 	 *               found:
 	 *                 value:
@@ -358,10 +341,6 @@ const establishRoutes = (isInternal) => {
 	 *                     "IFC Type": "IfcBuilding"
 	 *                     "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A"
 	 *                     "NumberOfStoreys": 2
-	 *               notFound:
-	 *                 value:
-	 *                   _id: "2f461edf-4544-412a-bb84-ffdb3bbe563b"
-	 *                   metadata: {}
 	 */
 	router.get('/:metadata', hasReadAccessToContainer, getMetadataById, formatMetadata);
 

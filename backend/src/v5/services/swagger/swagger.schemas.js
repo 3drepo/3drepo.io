@@ -14,8 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const {
+	DEFAULT_PIN_ICONS,
+	presetEnumValues,
+	presetModules,
+	propTypes,
+	statusTypes,
+} = require('../../schemas/tickets/templates.constants');
 const { fieldOperators, valueOperators } = require('../../models/metadata.rules.constants');
-const { presetModules, propTypes, statusTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 const { idTypes } = require('../../models/metadata.constants');
@@ -102,6 +108,28 @@ Schemas.schemas.roles = {
 	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
 };
 
+Schemas.schemas.modelListEntry = {
+	type: 'object',
+	properties: {
+		_id: {
+			type: 'string',
+			format: 'uuid',
+			description: 'Model ID',
+		},
+		name: {
+			type: 'string',
+			description: 'Name of the model',
+		},
+		role: {
+			$ref: '#/components/schemas/roles',
+		},
+		isFavourite: {
+			type: 'boolean',
+			description: 'Whether the model is a favourited item for the user',
+		},
+	},
+};
+
 Schemas.schemas.errorCodes = {
 	type: 'string',
 	enum: [1, 2, 3, 4, 5],
@@ -128,6 +156,87 @@ const ticketTemplateStatusConfig = {
 	},
 };
 
+const pinColorValueSchema = {
+	type: 'array',
+	minItems: 3,
+	maxItems: 3,
+	items: {
+		type: 'integer',
+		minimum: 0,
+		maximum: 255,
+	},
+	example: [255, 0, 0],
+};
+
+const pinIconValueSchema = {
+	type: 'string',
+	enum: DEFAULT_PIN_ICONS,
+	example: DEFAULT_PIN_ICONS[0],
+};
+
+const createPinMappingSchema = (type, valueSchema) => ({
+	type: 'object',
+	description: `Map ${type} values based on another property. Include exactly one mapping entry with a default value.`,
+	required: ['property', 'mapping'],
+	properties: {
+		property: {
+			type: 'object',
+			required: ['name'],
+			properties: {
+				name: {
+					type: 'string',
+					description: 'Name of property used to select mapping',
+					example: 'Status',
+				},
+				module: {
+					type: 'string',
+					description: 'Optional module containing the property',
+					example: 'BCF Reference',
+				},
+			},
+		},
+		mapping: {
+			type: 'array',
+			minItems: 1,
+			description: 'Mapping entries; exactly one must provide default.',
+			items: {
+				oneOf: [
+					{
+						type: 'object',
+						description: 'Default mapping entry used when no explicit value matches',
+						required: ['default'],
+						properties: {
+							default: {
+								...valueSchema,
+								description: 'Fallback value when no explicit value matches',
+							},
+						},
+					},
+					{
+						type: 'object',
+						description: 'Mapping entry applied when value matches',
+						required: ['value', type],
+						properties: {
+							value: {
+								description: 'Value to match',
+								example: 'Open',
+							},
+							[type]: valueSchema,
+						},
+					},
+				],
+			},
+			example: [
+				{ value: 'Open', [type]: type === 'color' ? [255, 0, 0] : DEFAULT_PIN_ICONS[0] },
+				{ default: type === 'color' ? [128, 128, 128] : DEFAULT_PIN_ICONS[1] },
+			],
+		},
+	},
+});
+
+const pinColorMappingSchema = createPinMappingSchema('color', pinColorValueSchema);
+const pinIconMappingSchema = createPinMappingSchema('icon', pinIconValueSchema);
+
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
 	type: 'array',
@@ -141,9 +250,34 @@ const ticketTemplatePropSchema = {
 			immutable: helpers.boolDef('Denotes if this prop is immutable', false),
 			readOnlyOnUI: helpers.boolDef('Denotes if this prop can be edited from the UI', false),
 			hiddenOnUI: helpers.boolDef('Denotes if this prop should be hidden from the UI', false),
+			readOnly: helpers.boolDef('Denotes if this prop is read-only', false),
 			unique: helpers.boolDef('Denotes if the value of this prop should be unique among tickets of the same type in the model', false),
-			required: helpers.boolDef('If this prop is required (default: false)', true),
-			values: helpers.arrayDef(`list of possible values (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+			required: helpers.boolDef('If this prop is required (default: false)', false),
+			value: helpers.stringDef('Configured value for a read-only text property', '{username}'),
+			default: {
+				description: 'Default value for the property',
+			},
+			values: {
+				description: `List of possible values, or name of a preset (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF})`,
+				oneOf: [
+					helpers.stringDef('Name of a preset enum', undefined, Object.values(presetEnumValues)),
+					helpers.arrayDef('Explicit possible values', helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
+				],
+			},
+			color: {
+				description: 'Conditional colour mapping for coordinate properties',
+				oneOf: [
+					pinColorValueSchema,
+					pinColorMappingSchema,
+				],
+			},
+			icon: {
+				description: 'Conditional icon mapping for coordinate properties',
+				oneOf: [
+					pinIconValueSchema,
+					pinIconMappingSchema,
+				],
+			},
 		},
 	},
 };
@@ -152,13 +286,29 @@ const ticketTemplateModSchema = {
 	description: 'Configure a custom or preset module',
 	type: 'array',
 	items: {
-		type: 'object',
-		properties: {
-			name: helpers.stringDef('Name of the module', 'BCF Reference'),
-			type: helpers.stringDef('Preset module name', undefined, Object.values(presetModules)),
-			deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
-			properties: ticketTemplatePropSchema,
-		},
+		oneOf: [
+			{
+				type: 'object',
+				required: ['name'],
+				properties: {
+					name: {
+						...helpers.stringDef('Name of the module', 'Custom module'),
+						not: { enum: Object.values(presetModules) },
+					},
+					deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
+					properties: ticketTemplatePropSchema,
+				},
+			},
+			{
+				type: 'object',
+				required: ['type'],
+				properties: {
+					type: helpers.stringDef('Preset module name', undefined, Object.values(presetModules)),
+					deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
+					properties: ticketTemplatePropSchema,
+				},
+			},
+		],
 	},
 };
 
@@ -169,7 +319,25 @@ const ticketTemplateConfigSchema = {
 		issueProperties: helpers.boolDef('Include issue properties (default: false)'),
 		defaultView: helpers.boolDef('Include a default view with image (default: false)'),
 		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
-		pin: helpers.boolDef('Include a pin (default: false)'),
+		attachments: helpers.boolDef('Attachments enabled (default: false)'),
+		pin: {
+			description: 'Include a pin, optionally with conditional colour or icon mapping',
+			oneOf: [
+				{ type: 'boolean', default: false },
+				{
+					type: 'object',
+					description: 'Pin configuration using direct colour/icon values or conditional mappings',
+					properties: {
+						color: {
+							oneOf: [pinColorValueSchema, pinColorMappingSchema],
+						},
+						icon: {
+							oneOf: [pinIconValueSchema, pinIconMappingSchema],
+						},
+					},
+				},
+			],
+		},
 		status: ticketTemplateStatusConfig,
 		tabular: {
 			type: 'object',
@@ -180,6 +348,7 @@ const ticketTemplateConfigSchema = {
 					description: 'Columns to show in the tabular view',
 					items: {
 						type: 'object',
+						required: ['property'],
 						properties: {
 							property: helpers.stringDef('Name of the property', 'Level of Risk'),
 							module: helpers.stringDef('Name of the module', 'safetibase'),
@@ -194,7 +363,7 @@ const ticketTemplateConfigSchema = {
 Schemas.schemas.ticketTemplate = {
 	description: 'Custom ticket Template',
 	type: 'object',
-	required: ['name'],
+	required: ['name', 'code'],
 	properties: {
 		name: helpers.stringDef('Name of the ticket', 'Risk'),
 		code: { ...helpers.stringDef('A 3 character code for the template', 'RSK'), minLength: 3, maxLength: 3 },
@@ -220,9 +389,9 @@ Schemas.schemas.group = {
 			description: 'color for the group. Must be an array of 3 or 4 values between 0 to 255',
 			items: {
 				type: 'integer',
-				minLength: 3,
-				maxLength: 4,
 			},
+			minItems: 3,
+			maxItems: 4,
 			example: [0, 0, 255],
 		},
 		name: {
@@ -366,7 +535,9 @@ Schemas.schemas.ticketGroup = {
 			description: 'Whether this group represents all objects except the defined objects',
 			example: true,
 		},
-		rules: Schemas.schemas.ticketGroupRules,
+		rules: {
+			$ref: '#/components/schemas/ticketGroupRules',
+		},
 		objects: {
 			type: 'array',
 			items: {
@@ -483,7 +654,7 @@ Schemas.schemas.modelSettings = {
 						description: 'The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)',
 						items: {
 							type: 'number',
-							example: '23.56',
+							example: 23.56,
 						},
 						minItems: 3,
 						maxItems: 3,
@@ -493,7 +664,7 @@ Schemas.schemas.modelSettings = {
 						description: 'The latitude and longitude of the survey point',
 						items: {
 							type: 'number',
-							example: '23.56',
+							example: 23.56,
 						},
 						minItems: 2,
 						maxItems: 2,
@@ -508,7 +679,7 @@ Schemas.schemas.modelSettings = {
 		},
 		timestamp: {
 			type: 'integer',
-			example: '1629976656315',
+			example: 1629976656315,
 			description: 'The date the last model was uploaded (in ms)',
 		},
 		status: {
@@ -551,10 +722,10 @@ Schemas.schemas.modelSettings = {
 				timestamp: {
 					type: 'integer',
 					description: 'The date the error occured (in ms)',
-					example: '1629976656315',
+					example: 1629976656315,
 				},
 				errorCode: {
-					type: 'string',
+					type: 'integer',
 					description: 'The error code',
 					example: 14,
 				},
@@ -597,7 +768,7 @@ Schemas.schemas.ticketCommentView = {
 				},
 				type: {
 					type: 'string',
-					enum: ['orthographic ', 'perspective'],
+					enum: ['orthographic', 'perspective'],
 				},
 			},
 		},
@@ -648,7 +819,9 @@ Schemas.schemas.ticketCommentView = {
 								minItems: 3,
 								maxItems: 3,
 							},
-							group: Schemas.schemas.ticketGroup,
+							group: {
+								$ref: '#/components/schemas/ticketGroup',
+							},
 						},
 					},
 				},
@@ -672,7 +845,9 @@ Schemas.schemas.ticketCommentView = {
 								minimum: 0,
 								maximum: 1,
 							},
-							group: Schemas.schemas.ticketGroup,
+							group: {
+								$ref: '#/components/schemas/ticketGroup',
+							},
 						},
 					},
 				},
@@ -681,7 +856,9 @@ Schemas.schemas.ticketCommentView = {
 					items: {
 						type: 'object',
 						properties: {
-							group: Schemas.schemas.ticketGroup,
+							group: {
+								$ref: '#/components/schemas/ticketGroup',
+							},
 						},
 					},
 				},
@@ -690,7 +867,9 @@ Schemas.schemas.ticketCommentView = {
 					items: {
 						type: 'object',
 						properties: {
-							group: Schemas.schemas.ticketGroup,
+							group: {
+								$ref: '#/components/schemas/ticketGroup',
+							},
 						},
 					},
 				},
