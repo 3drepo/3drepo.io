@@ -3436,4 +3436,12 @@ export class UnityUtil {
 	static resetDrawOrder() {
 		UnityUtil.toUnity('ResetDrawOrder', UnityUtil.LoadingState.MODEL_LOADED);
 	}
+
+	/**
+	 * Enable or disable click-through transparency for navigation.
+	 * @param enable
+	 */
+	public static navigationClickThroughTransparency(enable: boolean) {
+		UnityUtil.toUnity('NavigationClickThroughTransparency', UnityUtil.LoadingState.VIEWER_READY, enable ? 1 : 0);
+	}
 }
