@@ -199,15 +199,10 @@
 		USER_NOT_ASSIGNED_JOB: { message: "Job must be assigned to user", status: 400 },
 		USER_ALREADY_EXISTS: { message: "User already exists", status: 400 },
 
-		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
-		EXECUTE_AGREEMENT_ERROR: { message: "Failed to get payment from PayPal", status: 400 },
-
 		LICENCE_REMOVAL_SPACE_EXCEEDED: { message: "Your current quota usage exceeds the requested change.", status: 400 },
 		REMOVE_ASSIGNED_LICENCE: { message: "Some of the licences are assigned and can\"t be removed", status: 400 },
 		LICENCE_LIMIT_REACHED: { message: "All licenses have been assigned", status: 400 },
 
-		BILLING_NOT_FOUND: { message: "Billing not found", status: 404 },
-		PAYPAL_ERROR: { status: 400 },
 		NO_FILE_FOUND: { message: "No file can be downloaded", status: 404 },
 
 		MODEL_NO_UNIT: { status: 400, message: "Unit is not specified" },
@@ -215,7 +210,6 @@
 		TREE_NOT_FOUND: { message: "Model fulltree not found in stash", status: 404 },
 		REPOERR_FED_GEN_FAIL: { message: "Failed to create federation", status: 400 },
 
-		INVALID_VAT: { status: 400, message: "Invalid VAT number" },
 		NO_CONTACT_EMAIL: { status: 400, message: "contact.email is not defined in config" },
 
 		DUPLICATE_TAG: { status: 400, message: "Revision name already exists" },
@@ -257,8 +251,7 @@
 		NEW_OLD_PASSWORD_SAME: { message: "New password can't be the same as old password", status: 400 },
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
-		SEQ_TAG_NOT_FOUND: { message: "Sequence Tag not set", status: 404 },
-		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500 },
+		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
 
 		JOB_NOT_FOUND: { message: "Job not found", status: 404 },
 		DUP_JOB: { message: "Duplicate job id", status: 400 },
@@ -275,8 +268,6 @@
 
 		UNSUPPORTED_STORAGE_TYPE: { message: "File is stored in an unsupported storage type", status: 500 },
 		UNRECOGNISED_STORAGE_TYPE: { message: "File is stored an unrecognised storage type", status: 500 },
-
-		VAT_CODE_ERROR: { message: "Error validating VAT number", status: 500 },
 
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
 		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404 },

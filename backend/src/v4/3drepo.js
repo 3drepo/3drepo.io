@@ -32,36 +32,10 @@ const crypto = require("crypto");
 const utils = require("./utils");
 
 const { v5Path } = require("../interop");
-const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
-const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
 
 const certs = {};
 const certMap = {};
 let sslOptions = {};
-
-process.on("unhandledRejection", async (err) => {
-	systemLogger.logError(`Unhandled promise rejection found with error: ${err?.message || err}`);
-	await sendSystemEmail(templates.ERROR_NOTIFICATION.name, {err, title: "Application exiting on unhandled promise rejection", message: "Unhandled promise rejection found"}, undefined, true);
-
-	// eslint-disable-next-line n/no-process-exit
-	process.exit(-1);
-});
-
-function initAPM() {
-	systemLogger.logInfo("Initialising APM:");
-	// Any option not supplied via the options object can instead be configured using environment variables, however an empty elastic array required to initialise in the app
-	const apm = require("elastic-apm-node");
-	apm.start({
-		// Override service name from package.json
-		// Allowed characters: a-z, A-Z, 0-9, -, _, and space
-		serviceName: config.apm.serviceName || "",
-		// Use if APM Server requires a token
-		secretToken: config.apm.secretToken || "",
-		// Set custom APM Server URL (default: http://localhost:8200)
-		serverUrl: config.apm.serverUrl || "",
-		logLevel: config.apm.logLevel || ""
-	});
-}
 
 function setupSSL() {
 	if ("ssl" in config) {
@@ -139,25 +113,6 @@ function handleHTTPSRedirect() {
 
 async function runServer() {
 
-	if (config.apm) {
-		initAPM();
-	}
-
-	// The core express application
-	const mainApp = express();
-	mainApp.use(compression());
-
-	const cors = require("cors");
-	mainApp.use(cors({origin: true, credentials: true}));
-
-	if(utils.hasField(config, "umask")) {
-		systemLogger.logInfo("Setting umask: " + config.umask);
-		process.umask(config.umask);
-	}
-
-	// Peform setup for various parts of the server
-	setupSSL();
-	handleHTTPSRedirect();
 	await handleSubdomains(mainApp);
 
 	const server = config.using_ssl ?

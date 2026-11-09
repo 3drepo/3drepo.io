@@ -19,6 +19,7 @@ const { UUIDToString, stringToUUID } = require('./uuids');
 const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
 const { fileUploads } = require('../config');
+const { statSync } = require('fs');
 const tz = require('countries-and-timezones');
 
 const YupHelper = { validators: {}, transformer: {}, types: { strings: {} }, utils: {} };
@@ -32,6 +33,19 @@ YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 
 YupHelper.transformer.uniqueArray = (yupObj) => yupObj.transform(
 	(values) => (values ? Array.from(new Set(values)) : values));
+
+YupHelper.types.strings.filePath = Yup.string().matches(/^[\w|_|.|-|/]*$/, 'File path can only contain alpha-numeric characters, full stops, hyphens, underscores or forward slashes')
+	.test('file-exists', 'File does not exist',
+		(filePath) => {
+			if (!filePath) return false;
+
+			try {
+				const stat = statSync(filePath);
+				return stat.isFile();
+			} catch {
+				return false;
+			}
+		});
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 

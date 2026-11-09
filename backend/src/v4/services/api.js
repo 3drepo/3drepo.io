@@ -41,8 +41,6 @@ const addV4Routes = (app) => {
 
 		app.use("/:account", require("../routes/job"));
 
-		app.use("/", require("../routes/plan"));
-
 		app.use("/", require("../routes/auth"));
 
 		// notifications handler

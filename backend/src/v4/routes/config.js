@@ -54,8 +54,6 @@ function createClientConfig(serverConfig, req) {
 		"frontendPug": [],
 		"development" : config.development,
 		"gtm": config.gtm,
-		"userNotice" : config.userNotice,
-		"customLogins" : config.customLogins,
 		"intercomLicense" : _.get(config, "intercom.license"),
 		"apryseLicense": _.get(config, "apryse.licenseKey"),
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
@@ -64,29 +62,8 @@ function createClientConfig(serverConfig, req) {
 		"loginPolicy": config.loginPolicy
 	};
 
-	if (utils.hasField(config, "captcha_client_key")) {
-		clientConfig.captcha_client_key = config.captcha_client_key;
-	}
-
-	// Set up the legal plugins
-	if (utils.hasField(config, "legal")) {
-		for (let i = 0; i < config.legal.length; i += 1) {
-			pluginStructure.functions.push(config.legal[i].page);
-		}
-	}
-
-	if (utils.hasField(config, "captcha_client_key")) {
-		clientConfig.captcha_client_key = config.captcha_client_key;
-	}
-
 	if (req) {
 		clientConfig.userId = _.get(req, "session.user.username");
-	}
-
-	// Set up the legal plugins
-	clientConfig.legalTemplates = [];
-	if (utils.hasField(config, "legal")) {
-		clientConfig.legalTemplates = config.legal;
 	}
 
 	clientConfig.apiUrls = config.apiUrls;
@@ -108,17 +85,7 @@ function createClientConfig(serverConfig, req) {
 
 	clientConfig.VERSION = config.version;
 
-	if (serverConfig.backgroundImage) {
-		clientConfig.backgroundImage = serverConfig.backgroundImage;
-	}
-
 	clientConfig.return_path = "/";
-
-	clientConfig.auth =  config.auth;
-
-	if(config.captcha && config.captcha.clientKey) {
-		clientConfig.captcha_client_key = config.captcha.clientKey;
-	}
 
 	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
 	clientConfig.imageSizeLimit = config.fileUploads.imageSizeLimit;
@@ -127,13 +94,11 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.euCountriesCode = addressMeta.euCountriesCode;
 	clientConfig.usStates = addressMeta.usStates;
 	clientConfig.units = units;
-	clientConfig.legal = config.legal;
 	clientConfig.tagRegExp = History.tagRegExp;
 	clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
 	clientConfig.fileNameRegExp = C.FILENAME_REGEXP;
 	clientConfig.usernameRegExp = User.usernameRegExp;
 	clientConfig.acceptedFormat = C.ACCEPTED_FILE_FORMATS;
-	clientConfig.login_check_interval = config.login_check_interval;
 
 	clientConfig.responseCodes = _.each(responseCodes.codesMap);
 

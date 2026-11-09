@@ -17,7 +17,6 @@
 
 "use strict";
 
-const BillingAddress = require("./billingAddress");
 const config = require("../config");
 const {v5Path} = require("../../interop");
 const TeamspaceModelV5 = require(`${v5Path}/models/teamspaceSettings`);
@@ -34,11 +33,6 @@ UserBilling.getSubscriptionLimits = async (teamspace) => {
 	const { data, collaborators } = await getQuotaInfo(teamspace);
 
 	return { spaceLimit: data / (1024 * 1024), collaboratorLimit: collaborators };
-};
-
-UserBilling.changeBillingAddress = async function(billing, billingAddress) {
-	billing.billingInfo = await BillingAddress.changeBillingAddress(billing.billingInfo, billingAddress);
-	return billing;
 };
 
 module.exports = UserBilling;

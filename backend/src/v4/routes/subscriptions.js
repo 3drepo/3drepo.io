@@ -66,30 +66,6 @@ const UserBilling = require("../models/userBilling");
  */
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 
-router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
-
-function updateSubscription(req, res, next) {
-
-	const responsePlace = utils.APIInfo(req);
-
-	User.findByUserName(req.params.account)
-		.then(dbUser => {
-			const billingUser = req.session.user.username;
-			return User.updateSubscriptions(dbUser, req.body.plans, billingUser, req.body.billingAddress || {});
-		})
-		.then(agreement => {
-
-			const resData = {
-				url: agreement.url
-			};
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
-
-		})
-		.catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-}
-
 function listSubscriptions(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
