@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsBulkEditForm.component';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
 import { useParams } from 'react-router';
@@ -83,7 +83,9 @@ export const BulkUpdateDropdown = () => {
 
 	const templates = Array.from(templatesSet);
 
+	const propertiesWithPermissions = TemplatesPermissionsHooksSelectors.selectEditableProperties(templates, [containerOrFederation]);
 	const selectableItems = templatesToFilters(templates).filter((filter) => {
+		if (!propertiesWithPermissions.includes(propertyNameFromFilter(filter))) return false;
 		return templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
 	});
 	

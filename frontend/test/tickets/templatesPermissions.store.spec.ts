@@ -17,6 +17,7 @@
 
 import {
 	selectCreatableTemplates,
+	selectEditableProperties,
 	selectEditableTicketIds,
 	selectHasAssignPermissionForTemplate,
 	selectHasCommentPermissionForTemplate,
@@ -51,6 +52,15 @@ jest.mock('@/v5/store/currentUser/currentUser.selectors', () => ({
 }));
 jest.mock('@/v4/modules/jobs', () => ({
 	selectMyJob: (state) => state.job,
+}));
+jest.mock('@/v5/store/tickets/tickets.helpers', () => ({
+	getTemplatePropertiesDefinitions: (template) => {
+		if (!template) return [];
+		return [
+			...(template.properties || []).map((property) => ({ ...property, name: `properties.${property.name}` })),
+			...(template.modules || []).flatMap((module) => (module.properties || []).map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+		];
+	},
 }));
 
 const user = { username: 'myUsername', email: 'my@email.com' };
@@ -215,5 +225,99 @@ describe('Template permissions', () => {
 		expect(selectTemplateCanBeCreatedOnModels(state, ['viewerModel', 'commenterModel'], templateId)).toBe(true);
 		expect(selectTemplateCanBeCreatedOnModels(state, ['viewerModel'], templateId)).toBe(false);
 		expect(selectTemplateCanBeCreatedOnModels(state, [], templateId)).toBe(false);
+	});
+});
+
+describe('selectEditableProperties', () => {
+	const modelId = 'modelId';
+	const templateId = 'templateId';
+
+	it('returns empty array when user has no edit permissions', () => {
+		const template = templateMockFactory({
+			_id: templateId,
+			properties: [
+				{ name: 'Status', type: 'oneOf' },
+				{ name: 'Assignees', type: 'manyOf' },
+			],
+			config: {
+				permissions: {
+					edit: { default: [], status: [], assign: [] },
+				},
+			},
+		});
+		const state = makePermissionState(template, Role.COMMENTER, [template]);
+
+		const result = selectEditableProperties(state, [template], [modelId]);
+		expect(result).toEqual([]);
+	});
+
+	it('returns only properties where user has permission', () => {
+		const template = templateMockFactory({
+			_id: templateId,
+			properties: [
+				{ name: 'Status', type: 'oneOf' },
+				{ name: 'Assignees', type: 'manyOf' },
+				{ name: 'priority', type: 'text' },
+			],
+			config: {
+				permissions: {
+					edit: { 
+						default: [user.username],
+						status: [],
+						assign: [],
+					},
+				},
+			},
+		});
+		const state = makePermissionState(template, Role.COMMENTER, [template]);
+
+		const result = selectEditableProperties(state, [template], [modelId]);
+		// Status uses status permission, not default, so it won't be included
+		expect(result).toContain('properties.priority');
+		expect(result).not.toContain('properties.Assignees');
+	});
+
+	it('includes assign permission for Assignees property', () => {
+		const template = templateMockFactory({
+			_id: templateId,
+			properties: [
+				{ name: 'Assignees', type: 'manyOf' },
+			],
+			config: {
+				permissions: {
+					edit: { 
+						default: [],
+						status: [],
+						assign: [user.username],
+					},
+				},
+			},
+		});
+		const state = makePermissionState(template, Role.COMMENTER, [template]);
+
+		const result = selectEditableProperties(state, [template], [modelId]);
+		expect(result).toContain('properties.Assignees');
+	});
+
+	it('includes status permission for Status property', () => {
+		const template = templateMockFactory({
+			_id: templateId,
+			properties: [
+				{ name: 'Status', type: 'oneOf' },
+			],
+			config: {
+				permissions: {
+					edit: { 
+						default: [],
+						status: [user.username],
+						assign: [],
+					},
+				},
+			},
+		});
+		const state = makePermissionState(template, Role.COMMENTER, [template]);
+
+		const result = selectEditableProperties(state, [template], [modelId]);
+		expect(result).toContain('properties.Status');
 	});
 });

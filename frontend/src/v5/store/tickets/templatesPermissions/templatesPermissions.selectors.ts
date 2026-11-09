@@ -26,6 +26,7 @@ import { selectMyJob } from '@/v4/modules/jobs';
 import { isCommenterRole } from '../../store.helpers';
 import { ITemplate, ITicket } from '../tickets.types';
 import { selectCurrentProjectTemplateById } from '../../projects/projects.selectors';
+import { getTemplatePropertiesDefinitions } from '../tickets.helpers';
 
 type TemplatePermissions = NonNullable<NonNullable<ITemplate['config']>['permissions']>;
 
@@ -103,3 +104,31 @@ export const selectEditableTicketIds = createSelector(
 			.map(({ _id }) => _id),
 	),
 );
+
+const permissionSelectorFunction = (name: string) => {
+	switch (name) {
+		case 'properties.Assignees':
+			return selectHasAssignPermissionForTemplate;
+		case 'properties.Status':
+			return selectHasStatusEditPermissionForTemplate;
+		default:
+			return selectHasDefaultEditPermissionForTemplate;
+	}
+};
+
+export const selectEditableProperties = (state, templates: ITemplate[], modelIds: string[]) => {
+	const editableProperties = new Set<string>();
+	templates.forEach((template) => {
+		const propertyDefs = getTemplatePropertiesDefinitions(template);
+		propertyDefs.forEach((propertyDef) => {
+			if (editableProperties.has(propertyDef.name)) return;
+			modelIds.forEach((modelId) => {
+				if (editableProperties.has(propertyDef.name)) return;
+				if (permissionSelectorFunction(propertyDef?.name)(state, modelId, template._id)) {
+					editableProperties.add(propertyDef.name);
+				}
+			});
+		});
+	});
+	return Array.from(editableProperties);
+};
