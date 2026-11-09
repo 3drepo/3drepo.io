@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { basename, extname } = require('path');
+const { basename, extname, relative, resolve } = require('path');
 const { checkQuotaIsSufficient, fileFilter } = require('./commons/revisions');
 const { codeExists, createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const FSHandler = require('../../../../../../handler/fs');
@@ -34,6 +34,7 @@ const { singleFileUpload } = require('../../../../multer');
 const tz = require('countries-and-timezones');
 const { validateMany } = require('../../../../../common');
 const { types: yupTypes } = require('../../../../../../utils/helper/yup');
+const { externalFS: { path: externalFSPath } } = require('../../../../../../utils/config');
 
 const Containers = {};
 
@@ -128,11 +129,13 @@ const checkFileFromPath = async (req, res, next) => {
 		if (!req.body.file) throw new Error('File is required');
 		const fsHandler = FSHandler.getHandler(FileStorageTypes.EXTERNAL_FS);
 		const { path, size } = await fsHandler.getFileInfo(req.body.file);
+		const extFSPath = resolve(externalFSPath);
+		const relativePath = relative(extFSPath, path);
 
 		// get file extension from original file name
 		const ext = extname(path).toLowerCase();
 
-		const file = { path, size, originalname: basename(path), readOnly: true, format: ext };
+		const file = { path: relativePath, size, originalname: basename(path), readOnly: true, format: ext };
 
 		if (!ext || !ACCEPTED_CONTAINER_EXT.includes(ext)) {
 			throw templates.unsupportedFileFormat;
