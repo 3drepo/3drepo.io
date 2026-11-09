@@ -107,7 +107,7 @@ export const TicketsTopPanel = ({
 			</DescriptionProperty>
 			<FlexContainer>
 				{hasIssueProperties ? (
-					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnlyDefault} />
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnlyDefault={readOnlyDefault} readOnlyStatus={readOnlyStatus} />
 				) : (
 					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnlyStatus} />
 				)}
