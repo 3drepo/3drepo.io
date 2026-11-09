@@ -86,10 +86,9 @@ const setupDocEndpoint = (app) => {
 			res.json(filteredDoc);
 		});
 
-		app.use(route, swaggerUi.serve, (req, res, next) => {
-			const ui = swaggerUi.setup(filteredDoc, uiOptions);
-			ui(req, res, next);
-		});
+		app.use(route,
+			...swaggerUi.serveFiles(filteredDoc, uiOptions),
+			swaggerUi.setup(filteredDoc, uiOptions));
 	};
 
 	app.use('/docs-list', (req, res) => res.json({ uri: Object.keys(pathsByGroups) }));
