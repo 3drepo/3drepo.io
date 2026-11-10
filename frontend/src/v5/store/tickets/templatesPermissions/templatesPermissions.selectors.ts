@@ -105,7 +105,7 @@ export const selectEditableTicketIds = createSelector(
 	),
 );
 
-const permissionSelectorFunction = (name: string) => {
+export const permissionSelectorFunction = (name: string) => {
 	switch (name) {
 		case 'properties.Assignees':
 			return selectHasAssignPermissionForTemplate;
