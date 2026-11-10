@@ -215,6 +215,9 @@ const createPinMappingSchema = (type, valueSchema) => ({
 					{
 						type: 'object',
 						description: 'Mapping entry applied when value matches',
+						not: {
+							required: ['default'],
+						},
 						required: ['value', type],
 						properties: {
 							value: {
@@ -253,7 +256,7 @@ const ticketTemplatePropSchema = {
 			readOnly: helpers.boolDef('Denotes if this prop is read-only', false),
 			unique: helpers.boolDef('Denotes if the value of this prop should be unique among tickets of the same type in the model', false),
 			required: helpers.boolDef('If this prop is required (default: false)', false),
-			value: helpers.stringDef('Configured value for a read-only text property', '{username}'),
+			value: helpers.stringDef('Configured value for a read-only text property', '{model_name}'),
 			default: {
 				description: 'Default value for the property',
 			},
@@ -327,6 +330,10 @@ const ticketTemplateConfigSchema = {
 				{
 					type: 'object',
 					description: 'Pin configuration using direct colour/icon values or conditional mappings',
+					anyOf: [
+						{ required: ['color'] },
+						{ required: ['icon'] },
+					],
 					properties: {
 						color: {
 							oneOf: [pinColorValueSchema, pinColorMappingSchema],
