@@ -201,7 +201,7 @@ const establishRoutes = (isFed) => {
 	 *                     description: The Id of the comment image
 	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 view:
-	 *                   $ref: "#components/schemas/ticketCommentView"
+	 *                   $ref: "#/components/schemas/ticketCommentView"
 	 *                 history:
 	 *                   type: array
 	 *                   description: The update history of the comment
@@ -340,7 +340,7 @@ const establishRoutes = (isFed) => {
 	 *                       description: The Id of the comment image
 	 *                       example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                   view:
-	 *                     $ref: "#components/schemas/ticketCommentView"
+	 *                     $ref: "#/components/schemas/ticketCommentView"
 	 *                   deleted:
 	 *                     type: boolean
 	 *                     example: true
@@ -424,7 +424,7 @@ const establishRoutes = (isFed) => {
 	 *                   type: string
 	 *                   description: Image in a Base64 format
 	 *               view:
-	 *                 $ref: "#components/schemas/ticketCommentView"
+	 *                 $ref: "#/components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -432,6 +432,15 @@ const establishRoutes = (isFed) => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: comment has been successfully created
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: ID of the created comment
 	 */
 	router.post('', hasCommenterAccess, checkTicketExists, validateNewComment, createComment(isFed));
 
@@ -497,7 +506,7 @@ const establishRoutes = (isFed) => {
 	 *                     type: string
 	 *                     description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *                 view:
-	 *                   $ref: "#components/schemas/ticketCommentView"
+	 *                   $ref: "#/components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

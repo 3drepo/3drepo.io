@@ -247,7 +247,7 @@ const establishRoutes = (isInternal) => {
 	 *       200:
 	 *         description: returns a project image
 	 *         content:
-	 *           image/png:
+	 *           image/*:
 	 *             schema:
 	 *               type: string
 	 *               format: binary
@@ -404,7 +404,8 @@ const establishRoutes = (isInternal) => {
 	*                         type: string
 	*                         description: Suitable for coordinationn
 	*                         example: S1
-	*             example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
+	*             example:
+	*               statusCodes: [{ code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
 	*/
 		router.get('/:project/settings/statusCodes', hasAccessToTeamspace, projectExists, getStatusCodes);
 	}
@@ -481,7 +482,7 @@ const establishRoutes = (isInternal) => {
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
-	 *                       id:
+	 *                       _id:
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: Project ID
