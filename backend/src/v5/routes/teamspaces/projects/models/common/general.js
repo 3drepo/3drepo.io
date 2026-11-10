@@ -330,45 +330,45 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                         type: string
 		 *                         description: Model ID
 		 *                         example: a54e8776-da7c-11ec-9d64-0242ac120002
+		 *                       type:
+		 *                         type: string
+		 *                         description: Model type (containers only)
 		 *                       code:
 		 *                         type: string
 		 *                         description: Model code
-		 *                         example: STR-01
+		 *                       unit:
+		 *                         type: string
+		 *                         description: Model unit
 		 *                       status:
 		 *                         type: string
 		 *                         description: Current status of the model
-		 *                         example: ok
 		 *                       containers:
 		 *                         type: array
-		 *                         description: The IDs of the models the model consists of
+		 *                         description: Containers included in a federation
 		 *                         items:
 		 *                           type: object
-		 *                           properties:
-		 *                             _id:
-		 *                               description: Container id
-		 *                               type: string
-		 *                               format: uuid
-		 *                             group:
-		 *                               description: Federation group the container is under (optional)
-		 *                               type: string
-		 *                               example: Architectural
-		 *                       tickets:
-		 *                         type: object
-		 *                         properties:
-		 *                           issues:
-		 *                             type: integer
-		 *                             description: The number of non-closed issues of the model
-		 *                           risks:
-		 *                             type: integer
-		 *                             description: The number of unmitigated risks of the model
 		 *                       desc:
 		 *                         type: string
 		 *                         description: Model description
-		 *                         example: Floor 1 MEP with Facade
+		 *                       tickets:
+		 *                         type: integer
+		 *                         description: Number of open tickets on a federation
+		 *                       revisions:
+		 *                         type: object
+		 *                         description: Revision statistics for a container or drawing
+		 *                         properties:
+		 *                           total:
+		 *                             type: integer
+		 *                           lastUpdated:
+		 *                             type: integer
+		 *                           latestRevision:
+		 *                             type: string
+		 *                       errorReason:
+		 *                         type: object
+		 *                         description: Error details when model status is failed
 		 *                       lastUpdated:
 		 *                         type: integer
-		 *                         description: Timestamp (ms) of when any of the submodels was updated
-		 *                         example: 1630598072000
+		 *                         description: Timestamp (ms) of the latest model update
 		 *       401:
 		 *         $ref: "#/components/responses/notLoggedIn"
 		 *       404:
@@ -408,12 +408,31 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         application/json:
 		 *           schema:
 		 *             type: object
-		 *             properties:
-		 *               models:
-		 *                 type: array
-		 *                 items:
-		 *                   type: string
-		 *                   format: uuid
+		 *             oneOf:
+		 *               - type: object
+		 *                 required: [containers]
+		 *                 properties:
+		 *                   containers:
+		 *                     type: array
+		 *                     items:
+		 *                       type: string
+		 *                       format: uuid
+		 *               - type: object
+		 *                 required: [federations]
+		 *                 properties:
+		 *                   federations:
+		 *                     type: array
+		 *                     items:
+		 *                       type: string
+		 *                       format: uuid
+		 *               - type: object
+		 *                 required: [drawings]
+		 *                 properties:
+		 *                   drawings:
+		 *                     type: array
+		 *                     items:
+		 *                       type: string
+		 *                       format: uuid
 		 *           examples:
 		 *             containers:
 		 *               summary: containers
@@ -632,6 +651,11 @@ const establishRoutes = (modelType, isInternal) => {
 			 *         $ref: "#/components/responses/notLoggedIn"
 			 *       200:
 			 *         description: returns a raster image of the thumbnail
+			 *         content:
+			 *           image/*:
+			 *             schema:
+			 *               type: string
+			 *               format: binary
 			 */
 			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
 		}
@@ -738,7 +762,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                 code: LEGO_ARCHIT_001
 	 *                 type: Architecture
 	 *                 angleFromNorth: 100
-	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *             federation:
 	 *               summary: federation
 	 *               value:
@@ -747,7 +771,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                 desc: The Structural model of the Lego House
 	 *                 code: LEGO_ARCHIT_002
 	 *                 angleFromNorth: 150
-		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *             drawing:
 	 *               summary: drawing
 	 *               value:
@@ -813,25 +837,28 @@ const establishRoutes = (modelType, isInternal) => {
 	 *           application/json:
 	 *             schema:
 	 *               type: object
-	 *               properties:
-	 *                 models:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       id:
-	 *                         type: string
-	 *                         description: Model ID
-	 *                         example: 02b05cb0-0057-11ec-8d97-41a278fb55fd
-	 *                       name:
-	 *                         type: string
-	 *                         description: name of the model
-	 *                         example: Complete structure
-	 *                       role:
-	 *                         $ref: "#/components/schemas/roles"
-	 *                       isFavourite:
-	 *                         type: boolean
-	 *                         description: whether the model is a favourited item for the user
+	 *               oneOf:
+	 *                 - type: object
+	 *                   required: [containers]
+	 *                   properties:
+	 *                     containers:
+	 *                       type: array
+	 *                       items:
+	 *                         $ref: "#/components/schemas/modelListEntry"
+	 *                 - type: object
+	 *                   required: [federations]
+	 *                   properties:
+	 *                     federations:
+	 *                       type: array
+	 *                       items:
+	 *                         $ref: "#/components/schemas/modelListEntry"
+	 *                 - type: object
+	 *                   required: [drawings]
+	 *                   properties:
+	 *                     drawings:
+	 *                       type: array
+	 *                       items:
+	 *                         $ref: "#/components/schemas/modelListEntry"
 	 *             examples:
 	 *               containers:
 	 *                 summary: containers
@@ -897,6 +924,9 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   type: string
 	 *                   description: Model code
 	 *                   example: STR-01
+	 *                 unit:
+	 *                   type: string
+	 *                   description: Model unit (containers and federations)
 	 *                 status:
 	 *                   type: string
 	 *                   description: Current status of the model
@@ -916,22 +946,31 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                         type: string
 	 *                         example: Architectural
 	 *                 tickets:
-	 *                   type: object
-	 *                   properties:
-	 *                     issues:
-	 *                       type: integer
-	 *                       description: The number of non closed issues of the model
-	 *                     risks:
-	 *                       type: integer
-	 *                       description: The number of unmitigated risks of the model
+	 *                   type: integer
+	 *                   description: The number of open tickets on a federation
 	 *                 desc:
 	 *                   type: string
 	 *                   description: Model description
 	 *                   example: Floor 1 MEP with Facade
+	 *                 number:
+	 *                   type: string
+	 *                   description: Drawing number
+	 *                 calibration:
+	 *                   type: string
+	 *                   description: Drawing calibration status
+	 *                 revisions:
+	 *                   type: object
+	 *                   description: Revision statistics for a container or drawing
+	 *                   properties:
+	 *                     total:
+	 *                       type: integer
+	 *                     lastUpdated:
+	 *                       type: integer
+	 *                     latestRevision:
+	 *                       type: string
 	 *                 lastUpdated:
 	 *                   type: integer
-	 *                   description: Timestamp(ms) of when any of the submodels was updated
-	 *                   example: 1630598072000
+	 *                   description: Timestamp (ms) of the latest model update
 	 *             examples:
 	 *               container:
 	 *                 summary: container
@@ -949,7 +988,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   status: ok
 	 *                   desc: Floor 1 MEP with Facade
 	 *                   lastUpdated: 1630598072000
-	 *                   tickets: { issues: 10, risks: 5 }
+	 *                   tickets: 10
 	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 	 *               drawing:
 	 *                 summary: drawing
@@ -1095,7 +1134,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 angleFromNorth: 100
-	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *             federation:
 	 *               summary: federation
 	 *               value:
@@ -1105,7 +1144,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 angleFromNorth: 120
-	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *             drawing:
 	 *               summary: drawing
 	 *               value:
@@ -1182,7 +1221,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                   angleFromNorth: 100
-	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *               federation:
 	 *                 summary: federation
 	 *                 value:
@@ -1197,7 +1236,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                   angleFromNorth: 100
-	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7.76] }]
 	 *               drawing:
 	 *                 summary: drawing
 	 *                 value:
