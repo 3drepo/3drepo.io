@@ -167,8 +167,22 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 	let v4Viewpoint:any = {};
 	if (viewpoint.camera) {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
-		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
+		const { position, up, forward: view_dir, type, size: orthographicSize, zoomTo } = viewpoint.camera;
+		v4Viewpoint = {
+			position,
+			up,
+			view_dir,
+			type,
+			orthographicSize,
+			zoomTo: zoomTo?.map(({ container: modelId, _ids }) => ({
+				modelId,
+				teamspace: selectCurrentTeamspace(getState()),
+				meshes: _ids,
+			})),
+			look_at: null,
+			account: null,
+			model: null,
+		};
 	}
 
 	if (!isEmpty(viewpoint.state)) {
