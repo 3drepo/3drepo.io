@@ -47,13 +47,28 @@ export const createStateWithGroup = (state: ViewpointState, groups: Record<strin
 
 /* eslint-disable no-param-reassign */
 const createPropertiesWithGroups = (properties, groups) => Object.keys(properties).reduce((partialProps, key) => {
+	partialProps[key] = properties[key];
+
 	if (properties[key]?.state) {
 		partialProps[key] = {
 			...properties[key],
 			state: createStateWithGroup(properties[key].state, groups),
 		};
-	} else {
-		partialProps[key] = properties[key];
+	} 
+	
+	if (properties[key]?.camera?.zoomTo) {
+		partialProps[key] = {
+			...partialProps[key],
+			camera: {
+				...partialProps[key].camera,
+				zoomTo: properties[key].camera.zoomTo.flatMap((obj) => {
+					if (!groups[obj.group]) {
+						return [];
+					}
+					return groups[obj.group].objects;
+				}),
+			},
+		};
 	}
 
 	return partialProps;
