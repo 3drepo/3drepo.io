@@ -24,12 +24,8 @@ import { isArrayChange, isDescribableChange } from '../../ticketHistory.helpers'
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 const parseValueOfType = (value, type) => {
-	if (isDateType(type)) {
-		return formatDateTime(value);
-	}
-	if (type === 'coords') {
-		return null;
-	}
+	if (isDateType(type)) return formatDateTime(value);
+	if (type === 'coords') return null;
 	return value?.toString() ?? '';
 };
 
@@ -37,11 +33,12 @@ export const ChangeDetail = ({ propertyName, change }) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const propertyDef = findPropertyDefinition(template, propertyName);
 	const { from, to } = change;
-	const emptyValue = [from, to].findIndex((value) => isNull(value));
+	const emptyValue = [from, to].findIndex((value) => isNull(value)
+		|| (isDateType(propertyDef?.type) && !value)); // Unset dates can have a value of 0
 	const wasDeleted = emptyValue === 1;
 	const wasAdded = emptyValue === 0;
 	const wasChanged = !wasDeleted && !wasAdded;
-	const isTitleChange = propertyName === 'title'; // title lacks a type
+	const isTitleChange = propertyName === 'title'; // title property lacks a type
 
 	if (!propertyDef?.type && !isTitleChange) {
 		return (
