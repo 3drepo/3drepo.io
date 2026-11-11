@@ -191,6 +191,7 @@
 		"stylelint-config-styled-components": "0.1.1",
 		"stylelint-processor-styled-components": "1.10.0",
 		"ts-jest": "29.1.0",
+		"ts-json-schema-generator": "2.9.0",
 		"tslint": "5.18.0",
 		"typedoc": "0.25.3",
 		"typescript": "5.9.3",
