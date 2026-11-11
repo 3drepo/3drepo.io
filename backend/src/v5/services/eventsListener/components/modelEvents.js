@@ -413,7 +413,7 @@ const ticketUpdated = async (payload) => {
 		const updateData = constructUpdatedObject(changes);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
 		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, fullTemplate);
-		await createTicketMessage(event, serialisedTicket, teamspace, project, model, template._id, author);
+		await createTicketMessage(event, serialisedTicket, teamspace, project, model, template._id);
 	} catch (error) {
 		logger.logError(`Failed to process ticket updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
@@ -435,7 +435,7 @@ const ticketGroupUpdated = async (payload) => {
 
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_GROUP : chatEvents.CONTAINER_UPDATE_TICKET_GROUP;
 		const serialisedMsg = serialiseGroup({ _id, ticket, ...changes });
-		await createTicketMessage(event, serialisedMsg, teamspace, project, model, template, author);
+		await createTicketMessage(event, serialisedMsg, teamspace, project, model, template);
 	} catch (error) {
 		logger.logError(`Failed to process group updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {

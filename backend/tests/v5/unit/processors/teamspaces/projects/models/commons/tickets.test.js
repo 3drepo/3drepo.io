@@ -689,7 +689,7 @@ const testImportTickets = () => {
 				const ticketsComments = tickets.map(({ comments }, i) => ({ ticket: expectedOutput[i]._id, comments }));
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
 				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project,
-					model, ticketsComments, author);
+					model, template._id, ticketsComments, author);
 			});
 		});
 	});
@@ -874,7 +874,7 @@ const testUpdateManyTickets = () => {
 
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
 				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace,
-					project, model, commentsByTickets, author);
+					project, model, template._id, commentsByTickets, author);
 			});
 
 			test(`should not trigger ${events.UPDATE_TICKET} events if there are only comments update`, async () => {
@@ -913,7 +913,7 @@ const testUpdateManyTickets = () => {
 
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(1);
 				expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model,
-					commentsByTickets, author);
+					template._id, commentsByTickets, author);
 			});
 		});
 	});
