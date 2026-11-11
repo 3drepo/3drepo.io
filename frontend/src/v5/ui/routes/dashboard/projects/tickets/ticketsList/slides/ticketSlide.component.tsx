@@ -113,7 +113,7 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 
 
 	useEffect(() => {
-		if (!template?._id) return undefined;
+		if (!template?._id || !teamspace || !project || !containerOrFederation || !isFederation) return undefined;
 		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, [template._id]);
 	}, [containerOrFederation, template?._id]);
 
