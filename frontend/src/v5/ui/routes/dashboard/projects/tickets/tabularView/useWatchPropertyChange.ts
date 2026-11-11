@@ -17,7 +17,7 @@
 
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useSearchParam, Transformers } from '@/v5/ui/routes/useSearchParam';
@@ -30,6 +30,7 @@ export const useWatchPropertiesChange = (properties, callback) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	useEffect(() => {
 		const watch = new EventEmitter();
@@ -44,11 +45,20 @@ export const useWatchPropertiesChange = (properties, callback) => {
 	}, [properties, callback]);
 
 	useEffect(() => {
+		if (!templates.length) return undefined;
 		const subscriptions = containersAndFederations.map((modelId) => 
-			enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFed(modelId), properties, callback),
+			enableRealtimeWatchPropertiesUpdateTicket(
+				teamspace,
+				project,
+				modelId,
+				isFed(modelId),
+				properties,
+				callback,
+				templates.map(({ _id }) => _id),
+			),
 		);
 		return combineSubscriptions(...subscriptions);
-	}, [teamspace, project, containersAndFederations, isFed, properties, callback]);
+	}, [teamspace, project, containersAndFederations, isFed, properties, callback, JSON.stringify(templates)]);
 };
 
 export const useWatchPropertyChange = (property, callback) => {

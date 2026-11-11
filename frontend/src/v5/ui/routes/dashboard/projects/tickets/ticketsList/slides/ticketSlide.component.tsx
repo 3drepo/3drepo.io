@@ -113,8 +113,9 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 
 
 	useEffect(() => {
-		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation);
-	}, [containerOrFederation]);
+		if (!template?._id) return undefined;
+		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, [template._id]);
+	}, [containerOrFederation, template?._id]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
@@ -124,7 +125,7 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
 
 	return (
-		<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
+		<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded ticket={ticket} />}>
 			<FormProvider {...formData}>
 				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 			</FormProvider>

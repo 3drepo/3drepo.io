@@ -19,11 +19,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { Accordion } from './commentsAccordion.styles';
 import { CommentsList } from '../commentsList/commentsList.component';
 import { TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 type CommentsAccordionProps = {
 	scrollPanelIntoView?: (event, isExpanding) => void,
+	ticket: Partial<ITicket>;
 };
-export const CommentsAccordion = ({ scrollPanelIntoView }: CommentsAccordionProps) => {
+export const CommentsAccordion = ({ scrollPanelIntoView, ticket }: CommentsAccordionProps) => {
 	const hasUnsavedComments = TicketCommentsHooksSelectors.selectUnsavedComments().length > 0;
 	return (
 		<Accordion
@@ -32,7 +34,7 @@ export const CommentsAccordion = ({ scrollPanelIntoView }: CommentsAccordionProp
 			onChange={scrollPanelIntoView}
 			defaultExpanded={hasUnsavedComments}
 		>
-			<CommentsList />
+			<CommentsList ticket={ticket}/>
 		</Accordion>
 	);
 };
