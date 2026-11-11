@@ -16,18 +16,19 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
-const { basePropertyLabels, propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
+
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { getArrayDifference, getCommonElements } = require('../../../../../../../utils/helper/arrays');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
+const { hasTemplateEditPermissions, hasTemplatePermissions } = require('../../../../../../../utils/permissions');
+
 const { checkTicketTemplateExists } = require('../../../settings');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
-const { getJobsByUsers } = require('../../../../../../../models/jobs');
+const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
-const { isTeamspaceAdmin } = require('../../../../../../../utils/permissions');
 const { permissionTypes } = require('../../../../../../../schemas/tickets/templates.constants');
+const { propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 const { validateTickets } = require('../../../../../../../schemas/tickets');
@@ -226,18 +227,12 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 const hasTemplatePermission = (colName) => async (req, res, next) => {
 	try {
 		const user = getUserFromSession(req.session);
-		const isAdmin = await isTeamspaceAdmin(req.params.teamspace, user);
 		const permissions = req.templateData?.config?.permissions?.[colName];
-		if (permissions && !isAdmin) {
-			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
-			const userAndJobs = [user, ...userJobs];
-
-			const hasPermission = getCommonElements(permissions, userAndJobs).length > 0;
-
-			if (!hasPermission) {
-				throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
-			}
+		const hasPermissions = await hasTemplatePermissions(user, req.params.teamspace, permissions);
+		if (!hasPermissions) {
+			throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
 		}
+
 		await next();
 	} catch (err) {
 		respond(req, res, err);
@@ -252,54 +247,13 @@ TicketsMiddleware.hasTemplateViewPermission = hasTemplatePermission(permissionTy
 
 TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res, next) => {
 	try {
-		const nonEditableProps = ['_id', 'type'];
-		const editPermissions = req.templateData.config.permissions?.edit;
+		const permissions = req.templateData.config.permissions?.edit;
 		const user = getUserFromSession(req.session);
-		const isAdmin = await isTeamspaceAdmin(req.params.teamspace, user);
+		const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
+		const hasPermissions = await hasTemplateEditPermissions(user, req.params.teamspace, permissions, ticketUpdates);
 
-		if (editPermissions && !isAdmin) {
-			const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
-			const { assign: assignPerms, status: statusPerms, default: defaultPerms } = editPermissions;
-
-			const userJobs = await getJobsByUsers(req.params.teamspace, [user]);
-			const userAndJobs = [user, ...userJobs];
-
-			let isAssignedModified;
-			let isStatusModified;
-			let isDefaultPropModified;
-
-			const checkProperties = (value) => {
-				for (const prop of Object.keys(value)) {
-					if (prop === basePropertyLabels.ASSIGNEES) isAssignedModified = true;
-					else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
-					else isDefaultPropModified = true;
-				}
-			};
-
-			const checkPerm = (permArray) => {
-				if (permArray?.length) {
-					const hasPermission = getCommonElements(permArray, userAndJobs).length;
-					if (!hasPermission) {
-						throw createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
-					}
-				}
-			};
-
-			for (const update of ticketUpdates) {
-				for (const [key, value] of Object.entries(update)) {
-					if (key === 'properties') {
-						checkProperties(value);
-					} else if (!nonEditableProps.includes(key)) {
-						isDefaultPropModified = true;
-					}
-				}
-
-				if (isAssignedModified && isStatusModified && isDefaultPropModified) break;
-			}
-
-			if (isAssignedModified) checkPerm(assignPerms ?? defaultPerms);
-			if (isStatusModified) checkPerm(statusPerms ?? defaultPerms);
-			if (isDefaultPropModified) checkPerm(defaultPerms);
+		if (!hasPermissions) {
+			throw createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 		}
 
 		await next();
@@ -315,11 +269,11 @@ TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), c
 	hasTemplateCreatePermission, validateTicket(true)]);
 
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists,
-	TicketsMiddleware.hasTemplateEditPermission(false), validateTicket(false)]);
+	validateTicket(false), TicketsMiddleware.hasTemplateEditPermission(false)]);
 
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
-	checkAllTicketsExist, TicketsMiddleware.hasTemplateEditPermission(true), validateTicketImportData(false)]);
+	checkAllTicketsExist, validateTicketImportData(false), TicketsMiddleware.hasTemplateEditPermission(true)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

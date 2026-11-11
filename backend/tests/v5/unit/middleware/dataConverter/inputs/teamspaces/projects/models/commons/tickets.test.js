@@ -26,8 +26,8 @@ const {
 	generateRandomObject,
 } = require('../../../../../../../../helper/dataGen');
 const { generateTicket } = require('../../../../../../../../helper/dataGen.tickets');
-const { isEqual } = require('../../../../../../../../../../src/v5/utils/helper/objects');
-const { basePropertyLabels } = require('../../../../../../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { isEqual } = require(`${src}/utils/helper/objects`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -47,8 +47,8 @@ const TicketSchema = require(`${src}/schemas/tickets`);
 jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
 
-jest.mock('../../../../../../../../../../src/v5/models/jobs');
-const JobsModel = require(`${src}/models/jobs`);
+jest.mock('../../../../../../../../../../src/v5/utils/permissions');
+const UtilPermissions = require(`${src}/utils/permissions`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets');
 const TicketModelSchema = require(`${src}/models/tickets`);
@@ -65,10 +65,9 @@ const testValidateNewTicket = () => {
 	const deprecatedTemplateID = generateUUIDString();
 	const unknownTemplateID = generateUUIDString();
 	const defaultUser = generateRandomString();
-	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
 	const errMsg = generateRandomString();
+	const validPermissions = times(5, generateRandomString);
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
 
 	describe.each([
@@ -77,12 +76,8 @@ const testValidateNewTicket = () => {
 		['the template is deprecated', { body: { type: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
 		['validation failed', {}, false, createResponseCode(templates.invalidArguments, errMsg), true],
 		['validation succeeded', {}, true],
-		['create permissions are not configured', {}, true, undefined, false, { }],
-		['the user has create permission', {}, true, undefined, false, { create: [defaultUser] }],
-		['one of the user jobs has create permission', {}, true, undefined, false, { create: [userJob, generateRandomString()] }],
-		['neither the user nor their jobs has create permission', {}, false, permissionError, false, { create: [generateRandomString()] }],
-		['the create permission list is empty', {}, false, permissionError, false, { create: [] }],
-		['the user is teamspace admin', {}, true, undefined, false, undefined, tsAdmin],
+		['there are no template permissions', {}, false, permissionError, false, { create: null }],
+		['there are template permissions', {}, true, undefined, false, { create: validPermissions }],
 	])('Validate new ticket', (desc, additionalReq = {}, success = false, expectedRes, validationFails = false, permissions, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -95,6 +90,9 @@ const testValidateNewTicket = () => {
 				const fn = jest.fn();
 				const res = {};
 				const templateId = req.body.type;
+
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
 
 				SettingsMW.checkTicketTemplateExists.mockImplementation(
 					async (_req, _res, next) => {
@@ -114,9 +112,7 @@ const testValidateNewTicket = () => {
 				);
 
 				Sessions.getUserFromSession.mockReturnValue(user);
-				Permissions.isTeamspaceAdmin
-					.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
+
 				TicketSchema.validateTickets.mockImplementation(() => {
 					if (validationFails) {
 						return Promise.reject(new Error(errMsg));
@@ -137,6 +133,9 @@ const testValidateNewTicket = () => {
 					expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 					expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
 					expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						permissions?.create);
 				} else {
 					expect(fn).not.toHaveBeenCalled();
 					if (expectedRes) {
@@ -146,20 +145,13 @@ const testValidateNewTicket = () => {
 						expect(Responder.respond).not.toHaveBeenCalled();
 					}
 				}
-
-				if (permissions?.create) {
-					expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
-				} else {
-					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
-				}
 			},
 		);
 	});
 };
 
 const testValidateImportTickets = () => {
+	const teamspace = generateUUIDString();
 	const template = generateTemplate();
 	const uniquePropName = generateRandomString();
 	const uniqueModuleName = generateRandomString();
@@ -176,9 +168,8 @@ const testValidateImportTickets = () => {
 	const duplicateModuleUniqueProp = [];
 	const defaultUser = generateRandomString();
 	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
-
+	const validPermissions = times(5, generateRandomString);
 	const goodTickets = times(5, () => generateTicket(template));
 
 	times(3, () => {
@@ -223,11 +214,8 @@ const testValidateImportTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
-		['the user has create permission', {}, true, undefined, { create: [defaultUser] }],
-		['one of the user jobs has create permission', {}, true, undefined, { create: [userJob, generateRandomString()] }],
-		['neither the user nor their jobs has create permission', {}, false, permissionError, { create: [generateRandomString()] }],
-		['the create permission list is empty', {}, false, permissionError, { create: [] }],
-		['the user is teamspace admin', {}, true, undefined, undefined, tsAdmin],
+		['there are no template permissions', {}, false, permissionError, { create: null }],
+		['there are template permissions', {}, true, undefined, { create: validPermissions }],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes, permissions, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -235,7 +223,7 @@ const testValidateImportTickets = () => {
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
 			const req = {
-				params: {},
+				params: { teamspace },
 				query: { template: knownTemplateID },
 				body: { tickets: goodTickets },
 				...additionalReq,
@@ -243,6 +231,8 @@ const testValidateImportTickets = () => {
 			const fn = jest.fn();
 			const res = {};
 
+			UtilPermissions.hasTemplatePermissions
+				.mockImplementation((username, ts, perms) => perms !== null);
 			SettingsMW.checkTicketTemplateExists.mockImplementation(async (_req, _res, next) => {
 				const { template: tem } = _req.params;
 
@@ -272,7 +262,6 @@ const testValidateImportTickets = () => {
 			Sessions.getUserFromSession.mockReturnValue(user);
 			Permissions.isTeamspaceAdmin
 				.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-			JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
 			TicketSchema.validateTickets.mockImplementation(validation);
 
 			await Tickets.validateImportTickets(req, res, fn);
@@ -288,6 +277,9 @@ const testValidateImportTickets = () => {
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
 				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+					permissions?.create);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.
@@ -302,22 +294,16 @@ const testValidateImportTickets = () => {
 
 const testHasTemplateViewPermission = () => {
 	const defaultUser = generateRandomString();
-	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have view permissions for this ticket');
-
+	const validPermissions = times(5, generateRandomString);
 	describe.each([
 		['permissions are undefined', { config: { permissions: undefined } }, true],
 		['config is undefined', { config: undefined }, true],
 		['templateData is undefined', undefined, true],
 		['view permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
-		['the user has view permission', { config: { permissions: { view: [defaultUser] } } }, true],
-		['one of the user jobs has view permission', { config: { permissions: { view: [userJob] } } }, true],
-		['neither the user nor their jobs has view permission', { config: { permissions: { view: [generateRandomString()] } } }, false, permissionError],
-		['the view permission list is empty', { config: { permissions: { view: [] } } }, false, permissionError],
-		['the user only has create permission', { config: { permissions: { create: [defaultUser], view: [generateRandomString()] } } }, false, permissionError],
-		['user is teamspace admin', undefined, true, undefined, tsAdmin],
+		['hasTemplatePermissions returns false', { config: { permissions: { view: null } } }, false, permissionError],
+		['hasTemplatePermissions return true', { config: { permissions: { view: validPermissions } } }, true],
 	])('Has template view permission', (desc, templateData, success, expectedRes, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -334,16 +320,18 @@ const testHasTemplateViewPermission = () => {
 				const res = {};
 				const fn = jest.fn();
 
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
 				Sessions.getUserFromSession.mockReturnValue(user);
-				Permissions.isTeamspaceAdmin
-					.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
 
 				await Tickets.hasTemplateViewPermission(req, res, fn);
 
 				if (success) {
 					expect(fn).toHaveBeenCalledTimes(1);
 					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						templateData?.config?.permissions?.view);
 				} else {
 					expect(fn).not.toHaveBeenCalled();
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -352,13 +340,6 @@ const testHasTemplateViewPermission = () => {
 
 				expect(Sessions.getUserFromSession).toHaveBeenCalledTimes(1);
 				expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
-
-				if (templateData?.config?.permissions?.view) {
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
-				} else {
-					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
-				}
 			},
 		);
 	});
@@ -366,22 +347,17 @@ const testHasTemplateViewPermission = () => {
 
 const testHasTemplateCommentPermission = () => {
 	const defaultUser = generateRandomString();
-	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have comment permissions for this ticket');
+	const validPermissions = times(5, generateRandomString);
 
 	describe.each([
 		['permissions are undefined', { config: { permissions: undefined } }, true],
 		['config is undefined', { config: undefined }, true],
 		['templateData is undefined', undefined, true],
 		['comment permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
-		['the user has comment permission', { config: { permissions: { comment: [defaultUser] } } }, true],
-		['one of the user jobs has comment permission', { config: { permissions: { comment: [userJob] } } }, true],
-		['neither the user nor their jobs has comment permission', { config: { permissions: { comment: [generateRandomString()] } } }, false, permissionError],
-		['the comment permission list is empty', { config: { permissions: { comment: [] } } }, false, permissionError],
-		['the user only has create permission', { config: { permissions: { create: [defaultUser], comment: [generateRandomString()] } } }, false, permissionError],
-		['user is teamspace admin', undefined, true, undefined, tsAdmin],
+		['hasTemplatePermissions returns false', { config: { permissions: { comment: null } } }, false, permissionError],
+		['hasTemplatePermissions return true', { config: { permissions: { comment: validPermissions } } }, true],
 	])('Has template comment permission', (desc, templateData, success, expectedRes, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -398,16 +374,18 @@ const testHasTemplateCommentPermission = () => {
 				const res = {};
 				const fn = jest.fn();
 
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
 				Sessions.getUserFromSession.mockReturnValue(user);
-				Permissions.isTeamspaceAdmin
-					.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
 
 				await Tickets.hasTemplateCommentPermission(req, res, fn);
 
 				if (success) {
 					expect(fn).toHaveBeenCalledTimes(1);
 					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						templateData?.config?.permissions?.comment);
 				} else {
 					expect(fn).not.toHaveBeenCalled();
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -416,12 +394,6 @@ const testHasTemplateCommentPermission = () => {
 
 				expect(Sessions.getUserFromSession).toHaveBeenCalledTimes(1);
 				expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
-				if (templateData?.config?.permissions?.comment) {
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
-				} else {
-					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
-				}
 			},
 		);
 	});
@@ -432,26 +404,13 @@ const testValidateUpdateTicket = () => {
 	const ticket = { type: template._id, ...generateRandomObject() };
 	const knownTicketID = generateUUIDString();
 	const defaultUser = generateRandomString();
-	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
 	const errMsg = generateRandomString();
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 	const standardUpdate = generateRandomObject();
-	const statusUpdate = {
-		type: generateRandomString(),
-		properties: { [basePropertyLabels.STATUS]: generateRandomString() },
-	};
-	const assignUpdate = { properties: { [basePropertyLabels.ASSIGNEES]: [generateRandomString()] } };
-	const allUpdate = {
-		title: generateRandomString(),
-		properties: {
-			[basePropertyLabels.STATUS]: generateRandomString(),
-			[basePropertyLabels.ASSIGNEES]: [generateRandomString()],
-		},
-	};
+	const validPermissions = times(5, generateRandomString);
 
 	describe.each([
 		['ticket does not exist', generateRandomString(), false, templates.ticketNotFound],
@@ -460,22 +419,8 @@ const testValidateUpdateTicket = () => {
 		['there is nothing to update', undefined, false, templates.ok, false, undefined, ticket],
 		['permissions are undefined', undefined, true, undefined, false],
 		['edit permissions are not configured', undefined, true, undefined, false, { }],
-		['edit default permissions are not configured', undefined, true, undefined, false, { assign: [generateRandomString()], status: [generateRandomString()] }],
-		['the user has default permission', undefined, true, undefined, false, { edit: { default: [defaultUser] } }],
-		['the job of the user has default permission', undefined, true, undefined, false, { edit: { default: [userJob] } }],
-		['the user has default permission (status update)', undefined, true, undefined, false, { edit: { default: [defaultUser] } }, statusUpdate],
-		['the job of the user has default permission (status update)', undefined, true, undefined, false, { edit: { default: [userJob] } }, statusUpdate],
-		['the user has default permission (assignees update)', undefined, true, undefined, false, { edit: { default: [defaultUser] } }, assignUpdate],
-		['the job of the user has default permission (assignees update)', undefined, true, undefined, false, { edit: { default: [userJob] } }, assignUpdate],
-		['the user has edit permission for status update', undefined, true, undefined, false, { edit: { status: [defaultUser] } }, statusUpdate],
-		['the job of the user has edit permission for status update', undefined, true, undefined, false, { edit: { status: [userJob] } }, statusUpdate],
-		['the user has edit permission for assignes update', undefined, true, undefined, false, { edit: { assign: [defaultUser] } }, assignUpdate],
-		['the job of the user has edit permission for assignees update', undefined, true, undefined, false, { edit: { assign: [userJob] } }, assignUpdate],
-		['the user has all permissions (all updates)', undefined, true, undefined, false, { edit: { assign: [defaultUser], default: [defaultUser], status: [defaultUser] } }, allUpdate],
-		['neither the user nor their jobs has edit permission', undefined, false, permissionError, false, { edit: { default: [generateRandomString()] } }],
-		['neither the user nor their jobs has edit permission for status update', undefined, false, permissionError, false, { edit: { status: [generateRandomString()] } }, statusUpdate],
-		['neither the user nor their jobs has edit permission for assignees update', undefined, false, permissionError, false, { edit: { assign: [generateRandomString()] } }, assignUpdate],
-		['user is teamspace admin', undefined, true, templates.ok, false, undefined, standardUpdate, tsAdmin],
+		['there are no template permissions', undefined, false, permissionError, false, { edit: null }],
+		['there are template permissions', undefined, true, undefined, false, { edit: validPermissions }],
 	])('Validate update ticket', (desc, ticketID = knownTicketID, success = false, expectedRes, validationFails = false, permissions, update = standardUpdate, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -492,6 +437,8 @@ const testValidateUpdateTicket = () => {
 				const fn = jest.fn();
 				const res = {};
 
+				UtilPermissions.hasTemplateEditPermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
 				TicketModelSchema.getTicketById.mockImplementation(() => (
 					ticketID === knownTicketID ? Promise.resolve(ticket) : Promise.reject(expectedRes)));
 				TemplateModelSchema.getTemplateById.mockImplementation(() => Promise.resolve({
@@ -500,9 +447,7 @@ const testValidateUpdateTicket = () => {
 				}));
 
 				Sessions.getUserFromSession.mockReturnValue(user);
-				Permissions.isTeamspaceAdmin
-					.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-				JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
+
 				TicketSchema.validateTickets.mockImplementation(() => (validationFails
 					? Promise.reject(new Error(errMsg))
 					: Promise.resolve([{ newTicket: update === ticket ? undefined : update }])));
@@ -518,6 +463,9 @@ const testValidateUpdateTicket = () => {
 					expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledTimes(1);
 					expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(teamspace, template._id);
 					expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledWith(user, teamspace,
+						permissions?.edit, [update]);
 				} else {
 					expect(fn).not.toHaveBeenCalled();
 					if (expectedRes) {
@@ -526,14 +474,6 @@ const testValidateUpdateTicket = () => {
 					} else {
 						expect(Responder.respond).not.toHaveBeenCalled();
 					}
-				}
-
-				if (permissions?.edit) {
-					expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
-					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
-				} else {
-					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
 				}
 			},
 		);
@@ -550,8 +490,6 @@ const testValidateUpdateMultipleTickets = () => {
 		properties: [{ name: uniqueModuleName, type: 'text', unique: true }],
 	});
 	const defaultUser = generateRandomString();
-	const tsAdmin = generateRandomString();
-	const userJob = generateRandomString();
 	const knownTemplateID = generateUUIDString();
 	const deprecatedTemplateID = generateUUIDString();
 	const duplicateUniqueValue = generateRandomString();
@@ -559,6 +497,7 @@ const testValidateUpdateMultipleTickets = () => {
 	const duplicateUniqueProp = [];
 	const duplicateModuleUniqueProp = [];
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
+	const validPermissions = times(5, generateRandomString);
 
 	const goodTickets = times(5, () => {
 		const ticket = generateTicket(template);
@@ -637,19 +576,8 @@ const testValidateUpdateMultipleTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
-		['the user has default permission', { body: { tickets: [{ ...goodTickets[0], title: generateRandomString() }] } }, true, undefined, { edit: { default: [defaultUser] } }],
-		['the job of the user has default permission', { body: { tickets: [{ ...goodTickets[0], title: generateRandomString() }] } }, true, undefined, { edit: { default: [userJob] } }],
-		['the user has default permission (status update)', undefined, true, undefined, { edit: { default: [defaultUser] } }],
-		['the job of the user has default permission (status update)', undefined, true, undefined, { edit: { default: [userJob] } }],
-		['the user has default permission (assignees update)', { body: { tickets: [{ ...goodTickets[0], properties: { [basePropertyLabels.ASSIGNEES]: [defaultUser] } }] } }, true, undefined, { edit: { default: [defaultUser] } }],
-		['the job of the user has default permission (assignees update)', { body: { tickets: [{ ...goodTickets[0], properties: { [basePropertyLabels.ASSIGNEES]: [userJob] } }] } }, true, undefined, { edit: { default: [userJob] } }],
-		['the user has edit permission for status update', undefined, true, undefined, { edit: { status: [defaultUser] } }],
-		['the job of the user has edit permission for status update', undefined, true, undefined, { edit: { status: [userJob] } }],
-		['the user has edit permission for assignees update', { body: { tickets: [{ ...goodTickets[0], properties: { [basePropertyLabels.ASSIGNEES]: [defaultUser] } }] } }, true, undefined, { edit: { assign: [defaultUser] } }],
-		['the job of the user has edit permission for assignees update', { body: { tickets: [{ ...goodTickets[0], properties: { [basePropertyLabels.ASSIGNEES]: [userJob] } }] } }, true, undefined, { edit: { assign: [userJob] } }],
-		['neither the user nor their jobs has edit permission', undefined, false, permissionError, { edit: { default: [generateRandomString()] } }],
-		['neither the user nor their jobs has edit permission for status update', undefined, false, permissionError, { edit: { status: [generateRandomString()] } }],
-		['neither the user nor their jobs has edit permission for assignees update', { body: { tickets: [{ ...goodTickets[0], properties: { [basePropertyLabels.ASSIGNEES]: [defaultUser] } }] } }, false, permissionError, { edit: { assign: [generateRandomString()] } }],
+		['there are no template permissions', {}, false, permissionError, { edit: null }],
+		['there are template permissions', {}, true, undefined, { edit: validPermissions }],
 		['tickets have no changes', { body: { tickets: existingTickets.slice(0, 2).map((ticket) => ({ ...ticket, _id: UUIDToString(ticket._id) })) } }, false, templates.ok],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
 	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes, permissions, user = defaultUser) => {
@@ -667,10 +595,10 @@ const testValidateUpdateMultipleTickets = () => {
 			const fn = jest.fn();
 			const res = {};
 
+			UtilPermissions.hasTemplateEditPermissions
+				.mockImplementation((username, ts, perms) => perms !== null);
 			Sessions.getUserFromSession.mockReturnValue(user);
-			Permissions.isTeamspaceAdmin
-				.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
-			JobsModel.getJobsByUsers.mockResolvedValue([userJob]);
+
 			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
 			TicketSchema.validateTickets.mockImplementation(validation);
 			TemplateModelSchema.getTemplateById.mockResolvedValue({ ...template, config: { permissions } });
@@ -688,6 +616,9 @@ const testValidateUpdateMultipleTickets = () => {
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
 				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledWith(user, req.params.teamspace,
+					permissions?.edit, req.body.tickets);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.

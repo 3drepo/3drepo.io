@@ -36,7 +36,7 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(teamspace, GROUPS_COL,
 	{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
+Groups.updateGroup = async (teamspace, project, model, ticket, template, groupId, data, author) => {
 	const toUpdate = { };
 	const toUnset = { };
 
@@ -61,7 +61,8 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, au
 	await updateOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, actions);
 
-	publish(events.UPDATE_TICKET_GROUP, { _id: groupId, teamspace, project, model, ticket, changes: data, author });
+	publish(events.UPDATE_TICKET_GROUP,
+		{ _id: groupId, teamspace, project, model, ticket, template, changes: data, author });
 };
 
 Groups.getGroupById = async (teamspace, project, model, ticket, groupId,

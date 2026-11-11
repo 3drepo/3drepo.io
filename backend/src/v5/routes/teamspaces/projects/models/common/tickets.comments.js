@@ -78,13 +78,13 @@ const getAllComments = (isFed) => async (req, res, next) => {
 };
 
 const createComment = (isFed) => async (req, res) => {
-	const { params, body: commentData } = req;
+	const { params, body: commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 	const user = getUserFromSession(req.session);
 
 	try {
 		const createComm = isFed ? addFedComment : addConComment;
-		const _id = await createComm(teamspace, project, model, ticket, commentData, user);
+		const _id = await createComm(teamspace, project, model, ticket, templateData._id, commentData, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
@@ -93,12 +93,12 @@ const createComment = (isFed) => async (req, res) => {
 };
 
 const updateComment = (isFed) => async (req, res) => {
-	const { params, body: updateData, commentData } = req;
+	const { params, body: updateData, commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 
 	try {
 		const updateComm = isFed ? updateFedComment : updateConComment;
-		await updateComm(teamspace, project, model, ticket, commentData, updateData);
+		await updateComm(teamspace, project, model, ticket, templateData._id, commentData, updateData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -108,11 +108,11 @@ const updateComment = (isFed) => async (req, res) => {
 };
 
 const deleteComment = (isFed) => async (req, res) => {
-	const { params, commentData } = req;
+	const { params, commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 	try {
 		const deleteComm = isFed ? deleteFedComment : deleteConComment;
-		await deleteComm(teamspace, project, model, ticket, commentData);
+		await deleteComm(teamspace, project, model, ticket, templateData._id, commentData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {

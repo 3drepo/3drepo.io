@@ -17,9 +17,10 @@
 
 const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
-const { hasReadAccessToModel, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions');
+const { hasReadAccessToModel, hasTemplatePermissions, isProjectAdmin, isTeamspaceAdmin } = require('../../utils/permissions');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projectSettings');
+const { getTemplateById } = require('../../models/tickets.templates');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
 const socketIdToSocket = {};
@@ -39,13 +40,25 @@ const emitError = (socket, error, message, action, data) => {
 };
 
 const joinRoom = async (socket, data) => {
-	const { teamspace, model, project, notifications } = data;
+	const { teamspace, model, project, template, notifications } = data;
 
 	const username = getUserNameFromSocket(socket);
 	let channelName;
 
 	if (notifications) {
 		channelName = `notifications::${username}`;
+	} else if (teamspace && project && model && template) {
+		channelName = `${teamspace}::${project}::${model}::ticket::${template}`;
+		try {
+			const { config } = await getTemplateById(teamspace, stringToUUID(template), { 'config.permissions': 1 });
+			const hasPermissions = await hasTemplatePermissions(username, teamspace, config.permissions?.view);
+			const hasModelAccess = await hasReadAccessToModel(teamspace, stringToUUID(project), model, username);
+			if (!hasModelAccess || !hasPermissions) {
+				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
+			}
+		} catch (err) {
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: err.message };
+		}
 	} else if (teamspace && project && model) {
 		channelName = `${teamspace}::${project}::${model}`;
 		try {
@@ -99,10 +112,12 @@ const joinRoomV4 = async (socket, data) => {
 };
 
 const leaveRoom = (socket, data) => {
-	const { teamspace, model, project, notifications } = data;
+	const { teamspace, model, project, notifications, template } = data;
 	let channelName;
 	if (notifications) {
 		channelName = `notifications::${getUserNameFromSocket(socket)}`;
+	} else if (teamspace && model && project && template) {
+		channelName = `${teamspace}::${project}::${model}::ticket::${template}`;
 	} else if (teamspace && model && project) {
 		channelName = `${teamspace}::${project}::${model}`;
 	} else if (teamspace && project) {

@@ -20,6 +20,8 @@ const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/dataGen');
 
+const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const permConst = require(`${src}/utils/permissions/permissions.constants`);
@@ -32,6 +34,8 @@ jest.mock('../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
 
 const tsAdminUser = generateRandomString();
 const projectAdminUser = generateRandomString();
@@ -670,6 +674,120 @@ const testCheckModelExists = () => {
 	});
 };
 
+const testHasTemplatePermissions = () => {
+	describe('Has template permissions', () => {
+		const teamspace = generateRandomString();
+		const jobName = generateRandomString();
+		const otherJob = generateRandomString();
+
+		describe.each([
+			['permissions is undefined', viewerUser, undefined, [], true],
+			['the user is a teamspace admin', tsAdminUser, [generateRandomString()], [], true],
+			['the user is included in the permissions', viewerUser, [viewerUser, generateRandomString()], [], true],
+			['one of the user jobs is included in the permissions', viewerUser, [jobName, generateRandomString()], [jobName], true],
+			['neither the user nor their jobs are included in the permissions', viewerUser, [generateRandomString()], [jobName], false],
+			['the user has no jobs and is not included in the permissions', viewerUser, [generateRandomString()], [], false],
+			['the user has other jobs, none of which are included in the permissions', viewerUser, [jobName], [otherJob], false],
+			['the permissions array is empty', viewerUser, [], [jobName], false],
+			['getJobsByUsers throws an error', viewerUser, [], [jobName], false, true],
+		])('Permission check', (desc, user, permissions, userJobs, result, jobsFail) => {
+			afterEach(() => {
+				jest.restoreAllMocks();
+				jest.clearAllMocks();
+			});
+
+			test(`should return ${result} if ${desc}`, async () => {
+				if (jobsFail) {
+					JobsModel.getJobsByUsers.mockRejectedValue(new Error('fail'));
+				} else {
+					JobsModel.getJobsByUsers.mockResolvedValue(userJobs);
+				}
+
+				expect(await Permissions.hasTemplatePermissions(user, teamspace, permissions)).toBe(result);
+
+				if (permissions && user !== tsAdminUser) {
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
+				} else {
+					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
+				}
+			});
+		});
+	});
+};
+
+const testHasTemplateEditPermissions = () => {
+	describe('Has template edit permissions', () => {
+		const teamspace = generateRandomString();
+		const jobName = generateRandomString();
+		const otherJob = generateRandomString();
+		const otherUser = generateRandomString();
+
+		const defaultUpdate = { title: generateRandomString() };
+		const assignUpdate = { properties: { [basePropertyLabels.ASSIGNEES]: [generateRandomString()] } };
+		const statusUpdate = { properties: { [basePropertyLabels.STATUS]: generateRandomString() } };
+		const customPropUpdate = { properties: { [generateRandomString()]: generateRandomString() } };
+
+		describe.each([
+			['editPermissions is undefined', viewerUser, undefined, [defaultUpdate], [], true],
+			['the user is a teamspace admin', tsAdminUser, { default: [otherUser] }, [defaultUpdate], [], true],
+			['the update only contains non editable props', viewerUser, { default: [otherUser] }, [{ _id: generateRandomString(), type: generateRandomString() }], [], true],
+			['the update only contains updatedAt', viewerUser, { default: [otherUser] }, [{ properties: { [basePropertyLabels.UPDATED_AT]: new Date() } }], [], true],
+			['the update contains empty values', viewerUser, { default: [otherUser] }, [{ title: '', properties: {} }], [], true],
+			['there are no updates', viewerUser, { default: [otherUser] }, [], [], true],
+			['a default prop is modified and the user is in default perms', viewerUser, { default: [viewerUser] }, [defaultUpdate], [], true],
+			['a default prop is modified and one of the user jobs is in default perms', viewerUser, { default: [jobName] }, [defaultUpdate], [jobName], true],
+			['a custom property is modified and the user is in default perms', viewerUser, { default: [viewerUser] }, [customPropUpdate], [], true],
+			['a default prop is modified and neither the user nor their jobs are in default perms', viewerUser, { default: [otherUser] }, [defaultUpdate], [otherJob], false],
+			['a default prop is modified and default perms is empty', viewerUser, { default: [] }, [defaultUpdate], [], true],
+			['a default prop is modified and default perms is not defined', viewerUser, { assign: [otherUser] }, [defaultUpdate], [], true],
+			['assignees are modified and the user is in assign perms', viewerUser, { assign: [viewerUser], default: [otherUser] }, [assignUpdate], [], true],
+			['assignees are modified and the user is not in assign perms', viewerUser, { assign: [otherUser], default: [viewerUser] }, [assignUpdate], [], false],
+			['assignees are modified, assign perms is not defined and the user is in default perms', viewerUser, { default: [viewerUser] }, [assignUpdate], [], true],
+			['assignees are modified, assign perms is not defined and the user is not in default perms', viewerUser, { default: [otherUser] }, [assignUpdate], [], false],
+			['assignees are modified and assign perms is empty', viewerUser, { assign: [], default: [otherUser] }, [assignUpdate], [], true],
+			['status is modified and the user is in status perms', viewerUser, { status: [viewerUser], default: [otherUser] }, [statusUpdate], [], true],
+			['status is modified and the user job is in status perms', viewerUser, { status: [jobName], default: [otherUser] }, [statusUpdate], [jobName], true],
+			['status is modified and the user is not in status perms', viewerUser, { status: [otherUser], default: [viewerUser] }, [statusUpdate], [], false],
+			['status is modified, status perms is not defined and the user is in default perms', viewerUser, { default: [viewerUser] }, [statusUpdate], [], true],
+			['status is modified, status perms is not defined and the user is not in default perms', viewerUser, { default: [otherUser] }, [statusUpdate], [], false],
+			['status is modified and status perms is empty', viewerUser, { status: [], default: [otherUser] }, [statusUpdate], [], true],
+			['assignees and status are modified and the user has both permissions', viewerUser, { assign: [viewerUser], status: [viewerUser] }, [{ properties: { ...assignUpdate.properties, ...statusUpdate.properties } }], [], true],
+			['assignees and status are modified and the user only has assign permissions', viewerUser, { assign: [viewerUser], status: [otherUser] }, [{ properties: { ...assignUpdate.properties, ...statusUpdate.properties } }], [], false],
+			['assignees and a default prop are modified and the user only has default permissions', viewerUser, { assign: [otherUser], default: [viewerUser] }, [{ ...defaultUpdate, properties: assignUpdate.properties }], [], false],
+			['all props are modified and the user has all permissions', viewerUser, { assign: [viewerUser], status: [jobName], default: [viewerUser] }, [{ ...defaultUpdate, properties: { ...assignUpdate.properties, ...statusUpdate.properties } }], [jobName], true],
+			['all props are modified and the user is missing one permission', viewerUser, { assign: [viewerUser], status: [viewerUser], default: [otherUser] }, [{ ...defaultUpdate, properties: { ...assignUpdate.properties, ...statusUpdate.properties } }], [], false],
+			['multiple updates modify different props and the user has all permissions', viewerUser, { assign: [viewerUser], status: [viewerUser], default: [viewerUser] }, [assignUpdate, statusUpdate, defaultUpdate], [], true],
+			['multiple updates and a later one modifies a prop the user cannot edit', viewerUser, { assign: [viewerUser], status: [viewerUser], default: [otherUser] }, [assignUpdate, statusUpdate, defaultUpdate], [], false],
+			['getJobsByUsers throws an error', viewerUser, { default: [viewerUser] }, [defaultUpdate], [], false, true],
+			['ticketUpdates is not iterable', viewerUser, { default: [viewerUser] }, undefined, [], false],
+		])('Edit permission check', (desc, user, editPermissions, ticketUpdates, userJobs, result, jobsFail) => {
+			afterEach(() => {
+				jest.restoreAllMocks();
+				jest.clearAllMocks();
+			});
+
+			test(`should return ${result} if ${desc}`, async () => {
+				if (jobsFail) {
+					JobsModel.getJobsByUsers.mockRejectedValue(new Error('fail'));
+				} else {
+					JobsModel.getJobsByUsers.mockResolvedValue(userJobs);
+				}
+
+				expect(await Permissions.hasTemplateEditPermissions(user, teamspace, editPermissions, ticketUpdates))
+					.toBe(result);
+
+				if (editPermissions && user !== tsAdminUser) {
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledTimes(1);
+					expect(JobsModel.getJobsByUsers).toHaveBeenCalledWith(teamspace, [user]);
+				} else {
+					expect(JobsModel.getJobsByUsers).not.toHaveBeenCalled();
+				}
+			});
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCheckModelExists();
 
@@ -698,4 +816,7 @@ describe(determineTestGroup(__filename), () => {
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
 	testHasAdminAccessToFederation();
+
+	testHasTemplatePermissions();
+	testHasTemplateEditPermissions();
 });

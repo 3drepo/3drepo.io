@@ -187,7 +187,9 @@ Tickets.importTickets = async (teamspace, project, model, template, tickets, aut
 		return comments?.length ? { ticket: savedTickets[i]._id, comments } : [];
 	});
 
-	if (commentsByTickets.length) await importComments(teamspace, project, model, commentsByTickets, author);
+	if (commentsByTickets.length) {
+		await importComments(teamspace, project, model, template._id, commentsByTickets, author);
+	}
 
 	publish(events.TICKETS_IMPORTED,
 		{
@@ -240,7 +242,7 @@ Tickets.updateManyTickets = async (teamspace, project, model, template, oldTicke
 	});
 
 	const commentsPromises = commentsByTickets.length
-		? importComments(teamspace, project, model, commentsByTickets, author) : Promise.resolve();
+		? importComments(teamspace, project, model, template._id, commentsByTickets, author) : Promise.resolve();
 
 	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
 	const changeSet = await updateTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);

@@ -58,13 +58,13 @@ const getGroup = (isFed) => async (req, res, next) => {
 };
 
 const updateGroup = (isFed) => async (req, res) => {
-	const { params, body: updateData } = req;
+	const { params, body: updateData, templateData } = req;
 	const { teamspace, project, model, ticket, group } = params;
 	const user = getUserFromSession(req.session);
 
 	try {
 		const updateFn = isFed ? updateFedGroup : updateConGroup;
-		await updateFn(teamspace, project, model, ticket, group, updateData, user);
+		await updateFn(teamspace, project, model, ticket, templateData._id, group, updateData, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {

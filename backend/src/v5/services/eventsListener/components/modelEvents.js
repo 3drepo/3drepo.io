@@ -17,7 +17,7 @@
 
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
-const { createModelMessage, createProjectMessage } = require('../../chat');
+const { createModelMessage, createProjectMessage, createTicketMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getContainerFileName, getLogArchive } = require('../../modelProcessing');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
@@ -341,7 +341,7 @@ const ticketAdded = async (payload) => {
 
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 		const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
-		await createModelMessage(event, serialisedTicket, teamspace, project, model);
+		await createTicketMessage(event, serialisedTicket, teamspace, project, model, template._id);
 	} catch (error) {
 		logger.logError(`Failed to process ticket added event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
@@ -367,7 +367,7 @@ const ticketsImported = async (payload) => {
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 		await Promise.all(updatedTickets.map(async (ticket) => {
 			const serialisedTicket = serialiseTicket(ticket, fullTemplate);
-			await createModelMessage(event, serialisedTicket, teamspace, project, model);
+			await createTicketMessage(event, serialisedTicket, teamspace, project, model, template._id);
 		}));
 	} catch (error) {
 		logger.logError(`Failed to process tickets imported event ${error.message}`);
@@ -413,7 +413,7 @@ const ticketUpdated = async (payload) => {
 		const updateData = constructUpdatedObject(changes);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
 		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, fullTemplate);
-		await createModelMessage(event, serialisedTicket, teamspace, project, model);
+		await createTicketMessage(event, serialisedTicket, teamspace, project, model, template._id, author);
 	} catch (error) {
 		logger.logError(`Failed to process ticket updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
@@ -426,7 +426,7 @@ const ticketUpdated = async (payload) => {
 };
 
 const ticketGroupUpdated = async (payload) => {
-	const { teamspace, project, model, ticket, _id, author, changes, timestamp } = payload;
+	const { teamspace, project, model, ticket, template, _id, author, changes, timestamp } = payload;
 	try {
 		const [isFed] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -435,7 +435,7 @@ const ticketGroupUpdated = async (payload) => {
 
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_GROUP : chatEvents.CONTAINER_UPDATE_TICKET_GROUP;
 		const serialisedMsg = serialiseGroup({ _id, ticket, ...changes });
-		await createModelMessage(event, serialisedMsg, teamspace, project, model);
+		await createTicketMessage(event, serialisedMsg, teamspace, project, model, template, author);
 	} catch (error) {
 		logger.logError(`Failed to process group updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
@@ -448,12 +448,12 @@ const ticketGroupUpdated = async (payload) => {
 };
 
 const ticketCommentAdded = async (payload) => {
-	const { teamspace, project, model, data } = payload;
+	const { teamspace, project, model, template, data } = payload;
 	try {
 		const isFed = await isFederationCheck(teamspace, model);
 		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET_COMMENT : chatEvents.CONTAINER_NEW_TICKET_COMMENT;
 		const serialisedComment = serialiseComment(data);
-		await createModelMessage(event, serialisedComment, teamspace, project, model);
+		await createTicketMessage(event, serialisedComment, teamspace, project, model, template);
 	} catch (error) {
 		logger.logError(`Failed to process comment added event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
@@ -466,12 +466,12 @@ const ticketCommentAdded = async (payload) => {
 };
 
 const ticketCommentUpdated = async (payload) => {
-	const { teamspace, project, model, data } = payload;
+	const { teamspace, project, model, template, data } = payload;
 	try {
 		const isFed = await isFederationCheck(teamspace, model);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_COMMENT : chatEvents.CONTAINER_UPDATE_TICKET_COMMENT;
 		const serialisedComment = serialiseComment(data);
-		await createModelMessage(event, serialisedComment, teamspace, project, model);
+		await createTicketMessage(event, serialisedComment, teamspace, project, model, template);
 	} catch (error) {
 		logger.logError(`Failed to process comment updated event ${error.message}`);
 		await sendSystemEmail(emailTemplates.LISTENER_ERROR_NOTIFICATION.name, {
