@@ -15,34 +15,59 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { presetModules, statusTypes } = require('../schemas/tickets/templates.constants');
+const { modulePropertyLabels, presetModules, riskLevels } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
 
 const TemplateConsts = {};
 
 TemplateConsts.defaultTemplates = [
 	{
-		_id: stringToUUID('6d8bca8e-cb85-44f7-b04f-72d2954ddd67'),
-		name: 'Clash (Default template)',
-		code: 'CSH',
+		_id: stringToUUID('39fa1042-67a2-4097-ba55-82cfced25909'),
+		name: 'SafetiBase (Default template)',
+		code: 'SFB',
 		config: {
 			comments: true,
 			issueProperties: true,
 			defaultView: true,
-			pin: true,
-			status: {
-				values: [
-					{ name: 'Active', type: statusTypes.OPEN },
-					{ name: 'Reviewed', type: statusTypes.REVIEW },
-					{ name: 'Approved', type: statusTypes.REVIEW },
-					{ name: 'Resolved', type: statusTypes.DONE },
-				],
-				default: 'Active',
+			pin: {
+				icon: 'RISK',
+				color: {
+					property: {
+						module: presetModules.SAFETIBASE,
+						name: modulePropertyLabels[presetModules.SAFETIBASE].LEVEL_OF_RISK,
+					},
+					mapping: [
+						{
+							default: [52, 82, 255],
+						},
+						{
+							value: riskLevels.VERY_LOW,
+							color: [0, 130, 65],
+						},
+						{
+							value: riskLevels.LOW,
+							color: [78, 178, 39],
+						},
+						{
+							value: riskLevels.MODERATE,
+							color: [240, 217, 46],
+						},
+						{
+							value: riskLevels.HIGH,
+							color: [255, 136, 0],
+						},
+						{
+							value: riskLevels.VERY_HIGH,
+							color: [240, 0, 0],
+						},
+
+					],
+				},
 			},
 		},
 		properties: [],
 		modules: [
-			{ type: presetModules.CLASH, properties: [] },
+			{ type: presetModules.SAFETIBASE },
 		],
 	},
 ];

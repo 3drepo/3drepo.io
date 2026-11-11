@@ -523,7 +523,7 @@ const establishRoutes = (isFed) => {
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *                             view:
-	 *                               $ref: "#components/schemas/ticketCommentView"
+	 *                               $ref: "#/components/schemas/ticketCommentView"
 	 *
 	 *
 	 *     responses:
@@ -866,7 +866,7 @@ const establishRoutes = (isFed) => {
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *                             view:
-	 *                               $ref: "#components/schemas/ticketCommentView"
+	 *                               $ref: "#/components/schemas/ticketCommentView"
 	 *
 	 *
 	 *     responses:
