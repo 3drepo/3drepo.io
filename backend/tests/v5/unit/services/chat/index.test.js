@@ -18,7 +18,9 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/dataGen');
+const { generateRandomString, generateUUID } = require('../../../helper/dataGen');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../src/v5/handler/realTimeMsging');
 const RTM = require(`${src}/handler/realTimeMsging`);
@@ -302,6 +304,55 @@ const testCreateModelMessage = () => {
 	});
 };
 
+const testCreateTicketMessage = () => {
+	describe('CreateTicketMessage', () => {
+		test('Should broadcast to event exchange', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const projectId = generateUUID();
+			const templateId = generateUUID();
+			const model = generateRandomString();
+			const sender = generateRandomString();
+
+			await ChatService.createTicketMessage(event, data, teamspace, projectId, model, templateId, sender);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const templateStr = UUIDToString(templateId);
+			const projectStr = UUIDToString(projectId);
+
+			const expectedMsg = JSON.stringify({ event,
+				data: { data, teamspace, project: projectStr, model, template: templateStr },
+				recipients: [`${teamspace}::${projectStr}::${model}::ticket::${templateStr}`],
+				sender });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+
+		test('Should catch error if broadcastMessage fails', async () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const projectId = generateUUID();
+			const templateId = generateUUID();
+			const model = generateRandomString();
+			const sender = generateRandomString();
+
+			QueueService.broadcastMessage.mockRejectedValueOnce(new Error());
+			await ChatService.createTicketMessage(event, data, teamspace, projectId, model, templateId, sender);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const templateStr = UUIDToString(templateId);
+			const projectStr = UUIDToString(projectId);
+
+			const expectedMsg = JSON.stringify({ event,
+				data: { data, teamspace, project: projectStr, model, template: templateStr },
+				recipients: [`${teamspace}::${projectStr}::${model}::ticket::${templateStr}`],
+				sender });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+	});
+};
+
 const testCreateInternalMessage = () => {
 	describe('CreateInternalMessage', () => {
 		test('Should broadcast to event exchange', async () => {
@@ -364,6 +415,7 @@ describe(determineTestGroup(__filename), () => {
 	testOnNewMsg();
 	testCreateDirectMessage();
 	testCreateModelMessage();
+	testCreateTicketMessage();
 	testCreateInternalMessage();
 	testCreateProjectMessage();
 });
