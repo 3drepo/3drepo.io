@@ -27,15 +27,14 @@ const {
 const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { deleteLogsByTicketIds, getTicketLogs } = require('../../../../../models/tickets.logs');
+const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 const { removeFiles, removeFilesWithMeta, storeFiles } = require('../../../../../services/filesManager');
 const { deleteCommentsByTicketIds } = require('../../../../../models/tickets.comments');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
-const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getModelById } = require('../../../../../models/modelSettings');

@@ -67,7 +67,7 @@ TemplateConsts.defaultTemplates = [
 		},
 		properties: [],
 		modules: [
-			{ type: presetModules.SAFETIBASE },
+			{ type: presetModules.SAFETIBASE, properties: [] },
 		],
 	},
 ];
