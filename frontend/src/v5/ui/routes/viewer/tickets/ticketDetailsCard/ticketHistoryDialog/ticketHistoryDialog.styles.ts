@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { ColumnWidths } from './ticketHistory.helpers';
 import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 import { ModalBody as BaseModalBody } from '@controls/formModal/modalBody/modalBody.styles';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 
 export const ModalBody = styled(BaseModalBody)`
 	min-width: 1212px;
@@ -27,6 +28,11 @@ export const ModalBody = styled(BaseModalBody)`
 export const TicketHistoryTable = styled.div`
 	border-radius: 10px;
 	overflow: hidden;
+`;
+
+export const NoHistoryMessage = styled(EmptyListMessage)`
+	padding: 20px;
+	margin: 10px 0;
 `;
 
 export const ItemContainer = styled.li<{ selected?: boolean }>`
