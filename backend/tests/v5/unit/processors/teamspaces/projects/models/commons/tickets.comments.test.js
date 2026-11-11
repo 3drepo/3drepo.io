@@ -50,6 +50,7 @@ const testAddComment = () => {
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const ticket = generateRandomString();
+		const template = generateRandomString();
 		const author = generateRandomString();
 		const expectedOutput = {
 			_id: generateRandomString(),
@@ -60,7 +61,7 @@ const testAddComment = () => {
 			const commentData = generateRandomString();
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
+			await expect(Comments.addComment(teamspace, project, model, ticket, template, commentData, author))
 				.resolves.toEqual(expectedOutput._id);
 
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
@@ -77,6 +78,7 @@ const testAddComment = () => {
 				events.NEW_COMMENT, { teamspace,
 					project,
 					model,
+					template,
 					data: expectedOutput });
 		});
 
@@ -88,7 +90,7 @@ const testAddComment = () => {
 			};
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
+			await expect(Comments.addComment(teamspace, project, model, ticket, template, commentData, author))
 				.resolves.toEqual(expectedOutput._id);
 
 			const imgRef = CommentsModel.addComment.mock.calls[0][4].images[0];
@@ -108,6 +110,7 @@ const testAddComment = () => {
 				events.NEW_COMMENT, { teamspace,
 					project,
 					model,
+					template,
 					data: expectedOutput });
 		});
 	});
@@ -119,6 +122,7 @@ const testImportComments = () => {
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const author = generateRandomString();
+		const template = generateRandomString();
 		const nIterations = 10;
 
 		test('should call addComment in model and return whatever it returns', async () => {
@@ -134,7 +138,7 @@ const testImportComments = () => {
 
 			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.importComments(teamspace, project, model, commentData, author))
+			await expect(Comments.importComments(teamspace, project, model, template, commentData, author))
 				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 
 			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
@@ -151,6 +155,7 @@ const testImportComments = () => {
 					events.NEW_COMMENT, { teamspace,
 						project,
 						model,
+						template,
 						data });
 			});
 		});
@@ -168,7 +173,7 @@ const testImportComments = () => {
 
 			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.importComments(teamspace, project, model, cloneDeep(commentData), author))
+			await expect(Comments.importComments(teamspace, project, model, template, cloneDeep(commentData), author))
 				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
 
 			const commentsWithRefs = CommentsModel.importComments.mock.calls[0][3];
@@ -198,6 +203,7 @@ const testImportComments = () => {
 					events.NEW_COMMENT, { teamspace,
 						project,
 						model,
+						template,
 						data });
 			});
 		});
@@ -210,19 +216,20 @@ const testUpdateComment = () => {
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const ticket = generateRandomString();
+		const template = generateRandomString();
 		const oldComment = { [generateRandomString()]: generateRandomString() };
 
 		test('should call updateComment in model', async () => {
 			const updateData = generateRandomString();
 
-			await expect(Comments.updateComment(teamspace, project, model, ticket, oldComment, updateData))
+			await expect(Comments.updateComment(teamspace, project, model, ticket, template, oldComment, updateData))
 				.resolves.toEqual(undefined);
 
 			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
-				oldComment, updateData);
+				template, oldComment, updateData);
 
 			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 		});
@@ -234,13 +241,13 @@ const testUpdateComment = () => {
 				images: [imageBuffer, generateUUIDString()],
 			};
 
-			await expect(Comments.updateComment(teamspace, project, model, ticket, oldComment, updateData))
+			await expect(Comments.updateComment(teamspace, project, model, ticket, template, oldComment, updateData))
 				.resolves.toEqual(undefined);
 
-			const imgRef = CommentsModel.updateComment.mock.calls[0][5].images[0];
+			const imgRef = CommentsModel.updateComment.mock.calls[0][6].images[0];
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
-				oldComment, updateData);
+				template, oldComment, updateData);
 
 			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
 			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
@@ -257,14 +264,20 @@ const testDeleteComment = () => {
 	describe('Delete comment', () => {
 		test('should call deleteComment in model with the expected parameters', async () => {
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const template = generateRandomString();
 			const oldComment = generateRandomString();
 
 			CommentsModel.deleteComment.mockResolvedValueOnce(undefined);
 
-			await expect(Comments.deleteComment(teamspace, oldComment));
+			await expect(Comments.deleteComment(teamspace, project, model, ticket, template, oldComment))
+				.resolves.toEqual(undefined);
 
 			expect(CommentsModel.deleteComment).toHaveBeenCalledTimes(1);
-			expect(CommentsModel.deleteComment).toHaveBeenCalledWith(teamspace, oldComment);
+			expect(CommentsModel.deleteComment).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, template, oldComment);
 		});
 	});
 };

@@ -164,10 +164,11 @@ const testUpdateGroup = () => {
 		const ticket = generateRandomString();
 		const groupId = generateRandomString();
 		const author = generateRandomString();
+		const template = generateRandomString();
 
 		test('Should update the group as expected (set)', async () => {
 			const data = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, template, groupId, data,
 				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
@@ -176,14 +177,14 @@ const testUpdateGroup = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
-				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
+				{ _id: groupId, teamspace, project, model, ticket, template, changes: data, author });
 		});
 
 		test('Should update the group as expected (unset)', async () => {
 			const unsetProp = generateRandomString();
 			const data = { [unsetProp]: null };
 
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, template, groupId, data,
 				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
@@ -193,13 +194,13 @@ const testUpdateGroup = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
-				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
+				{ _id: groupId, teamspace, project, model, ticket, template, changes: data, author });
 		});
 
 		test('Should unset objects if rules is being inserted/updated', async () => {
 			const data = generateRandomObject();
 			data.rules = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, template, groupId, data,
 				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
@@ -207,13 +208,13 @@ const testUpdateGroup = () => {
 				{ teamspace, project, model, ticket, _id: groupId }, { $set: data, $unset: { objects: 1 } });
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
-				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
+				{ _id: groupId, teamspace, project, model, ticket, template, changes: data, author });
 		});
 
 		test('Should unset rules if objects is being inserted/updated', async () => {
 			const data = generateRandomObject();
 			data.objects = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, template, groupId, data,
 				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
@@ -222,7 +223,7 @@ const testUpdateGroup = () => {
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
-				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
+				{ _id: groupId, teamspace, project, model, ticket, template, changes: data, author });
 		});
 	});
 };
