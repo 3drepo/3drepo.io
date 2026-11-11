@@ -16,7 +16,7 @@
  */
 
 import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
-import { subscribeToRoomEvent } from './realtime.service';
+import { subscribeToTicketEvent } from './realtime.service';
 import { debounce, get } from 'lodash';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
@@ -27,7 +27,13 @@ export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `feder
 export const UPDATE_TICKETS_BATCH_INTERVAL = 200;
 export const UPDATE_TICKETS_BATCH_SIZE = 300;
 
-export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean) => {
+export const enableRealtimeUpdateTicket = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: string,
+	isFed:boolean,
+	templates: string[],
+) => {
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
 	// We debounce in order to batch multiple ticket updates together
@@ -39,8 +45,8 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 		TicketsActionsDispatchers.upsertTicketsSuccess(containerOrFederation, tickets);
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
-	return subscribeToRoomEvent(
-		{ teamspace, project, model: containerOrFederation },
+	return subscribeToTicketEvent(
+		{ teamspace, project, model: containerOrFederation, templates },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
 			const fullTicket = selectTicketByIdRaw(getState(), containerOrFederation, (ticket as any)._id);
@@ -56,9 +62,16 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 	);
 };
 
-export const enableRealtimeNewTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision?: string) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: containerOrFederation },
+export const enableRealtimeNewTicket = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: string,
+	isFed:boolean,
+	templates: string[],
+	revision?: string,
+) => (
+	subscribeToTicketEvent(
+		{ teamspace, project, model: containerOrFederation, templates },
 		ticketEvent(isFed, 'NewTicket'),
 		(ticket: ITicket) => {
 			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerOrFederation, ticket, revision);
@@ -67,9 +80,9 @@ export const enableRealtimeNewTicket = (teamspace: string, project: string, cont
 );
 
 export const enableRealtimeWatchPropertiesUpdateTicket = 
-	(teamspace: string, project: string, modelId: string, isFed:boolean, properties:string[], callback: (...any) => void) => (
-		subscribeToRoomEvent(
-			{ teamspace, project, model: modelId },
+	(teamspace: string, project: string, modelId: string, isFed:boolean, properties:string[], callback: (...any) => void, templates: string[]) => (
+		subscribeToTicketEvent(
+			{ teamspace, project, model: modelId, templates },
 			ticketEvent(isFed, 'UpdateTicket'),
 			(ticket: Partial<EditableTicket>) => {
 				const aWatchedPropertyChanged = properties.some((watchedProperty) => get(ticket, watchedProperty));
@@ -81,9 +94,9 @@ export const enableRealtimeWatchPropertiesUpdateTicket =
 	);
 
 export const enableRealtimeWatchPropertiesNewTicket = 
-	(teamspace: string, project: string, containerId: string, isFed:boolean, callback: (...any) => void) => (
-		subscribeToRoomEvent(
-			{ teamspace, project, model: containerId },
+	(teamspace: string, project: string, containerId: string, isFed:boolean, callback: (...any) => void, templates: string[]) => (
+		subscribeToTicketEvent(
+			{ teamspace, project, model: containerId, templates },
 			ticketEvent(isFed, 'NewTicket'),
 			(ticket: Partial<EditableTicket>) => {
 				callback(teamspace, project, containerId, isFed, ticket);
