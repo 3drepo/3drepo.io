@@ -32,6 +32,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { BreakableText, ChevronLeft, ChevronRight, ExpandIcon } from './ticketDetailsCard.styles';
+import { AddGroupButton } from './addGroupButton/addGroupButton.component';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
@@ -197,6 +198,7 @@ export const TicketDetailsCard = () => {
 								<BreakableText>{ticket.title}</BreakableText>
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
+							actions={<AddGroupButton />}
 						/>
 						<ExpandableCard ExpandedComponent={null}>
 							<InputController
