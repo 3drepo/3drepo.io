@@ -222,6 +222,6 @@
 		"qs": "6.16.1",
 		"follow-redirects": "1.16.2",
 		"dpdm/glob": "14.0.2",
-		"typedoc/minimatch": "11.0.1"
+		"typedoc/minimatch": "9.0.9"
 	}
 }
