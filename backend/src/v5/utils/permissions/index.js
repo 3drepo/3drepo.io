@@ -225,10 +225,13 @@ Permissions.hasTemplateEditPermissions = async (user, teamspace, editPermissions
 			});
 		};
 
+		const isValidUpdate = (key, value) => !nonEditableProps.includes(key)
+			&& !(key === 'properties' && isEmpty(value))
+			&& !(key === 'modules' && isEmpty(value));
+
 		for (const update of ticketUpdates) {
 			for (const [key, value] of Object.entries(update)) {
-				const isValidUpdate = !nonEditableProps.includes(key) && !isEmpty(value);
-				if (isValidUpdate) {
+				if (isValidUpdate(key, value)) {
 					if (key === 'properties') {
 						checkProperties(value);
 					} else {

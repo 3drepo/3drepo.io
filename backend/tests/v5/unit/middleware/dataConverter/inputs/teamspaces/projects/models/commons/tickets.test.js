@@ -411,6 +411,7 @@ const testValidateUpdateTicket = () => {
 	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
 	const standardUpdate = generateRandomObject();
 	const validPermissions = times(5, generateRandomString);
+	const invalidPermissions = generateRandomString();
 
 	describe.each([
 		['ticket does not exist', generateRandomString(), false, templates.ticketNotFound],
@@ -419,8 +420,10 @@ const testValidateUpdateTicket = () => {
 		['there is nothing to update', undefined, false, templates.ok, false, undefined, ticket],
 		['permissions are undefined', undefined, true, undefined, false],
 		['edit permissions are not configured', undefined, true, undefined, false, { }],
-		['there are no template permissions', undefined, false, permissionError, false, { edit: null }],
-		['there are template permissions', undefined, true, undefined, false, { edit: validPermissions }],
+		['there are no template edit permissions', undefined, false, permissionError, false, { edit: invalidPermissions }],
+		['there are template edit permissions', undefined, true, undefined, false, { edit: validPermissions }],
+		['there are template comment permissions', undefined, true, undefined, false, { edit: validPermissions, comment: invalidPermissions }],
+		['there are template comment and edit permissions', undefined, true, undefined, false, { edit: validPermissions, comment: validPermissions }],
 	])('Validate update ticket', (desc, ticketID = knownTicketID, success = false, expectedRes, validationFails = false, permissions, update = standardUpdate, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
@@ -438,7 +441,9 @@ const testValidateUpdateTicket = () => {
 				const res = {};
 
 				UtilPermissions.hasTemplateEditPermissions
-					.mockImplementation((username, ts, perms) => perms !== null);
+					.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
 				TicketModelSchema.getTicketById.mockImplementation(() => (
 					ticketID === knownTicketID ? Promise.resolve(ticket) : Promise.reject(expectedRes)));
 				TemplateModelSchema.getTemplateById.mockImplementation(() => Promise.resolve({
@@ -496,8 +501,9 @@ const testValidateUpdateMultipleTickets = () => {
 	const existingTickets = [];
 	const duplicateUniqueProp = [];
 	const duplicateModuleUniqueProp = [];
-	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
+	const permissionError = (colName = 'edit') => createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
 	const validPermissions = times(5, generateRandomString);
+	const invalidPermissions = generateRandomString();
 
 	const goodTickets = times(5, () => {
 		const ticket = generateTicket(template);
@@ -576,8 +582,10 @@ const testValidateUpdateMultipleTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
-		['there are no template permissions', {}, false, permissionError, { edit: null }],
-		['there are template permissions', {}, true, undefined, { edit: validPermissions }],
+		['there are no template edit permissions', {}, false, permissionError('edit'), { edit: invalidPermissions }],
+		['there are template edit permissions', {}, true, undefined, { edit: validPermissions }],
+		['there are no template comment permissions', { body: { tickets: [{ ...goodTickets[0], comments: [generateRandomObject()] }] } }, false, permissionError('comment'), { comment: invalidPermissions }],
+		['there are template comment permissions', { body: { tickets: [{ ...goodTickets[0], comments: [generateRandomObject()] }] } }, true, undefined, { comment: validPermissions }],
 		['tickets have no changes', { body: { tickets: existingTickets.slice(0, 2).map((ticket) => ({ ...ticket, _id: UUIDToString(ticket._id) })) } }, false, templates.ok],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
 	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes, permissions, user = defaultUser) => {
@@ -596,7 +604,9 @@ const testValidateUpdateMultipleTickets = () => {
 			const res = {};
 
 			UtilPermissions.hasTemplateEditPermissions
-				.mockImplementation((username, ts, perms) => perms !== null);
+				.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+			UtilPermissions.hasTemplatePermissions
+				.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
 			Sessions.getUserFromSession.mockReturnValue(user);
 
 			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);

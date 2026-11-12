@@ -224,13 +224,15 @@ TicketsMiddleware.validateTagProperty = async (req, res, next) => {
 	}
 };
 
+const getPermissionError = (colName) => `You do not have ${colName} permissions for this ticket`;
+
 const hasTemplatePermission = (colName) => async (req, res, next) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const permissions = req.templateData?.config?.permissions?.[colName];
 		const hasPermissions = await hasTemplatePermissions(user, req.params.teamspace, permissions);
 		if (!hasPermissions) {
-			throw createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
+			throw createResponseCode(templates.notAuthorized, getPermissionError(colName));
 		}
 
 		await next();
@@ -250,10 +252,18 @@ TicketsMiddleware.hasTemplateEditPermission = (isBatchUpdate) => async (req, res
 		const permissions = req.templateData.config.permissions?.edit;
 		const user = getUserFromSession(req.session);
 		const ticketUpdates = isBatchUpdate ? req.body.tickets : [req.body];
-		const hasPermissions = await hasTemplateEditPermissions(user, req.params.teamspace, permissions, ticketUpdates);
+		const hasEditPerms = await hasTemplateEditPermissions(user, req.params.teamspace, permissions, ticketUpdates);
 
-		if (!hasPermissions) {
-			throw createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
+		if (!hasEditPerms) {
+			throw createResponseCode(templates.notAuthorized, getPermissionError(permissionTypes.EDIT));
+		}
+
+		if (ticketUpdates.some((update) => update.comments)) {
+			const commentPermissions = req.templateData.config.permissions?.comment;
+			const hasCommentPerm = await hasTemplatePermissions(user, req.params.teamspace, commentPermissions);
+			if (!hasCommentPerm) {
+				throw createResponseCode(templates.notAuthorized, getPermissionError(permissionTypes.COMMENT));
+			}
 		}
 
 		await next();

@@ -57,6 +57,7 @@ const generateBasicData = () => {
 		tsAdmin2: generateUserCredentials(),
 		noTemplatePerm: generateUserCredentials(),
 		templatePerm: generateUserCredentials(),
+		templateCommentPerm: generateUserCredentials(),
 		viewer: generateUserCredentials(),
 		noProjectAccess: generateUserCredentials(),
 		nobody: generateUserCredentials(),
@@ -70,6 +71,7 @@ const generateBasicData = () => {
 		tsAdmin2: generateUserCredentials(),
 		noTemplatePerm: generateUserCredentials(),
 		templatePerm: generateUserCredentials(),
+		templateCommentPerm: generateUserCredentials(),
 		teamspace: generateRandomString(),
 		project: generateRandomProject(),
 		con: generateRandomModel({ viewers: [users.viewer.user] }),
@@ -96,7 +98,8 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd,
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
-			[users.projectAdmin.user, users.noTemplatePerm.user, users.templatePerm.user]),
+			[users.projectAdmin.user, users.noTemplatePerm.user, users.templatePerm.user,
+				users.templateCommentPerm.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
 		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [users.projectAdmin.user] }]),
 	]);
@@ -1385,11 +1388,14 @@ const testUpdateManyTickets = () => {
 		const template = generateTemplate(false, false, {
 			comments: true,
 			issueProperties: true,
-			permissions: { edit: {
-				status: [users.templatePerm.user],
-				assign: [users.templatePerm.user],
-				default: [users.templatePerm.user],
-			} },
+			permissions: {
+				edit: {
+					status: [users.templatePerm.user],
+					assign: [users.templatePerm.user],
+					default: [users.templatePerm.user, users.templateCommentPerm.user],
+				},
+				comment: [users.templateCommentPerm.user],
+			},
 		});
 		const duplicateTemplate = generateTemplate();
 		duplicateTemplate.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
@@ -1504,6 +1510,8 @@ const testUpdateManyTickets = () => {
 				['status property is updated by a user that has status template permissions', true, { ...baseRouteParams, key: users.templatePerm.apiKey }, undefined, () => ({ title: generateRandomString(), properties: { [basePropertyLabels.STATUS]: statuses.VOID } })],
 				['default property is updated by a user that has default template permissions', true, { ...baseRouteParams, key: users.templatePerm.apiKey }, undefined, () => ({ title: generateRandomString() })],
 				['default property is updated by a user that has inadequate template permissions', false, { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, templates.notAuthorized, () => ({ title: generateRandomString() })],
+				['comments are updated by a user that has comment template permissions', true, { ...baseRouteParams, key: users.templateCommentPerm.apiKey }, undefined, () => ({ title: generateRandomString(), comments: [ServiceHelper.generateImportedComment()] })],
+				['comments are updated by a user that has inadequate comment template permissions', false, { ...baseRouteParams, key: users.templatePerm.apiKey }, templates.notAuthorized, () => ({ title: generateRandomString(), comments: [ServiceHelper.generateImportedComment()] })],
 			];
 		};
 
