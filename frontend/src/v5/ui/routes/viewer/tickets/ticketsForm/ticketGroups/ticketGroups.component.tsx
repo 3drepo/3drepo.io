@@ -226,37 +226,40 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty }: TicketGroupsP
 	}, []);
 
 	if (isLoading) return (<Loader />);
-
 	return (
 		<Container onClick={clearHighlightedIndex}>
-			<TicketGroupsContextComponent
-				groupType={OverrideType.COLORED}
-				onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
-				onSelectedGroupsChange={setSelectedColorIndexes}
-				overrides={state.colored || []}
-				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-				highlightedIndex={getHighlightedIndexByType(OverrideType.COLORED)}
-				clearHighlightedIndex={clearHighlightedIndex}
-				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
-			>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-				/>
-			</TicketGroupsContextComponent>
-			<TicketGroupsContextComponent
-				groupType={OverrideType.HIDDEN}
-				onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
-				onSelectedGroupsChange={onSelectedHiddenGroupChange}
-				overrides={state.hidden || []}
-				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
-				highlightedIndex={getHighlightedIndexByType(OverrideType.HIDDEN)}
-				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
-				clearHighlightedIndex={clearHighlightedIndex}
-			>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-				/>
-			</TicketGroupsContextComponent>
+			{state.colored && (
+				<TicketGroupsContextComponent
+					groupType={OverrideType.COLORED}
+					onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
+					onSelectedGroupsChange={setSelectedColorIndexes}
+					overrides={state.colored}
+					onEditGroup={onSetEditGroup(OverrideType.COLORED)}
+					highlightedIndex={getHighlightedIndexByType(OverrideType.COLORED)}
+					clearHighlightedIndex={clearHighlightedIndex}
+					setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
+				>
+					<GroupsAccordion
+						title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
+					/>
+				</TicketGroupsContextComponent>
+			)}
+			{state.hidden && (
+				<TicketGroupsContextComponent
+					groupType={OverrideType.HIDDEN}
+					onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
+					onSelectedGroupsChange={onSelectedHiddenGroupChange}
+					overrides={state.hidden}
+					onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
+					highlightedIndex={getHighlightedIndexByType(OverrideType.HIDDEN)}
+					setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
+					clearHighlightedIndex={clearHighlightedIndex}
+				>
+					<GroupsAccordion
+						title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
+					/>
+				</TicketGroupsContextComponent>
+			)}
 			<Popper
 				open={editingOverride.editing}
 				style={{ /* style is required to override the default positioning style Popper gets */
