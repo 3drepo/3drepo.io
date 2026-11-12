@@ -300,6 +300,7 @@ const generateRuntimeMetadata = ({
 	const commands = {};
 
 	commandEntries.forEach(({
+		method,
 		methodName,
 		inputTypeName,
 		outputTypeName,
@@ -322,6 +323,7 @@ const generateRuntimeMetadata = ({
 
 		commands[methodName] = {
 			description: metadata.description,
+			parameterOrder: method.parameters.map((parameter) => getName(parameter.name, programSource)),
 			inputSchema,
 			outputSchema,
 			...(metadata.category ? { category: metadata.category } : {}),
