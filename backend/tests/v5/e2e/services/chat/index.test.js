@@ -180,7 +180,7 @@ const testTSAdmin = () => {
 			['should be able to join a project room', { teamspace, project: project.id }],
 			['should not be able to join a project room that doesn\'t exist', { teamspace, project: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should not be able to join a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to join a template room', { teamspace, project: project.id, model: container._id, template: template.id }],
+			['should be able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }],
 			['should not be able to join a template room that doesn\'t exist', { teamspace, project: project.id, model: container._id, template: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
@@ -242,7 +242,7 @@ const testNobody = () => {
 		describe.each([
 			['should not be not able to join a model room', { teamspace, project: project.id, model: container._id }, ERRORS.ROOM_NOT_FOUND],
 			['should not be not able to join a project room', { teamspace, project: project.id }, ERRORS.ROOM_NOT_FOUND],
-			['should not be not able to join a template room', { teamspace, project: project.id, model: container._id, template: template.id }, ERRORS.ROOM_NOT_FOUND],
+			['should not be not able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
