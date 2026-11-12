@@ -53,7 +53,8 @@ const setupData = async () => {
 	);
 	await Promise.all([
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id], [userWithNoTemplatePerm]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id],
+			[userWithNoTemplatePerm.user]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 };
