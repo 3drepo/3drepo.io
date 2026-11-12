@@ -219,10 +219,11 @@ const getConfigSchema = async (teamspace) => {
 	const jobs = await getJobs(teamspace);
 	const users = await getUsersByQuery(undefined, { user: 1, 'customData.email': 1 });
 	const jobsAndUsers = [...jobs.map(({ _id }) => _id), ...users.map(({ user }) => user)];
-	const emailToUser = Object.fromEntries(users.map(({ user, customData: { email } }) => [email, user]));
+	const emailToUser = new Map(users.map(({ user, customData: { email } }) => [email, user]));
+
 	const jobOrUserArr = Yup.array().min(1)
 		.of(Yup.string().oneOf(jobsAndUsers, ({ path }) => `${path} must be a valid job, username or email`))
-		.transform((values) => (values?.length ? values.map((value) => emailToUser[value] ?? value) : values));
+		.transform((values) => (values?.length ? values.map((value) => emailToUser.get(value) ?? value) : values));
 
 	const configSchema = Yup.object().shape({
 	// If new configs are added, please ensure we add it to the e2e test case
