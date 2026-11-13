@@ -23,12 +23,20 @@ const { src } = require('../../../../../../../../helper/path');
 const {
 	generateRandomString,
 	generateTemplate,
+	generateRandomObject,
 } = require('../../../../../../../../helper/dataGen');
 const { generateTicket } = require('../../../../../../../../helper/dataGen.tickets');
-const { isEqual } = require('../../../../../../../../../../src/v5/utils/helper/objects');
+
+const { isEqual } = require(`${src}/utils/helper/objects`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../../../../../../../src/v5/utils/sessions');
+const Sessions = require(`${src}/utils/sessions`);
+
+jest.mock('../../../../../../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
 
 jest.mock('../../../../../../../../../../src/v5/middleware/dataConverter/inputs/teamspaces/settings');
 const SettingsMW = require(`${src}/middleware/dataConverter/inputs/teamspaces/settings`);
@@ -38,6 +46,9 @@ const TicketSchema = require(`${src}/schemas/tickets`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
 const TemplateModelSchema = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../../../../../../src/v5/utils/permissions');
+const UtilPermissions = require(`${src}/utils/permissions`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets');
 const TicketModelSchema = require(`${src}/models/tickets`);
@@ -50,124 +61,97 @@ const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils
 const ticketArrTestErrorMsg = 'Expected body to contain an array of tickets';
 
 const testValidateNewTicket = () => {
-	describe('Validate new ticket', () => {
-		test(`Should respond with ${templates.invalidArguments.code} if template is not provided`, async () => {
-			const fn = jest.fn();
-			const req = { body: {} };
-			const res = {};
-			await Tickets.validateNewTicket(req, res, fn);
-			expect(fn).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'Template must be provided'));
+	const knownTemplateID = generateUUIDString();
+	const deprecatedTemplateID = generateUUIDString();
+	const unknownTemplateID = generateUUIDString();
+	const defaultUser = generateRandomString();
+	const teamspace = generateRandomString();
+	const errMsg = generateRandomString();
+	const validPermissions = times(5, generateRandomString);
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
+
+	describe.each([
+		['template is not provided', { body: {} }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
+		['template does not exist', { body: { type: unknownTemplateID } }, false],
+		['the template is deprecated', { body: { type: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
+		['validation failed', {}, false, createResponseCode(templates.invalidArguments, errMsg), true],
+		['validation succeeded', {}, true],
+		['there are no template permissions', {}, false, permissionError, false, { create: null }],
+		['there are template permissions', {}, true, undefined, false, { create: validPermissions }],
+	])('Validate new ticket', (desc, additionalReq = {}, success = false, expectedRes, validationFails = false, permissions, user = defaultUser) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
 		});
 
-		test('Should not call next if template doesn\'t exist', async () => {
-			const fn = jest.fn();
-			const templateId = generateUUIDString();
-			const req = { params: {}, body: { type: templateId } };
-			const res = {};
+		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`,
+			async () => {
+				const req = { params: { teamspace }, body: { type: knownTemplateID }, session: {}, ...additionalReq };
+				const fn = jest.fn();
+				const res = {};
+				const templateId = req.body.type;
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => { });
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
 
-			await Tickets.validateNewTicket(req, res, fn);
+				SettingsMW.checkTicketTemplateExists.mockImplementation(
+					async (_req, _res, next) => {
+						const id = UUIDToString(_req.params.template);
 
-			expect(fn).not.toHaveBeenCalled();
-			expect(req.params.template).toEqual(stringToUUID(templateId));
-		});
+						if ([knownTemplateID, deprecatedTemplateID].includes(id)) {
+							// eslint-disable-next-line no-param-reassign
+							_req.templateData = {
+								_id: stringToUUID(id),
+								config: { permissions },
+								deprecated: id === deprecatedTemplateID,
+							};
 
-		test(`Should respond with ${templates.invalidArguments.code} if the template is deprecated`, async () => {
-			const fn = jest.fn();
-			const templateId = generateUUIDString();
-			const req = { params: {}, body: { type: templateId } };
-			const res = {};
+							await next();
+						}
+					},
+				);
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
-				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { deprecated: true };
-				await next();
-			});
+				Sessions.getUserFromSession.mockReturnValue(user);
 
-			await Tickets.validateNewTicket(req, res, fn);
+				TicketSchema.validateTickets.mockImplementation(() => {
+					if (validationFails) {
+						return Promise.reject(new Error(errMsg));
+					}
 
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'Template has been deprecated'));
+					return Promise.resolve([{ newTicket: req.body }]);
+				});
 
-			expect(fn).not.toHaveBeenCalled();
-		});
+				await Tickets.validateNewTicket(req, res, fn);
 
-		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
-			const fn = jest.fn();
-			const templateId = generateUUIDString();
-			const req = { params: {}, body: { type: templateId } };
-			const res = {};
+				if (templateId) {
+					expect(req.params.template).toEqual(stringToUUID(templateId));
+				}
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
-				// eslint-disable-next-line no-param-reassign
-				_req.templateData = {};
-				await next();
-			});
-
-			const errMsg = generateRandomString();
-			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
-
-			await Tickets.validateNewTicket(req, res, fn);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, errMsg));
-
-			expect(fn).not.toHaveBeenCalled();
-		});
-
-		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
-			const fn = jest.fn();
-			const templateId = generateUUIDString();
-			const req = { params: {}, body: { type: templateId } };
-			const res = {};
-
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
-				// eslint-disable-next-line no-param-reassign
-				_req.templateData = {};
-				await next();
-			});
-
-			const errMsg = generateRandomString();
-			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
-
-			await Tickets.validateNewTicket(req, res, fn);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, errMsg));
-
-			expect(fn).not.toHaveBeenCalled();
-		});
-
-		test('Should call next if validation succeeded', async () => {
-			const fn = jest.fn();
-			const templateId = generateUUIDString();
-			const req = { params: {}, body: { type: templateId } };
-			const res = {};
-
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
-				// eslint-disable-next-line no-param-reassign
-				_req.templateData = {};
-				await next();
-			});
-
-			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
-
-			await Tickets.validateNewTicket(req, res, fn);
-
-			expect(fn).toHaveBeenCalled();
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
+				if (success) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
+					expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
+					expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						permissions?.create);
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					if (expectedRes) {
+						expect(Responder.respond).toHaveBeenCalledTimes(1);
+						expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+					} else {
+						expect(Responder.respond).not.toHaveBeenCalled();
+					}
+				}
+			},
+		);
 	});
 };
 
 const testValidateImportTickets = () => {
+	const teamspace = generateUUIDString();
 	const template = generateTemplate();
 	const uniquePropName = generateRandomString();
 	const uniqueModuleName = generateRandomString();
@@ -179,11 +163,13 @@ const testValidateImportTickets = () => {
 
 	const knownTemplateID = generateUUIDString();
 	const deprecatedTemplateID = generateUUIDString();
-
 	const duplicateUniqueValue = generateRandomString();
 	const duplicateUniqueProp = [];
 	const duplicateModuleUniqueProp = [];
-
+	const defaultUser = generateRandomString();
+	const tsAdmin = generateRandomString();
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have create permissions for this ticket');
+	const validPermissions = times(5, generateRandomString);
 	const goodTickets = times(5, () => generateTicket(template));
 
 	times(3, () => {
@@ -198,22 +184,6 @@ const testValidateImportTickets = () => {
 
 	const badTicket = generateTicket(template);
 	const throwTicket = generateTicket(template);
-
-	const templateCheck = async (req, res, next) => {
-		const { template: tem } = req.params;
-
-		const temIdStr = UUIDToString(tem);
-		if (temIdStr === knownTemplateID) {
-			req.templateData = { ...template, _id: stringToUUID(knownTemplateID) };
-			await next();
-			return;
-		}
-
-		if (temIdStr === deprecatedTemplateID) {
-			req.templateData = { ...template, deprecated: true, _id: stringToUUID(deprecatedTemplateID) };
-			await next();
-		}
-	};
 
 	const validation = (t, p, m, tem, tickets) => {
 		if (tickets.includes(badTicket)) return Promise.reject(templates.invalidArguments);
@@ -244,14 +214,16 @@ const testValidateImportTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
-	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
+		['there are no template permissions', {}, false, permissionError, { create: null }],
+		['there are template permissions', {}, true, undefined, { create: validPermissions }],
+	])('Validate import tickets', (desc, additionalReq, success, expectedRes, permissions, user = defaultUser) => {
 		afterEach(() => {
 			jest.restoreAllMocks();
 			jest.clearAllMocks();
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
 			const req = {
-				params: {},
+				params: { teamspace },
 				query: { template: knownTemplateID },
 				body: { tickets: goodTickets },
 				...additionalReq,
@@ -259,7 +231,37 @@ const testValidateImportTickets = () => {
 			const fn = jest.fn();
 			const res = {};
 
-			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
+			UtilPermissions.hasTemplatePermissions
+				.mockImplementation((username, ts, perms) => perms !== null);
+			SettingsMW.checkTicketTemplateExists.mockImplementation(async (_req, _res, next) => {
+				const { template: tem } = _req.params;
+
+				const temIdStr = UUIDToString(tem);
+				if (temIdStr === knownTemplateID) {
+					// eslint-disable-next-line no-param-reassign
+					_req.templateData = {
+						...template,
+						config: { permissions },
+						_id: stringToUUID(knownTemplateID) };
+					await next();
+					return;
+				}
+
+				if (temIdStr === deprecatedTemplateID) {
+					// eslint-disable-next-line no-param-reassign
+					_req.templateData = {
+						...template,
+						config: { permissions },
+						deprecated: true,
+						_id:
+						stringToUUID(deprecatedTemplateID) };
+					await next();
+				}
+			});
+
+			Sessions.getUserFromSession.mockReturnValue(user);
+			Permissions.isTeamspaceAdmin
+				.mockImplementation((ts, username) => Promise.resolve(username === tsAdmin));
 			TicketSchema.validateTickets.mockImplementation(validation);
 
 			await Tickets.validateImportTickets(req, res, fn);
@@ -275,6 +277,9 @@ const testValidateImportTickets = () => {
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
 				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+					permissions?.create);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.
@@ -287,124 +292,196 @@ const testValidateImportTickets = () => {
 	});
 };
 
+const testHasTemplateViewPermission = () => {
+	const defaultUser = generateRandomString();
+	const teamspace = generateRandomString();
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have view permissions for this ticket');
+	const validPermissions = times(5, generateRandomString);
+	describe.each([
+		['permissions are undefined', { config: { permissions: undefined } }, true],
+		['config is undefined', { config: undefined }, true],
+		['templateData is undefined', undefined, true],
+		['view permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
+		['hasTemplatePermissions returns false', { config: { permissions: { view: null } } }, false, permissionError],
+		['hasTemplatePermissions return true', { config: { permissions: { view: validPermissions } } }, true],
+	])('Has template view permission', (desc, templateData, success, expectedRes, user = defaultUser) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
+		});
+
+		test(`Should ${success ? 'succeed and call next()' : `fail and respond with ${expectedRes.code}`} if ${desc}`,
+			async () => {
+				const req = {
+					params: { teamspace },
+					session: {},
+					templateData,
+				};
+				const res = {};
+				const fn = jest.fn();
+
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
+				Sessions.getUserFromSession.mockReturnValue(user);
+
+				await Tickets.hasTemplateViewPermission(req, res, fn);
+
+				if (success) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						templateData?.config?.permissions?.view);
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					expect(Responder.respond).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+				}
+
+				expect(Sessions.getUserFromSession).toHaveBeenCalledTimes(1);
+				expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
+			},
+		);
+	});
+};
+
+const testHasTemplateCommentPermission = () => {
+	const defaultUser = generateRandomString();
+	const teamspace = generateRandomString();
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have comment permissions for this ticket');
+	const validPermissions = times(5, generateRandomString);
+
+	describe.each([
+		['permissions are undefined', { config: { permissions: undefined } }, true],
+		['config is undefined', { config: undefined }, true],
+		['templateData is undefined', undefined, true],
+		['comment permissions are not configured', { config: { permissions: { create: [generateRandomString()] } } }, true],
+		['hasTemplatePermissions returns false', { config: { permissions: { comment: null } } }, false, permissionError],
+		['hasTemplatePermissions return true', { config: { permissions: { comment: validPermissions } } }, true],
+	])('Has template comment permission', (desc, templateData, success, expectedRes, user = defaultUser) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
+		});
+
+		test(`Should ${success ? 'succeed and call next()' : `fail and respond with ${expectedRes.code}`} if ${desc}`,
+			async () => {
+				const req = {
+					params: { teamspace },
+					session: {},
+					templateData,
+				};
+				const res = {};
+				const fn = jest.fn();
+
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== null);
+				Sessions.getUserFromSession.mockReturnValue(user);
+
+				await Tickets.hasTemplateCommentPermission(req, res, fn);
+
+				if (success) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplatePermissions).toHaveBeenCalledWith(user, teamspace,
+						templateData?.config?.permissions?.comment);
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					expect(Responder.respond).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+				}
+
+				expect(Sessions.getUserFromSession).toHaveBeenCalledTimes(1);
+				expect(Sessions.getUserFromSession).toHaveBeenCalledWith(req.session);
+			},
+		);
+	});
+};
+
 const testValidateUpdateTicket = () => {
-	describe('Validate update ticket', () => {
-		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
-			const fn = jest.fn();
-			const req = { params: {}, body: {} };
-			const res = {};
+	const template = { _id: generateUUIDString(), ...generateRandomObject() };
+	const ticket = { type: template._id, ...generateRandomObject() };
+	const knownTicketID = generateUUIDString();
+	const defaultUser = generateRandomString();
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const errMsg = generateRandomString();
+	const permissionError = createResponseCode(templates.notAuthorized, 'You do not have edit permissions for this ticket');
+	const standardUpdate = generateRandomObject();
+	const validPermissions = times(5, generateRandomString);
+	const invalidPermissions = generateRandomString();
 
-			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
-
-			await Tickets.validateUpdateTicket(req, res, fn);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ticketNotFound);
-			expect(fn).not.toHaveBeenCalled();
+	describe.each([
+		['ticket does not exist', generateRandomString(), false, templates.ticketNotFound],
+		['validation failed', undefined, false, createResponseCode(templates.invalidArguments, errMsg), true],
+		['validation succeeded', undefined, true],
+		['there is nothing to update', undefined, false, templates.ok, false, undefined, ticket],
+		['permissions are undefined', undefined, true, undefined, false],
+		['edit permissions are not configured', undefined, true, undefined, false, { }],
+		['there are no template edit permissions', undefined, false, permissionError, false, { edit: invalidPermissions }],
+		['there are template edit permissions', undefined, true, undefined, false, { edit: validPermissions }],
+		['there are template comment permissions', undefined, true, undefined, false, { edit: validPermissions, comment: invalidPermissions }],
+		['there are template comment and edit permissions', undefined, true, undefined, false, { edit: validPermissions, comment: validPermissions }],
+	])('Validate update ticket', (desc, ticketID = knownTicketID, success = false, expectedRes, validationFails = false, permissions, update = standardUpdate, user = defaultUser) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
 		});
 
-		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
-			const fn = jest.fn();
-			const req = { params: {}, body: {} };
-			const res = {};
-			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = { [generateRandomString()]: generateRandomString() };
+		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`,
+			async () => {
+				const req = {
+					params: { teamspace, project, model, ticket: ticketID },
+					body: update,
+					session: {},
+				};
+				const fn = jest.fn();
+				const res = {};
 
-			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			const errMsg = generateRandomString();
-			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
+				UtilPermissions.hasTemplateEditPermissions
+					.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+				UtilPermissions.hasTemplatePermissions
+					.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+				TicketModelSchema.getTicketById.mockImplementation(() => (
+					ticketID === knownTicketID ? Promise.resolve(ticket) : Promise.reject(expectedRes)));
+				TemplateModelSchema.getTemplateById.mockImplementation(() => Promise.resolve({
+					...template,
+					config: { permissions },
+				}));
 
-			await Tickets.validateUpdateTicket(req, res, fn);
+				Sessions.getUserFromSession.mockReturnValue(user);
 
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, errMsg));
-			expect(fn).not.toHaveBeenCalled();
-		});
+				TicketSchema.validateTickets.mockImplementation(() => (validationFails
+					? Promise.reject(new Error(errMsg))
+					: Promise.resolve([{ newTicket: update === ticket ? undefined : update }])));
 
-		test(`Should respond with ${templates.ok.code} if there is nothing to update`, async () => {
-			const fn = jest.fn();
-			const req = { params: {}, body: {} };
-			const res = {};
-			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = { [generateRandomString()]: generateRandomString() };
+				await Tickets.validateUpdateTicket(req, res, fn);
 
-			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			TicketSchema.validateTickets.mockResolvedValueOnce([]);
-
-			await Tickets.validateUpdateTicket(req, res, fn);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok);
-			expect(fn).not.toHaveBeenCalled();
-		});
-
-		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
-			const fn = jest.fn();
-			const req = { params: {}, body: {} };
-			const res = {};
-			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = { [generateRandomString()]: generateRandomString() };
-
-			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			const errMsg = generateRandomString();
-			TicketSchema.validateTickets.mockRejectedValueOnce(new Error(errMsg));
-
-			await Tickets.validateUpdateTicket(req, res, fn);
-
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, errMsg));
-
-			expect(fn).not.toHaveBeenCalled();
-		});
-
-		test('Should call next if validation succeeded', async () => {
-			const fn = jest.fn();
-			const req = { params: {}, body: { modules: { mod1: generateRandomString(), mod2: {} } } };
-			const res = {};
-			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = { [generateRandomString()]: generateRandomString() };
-
-			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
-
-			await Tickets.validateUpdateTicket(req, res, fn);
-
-			expect(fn).toHaveBeenCalled();
-			expect(Responder.respond).not.toHaveBeenCalled();
-		});
-
-		test('Should call next if validation succeeded and the template is deprecated', async () => {
-			const fn = jest.fn();
-			const req = {
-				params: {},
-				body: { [generateRandomString()]: generateRandomString() },
-				session: { user: { username: generateRandomString() } },
-			};
-			const res = {};
-			const ticket = { [generateRandomString()]: generateRandomString() };
-			const template = {
-				deprecated: true,
-				[generateRandomString()]: generateRandomString(),
-			};
-
-			TicketSchema.validateTickets.mockResolvedValueOnce([{ newTicket: req.body }]);
-			TicketModelSchema.getTicketById.mockResolvedValueOnce(ticket);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			await Tickets.validateUpdateTicket(req, res, fn);
-
-			expect(fn).toHaveBeenCalled();
-			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(TicketSchema.validateTickets).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
-				req.params.model, template, [req.body], {
-					author: req.session.user.username,
-					existingData: [ticket],
-				});
-		});
+				if (success) {
+					expect(fn).toHaveBeenCalledTimes(1);
+					expect(Responder.respond).not.toHaveBeenCalled();
+					expect(TicketModelSchema.getTicketById).toHaveBeenCalledTimes(1);
+					expect(TicketModelSchema.getTicketById).toHaveBeenCalledWith(teamspace, project, model,
+						req.params.ticket);
+					expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledTimes(1);
+					expect(TemplateModelSchema.getTemplateById).toHaveBeenCalledWith(teamspace, template._id);
+					expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledTimes(1);
+					expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledWith(user, teamspace,
+						permissions?.edit, [update]);
+				} else {
+					expect(fn).not.toHaveBeenCalled();
+					if (expectedRes) {
+						expect(Responder.respond).toHaveBeenCalledTimes(1);
+						expect(Responder.respond).toHaveBeenCalledWith(req, res, expectedRes);
+					} else {
+						expect(Responder.respond).not.toHaveBeenCalled();
+					}
+				}
+			},
+		);
 	});
 };
 
@@ -417,13 +494,16 @@ const testValidateUpdateMultipleTickets = () => {
 		name: uniqueModuleName,
 		properties: [{ name: uniqueModuleName, type: 'text', unique: true }],
 	});
-
+	const defaultUser = generateRandomString();
 	const knownTemplateID = generateUUIDString();
 	const deprecatedTemplateID = generateUUIDString();
 	const duplicateUniqueValue = generateRandomString();
 	const existingTickets = [];
 	const duplicateUniqueProp = [];
 	const duplicateModuleUniqueProp = [];
+	const permissionError = (colName = 'edit') => createResponseCode(templates.notAuthorized, `You do not have ${colName} permissions for this ticket`);
+	const validPermissions = times(5, generateRandomString);
+	const invalidPermissions = generateRandomString();
 
 	const goodTickets = times(5, () => {
 		const ticket = generateTicket(template);
@@ -502,10 +582,15 @@ const testValidateUpdateMultipleTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
+		['there are no template edit permissions', {}, false, permissionError('edit'), { edit: invalidPermissions }],
+		['there are template edit permissions', {}, true, undefined, { edit: validPermissions }],
+		['there are no template comment permissions', { body: { tickets: [{ ...goodTickets[0], comments: [generateRandomObject()] }] } }, false, permissionError('comment'), { comment: invalidPermissions }],
+		['there are template comment permissions', { body: { tickets: [{ ...goodTickets[0], comments: [generateRandomObject()] }] } }, true, undefined, { comment: validPermissions }],
 		['tickets have no changes', { body: { tickets: existingTickets.slice(0, 2).map((ticket) => ({ ...ticket, _id: UUIDToString(ticket._id) })) } }, false, templates.ok],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
-	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes) => {
+	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes, permissions, user = defaultUser) => {
 		afterEach(() => {
+			jest.restoreAllMocks();
 			jest.clearAllMocks();
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
@@ -518,10 +603,16 @@ const testValidateUpdateMultipleTickets = () => {
 			const fn = jest.fn();
 			const res = {};
 
+			UtilPermissions.hasTemplateEditPermissions
+				.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+			UtilPermissions.hasTemplatePermissions
+				.mockImplementation((username, ts, perms) => perms !== invalidPermissions);
+			Sessions.getUserFromSession.mockReturnValue(user);
+
 			SettingsMW.checkTicketTemplateExists.mockImplementation(templateCheck);
 			TicketSchema.validateTickets.mockImplementation(validation);
-			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(template);
-			TicketModelSchema.getTicketsByQuery.mockResolvedValueOnce(existingTickets);
+			TemplateModelSchema.getTemplateById.mockResolvedValue({ ...template, config: { permissions } });
+			TicketModelSchema.getTicketsByQuery.mockResolvedValue(existingTickets);
 
 			await Tickets.validateUpdateMultipleTickets(req, res, fn);
 
@@ -535,6 +626,9 @@ const testValidateUpdateMultipleTickets = () => {
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledWith(req, res, expect.anything());
 				expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledTimes(1);
+				expect(UtilPermissions.hasTemplateEditPermissions).toHaveBeenCalledWith(user, req.params.teamspace,
+					permissions?.edit, req.body.tickets);
 			} else if (expectedRes) {
 				expect(fn).not.toHaveBeenCalled();
 				// We don't always expect a response - the response might've been done on a mocked function.
@@ -600,6 +694,8 @@ describe(determineTestGroup(__filename), () => {
 	});
 
 	testValidateNewTicket();
+	testHasTemplateViewPermission();
+	testHasTemplateCommentPermission();
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();

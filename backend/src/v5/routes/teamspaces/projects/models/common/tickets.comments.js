@@ -30,6 +30,7 @@ const {
 	updateComment: updateFedComment,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const { canUpdateComment, validateNewComment, validateUpdateComment } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.comments');
+const { checkTicketExists, hasTemplateCommentPermission, hasTemplateViewPermission } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -40,7 +41,6 @@ const { serialiseComment, serialiseCommentList } = require('../../../../../middl
 
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
-const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -78,13 +78,13 @@ const getAllComments = (isFed) => async (req, res, next) => {
 };
 
 const createComment = (isFed) => async (req, res) => {
-	const { params, body: commentData } = req;
+	const { params, body: commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 	const user = getUserFromSession(req.session);
 
 	try {
 		const createComm = isFed ? addFedComment : addConComment;
-		const _id = await createComm(teamspace, project, model, ticket, commentData, user);
+		const _id = await createComm(teamspace, project, model, ticket, templateData._id, commentData, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
@@ -93,12 +93,12 @@ const createComment = (isFed) => async (req, res) => {
 };
 
 const updateComment = (isFed) => async (req, res) => {
-	const { params, body: updateData, commentData } = req;
+	const { params, body: updateData, commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 
 	try {
 		const updateComm = isFed ? updateFedComment : updateConComment;
-		await updateComm(teamspace, project, model, ticket, commentData, updateData);
+		await updateComm(teamspace, project, model, ticket, templateData._id, commentData, updateData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -108,11 +108,11 @@ const updateComment = (isFed) => async (req, res) => {
 };
 
 const deleteComment = (isFed) => async (req, res) => {
-	const { params, commentData } = req;
+	const { params, commentData, templateData } = req;
 	const { teamspace, project, model, ticket } = params;
 	try {
 		const deleteComm = isFed ? deleteFedComment : deleteConComment;
-		await deleteComm(teamspace, project, model, ticket, commentData);
+		await deleteComm(teamspace, project, model, ticket, templateData._id, commentData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -249,7 +249,7 @@ const establishRoutes = (isFed) => {
 	 *                   example: 1632821119000
 	 *                   description: (Imported comments only) returns the time when the comment was imported
 	 */
-	router.get('/:comment', hasReadAccess, checkTicketExists, getComment(isFed), serialiseComment);
+	router.get('/:comment', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getComment(isFed), serialiseComment);
 
 	/**
 	 * @openapi
@@ -366,7 +366,7 @@ const establishRoutes = (isFed) => {
 	 *                     example: 1632821119000
 	 *                     description: (Imported comments only) returns the time when the comment was imported
 	 */
-	router.get('', hasReadAccess, checkTicketExists, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
+	router.get('', hasReadAccess, checkTicketExists, hasTemplateViewPermission, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
 
 	/**
 	 * @openapi
@@ -442,7 +442,7 @@ const establishRoutes = (isFed) => {
 	 *                   format: uuid
 	 *                   description: ID of the created comment
 	 */
-	router.post('', hasCommenterAccess, checkTicketExists, validateNewComment, createComment(isFed));
+	router.post('', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, validateNewComment, createComment(isFed));
 
 	/**
 	 * @openapi
@@ -515,7 +515,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully updated
 	 */
-	router.put('/:comment', hasCommenterAccess, checkTicketExists, validateUpdateComment, updateComment(isFed));
+	router.put('/:comment', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, validateUpdateComment, updateComment(isFed));
 
 	/**
 	 * @openapi
@@ -570,7 +570,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully deleted
 	 */
-	router.delete('/:comment', hasCommenterAccess, canUpdateComment, deleteComment(isFed));
+	router.delete('/:comment', hasCommenterAccess, checkTicketExists, hasTemplateCommentPermission, canUpdateComment, deleteComment(isFed));
 
 	return router;
 };

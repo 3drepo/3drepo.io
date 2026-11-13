@@ -33,14 +33,20 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketContext } from '../../../ticket.context';
 import { VListHandle } from '@controls/virtualList/virtualList.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export const CommentsList = () => {
+type CommentsListProps = {
+	ticket: Partial<ITicket>;
+};
+
+export const CommentsList = ({ ticket }: CommentsListProps) => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketId = ticket._id;
+	const ticketTemplate = ticket.type;
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const [commentToShow, setCommentToShow] = useSearchParam('commentId');
 	const commentsLength = comments.length;
@@ -73,7 +79,7 @@ export const CommentsList = () => {
 	};
 
 	useEffect(() => {
-		if (!ticketId) return;
+		if (!ticketId || !ticketTemplate) return;
 		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
@@ -83,15 +89,15 @@ export const CommentsList = () => {
 		);
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation),
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation),
-			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
 		);
-	}, [ticketId]);
+	}, [ticketId, ticketTemplate]);
 
 	const tableHandle = useRef<VListHandle>(null);
 

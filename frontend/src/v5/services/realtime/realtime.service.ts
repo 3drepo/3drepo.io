@@ -21,7 +21,12 @@ interface IRoomType {
 	teamspace?: string;
 	model?: string;
 	project?: string;
+	templates?: string[];
 	notifications?: boolean
+}
+
+interface ITicketRoomType extends IRoomType {
+	template: string;
 }
 
 export enum SocketEvents {
@@ -126,6 +131,21 @@ export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callbac
  */
 // eslint-disable-next-line max-len
 export const combineSubscriptions = (...unsubscribeFunctions: (() => void)[]) => () => unsubscribeFunctions.forEach((f) => f());
+
+export const subscribeToTicketEvent = (roomType: IRoomType, event: string, callback) => {
+	if (!roomType.teamspace || !roomType.project || !roomType.model || !roomType.templates?.length) {
+		throw new Error('Ticket room requires teamspace, project, model, and templates');
+	}
+
+	const { templates, ...baseRoomType } = roomType;
+	return combineSubscriptions(
+		...templates.map((template) => subscribeToRoomEvent(
+			{ ...baseRoomType, template } as ITicketRoomType,
+			event,
+			callback,
+		)),
+	);
+};
 
 interface IDirectMessage {
 	event: string;

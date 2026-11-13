@@ -46,7 +46,25 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const template = generateTemplate(false, true);
+	const users = {
+		tsAdmin: generateUserCredentials(),
+		tsAdmin2: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		projectAdmin: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		templatePerm: generateUserCredentials(),
+		noTemplatePerm: generateUserCredentials(),
+		nobody: generateUserCredentials(),
+	};
+
+	const job = { _id: generateRandomString(), color: generateRandomString(), users: [] };
+
+	const template = generateTemplate(false, true,
+		{ permissions: {
+			view: [users.templatePerm.user, job._id],
+			edit: { default: [users.templatePerm.user, job._id] } },
+		});
+
 	const con = generateRandomModel();
 	const fed = generateRandomModel({ modelType: modelTypes.FEDERATION,
 		properties: { subModels: [{ _id: con._id }] } });
@@ -54,28 +72,25 @@ const generateBasicData = () => {
 	fed.rev = ServiceHelper.generateRevisionEntry();
 
 	return ({
-		users: {
-			tsAdmin: generateUserCredentials(),
-			tsAdmin2: generateUserCredentials(),
-			viewer: generateUserCredentials(),
-			noProjectAccess: generateUserCredentials(),
-			nobody: generateUserCredentials(),
-		},
+		users,
 		teamspace: generateRandomString(),
 		project: generateRandomProject(),
 		con,
 		fed,
 		template,
 		ticket: ServiceHelper.generateTicket(template, false, con._id),
+		job,
 	});
 };
 
-const setupBasicData = async ({ users, teamspace, project, fed, con, template, ticket }) => {
+const setupBasicData = async ({ users, teamspace, project, fed, con, template, ticket, job }) => {
 	const models = [fed, con];
 	const { tsAdmin, tsAdmin2, ...otherUsers } = users;
 
-	await ServiceHelper.db.createUser(tsAdmin);
-	await ServiceHelper.db.createUser(tsAdmin2);
+	await Promise.all([
+		ServiceHelper.db.createUser(tsAdmin),
+		ServiceHelper.db.createUser(tsAdmin2),
+	]);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user, tsAdmin2.user]);
 
 	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
@@ -88,8 +103,10 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 	await Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
+			[users.projectAdmin.user, users.noTemplatePerm.user, users.templatePerm.user]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
+		ServiceHelper.db.createJobs(teamspace, [{ ...job, users: [users.projectAdmin.user] }]),
 	]);
 
 	/* eslint-disable no-param-reassign */
@@ -230,13 +247,19 @@ const setupExtIDTicket = (container) => {
 const testGetGroup = () => {
 	describe('Get group', () => {
 		const basicData = generateBasicData();
-		const { users, teamspace, project, con, fed } = basicData;
+		const { users, teamspace, project, con, fed, job } = basicData;
 		const extIdTestCase = setupExtIDTicket(con);
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 
-			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
+			const extIdTemplate = {
+				...extIdTestCase.template,
+				config: { permissions:
+					{ view: [users.tsAdmin.user, job._id], edit: { default: [users.tsAdmin.user, job._id] } } },
+			};
+
+			await ServiceHelper.db.createTemplates(teamspace, [extIdTemplate]);
 
 			await ServiceHelper.db.createScene(teamspace, project.id, con._id, extIdTestCase.scene.rev,
 				extIdTestCase.scene.nodes, extIdTestCase.scene.meshMap);
@@ -297,6 +320,9 @@ const testGetGroup = () => {
 				['the group id is valid with unfound RVT IDs should return empty array', { ...baseRouteParams, groupName: 'groupWithRvtIdsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
 				['the smart group id is valid', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids' }, true],
 				['the smart group id is valid (returning IFC Guids)', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids', convertIds: false }, true],
+				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, true],
 			];
 		};
 
@@ -367,6 +393,9 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
+				['the user does not have template permission', { ...baseRouteParams, key: users.noTemplatePerm.apiKey }, payload, false, templates.notAuthorized],
+				['the job of the user has template permission', { ...baseRouteParams, key: users.projectAdmin.apiKey }, payload, true],
+				['the user has template permission', { ...baseRouteParams, key: users.templatePerm.apiKey }, payload, true],
 				['the payload has excludeDefinedObjects', { ...baseRouteParams, checkOutput: false }, { excludeDefinedObjects: true }, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id, [idTypes.IFC]: [generateRandomIfcGuid()] },

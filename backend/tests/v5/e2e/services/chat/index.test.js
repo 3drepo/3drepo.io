@@ -21,6 +21,7 @@ const {
 	generateUserCredentials,
 	generateRandomProject,
 	generateRandomModel,
+	generateTemplate,
 } = require('../../../helper/dataGen');
 const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
@@ -32,14 +33,17 @@ const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/co
 
 const tsAdmin = generateUserCredentials();
 const nobody = generateUserCredentials();
+const userWithNoTemplatePerm = generateUserCredentials();
 
 const teamspace = generateRandomString();
 const project = generateRandomProject();
 const container = generateRandomModel();
+const template = generateTemplate();
 
 let agent;
 const setupData = async () => {
 	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createUser(userWithNoTemplatePerm);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
 	await ServiceHelper.db.createModel(
 		teamspace,
@@ -49,7 +53,9 @@ const setupData = async () => {
 	);
 	await Promise.all([
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id]),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id],
+			[userWithNoTemplatePerm.user]),
+		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 };
 
@@ -129,6 +135,7 @@ const testUnauthenticatedUser = () => {
 			['should not be able to join a notification room (v4)', { account: tsAdmin.user }],
 			['should not be able to join a model room', { teamspace, project: project.id, model: container._id }],
 			['should not be able to join a model room (v4)', { account: teamspace, model: container._id }],
+			['should not be able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }],
 		])('Join room', (desc, data) => {
 			test(desc, async () => {
 				const socket = await ServiceHelper.socket.connectToSocket();
@@ -174,6 +181,8 @@ const testTSAdmin = () => {
 			['should be able to join a project room', { teamspace, project: project.id }],
 			['should not be able to join a project room that doesn\'t exist', { teamspace, project: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should not be able to join a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }],
+			['should not be able to join a template room that doesn\'t exist', { teamspace, project: project.id, model: container._id, template: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -195,6 +204,7 @@ const testTSAdmin = () => {
 			['should not be be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should be able to leave a project room', { teamspace, project: project.id }],
 			['should not be be able to leave a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to leave a template room', { teamspace, project: project.id, model: container._id, template: template._id }],
 		])('Leave room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
@@ -206,6 +216,14 @@ const testTSAdmin = () => {
 					await expect(onLeaveErrorCheck(socket, data, failError)).resolves.toBeUndefined();
 				} else await expect(onLeaveSuccessCheck(socket, data)).resolves.toBeUndefined();
 			});
+		});
+
+		test('should not be able to join a template room without template permissions', async () => {
+			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, userWithNoTemplatePerm, { teamspace });
+			const socket = await ServiceHelper.socket.connectToSocket(cookieInfo.session);
+			const data = { teamspace, project: project.id, model: container._id, template: template._id };
+			await expect(onJoinErrorCheck(socket, data, ERRORS.ROOM_NOT_FOUND)).resolves.toBeUndefined();
+			socket.close();
 		});
 	});
 };
@@ -225,6 +243,7 @@ const testNobody = () => {
 		describe.each([
 			['should not be not able to join a model room', { teamspace, project: project.id, model: container._id }, ERRORS.ROOM_NOT_FOUND],
 			['should not be not able to join a project room', { teamspace, project: project.id }, ERRORS.ROOM_NOT_FOUND],
+			['should not be not able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {

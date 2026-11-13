@@ -231,25 +231,4 @@ Tickets.getTicketsByFilter = (
 	return DbHandler.find(teamspace, TICKETS_COL, formattedQuery, projection, sort, limit, skip);
 };
 
-Tickets.getAllTickets = (
-	teamspace,
-	project,
-	model,
-	{
-		projection = { teamspace: 0, project: 0, model: 0 },
-		updatedSince,
-		sort = { [`properties.${basePropertyLabels.CREATED_AT}`]: -1 },
-		limit,
-		skip = 0,
-	} = {},
-) => {
-	const query = { teamspace, project, model };
-
-	if (updatedSince) {
-		query[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
-	}
-
-	return DbHandler.find(teamspace, TICKETS_COL, query, projection, sort, limit, skip);
-};
-
 module.exports = Tickets;

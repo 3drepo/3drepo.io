@@ -23,7 +23,11 @@ const {
 } = require('./permissions.constants');
 const { findModels, getContainerById, getContainers, getDrawingById, getDrawings, getFederationById, getFederations, getMultipleModelsByIds } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
+const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
+const { getCommonElements } = require('../helper/arrays');
+const { getJobsByUsers } = require('../../models/jobs');
 const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
+const { isEmpty } = require('../helper/objects');
 const { modelTypes } = require('../../models/modelSettings.constants');
 
 const Permissions = {};
@@ -180,5 +184,75 @@ Permissions.hasReadAccessToDrawing = modelPermCheck(
 Permissions.hasReadAccessToMultipleDrawings = multipleModelsPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.DRAWING,
 );
+
+Permissions.hasTemplatePermissions = async (user, teamspace, permissions) => {
+	try {
+		if (permissions) {
+			const isAdmin = await Permissions.isTeamspaceAdmin(teamspace, user);
+			if (!isAdmin) {
+				const userJobs = await getJobsByUsers(teamspace, [user]);
+				const userAndJobs = [user, ...userJobs];
+				const hasPermission = getCommonElements(permissions, userAndJobs).length > 0;
+				return hasPermission;
+			}
+		}
+
+		return true;
+	} catch (err) {
+		return false;
+	}
+};
+
+Permissions.hasTemplateEditPermissions = async (user, teamspace, editPermissions, ticketUpdates) => {
+	try {
+		if (!editPermissions || await Permissions.isTeamspaceAdmin(teamspace, user)) return true;
+
+		const nonEditableProps = ['_id', 'type'];
+		const { assign: assignPerms, status: statusPerms, default: defaultPerms } = editPermissions;
+		const userJobs = await getJobsByUsers(teamspace, [user]);
+		const userAndJobs = [user, ...userJobs];
+
+		let isAssignedModified;
+		let isStatusModified;
+		let isDefaultPropModified;
+
+		const checkProperties = (value) => {
+			Object.keys(value).forEach((prop) => {
+				if (prop === basePropertyLabels.UPDATED_AT) return;
+				if (prop === basePropertyLabels.ASSIGNEES) isAssignedModified = true;
+				else if (prop === basePropertyLabels.STATUS) isStatusModified = true;
+				else isDefaultPropModified = true;
+			});
+		};
+
+		const isValidUpdate = (key, value) => !nonEditableProps.includes(key)
+			&& !(key === 'properties' && isEmpty(value))
+			&& !(key === 'modules' && isEmpty(value));
+
+		for (const update of ticketUpdates) {
+			for (const [key, value] of Object.entries(update)) {
+				if (isValidUpdate(key, value)) {
+					if (key === 'properties') {
+						checkProperties(value);
+					} else {
+						isDefaultPropModified = true;
+					}
+				}
+			}
+
+			if (isAssignedModified && isStatusModified && isDefaultPropModified) break;
+		}
+
+		const checkPerm = (permArray) => !permArray?.length || getCommonElements(permArray, userAndJobs).length > 0;
+
+		const assignPermPass = !isAssignedModified || checkPerm(assignPerms ?? defaultPerms);
+		const statusPermPass = !isStatusModified || checkPerm(statusPerms ?? defaultPerms);
+		const defaultPermPass = !isDefaultPropModified || checkPerm(defaultPerms);
+
+		return assignPermPass && statusPermPass && defaultPermPass;
+	} catch (err) {
+		return false;
+	}
+};
 
 module.exports = Permissions;

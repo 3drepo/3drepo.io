@@ -127,7 +127,7 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 	[models, containerOrFederation]);
 
 	useEffect(() => {
-		if (!models.length) return;
+		if (!models.length || !templates.length) return undefined;
 
 		modelsIds.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
@@ -143,12 +143,12 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 		});
 		const subscriptions = modelsIds.flatMap((modelId) => {
 			return [
-				enableRealtimeNewTicket(teamspace, project, modelId, isFed(modelId)),
-				enableRealtimeUpdateTicket(teamspace, project, modelId, isFed(modelId)),
+				enableRealtimeNewTicket(teamspace, project, modelId, isFed(modelId), templates.map(({ _id }) => _id)),
+				enableRealtimeUpdateTicket(teamspace, project, modelId, isFed(modelId), templates.map(({ _id }) => _id)),
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [models]);
+	}, [models, JSON.stringify(templates)]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
