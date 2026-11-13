@@ -21,7 +21,6 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { rulesAreEqual , stripGroupRules } from '../../../../../../helpers/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -57,7 +56,6 @@ interface IProps {
 	resetToSavedSelection: () => void;
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
-	isReadOnly: boolean;
 }
 
 interface IState {
@@ -125,7 +123,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			setSelectedCriterionId={this.props.setSelectedCriterionId}
 			label="Filters"
 			placeholder="Select first filter"
-			disabled={!this.props.canUpdate || this.props.isReadOnly}
+			disabled={!this.props.canUpdate}
 			onClose={this.handleCriteriaFieldClose}
 		/>
 	));

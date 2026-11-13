@@ -25,11 +25,12 @@ import { StatusProperty } from '../statusProperty/statusProperty.component';
 
 type IIssuePropertiesInputs = {
 	onBlur: () => void;
-	readOnly: boolean;
+	readOnlyDefault: boolean;
+	readOnlyStatus: boolean;
 };
-export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInputs) => (
+export const IssuePropertiesInputs = ({ onBlur, readOnlyDefault, readOnlyStatus }: IIssuePropertiesInputs) => (
 	<>
-		<StatusProperty onBlur={onBlur} readOnly={readOnly} />
+		<StatusProperty onBlur={onBlur} readOnly={readOnlyStatus} />
 		<Property>
 			<PropertyTitle>
 				<FormattedMessage
@@ -47,7 +48,7 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 				onBlur={onBlur}
 				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
-				disabled={readOnly}
+				disabled={readOnlyDefault}
 			/>
 		</Property>
 		<Property>
@@ -65,7 +66,7 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 				name={`properties.${IssueProperties.DUE_DATE}`}
 				onBlur={onBlur}
 				key={IssueProperties.DUE_DATE}
-				disabled={readOnly}
+				disabled={readOnlyDefault}
 			/>
 		</Property>
 	</>

@@ -34,6 +34,7 @@ import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableHeaders/ticketsTableHeaders.helpers';
+export { templateAlreadyFetched } from './ticketsTemplates.helpers';
 
 
 export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
@@ -295,12 +296,6 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 			sanitizeViewValues(values.modules[module.name], ticket.modules[module.name], module.properties);
 		}));
 	}
-};
-
-export const templateAlreadyFetched = (template: ITemplate) => {
-	if (!template) return false;
-	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
-	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 
 export const normalizeTicketAssignees = (ticket: ITicket) => {

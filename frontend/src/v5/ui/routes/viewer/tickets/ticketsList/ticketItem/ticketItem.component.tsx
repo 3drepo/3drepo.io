@@ -18,7 +18,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext, useRef } from 'react';
 import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate, TicketCheckbox } from './ticketItem.styles';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
@@ -31,6 +31,7 @@ import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.hel
 import { formatMessage } from '@/v5/services/intl';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
+import { TextOverflow } from '@controls/textOverflow';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -44,11 +45,13 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticket.type);
+
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
 	const hasThumbnail = has(template, [TicketBaseKeys.CONFIG, 'defaultView']) || has(template, [TicketBaseKeys.CONFIG, 'defaultImage']);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, ticket.type);
+	const editable = TemplatesPermissionsHooksSelectors.selectIsTemplateEditable(containerOrFederation, ticket.type);
 
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
@@ -68,6 +71,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		if (bulkModeOn) {
+			if (!editable) return;
 			toggleSelection(ticket._id);
 			return;
 		}
@@ -86,8 +90,10 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						{bulkModeOn && (<TicketCheckbox checked={bulkSelection.has(ticket._id)}/>)}
-						{ticket.title}
+						{bulkModeOn && <TicketCheckbox checked={bulkSelection.has(ticket._id)} disabled={!editable} />}
+						<TextOverflow>
+							{ticket.title}
+						</TextOverflow>
 					</Title>
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (

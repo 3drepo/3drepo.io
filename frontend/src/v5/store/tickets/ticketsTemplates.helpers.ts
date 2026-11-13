@@ -16,6 +16,13 @@
  */
 
 import { ITemplate, PropertyDefinition, TemplateModule } from './tickets.types';
+import { TicketBaseKeys } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+
+export const templateAlreadyFetched = (template: ITemplate) => {
+	if (!template) return false;
+	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
+	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
+};
 
 const removeHiddenProperties = (properties: PropertyDefinition[] = []) => (
 	properties.filter(({ hiddenOnUI }) => !hiddenOnUI)

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { get, isUndefined } from 'lodash';
@@ -38,10 +38,11 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const { containerOrFederation } = useContext(TicketContext);
 
 	const { formState } = useFormContext();
-	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
+	const canEditDefault = TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticketFromStore?.type);
+	const ticketIsReadOnly = !isNewTicket && !canEditDefault;
 
 	if (!properties.length) return null;
 	return (
@@ -49,7 +50,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 			{properties.map(({
 				name,
 				type: basicType,
-				readOnly: disabled,
+				readOnly: propertyIsReadOnly,
 				readOnlyOnUI,
 				required,
 				values,
@@ -67,7 +68,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 							// @ts-ignore
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}
+							disabled={propertyIsReadOnly || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}
 							immutable={immutable}
 							required={required}
 							name={inputName}

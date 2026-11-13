@@ -16,6 +16,7 @@
  */
 
 import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.component';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { omit } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -35,6 +36,9 @@ interface IProps {
 export const NewCriterionForm = ({ selectedCriterion, onSubmit, onClose, criteria = [], criterionForm }: IProps) => {
 	const [key, setKey] = useState(0);
 	const { containerOrFederation } = useParams<ViewerParams>();
+	const isCommenterContainer = ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const isCommenterFederation = FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const readOnly = !isCommenterContainer && !isCommenterFederation;
 	const rule = selectedCriterion ? omit(selectedCriterion, '_id') : null;
 
 	const handleSubmit = (data) => {
@@ -51,9 +55,9 @@ export const NewCriterionForm = ({ selectedCriterion, onSubmit, onClose, criteri
 		<Container>
 			<GroupRulesForm
 				key={key}
-				containerOrFederation={containerOrFederation}
 				rule={rule}
 				existingRules={criteria}
+				readOnly={readOnly}
 				onSubmit={handleSubmit}
 				onClose={onClose}
 				unsavedState={criterionForm}
