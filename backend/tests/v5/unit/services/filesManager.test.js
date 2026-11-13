@@ -311,10 +311,12 @@ const testGetFileAsStream = () => {
 		});
 
 		test('should include the filename if it is part of the ref entry', async () => {
-			const fileEntry = { size: 100,
+			const fileEntry = {
+				size: 100,
 				type: FileStorageTypes.FS,
 				link: generateRandomString(),
-				name: generateRandomString() };
+				name: generateRandomString(),
+			};
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
 			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
@@ -324,10 +326,12 @@ const testGetFileAsStream = () => {
 			const fileName = generateRandomString();
 
 			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream,
+				.resolves.toEqual({
+					readStream,
 					size: fileEntry.size,
 					mimeType: DEFAULT_MIME_TYPE,
-					filename: fileEntry.name });
+					filename: fileEntry.name,
+				});
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
@@ -551,6 +555,40 @@ const testStoreFileStream = () => {
 	});
 };
 
+const testAddExternalFileReference = () => {
+	describe('Add external file reference', () => {
+		test('should insert the external reference with the given ID and default mime type', async () => {
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
+			const externalInfo = { _id: generateRandomString(), link: generateRandomString(), size: 123 };
+
+			await expect(FilesManager.addExternalFileReference(teamspace, collection, id, externalInfo))
+				.resolves.toBeUndefined();
+
+			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection, {
+				...externalInfo,
+				_id: id,
+				mimeType: DEFAULT_MIME_TYPE,
+				type: FileStorageTypes.EXTERNAL_FS,
+			});
+		});
+
+		test('should propagate an error if inserting the external reference fails', async () => {
+			const error = new Error(generateRandomString());
+			FileRefs.insertRef.mockRejectedValueOnce(error);
+
+			await expect(FilesManager.addExternalFileReference(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+				{ link: generateRandomString() },
+			)).rejects.toBe(error);
+		});
+	});
+};
+
 const testFileExists = () => {
 	describe('Check whether a file exists or not', () => {
 		test('should return fs if config.defaultStorage is set to fs', async () => {
@@ -587,9 +625,11 @@ const testRemoveFilesWithMeta = () => {
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
 		test('!Should remove all files that satisfy the query', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+			const expectedRefs = times(3, () => ({
+				_id: generateRandomString(),
 				type: FileStorageTypes.FS,
-				link: generateRandomString() }));
+				link: generateRandomString(),
+			}));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
@@ -617,9 +657,11 @@ const testRemoveFilesWithMeta = () => {
 		});
 
 		test('Should manage non file refs properly', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+			const expectedRefs = times(3, () => ({
+				_id: generateRandomString(),
 				type: FileStorageTypes.FS,
-				link: generateRandomString() }));
+				link: generateRandomString(),
+			}));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });
@@ -688,6 +730,7 @@ describe(determineTestGroup(__filename), () => {
 	testStoreFile();
 	testStoreFiles();
 	testStoreFileStream();
+	testAddExternalFileReference();
 	testFileExists();
 	testGetMD5FileHash();
 });
