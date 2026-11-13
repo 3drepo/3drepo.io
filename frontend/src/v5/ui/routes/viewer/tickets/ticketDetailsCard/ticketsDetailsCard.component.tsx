@@ -100,7 +100,7 @@ export const TicketDetailsCard = () => {
 	};
 
 	const openTicketHistory = () => {
-		DialogsActionsDispatchers.open(TicketHistoryDialog, { containerOrFederation });
+		DialogsActionsDispatchers.open(TicketHistoryDialog, { containerOrFederation, ticketId });
 	};
 
 	const goBack = () => {

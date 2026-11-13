@@ -17,7 +17,7 @@
 
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
@@ -33,18 +33,22 @@ type ITicketHistoryDialog = {
 	onClickClose: () => void;
 	open: boolean;
 	containerOrFederation: string;
+	ticketId: string;
 };
 
-export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }: ITicketHistoryDialog) => {
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
+export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation, ticketId }: ITicketHistoryDialog) => {
+	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const templateTabularView = ProjectsHooksSelectors.selectCurrentProjectTemplateById(ticket?.type);
+	const templateViewer = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
+	const template = templateTabularView ?? templateViewer;
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticket._id);
+	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticket?._id);
 	
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticket._id, isFederation);
-	}, [ticket._id]);
+		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticket?._id, isFederation);
+	}, [ticket?._id]);
 
 	return (
 		<Modal open={open} onClose={onClickClose} maxWidth="xl" fullWidth>
@@ -85,7 +89,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation 
 							</NoHistoryMessage>
 						)}
 						{ticketHistory?.toReversed().map((historyItem) => (
-							<TicketHistoryItem key={historyItem.timestamp} {...historyItem} />
+							<TicketHistoryItem key={historyItem.timestamp} template={template} {...historyItem} />
 						))}
 					</TicketHistoryTable>
 				</ModalBody>

@@ -20,13 +20,14 @@ import { getPathsOfChanges } from '../../ticketHistory.helpers';
 import { ChangePropertyName, ChangeRow, DetailContainer } from './changesTable.styles';
 import { ChangeDetail } from './changeDetail.component';
 import { get } from 'lodash';
-import type { TicketChange } from '@/v5/store/tickets/tickets.types';
+import type { ITemplate, TicketChange } from '@/v5/store/tickets/tickets.types';
 
 type IChangesTable = {
 	changes: Record<string, TicketChange>;
+	template: ITemplate;
 };
 
-export const ChangesTable = ({ changes }: IChangesTable) => {
+export const ChangesTable = ({ changes, template }: IChangesTable) => {
 	const paths = getPathsOfChanges(changes);
 	return (
 		<div>
@@ -34,7 +35,7 @@ export const ChangesTable = ({ changes }: IChangesTable) => {
 				<ChangeRow key={propertyName}>
 					<ChangePropertyName>{getPropertyLabel(propertyName)}</ChangePropertyName>
 					<DetailContainer>
-						<ChangeDetail propertyName={propertyName} change={get(changes, propertyName)} />
+						<ChangeDetail template={template} propertyName={propertyName} change={get(changes, propertyName)} />
 					</DetailContainer>
 				</ChangeRow>
 			))}

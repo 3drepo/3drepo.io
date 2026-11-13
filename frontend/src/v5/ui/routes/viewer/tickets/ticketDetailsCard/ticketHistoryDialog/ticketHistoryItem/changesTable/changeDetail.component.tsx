@@ -14,18 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ChangeValue, ErrorMessage } from './changesTable.styles';
 import { isArrayChange, isDateChange, isDescribableChange } from '../../ticketHistory.helpers';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { PropertyTypeDefinition, TicketChange } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyTypeDefinition, TicketChange } from '@/v5/store/tickets/tickets.types';
 
 type ChangeDetailProps = {
 	propertyName: string;
 	change: TicketChange;
+	template: ITemplate;
 };
 
 const parseValueOfType = (value: any, type: PropertyTypeDefinition) => {
@@ -34,8 +34,7 @@ const parseValueOfType = (value: any, type: PropertyTypeDefinition) => {
 	return value?.toString() ?? '';
 };
 
-export const ChangeDetail = ({ propertyName, change }: ChangeDetailProps) => {
-	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
+export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailProps) => {
 	const propertyDef = findPropertyDefinition(template, propertyName);
 	const { from, to } = change;
 	const emptyValue = [from, to].findIndex((value) => isNull(value)
