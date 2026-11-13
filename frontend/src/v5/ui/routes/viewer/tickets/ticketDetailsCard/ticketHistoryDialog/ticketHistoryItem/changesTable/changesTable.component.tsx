@@ -20,8 +20,13 @@ import { getPathsOfChanges } from '../../ticketHistory.helpers';
 import { ChangePropertyName, ChangeRow, DetailContainer } from './changesTable.styles';
 import { ChangeDetail } from './changeDetail.component';
 import { get } from 'lodash';
+import type { TicketChange } from '@/v5/store/tickets/tickets.types';
 
-export const ChangesTable = ({ changes }) => {
+type IChangesTable = {
+	changes: Record<string, TicketChange>;
+};
+
+export const ChangesTable = ({ changes }: IChangesTable) => {
 	const paths = getPathsOfChanges(changes);
 	return (
 		<div>

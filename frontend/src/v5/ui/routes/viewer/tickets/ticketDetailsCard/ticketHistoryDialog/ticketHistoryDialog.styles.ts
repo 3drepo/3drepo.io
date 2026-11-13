@@ -56,7 +56,7 @@ export const TimestampContainer = styled.div`
 export const Author = styled.div`
 	width: ${ColumnWidths.Author}px;
 	display: inline-flex;
-    gap: 5px;
+	gap: 5px;
 	align-items: center;
 	font-size: 15px;
 `;

@@ -29,7 +29,13 @@ import { FormattedMessage } from 'react-intl';
 import { ColumnWidths } from './ticketHistory.helpers';
 import { TicketHistoryTable, ModalBody, NoHistoryMessage } from './ticketHistoryDialog.styles';
 
-export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }) => {
+type ITicketHistoryDialog = {
+	onClickClose: () => void;
+	open: boolean;
+	containerOrFederation: string;
+};
+
+export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation }: ITicketHistoryDialog) => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();

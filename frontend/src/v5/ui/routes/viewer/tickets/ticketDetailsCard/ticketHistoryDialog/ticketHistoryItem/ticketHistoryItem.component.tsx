@@ -21,6 +21,7 @@ import { ItemContainer, Author, TimestampContainer, ActionType, ImportChip, Upda
 import { ChangesTable } from './changesTable/changesTable.component';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatTime } from '@/v5/services/intl';
+import type { ITicketHistory } from '@/v5/store/tickets/tickets.types';
 
 const Timestamp = ({ timestamp }) => {
 	const formattedDate = formatDate(timestamp);
@@ -37,7 +38,7 @@ const Timestamp = ({ timestamp }) => {
 	);
 };
 
-export const TicketHistoryItem = ({ author, timestamp, changes, imported }) => {
+export const TicketHistoryItem = ({ author, timestamp, changes, imported }: ITicketHistory) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const fullname = getFullnameFromUser(user);

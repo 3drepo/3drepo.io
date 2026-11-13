@@ -16,25 +16,30 @@
  */
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { isDateType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ChangeValue, ErrorMessage } from './changesTable.styles';
-import { isArrayChange, isDescribableChange } from '../../ticketHistory.helpers';
+import { isArrayChange, isDateChange, isDescribableChange } from '../../ticketHistory.helpers';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { PropertyTypeDefinition, TicketChange } from '@/v5/store/tickets/tickets.types';
 
-const parseValueOfType = (value, type) => {
-	if (isDateType(type)) return formatDateTime(value);
+type ChangeDetailProps = {
+	propertyName: string;
+	change: TicketChange;
+};
+
+const parseValueOfType = (value: any, type: PropertyTypeDefinition) => {
+	if (isDateChange(type)) return formatDateTime(value);
 	if (type === 'coords') return null;
 	return value?.toString() ?? '';
 };
 
-export const ChangeDetail = ({ propertyName, change }) => {
+export const ChangeDetail = ({ propertyName, change }: ChangeDetailProps) => {
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const propertyDef = findPropertyDefinition(template, propertyName);
 	const { from, to } = change;
 	const emptyValue = [from, to].findIndex((value) => isNull(value)
-		|| (isDateType(propertyDef?.type) && !value)); // Unset dates can have a value of 0
+		|| (isDateChange(propertyDef?.type) && !value)); // Unset dates can have a value of 0
 	const wasDeleted = emptyValue === 1;
 	const wasAdded = emptyValue === 0;
 	const wasChanged = !wasDeleted && !wasAdded;

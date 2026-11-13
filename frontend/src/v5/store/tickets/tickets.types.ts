@@ -231,7 +231,12 @@ export type OverridesDicts = {
 
 export type ITicketHistory = {
 	author: string;
-	timestamp: string;
+	timestamp: number;
 	changes?: any;
 	imported?: any;
+};
+
+export type TicketChange = {
+	from: any;
+	to: any;
 };

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { has } from 'lodash';
 
 export const ColumnWidths = {
@@ -27,9 +28,10 @@ export const ColumnWidths = {
 
 
 // Values can easily be described in a human-readable format. (e.g. not coords)
-export const isDescribableChange = (type: string) => ['text', 'longText', 'date', 'pastDate', 'sequencing', 'number', 'tags', 'oneOf', 'manyOf', 'boolean'].includes(type);
+export const isDescribableChange = (type: PropertyTypeDefinition) => ['text', 'longText', 'date', 'pastDate', 'sequencing', 'number', 'tags', 'oneOf', 'manyOf', 'boolean'].includes(type);
 // Value is an array so can consist of removals and additions
-export const isArrayChange = (type: string) => ['manyOf', 'tags', 'imageList'].includes(type);
+export const isArrayChange = (type: PropertyTypeDefinition) => ['manyOf', 'tags', 'imageList'].includes(type);
+export const isDateChange = (type: PropertyTypeDefinition) => ['date', 'pastDate', 'sequencing'].includes(type);
 
 export const getPathsOfChanges = (changes: any, prefix = ''): string[] =>
 	Object.entries(changes).flatMap(([key, value]) => {

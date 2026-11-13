@@ -230,7 +230,7 @@ export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & 
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
 export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, onSuccess?: () => void, onError?: () => void };
 export type FetchTicketHistoryAction = Action<'FETCH_TICKET_HISTORY'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean };
-export type FetchTicketHistorySuccessAction = Action<'FETCH_TICKET_HISTORY_SUCCESS'> & { ticketId: string, ticketHistory: any[] }; // TODO 6329 replace type
+export type FetchTicketHistorySuccessAction = Action<'FETCH_TICKET_HISTORY_SUCCESS'> & { ticketId: string, ticketHistory: ITicketHistory[] };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -349,5 +349,5 @@ export interface ITicketsActionCreators {
 	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction,
 	setTabularViewParams: (params: Partial<DashboardTicketsParams>, search: string) => SetTabularViewParamsAction,
 	fetchTicketHistory: (teamspace: string, projectId: string, modelId: string, ticketId: string, isFederation: boolean) => FetchTicketHistoryAction,
-	fetchTicketHistorySuccess: (ticketId: string, ticketHistory: any[]) => FetchTicketHistorySuccessAction,
+	fetchTicketHistorySuccess: (ticketId: string, ticketHistory:  ITicketHistory[]) => FetchTicketHistorySuccessAction,
 }
