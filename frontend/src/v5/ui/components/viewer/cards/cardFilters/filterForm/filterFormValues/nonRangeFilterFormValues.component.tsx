@@ -17,8 +17,8 @@
 
 import { useEffect, useRef } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { compact, isEmpty } from 'lodash';
-import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { compact, isEmpty, uniqBy } from 'lodash';
+import { mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
 import { isDateType, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
@@ -81,7 +81,14 @@ export const FilterFormNonRangeValues = ({
 	ContainersHooksSelectors.selectContainers();
 
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
-	const selectOptions = type === 'tags' ? tagOptions : getSelectOptions(module, property, type, templates, modelsIds);
+	const selectOptions: SelectOption[] = type === 'tags'
+		? uniqBy<SelectOption>([
+			...tagOptions,
+			...(filter?.values || [])
+				.filter((value): value is string => typeof value === 'string')
+				.map((value) => ({ value })),
+		], 'value')
+		: getSelectOptions(module, property, type, templates, modelsIds);
 	const isJobsAndUsers = getIsJobsAndUsersProperty(templates, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;

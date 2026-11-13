@@ -236,6 +236,7 @@ const establishRoutes = (modelType) => {
 	 *               oneOf:
 	 *                 # Case 1: Single model (container)
 	 *                 - type: object
+	 *                   required: [model, supermeshes]
 	 *                   properties:
 	 *                     model:
 	 *                       type: string
@@ -303,6 +304,7 @@ const establishRoutes = (modelType) => {
 	 *                                       example: ["c1fbb598-b971-4122-bd79-1cd5bf8ae100_0"]
 	 *                 # Case 2: Federation (submodels array)
 	 *                 - type: object
+	 *                   required: [submodels]
 	 *                   properties:
 	 *                     submodels:
 	 *                       type: array
@@ -380,7 +382,7 @@ const establishRoutes = (modelType) => {
 	if (modelType === modelTypes.CONTAINER) {
 		/**
 		* @openapi
-		* /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/repo/{bundleId}:
+		* /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/bundles/repo/{bundleId}:
 		*   get:
 		*     description: Gets an actual Repo Bundle file containing a set of assets
 		*     tags: [v:external, v:internal, Models]
@@ -398,7 +400,7 @@ const establishRoutes = (modelType) => {
 		*         required: true
 		*         schema:
 		*           type: string
-		*       - name: containerId
+		*       - name: container
 		*         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
 		*         in: path
 		*         required: true

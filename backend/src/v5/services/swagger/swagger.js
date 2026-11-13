@@ -75,21 +75,31 @@ const setupDocEndpoint = (app) => {
 	docs.components = docs.components || {};
 	docs.components = { ...docs.components, ...Schemas };
 	const uiOptions = {
-		explorer: true,
+		explorer: false,
 	};
 	const pathsByGroups = groupPathsByVersion(docs);
 
 	const generateDocWithVersion = (route, filteredDoc) => {
 		logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
+		const routeUiOptions = {
+			...uiOptions,
+			swaggerUrl: `${route}/openapi.json`,
+		};
+		const preventUiCaching = (req, res, next) => {
+			if (req.path === '/' || req.path === '/swagger-ui-init.js') {
+				res.set('Cache-Control', 'no-store');
+			}
+			next();
+		};
 
 		app.get(`${route}/openapi.json`, (req, res) => {
 			res.json(filteredDoc);
 		});
 
-		app.use(route, swaggerUi.serve, (req, res, next) => {
-			const ui = swaggerUi.setup(filteredDoc, uiOptions);
-			ui(req, res, next);
-		});
+		app.use(route,
+			preventUiCaching,
+			...swaggerUi.serveFiles(filteredDoc, routeUiOptions),
+			swaggerUi.setup(filteredDoc, routeUiOptions));
 	};
 
 	app.use('/docs-list', (req, res) => res.json({ uri: Object.keys(pathsByGroups) }));
