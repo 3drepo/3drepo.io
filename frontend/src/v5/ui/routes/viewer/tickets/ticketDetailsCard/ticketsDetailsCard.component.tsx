@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DialogsHooksSelectors, TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -185,6 +185,12 @@ export const TicketDetailsCard = () => {
 		setTicketId.current();
 	}, []);
 
+
+	const groupsHandle = useRef(null);
+
+	const readOnlyGroups = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticket.type);
+
+
 	if (!ticket) return null;
 
 	return (
@@ -198,13 +204,14 @@ export const TicketDetailsCard = () => {
 								<BreakableText>{ticket.title}</BreakableText>
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
-							actions={<AddGroupButton />}
+							actions={readOnlyGroups ? null : <AddGroupButton newGroupsHandle={groupsHandle} />}
 						/>
 						<ExpandableCard ExpandedComponent={null}>
 							<InputController
 								Input={TicketGroups}
 								onBlur={onBlurHandler}
 								name={viewProps.name}
+								newGroupsHandle={groupsHandle}
 							/>
 						</ExpandableCard>
 					</>

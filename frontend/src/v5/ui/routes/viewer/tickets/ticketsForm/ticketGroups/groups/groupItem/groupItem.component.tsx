@@ -44,14 +44,14 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { RgbArray, rgbToHex } from '@/v5/helpers/colors.helper';
 import { TicketContext } from '../../../../ticket.context';
 
-type GroupProps = { override: GroupOverride, index: number };
-export const GroupItem = ({ override, index }: GroupProps) => {
+type GroupProps = { override: GroupOverride };
+export const GroupItem = ({ override }: GroupProps) => {
 	const dispatch = useDispatch();
 	const {
 		groupType,
-		highlightedIndex,
-		setHighlightedIndex,
-		clearHighlightedIndex,
+		highlightedKey,
+		setHighlightedKey,
+		clearHighlightedKey,
 		getGroupIsChecked,
 		setGroupIsChecked,
 		deleteGroup,
@@ -60,10 +60,11 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
-	const { group, color, opacity } = override;
-	const checked = getGroupIsChecked(index);
+	const { group, color, opacity, key } = override;
+	const checked = getGroupIsChecked(key);
+
 	const isHidden = groupType === 'hidden';
-	const isHighlighted = highlightedIndex === index;
+	const isHighlighted = highlightedKey === key;
 
 	const sharedIds = convertToV4GroupNodes(group as Group).flatMap(({ shared_ids }) => shared_ids);
 	const objectsCount = useSelector((state) => selectNumNodesByMeshSharedIdsArray(state, sharedIds));
@@ -81,14 +82,14 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this group your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => deleteGroup(index),
+			onClickConfirm: () => deleteGroup(key),
 			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Group' }),
 		});
 	};
 
 	const handleClick = (e) => {
 		preventPropagation(e);
-		setHighlightedIndex(index);
+		setHighlightedKey(key);
 	};
 
 	const isolateGroup = (e) => {
@@ -97,13 +98,13 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 
-	const onEditGroup = () => editGroup(index);
+	const onEditGroup = () => editGroup(key);
 
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
-		setGroupIsChecked(index, !checked);
+		setGroupIsChecked(key, !checked);
 		if (isHidden && !checked && isHighlighted) {
-			clearHighlightedIndex();
+			clearHighlightedKey();
 		}
 	};
 

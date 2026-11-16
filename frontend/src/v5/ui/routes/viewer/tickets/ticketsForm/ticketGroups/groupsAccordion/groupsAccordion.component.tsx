@@ -33,37 +33,32 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
 		setCollectionIsChecked,
-		indexedOverrides,
+		overrides,
 		editGroup,
 		groupType,
-		highlightedIndex,
-		clearHighlightedIndex,
+		highlightedKey,
+		clearHighlightedKey,
 	} = useContext(TicketGroupsContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const { containerOrFederation } = useContext(TicketContext);
 	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
 	
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
-	const indexes = indexedOverrides.map(({ index }) => index);
-	const overridesCount = indexedOverrides.length;
-	const state = getCollectionState(indexes);
+	const keys = overrides.map(({ key }) => key);
+	const overridesCount = overrides.length;
+	const state = getCollectionState(keys);
 	const isColored = groupType === 'colored';
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		setCollectionIsChecked(indexes, state !== GroupState.CHECKED);
-	};
-
-	const addNewGroup = (e) => {
-		e.stopPropagation();
-		editGroup(overridesCount); // Set the edit mode with a new index
+		setCollectionIsChecked(keys, state !== GroupState.CHECKED);
 	};
 
 	useEffect(() => {
 		if (!isColored || !hasClearedOverrides) return;
-		setCollectionIsChecked(indexes, false);
-		if (highlightedIndex >= 0) {
-			clearHighlightedIndex();
+		setCollectionIsChecked(keys, false);
+		if (highlightedKey) {
+			clearHighlightedKey();
 		}
 	}, [hasClearedOverrides]);
 
@@ -81,7 +76,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 			$isHiddenGroups={!isColored}
 		>
 			{overridesCount ? (
-				<Groups indexedOverrides={indexedOverrides} />
+				<Groups overrides={overrides} />
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage
@@ -89,14 +84,6 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 						defaultMessage="No Groups"
 					/>
 				</EmptyListMessage>
-			)}
-			{!readOnly && (
-				<NewGroupButton startIcon={<AddCircleIcon />} onClick={addNewGroup}>
-					<FormattedMessage
-						id="ticketCard.groups.addGroup"
-						defaultMessage="Add group"
-					/>
-				</NewGroupButton>
 			)}
 		</Accordion>
 	);

@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
-import _, { sortBy } from 'lodash';
-import { useEffect, useState } from 'react';
+import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import _ from 'lodash';
+import { useEffect, useRef, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
-import { GroupState, IndexedOverride, addIndex } from './ticketGroupsContext.helper';
+import { GroupState } from './ticketGroupsContext.helper';
 
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
 	overrides: GroupOverride[],
 	groupType: 'colored' | 'hidden',
 	children: any,
-	onSelectedGroupsChange?: (indexes: number[]) => void,
-	onDeleteGroups?: (indexes: number[]) => void,
-	onEditGroup?: (index: number) => void,
-	highlightedIndex: number,
-	setHighlightedIndex: (index: number) => void,
-	clearHighlightedIndex: () => void,
+	onSelectedGroupsChange?: (keys: string[]) => void,
+	onDeleteGroups?: (keys: string[]) => void,
+	onEditGroup?: (key?: string) => void,
+	highlightedKey: string,
+	setHighlightedKey: (key: string) => void,
+	clearHighlightedKey: () => void,
 };
 export const TicketGroupsContextComponent = ({
 	children,
@@ -39,87 +39,58 @@ export const TicketGroupsContextComponent = ({
 	onDeleteGroups,
 	onSelectedGroupsChange,
 	onEditGroup,
-	highlightedIndex,
-	clearHighlightedIndex,
+	highlightedKey,
+	clearHighlightedKey,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
-	// overrides should arrive already indexed
-	const [indexedOverrides, setIndexedOverrides] = useState<IndexedOverride[]>(_.sortBy(addIndex(overrides), 'prefix'));
-	const [checkedIndexes, setCheckedIndexes] = useState<number[]>(overrides.map((o, i) => i));
+	const [checkedKeys, setCheckedKeys] = useState<string[]>(overrides.map(({ key }) => key).filter(Boolean));
+	const previousKeys = useRef(new Set(checkedKeys));
 
-	const getGroupIsChecked = (index) => checkedIndexes.includes(index);
+	const getGroupIsChecked = (key: string) => checkedKeys.includes(key);
 
-	const setGroupIsChecked = (index, state) => setCheckedIndexes(
-		state ? _.union(checkedIndexes, [index]) : _.without(checkedIndexes, index),
+	const setGroupIsChecked = (key: string, state: boolean) => setCheckedKeys(
+		state ? _.union(checkedKeys, [key]) : _.without(checkedKeys, key),
 	);
 
-	const getCollectionState = (indexes = []) => {
-		if (!indexes.length) return GroupState.UNCHECKED;
-		const firstDescendantState = getGroupIsChecked(indexes[0]);
-		if (!indexes.every((index) => getGroupIsChecked(index) === firstDescendantState)) return GroupState.INDETERMINATE;
+	const getCollectionState = (keys: string[] = []) => {
+		if (!keys.length) return GroupState.UNCHECKED;
+		const firstDescendantState = getGroupIsChecked(keys[0]);
+		if (!keys.every((key) => getGroupIsChecked(key) === firstDescendantState)) return GroupState.INDETERMINATE;
 		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const setCollectionIsChecked = (indexes, state) => setCheckedIndexes(
-		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
+	const setCollectionIsChecked = (keys: string[], state: boolean) => setCheckedKeys(
+		state ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys),
 	);
 
-	const handleDeleteGroups = (indexesToDelete: number[]) => {
-		indexesToDelete = sortBy(indexesToDelete).reverse();
-		let newCheckedIndexes = [...checkedIndexes];
-
-		indexesToDelete.forEach((indexToDelete) => {
-			const indexPosition = newCheckedIndexes.findIndex((i) => i === indexToDelete);
-
-			if (indexPosition !== -1) {
-				newCheckedIndexes.splice(indexPosition, 1);
-			}
-			newCheckedIndexes = newCheckedIndexes.map((i) => (i < indexToDelete ? i : (i - 1)));
-		});
-		setCheckedIndexes(newCheckedIndexes);
-
-		if (highlightedIndex !== -1 && indexesToDelete.includes(highlightedIndex)) {
-			clearHighlightedIndex();
-		}
-	};
-
 	useEffect(() => {
-		if (overrides.length > indexedOverrides.length) {
-			// overrides length increased as new overrides were added
-			const newCheckedIndexes = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
-			setCheckedIndexes(_.union(checkedIndexes, newCheckedIndexes));
-		}
-		if (overrides.length < indexedOverrides.length) {
-			const deletedIndexes = [];
-			const idsToKeep = overrides.map((o) => (o.group as Group)._id);
-			indexedOverrides.forEach(({ group, index }) => {
-				if (!idsToKeep.includes((group as Group)._id)) {
-					deletedIndexes.push(index);
-				}
-			});
-			handleDeleteGroups(deletedIndexes);
-		}
-		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
+		const keys = overrides.map(({ key }) => key).filter(Boolean);
+		const newKeys = keys.filter((key) => !previousKeys.current.has(key));
+		setCheckedKeys((currentKeys) => _.union(
+			_.intersection(currentKeys, keys),
+			newKeys,
+		));
+		previousKeys.current = new Set(keys);
 	}, [overrides]);
 
 	useEffect(() => {
-		onSelectedGroupsChange(checkedIndexes);
-	}, [checkedIndexes]);
+		onSelectedGroupsChange(checkedKeys);
+	}, [checkedKeys]);
 
 	return (
 		<TicketGroupsContext.Provider
 			value={{
 				...contextValue,
-				deleteGroup: (index) => onDeleteGroups([index]),
+				deleteGroup: (key) => onDeleteGroups([key]),
 				deleteCollection: onDeleteGroups,
 				editGroup: onEditGroup,
 				getGroupIsChecked,
 				setGroupIsChecked,
 				setCollectionIsChecked,
 				getCollectionState,
-				indexedOverrides,
-				highlightedIndex,
-				clearHighlightedIndex,
+				overrides: _.sortBy(overrides || [], 'prefix'),
+				highlightedKey,
+				clearHighlightedKey,
 			}}
 		>
 			{children}
