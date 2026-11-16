@@ -18,7 +18,7 @@
 import { groupBy, isString, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Group } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
@@ -38,24 +38,25 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
-import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 import { TicketContext } from '../../../ticket.context';
+import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
 	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
-	const overridesIndexes = overrides.map(({ index }) => index);
-	const state = getCollectionState(overridesIndexes);
+
+	const overrideKeys = overrides.map(({ key }) => key);
+	const state = getCollectionState(overrideKeys);
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
-	
+
 	const dispatch = useDispatch();
 
 	const handleCheckboxClick = (e) => {
 		e.stopPropagation();
 		// setting the state for all the groups descendants of this collection
-		setCollectionIsChecked(overridesIndexes, state !== GroupState.CHECKED);
+		setCollectionIsChecked(overrideKeys, state !== GroupState.CHECKED);
 	};
 	const handleDeleteCollection = (e) => {
 		e.stopPropagation();
@@ -65,7 +66,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting these groups your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => deleteCollection(overridesIndexes),
+			onClickConfirm: () => deleteCollection(overrideKeys),
 			confirmLabel: formatMessage({ id: 'deleteModal.groupCollection.confirmButton', defaultMessage: 'Delete Groups' }),
 		});
 	};
@@ -103,32 +104,31 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 			)}
 		>
 			<GroupsContainer>
-				<Groups indexedOverrides={overrides} level={level + 1} />
+				<Groups overrides={overrides} level={level + 1} />
 			</GroupsContainer>
 		</CollectionAccordion>
 	);
 };
 
 type GroupsProps = {
-	indexedOverrides: IndexedOverride[],
+	overrides: GroupOverride[],
 	level?: number,
 };
 
-export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
+export const Groups = ({ overrides, level = 0 }: GroupsProps) => {
+	const [overrideItems, overrideBatches] = partition(overrides, (o) => (o.prefix?.length || 0) === level);
 	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
 	return (
 		<>
-			{overrideItems.map(({ index, ...override }) => (
+			{overrideItems.map((override) => (
 				<GroupItem
 					override={override}
-					key={isString(override.group) ? override.group : override.group._id || index}
-					index={index}
+					key={override.key || (isString(override.group) ? override.group : override.group._id)}
 				/>
 			))}
-			{Object.entries(overridesByPrefix).map(([prefix, overrides]) => (
-				<GroupCollection overrides={overrides} prefix={prefix} level={level} key={prefix} />
+			{Object.entries(overridesByPrefix).map(([prefix, collectionOverrides]) => (
+				<GroupCollection overrides={collectionOverrides} prefix={prefix} level={level} key={prefix} />
 			))}
 		</>
 	);

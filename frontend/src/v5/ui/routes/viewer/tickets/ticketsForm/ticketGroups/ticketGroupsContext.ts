@@ -20,22 +20,22 @@ import { createContext } from 'react';
 import { GroupState } from './ticketGroupsContext.helper';
 
 type TicketGroupsContextType = {
-	indexedOverrides: (GroupOverride & { index: number })[],
+	overrides: GroupOverride[],
 	groupType: 'colored' | 'hidden',
-	editGroup: (index: number) => void,
-	deleteGroup: (index: number) => void,
-	deleteCollection: (indexes: number[]) => void,
-	getGroupIsChecked: (index: number) => boolean,
-	setGroupIsChecked: (index: number, isChecked: boolean) => void,
-	getCollectionState: (indexes: number[]) => GroupState,
-	highlightedIndex: number,
-	setCollectionIsChecked: (indexes: number[], isChecked: boolean) => void,
-	setHighlightedIndex: (index: number) => void,
-	clearHighlightedIndex: () => void,
+	editGroup: (key?: string) => void,
+	deleteGroup: (key: string) => void,
+	deleteCollection: (keys: string[]) => void,
+	getGroupIsChecked: (key: string) => boolean,
+	setGroupIsChecked: (key: string, isChecked: boolean) => void,
+	getCollectionState: (keys: string[]) => GroupState,
+	highlightedKey: string | null,
+	setCollectionIsChecked: (keys: string[], isChecked: boolean) => void,
+	setHighlightedKey: (key: string) => void,
+	clearHighlightedKey: () => void,
 };
 
 export const TicketGroupsContext = createContext<TicketGroupsContextType>({
-	indexedOverrides: [],
+	overrides: [],
 	groupType: null,
 	deleteGroup: () => {},
 	deleteCollection: () => {},
@@ -44,8 +44,8 @@ export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	getGroupIsChecked: () => null,
 	setCollectionIsChecked: () => {},
 	getCollectionState: () => null,
-	highlightedIndex: -1,
-	setHighlightedIndex: () => {},
-	clearHighlightedIndex: () => {},
+	highlightedKey: null,
+	setHighlightedKey: () => {},
+	clearHighlightedKey: () => {},
 });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

@@ -32,11 +32,23 @@ import {
 	Heading,
 	Subheading,
 } from '../../ticketsForm/ticketGroups/groups/groupActionMenu/groupSettingsForm/groupSettingsForm.styles';
+import { OverrideType } from '@/v5/store/tickets/tickets.types';
 
-export const AddGroupButton = () => {
+
+type AddGroupButtonProps = {
+	newGroupsHandle: React.RefObject<any>;
+};
+
+export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 	const { formatMessage } = useIntl();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const [groupFunction, setGroupFunction] = useState('');
+
+	const createGroup = () => {
+		if (!groupFunction) return;
+		newGroupsHandle.current?.triggerNewGroup(groupFunction as OverrideType)();
+		setAnchorEl(null);
+	};
 
 	return (
 		<>
@@ -81,16 +93,16 @@ export const AddGroupButton = () => {
 							formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.placeholder', defaultMessage: 'Select group function' })
 						}
 					>
-						<MenuItem value="Coloured">
+						<MenuItem value={OverrideType.COLORED}>
 							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.coloured" defaultMessage="Coloured" />
 						</MenuItem>
-						<MenuItem value="Selected">
+						<MenuItem value={OverrideType.SELECTED}>
 							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.selected" defaultMessage="Selected" />
 						</MenuItem>
-						<MenuItem value="Hidden">
+						<MenuItem value={OverrideType.HIDDEN}>
 							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.hidden" defaultMessage="Hidden" />
 						</MenuItem>
-						<MenuItem value="Isolated">
+						<MenuItem value={OverrideType.ISOLATED}>
 							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.isolated" defaultMessage="Isolated" />
 						</MenuItem>
 					</GroupFunctionSelect>
@@ -99,7 +111,7 @@ export const AddGroupButton = () => {
 					<Button variant="text" color="secondary" onClick={() => setAnchorEl(null)}>
 						<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 					</Button>
-					<SubmitButton fullWidth={false} disabled={!groupFunction}>
+					<SubmitButton fullWidth={false} disabled={!groupFunction} onClick={createGroup}>
 						<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
 					</SubmitButton>
 				</AddGroupActions>

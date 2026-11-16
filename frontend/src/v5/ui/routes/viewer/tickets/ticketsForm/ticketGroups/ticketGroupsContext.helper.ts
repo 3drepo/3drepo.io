@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
-
 export enum GroupState {
 	CHECKED,
 	INDETERMINATE,
 	UNCHECKED,
 }
-
-export type IndexedOverride = GroupOverride & { index: number };
 
 export const getCollectionCheckboxState = (state: GroupState) => {
 	switch (state) {
@@ -35,5 +31,3 @@ export const getCollectionCheckboxState = (state: GroupState) => {
 			return { checked: state === GroupState.CHECKED };
 	}
 };
-
-export const addIndex = ((overrides: GroupOverride[]) => overrides.map((o, index) => ({ index, ...o })));

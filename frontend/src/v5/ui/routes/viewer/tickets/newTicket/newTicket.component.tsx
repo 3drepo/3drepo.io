@@ -40,6 +40,7 @@ import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { AddGroupButton } from '../ticketDetailsCard/addGroupButton/addGroupButton.component';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -135,6 +136,7 @@ export const NewTicketCard = () => {
 									defaultMessage="New {template} ticket:Groups"
 									values={{ template: template.name }}
 								/>}
+								actions={<AddGroupButton />}
 							/>
 							<CardContent>
 								<InputController

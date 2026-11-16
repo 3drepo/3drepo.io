@@ -211,8 +211,15 @@ type GroupProperties = {
 export type GroupOverride = GroupProperties & {
 	prefix?: string[],
 	group: string | Group,
-	key?: number;
+	key?: string;
 };
+
+export enum OverrideType {
+	COLORED = 'colored',
+	HIDDEN = 'hidden',
+	ISOLATED = 'isolated',
+	SELECTED = 'selected',
+}
 
 export type ViewpointState = {
 	showHidden: boolean;
