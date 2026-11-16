@@ -10,7 +10,8 @@ const outputNames = {
   main: 'three_d_repo.min.js',
   support: 'support.min.js',
   maintenance: 'maintenance.min.js',
-  unity: '../unity/unity-util.js'
+  unity: '../unity/unity-util.js',
+  unityRpc: '../unity/unity-util-rpc.js'
 };
 
 const customFolderExists = fs.existsSync(resolve(PROJECT_DIR, 'custom'));
@@ -18,7 +19,8 @@ const customFolderExists = fs.existsSync(resolve(PROJECT_DIR, 'custom'));
 module.exports = getWebpackConfig({
   mode: MODES.PRODUCTION,
   entry: {
-    unity: './src/globals/unity-util-external.ts'
+    unity: './src/globals/unity-util-external.ts',
+    unityRpc: './src/globals/unity-util-rpc.ts'
   },
   output: {
     filename: ({ chunk: { name }}) => outputNames[name] || '[name].js'

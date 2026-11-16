@@ -1901,9 +1901,9 @@ export class UnityUtil {
 	 * The object status will be returned via the promise provided.
 	 * @category Model Interactions
 	 * @param account - name of teamspace
-	 * @param model - name of the model
+	 * @param model - UUID of the model
 	 */
-	public static getObjectsStatus(account: string, model: string): Promise<ObjectStatus> {
+	public static getObjectsStatus(account?: string, model?: string): Promise<ObjectStatus> {
 		const newObjectStatusPromise = new Promise((resolve, reject) => {
 			this.objectStatusPromises.push({ resolve, reject });
 		});
@@ -1995,8 +1995,8 @@ export class UnityUtil {
 	 * Get the Axis Aligned Bounds in Project Coordinates for set of elements by
 	 * uniqueId.
 	 * @param teamspace name of the teamspace
-	 * @param project name of the project
-	 * @param container name of the container - this must be the exact
+	 * @param project uuid of the project
+	 * @param container uuid of the container - this must be the exact
 	 * container holding the unique id, it cannot be a federation.
 	 * @param uniqueIds a list of uniqueids - the bounds will encompass all of
 	 * them. If the array is empty, will return the bounds of the whole container.
@@ -2456,9 +2456,11 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Request a screenshot. The screenshot will be returned as a JSON
-	 * object with a single field, ssByte, containing the screenshot in
-	 * base64 or as a length value that can be used to read from shared memory.
+	 * Request a screenshot. The promise will resolve to a string containing
+	 * a base64 encoded PNG by default, or the length of the PNG data in
+	 * shared memory if useSharedMemory is true. useSharedMemory should usually
+	 * be false, unless there is a very specific reason to use the shared
+	 * memory implementation.
 	 * @category Model Interactions
 	 * @return returns a promise which will resolve with a base64 encoded string holding
 	 * the screenshot or the length of the screenshot data in shared memory.
