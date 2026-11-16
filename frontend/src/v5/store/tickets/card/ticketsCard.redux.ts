@@ -37,7 +37,6 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	fetchFilteredTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	setCardView: ['view', 'props'],
 	openTicket: ['ticketId'],
-	setReadOnly: ['readOnly'],
 	resetState: [],
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
@@ -59,7 +58,6 @@ export interface ITicketsCardState {
 	filteredTicketIds: Set<string>,
 	view: TicketsCardViews,
 	viewProps: any,
-	readOnly: boolean,
 	overrides: OverridesDicts | null,
 	unsavedTicket: EditableTicket | null,
 	isEditingGroups: boolean,
@@ -79,7 +77,6 @@ export const INITIAL_STATE: ITicketsCardState = {
 	view: TicketsCardViews.List,
 	viewProps: null,
 	overrides: null,
-	readOnly: false,
 	unsavedTicket: null,
 	isEditingGroups: false,
 	isShowingPins: true,
@@ -122,10 +119,6 @@ export const setCardView = (state: ITicketsCardState, { view, props }: SetCardVi
 	state.viewProps = props;
 };
 
-export const setReadOnly = (state: ITicketsCardState, { readOnly }: SetReadOnlyAction) => {
-	state.readOnly = readOnly;
-};
-
 export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverridesAction) => {
 	state.overrides = overrides;
 };
@@ -134,11 +127,10 @@ export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsave
 	state.unsavedTicket = ticket;
 };
 
-export const resetState = ({ filters, filteredTicketIds, readOnly, isShowingPins, isExpandedTicketView }: ITicketsCardState) => ({
+export const resetState = ({ filters, filteredTicketIds, isShowingPins, isExpandedTicketView }: ITicketsCardState) => ({
 	...INITIAL_STATE,
 	filters,
 	filteredTicketIds,
-	readOnly,
 	isShowingPins,
 	isExpandedTicketView,
 });
@@ -171,7 +163,6 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_PIN_TO_DROP]: setPinToDrop,
 	[TicketsCardTypes.RESET_FILTERS]: resetFilters,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
-	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
 	[TicketsCardTypes.RESET_STATE]: resetState,
 	[TicketsCardTypes.SET_OVERRIDES]: setOverrides,
 	[TicketsCardTypes.SET_UNSAVED_TICKET]: setUnsavedTicket,
@@ -197,7 +188,6 @@ export type FetchTicketsListAction = Action<'FETCH_TICKETS_LIST'> & TeamspacePro
 export type FetchFilteredTicketsAction = Action<'FETCH_FILTERED_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, props?:any };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
-export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
@@ -231,7 +221,6 @@ export interface ITicketsCardActionCreators {
 	) => FetchFilteredTicketsAction;
 	setCardView: (view: TicketsCardViews, props?: any) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
-	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
