@@ -88,7 +88,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 						/>
 					))
 				}
-				{template?.config?.comments && !isExpandedView && (<CommentsAccordion ticket={ticket} scrollPanelIntoView={scrollPanelIntoView} />)}
+				{template?.config?.comments && !isExpandedView && (<CommentsAccordion scrollPanelIntoView={scrollPanelIntoView} />)}
 			</PanelsContainer>
 		</CardContent>
 	);

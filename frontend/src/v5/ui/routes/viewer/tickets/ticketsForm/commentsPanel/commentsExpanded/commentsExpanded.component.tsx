@@ -21,13 +21,8 @@ import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { AccordionSummary } from '@mui/material';
 import { ExpandedContainer } from './commentsExpanded.styles';
 import { FormattedMessage } from 'react-intl';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-type CommentsExpandedProps = {
-	ticket: Partial<ITicket>;
-};
-
-export const CommentsExpanded = ({ ticket }: CommentsExpandedProps) => (
+export const CommentsExpanded = () => (
 	<ExpandedContainer>
 		<AccordionSummary expandIcon={null}>
 			<IconContainer>
@@ -37,6 +32,6 @@ export const CommentsExpanded = ({ ticket }: CommentsExpandedProps) => (
 				<FormattedMessage id="commentsExpanded.title" defaultMessage="Comments" />
 			</TitleContainer>
 		</AccordionSummary>
-		<CommentsList ticket={ticket} />
+		<CommentsList />
 	</ExpandedContainer>
 );

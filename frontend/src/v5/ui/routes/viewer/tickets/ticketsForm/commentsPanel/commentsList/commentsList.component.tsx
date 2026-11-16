@@ -20,7 +20,7 @@ import { Comments, CreateCommentBox, EmptyCommentsBox, CommentsContainer, TableR
 import { FormattedMessage } from 'react-intl';
 import { Comment } from '../comment/comment.component';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -33,20 +33,16 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketContext } from '../../../ticket.context';
 import { VListHandle } from '@controls/virtualList/virtualList.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-type CommentsListProps = {
-	ticket: Partial<ITicket>;
-};
-
-export const CommentsList = ({ ticket }: CommentsListProps) => {
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+export const CommentsList = () => {
 	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketId = ticket._id;
-	const ticketTemplate = ticket.type;
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const ticketTemplate = ticketFromStore?.type;
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const [commentToShow, setCommentToShow] = useSearchParam('commentId');
 	const commentsLength = comments.length;
