@@ -135,6 +135,7 @@ export type Camera = {
 	forward: number[];
 	up: number[];
 	size?: number;
+	zoomTo?: { container: string, _ids: string[] }[];
 };
 
 export type ClippingPlane = {
