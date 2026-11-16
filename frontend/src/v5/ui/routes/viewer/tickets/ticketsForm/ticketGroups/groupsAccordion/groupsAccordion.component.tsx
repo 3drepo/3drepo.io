@@ -18,7 +18,7 @@
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
@@ -26,6 +26,7 @@ import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } 
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import { TicketContext } from '../../../ticket.context';
 
 type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
@@ -38,7 +39,10 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		highlightedIndex,
 		clearHighlightedIndex,
 	} = useContext(TicketGroupsContext);
-	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const { containerOrFederation } = useContext(TicketContext);
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);
+	
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
@@ -86,7 +90,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 					/>
 				</EmptyListMessage>
 			)}
-			{isAdmin && (
+			{!readOnly && (
 				<NewGroupButton startIcon={<AddCircleIcon />} onClick={addNewGroup}>
 					<FormattedMessage
 						id="ticketCard.groups.addGroup"
