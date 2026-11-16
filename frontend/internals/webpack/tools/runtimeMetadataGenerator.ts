@@ -1,17 +1,64 @@
 import type { Compiler } from 'webpack';
 
-const fs = require('fs');
-const path = require('path');
-const ts = require('typescript');
-const { createGenerator } = require('ts-json-schema-generator');
+const fs: typeof import('fs') = require('fs');
+const path: typeof import('path') = require('path');
+const ts: typeof import('typescript') = require('typescript');
+const { createGenerator }: typeof import('ts-json-schema-generator') = require('ts-json-schema-generator');
 
-const isPublicAndVisible = (member) => !member.modifiers?.some(({ kind }) => (
+type RuntimeJsonSchema = {
+	$schema?: string;
+	$ref?: string;
+	description?: string;
+	definitions?: Record<string, RuntimeJsonSchema>;
+	properties?: Record<string, RuntimeJsonSchema>;
+	[key: string]: unknown;
+};
+
+type GeneratorOptions = {
+	inputFile: string;
+	outputFile: string;
+	primaryClass: string;
+};
+
+type MethodTag = {
+	name: string;
+	parameterName?: string;
+	text: string;
+};
+
+type MethodMetadata = {
+	description: string;
+	category?: string;
+	tags: MethodTag[];
+};
+
+type CommandEntry = {
+	method: import('typescript').MethodDeclaration;
+	methodName: string;
+	inputTypeName: string;
+	outputTypeName: string;
+	metadata: MethodMetadata;
+};
+
+type GeneratedCommand = {
+	description: string;
+	parameterOrder: string[];
+	inputSchema: RuntimeJsonSchema;
+	outputSchema: RuntimeJsonSchema;
+	category?: string;
+	tags: MethodTag[];
+};
+
+const isPublicAndVisible = (
+	member: import('typescript').MethodDeclaration | import('typescript').PropertyDeclaration
+) => !member.modifiers?.some(({ kind }) => (
 	kind === ts.SyntaxKind.PrivateKeyword || kind === ts.SyntaxKind.ProtectedKeyword
 )) && !ts.isPrivateIdentifier(member.name)
 	&& !ts.getJSDocTags(member).some(({ tagName }) => tagName.text === 'hidden');
 
-const isBrowserNativeType = (type) => {
-	const symbols = [type.aliasSymbol, type.getSymbol()].filter(Boolean);
+const isBrowserNativeType = (type: import('typescript').Type): boolean => {
+	const symbols = [type.aliasSymbol, type.getSymbol()]
+		.filter((symbol): symbol is import('typescript').Symbol => symbol !== undefined);
 
 	return symbols.some((symbol) => symbol.declarations?.some((declaration) => {
 		const fileName = path.basename(declaration.getSourceFile().fileName);
@@ -21,7 +68,11 @@ const isBrowserNativeType = (type) => {
 	}));
 };
 
-const containsBrowserNativeType = (type, checker, visited = new Set()) => {
+const containsBrowserNativeType = (
+	type: import('typescript').Type,
+	checker: import('typescript').TypeChecker,
+	visited: Set<import('typescript').Type> = new Set()
+): boolean => {
 	if (visited.has(type)) {
 		return false;
 	}
@@ -41,7 +92,7 @@ const containsBrowserNativeType = (type, checker, visited = new Set()) => {
 	}
 
 	if (checker.isArrayType(type) || checker.isTupleType(type)) {
-		return checker.getTypeArguments(type).some((memberType) => (
+		return checker.getTypeArguments(type as import('typescript').TypeReference).some((memberType) => (
 			containsBrowserNativeType(memberType, checker, visited)
 		));
 	}
@@ -61,7 +112,10 @@ const containsBrowserNativeType = (type, checker, visited = new Set()) => {
 	});
 };
 
-const getName = (name, sourceFile) => {
+const getName = (
+	name: import('typescript').Node,
+	sourceFile: import('typescript').SourceFile
+): string => {
 	if (ts.isIdentifier(name) || ts.isPrivateIdentifier(name)
 		|| ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
 		return name.text;
@@ -70,36 +124,44 @@ const getName = (name, sourceFile) => {
 	return name.getText(sourceFile);
 };
 
-const getCommentText = (comment) => {
+const getCommentText = (
+	comment: string | import('typescript').NodeArray<import('typescript').JSDocComment> | undefined
+): string => {
 	if (!comment) {
 		return '';
 	}
 
-	return typeof comment === 'string' ? comment : ts.displayPartsToString(comment);
+	return typeof comment === 'string' ? comment : comment.map(({ text }) => text).join('');
 };
 
-const getMethodMetadata = (method) => {
+const getMethodMetadata = (method: import('typescript').MethodDeclaration): MethodMetadata => {
 	const tags = ts.getJSDocTags(method).map((tag) => ({
 		name: tag.tagName.text,
 		...(ts.isJSDocParameterTag(tag) ? { parameterName: tag.name.getText() } : {}),
 		text: getCommentText(tag.comment).trim(),
 	}));
-	const category = tags.find(({ name }) => name === 'category')?.text;
-	const description = (method.jsDoc || [])
-		.map(({ comment }) => getCommentText(comment).trim())
+	const category = tags.find(({ name }) => name === 'category')?.text || undefined;
+	const description = ts.getJSDocCommentsAndTags(method)
+		.filter(ts.isJSDoc)
+		.map((doc) => getCommentText(doc.comment).trim())
 		.filter(Boolean)
 		.join('\n\n');
 
 	return { description, category, tags };
 };
 
-const collectSchemaReferences = (value, definitions, collected = {}) => {
+const collectSchemaReferences = (
+	value: unknown,
+	definitions: Record<string, RuntimeJsonSchema>,
+	collected: Record<string, RuntimeJsonSchema> = {}
+): Record<string, RuntimeJsonSchema> => {
 	if (!value || typeof value !== 'object') {
 		return collected;
 	}
 
-	if (typeof value.$ref === 'string') {
-		const match = value.$ref.match(/^#\/definitions\/(.+)$/);
+	const schema = value as RuntimeJsonSchema;
+	if (typeof schema.$ref === 'string') {
+		const match = schema.$ref.match(/^#\/definitions\/(.+)$/);
 		if (match) {
 			const name = decodeURIComponent(match[1]);
 			if (definitions[name] && !collected[name]) {
@@ -109,11 +171,15 @@ const collectSchemaReferences = (value, definitions, collected = {}) => {
 		}
 	}
 
-	Object.values(value).forEach((child) => collectSchemaReferences(child, definitions, collected));
+	Object.values(schema).forEach((child) => collectSchemaReferences(child, definitions, collected));
 	return collected;
 };
 
-const getStandaloneSchema = (schema, definitionName, description = '') => {
+const getStandaloneSchema = (
+	schema: RuntimeJsonSchema,
+	definitionName: string,
+	description = ''
+): RuntimeJsonSchema => {
 	const sourceDefinitions = schema.definitions || {};
 	const rootDefinitions = new Set([definitionName]);
 	let rootDefinition = sourceDefinitions[definitionName];
@@ -148,11 +214,24 @@ const getStandaloneSchema = (schema, definitionName, description = '') => {
 	};
 };
 
+const ensureDirectoryExists = (directory: string): void => {
+	if (fs.existsSync(directory)) {
+		return;
+	}
+
+	const parentDirectory = path.dirname(directory);
+	if (parentDirectory !== directory) {
+		ensureDirectoryExists(parentDirectory);
+	}
+
+	fs.mkdirSync(directory);
+};
+
 const generateRuntimeMetadata = ({
 	inputFile,
 	outputFile,
 	primaryClass
-}: {inputFile: string, outputFile: string, primaryClass: string}) => {
+}: GeneratorOptions) => {
 	if (!inputFile || !outputFile || !primaryClass) {
 		throw new TypeError('inputFile, outputFile, and primaryClass must be specified');
 	}
@@ -163,9 +242,10 @@ const generateRuntimeMetadata = ({
 
 	const source = fs.readFileSync(inputFile, 'utf8');
 	const sourceFile = ts.createSourceFile(inputFile, source, ts.ScriptTarget.Latest, true);
+	const parseDiagnostics = ts.transpileModule(source, { reportDiagnostics: true }).diagnostics || [];
 
-	if (sourceFile.parseDiagnostics.length) {
-		const diagnostic = sourceFile.parseDiagnostics[0];
+	if (parseDiagnostics.length) {
+		const diagnostic = parseDiagnostics[0];
 		const { line } = sourceFile.getLineAndCharacterOfPosition(diagnostic.start || 0);
 		const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 		throw new Error(`${inputFile}:${line + 1}: ${message}`);
@@ -197,14 +277,18 @@ const generateRuntimeMetadata = ({
 		throw new Error(`Unable to load TypeScript program for ${inputFile}`);
 	}
 
-	const programClass = programSource.statements.find((statement) => (
+	const programClass = programSource.statements.find((statement): statement is import('typescript').ClassDeclaration => (
 		ts.isClassDeclaration(statement)
 		&& statement.name?.text === primaryClass
-		&& statement.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.ExportKeyword)
+		&& Boolean(statement.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.ExportKeyword))
 	));
-	const methods = programClass.members.filter((member) => (
+	if (!programClass) {
+		throw new Error(`Unable to load exported class "${primaryClass}" from ${inputFile}`);
+	}
+
+	const methods = programClass.members.filter((member): member is import('typescript').MethodDeclaration => (
 		ts.isMethodDeclaration(member)
-		&& member.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.StaticKeyword)
+		&& Boolean(member.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.StaticKeyword))
 		&& isPublicAndVisible(member)
 		&& !member.parameters.some((parameter) => (
 			containsBrowserNativeType(checker.getTypeAtLocation(parameter), checker)
@@ -218,11 +302,19 @@ const generateRuntimeMetadata = ({
 			|| ts.isTypeAliasDeclaration(statement)
 			|| ts.isInterfaceDeclaration(statement))
 			&& statement.modifiers?.some(({ kind }) => kind === ts.SyntaxKind.ExportKeyword))
-		.map(({ name }) => name.text);
-	const schemaTypes = exportedTypes.length
+		.map((statement) => {
+			if (ts.isEnumDeclaration(statement)
+				|| ts.isTypeAliasDeclaration(statement)
+				|| ts.isInterfaceDeclaration(statement)) {
+				return statement.name.text;
+			}
+
+			throw new Error('Unsupported exported type declaration');
+		});
+	const schemaTypes: string[] = exportedTypes.length
 		? [`import type { ${exportedTypes.join(', ')} } from ${JSON.stringify(inputFile.replace(/\\/g, '/'))};`]
 		: [];
-	const commandEntries = [];
+	const commandEntries: CommandEntry[] = [];
 
 	methods.forEach((method, index) => {
 		const inputTypeName = `CommandInput${index}`;
@@ -238,7 +330,12 @@ const generateRuntimeMetadata = ({
 				typeNode ? printer.printNode(ts.EmitHint.Unspecified, typeNode, programSource) : 'unknown'
 			};`;
 		});
-		const returnType = checker.getReturnTypeOfSignature(checker.getSignatureFromDeclaration(method));
+		const signature = checker.getSignatureFromDeclaration(method);
+		if (!signature) {
+			throw new Error(`Unable to resolve signature for "${methodName}"`);
+		}
+
+		const returnType = checker.getReturnTypeOfSignature(signature);
 		const resolvedReturnType = checker.getAwaitedType(returnType) || returnType;
 		const returnTypeNode = checker.typeToTypeNode(resolvedReturnType, method, typeNodeFlags);
 
@@ -296,8 +393,8 @@ const generateRuntimeMetadata = ({
 	const generatedSchemas = generator.createSchema(commandEntries.flatMap(({
 		inputTypeName,
 		outputTypeName,
-	}) => [inputTypeName, outputTypeName]));
-	const commands = {};
+	}) => [inputTypeName, outputTypeName])) as unknown as RuntimeJsonSchema;
+	const commands: Record<string, GeneratedCommand> = {};
 
 	commandEntries.forEach(({
 		method,
@@ -332,20 +429,16 @@ const generateRuntimeMetadata = ({
 	});
 
 	const contents = `export const commands = ${JSON.stringify(commands, null, 2)};\n`;
-	fs.mkdirSync(path.dirname(outputFile), { recursive: true });
+	ensureDirectoryExists(path.dirname(outputFile));
 	fs.writeFileSync(outputFile, contents);
 
 	return commands;
 };
 
 class RuntimeMetadataPlugin {
-	private options: {
-		inputFile: string;
-		outputFile: string;
-		primaryClass: string;
-	};
+	private options: GeneratorOptions;
 
-	constructor(options: {inputFile: string, outputFile: string, primaryClass: string}) {
+	constructor(options: GeneratorOptions) {
 		this.options = options;
 	}
 
