@@ -90,7 +90,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 								<FormattedMessage id="ticketHistoryDialog.list.noHistory" defaultMessage="No history available" />
 							</NoHistoryMessage>
 						)}
-						{ticketHistory?.toReversed().map((historyItem) => (
+						{ticketHistory?.map((historyItem) => (
 							<TicketHistoryItem key={historyItem.timestamp} template={template} {...historyItem} />
 						))}
 					</TicketHistoryTable>

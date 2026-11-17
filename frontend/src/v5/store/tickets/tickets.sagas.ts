@@ -476,7 +476,7 @@ export function* fetchTicketHistory({ teamspace, projectId, modelId, ticketId, i
 	try {
 		yield put(TicketsActions.setIsTicketHistoryPending(true));
 		const ticketHistory = yield API.Tickets.fetchTicketHistory(teamspace, projectId, modelId, ticketId, modelType(isFederation));
-		yield put(TicketsActions.fetchTicketHistorySuccess(ticketId, ticketHistory));
+		yield put(TicketsActions.fetchTicketHistorySuccess(ticketId, ticketHistory.toReversed()));
 		yield put(TicketsActions.setIsTicketHistoryPending(false));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
