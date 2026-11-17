@@ -27,7 +27,8 @@ import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.compone
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { ColumnWidths } from './ticketHistory.helpers';
-import { TicketHistoryTable, ModalBody, NoHistoryMessage, CenteredSpinner } from './ticketHistoryDialog.styles';
+import { TicketHistoryTable, ModalBody, NoHistoryMessage, CenteredSpinner, MIN_ITEM_HEIGHT } from './ticketHistoryDialog.styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 type ITicketHistoryDialog = {
 	onClickClose: () => void;
@@ -90,9 +91,15 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 								<FormattedMessage id="ticketHistoryDialog.list.noHistory" defaultMessage="No history available" />
 							</NoHistoryMessage>
 						)}
-						{!isPending && ticketHistory?.map((historyItem) => (
-							<TicketHistoryItem key={historyItem.timestamp} template={template} {...historyItem} />
-						))}
+						<VirtualList items={ticketHistory ?? []} itemHeight={MIN_ITEM_HEIGHT} ItemComponent={
+							(item) => (
+								<TicketHistoryItem 
+									key={item.timestamp}
+									template={template}
+									{...item}
+								/>
+							)
+						} />
 					</TicketHistoryTable>
 				</ModalBody>
 			</Form>

@@ -22,6 +22,8 @@ import { ModalBody as BaseModalBody } from '@controls/formModal/modalBody/modalB
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
+export const MIN_ITEM_HEIGHT = 80;
+
 export const ModalBody = styled(BaseModalBody)`
 	min-width: 1212px;
 `;
@@ -44,7 +46,7 @@ export const NoHistoryMessage = styled(EmptyListMessage)`
 
 export const ItemContainer = styled.li<{ selected?: boolean }>`
 	width: 100%;
-	min-height: 80px;
+	min-height: ${MIN_ITEM_HEIGHT}px;
 	padding: 15px 29px;
 	position: relative;
 	display: flex;

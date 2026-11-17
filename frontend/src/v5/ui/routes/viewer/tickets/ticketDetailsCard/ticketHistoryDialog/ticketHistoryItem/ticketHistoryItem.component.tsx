@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { memo } from 'react';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
 import { ItemContainer, Author, TimestampContainer, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
@@ -38,7 +39,7 @@ const Timestamp = ({ timestamp }) => {
 	);
 };
 
-export const TicketHistoryItem = ({ author, timestamp, changes, imported, template }: ITicketHistory & { template: ITemplate }) => {
+export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, template }: ITicketHistory & { template: ITemplate }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const fullname = getFullnameFromUser(user);
@@ -69,4 +70,5 @@ export const TicketHistoryItem = ({ author, timestamp, changes, imported, templa
 			<ChangesTable template={template} changes={changes} />
 		</ItemContainer>
 	);
-};
+});
+TicketHistoryItem.displayName = 'TicketHistoryItem';
