@@ -270,3 +270,8 @@ export const selectTicketHistoryByTicketId = createSelector(
 	(state, ticketId: string) => ticketId,
 	(state, ticketId) => state.ticketHistoryByTicketId[ticketId] || [],
 ) as (state: any, ticketId: string) => ITicketHistory[];
+
+export const selectIsTicketHistoryPending = createSelector(
+	selectTicketsDomain,
+	(state) => state.isTicketHistoryPending,
+) as (state: any) => boolean;

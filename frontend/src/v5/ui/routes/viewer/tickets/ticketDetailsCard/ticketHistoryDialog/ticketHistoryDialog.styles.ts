@@ -20,6 +20,7 @@ import { ColumnWidths } from './ticketHistory.helpers';
 import { ChipContainer } from '@controls/chip/baseChip/baseChip.styles';
 import { ModalBody as BaseModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 export const ModalBody = styled(BaseModalBody)`
 	min-width: 1212px;
@@ -28,6 +29,12 @@ export const ModalBody = styled(BaseModalBody)`
 export const TicketHistoryTable = styled.div`
 	border-radius: 10px;
 	overflow: hidden;
+`;
+
+export const CenteredSpinner = styled(Spinner)`
+	margin: 30px auto;
+	height: 34px;
+	width: 34px;
 `;
 
 export const NoHistoryMessage = styled(EmptyListMessage)`
@@ -54,6 +61,7 @@ export const TimestampContainer = styled.div`
     flex-shrink: 0;
 	width: ${ColumnWidths.Timestamp}px;
 `;
+
 export const Author = styled.div`
     flex-shrink: 0;
 	width: ${ColumnWidths.Author}px;

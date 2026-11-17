@@ -474,8 +474,10 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 
 export function* fetchTicketHistory({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketHistoryAction) {
 	try {
+		yield put(TicketsActions.setIsTicketHistoryPending(true));
 		const ticketHistory = yield API.Tickets.fetchTicketHistory(teamspace, projectId, modelId, ticketId, modelType(isFederation));
 		yield put(TicketsActions.fetchTicketHistorySuccess(ticketId, ticketHistory));
+		yield put(TicketsActions.setIsTicketHistoryPending(false));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -484,6 +486,7 @@ export function* fetchTicketHistory({ teamspace, projectId, modelId, ticketId, i
 			),
 			error,
 		}));
+		yield put(TicketsActions.setIsTicketHistoryPending(false));
 	}
 }
 

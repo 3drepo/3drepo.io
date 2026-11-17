@@ -27,7 +27,7 @@ import { TicketHistoryItem } from './ticketHistoryItem/ticketHistoryItem.compone
 import { DashboardListHeader as Header, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { ColumnWidths } from './ticketHistory.helpers';
-import { TicketHistoryTable, ModalBody, NoHistoryMessage } from './ticketHistoryDialog.styles';
+import { TicketHistoryTable, ModalBody, NoHistoryMessage, CenteredSpinner } from './ticketHistoryDialog.styles';
 
 type ITicketHistoryDialog = {
 	onClickClose: () => void;
@@ -45,6 +45,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketHistory = TicketsHooksSelectors.selectTicketHistoryByTicketId(ticket?._id);
+	const isPending = TicketsHooksSelectors.selectIsTicketHistoryPending();
 	
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchTicketHistory(teamspace, project, containerOrFederation, ticket?._id, isFederation);
@@ -83,7 +84,8 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 						</Label>
 					</Header>
 					<TicketHistoryTable>
-						{ticketHistory.length < 1 && (
+						{isPending && <CenteredSpinner />}
+						{!isPending && ticketHistory.length < 1 && (
 							<NoHistoryMessage>
 								<FormattedMessage id="ticketHistoryDialog.list.noHistory" defaultMessage="No history available" />
 							</NoHistoryMessage>
