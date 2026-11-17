@@ -292,7 +292,7 @@ const establishRoutes = (modelType, isInternal) => {
          *       200:
          *         description: Texture binary data
          *         content:
-         *           image/png:
+         *           image/*:
          *             schema:
          *               type: string
          *               format: binary

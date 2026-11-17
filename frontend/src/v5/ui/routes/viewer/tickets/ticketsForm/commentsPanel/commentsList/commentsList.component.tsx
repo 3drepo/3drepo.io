@@ -20,7 +20,7 @@ import { Comments, CreateCommentBox, EmptyCommentsBox, CommentsContainer, TableR
 import { FormattedMessage } from 'react-intl';
 import { Comment } from '../comment/comment.component';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -35,12 +35,13 @@ import { VListHandle } from '@controls/virtualList/virtualList.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const CommentsList = () => {
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, ticketFromStore?.type);
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const [commentToShow, setCommentToShow] = useSearchParam('commentId');
 	const commentsLength = comments.length;

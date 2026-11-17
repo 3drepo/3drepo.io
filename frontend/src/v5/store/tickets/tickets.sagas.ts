@@ -281,9 +281,13 @@ const getViewGroupsIds = (state: ViewpointState): string[] => {
 
 const appendPropertiesGroupsToArray = (groupsIds: any[], properties: object) => {
 	Object.keys(properties).forEach((propName) => {
-		const { state } = properties[propName] || {};
+		const { state, camera } = properties[propName] || {};
 		if (state) {
 			Array.prototype.push.apply(groupsIds, getViewGroupsIds(state));
+		}
+
+		if (camera?.zoomTo) {
+			Array.prototype.push.apply(groupsIds, camera.zoomTo.map((obj) => obj.group as unknown as string));
 		}
 	});
 };
@@ -330,6 +334,7 @@ export function* fetchTicketGroupsAndGoToView({ teamspace, projectId, modelId, t
 		yield take(TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS);
 		const ticketWithGroups = yield select(selectTicketById, modelId, ticketId);
 		const defaultView = get(ticketWithGroups?.properties, AdditionalProperties.DEFAULT_VIEW);
+
 		if (!defaultView) return;
 		goToView(defaultView);
 	} catch (error) {

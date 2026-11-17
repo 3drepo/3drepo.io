@@ -114,6 +114,15 @@ export interface ITemplate {
 		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
 		tabular?: ITabularConfig;
+		permissions?: {
+			create?: string[],
+			comment?: string[],
+			edit?: {
+				assign?: string[],
+				status?: string[],
+				default?: string[],
+			},
+		};
 	};
 }
 
@@ -126,6 +135,7 @@ export type Camera = {
 	forward: number[];
 	up: number[];
 	size?: number;
+	zoomTo?: { container: string, _ids: string[] }[];
 };
 
 export type ClippingPlane = {

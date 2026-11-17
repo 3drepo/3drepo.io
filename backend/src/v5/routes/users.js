@@ -305,7 +305,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Gets the avatar of the user
 	*         content:
-	*           image/png:
+	*           image/*:
 	*             schema:
 	*               type: string
 	*               format: binary

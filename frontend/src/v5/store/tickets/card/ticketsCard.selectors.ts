@@ -49,11 +49,6 @@ export const selectViewProps = createSelector(
 	(ticketCardState) => ticketCardState.viewProps,
 );
 
-export const selectReadOnly = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.readOnly,
-);
-
 export const selectIsEditingGroups = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.isEditingGroups,

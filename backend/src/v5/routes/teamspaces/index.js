@@ -409,7 +409,7 @@ const establishRoutes = (isInternal) => {
 		*       200:
 		*         description: Gets the avatar of the Teamspace
 		*         content:
-		*           image/png:
+		*           image/*:
 		*             schema:
 		*               type: string
 		*               format: binary
@@ -471,7 +471,7 @@ const establishRoutes = (isInternal) => {
 		*       200:
 		*         description: Gets the avatar of a member of a teamspace
 		*         content:
-		*           image/png:
+		*           image/*:
 		*             schema:
 		*               type: string
 		*               format: binary

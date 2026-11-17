@@ -199,6 +199,10 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
+		if (viewpoint.zoomTo?.length) {
+			Viewer.zoomToObjects({ entries: viewpoint.zoomTo });
+		}
+
 		yield put(TreeActions.clearCurrentlySelected());
 
 		if (viewpoint.hidden_group?.objects?.length > 0) {

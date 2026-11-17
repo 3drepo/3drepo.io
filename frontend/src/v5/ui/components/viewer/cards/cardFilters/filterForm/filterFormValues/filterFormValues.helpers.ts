@@ -200,11 +200,11 @@ export const useTagsSelectOptions = (
 		if (type !== 'tags') return;
 		if (!modelsIds.length || !teamspace || !project) return;
 
-		const matchingTemplate = templates.find((t) => getTemplateProperty(t, module, property)?.type === 'tags');
-		if (!matchingTemplate) return;
+		const matchingTemplates = templates.filter((t) => getTemplateProperty(t, module, property)?.type === 'tags');
+		if (!matchingTemplates.length) return;
 
 		const propName = module ? `${module}::${property}` : property;
-		const cacheKey = `${matchingTemplate._id}:${propName}:${modelsIds.join(',')}`;
+		const cacheKey = `${matchingTemplates.map(({ _id }) => _id).join(',')}:${propName}:${modelsIds.join(',')}`;
 
 		if (cache.current[cacheKey]) {
 			setSelectOptions(cache.current[cacheKey]);
@@ -215,9 +215,9 @@ export const useTagsSelectOptions = (
 
 		setIsFetchingOptions(true);
 		Promise.all(
-			modelsIds.map((modelId) => fetchTagsValues(
-				teamspace, project, getModelType(isFed(modelId)), modelId, matchingTemplate._id, propName,
-			).catch(() => ({ values: [] as string[] }))),
+			modelsIds.flatMap((modelId) => matchingTemplates.map(({ _id }) => fetchTagsValues(
+				teamspace, project, getModelType(isFed(modelId)), modelId, _id, propName,
+			).catch(() => ({ values: [] as string[] })))),
 		)
 			.then((results) => {
 				if (cancelled) return;

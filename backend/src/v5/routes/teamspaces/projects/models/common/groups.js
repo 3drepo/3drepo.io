@@ -130,7 +130,12 @@ const establishRoutes = (isFed) => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               $ref: "#/components/schemas/group"
+	 *               type: object
+	 *               properties:
+	 *                 groups:
+	 *                   type: array
+	 *                   items:
+	 *                     $ref: "#/components/schemas/group"
 	 *
 	 */
 	router.post('/export', hasReadAccessToModel(isFed), validateGroupsExportData, exportGroups(isFed), serialiseGroupArray);
