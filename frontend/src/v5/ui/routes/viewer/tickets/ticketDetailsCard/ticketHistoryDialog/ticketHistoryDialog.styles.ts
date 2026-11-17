@@ -60,12 +60,12 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 `;
 
 export const TimestampContainer = styled.div`
-    flex-shrink: 0;
+	flex-shrink: 0;
 	width: ${ColumnWidths.Timestamp}px;
 `;
 
 export const Author = styled.div`
-    flex-shrink: 0;
+	flex-shrink: 0;
 	width: ${ColumnWidths.Author}px;
 	display: inline-flex;
 	gap: 5px;
@@ -74,7 +74,7 @@ export const Author = styled.div`
 `;
 
 export const ActionType = styled.div`
-    flex-shrink: 0;
+	flex-shrink: 0;
 	width: ${ColumnWidths.ActionType}px;
 `;
 
