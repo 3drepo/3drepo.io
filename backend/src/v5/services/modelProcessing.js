@@ -220,15 +220,16 @@ ModelProcessing.queueModelUpload = async (
 	const fileId = `${generateUUIDString()}${fileNameSanitised}`;
 	const rev_id = await addRevision(teamspace, project, container, modelTypes.CONTAINER,
 		{ ...revData, author: owner, format, rFile: [fileId] });
+	const stringRevId = UUIDToString(rev_id);
 	const collection = collectionName(container);
-	const pathToRevFolder = Path.join(sharedDir, UUIDToString(rev_id));
+	const pathToRevFolder = Path.join(sharedDir, stringRevId);
 
 	try {
 		if (readOnly) {
 			const refInfo = {
 				_id: fileId,
 				name: originalname,
-				rev_id: UUIDToString(rev_id),
+				rev_id: stringRevId,
 				project,
 				model: container,
 				link: path,
@@ -236,14 +237,14 @@ ModelProcessing.queueModelUpload = async (
 			};
 			await addExternalFileReference(teamspace, `${collection}.ref`, fileId, refInfo);
 		} else {
-			const fileMeta = { name: originalname, rev_id: UUIDToString(rev_id), project, model: container };
+			const fileMeta = { name: originalname, rev_id: stringRevId, project, model: container };
 			await storeFileStream(teamspace, collection, fileId, createReadStream(path), fileMeta);
 		}
 
 		const json = {
 			teamspace,
 			container,
-			revId: UUIDToString(rev_id),
+			revId: stringRevId,
 			owner,
 			timezone: revData.timezone,
 			units: revData.units,
@@ -258,21 +259,21 @@ ModelProcessing.queueModelUpload = async (
 
 		await writeFile(`${pathToRevFolder}.json`, JSON.stringify(json));
 
-		const msg = `import ${SHARED_SPACE_TAG}/${UUIDToString(rev_id)}.json`;
+		const msg = `import ${SHARED_SPACE_TAG}/${stringRevId}.json`;
 
-		await queueMessage(modelq, UUIDToString(rev_id), msg);
+		await queueMessage(modelq, stringRevId, msg);
 
 		publish(events.QUEUED_TASK_UPDATE, {
 			teamspace,
 			model: container,
 			modelType: modelTypes.CONTAINER,
-			corId: UUIDToString(rev_id),
+			corId: stringRevId,
 			status: processStatuses.QUEUED,
 		});
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
-			rm(`${sharedDir}/${UUIDToString(rev_id)}.json`),
+			rm(`${pathToRevFolder}.json`),
 			removeFile(teamspace, collection, fileId),
 		]).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
