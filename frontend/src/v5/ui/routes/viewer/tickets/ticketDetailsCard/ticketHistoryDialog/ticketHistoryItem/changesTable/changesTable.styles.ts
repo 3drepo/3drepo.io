@@ -39,7 +39,6 @@ export const ErrorMessage = styled.span`
 
 export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
-	padding: 0 3px;
 	flex-grow: 0;
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
