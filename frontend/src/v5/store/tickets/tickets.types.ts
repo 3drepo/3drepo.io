@@ -217,7 +217,7 @@ export type GroupOverride = GroupProperties & {
 export enum OverrideType {
 	COLORED = 'colored',
 	HIDDEN = 'hidden',
-	ISOLATED = 'isolated',
+	SHOWN = 'shownw',
 	SELECTED = 'selected',
 }
 
@@ -225,6 +225,8 @@ export type ViewpointState = {
 	showHidden: boolean;
 	hidden?: GroupOverride[],
 	colored?: GroupOverride[],
+	selected?: GroupOverride[],
+	shown?: GroupOverride[],
 	transformed?: GroupOverride[],
 };
 
@@ -235,7 +237,7 @@ export type Viewpoint = {
 	state?: ViewpointState;
 };
 
-export type IGroupSettingsForm = GroupOverride & { group: Group };
+export type TicketGroupFormValue = GroupOverride & { group: Group };
 
 type MeshIdColorDict = Record<string, string>;
 type MeshIdTransparencyDict = Record<string, number>;

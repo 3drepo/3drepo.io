@@ -28,7 +28,7 @@ import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { cloneDeep, merge } from 'lodash';
@@ -122,6 +122,7 @@ export const NewTicketCard = () => {
 	}, [isLoading]);
 
 	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
+	const newGroupsHandle = useRef(null);
 
 	return (
 		<CardContainer>
@@ -136,12 +137,13 @@ export const NewTicketCard = () => {
 									defaultMessage="New {template} ticket:Groups"
 									values={{ template: template.name }}
 								/>}
-								actions={<AddGroupButton />}
+								actions={<AddGroupButton newGroupsHandle={newGroupsHandle} />}
 							/>
 							<CardContent>
 								<InputController
 									Input={TicketGroups}
 									name={viewProps.name}
+									newGroupsHandle={newGroupsHandle}
 								/>
 							</CardContent>
 						</>
