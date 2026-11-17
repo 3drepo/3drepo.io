@@ -271,10 +271,12 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 
 const getViewGroupsIds = (state: ViewpointState): string[] => {
 	const colored = state.colored || [];
+	const selected = state.selected || [];
+	const shown = state.shown || [];
 	const hidden = state.hidden || [];
 	const transformed = state.transformed || [];
 
-	return [...colored, ...hidden, ...transformed].map((val) => val.group as unknown as string);
+	return [...colored, ...selected, ...shown, ...hidden, ...transformed].map((val) => val.group as unknown as string);
 };
 
 const appendPropertiesGroupsToArray = (groupsIds: any[], properties: object) => {
