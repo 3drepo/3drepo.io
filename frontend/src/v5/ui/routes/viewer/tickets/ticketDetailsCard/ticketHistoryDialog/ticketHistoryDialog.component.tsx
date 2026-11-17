@@ -79,7 +79,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 						<Label width={ColumnWidths.ChangePropertyName}>
 							<FormattedMessage id="ticketHistoryDialog.list.header.property" defaultMessage="Property" />
 						</Label>
-						<Label minWidth={ColumnWidths.ChangeDetails}>
+						<Label>
 							<FormattedMessage id="ticketHistoryDialog.list.header.details" defaultMessage="Details" />
 						</Label>
 					</Header>
@@ -90,7 +90,7 @@ export const TicketHistoryDialog = ({ onClickClose, open, containerOrFederation,
 								<FormattedMessage id="ticketHistoryDialog.list.noHistory" defaultMessage="No history available" />
 							</NoHistoryMessage>
 						)}
-						{ticketHistory?.map((historyItem) => (
+						{!isPending && ticketHistory?.map((historyItem) => (
 							<TicketHistoryItem key={historyItem.timestamp} template={template} {...historyItem} />
 						))}
 					</TicketHistoryTable>

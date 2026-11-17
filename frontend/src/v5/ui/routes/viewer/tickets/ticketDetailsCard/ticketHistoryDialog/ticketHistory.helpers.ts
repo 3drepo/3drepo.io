@@ -23,7 +23,7 @@ export const ColumnWidths = {
 	Author: 176,
 	ActionType: 90,
 	ChangePropertyName: 250,
-	ChangeDetails: 400,
+	// ChangeDetails stretches to fill the remaining space
 };
 
 

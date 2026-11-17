@@ -36,9 +36,6 @@ const Value = ({ value, propertyDef }) => {
 	if (isDateChange(propertyDef?.type)) {
 		return <ChangeValue>{formatDateTime(value)}</ChangeValue>;
 	}
-	if (propertyDef?.type === 'coords') {
-		return null;
-	}
 	return <ChangeValue>{value?.toString() ?? ''}</ChangeValue>;
 };
 
