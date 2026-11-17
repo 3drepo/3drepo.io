@@ -42,15 +42,13 @@ const Value = ({ value, propertyDef }) => {
 	return <ChangeValue>{value?.toString() ?? ''}</ChangeValue>;
 };
 
-const CommaSeparatedList = ({ items, propertyDef }) =>{
-	const hasMultiple = items.length > 1;
+const CommaSeparatedList = ({ value, propertyDef }) =>{
+	if (!isArrayChange(propertyDef?.type)) return <Value value={value} propertyDef={propertyDef} />;
 	return (
 		<>
-			{items.reduce((acc, item, index) => {
-				acc.push(
-					<Value key={`value-${index}`} value={item} propertyDef={propertyDef} />,
-				);
-				if (hasMultiple && index < items.length - 1) {
+			{value.reduce((acc, item, index) => {
+				acc.push(<Value key={`value-${index}`} value={item} propertyDef={propertyDef} />);
+				if (index < value.length - 1) {
 					acc.push(<span key={`comma-${index}`}>,&nbsp;</span>);
 				}
 				return acc;
@@ -81,14 +79,9 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 
 	if (wasDeleted) {
 		if (isDescribableChange(propertyDef.type)) {
-			if (isArrayChange(propertyDef.type)) {
-				return <FormattedMessage
-					id="ticketHistory.changesTable.array.removed"
-					defaultMessage="Removed&nbsp;{removed}" values={{ removed: <CommaSeparatedList items={from} propertyDef={propertyDef} /> }} />;
-			}
 			return <FormattedMessage
 				id="ticketHistory.changesTable.deleted.specific"
-				defaultMessage="Deleted&nbsp;{from}" values={{ from: <Value value={from} propertyDef={propertyDef} /> }} />;
+				defaultMessage="Deleted&nbsp;{from}" values={{ from: <CommaSeparatedList value={from} propertyDef={propertyDef} /> }} />;
 		}
 		// If value is complex return a generic deleted message
 		return <FormattedMessage
@@ -98,7 +91,7 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 		if (isDescribableChange(propertyDef.type)) {
 			return <FormattedMessage
 				id="ticketHistory.changesTable.set.specific"
-				defaultMessage="Set to&nbsp;{to}" values={{ to: <Value value={to} propertyDef={propertyDef} /> }} />;
+				defaultMessage="Set to&nbsp;{to}" values={{ to: <CommaSeparatedList value={to} propertyDef={propertyDef} /> }} />;
 		}
 		// If value is complex return a generic set message
 		return <FormattedMessage
@@ -111,8 +104,16 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 				const added = difference(to, from);
 				return (
 					<>
-						{removed.length > 0 && <FormattedMessage id="ticketHistory.changesTable.array.removed" defaultMessage="Removed&nbsp;{removed}&nbsp;" values={{ removed: <CommaSeparatedList items={removed} propertyDef={propertyDef} /> }} />}
-						{added.length > 0 && <FormattedMessage id="ticketHistory.changesTable.array.added" defaultMessage="Added&nbsp;{added}" values={{ added: <CommaSeparatedList items={added} propertyDef={propertyDef} /> }} />}
+						{removed.length > 0 &&
+							<FormattedMessage
+								id="ticketHistory.changesTable.array.removed"
+								defaultMessage="Removed&nbsp;{removed}&nbsp;"
+								values={{ removed: <CommaSeparatedList value={removed} propertyDef={propertyDef} /> }} />}
+						{added.length > 0 &&
+							<FormattedMessage
+								id="ticketHistory.changesTable.array.added"
+								defaultMessage="Added&nbsp;{added}"
+								values={{ added: <CommaSeparatedList value={added} propertyDef={propertyDef} /> }} />}
 					</>
 				);
 			}
