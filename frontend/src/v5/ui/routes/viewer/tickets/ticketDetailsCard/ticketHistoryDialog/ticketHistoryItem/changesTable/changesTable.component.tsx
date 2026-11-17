@@ -17,7 +17,7 @@
 
 import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { getPathsOfChanges } from '../../ticketHistory.helpers';
-import { ChangePropertyName, ChangeRow, DetailContainer } from './changesTable.styles';
+import { ChangePropertyName, ChangeRow, ChangesContainer, DetailContainer } from './changesTable.styles';
 import { ChangeDetail } from './changeDetail.component';
 import { get } from 'lodash';
 import type { ITemplate, TicketChange } from '@/v5/store/tickets/tickets.types';
@@ -30,7 +30,7 @@ type IChangesTable = {
 export const ChangesTable = ({ changes, template }: IChangesTable) => {
 	const paths = getPathsOfChanges(changes);
 	return (
-		<div>
+		<ChangesContainer>
 			{paths.map((propertyName) => (
 				<ChangeRow key={propertyName}>
 					<ChangePropertyName>{getPropertyLabel(propertyName)}</ChangePropertyName>
@@ -39,6 +39,6 @@ export const ChangesTable = ({ changes, template }: IChangesTable) => {
 					</DetailContainer>
 				</ChangeRow>
 			))}
-		</div>
+		</ChangesContainer>
 	);
 };

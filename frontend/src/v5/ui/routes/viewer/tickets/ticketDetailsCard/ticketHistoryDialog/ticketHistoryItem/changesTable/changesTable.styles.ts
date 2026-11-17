@@ -19,9 +19,15 @@ import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 import { ColumnWidths } from '../../ticketHistory.helpers';
 
+export const ChangesContainer = styled.div`
+	flex: 1;
+	min-width: 0;
+`;
+
 export const ChangeRow = styled.div`
+	flex-shrink: 0;
 	display: grid;
-	grid-template-columns: ${ColumnWidths.ChangePropertyName}px ${ColumnWidths.ChangeDetails}px;
+	grid-template-columns: ${ColumnWidths.ChangePropertyName}px minmax(0, 1fr);
 `;
 
 export const ChangePropertyName = styled.div`
@@ -30,6 +36,8 @@ export const ChangePropertyName = styled.div`
 
 export const DetailContainer = styled.div`
 	display: inline-flex;
+	min-width: 0;
+	white-space: nowrap;
 `;
 
 export const ErrorMessage = styled.span`
