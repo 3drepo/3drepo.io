@@ -38,6 +38,7 @@ import {
 	WatchPropertiesUpdatesAction,
 	SetPropertiesFetchedAction,
 	UpdateManyTicketsAction,
+	FetchTicketHistoryAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -52,6 +53,7 @@ import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
 import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { modelType } from '@/v5/services/api/tickets';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -150,8 +152,8 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
-				{ model: getContainerOrFederationFormattedText(isFederation) },
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {ticketId}' },
+				{ ticketId },
 			),
 			error,
 		}));
@@ -475,6 +477,24 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 	}
 }
 
+export function* fetchTicketHistory({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketHistoryAction) {
+	try {
+		yield put(TicketsActions.setIsTicketHistoryPending(true));
+		const ticketHistory = yield API.Tickets.fetchTicketHistory(teamspace, projectId, modelId, ticketId, modelType(isFederation));
+		yield put(TicketsActions.fetchTicketHistorySuccess(ticketId, ticketHistory.toReversed()));
+		yield put(TicketsActions.setIsTicketHistoryPending(false));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicketHistory.error', defaultMessage: 'trying to fetch the ticket history for {ticketId}' },
+				{ ticketId },
+			),
+			error,
+		}));
+		yield put(TicketsActions.setIsTicketHistoryPending(false));
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
@@ -490,4 +510,5 @@ export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
 	yield takeEvery(TicketsTypes.WATCH_PROPERTIES_UPDATES, watchPropertiesUpdates);
 	yield takeLatest(TicketsTypes.UPDATE_MANY_TICKETS, updateManyTickets);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_HISTORY, fetchTicketHistory);
 }

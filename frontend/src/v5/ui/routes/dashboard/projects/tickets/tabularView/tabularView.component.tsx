@@ -60,8 +60,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { SortedTableComponent } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../../../../components/tickets/ticketsGroupBy.helper';
-import { ExpandIcon } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketDetailsCard.styles';
+import { ExpandIcon, TicketHistoryIcon } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketDetailsCard.styles';
 import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
+import { TicketHistoryDialog } from '@/v5/ui/routes/viewer/tickets/ticketDetailsCard/ticketHistoryDialog/ticketHistoryDialog.component';
 import { JobsActions } from '@/v4/modules/jobs';
 
 const paramToInputProps = (value, setter) => ({
@@ -422,6 +423,8 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const isExpanded = TicketsCardHooksSelectors.selectIsExpandedTicketView() && isSidebarOpen && selectedTemplate?.config?.comments;
 	const hideExpandButton = !selectedTemplate?.config?.comments || isNewTicket;
 
+	const openTicketHistory = () =>DialogsActionsDispatchers.open(TicketHistoryDialog, { containerOrFederation, ticketId });
+
 	const onClickExpandTicketMode = () => {
 		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
 	};
@@ -442,6 +445,9 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 					</OpenInViewerButton>
 				</Link>
 				<CircleButtons>
+					<CircleButton onClick={openTicketHistory}>
+						<TicketHistoryIcon />
+					</CircleButton>
 					{!hideExpandButton && (
 						<CircleButton onClick={onClickExpandTicketMode} selected={isExpanded}>
 							<ExpandIcon />

@@ -17,12 +17,17 @@
 
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import ExpandArrowsIcon from '@assets/icons/outlined/expand_arrows-outlined.svg';
+import HistoryIcon from '@assets/icons/outlined/history-outlined.svg';
 import styled from 'styled-components';
 
 const CommonChevronStyle = styled(ChevronIcon)`
 	&& {
 		height: 10px;
 	}
+`;
+
+export const TicketHistoryIcon = styled(HistoryIcon)`
+	overflow: visible;
 `;
 
 export const ChevronLeft = styled(CommonChevronStyle)`

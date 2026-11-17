@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
-import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
+import { ITemplate, ITicket, NewTicket, Group, ITicketHistory } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
 import EventEmitter from 'eventemitter3';
@@ -56,6 +56,9 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setTabularViewParams: ['params', 'search'],
 	updateManyTickets: ['teamspace', 'projectId', 'ids', 'ticket', 'onSuccess', 'onError'],
 	resetPropertiesFetched: [],
+	fetchTicketHistory: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
+	fetchTicketHistorySuccess: ['ticketId', 'ticketHistory'],
+	setIsTicketHistoryPending: ['isPending'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -67,6 +70,8 @@ export const INITIAL_STATE: ITicketsState = {
 	sorting: DEFAULT_TICKETS_SORTING,
 	fetchedProperties: {}, // This is used to track which properties have been fetched for each ticket
 	tabularViewParams: { params: {}, search:'' },
+	ticketHistoryByTicketId: {},
+	isTicketHistoryPending: false,
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -164,6 +169,14 @@ const resetPropertiesFetched = (state:ITicketsState) => {
 	state.fetchedProperties = {};
 };
 
+const fetchTicketHistorySuccess = (state: ITicketsState, { ticketId, ticketHistory }: FetchTicketHistorySuccessAction) => {
+	state.ticketHistoryByTicketId[ticketId] = ticketHistory;
+};
+
+const setIsTicketHistoryPending = (state: ITicketsState, { isPending }: SetIsTicketHistoryPendingAction) => {
+	state.isTicketHistoryPending = isPending;
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -179,6 +192,8 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.SET_PROPERTIES_FETCHED]: setPropertiesFetched,
 	[TicketsTypes.SET_TABULAR_VIEW_PARAMS]: setTabularViewParams,
 	[TicketsTypes.RESET_PROPERTIES_FETCHED]: resetPropertiesFetched,
+	[TicketsTypes.FETCH_TICKET_HISTORY_SUCCESS]: fetchTicketHistorySuccess,
+	[TicketsTypes.SET_IS_TICKET_HISTORY_PENDING]: setIsTicketHistoryPending,
 }));
 
 export interface ITicketsState {
@@ -189,7 +204,9 @@ export interface ITicketsState {
 	groupsByGroupId: Record<string, Group>,
 	sorting: TicketsSorting,
 	fetchedProperties: Record<string, Record<string, boolean>>, // Tracks which properties have been fetched for each ticket
-	tabularViewParams: { params: Partial<DashboardTicketsParams>, search: string }
+	tabularViewParams: { params: Partial<DashboardTicketsParams>, search: string },
+	ticketHistoryByTicketId: Record<string, ITicketHistory[]>,
+	isTicketHistoryPending: boolean,
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -220,7 +237,9 @@ export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & 
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
 export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, onSuccess?: () => void, onError?: () => void };
-
+export type FetchTicketHistoryAction = Action<'FETCH_TICKET_HISTORY'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean };
+export type FetchTicketHistorySuccessAction = Action<'FETCH_TICKET_HISTORY_SUCCESS'> & { ticketId: string, ticketHistory: ITicketHistory[] };
+export type SetIsTicketHistoryPendingAction = Action<'SET_IS_TICKET_HISTORY_PENDING'> & { isPending: boolean };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -337,5 +356,8 @@ export interface ITicketsActionCreators {
 	resetSorting: () => ResetSortingAction,
 	setPropertiesFetched: (ticketIds: string[], properties: string[], fetched: boolean) => SetPropertiesFetchedAction,
 	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction,
-	setTabularViewParams: (params: Partial<DashboardTicketsParams>, search: string) => SetTabularViewParamsAction
+	setTabularViewParams: (params: Partial<DashboardTicketsParams>, search: string) => SetTabularViewParamsAction,
+	fetchTicketHistory: (teamspace: string, projectId: string, modelId: string, ticketId: string, isFederation: boolean) => FetchTicketHistoryAction,
+	fetchTicketHistorySuccess: (ticketId: string, ticketHistory:  ITicketHistory[]) => FetchTicketHistorySuccessAction,
+	setIsTicketHistoryPending: (isPending: boolean) => SetIsTicketHistoryPendingAction,
 }

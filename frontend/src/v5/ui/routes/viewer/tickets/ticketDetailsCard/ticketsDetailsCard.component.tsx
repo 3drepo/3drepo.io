@@ -19,7 +19,7 @@ import { ArrowBack, CardContainer } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DialogsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers, TicketsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers, TicketsActionsDispatchers, TicketCommentsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -31,7 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { BreakableText, ChevronLeft, ChevronRight, ExpandIcon } from './ticketDetailsCard.styles';
+import { BreakableText, ChevronLeft, ChevronRight, ExpandIcon, TicketHistoryIcon } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
@@ -42,6 +42,7 @@ import { CommentsExpanded } from '../ticketsForm/commentsPanel/commentsExpanded/
 import { ExpandableCard } from '@components/viewer/cards/expandableCard/expandableCard.component';
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
+import { TicketHistoryDialog } from './ticketHistoryDialog/ticketHistoryDialog.component';
 
 enum IndexChange {
 	PREV = -1,
@@ -96,6 +97,10 @@ export const TicketDetailsCard = () => {
 
 	const onClickExpandTicketMode = () => {
 		TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpanded);
+	};
+
+	const openTicketHistory = () => {
+		DialogsActionsDispatchers.open(TicketHistoryDialog, { containerOrFederation, ticketId });
 	};
 
 	const goBack = () => {
@@ -213,6 +218,7 @@ export const TicketDetailsCard = () => {
 							icon={<ArrowBack onClick={goBack} />}
 							title={`${template.code}:${ticket.number}`}
 							actions={<>
+								<CircleButton variant="viewer" onClick={openTicketHistory}><TicketHistoryIcon /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
 								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
 								<Tooltip title={disableExpandButton ? formatMessage({ id: 'ticketsTable.button.expand.disabled', defaultMessage: 'Comments are disabled in this ticket' }) : ''}>
