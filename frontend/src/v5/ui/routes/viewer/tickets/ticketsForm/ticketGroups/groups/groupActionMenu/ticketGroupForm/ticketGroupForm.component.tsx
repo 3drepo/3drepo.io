@@ -28,7 +28,7 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy, uniqBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { TicketGroupFormValue } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
@@ -58,20 +58,20 @@ import {
 	FormRulesBox,
 	NewCollectionActionMenu,
 	ObjectsCount,
-} from './groupSettingsForm.styles';
+} from './ticketGroupForm.styles';
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
-import { RulesField } from './rulesField/ruelsField.component';
+import { RulesField } from './rulesField/rulesField.component';
 import { Popper } from '../../../ticketGroups.styles';
 import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 import { TicketContext } from '../../../../../ticket.context';
 import { hexToRgb } from '@/v5/helpers/colors.helper';
 
-type GroupSettingsFormProps = {
-	value?: IGroupSettingsForm,
-	onSubmit?: (value: IGroupSettingsForm) => void,
+type TicketGroupFormProps = {
+	value?: TicketGroupFormValue,
+	onSubmit?: (value: TicketGroupFormValue) => void,
 	onCancel?: () => void,
 	prefixes: string[][],
 	isColored?: boolean,
@@ -97,7 +97,7 @@ const mergePrefixes = (prefixesA: string[][], prefixesB: string[][]) => {
 	return uniqBy(prefixesA.concat(prefixesB).sort(), JSON.stringify);
 };
  
-export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
+export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored }: TicketGroupFormProps) => {
 	const [isSmart, setIsSmart] = useState(true);
 	const [isGroupDefinitionValid, setIsGroupDefinitionValid] = useState(true);
 	const [isGroupDefinitionDirty, setIsGroupDefinitionDirty] = useState(false);
@@ -122,7 +122,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const selectedNodes = TreeHooksSelectors.selectSelectedNodes();
 	const objectsCount = TreeHooksSelectors.selectSelectedObjectsCount();
 
-	const formData = useForm<IGroupSettingsForm>({
+	const formData = useForm<TicketGroupFormValue>({
 		mode: 'all',
 		resolver: yupResolver(GroupSettingsSchema),
 	});
@@ -142,7 +142,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		return ((isDirty || isGroupDefinitionDirty) && (isValid && isGroupDefinitionValid));
 	};
 
-	const onClickSubmit = async (newValues:IGroupSettingsForm) => {
+	const onClickSubmit = async (newValues:TicketGroupFormValue) => {
 		if (!isSmart) {
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		} else {
@@ -164,7 +164,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			delete newValues.opacity;
 		}
 
-		onSubmit?.(omitBy(newValues, isUndefined) as IGroupSettingsForm);
+		onSubmit?.(omitBy(newValues, isUndefined) as TicketGroupFormValue);
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {

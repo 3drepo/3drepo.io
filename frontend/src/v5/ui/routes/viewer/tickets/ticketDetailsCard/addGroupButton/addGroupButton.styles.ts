@@ -19,7 +19,7 @@ import { Button } from '@controls/button';
 import { Select } from '@controls/inputs/select/select.component';
 import { Popover } from '@mui/material';
 import styled from 'styled-components';
-import { Buttons } from '../../ticketsForm/ticketGroups/groups/groupActionMenu/groupSettingsForm/groupSettingsForm.styles';
+import { Buttons } from '../../ticketsForm/ticketGroups/groups/groupActionMenu/ticketGroupForm/ticketGroupForm.styles';
 
 export const AddGroupButtonBase = styled(Button).attrs({
 	variant: 'outlined',

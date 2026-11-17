@@ -31,7 +31,7 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
-import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
+import { TicketGroupForm } from './groups/groupActionMenu/ticketGroupForm/ticketGroupForm.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { v4 as uuid } from 'uuid';
@@ -224,7 +224,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		<Container onClick={clearHighlightedKey}>
 			{state.colored && (
 				<TicketGroupsContextComponent
-					groupType={OverrideType.COLORED}
+					groupType="colored"
 					onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
 					onSelectedGroupsChange={setSelectedColorKeys}
 					overrides={state.colored}
@@ -238,9 +238,42 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					/>
 				</TicketGroupsContextComponent>
 			)}
+			{state.selected && (
+				<TicketGroupsContextComponent
+					groupType="colored"
+					onDeleteGroups={onDeleteGroups(OverrideType.SELECTED)}
+					onSelectedGroupsChange={() => {}}
+					overrides={state.selected}
+					onEditGroup={onSetEditGroup(OverrideType.SELECTED)}
+					highlightedKey={getHighlightedKeyByType(OverrideType.SELECTED)}
+					clearHighlightedKey={clearHighlightedKey}
+					setHighlightedKey={onSetHighlightedKey(OverrideType.SELECTED)}
+				>
+					<GroupsAccordion
+						title={formatMessage({ id: 'ticketCard.groups.selected', defaultMessage: 'Selected Groups' })}
+					/>
+				</TicketGroupsContextComponent>
+			)}
+			{state.shown && (
+				<TicketGroupsContextComponent
+					groupType="hidden"
+					onDeleteGroups={onDeleteGroups(OverrideType.SHOWN)}
+					onSelectedGroupsChange={() => {}}
+					overrides={state.shown}
+					onEditGroup={onSetEditGroup(OverrideType.SHOWN)}
+					highlightedKey={getHighlightedKeyByType(OverrideType.SHOWN)}
+					clearHighlightedKey={clearHighlightedKey}
+					setHighlightedKey={onSetHighlightedKey(OverrideType.SHOWN)}
+				>
+					<GroupsAccordion
+						title={formatMessage({ id: 'ticketCard.groups.shown', defaultMessage: 'Shown Groups' })}
+					/>
+				</TicketGroupsContextComponent>
+			)}
+
 			{state.hidden && (
 				<TicketGroupsContextComponent
-					groupType={OverrideType.HIDDEN}
+					groupType="hidden"
 					onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
 					onSelectedGroupsChange={onSelectedHiddenGroupChange}
 					overrides={state.hidden}
@@ -263,12 +296,12 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 				}}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<GroupSettingsForm
+				<TicketGroupForm
 					value={editingOverride.override}
 					onSubmit={onSubmit}
 					onCancel={cancelEdition}
 					prefixes={getPossiblePrefixes(state[editingOverride.type])}
-					isColored={editingOverride.type === OverrideType.COLORED}
+					isColored={editingOverride.type === OverrideType.COLORED || editingOverride.type === OverrideType.SELECTED}
 				/>
 			</Popper>
 		</Container>

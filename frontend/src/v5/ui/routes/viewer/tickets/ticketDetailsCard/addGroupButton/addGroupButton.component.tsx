@@ -31,7 +31,7 @@ import {
 	FormBox,
 	Heading,
 	Subheading,
-} from '../../ticketsForm/ticketGroups/groups/groupActionMenu/groupSettingsForm/groupSettingsForm.styles';
+} from '../../ticketsForm/ticketGroups/groups/groupActionMenu/ticketGroupForm/ticketGroupForm.styles';
 import { OverrideType } from '@/v5/store/tickets/tickets.types';
 
 
@@ -102,8 +102,8 @@ export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 						<MenuItem value={OverrideType.HIDDEN}>
 							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.hidden" defaultMessage="Hidden" />
 						</MenuItem>
-						<MenuItem value={OverrideType.ISOLATED}>
-							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.isolated" defaultMessage="Isolated" />
+						<MenuItem value={OverrideType.SHOWN}>
+							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.shown" defaultMessage="Shown" />
 						</MenuItem>
 					</GroupFunctionSelect>
 				</FormBox>
