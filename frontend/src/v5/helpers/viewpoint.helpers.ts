@@ -59,10 +59,10 @@ export const getNodesIdsFromSharedIds = (objects) => {
 	return Array.from(ids);
 };
 
-const createModelBySharedIdDictionary = (sharedIdnodes) => {
+const createModelBySharedIdDictionary = (sharedIdNodes) => {
 	const state = getState();
 	// Converts shareIds to nodeIds
-	const nodes = getNodesIdsFromSharedIds([{ shared_ids: sharedIdnodes }]);
+	const nodes = getNodesIdsFromSharedIds([{ shared_ids: sharedIdNodes }]);
 	const meshesInfo: any[] = selectGetMeshesByIds(nodes)(state);
 
 	// This generates a dictionary to get the teamspace and model from the sharedId: sharedId => {teamspace, modelId}
@@ -71,15 +71,15 @@ const createModelBySharedIdDictionary = (sharedIdnodes) => {
 		const model = { teamspace, modelId };
 		return meshesByModel.meshes.reduce((d, mesh) => {
 			const index = nodes.indexOf(mesh);
-			d[sharedIdnodes[index]] = model;
+			d[sharedIdNodes[index]] = model;
 			return d;
 		}, dict);
 	}, {});
 };
 
 const createGroupsByColor = (overrides) => {
-	const sharedIdnodes = Object.keys(overrides);
-	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
+	const sharedIdNodes = Object.keys(overrides);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdNodes);
 
 	/* This creates an array of groups grouped by colour
 	for example:
@@ -125,7 +125,7 @@ const createGroupsByColor = (overrides) => {
 		}
 	]
 	 */
-	return sharedIdnodes
+	return sharedIdNodes
 		.filter((objectId) => objectId in modelsDict)
 		.reduce((arr, objectId) =>  {
 			const { teamspace, modelId } = modelsDict[objectId];
@@ -154,10 +154,10 @@ const createGroupsByColor = (overrides) => {
 };
 
 const createGroupsByTransformations = (transformations) => {
-	const sharedIdnodes = Object.keys(transformations);
-	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
+	const sharedIdNodes = Object.keys(transformations);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdNodes);
 
-	return sharedIdnodes.reduce((arr, objectId) =>  {
+	return sharedIdNodes.reduce((arr, objectId) =>  {
 		const { teamspace, modelId } = modelsDict[objectId];
 
 		// 1 . Use or create the transform group with that transformation value
@@ -557,7 +557,6 @@ export const goToView = async (view: Viewpoint) => {
 	});
 	
 	ViewpointsActionsDispatchers.showViewpoint(null, null, viewpointV5ToV4(view));
-	// ViewpointsActionsDispatchers.showViewpoint(null, null, view);
 };
 
 const getGroupsIDsOfViewpoint = (viewpoint: IViewpoint) => {
