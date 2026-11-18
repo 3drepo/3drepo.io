@@ -172,12 +172,18 @@ export type MapInitialisationInfo = {
 };
 
 export type ModelLoadedEvent = {
-	teamspace: string;
-	project: string;
+	teamspace: string; // Name of teamspace
+	project: string; // UUID of project
 	model: string; // UUID of a Federation or Container, depending on which was provided to loadModel
-	revision: string;
+	revision: string; // UUID or Name of revision, depending on which was provided to loadModel
 	isComparator: boolean;
+	isFederation: boolean;
 };
+
+export type LoadedModelsInfo = {
+	mainModel: ModelLoadedEvent; // The first model loaded - if a Federation has been loaded, will be that Federation
+	containers: ModelLoadedEvent[]; // A list of individual Containers, including those in the main model. isFederation will always be false for these.
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -277,6 +283,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static viewpointsPromises = [];
+
+	/** @hidden */
+	public static loadedModelsInfoPromises: DeferredPromise<LoadedModelsInfo>[] = [];
 
 	/** @hidden */
 	public static objectStatusPromises = [];
@@ -876,6 +885,25 @@ export class UnityUtil {
 		} else {
 			deferred.reject();
 		}
+	}
+
+	/** @hidden **/
+	public static respondToLoadedModelsInfoRequest(json: string) {
+		try {
+			const info = JSON.parse(json);
+			if (UnityUtil.verbose) {
+				console.debug('[FROM UNITY] respondToLoadedModelsInfoRequest', json);
+			}
+			UnityUtil.loadedModelsInfoPromises.forEach((promise) => {
+				promise.resolve(info);
+			});
+		} catch (error) {
+			console.error('Failed to parse models info', json);
+			UnityUtil.loadedModelsInfoPromises.forEach((promise) => {
+				promise.reject(json);
+			});
+		}
+		UnityUtil.loadedModelsInfoPromises = [];
 	}
 
 	/** @hidden */
@@ -1896,19 +1924,19 @@ export class UnityUtil {
 	/**
 	 * Get Object Status within the viewer. This will return you the list of
 	 * objects that are currently set invisible, and a list of object that are
-	 * currently highlighted.
-	 *
-	 * The object status will be returned via the promise provided.
+	 * currently highlighted. The teamspace and model parameters are not required;
+	 * if omitted all selected and invisible objects across all Containers will
+	 * be returned.
 	 * @category Model Interactions
-	 * @param account - name of teamspace
+	 * @param teamspace - name of teamspace
 	 * @param model - UUID of the model
 	 */
-	public static getObjectsStatus(account?: string, model?: string): Promise<ObjectStatus> {
+	public static getObjectsStatus(teamspace?: string, model?: string): Promise<ObjectStatus> {
 		const newObjectStatusPromise = new Promise((resolve, reject) => {
 			this.objectStatusPromises.push({ resolve, reject });
 		});
 
-		const nameSpace = account && model ? `${account}.${model}` : '';
+		const nameSpace = teamspace && model ? `${teamspace}.${model}` : '';
 
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
@@ -2472,7 +2500,6 @@ export class UnityUtil {
 			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, useSharedMemory ? 1 : 0);
-
 		return newScreenshotPromise as Promise<string>;
 	}
 
@@ -2485,10 +2512,15 @@ export class UnityUtil {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});
-
 		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, '');
-
 		return newViewpointPromise as Promise<Viewpoint>;
+	}
+
+	public static requestLoadedModelsInfo(): Promise<LoadedModelsInfo> {
+		const deferred = this.createDeferredPromise<LoadedModelsInfo>();
+		this.loadedModelsInfoPromises.push(deferred);
+		UnityUtil.toUnity('RequestModelsInfo', UnityUtil.LoadingState.VIEWER_READY, '');
+		return deferred.promise;
 	}
 
 	/**
@@ -2757,8 +2789,8 @@ export class UnityUtil {
 	 * Toggle visibility of the given list of objects
 	 * @category Model Interactions
 	 * @param account - name of teamspace
-	 * @param model - name of model
-	 * @param ids - list of unique ids to toggle visibility
+	 * @param model - uuid of model
+	 * @param ids - list of unique _ids of meshes to toggle visibility of
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
