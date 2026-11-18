@@ -207,7 +207,7 @@ Permissions.hasTemplateEditPermissions = async (user, teamspace, editPermissions
 	try {
 		if (!editPermissions || await Permissions.isTeamspaceAdmin(teamspace, user)) return true;
 
-		const nonEditableProps = ['_id', 'type'];
+		const nonEditableProps = ['_id', 'type', 'comments'];
 		const { assign: assignPerms, status: statusPerms, default: defaultPerms } = editPermissions;
 		const userJobs = await getJobsByUsers(teamspace, [user]);
 		const userAndJobs = [user, ...userJobs];
