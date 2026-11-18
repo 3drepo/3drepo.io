@@ -63,10 +63,6 @@ const selectAddons = createSelector(
 	),
 );
 
-export const selectRisksEnabled = createSelector(
-	selectAddons, (addOns) => !!addOns.modules?.includes(AddOnModule.Risks),
-);
-
 export const selectIssuesEnabled = createSelector(
 	selectAddons, (addOns) => !!addOns.modules?.includes(AddOnModule.Issues),
 );

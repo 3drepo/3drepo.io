@@ -18,10 +18,9 @@
 import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
-import { addToGroupDictionary } from '@/v4/helpers/colorOverrides';
+import { addToGroupDictionary, ColorOverrides } from '@/v4/helpers/colorOverrides';
 import { selectActiveIssue } from '@/v4/modules/issues';
 import { selectDefaultView } from '@/v4/modules/model';
-import { selectActiveRisk } from '@/v4/modules/risks';
 import { selectQueryParams } from '@/v4/modules/router/router.selectors';
 import { IViewpointsState } from './viewpoints.redux';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
@@ -89,18 +88,13 @@ const selectOverridesDict = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectOverridesDict, (overrides) => overrides?.colors || {},
-);
-
-export const selectTransparencies = createSelector(
-	selectOverridesDict, (overrides) => overrides?.transparencies || {},
+	selectOverridesDict, (overrides: ColorOverrides) => overrides?.colors || {},
 );
 
 export const selectInitialView = createSelector(
-	selectViewpointsDomain, selectQueryParams, selectDefaultView, selectActiveIssue, selectActiveRisk,
-	({ viewpointsMap }, { viewId }, defaultView, activeIssue, activeRisk) => {
+	selectViewpointsDomain, selectQueryParams, selectDefaultView, selectActiveIssue,
+	({ viewpointsMap }, { viewId }, defaultView, activeIssue) => {
 		if (!isEmpty(activeIssue)) return activeIssue;
-		if (!isEmpty(activeRisk)) return activeRisk;
 		return !viewpointsMap ? null : viewpointsMap[viewId || defaultView?.id];
 	},
 );

@@ -23,6 +23,8 @@ const { processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
 const utils = require("../utils");
 const Queue = require("../services/queue");
+const { sendSystemEmail } = require("../../v5/services/mailer");
+const { templates } = require("../../v5/services/mailer/mailer.constants");
 
 const eventTypes = Object.freeze({
 	CREATED: "Created",
@@ -32,35 +34,44 @@ const eventTypes = Object.freeze({
 
 async function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 
-	let channel = `notifications::${account}`;
-	if (model) {
-		const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
+	try {
+		let channel = `notifications::${account}`;
+		if (model) {
+			const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
 
-		const project = await findProjectByModelId(account, model, { _id: 1 });
+			const project = await findProjectByModelId(account, model, { _id: 1 });
 
-		if (!project) {
-			// models must be inside a project
-			return;
+			if (!project) {
+				// models must be inside a project
+				return;
+			}
+
+			const projectId = utils.uuidToString(project._id);
+
+			channel = `${account}::${projectId}::${model}`;
 		}
 
-		const projectId = utils.uuidToString(project._id);
+		model = !model ? "" : `::${model}`;
+		extraKeys = !extraKeys ? [] : extraKeys;
+		const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
+		event = `${account}${model}${extraPrefix}::${event}`;
 
-		channel = `${account}::${projectId}::${model}`;
+		const msg = {
+			event,
+			channel,
+			emitter,
+			data
+		};
+
+		return Queue.insertEventMessage(msg);
+	} catch (err) {
+		await sendSystemEmail(templates.LISTENER_ERROR_NOTIFICATION.name, {
+			component: "ChatEventV4",
+			listenerName: "insertEventQueue",
+			payload: { event, teamspace: account, model, data },
+			error: err
+		}, undefined, true);
 	}
-
-	model = !model ? "" : `::${model}`;
-	extraKeys = !extraKeys ? [] : extraKeys;
-	const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
-	event = `${account}${model}${extraPrefix}::${event}`;
-
-	const msg = {
-		event,
-		channel,
-		emitter,
-		data
-	};
-
-	return Queue.insertEventMessage(msg);
 }
 
 // Notifications chat events
@@ -138,15 +149,6 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
-// Risks chat events
-function newRisks(emitter, account, model, data) {
-	return insertEventQueue("risk" + eventTypes.CREATED, emitter, account, model, null, data);
-}
-
-function riskChanged(emitter, account, model, _id, data) {
-	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, { _id, ...data });
-}
-
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
@@ -198,11 +200,11 @@ const subscribeToV5Events = () => {
 		}
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, user, data : importData }) => {
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({ teamspace, model, corId, user, data: importData }) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
-		const rawSettings =  await findModelSettingById(teamspace, model);
-		const [nRevisions, setting]  = await Promise.all([
+		const rawSettings = await findModelSettingById(teamspace, model);
+		const [nRevisions, setting] = await Promise.all([
 			revisionCount(teamspace, model),
 			prepareDefaultView(teamspace, model, rawSettings)
 		]);
@@ -210,9 +212,9 @@ const subscribeToV5Events = () => {
 		const data = { user, nRevisions, ...setting };
 		modelStatusChanged(null, teamspace, model, data);
 
-		if(importData.status === processStatuses.OK) {
-			const rev = await findLatest(teamspace, model, {tag: 1});
-			if(rev) {
+		if (importData.status === processStatuses.OK) {
+			const rev = await findLatest(teamspace, model, { tag: 1 });
+			if (rev) {
 				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId || rev._id);
 				notes.forEach((note) => upsertedNotification(null, note));
 			}
@@ -247,8 +249,6 @@ module.exports = {
 	commentDeleted,
 	groupChanged,
 	groupsDeleted,
-	newRisks,
-	riskChanged,
 	viewpointsChanged,
 	viewpointsCreated,
 	viewpointsDeleted,

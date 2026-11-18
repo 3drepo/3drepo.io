@@ -16,12 +16,12 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectTicketOverrides, selectTicketTransparencies } from '@/v5/store/tickets/card/ticketsCard.selectors';
-import { selectOverrides as selectViewsOverrides, selectTransparencies as selectViewsTransparencies } from '@/v5/store/viewpoints/viewpoints.selectors';
+import { selectOverrides as selectViewsOverrides } from '@/v5/store/viewpoints/viewpoints.selectors';
+import { selectTicketOverrides } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { ColorOverrides } from '../../helpers/colorOverrides';
 import * as Bim from '../bim';
-import { selectOverrides as selectGroupsOverrides,
-	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
+import { selectOverrides as selectGroupsOverrides } from '../groups/groups.selectors';
 import { selectIsTreeProcessed } from '../tree';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
@@ -86,13 +86,6 @@ export const selectIsClipEdit = createSelector(
 
 export const selectColorOverrides = createSelector(
 	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides,
-		(viewsOverrides, groupsOverrides, ticketsOverrides) =>
+		(viewsOverrides: ColorOverrides, groupsOverrides: ColorOverrides, ticketsOverrides: ColorOverrides) =>
 			({...viewsOverrides,  ...groupsOverrides, ...ticketsOverrides })
-);
-
-
-export const selectAllTransparencyOverrides = createSelector(
-	selectViewsTransparencies, selectGroupsTransparencies, selectTicketTransparencies,
-		(viewsTransparencies, groupsTransparencies, ticketsTransparencies) =>
-			({...viewsTransparencies, ...groupsTransparencies, ...ticketsTransparencies })
 );

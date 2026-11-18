@@ -26,7 +26,7 @@ import { selectHasSequences } from '@/v4/modules/sequences';
 import {
 	FieldsRow,
 	StyledFormControl,
-} from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+} from '../../viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 

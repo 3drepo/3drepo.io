@@ -16,14 +16,24 @@
  */
 
 const { determineTestGroup } = require('../../../../helper/utils');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateCalibration,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 const { isUUIDString } = require('../../../../../../src/v5/utils/helper/typeCheck');
 
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { queueMessage } = require(`${src}/handler/queue`);
+const DBHandler = require(`${src}/handler/db`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -32,20 +42,20 @@ const { modelTypes, processStatuses, statusCodes } = require(`${src}/models/mode
 
 const { getRevisionFormat } = require(`${src}/models/revisions`);
 
-const user = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
-const container2 = ServiceHelper.generateRandomModel();
-const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+const user = generateUserCredentials();
+const teamspace = generateRandomString();
+const project = generateRandomProject();
+const container = generateRandomModel();
+const container2 = generateRandomModel();
+const federation = generateRandomModel({ modelType: modelTypes.FEDERATION });
+const drawing = generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
 const federationRevision = ServiceHelper.generateRevisionEntry();
 const drawingRevision = { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 	incomplete: true,
 	status: processStatuses.PROCESSING };
 
-const calibration = ServiceHelper.generateCalibration();
+const calibration = generateCalibration();
 
 let agent;
 const setupData = async () => {
@@ -90,6 +100,12 @@ const setupData = async () => {
 		ServiceHelper.db.createCalibration(teamspace, project.id, drawing._id,
 			drawingRevision._id, calibration),
 	]);
+	await Promise.all([
+		DBHandler.updateOne(teamspace, 'settings', { _id: container._id },
+			{ $set: { corID: containerRevision._id } }),
+		DBHandler.updateOne(teamspace, 'settings', { _id: container2._id },
+			{ $set: { corID: containerRevision._id } }),
+	]);
 };
 
 const waitForEvent = (socket, event) => new Promise((resolve) => {
@@ -114,7 +130,7 @@ const modelUploadTest = () => {
 
 			await agent.post(`${route()}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('tag', ServiceHelper.generateRandomString())
+				.field('tag', generateRandomString())
 				.attach('file', objModel)
 				.expect(templates.ok.status);
 
@@ -209,9 +225,9 @@ const modelUploadTest = () => {
 
 			await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/drawings/${drawing._id}/revisions?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('revCode', ServiceHelper.generateRandomString(10))
+				.field('revCode', generateRandomString(10))
 				.field('statusCode', statusCodes[0].code)
-				.field('desc', ServiceHelper.generateRandomString())
+				.field('desc', generateRandomString())
 				.attach('file', dwgModel)
 				.expect(templates.ok.status);
 
@@ -248,7 +264,7 @@ const modelUploadTest = () => {
 
 			await agent.post(`${route(teamspace, project.id, container2._id)}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
-				.field('tag', ServiceHelper.generateRandomString())
+				.field('tag', generateRandomString())
 				.attach('file', objModel)
 				.expect(templates.ok.status);
 
@@ -269,7 +285,7 @@ const queueUpdateTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
 
@@ -305,8 +321,6 @@ const queueFinishedTest = () => {
 			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
 			const content = { value: 0, teamspace, container: container._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
-				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
 
 			const modelUpdateResults = await modelUpdatePromise;
@@ -361,6 +375,48 @@ const queueFinishedTest = () => {
 
 			socket.close();
 		});
+
+		test('should ignore a late container processing update after completion', async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
+			const data = { teamspace, project: project.id, model: container2._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+			const callbackConsumedPromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
+			const content = { status: 'processing', teamspace, container: container._id };
+			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
+				JSON.stringify({ value: 0, teamspace, container: container2._id }));
+			await expect(callbackConsumedPromise).resolves.toEqual(expect.objectContaining({
+				...data,
+				data: expect.objectContaining({ status: 'ok' }),
+			}));
+
+			const modelSettings = await DBHandler.findOne(teamspace, 'settings',
+				{ _id: container._id }, { status: 1, corID: 1 });
+			expect(modelSettings).toEqual({ _id: container._id });
+			socket.close();
+		});
+
+		test('should ignore a late drawing processing update after completion', async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
+			const data = { teamspace, project: project.id, model: container2._id };
+			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
+			const callbackConsumedPromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
+			const content = { status: 'processing', teamspace, drawing: drawing._id };
+			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
+			await DBHandler.updateOne(teamspace, 'settings', { _id: container2._id },
+				{ $set: { corID: containerRevision._id } });
+			await queueMessage(queueConfig.callback_queue, containerRevision._id,
+				JSON.stringify({ value: 0, teamspace, container: container2._id }));
+			await expect(callbackConsumedPromise).resolves.toEqual(expect.objectContaining({
+				...data,
+				data: expect.objectContaining({ status: 'ok' }),
+			}));
+
+			const revision = await DBHandler.findOne(teamspace, 'drawings.history',
+				{ _id: stringToUUID(drawingRevision._id) }, { status: 1, incomplete: 1 });
+			expect(revision).toEqual({ _id: stringToUUID(drawingRevision._id) });
+			socket.close();
+		});
 	});
 };
 
@@ -376,7 +432,7 @@ describe(determineTestGroup(__filename), () => {
 	afterAll(() => Promise.all([
 		ServiceHelper.closeApp(server),
 		chatApp.close()]));
-	modelUploadTest();
 	queueUpdateTest();
 	queueFinishedTest();
+	modelUploadTest();
 });

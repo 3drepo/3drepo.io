@@ -20,18 +20,17 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectIsEditingGroups, selectSelectedTicket, selectView } from '@/v5/store/tickets/card/ticketsCard.selectors';
-import { selectIssuesEnabled, selectRisksEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
 import { IssuesActions } from '../../modules/issues';
 import { MeasurementsActions } from '../../modules/measurements';
 import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
-import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions, selectTreeNodesList } from '../../modules/tree';
 import {
-	selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
+	selectDraggablePanels, selectIsFocusMode, selectLeftPanels,
 	ViewerGuiActions,
 } from '../../modules/viewerGui';
 import { withDataCache } from '../../services/dataCache';
@@ -45,7 +44,6 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelPending: selectIsPending,
 	leftPanels: selectLeftPanels,
-	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isFocusMode: selectIsFocusMode,
 	selectedTicket: selectSelectedTicket,
@@ -53,7 +51,6 @@ const mapStateToProps = createStructuredSelector({
 	ticketsCardView: selectView,
 	isEditingGroups: selectIsEditingGroups,
 	issuesEnabled: selectIssuesEnabled,
-	risksEnabled: selectRisksEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -66,12 +63,11 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 	resetModel: ModelActions.reset,
 	resetViewerGui: ViewerGuiActions.reset,
+	resetClipping: ViewerGuiActions.resetClipping,
 	removeMeasurement: MeasurementsActions.removeMeasurement,
 	resetCompareComponent: CompareActions.resetComponentState,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
-	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
-	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	setProjectionModeSuccess: ViewerGuiActions.setProjectionModeSuccess,
 	clearCurrentlySelected: TreeActions.clearCurrentlySelected
 }, dispatch);

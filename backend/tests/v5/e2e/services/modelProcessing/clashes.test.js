@@ -15,7 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../helper/utils');
+const { determineTestGroup, sleepMS } = require('../../../helper/utils');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomNumber,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateTemplate,
+	generateRandomObject,
+	generateBasicNode,
+} = require('../../../helper/dataGen');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
@@ -24,19 +35,25 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const {
 	CLASH_RUNS_COL,
+	clashObjectIdTypes,
 	clashRunStatus,
-	triggerOptions,
 } = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
 const { deleteModel } = require(`${src}/models/modelSettings`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { MESSAGE_TYPES } = require(`${src}/services/modelProcessing.constants`);
 const { getClashRunByQuery } = require(`${src}/models/clashes.runs`);
+const { getTicketsByQuery } = require(`${src}/models/tickets`);
+const { addModelToProject } = require(`${src}/models/projectSettings`);
 const { fileExists, getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
+const { getLatestRevision } = require(`${src}/models/revisions`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { modulePropertyLabels, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
 const path = require('path');
+const { times } = require('lodash');
 
 jest.mock('../../../../../src/v5/services/mailer');
 
@@ -70,14 +87,14 @@ const formatClash = (clash) => {
 };
 
 const generateBasicData = () => {
-	const user = ServiceHelper.generateUserCredentials();
-	const project = ServiceHelper.generateRandomProject();
-	const modelA = ServiceHelper.generateRandomModel();
-	const modelB = ServiceHelper.generateRandomModel();
+	const user = generateUserCredentials();
+	const project = generateRandomProject();
+	const modelA = generateRandomModel();
+	const modelB = generateRandomModel();
 
 	return ({
 		user,
-		teamspace: ServiceHelper.generateRandomString(),
+		teamspace: generateRandomString(),
 		project,
 		modelA,
 		modelB,
@@ -85,8 +102,8 @@ const generateBasicData = () => {
 };
 
 const generateRunData = (hasPreviousRun) => {
-	const modelA = ServiceHelper.generateRandomModel();
-	const modelB = ServiceHelper.generateRandomModel();
+	const modelA = generateRandomModel();
+	const modelB = generateRandomModel();
 	const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
 	const previousClashes = hasPreviousRun ? ServiceHelper.generateClashes(plan) : [];
 	const previousRunDate = new Date(Date.now() - DAY_IN_MS);
@@ -96,7 +113,7 @@ const generateRunData = (hasPreviousRun) => {
 		previousRun: hasPreviousRun
 			? ServiceHelper.generateClashRun(plan,
 				{ new: previousClashes.map(formatClash), active: [], resolved: [] },
-				{ triggeredAt: previousRunDate })
+				{ triggeredAt: previousRunDate.getTime() })
 			: undefined,
 		previousClashes,
 	});
@@ -123,9 +140,14 @@ const setupBasicData = async ({
 	]);
 };
 
-const eventTriggeredPromise = (event) => new Promise(
-	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
-);
+const eventTriggeredPromise = (event) => new Promise((resolve) => {
+	let unsubscribe;
+	const callback = (eventData) => setTimeout(() => {
+		unsubscribe();
+		resolve(eventData);
+	}, 10);
+	unsubscribe = EventsManager.subscribe(event, callback);
+});
 
 const getResultsPath = (run) => path.join(SHARED_SPACE_TAG, `${run._id}`, 'results.json');
 
@@ -158,25 +180,49 @@ const getFileContents = async (teamspace, fileId) => {
 
 const testParseClashResults = () => {
 	const basicData = generateBasicData();
-	const { teamspace, project, modelA, modelB } = basicData;
+	const { user, teamspace, project, modelA, modelB } = basicData;
+	const ticketFederation = generateRandomModel({ modelType: modelTypes.FEDERATION });
+	const { CLOUD_CLASH } = presetModules;
+	const { CLASH_PLAN_ID, CLASH_RUN_ID, TAGS } = modulePropertyLabels[CLOUD_CLASH];
+	const ticketTemplate = { ...generateTemplate(), properties: [] };
+	ticketTemplate.modules.push({ type: CLOUD_CLASH, properties: [] });
+	const tagMetadataField = `${generateRandomString()}::${generateRandomString()}`;
+	const [staticTag, objectATag, objectBTag] = times(3, () => generateRandomString());
+	const [tagObjectAId, tagObjectBId] = times(2, () => generateUUIDString());
 	const planWithPreviousRun = ServiceHelper.generateClashPlan(modelA._id, modelA._id);
 	const planForBouncerError = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
-	const planWithoutPreviousRun = ServiceHelper.generateClashPlan(modelB._id, modelB._id);
+	const planWithoutPreviousRun = ServiceHelper.generateClashPlan(
+		modelB._id,
+		modelB._id,
+		{ federation: ticketFederation, template: ticketTemplate, creator: user.user },
+	);
+	const tagPlan = ServiceHelper.generateClashPlan(modelA._id, modelB._id,
+		{
+			federation: ticketFederation,
+			template: ticketTemplate,
+			creator: user.user,
+			valuesAtCreation: [{
+				module: CLOUD_CLASH,
+				property: TAGS,
+				value: [staticTag, `{$meta-${tagMetadataField}}`],
+			}],
+		});
 	const previousRunDate = new Date(Date.now() - DAY_IN_MS);
-	const [runWithPreviousRun, bouncerErrorRun, runWithoutPreviousRun] = [
+	const [runWithPreviousRun, bouncerErrorRun, runWithoutPreviousRun, tagRun] = [
 		planWithPreviousRun,
 		planForBouncerError,
 		planWithoutPreviousRun,
+		tagPlan,
 	]
 		.map((plan) => ServiceHelper.generateClashRun(plan));
 	const clashes = ServiceHelper.generateClashes(planWithPreviousRun);
 	const previousCompletedRun = ServiceHelper.generateClashRun(planWithPreviousRun,
 		{ new: clashes.map(formatClash), active: [], resolved: [] },
-		{ triggeredAt: previousRunDate });
+		{ triggeredAt: previousRunDate.getTime() });
 	const resultsWithPreviousRun = getResultsPath(runWithPreviousRun);
 	const resultsForBouncerError = getResultsPath(bouncerErrorRun);
 	const resultsWithoutPreviousRun = getResultsPath(runWithoutPreviousRun);
-	const basicCBData = { type: 'clash', teamspace, project: project.id };
+	const basicCBData = { type: MESSAGE_TYPES.CLASH, teamspace, project: project.id };
 	const missingResultsData = generateRunData(false);
 	const missingResultsPath = getResultsPath(missingResultsData.run);
 	const unreadablePreviousResultsData = generateRunData(true);
@@ -192,21 +238,54 @@ const testParseClashResults = () => {
 		{ plan: planWithPreviousRun, runs: [runWithPreviousRun, previousCompletedRun] },
 		{ plan: planForBouncerError, runs: [bouncerErrorRun] },
 		{ plan: planWithoutPreviousRun, runs: [runWithoutPreviousRun] },
+		{ plan: tagPlan, runs: [tagRun] },
 		...[missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData]
 			.map(({ run, previousRun }) => ({ plan: run.plan, runs: [run, previousRun].filter(Boolean) })),
 	];
 	const scenarioRuns = [
 		missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData,
 	].map(({ run }) => run);
+	const bbox = JSON.stringify({ min: [0, 0, 0], max: [1, 1, 1] });
+	const tagClash = {
+		a: [modelA._id, clashObjectIdTypes.INTERNAL, tagObjectAId, bbox].join('::'),
+		b: [modelB._id, clashObjectIdTypes.INTERNAL, tagObjectBId, bbox].join('::'),
+		positions: [[0, 0, 0], [1, 1, 1]],
+		fingerprint: generateRandomNumber(),
+	};
+	const tagCallbackObj = { ...basicCBData, results: getResultsPath(tagRun), value: 0 };
 
 	describe('Parse clash results', () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			const [revA, revB] = await Promise.all([
+				getLatestRevision(teamspace, modelA._id, modelTypes.CONTAINER, { _id: 1 }),
+				getLatestRevision(teamspace, modelB._id, modelTypes.CONTAINER, { _id: 1 }),
+			]);
+			const objectANode = generateBasicNode('mesh',
+				revA._id, [], { _id: stringToUUID(tagObjectAId) });
+			const objectBNode = generateBasicNode('mesh',
+				revB._id, [], { _id: stringToUUID(tagObjectBId) });
+			const objectAMetadata = generateBasicNode('meta', revA._id, [objectANode.shared_id], {
+				metadata: [{ key: tagMetadataField, value: objectATag }],
+			});
+			const objectBMetadata = generateBasicNode('meta', revB._id, [objectBNode.shared_id], {
+				metadata: [{ key: tagMetadataField, value: objectBTag }],
+			});
+			tagPlan.selectionA[0].revision = revA._id;
+			tagPlan.selectionB[0].revision = revB._id;
+
 			await Promise.all([
+				ServiceHelper.db.createModel(teamspace, ticketFederation._id,
+					ticketFederation.name, ticketFederation.properties),
+				addModelToProject(teamspace, stringToUUID(project.id), ticketFederation._id),
+				ServiceHelper.db.createScene(teamspace, project.id, modelA._id, revA, [objectANode, objectAMetadata]),
+				ServiceHelper.db.createScene(teamspace, project.id, modelB._id, revB, [objectBNode, objectBMetadata]),
+				ServiceHelper.db.createTemplates(teamspace, [ticketTemplate]),
 				ServiceHelper.db.createClashPlans(teamspace, project.id, [
 					planWithPreviousRun,
 					planForBouncerError,
 					planWithoutPreviousRun,
+					tagPlan,
 				]),
 				...clashRunData.map(({ plan, runs }) => (
 					ServiceHelper.db.createClashRuns(teamspace, project.id, plan, runs)
@@ -220,12 +299,12 @@ const testParseClashResults = () => {
 			['Bouncer returned an error', false, bouncerErrorRun, { ...basicCBData, results: resultsForBouncerError, value: 28 }, clashes],
 			['the results file from the callback object is not found', false, missingResultsData.run, { ...basicCBData, results: missingResultsPath, value: 0 }, undefined, undefined, undefined, clashRunStatus.FAILED, 'Could not read results file:'],
 			['the results data from the previous run cannot be read', false, unreadablePreviousResultsData.run, { ...basicCBData, results: getResultsPath(unreadablePreviousResultsData.run), value: 0 }, unreadablePreviousResultsClashes, undefined, undefined, clashRunStatus.FAILED, 'Error retrieving clashes from last run:'],
-			['Bouncer returned success and there was no previous run', true, runWithoutPreviousRun, { ...basicCBData, results: resultsWithoutPreviousRun, value: 0 }, clashes, { new: clashes.length, active: 0, resolved: 0 }, { new: clashes.map(formatClash), active: [], resolved: [] }],
+			['Bouncer returned success and there was no previous run', true, runWithoutPreviousRun, { ...basicCBData, results: resultsWithoutPreviousRun, value: 0 }, clashes, { new: clashes.length, active: 0, resolved: 0 }, { new: clashes.map(formatClash), active: [], resolved: [] }, undefined, undefined, { federation: ticketFederation._id, template: ticketTemplate._id, count: clashes.length }],
 			['Bouncer returned success and there was a run', true, runWithPreviousRun, { ...basicCBData, results: resultsWithPreviousRun, value: 0 }, clashes, { new: 0, active: clashes.length, resolved: 0 }, { new: [], active: clashes.map(formatClash), resolved: [] }],
 			['there was a previous run and all clashes were resolved', true, resolvedData.run, { ...basicCBData, results: getResultsPath(resolvedData.run), value: 0 }, [], { new: 0, active: 0, resolved: resolvedData.previousClashes.length }, { new: [], active: [], resolved: resolvedData.previousClashes.map(formatClash) }],
 			['there was a previous run and all found clashes were new', true, newClashesData.run, { ...basicCBData, results: getResultsPath(newClashesData.run), value: 0 }, newClashes, { new: newClashes.length, active: 0, resolved: newClashesData.previousClashes.length }, { new: newClashes.map(formatClash), active: [], resolved: newClashesData.previousClashes.map(formatClash) }],
 			['there was a previous run with resolved, active and new clashes', true, mixedData.run, { ...basicCBData, results: getResultsPath(mixedData.run), value: 0 }, [...mixedActiveClashes, ...mixedNewClashes], { new: mixedNewClashes.length, active: mixedActiveClashes.length, resolved: mixedResolvedClashes.length }, { new: mixedNewClashes.map(formatClash), active: mixedActiveClashes.map(formatClash), resolved: mixedResolvedClashes.map(formatClash) }],
-		])('', (desc, success, clashRun, callbackObj, resultsFileClashes, runStats, runRes, expectedStatus, errorReason) => {
+		])('', (desc, success, clashRun, callbackObj, resultsFileClashes, runStats, runRes, expectedStatus, errorReason, expectedTickets) => {
 			beforeEach(() => {
 				if (resultsFileClashes) {
 					writeResultsFile(clashRun, resultsFileClashes);
@@ -237,10 +316,18 @@ const testParseClashResults = () => {
 			});
 
 			test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const waitForTicketImport = expectedTickets
+					? eventTriggeredPromise(events.TICKETS_IMPORTED) : undefined;
+
 				await queueMessage(callbackq, clashRun._id, JSON.stringify(callbackObj));
 
-				// wait for the queue to process the message
-				await ServiceHelper.sleepMS(1000);
+				const ticketImportEvent = waitForTicketImport
+					? await waitForTicketImport
+					: undefined;
+				if (!waitForTicketImport) {
+					// wait for the queue to process the message
+					await sleepMS(1000);
+				}
 
 				const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
 					{ _id: stringToUUID(clashRun._id) }, { _id: 1, status: 1, results: 1 });
@@ -252,6 +339,28 @@ const testParseClashResults = () => {
 					const parsedContents = JSON.parse(contents);
 
 					expect(parsedContents).toEqual(runRes);
+					if (expectedTickets) {
+						expect(ticketImportEvent).toEqual(expect.objectContaining({
+							teamspace,
+							project: stringToUUID(project.id),
+							model: expectedTickets.federation,
+						}));
+						expect(ticketImportEvent.tickets).toHaveLength(expectedTickets.count);
+
+						const tickets = await getTicketsByQuery(
+							teamspace,
+							stringToUUID(project.id),
+							expectedTickets.federation,
+							{
+								type: stringToUUID(expectedTickets.template),
+								[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: clashRun.plan._id,
+								[`modules.${CLOUD_CLASH}.${CLASH_RUN_ID}`]: clashRun._id,
+							},
+							{ _id: 1 },
+						);
+
+						expect(tickets).toHaveLength(expectedTickets.count);
+					}
 				} else if (expectedStatus) {
 					expect(run.status).toEqual(expectedStatus);
 					expect(run.results.error.reason).toEqual(expect.stringContaining(errorReason));
@@ -263,13 +372,71 @@ const testParseClashResults = () => {
 			});
 		});
 
+		test('Should ignore a late interim status after a clash run has completed', async () => {
+			const callbackConsumedPromise = eventTriggeredPromise(events.CLASH_RUN_STATUS_UPDATED);
+			await queueMessage(callbackq, runWithPreviousRun._id, JSON.stringify({
+				...basicCBData,
+				status: clashRunStatus.QUEUED,
+			}));
+			await callbackConsumedPromise;
+
+			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(runWithPreviousRun._id) }, { _id: 1, status: 1 });
+			expect(run).toEqual({
+				_id: stringToUUID(runWithPreviousRun._id),
+				status: clashRunStatus.COMPLETED,
+			});
+		});
+
+		describe('Tag metadata placeholders', () => {
+			beforeEach(() => {
+				writeResultsFile(tagRun, [tagClash]);
+			});
+
+			afterEach(() => {
+				removeResultsFiles([tagRun]);
+			});
+
+			test('Should populate cloud clash tags from metadata placeholders when creating tickets', async () => {
+				await queueMessage(callbackq, tagRun._id, JSON.stringify(tagCallbackObj));
+
+				await sleepMS(1000);
+				const processedRun = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+					{ _id: stringToUUID(tagRun._id) }, { _id: 1, status: 1, results: 1 });
+				expect(processedRun.status).toEqual(clashRunStatus.COMPLETED);
+				expect(processedRun.results.stats).toEqual({ new: 1, active: 0, resolved: 0 });
+
+				let tickets = [];
+				for (let i = 0; i < 10; i += 1) {
+					// eslint-disable-next-line no-await-in-loop
+					tickets = await getTicketsByQuery(
+						teamspace,
+						stringToUUID(project.id),
+						ticketFederation._id,
+						{
+							type: stringToUUID(ticketTemplate._id),
+							[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: tagPlan._id,
+							[`modules.${CLOUD_CLASH}.${CLASH_RUN_ID}`]: tagRun._id,
+						},
+						{ [`modules.${CLOUD_CLASH}.${TAGS}`]: 1 },
+					);
+					if (tickets.length) break;
+					// eslint-disable-next-line no-await-in-loop
+					await sleepMS(500);
+				}
+
+				expect(tickets).toHaveLength(1);
+				expect(tickets[0].modules[CLOUD_CLASH][TAGS]).toEqual([staticTag, objectATag, objectBTag]);
+			});
+		});
+
 		test('Should abort an older completed run and still process the latest run', async () => {
 			const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
-			const oldRun = ServiceHelper.generateClashRun(plan, undefined, { triggeredAt: previousRunDate });
+			const oldRun = ServiceHelper.generateClashRun(plan, undefined, { triggeredAt: previousRunDate.getTime() });
 			const newRun = ServiceHelper.generateClashRun(plan);
 			const oldClashes = ServiceHelper.generateClashes(plan);
 			const latestRunClashes = ServiceHelper.generateClashes(plan);
-			const callbackData = { type: 'clash', teamspace, project: project.id };
+			const callbackData = { type: MESSAGE_TYPES.CLASH, teamspace, project: project.id };
 
 			await Promise.all([
 				ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
@@ -285,7 +452,7 @@ const testParseClashResults = () => {
 					value: 0,
 				}));
 
-				await ServiceHelper.sleepMS(1000);
+				await sleepMS(1000);
 
 				const oldRunInDb = await getClashRunByQuery(teamspace, stringToUUID(project.id),
 					{ _id: stringToUUID(oldRun._id) }, { _id: 1, status: 1, results: 1 });
@@ -303,7 +470,7 @@ const testParseClashResults = () => {
 					value: 0,
 				}));
 
-				await ServiceHelper.sleepMS(1000);
+				await sleepMS(1000);
 
 				const newRunInDb = await getClashRunByQuery(teamspace, stringToUUID(project.id),
 					{ _id: stringToUUID(newRun._id) }, { _id: 1, status: 1, results: 1 });
@@ -326,7 +493,6 @@ const getRunsByModel = (teamspace, projectId, modelId) => {
 			{ 'plan.selectionA.container': modelId },
 			{ 'plan.selectionB.container': modelId },
 		],
-		'plan.trigger': triggerOptions.NEW_REVISION,
 	};
 
 	return DBHandler.find(teamspace, CLASH_RUNS_COL, query);
@@ -336,7 +502,7 @@ const testStartClashRunsAfterNewRev = () => {
 	describe('Start clash runs after new revision', () => {
 		const basicData = generateBasicData();
 		const { user, teamspace, project, modelA, modelB } = basicData;
-		const modelWithNoRevs = ServiceHelper.generateRandomModel();
+		const modelWithNoRevs = generateRandomModel();
 		const [planWithModelA, planWithModelB, planWithModelWithoutRevisions] = [
 			modelA,
 			modelB,
@@ -373,7 +539,7 @@ const testStartClashRunsAfterNewRev = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 			await waitOnEvent;
 
-			await ServiceHelper.sleepMS(1000);
+			await sleepMS(1000);
 
 			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			expect(newRunsA.length).toEqual(existingRunsA.length + 2);
@@ -392,7 +558,7 @@ const testStartClashRunsAfterNewRev = () => {
 				model: modelA._id,
 				user: user.user,
 				modelType: modelTypes.CONTAINER,
-				data: { status: processStatuses.FAILED, errorReason: ServiceHelper.generateRandomObject() } };
+				data: { status: processStatuses.FAILED, errorReason: generateRandomObject() } };
 
 			const existingRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			const existingRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
@@ -400,7 +566,7 @@ const testStartClashRunsAfterNewRev = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 			await waitOnEvent;
 
-			await ServiceHelper.sleepMS(1000);
+			await sleepMS(1000);
 
 			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			expect(newRunsA.length).toEqual(existingRunsA.length);
@@ -424,7 +590,7 @@ const testStartClashRunsAfterNewRev = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 			await waitOnEvent;
 
-			await ServiceHelper.sleepMS(1000);
+			await sleepMS(1000);
 
 			const newRunsA = await getRunsByModel(teamspace, project.id, modelA._id);
 			expect(newRunsA.length).toEqual(existingRunsA.length);
@@ -448,7 +614,7 @@ const testStartClashRunsAfterNewRev = () => {
 			EventsManager.publish(events.MODEL_IMPORT_FINISHED, data);
 			await waitOnEvent;
 
-			await ServiceHelper.sleepMS(1000);
+			await sleepMS(1000);
 
 			const newRunsB = await getRunsByModel(teamspace, project.id, modelB._id);
 			expect(newRunsB.length).toEqual(existingRunsB.length);

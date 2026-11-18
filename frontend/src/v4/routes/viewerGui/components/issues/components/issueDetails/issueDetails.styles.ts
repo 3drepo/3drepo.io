@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 
 import Tab from '@mui/material/Tab';
 
-import { Tabs } from '@mui/material';
+import { FormControl, Grid, Tabs } from '@mui/material';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
@@ -29,9 +29,28 @@ import {
 } from '../../../../../components/messagesList/messagesList.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
-import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
+import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 
-export const Container = styled.div``;
+export const StyledFormControl = styled(FormControl)``;
+
+export const Container = styled.div<{ $fill?: boolean, top?: boolean }>`
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	overflow: hidden;
+	flex: ${({ $fill }) => $fill ? 1 : 'auto'};
+	padding-top: ${({ top }) => top ? '16px' : 'auto'};
+
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 1px 0;
+	}
+`;
+
 
 export const MessagesList = styled(MessagesListComponent)`
 	height: 100%;
@@ -122,7 +141,27 @@ export const Content = styled.div<{ active: boolean }>`
 	width: 100%;
 	margin-bottom: 5px;
 
-	${TabContainer} {
+	${Container} {
 		margin-top: 6px;
 	}
 `;
+
+export const FieldsRow = styled(Grid)`
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		flex: ${(props: any) => props.flex ? props.flex : 1};
+		margin: 1px 0;
+
+		&:nth-child(2n + 1) {
+			margin-right: 25px;
+		}
+	}
+
+	.select {
+		color: inherit;
+	}
+` as any;

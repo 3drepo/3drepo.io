@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
-import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
 import visualSettings from './overrides/visualSettings.overrides';
@@ -32,7 +31,6 @@ import previewComments from './overrides/preview/previewComments.overrides';
 import bim from './overrides/bim.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
 import issues from './overrides/cards/issues/issues.overrides';
-import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
 import sharedStyles from './overrides/cards/sharedStyles/sharedStyles.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
 import newJobDialog from './overrides/newJobForm.overrides';
@@ -80,14 +78,8 @@ export const V4OverridesContainer = styled.div`
 	${tree}
 	${measurements}
 	${issues}
-	${safetiBase}
 	${sequences}
 	${gis}
 	${compare}
-	
-	${RevisionsSwitchContainer} {
-		display: none;
-	}
-
 	${newJobDialog}
 `;

@@ -28,11 +28,6 @@ import { GroupsActions } from '../groups';
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
-import {
-	addTransparencyOverrides,
-	overridesTransparencyDiff,
-	removeTransparencyOverrides,
-} from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
@@ -77,15 +72,16 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 	return Promise.all(promises);
 };
 
-const toggleMeshesVisibility = (meshes, visibility) => {
-	if (meshes && meshes.length > 0) {
+const toggleMeshesVisibility = (meshes, visibility, excludeIds = false) => {
+	if (meshes && meshes.length > 0 || excludeIds) {
 		meshes.forEach((entry) => {
-			if (entry.meshes && entry.meshes.length) {
+			if (entry.meshes && entry.meshes.length || excludeIds) {
 				Viewer.switchObjectVisibility(
 					entry.teamspace,
 					entry.modelId,
 					entry.meshes,
-					visibility
+					visibility,
+					excludeIds,
 				);
 			}
 		});
@@ -397,8 +393,12 @@ function* isolateNodes(nodesIds = []) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
 
-			toggleMeshesVisibility(result.meshesToHide, false);
-			toggleMeshesVisibility(result.meshesToShow, true);
+			const modelsToHide = result.meshesToHide.map((entry) =>
+				result.meshesToShow.find(({ modelId: modelIdShown }) => modelIdShown === entry.modelId)
+				|| ({ ...entry, meshes: [] }) // if a container has no meshes to show we must include it in the list of models to hide
+			);
+			toggleMeshesVisibility(modelsToHide, false, true);
+			toggleMeshesVisibility(result.meshesToShow, true, false);
 
 			yield put(TreeActions.updateDataRevision());
 		}
@@ -677,17 +677,6 @@ function* zoomToHighlightedNodes() {
 	}
 }
 
-function* handleTransparencyOverridesChange({ currentOverrides, previousOverrides }) {
-	const toAdd = overridesTransparencyDiff(currentOverrides, previousOverrides);
-	const toRemove = overridesTransparencyDiff(previousOverrides, currentOverrides);
-
-	yield waitForTreeToBeReady();
-	yield all([
-		removeTransparencyOverrides(toRemove),
-		addTransparencyOverrides(toAdd)
-	]);
-}
-
 function* handleTransparenciesVisibility({ transparencies }) {
 	// 1. get node ids for the hidden nodes
 	const meshesToHide: any[] = yield select(selectGetNodesIdsFromSharedIds(([{shared_ids: transparencies}])));
@@ -721,7 +710,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
 	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
-	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCY_OVERRIDES_CHANGE, handleTransparencyOverridesChange);
 	yield takeLatest(TreeTypes.SET_SUBMODELS_VISIBILITY, setSubmodelsVisibility);
 	yield takeLatest(TreeTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 }

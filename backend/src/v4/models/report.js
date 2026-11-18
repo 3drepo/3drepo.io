@@ -19,61 +19,33 @@
 
 const moment = require("moment");
 const { findModelSettingById } = require("./modelSetting");
-const User = require ("./user");
+const User = require("./user");
 const config = require("../config");
 const C = require("../constants");
 const Job = require("./job");
 const utils = require("../utils");
 
 const ReportType = {
-	ISSUES : "Issues",
-	RISKS: "Risks"
+	ISSUES: "Issues"
 };
-
-const riskLevelMapping = ["Very Low", "Low", "Moderate", "High", "Very High"];
 
 const attributes = {};
 attributes[ReportType.ISSUES] = [
-	{label: "Assigned", field: "assigned_roles"},
-	{label: "Priority", field: "priority"},
-	{label: "Status", field: "status"},
-	{label: "Type", field: "topic_type"},
-	{label: "Due Date", field: "due_date", isDate: true}
-];
-attributes[ReportType.RISKS] = [
-	{ label: "Safetibase ID", field: "safetibase_id"},
-	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
-	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
-	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
-	{ label: "Assigned", field: "assigned_roles"},
-	{ label: "Category", field: "category"},
-	{ label: "Associated Activity", field: "associated_activity"},
-	{ label: "Element Type", field: "element"},
-	{ label: "Risk Factor", field: "risk_factor"},
-	{ label: "Construction Scope", field: "scope"},
-	{ label: "Location", field: "location_desc"},
-	{label: "Due Date", field: "due_date", isDate: true},
-	{ label: "Treatment", field: "mitigation_desc"},
-	{ label: "Treatment Details", field: "mitigation_detail"},
-	{ label: "Treatment Stage", field: "mitigation_stage"},
-	{ label: "Treatment Type", field: "mitigation_type"},
-	{ label: "Treatment Status", field: "mitigation_status", default: "Unmitigated"},
-	{ label: "Treatment Likelihood", field: "residual_likelihood", mapping: riskLevelMapping},
-	{ label: "Treatment Consequence", field: "residual_consequence", mapping: riskLevelMapping},
-	{ label: "Level of Treated Risk", field: "residual_level_of_risk", mapping: riskLevelMapping},
-	{ label: "Residual Risk", field: "residual_risk", default: "None"}
+	{ label: "Assigned", field: "assigned_roles" },
+	{ label: "Priority", field: "priority" },
+	{ label: "Status", field: "status" },
+	{ label: "Type", field: "topic_type" },
+	{ label: "Due Date", field: "due_date", isDate: true }
 ];
 
 const hiddenAttributes = [
-	{label: "Pin", field: "position"}
+	{ label: "Pin", field: "position" }
 ];
 
 const urlQS = {};
-urlQS[ReportType.RISKS] = "riskId";
 urlQS[ReportType.ISSUES] = "issueId";
 
 const singularLabel = {};
-singularLabel[ReportType.RISKS] = "risk";
 singularLabel[ReportType.ISSUES] = "issue";
 
 /**
@@ -115,10 +87,10 @@ class ReportGenerator {
 
 	getRevisionID() {
 		this.promises.push(
-			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
-				if(entry) {
+			require("./history").findLatest(this.teamspace, this.modelID, { timestamp: 1, tag: 1 }).then((entry) => {
+				if (entry) {
 					this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
-				} else{
+				} else {
 					this.rev = "not uploaded";
 				}
 			})
@@ -161,15 +133,15 @@ class ReportGenerator {
 				if (utils.hasField(entry, field.field)) {
 					const value = entry[field.field];
 
-					if(value === "" || value === undefined || value === null) {
+					if (value === "" || value === undefined || value === null) {
 						attri.value = field.default ? field.default : "Unknown";
 					} else {
-						if(field.mapping) {
+						if (field.mapping) {
 							attri.value = field.mapping[value];
 						} else if (field.isDate) {
 							attri.value = formatDate(value, false);
 						} else {
-							attri.value =  Array.isArray(entry[field.field]) ?
+							attri.value = Array.isArray(entry[field.field]) ?
 								entry[field.field].join(", ") : entry[field.field];
 						}
 
@@ -188,17 +160,17 @@ class ReportGenerator {
 					if (comment.viewpoint && comment.viewpoint.screenshot) {
 						comment.screenshot = comment.viewpoint.screenshot;
 					}
-					if(comment.action) {
-						if(comment.action.property === "due_date") {
+					if (comment.action) {
+						if (comment.action.property === "due_date") {
 							comment.action.to = formatDate(parseInt(comment.action.to), false);
 							comment.action.from = comment.action.from ? formatDate(parseInt(comment.action.from), false) : undefined;
 						}
-						if(!comment.action.propertyText) {
+						if (!comment.action.propertyText) {
 							comment.action.propertyText = this.getPropertyLabel(comment.action.property);
 						}
-						if(comment.action.property === "position" || comment.action.property === "viewpoint" || comment.action.property === "screenshot") {
+						if (comment.action.property === "position" || comment.action.property === "viewpoint" || comment.action.property === "screenshot") {
 							comment.action.to = comment.action.from = "";
-						} else if(!comment.action.to || comment.action.to === "") {
+						} else if (!comment.action.to || comment.action.to === "") {
 							comment.action.to = "(empty)";
 						}
 					}
@@ -214,7 +186,7 @@ class ReportGenerator {
 
 	addUsersToNameMap(users) {
 		users.forEach((user) => {
-			if(!this.userFullName[user]) {
+			if (!this.userFullName[user]) {
 				this.promises.push(
 					User.findByUserName(user).then(username => {
 						if (username) {
@@ -249,6 +221,5 @@ class ReportGenerator {
 }
 
 module.exports = {
-	newIssuesReport :  (teamspace, project, model, rev) =>  new ReportGenerator(ReportType.ISSUES, teamspace, project, model, rev),
-	newRisksReport :  (teamspace, project, model, rev) =>  new ReportGenerator(ReportType.RISKS, teamspace, project, model, rev)
+	newIssuesReport: (teamspace, project, model, rev) => new ReportGenerator(ReportType.ISSUES, teamspace, project, model, rev)
 };

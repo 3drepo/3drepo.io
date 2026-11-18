@@ -19,7 +19,12 @@ const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateRandomObject, generateUUIDString, generateUUID } = require('../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+	generateUUIDString,
+	generateUUID,
+} = require('../../../../../../helper/dataGen');
 const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 const { viewGroups } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');

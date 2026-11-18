@@ -91,7 +91,6 @@ export const INITIAL_STATE = {
 		newIssue: {},
 		newComment: {},
 		selectedFilters: DEFAULT_ISSUES_FILTERS,
-		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
 		postCommentIsPending: false,

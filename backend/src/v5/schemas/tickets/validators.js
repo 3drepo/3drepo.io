@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
+const { transformer: { uniqueArray }, utils: { stripWhen }, types } = require('../../utils/helper/yup');
 const { propTypes, viewGroups } = require('./templates.constants');
 const Yup = require('yup');
 const { schema: groupSchema } = require('./tickets.groups');
@@ -70,14 +70,28 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		},
 	).default(undefined), true);
 
-	const camera = imposeNullableRule(Yup.object({
+	const groupCameraSchema = imposeNullableRule(Yup.object({
+		zoomTo: Yup.array().of(
+			Yup.object({
+				group: groupSchema(isUpdate, isUpdate),
+			}),
+		),
+	}), false);
+
+	const standardCameraSchema = imposeNullableRule(Yup.object({
 		type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
 			.default(CameraType.PERSPECTIVE),
 		position: types.position.required(),
 		forward: types.position.required(),
 		up: types.position.required(),
-		size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
+		size: Yup.number().when('type', ([type], schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
 	}).default(undefined), false);
+
+	const camera = Yup.lazy((value) => {
+		const cameraRequired = !isUpdate && required;
+		const schema = value?.zoomTo !== undefined ? groupCameraSchema : standardCameraSchema;
+		return cameraRequired ? schema.required() : schema;
+	});
 
 	const clippingPlanes = imposeNullableRule(Yup.array().of(
 		Yup.object().shape({
@@ -89,7 +103,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 
 	const schema = {
 		state,
-		camera: !isUpdate && required ? camera.required() : camera,
+		camera,
 		clippingPlanes,
 	};
 
@@ -107,7 +121,7 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.TEXT:
 		return imposeNullableRule(types.strings.title);
 	case propTypes.LONG_TEXT:
-		return imposeNullableRule(types.strings.longDescription);
+		return imposeNullableRule(types.strings.ultralongDescription);
 	case propTypes.BOOLEAN:
 		return isUpdate ? Yup.boolean() : Yup.boolean().default(false);
 	case propTypes.DATE:
@@ -119,7 +133,9 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.ONE_OF:
 		return imposeNullableRule(types.strings.title);
 	case propTypes.MANY_OF:
-		return imposeNullableRule(Yup.array().of(types.strings.title));
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
+	case propTypes.TAGS:
+		return imposeNullableRule(uniqueArray(Yup.array().of(types.strings.title).min(1)));
 	case propTypes.IMAGE:
 		return types.embeddedImage(isNullable);
 	case propTypes.IMAGE_LIST:

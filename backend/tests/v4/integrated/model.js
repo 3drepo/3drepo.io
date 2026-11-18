@@ -21,7 +21,6 @@
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
@@ -39,7 +38,7 @@ describe("Model", function () {
 	const code = "00011";
 
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -55,7 +54,7 @@ describe("Model", function () {
 	});
 
 
-	after(function(done) {
+	afterAll(function(done) {
 		purgeQueues().then(() => {
 			server.close(function() {
 				console.log("API test server is closed");
@@ -68,7 +67,7 @@ describe("Model", function () {
 		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
 					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED");
 					})
 	});
 
@@ -78,7 +77,7 @@ describe("Model", function () {
 			agent.post(`/${username}/model`)
 						.send({ modelName: model, desc, type, unit, code, project })
 						.expect(410, function(err ,res) {
-							expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+							expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED");
 						})
 		});
 
@@ -90,7 +89,8 @@ describe("Model", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.be.an("array").and.to.have.length(683);
+					expect(Array.isArray(res.body)).toBe(true);
+					expect(res.body).toHaveLength(683);
 					done(err);
 				});
 		});
@@ -105,7 +105,7 @@ describe("Model", function () {
 
 			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=204`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenTreeItem);
+					expect(res.body).toEqual(goldenTreeItem);
 					done(err);
 				});
 		});
@@ -120,7 +120,8 @@ describe("Model", function () {
 
 			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=ComponentName:20`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.be.an("array").and.to.have.length(10);
+					expect(Array.isArray(res.body)).toBe(true);
+					expect(res.body).toHaveLength(10);
 					done(err);
 				});
 		});
@@ -128,7 +129,7 @@ describe("Model", function () {
 		it("with non-matching searchString should succeed", function(done) {
 			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=nomatches`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal([]);
+					expect(res.body).toEqual([]);
 					done(err);
 				});
 		});
@@ -136,7 +137,7 @@ describe("Model", function () {
 		it("with non-existent model should fail", function(done) {
 			agent.get(`/${username}/invalidModel/revision/master/head/searchtree.json`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -146,7 +147,7 @@ describe("Model", function () {
 		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
 					.expect(410, function(err ,res) {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED");
+						expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED");
 					})
 	});
 
@@ -158,7 +159,7 @@ describe("Model", function () {
 
 			agent.put(`/${username}/${model}/settings`)
 				.send({code}).expect(400, function(err ,res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_MODEL_CODE.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_MODEL_CODE.value);
 					done(err);
 				});
 		}
@@ -193,7 +194,7 @@ describe("Model", function () {
 		agent.put(`/${username}/${mymodel}/settings`)
 			.send(body).expect(200, function(err ,res) {
 
-				expect(res.body).to.deep.equal(expectedReturn);
+				expect(res.body).toEqual(expectedReturn);
 
 				if(err) {
 					return done(err);
@@ -201,7 +202,7 @@ describe("Model", function () {
 
 				agent.get(`/${username}/${mymodel}.json`)
 					.expect(200, function(err, res) {
-						expect(res.body.properties).to.deep.equal(expectedReturn);
+						expect(res.body.properties).toEqual(expectedReturn);
 						done(err);
 					});
 
@@ -213,7 +214,7 @@ describe("Model", function () {
 
 		agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
 			.expect(200, function(err, res) {
-				expect(res.body.heliSpeed).to.equal(1);
+				expect(res.body.heliSpeed).toBe(1);
 				done(err);
 			});
 	});
@@ -233,7 +234,7 @@ describe("Model", function () {
 			function(done) {
 				agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
 					.expect(200, function(err, res) {
-						expect(res.body.heliSpeed).to.equal(newSpeed.heliSpeed);
+						expect(res.body.heliSpeed).toBe(newSpeed.heliSpeed);
 						done(err);
 					});
 			}
@@ -245,7 +246,7 @@ describe("Model", function () {
 		agent.post(`/${username}/model`)
 					.send({ modelName: model, desc, type, unit, code, project })
 					.expect(410, (err, res) => {
-						expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+						expect(res.body.code).toBe("ENDPOINT_DECOMMISSIONED")
 					})
 	});
 
@@ -262,7 +263,7 @@ describe("Model", function () {
 				callback => {
 					agent.get(`/${username}/${testModel}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body.defaultView).to.deep.equal({
+							expect(res.body.defaultView).toEqual({
 								id: viewId,
 								name: "fdgdfg"
 							});
@@ -276,7 +277,7 @@ describe("Model", function () {
 			agent.put(`/${username}/${testModel}/settings`)
 				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.VIEW_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -285,7 +286,7 @@ describe("Model", function () {
 		it("removing a view when it's currently set as default should fail", function (done) {
 			agent.delete(`/${username}/${testModel}/viewpoints/${viewId}`)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.CANNOT_DELETE_DEFAULT_VIEW.value);
+					expect(res.body.value).toBe(responseCodes.CANNOT_DELETE_DEFAULT_VIEW.value);
 					done(err);
 				});
 		});
@@ -300,7 +301,7 @@ describe("Model", function () {
 				callback => {
 					agent.get(`/${username}/${testModel}.json`)
 						.expect(200, (err, res) => {
-							expect(res.body.defaultView).to.equal(undefined);
+							expect(res.body.defaultView).toBe(undefined);
 							callback(err);
 						});
 				}
@@ -316,7 +317,7 @@ describe("Model", function () {
 		const model = "testproject";
 		let testAgent;
 
-		before(async function() {
+		beforeAll(async function() {
 			testAgent = SessionTracker(request(server));
 			await testAgent.login(username, password);
 		});
@@ -324,7 +325,7 @@ describe("Model", function () {
 		it("should succeed and get the latest file", function(done) {
 			testAgent.get(`/${username}/${model}/download/latest`).expect(200, function(err, res) {
 
-				expect(res.headers["content-disposition"]).to.equal("attachment;filename=3DrepoBIM.obj");
+				expect(res.headers["content-disposition"]).toBe("attachment;filename=3DrepoBIM.obj");
 
 				done(err);
 			});
@@ -341,7 +342,7 @@ describe("Model", function () {
 		const collaboratorUsername = "testing";
 		let testAgent;
 
-		before(async function() {
+		beforeAll(async function() {
 			testAgent = SessionTracker(request(server));
 			await testAgent.login(username, password);
 		});
@@ -352,7 +353,7 @@ describe("Model", function () {
 
 		it("should fail if delete again", function(done) {
 			testAgent.delete(`/${username}/${model}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+				expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 				done(err);
 			});
 		});
@@ -367,20 +368,20 @@ describe("Model", function () {
 			const account = body.accounts.find(account => account.account === username);
 			const modelExists = account.models.find(m => m.model === model);
 
-			expect(modelExists).to.not.exist;
+			expect(modelExists).toBeFalsy();
 		});
 
 		it("should be removed from model group", function(done) {
 			testAgent.get(`/${username}.json`).expect(200, function(err, res) {
 
 				const account = res.body.accounts.find(account => account.account === username);
-				expect(account).to.exist;
+				expect(account).toBeTruthy();
 
 				const pg = account.projects.find(pg => pg.name === "project1");
-				expect(pg).to.exist;
+				expect(pg).toBeTruthy();
 
 				const myModel = pg.models.find(_model => _model.model === "sample_project");
-				expect(myModel).to.not.exist;
+				expect(myModel).toBeFalsy();
 
 				done(err);
 			});

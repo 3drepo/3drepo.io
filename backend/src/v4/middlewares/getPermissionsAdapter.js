@@ -47,7 +47,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: async function(username) {
 
-				await isTeamspaceMember(account, username);
+				await isTeamspaceMember(account, username, false, true);
 
 				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
 					const permission = AccountPermissions.findByUser(settings, username);

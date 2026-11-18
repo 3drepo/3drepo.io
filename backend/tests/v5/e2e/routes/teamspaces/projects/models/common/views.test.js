@@ -17,6 +17,13 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateView,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
@@ -30,20 +37,20 @@ let agent;
 const generateBasicData = () => {
 	const data = {
 		users: {
-			tsAdmin: ServiceHelper.generateUserCredentials(),
-			noProjectAccess: ServiceHelper.generateUserCredentials(),
-			nobody: ServiceHelper.generateUserCredentials(),
+			tsAdmin: generateUserCredentials(),
+			noProjectAccess: generateUserCredentials(),
+			nobody: generateUserCredentials(),
 		},
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel(),
-		fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		con: generateRandomModel(),
+		fed: generateRandomModel({ modelType: modelTypes.FEDERATION }),
 	};
 	const models = [data.con, data.fed];
 	models.forEach((model) => {
 		/* eslint-disable no-param-reassign */
-		model.viewWithThumbnail = ServiceHelper.generateView(data.teamspace, model._id);
-		model.viewNoThumbnail = ServiceHelper.generateView(data.teamspace, model._id, false);
+		model.viewWithThumbnail = generateView(data.teamspace, model._id);
+		model.viewNoThumbnail = generateView(data.teamspace, model._id, false);
 		/* eslint-enable no-param-reassign */
 	});
 
@@ -78,8 +85,8 @@ const setupBasicData = async (users, teamspace, project, models, modelsWithViews
 const testViewList = () => {
 	describe('Views List', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const conNoViews = ServiceHelper.generateRandomModel();
-		const fedNoViews = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const conNoViews = generateRandomModel();
+		const fedNoViews = generateRandomModel({ modelType: modelTypes.FEDERATION });
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoViews, fedNoViews], [con, fed]);
 		});
@@ -100,8 +107,8 @@ const testViewList = () => {
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: modelWrongType._id }), false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['all the parameters are valid', getRoute(), true, [model.viewWithThumbnail, model.viewNoThumbnail]],
@@ -159,12 +166,12 @@ const testViewThumbnail = () => {
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: modelWrongType._id }), false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the view has a thumbnail', getRoute(), true],
-				['the view does not exist', getRoute({ viewId: ServiceHelper.generateRandomString() }), false, templates.viewNotFound],
+				['the view does not exist', getRoute({ viewId: generateRandomString() }), false, templates.viewNotFound],
 				['the view does not have a thumbnail', getRoute({ viewId: model.viewNoThumbnail._id }), false, templates.thumbnailNotFound],
 			];
 		};

@@ -16,6 +16,13 @@
  */
 
 const { determineTestGroup } = require('../../../../helper/utils');
+const {
+	generateRandomString,
+	generateRandomNumber,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+} = require('../../../../helper/dataGen');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
@@ -26,11 +33,11 @@ const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const user = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
-const project = ServiceHelper.generateRandomProject();
-const container = ServiceHelper.generateRandomModel();
-const drawing = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+const user = generateUserCredentials();
+const teamspace = generateRandomString();
+const project = generateRandomProject();
+const container = generateRandomModel();
+const drawing = generateRandomModel({ modelType: modelTypes.DRAWING });
 const containerRevision = ServiceHelper.generateRevisionEntry();
 const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING);
 
@@ -137,7 +144,7 @@ const revisionUpdateTest = () => {
 					model: [[0, 0, 0], [1, 1, 1]],
 					drawing: [[0, 0], [1, 1]],
 				},
-				verticalRange: [ServiceHelper.generateRandomNumber(0, 5), ServiceHelper.generateRandomNumber(6, 10)],
+				verticalRange: [generateRandomNumber(0, 5), generateRandomNumber(6, 10)],
 				units: 'mm',
 			};
 

@@ -18,7 +18,11 @@
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
-const { generateRandomModelProperties, generateRandomObject, generateUUID } = require('../../../../../../../../helper/services');
+const {
+	generateRandomModelProperties,
+	generateRandomObject,
+	generateUUID,
+} = require('../../../../../../../../helper/dataGen');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);

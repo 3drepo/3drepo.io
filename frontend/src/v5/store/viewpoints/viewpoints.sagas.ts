@@ -16,7 +16,7 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { get } from 'lodash';
+import { get, take } from 'lodash';
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { generatePath } from 'react-router-dom';
 
@@ -24,7 +24,7 @@ import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
-import { createGroupsFromViewpoint, generateViewpointV4, getViewpointWithGroups, mergeGroupsDataFromViewpoint } from '@/v5/helpers/viewpoint.helpers';
+import { createGroupsFromViewpoint, generateViewpointV4, getViewpointWithGroups, isViewpointReady, mergeGroupsDataFromViewpoint } from '@/v5/helpers/viewpoint.helpers';
 import { ROUTES } from '@/v4/constants/routes';
 import * as API from '@/v4/services/api';
 import { Viewer } from '@/v4/services/viewer/viewer';
@@ -52,7 +52,7 @@ import {
 	UnsubscribeOnViewpointChangesAction,
 	UpdateViewpointNameAction,
 } from './viewpoints.redux';
-import { selectSelectedViewpoint } from './viewpoints.selectors';
+import { selectSelectedViewpoint, selectViewpointsGroups } from './viewpoints.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { PRESET_VIEW } from '@/v5/ui/routes/viewer/views/viewsCardFooter/presetViews/presetViews.component';
@@ -163,52 +163,118 @@ export function* showPreset({ preset }: ShowPresetAction) {
 	}
 }
 
+// export function* showViewpoint({ teamspace, modelId, view, ignoreCamera }: ShowViewpointAction) {
+// 	if (!view) return;
+
+// 	yield Viewer.isViewerReady();
+// 	const viewpoint = view.viewpoint;
+// 	if (!viewpoint) return;
+
+// 	if (viewpoint.up && !ignoreCamera) {
+// 		yield put(ViewerGuiActions.setCamera(viewpoint));
+// 	} else {
+// 		yield put(ViewerGuiActions.setProjectionModeSuccess(viewpoint.type));
+// 	}
+
+// 	const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
+// 	yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
+// 	yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
+
+// 	if (!viewpoint.clippingPlanes?.length) {
+// 		yield put(ViewerGuiActions.setClippingMode(null));
+// 	} else {
+// 		yield put(ViewerGuiActions.setClippingMode(
+// 			viewpoint.clippingPlanes.length === 1 ? VIEWER_CLIP_MODES.SINGLE : VIEWER_CLIP_MODES.BOX,
+// 		));
+// 	}
+
+// 	yield put(ViewerGuiActions.setClipEdit(false));
+// 	yield waitForTreeToBeReady();
+// 	yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
+// 	yield put(TreeActions.clearCurrentlySelected());
+
+// 	if (viewpoint.hidden_group?.objects?.length > 0) {
+// 		yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
+// 	} else if (viewpoint.shown_group?.objects?.length > 0) {
+// 		yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown_group.objects));
+// 	} else {
+// 		yield put(TreeActions.showAllNodes());
+// 	}
+
+// 	if (viewpoint.highlighted_group?.objects?.length > 0) {
+// 		yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
+// 		window.dispatchEvent(new Event('resize'));
+// 	}
+
+// 	yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
+// }
 export function* showViewpoint({ teamspace, modelId, view, ignoreCamera }: ShowViewpointAction) {
-	if (!view) return;
+	if (view) {
+		yield Viewer.isViewerReady();
 
-	yield Viewer.isViewerReady();
-	const viewpoint = view.viewpoint;
-	if (!viewpoint) return;
+		const viewpoint = view.viewpoint;
+		if (!viewpoint) {
+			return;
+		}
 
-	if (viewpoint.up && !ignoreCamera) {
-		yield put(ViewerGuiActions.setCamera(viewpoint));
-	} else {
-		yield put(ViewerGuiActions.setProjectionModeSuccess(viewpoint.type));
+		if (viewpoint.up && !ignoreCamera) {
+			yield put(ViewerGuiActions.setCamera(viewpoint));
+		} else {
+			// If we're not moving the camera, ensure the projection mode icon ion the gui matches the viewpoint
+			yield put(ViewerGuiActions.setProjectionModeSuccess(viewpoint.type));
+		}
+
+		const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
+
+		// The default value for hideIfc if it doesnt exists is 'false'
+		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
+
+		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
+		if (!viewpoint.clippingPlanes?.length) {
+			yield put(ViewerGuiActions.setClippingMode(null));
+		} else {
+			yield put(ViewerGuiActions.setClippingMode(viewpoint.clippingPlanes.length === 1 ? VIEWER_CLIP_MODES.SINGLE : VIEWER_CLIP_MODES.BOX));
+		}
+		yield put(ViewerGuiActions.setClipEdit(false));
+
+		yield waitForTreeToBeReady();
+		yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
+
+		let viewpointsGroups = yield select(selectViewpointsGroups);
+
+		while (!isViewpointReady(viewpoint)) {
+			yield take(ViewpointsTypes.VIEWPOINT_READY);
+			viewpointsGroups = yield select(selectViewpointsGroups);
+		}
+
+		if (viewpoint.zoomTo?.length) {
+			Viewer.zoomToObjects({ entries: viewpoint.zoomTo });
+		}
+
+		yield put(TreeActions.clearCurrentlySelected());
+
+		if (viewpoint.hidden_group?.objects?.length > 0) {
+			yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
+		} else if (viewpoint.shown_group?.objects?.length > 0) {
+			yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown_group.objects));
+		} else {
+			yield put(TreeActions.showAllNodes());
+		}
+
+		if (viewpoint.highlighted_group?.objects?.length > 0) {
+			yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
+			window.dispatchEvent(new Event('resize'));
+		}
+
+		// Because the viewpoint is set here instead of derived from the selectors,
+		// the viewpoint stays as a reference in the state.
+		// Thats why we need to wait for the groups to be fetched before proceeding.
+		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 	}
-
-	const clippingPlanes = view.clippingPlanes || get(view, 'viewpoint.clippingPlanes');
-	yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
-	yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
-
-	if (!viewpoint.clippingPlanes?.length) {
-		yield put(ViewerGuiActions.setClippingMode(null));
-	} else {
-		yield put(ViewerGuiActions.setClippingMode(
-			viewpoint.clippingPlanes.length === 1 ? VIEWER_CLIP_MODES.SINGLE : VIEWER_CLIP_MODES.BOX,
-		));
-	}
-
-	yield put(ViewerGuiActions.setClipEdit(false));
-	yield waitForTreeToBeReady();
-	yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
-	yield put(TreeActions.clearCurrentlySelected());
-
-	if (viewpoint.hidden_group?.objects?.length > 0) {
-		yield put(TreeActions.hideNodesBySharedIds(viewpoint.hidden_group.objects, true));
-	} else if (viewpoint.shown_group?.objects?.length > 0) {
-		yield put(TreeActions.isolateNodesBySharedIds(viewpoint.shown_group.objects));
-	} else {
-		yield put(TreeActions.showAllNodes());
-	}
-
-	if (viewpoint.highlighted_group?.objects?.length > 0) {
-		yield put(TreeActions.selectNodesBySharedIds(viewpoint.highlighted_group.objects));
-		window.dispatchEvent(new Event('resize'));
-	}
-
-	yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 }
 
+// This is only for V4 viewpoints. The fetch for tickets its in a different place.
+// In v5 the ticket groups are assigned in the selector bit
 export function* fetchViewpointGroups({ teamspace, modelId, view }: FetchViewpointGroupsAction) {
 	try {
 		const groupsObject = yield getViewpointWithGroups({ teamspace, modelId, view });
@@ -256,7 +322,14 @@ export function* prepareNewViewpoint({ viewpointName }: PrepareNewViewpointActio
 }
 
 export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, revision }: ShareViewpointLinkAction) {
-	const basePath = generatePath(ROUTES.V5_MODEL_VIEWER, { teamspace, project, model: modelId, revision });
+	const pathParams = {
+		teamspace,
+		project,
+		model: modelId,
+		revision,
+	};
+	const route = revision ? ROUTES.V5_REVISION_VIEWER : ROUTES.V5_MODEL_VIEWER;
+	const basePath = generatePath(route, pathParams);
 	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
 	copy(url);
 	yield put(SnackbarActions.show('Share link copied to clipboard'));

@@ -14,22 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import TicketPin from '@assets/icons/filled/pin_ticket-filled.svg';
-import IssuePin from '@assets/icons/filled/pin_issue-filled.svg';
-import RiskPin from '@assets/icons/filled/pin_risk-filled.svg';
-import MarkerPin from '@assets/icons/filled/pin_marker-filled.svg';
+import { useEffect, useRef } from 'react';
 import { PinIcon } from '@/v5/store/tickets/tickets.types';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { getEmbeddedPin } from './pinIcons.helper';
+import { getTintFilter, RgbArray } from '@/v5/helpers/colors.helper';
 
+export const Pin = ({ pinIcon, selected = false, colour }: { pinIcon: PinIcon | string, selected?: boolean, colour?: RgbArray }) => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const containerRef = useRef<HTMLSpanElement>(null);
 
-const PinPerType = 
-{
-	'ISSUE': IssuePin,
-	'RISK': RiskPin,
-	'DEFAULT': TicketPin,
-	'MARKER': MarkerPin,
-};
+	useEffect(() => {
+		let mounted = true;
+		(async () => {
+			const embeddedSvg = await getEmbeddedPin(teamspace, pinIcon, selected);
+			if (mounted && containerRef.current) {
+				containerRef.current.innerHTML = embeddedSvg;
+			}
+		})();
+		return () => { mounted = false; };
+	}, [teamspace, pinIcon, selected]);
 
-export const Pin = ({ pinIcon }: { pinIcon:PinIcon }) => {
-	const Icon = PinPerType[pinIcon];
-	return (<Icon />);
+	// Custom (backend) pin icons are tinted with a CSS filter instead of
+	// relying on internal SVG classes/ids, so they don't need to be
+	// hand-authored with specific colourable parts.
+	const style = colour ? { filter: getTintFilter(colour) } : undefined;
+	return (<span ref={containerRef} style={style} />);
 };

@@ -21,7 +21,6 @@ import { groupBy } from 'lodash';
 import { getModelType, ModelType } from '@/v5/store/projects/projects.helpers';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
-import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { BoardDialogTitle, FormWrapper, Title } from './board.styles';
 
 export const getTeamspaceProjects = (teamspaces = [], projectsMap, teamspaceName) => {
@@ -82,24 +81,21 @@ export const getProjectModels = (teamspaces = [], projectsMap, modelsMap, curren
 	return [];
 };
 
-export const getTemplateComponent = (isIssuesBoard) => isIssuesBoard ? IssueDetails : RiskDetails;
-
-export const getDialogTitle = ({ cardId, isIssuesBoard, cards, onNavigationChange }) => {
+export const getDialogTitle = ({ cardId, cards, onNavigationChange }) => {
 	const titlePrefix = cardId ? 'Edit' : 'Add new';
-	const dataType = isIssuesBoard ? 'issue' : 'risk';
 	const initialIndex = cards.findIndex((card) => card.id === cardId);
 	const itemsCount = cards.length;
 
 	return cardId ? (
 		<BoardDialogTitle>
-			<Title>{titlePrefix} {dataType}</Title>
+			<Title>{titlePrefix} issue</Title>
 			<ListNavigation
 				initialIndex={initialIndex}
 				itemsCount={itemsCount}
 				onChange={onNavigationChange}
 			/>
 		</BoardDialogTitle>
-	) : `${titlePrefix} ${dataType}`;
+	) : `${titlePrefix} issue`;
 };
 
 export const getDialogSize = (cardId) => cardId ? 'lg' : 'sm';

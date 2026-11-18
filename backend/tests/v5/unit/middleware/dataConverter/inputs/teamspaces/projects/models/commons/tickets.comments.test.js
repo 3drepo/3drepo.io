@@ -20,7 +20,11 @@ const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
-const { generateRandomString, generateUUID, generateRandomNumber } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateRandomNumber,
+} = require('../../../../../../../../helper/dataGen');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 

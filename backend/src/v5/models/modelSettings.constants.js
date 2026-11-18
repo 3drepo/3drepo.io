@@ -74,6 +74,11 @@ ModelSettingConstants.processStatuses = {
 	QUEUED_FOR_UNITY: 'Queued for Unity',
 };
 
+ModelSettingConstants.terminalProcessStatuses = [
+	ModelSettingConstants.processStatuses.OK,
+	ModelSettingConstants.processStatuses.FAILED,
+];
+
 ModelSettingConstants.getInfoFromCode = (code) => (
 	importErrorMapping[code] || systemFailureMsg
 );

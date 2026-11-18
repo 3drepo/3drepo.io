@@ -49,7 +49,17 @@ module.exports = {
         rules: [
           ...(config.module?.rules || []),
           {
-            test: /\.(ts|tsx|js|jsx)$/,
+            test: /\.(tsx|jsx)$/,
+            loader: 'esbuild-loader',
+            exclude: /node_modules/,
+            options: {
+              loader: 'tsx',
+              target: 'es2015',
+              tsconfigRaw: require('../tsconfig.json'),
+            },
+          },
+          {
+            test: /\.(ts|js)$/,
             loader: 'esbuild-loader',
             exclude: /node_modules/,
             options: {

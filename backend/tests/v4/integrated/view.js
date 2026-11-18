@@ -19,7 +19,6 @@
 
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
@@ -139,7 +138,7 @@ describe("Views", function () {
 		}
 	};
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -158,7 +157,7 @@ describe("Views", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			done();
 		});
@@ -169,7 +168,7 @@ describe("Views", function () {
 
 			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/`)
 				.expect(200, function(err, res) {
-					expect(res.body.length).to.equal(Object.keys(teamSpace1Views).length);
+					expect(res.body.length).toBe(Object.keys(teamSpace1Views).length);
 					return done(err);
 				});
 
@@ -179,7 +178,7 @@ describe("Views", function () {
 
 			agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
+					expect(res.body.value).toBe(responseCodesV5.teamspaceNotFound.code);
 					return done(err);
 				});
 		});
@@ -187,7 +186,7 @@ describe("Views", function () {
 		it("invalid model ID should fail", function(done) {
 			agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).toBe(responseCodes.MODEL_NOT_FOUND.code);
 					return done(err);
 			});
 		});
@@ -202,10 +201,10 @@ describe("Views", function () {
 					teamSpace1Views[viewId].viewpoint.aspect_ratio = res.body.viewpoint.aspect_ratio;
 					teamSpace1Views[viewId].viewpoint.hideIfc = res.body.viewpoint.hideIfc;
 
-					expect(res.body._id).to.equal(viewId);
-					expect(res.body.name).to.equal(teamSpace1Views[viewId].name);
-					expect(res.body.viewpoint).to.deep.equal(teamSpace1Views[viewId].viewpoint);
-					expect(res.body.thumbnail).to.exist;
+					expect(res.body._id).toBe(viewId);
+					expect(res.body.name).toBe(teamSpace1Views[viewId].name);
+					expect(res.body.viewpoint).toEqual(teamSpace1Views[viewId].viewpoint);
+					expect(res.body.thumbnail).toBeTruthy();
 					return done(err);
 				});
 		});
@@ -215,7 +214,7 @@ describe("Views", function () {
 
 			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.VIEW_NOT_FOUND.value);
 
 					return done(err);
 				});
@@ -226,9 +225,9 @@ describe("Views", function () {
 
 			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 				.expect(200, function(err, res) {
-					expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
-					expect(res.body.screenshot).to.exist;
-					expect(res.body.screenshot.thumbnail).to.equal(`${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/thumbnail.png`);
+					expect(res.body.clippingPlanes).toEqual(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					expect(res.body.screenshot).toBeTruthy();
+					expect(res.body.screenshot.thumbnail).toBe(`${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/thumbnail.png`);
 
 					return done(err);
 				});
@@ -239,7 +238,7 @@ describe("Views", function () {
 
 			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 				.expect(200, function(err, res) {
-					expect(res.body.viewpoint.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					expect(res.body.viewpoint.clippingPlanes).toEqual(teamSpace1Views[viewId].viewpoint.clippingPlanes);
 					return done(err);
 			});
 		});
@@ -249,7 +248,7 @@ describe("Views", function () {
 
 			agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 				.expect(200, function(err, res) {
-					expect(res.body.clippingPlanes).to.deep.equal(teamSpace1Views[viewId].viewpoint.clippingPlanes);
+					expect(res.body.clippingPlanes).toEqual(teamSpace1Views[viewId].viewpoint.clippingPlanes);
 					return done(err);
 			});
 		});
@@ -269,7 +268,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
 						.expect(200, function(err, res) {
-							expect(res.body.name).to.equal(newName.name);
+							expect(res.body.name).toBe(newName.name);
 							done(err);
 						});
 				}
@@ -312,7 +311,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}`)
 						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+							expect(res.body.value).toBe(responseCodes.VIEW_NOT_FOUND.value);
 
 							return done(err);
 						});
@@ -324,7 +323,7 @@ describe("Views", function () {
 			const viewId = "wrongID";
 			agent2.delete(`/${teamSpace1Username}/${teamSpace1Model}/viewpoints/${viewId}/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.VIEW_NOT_FOUND.value);
 
 					return done(err);
 				});
@@ -347,8 +346,8 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+						expect(res.body.name).toBe(view.name);
+						expect(res.body.viewpoint).toEqual(view.viewpoint);
 
 						return done(err);
 					});
@@ -379,9 +378,9 @@ describe("Views", function () {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
 						view.clippingPlanes = res.body.viewpoint.clippingPlanes;
 
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.clippingPlanes).to.deep.equal(view.clippingPlanes);
-						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+						expect(res.body.name).toBe(view.name);
+						expect(res.body.clippingPlanes).toEqual(view.clippingPlanes);
+						expect(res.body.viewpoint).toEqual(view.viewpoint);
 
 						return done(err);
 					});
@@ -406,7 +405,7 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}/`).expect(200, function(err, res) {
-						expect(res.body.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewId}/thumbnail.png`);
+						expect(res.body.thumbnail).toBe(`${username}/${model}/viewpoints/${viewId}/thumbnail.png`);
 						return done(err);
 					});
 				}
@@ -431,7 +430,7 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}/`).expect(200, function(err, res) {
-						expect(res.body.screenshot.thumbnail).to.equal(`${username}/${model}/viewpoints/${viewId}/thumbnail.png`);
+						expect(res.body.screenshot.thumbnail).toBe(`${username}/${model}/viewpoints/${viewId}/thumbnail.png`);
 						return done(err);
 					});
 				}
@@ -455,9 +454,9 @@ describe("Views", function () {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
 						delete view.viewpoint.screenshot;
 
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.unexpected).to.not.exist;
-						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+						expect(res.body.name).toBe(view.name);
+						expect(res.body.unexpected).toBeFalsy();
+						expect(res.body.viewpoint).toEqual(view.viewpoint);
 
 						return done(err);
 					});
@@ -487,7 +486,7 @@ describe("Views", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}/`)
 						.expect(200, function(err, res) {
-							expect(res.body.name).to.equal(newName.name);
+							expect(res.body.name).toBe(newName.name);
 							done(err);
 						});
 				}
@@ -584,12 +583,12 @@ describe("Views", function () {
 				getGroup(hidden_group_id),
 			].concat(override_group_ids.map(getGroup)));
 
-			expect(highlighted_group2.objects).to.deep.equal(highlighted_group.objects);
-			expect(hidden_group2.objects).to.deep.equal(hidden_group.objects);
+			expect(highlighted_group2.objects).toEqual(highlighted_group.objects);
+			expect(hidden_group2.objects).toEqual(hidden_group.objects);
 
 			const mergeObjects = (groups) => groups.reduce((arr, group) => arr.concat(group.objects), []);
 
-			expect(mergeObjects(override_groups_2)).to.deep.equal(mergeObjects(override_groups));
+			expect(mergeObjects(override_groups_2)).toEqual(mergeObjects(override_groups));
 		});
 
 		it("with transformation should succeed", function(done) {
@@ -610,8 +609,8 @@ describe("Views", function () {
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/viewpoints/${viewId}`).expect(200, function(err, res) {
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+						expect(res.body.name).toBe(view.name);
+						expect(res.body.viewpoint).toEqual(view.viewpoint);
 
 						return done(err);
 					});
@@ -660,8 +659,8 @@ describe("Views", function () {
 						delete view.viewpoint.transformation_groups;
 						view.viewpoint.transformation_group_ids = transformation_group_ids;
 
-						expect(res.body.name).to.equal(view.name);
-						expect(res.body.viewpoint).to.deep.equal(view.viewpoint);
+						expect(res.body.name).toBe(view.name);
+						expect(res.body.viewpoint).toEqual(view.viewpoint);
 
 						return done(err);
 					});
@@ -695,7 +694,7 @@ describe("Views", function () {
 			agent.post(`/${username}/${model}/viewpoints/`)
 				.send(view)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -726,7 +725,7 @@ describe("Views", function () {
 			agent.post(`/${username}/${model}/viewpoints/`)
 				.send(view)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -756,7 +755,7 @@ describe("Views", function () {
 			agent.post(`/${username}/${model}/viewpoints/`)
 				.send(view)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -782,7 +781,7 @@ describe("Views", function () {
 			agent.post(`/${username}/${model}/viewpoints/`)
 				.send(view)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});

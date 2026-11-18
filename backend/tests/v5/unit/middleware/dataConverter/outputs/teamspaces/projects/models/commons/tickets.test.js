@@ -18,7 +18,13 @@
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { cloneDeep, times, uniq } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateTemplate, generateTicket, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
+const {
+	generateTemplate,
+	generateRandomString,
+	generateRandomDate,
+	generateUUID,
+} = require('../../../../../../../../helper/dataGen');
+const { generateTicket } = require('../../../../../../../../helper/dataGen.tickets');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

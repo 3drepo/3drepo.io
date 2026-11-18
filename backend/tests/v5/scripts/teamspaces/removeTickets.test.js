@@ -25,7 +25,7 @@ const { disconnect } = require(`${src}/handler/db`);
 
 const RemoveTickets = require(`${utilScripts}/teamspaces/removeTickets`);
 
-const { getTemplateList } = require(`${src}/processors/teamspaces/settings`);
+const { getTemplateList } = require(`${src}/processors/teamspaces/settings.tickets`);
 const { getTicketList } = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 
@@ -54,7 +54,7 @@ const checkData = async (teamspace, project, model, templates, tickets, shouldEx
 	const allTickets = await getTicketList(teamspace, stringToUUID(project), model, {});
 
 	if (shouldExist) {
-		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for CSH template
+		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for SFB template
 		templates.forEach((template) => {
 			expect(existingTemplates.some((t) => UUIDToString(t._id) === template._id)).toBe(true);
 		});

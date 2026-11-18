@@ -22,6 +22,9 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 describe(determineTestGroup(__filename), () => {
+	afterAll(() => {
+		EventsManager.reset();
+	});
 	test('Should throw an error if the user tries to subscribe to an unknown event', () => {
 		expect(() => EventsManager.subscribe('sdflkdsjflds', () => {})).toThrow();
 	});

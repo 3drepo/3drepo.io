@@ -170,11 +170,9 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 	public renderTools = renderWhenTrue(() => {
 		const onUndo = () => {
 			CanvasHistoryActionsDispatchers.undo();
-			this.handleModeChange(MODES.BRUSH);
 		}
 		const onClear = () => {
 			this.markupRef.current.clearCanvas();
-			this.handleModeChange(MODES.BRUSH);
 
 		}
 		return (

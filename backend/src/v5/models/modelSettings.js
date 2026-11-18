@@ -169,9 +169,13 @@ Models.getDrawings = (ts, ids, projection, sort) => {
 
 Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	const query = { _id: model };
-	const updateObj = { status };
+	const updateObj = { status, lastProcessingUpdate: new Date() };
 	if (revId) {
-		updateObj.corID = UUIDToString(revId);
+		const corID = UUIDToString(revId);
+		updateObj.corID = corID;
+
+		// Queued status is only written internally, so it establishes corID only when no process is already active.
+		query.corID = status === processStatuses.QUEUED ? { $exists: false } : corID;
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1, modelType: 1 });
@@ -228,7 +232,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user) => {
 	const query = { _id: model };
 	const set = {};
-	const unset = { corID: 1 };
+	const unset = { corID: 1, lastProcessingUpdate: 1 };
 
 	if (success) {
 		unset.status = 1;

@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateRandomURL } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomURL,
+} = require('../../../helper/dataGen');
 
 // This prevents the session service from triggering a mongo service.
 jest.mock('../../../../../src/v5/handler/db');

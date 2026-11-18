@@ -22,7 +22,6 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Pin } from '@/v5/ui/routes/viewer/tickets/pin';
-import { pinTypeToPinIcon } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 type Pin2DProps = IPin & { scale: number };
 export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DProps) => {
@@ -44,7 +43,7 @@ export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DPr
 			selected={isSelected}
 			style={{ transform: `translate(${position[0]}px, ${position[1]}px) scale(${0.333 / scale})` }}
 		>
-			<Pin pinIcon={pinTypeToPinIcon(type)} />
+			<Pin pinIcon={type} selected={isSelected} colour={colour.map((v) => v * 255) as any} />
 		</PinContainer>
 	);
 };

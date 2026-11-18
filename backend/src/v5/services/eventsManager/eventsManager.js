@@ -36,9 +36,10 @@ EventsManager.publish = (eventName, message) => {
 EventsManager.subscribe = (eventName, callback) => {
 	if (eventConstants.events[eventName]) {
 		eventsEmitter.on(eventName, callback);
-	} else {
-		throw new Error(`Trying to subscribe to an unknown event: ${eventName}`);
+		return () => eventsEmitter.off(eventName, callback);
 	}
+
+	throw new Error(`Trying to subscribe to an unknown event: ${eventName}`);
 };
 
 // NOTE: this is only used in testing situation to reset the event listeners - not used in practice.

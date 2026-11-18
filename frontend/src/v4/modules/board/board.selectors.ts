@@ -23,15 +23,11 @@ import { get, groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import {  PRIORITIES, STATUSES } from '../../constants/issues';
-import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import {  selectAllFilteredIssuesGetter, selectSortByField as selectIssuesSortByField,
 	selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectAllFilteredRisksGetter, selectRiskCategories, selectSortByField as  selectRisksSortByField,
-	selectSortOrder as selectRisksSortOrder
-} from '../risks';
 import { selectTopicTypes } from '../teamspace';
-import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
+import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP } from './board.constants';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -45,10 +41,6 @@ export const selectIsPending = createSelector(
 
 export const selectFilterProp = createSelector(
 	selectBoardDomain, (state) => state.filterProp
-);
-
-export const selectBoardType = createSelector(
-	selectBoardDomain, (state) => state.boardType
 );
 
 export const selectFetchedTeamspace = createSelector(
@@ -103,21 +95,11 @@ const selectIssues = createSelector(
 	}
 );
 
-const selectRisks = createSelector(
-	selectBoardDomain, selectAllFilteredRisksGetter,
-	({ filterProp }, risksGetter) => {
-		const forceShowHidden = filterProp === RISK_FILTER_PROPS.mitigation_status.value;
-		return risksGetter(forceShowHidden, true);
-	}
-);
-
 const selectRawCardData = createSelector(
 	selectIssues,
-	selectRisks,
-	(issues, risks ) => {
+	(issues) => {
 		return {
 			[BOARD_TYPES.ISSUES]: issues,
-			[BOARD_TYPES.RISKS]: risks
 		};
 });
 
@@ -126,12 +108,7 @@ export const selectLanes = createSelector(
 	selectRawCardData,
 	selectTopicTypes,
 	selectJobsValues,
-	selectRiskCategories,
-	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues, riskCategories) => {
-		const isIssueBoardType = boardType === 'issues';
-
-		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
-
+	({ filterProp }, rawCardData, topicTypes, jobsValues) => {
 		const datesValues = [{
 			name: ISSUE_FILTER_PROPS.due_date.notDefinedLabel,
 			value: ISSUE_FILTER_PROPS.due_date.notDefinedLabel
@@ -179,28 +156,13 @@ export const selectLanes = createSelector(
 			[ISSUE_FILTER_PROPS.due_date.value]: datesValues,
 		};
 
-		const riskFiltersMap = {
-			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST,
-			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
-			[RISK_FILTER_PROPS.category.value]: riskCategories.map((t) => ({
-				name: startCase(t),
-				value: t
-			})),
-			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
-			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
-			[RISK_FILTER_PROPS.assigned_roles.value]: jobsValues,
-			[RISK_FILTER_PROPS.due_date.value]: datesValues,
-		};
-
-		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
-
 		const lanes = [];
 
-		const preparedData = rawCardData[boardType].map((item) => {
+		const preparedData = rawCardData[BOARD_TYPES.ISSUES].map((item) => {
 			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||
 				(typeof item[filterProp] !== 'string' && item[filterProp].length))) || typeof item[filterProp] === 'number';
 
-			const defaultValue = get(FILTER_PROPS[filterProp], 'notDefinedLabel', NOT_DEFINED_PROP);
+			const defaultValue = get(ISSUE_FILTER_PROPS[filterProp], 'notDefinedLabel', NOT_DEFINED_PROP);
 
 			return {
 				id: item._id,
@@ -210,7 +172,7 @@ export const selectLanes = createSelector(
 					id: item._id,
 					teamspace: item.account,
 					model: item.model,
-					type: boardType,
+					type: BOARD_TYPES.ISSUES,
 					showModelButton: true
 				},
 				prop: filterProp
@@ -218,22 +180,20 @@ export const selectLanes = createSelector(
 		});
 
 		const groups = groupBy(preparedData, filterProp);
-		const dataset = filtersMap[filterProp];
+		const dataset = issueFiltersMap[filterProp];
 		const notDefinedGroup = groups[NOT_DEFINED_PROP];
 
 		if (notDefinedGroup && notDefinedGroup.length) {
 			const propertyName = notDefinedGroup[0].prop;
 			let title = 'Undefined';
 
-			if (propertyName === FILTER_PROPS.assigned_roles.value) {
+			if (propertyName === ISSUE_FILTER_PROPS.assigned_roles.value) {
 				title = 'Unassigned';
-			} else if (propertyName === RISK_FILTER_PROPS.mitigation_status.value) {
-				title = 'Unmitigated';
 			}
 			const notDefinedLane = {
 				id: propertyName,
 				title,
-				label: `${notDefinedGroup.length} ${boardType}`,
+				label: `${notDefinedGroup.length} ${BOARD_TYPES.ISSUES}`,
 				cards: notDefinedGroup
 			};
 			lanes.push(notDefinedLane);
@@ -247,7 +207,7 @@ export const selectLanes = createSelector(
 				if (id !== null && id !== '') {
 					lane.id = `${id}`;
 					lane.title = dataset[i].name;
-					lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
+					lane.label = `${groups[id] ? groups[id].length : 0} ${BOARD_TYPES.ISSUES}`;
 					lane.cards = groups[id] ? groups[id] : [];
 
 					lanes.push(lane);
@@ -266,15 +226,4 @@ export const selectCards = createSelector(
 		lanes.forEach((lane) => cards.push(...lane.cards));
 		return cards;
 	}
-);
-
-/** Unified selectors */
-export const selectSortOrder = createSelector(
-	selectBoardType,  selectIssuesSortOrder, selectRisksSortOrder,
-	(type, issuesSortOrder, risksSortOrder) =>   type === 'issues' ? issuesSortOrder : risksSortOrder
-);
-
-export const selectSortByField = createSelector(
-	selectBoardType,  selectIssuesSortByField, selectRisksSortByField,
-	(type, issuesSortByField, risksSortByField) =>   type === 'issues' ? issuesSortByField : risksSortByField
 );

@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_RUNS_COL, clashRunStatus } = require('./clashes.constants');
+const { CLASH_RUNS_COL, clashRunStatus, terminalClashRunStatuses } = require('./clashes.constants');
 const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../utils/helper/uuids');
 const { logger } = require('../utils/logger');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const ClashRuns = {};
@@ -54,7 +56,17 @@ ClashRuns.createClashRun = async (teamspace, project, plan, user) => {
 };
 
 const updateClashRun = async (teamspace, project, runId, setUpdate) => {
-	await db.updateOne(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+	const query = {
+		project,
+		_id: runId,
+	};
+
+	// Interim updates must not overwrite a terminal state if callbacks arrive out of order.
+	if (setUpdate.status && !terminalClashRunStatuses.includes(setUpdate.status)) {
+		query.status = { $nin: terminalClashRunStatuses };
+	}
+
+	await db.updateOne(teamspace, CLASH_RUNS_COL, query,
 		{ $set: { ...setUpdate, updatedAt: new Date() } });
 };
 
@@ -63,6 +75,8 @@ ClashRuns.updateRunStatus = async (teamspace, project, runId, status, results) =
 		status,
 		results,
 	}));
+
+	publish(events.CLASH_RUN_STATUS_UPDATED, { teamspace, project, runId, status, results });
 };
 
 ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sort) => {
@@ -75,8 +89,19 @@ ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sor
 	return run;
 };
 
+ClashRuns.getClashRunById = (teamspace, project, runId, projection) => ClashRuns.getClashRunByQuery(
+	teamspace, project, { _id: runId }, projection);
+
 ClashRuns.getLatestRunByPlan = (teamspace, project, planId, projection) => ClashRuns.getClashRunByQuery(
 	teamspace, project, { 'plan._id': planId }, projection, { triggeredAt: -1 });
+
+ClashRuns.getClashRunsByPlan = (teamspace, project, planId, projection) => db.find(
+	teamspace,
+	CLASH_RUNS_COL,
+	{ project, 'plan._id': planId },
+	projection,
+	{ triggeredAt: -1 },
+);
 
 const deleteRunsByQuery = async (teamspace, project, query = {}) => {
 	const runs = await db.find(teamspace, CLASH_RUNS_COL, { project, ...query }, { _id: 1 });

@@ -128,7 +128,7 @@ export const selectFilteredCompareModels = createSelector(
 	selectCompareModels, selectSelectedFilters, selectSortType, selectSortOrder, selectTargetModels,
 	(compareModels, selectedFilters, sortType, sortOrder, targetModelsMap) => {
 		return orderBy(
-			searchByFilters(compareModels, selectedFilters),
+			searchByFilters(compareModels, selectedFilters, false, ['name']),
 			[getSortValue(sortType, targetModelsMap)],
 			[sortOrder]
 		);

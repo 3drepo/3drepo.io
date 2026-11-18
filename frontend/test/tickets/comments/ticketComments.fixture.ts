@@ -51,5 +51,3 @@ export const commentMockFactory = (overrides?: Partial<ITicketComment>): ITicket
 	history: [commentHistoryMockFactory()],
 	...overrides,
 }) as ITicketComment;
-
-export const mockRiskCategories = (): string[] => times(5, () => faker.random.word());

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../../../../helper/utils');
+const { determineTestGroup, sleepMS } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
@@ -25,20 +25,21 @@ const {
 	generateUUIDString,
 	generateRandomIfcGuid,
 	generateRandomRvtId,
-	sleepMS,
-	generateRandomObject } = require('../../../../../../helper/services');
+	generateRandomObject,
+} = require('../../../../../../helper/dataGen');
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const {
+	idTypesToKeys,
+	idTypes,
+	metadataKeyToIdTypes,
+} = require(`${src}/models/metadata.constants`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { nodeTypes } = require(`${src}/models/scenes.constants`);
 const GeoMaths = require(`${src}/utils/helper/geoMaths`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
-
-jest.mock('../../../../../../../../src/v5/models/scenes.stash');
-const SceneStashModel = require(`${src}/models/scenes.stash`);
 
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetaModel = require(`${src}/models/metadata`);
@@ -111,32 +112,36 @@ const testGetMeshesWithParentIds = () => {
 	});
 };
 
-const testGetMeshNodeBounds = () => {
+const testGetBoundsForGroupsOfMeshNodes = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateUUID();
 	const revision = generateUUID();
 
-	describe('Get mesh node bounds', () => {
+	describe('Get bounds for groups of mesh nodes', () => {
 		test('should return undefined if no mesh nodes are found', async () => {
-			const meshIds = times(2, generateUUIDString);
+			const meshIdGroups = [times(2, generateUUID), times(2, generateUUID)];
+			const meshIds = meshIdGroups.flat();
 
 			ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
 
-			const res = await Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				meshIdGroups);
 
-			expect(res).toBeUndefined();
+			expect(res).toEqual([undefined, undefined]);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledWith(teamspace, project, container, {
-				_id: { $in: meshIds.map(stringToUUID) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
-			expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, revision, { coordOffset: 1 });
 		});
 
 		const [meshId1, meshId2] = times(2, generateUUID);
 		const [parentId1, parentId2, parentId3] = times(3, generateUUID);
-		const stringMeshId = generateUUIDString();
+		const uuidMeshId = generateUUID();
 		const worldCoordOffset = [1, 2, 3];
 		const worldBoundsCase = {
 			meshIds: [meshId1, meshId2],
@@ -169,9 +174,9 @@ const testGetMeshNodeBounds = () => {
 			transformQueries: [[parentId1, parentId2]],
 		};
 		const defaultOffsetBoundsCase = {
-			meshIds: [stringMeshId],
+			meshIds: [uuidMeshId],
 			meshNodes: [{
-				_id: stringToUUID(stringMeshId),
+				_id: uuidMeshId,
 				parents: [parentId1],
 				bounding_box: [[0, 0, 0], [1, 2, 3]],
 			}],
@@ -234,12 +239,13 @@ const testGetMeshNodeBounds = () => {
 			});
 			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce(revisionData);
 
-			const res = await Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds);
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				[meshIds]);
 
-			expect(res).toEqual(expectedRes);
+			expect(res).toEqual([expectedRes]);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1 + transformResponses.length);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
-				_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
 			transformQueries.forEach((parentIds, index) => {
@@ -251,6 +257,46 @@ const testGetMeshNodeBounds = () => {
 			});
 			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
 				modelTypes.CONTAINER, revision, { coordOffset: 1 });
+		});
+
+		test('should calculate bounds for multiple groups using shared node lookups', async () => {
+			const meshIds = times(3, generateUUID);
+			const missingMeshId = generateUUID();
+			const parentId = generateUUID();
+			const meshIdGroups = [[meshIds[0]], [meshIds[1], missingMeshId, meshIds[2]]];
+			const meshNodes = [
+				{ _id: meshIds[0], parents: [parentId], bounding_box: [[0, 0, 0], [1, 1, 1]] },
+				{ _id: meshIds[1], parents: [parentId], bounding_box: [[2, 2, 2], [3, 3, 3]] },
+				{ _id: meshIds[2], parents: [parentId], bounding_box: [[4, 4, 4], [5, 5, 5]] },
+			];
+			const transform = [
+				[1, 0, 0, 10],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1],
+			];
+
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshNodes);
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce([{ shared_id: parentId, matrix: transform }]);
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ coordOffset: [1, 0, 0] });
+
+			const res = await Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				meshIdGroups);
+
+			expect(res).toEqual([
+				{ min: [11, 0, 0], max: [12, 1, 1] },
+				{ min: [13, 2, 2], max: [16, 5, 5] },
+			]);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(2);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
+				_id: { $in: meshIdGroups.flat() },
+				type: nodeTypes.MESH,
+			}, { _id: 1, parents: 1, bounding_box: 1 });
+			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(2, teamspace, project, container, {
+				shared_id: { $in: [parentId] },
+				type: nodeTypes.TRANSFORMATION,
+			}, { shared_id: 1, parents: 1, matrix: 1 });
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 		});
 
 		const meshWithoutParentCase = {
@@ -280,22 +326,25 @@ const testGetMeshNodeBounds = () => {
 			transformResponses.forEach((response) => {
 				ScenesModel.getNodesByQuery.mockResolvedValueOnce(response);
 			});
+			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
 
-			await expect(Scenes.getMeshNodeBounds(teamspace, project, container, revision, meshIds))
+			await expect(Scenes.getBoundsForGroupsOfMeshNodes(teamspace, project, container, revision,
+				[meshIds]))
 				.rejects.toThrow(expectedError);
 
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1 + transformResponses.length);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container, {
-				_id: { $in: meshIds.map((id) => (typeof id === 'string' ? stringToUUID(id) : id)) },
+				_id: { $in: meshIds },
 				type: nodeTypes.MESH,
 			}, { _id: 1, parents: 1, bounding_box: 1 });
-			expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, revision, { coordOffset: 1 });
 		});
 	});
 };
 
 const testGetExternalIdsFromMetadata = () => {
-	const generateMeta = (ifc, revit) => {
+	const generateMeta = (ifc, revit, dwg) => {
 		const metadata = [{ key: generateRandomString(), value: generateRandomString() }];
 
 		if (revit) {
@@ -310,16 +359,30 @@ const testGetExternalIdsFromMetadata = () => {
 			})));
 		}
 
+		if (dwg) {
+			metadata.push(...Object.values(idTypesToKeys[idTypes.DWG]).map((key) => ({
+				key, value: dwg,
+			})));
+		}
+
 		return { metadata };
 	};
 
 	const ifcOnlyMeta = times(4, () => generateMeta(generateRandomIfcGuid()));
-	const rvtOnlyMeta = times(4, () => generateMeta(undefined, generateRandomRvtId()));
+	const rvtOnlyMeta = times(4, () => ({
+		metadata: [{
+			key: idTypesToKeys[idTypes.REVIT][1],
+			value: generateRandomRvtId(),
+		}],
+	}));
+	const dwgOnlyMeta = times(4, () => generateMeta(undefined, undefined, generateRandomString()));
 	const bothMeta = times(4, () => generateMeta(generateRandomIfcGuid(), generateRandomRvtId()));
+	const allTypesMeta = times(4, () => generateMeta(
+		generateRandomIfcGuid(), generateRandomRvtId(), generateRandomString()));
 
 	const getIDsFromMeta = (meta, targetType) => meta.flatMap(({ metadata }) => {
 		for (const { key, value } of metadata) {
-			if (metaKeyToIdType[key] === targetType) return value;
+			if (metadataKeyToIdTypes[key] === targetType) return value;
 		}
 		return [];
 	});
@@ -330,6 +393,9 @@ const testGetExternalIdsFromMetadata = () => {
 		['ifc guids if matched', ifcOnlyMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(ifcOnlyMeta, idTypes.IFC) }],
 		['rvt ids if matched', rvtOnlyMeta, undefined, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
 		['ifc guids if both rvt and ifc matched', bothMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(bothMeta, idTypes.IFC) }],
+		['dwg ids if matched', dwgOnlyMeta, undefined, { key: idTypes.DWG, values: getIDsFromMeta(dwgOnlyMeta, idTypes.DWG) }],
+		['ifc guids if all id types matched according to type priority', allTypesMeta, undefined,
+			{ key: idTypes.IFC, values: getIDsFromMeta(allTypesMeta, idTypes.IFC) }],
 		['revit ids if requested', bothMeta, idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(bothMeta, idTypes.REVIT) }],
 		['partial match of a specific id if requested', [...ifcOnlyMeta, ...rvtOnlyMeta], idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
 		['undefined if partial match and no specific type is requested', [...ifcOnlyMeta, ...rvtOnlyMeta]],
@@ -476,8 +542,8 @@ const testGetMeshData = () => {
 		[
 			['Should return identity matrix if parent node has no matrix', [{}], GeoMaths.matrices.identity()],
 			['Should return parent\'s matrix if parent node exists', [{ matrix: matrix1 }], matrix1],
-			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
-			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, {}], resultMatrix],
 		]
 			.forEach(([desc, parentMocks, expectedMatrix]) => {
 				test(desc, async () => {
@@ -686,41 +752,12 @@ const testGetTexture = () => {
 	});
 };
 
-const testGetSuperMeshesInfo = () => {
-	describe('Get supermeshes info in revision', () => {
-		const teamspace = generateRandomString();
-		const model = generateRandomString();
-		const revision = generateUUID();
-
-		test('Should return supermeshes info in revision', async () => {
-			const data = generateRandomObject();
-			SceneStashModel.getSuperMeshesInRevision.mockResolvedValueOnce(data);
-
-			expect(await Scenes.getSuperMeshesInfo(teamspace, model, revision)).toEqual({ superMeshes: data });
-
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledTimes(1);
-			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledWith(
-				teamspace, model, revision,
-				{
-					_id: 1,
-					vertices_count: 1,
-					faces_count: 1,
-					uv_channels_count: 1,
-					bounding_box: 1,
-					primitive: 1,
-				},
-			);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
-	testGetMeshNodeBounds();
+	testGetBoundsForGroupsOfMeshNodes();
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();
 	testGetTexture();
 	testGetMeshData();
-	testGetSuperMeshesInfo();
 });

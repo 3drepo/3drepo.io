@@ -58,7 +58,6 @@ export type View = {
 
 export enum AddOnModule {
 	Issues = 'issues',
-	Risks = 'risks',
 }
 
 export type AddOns = {

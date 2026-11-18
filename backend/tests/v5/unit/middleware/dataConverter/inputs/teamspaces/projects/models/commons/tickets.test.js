@@ -20,7 +20,11 @@ const { times } = require('lodash');
 
 const { src } = require('../../../../../../../../helper/path');
 
-const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateTemplate,
+} = require('../../../../../../../../helper/dataGen');
+const { generateTicket } = require('../../../../../../../../helper/dataGen.tickets');
 const { isEqual } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
@@ -40,6 +44,7 @@ const TicketModelSchema = require(`${src}/models/tickets`);
 
 const Tickets = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
+const { presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { UUIDToString, stringToUUID, generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
 const ticketArrTestErrorMsg = 'Expected body to contain an array of tickets';
@@ -63,7 +68,7 @@ const testValidateNewTicket = () => {
 			const req = { params: {}, body: { type: templateId } };
 			const res = {};
 
-			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => {});
+			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(() => { });
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -100,7 +105,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -124,7 +129,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -148,7 +153,7 @@ const testValidateNewTicket = () => {
 
 			SettingsMW.checkTicketTemplateExists.mockImplementationOnce(async (_req, _res, next) => {
 				// eslint-disable-next-line no-param-reassign
-				_req.templateData = { };
+				_req.templateData = {};
 				await next();
 			});
 
@@ -232,7 +237,7 @@ const testValidateImportTickets = () => {
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
@@ -241,6 +246,7 @@ const testValidateImportTickets = () => {
 		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
+			jest.restoreAllMocks();
 			jest.clearAllMocks();
 		});
 		test(`Should ${success ? 'succeed and call next()' : `fail and ${expectedRes ? `respond with ${expectedRes.code}` : 'not respond'}`} if ${desc}`, async () => {
@@ -285,7 +291,7 @@ const testValidateUpdateTicket = () => {
 	describe('Validate update ticket', () => {
 		test(`Should respond with ${templates.ticketNotFound.code} if ticket doesn't exist`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 
 			TicketModelSchema.getTicketById.mockRejectedValueOnce(templates.ticketNotFound);
@@ -298,7 +304,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the validation failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -318,7 +324,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.ok.code} if there is nothing to update`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -336,7 +342,7 @@ const testValidateUpdateTicket = () => {
 
 		test(`Should respond with ${templates.invalidArguments.code} if the processing read only values failed`, async () => {
 			const fn = jest.fn();
-			const req = { params: {}, body: { } };
+			const req = { params: {}, body: {} };
 			const res = {};
 			const ticket = { [generateRandomString()]: generateRandomString() };
 			const template = { [generateRandomString()]: generateRandomString() };
@@ -487,7 +493,7 @@ const testValidateUpdateMultipleTickets = () => {
 		['template does not exist', { query: { template: generateUUIDString() } }, false],
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
-		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
+		['tickets array doesn\'t exist', { body: {} }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, ticketArrTestErrorMsg)],
 		['ticket array contains a ticket with no _id', { body: { tickets: [{ ...goodTickets[0], _id: undefined }] } }, false, createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets')],
@@ -541,9 +547,61 @@ const testValidateUpdateMultipleTickets = () => {
 	});
 };
 
+const testValidateTagProperty = () => {
+	const rootProp = generateRandomString();
+	const moduleName = generateRandomString();
+	const moduleProp = generateRandomString();
+	const presetModuleProp = generateRandomString();
+	const textProp = generateRandomString();
+	const template = {
+		properties: [
+			{ name: rootProp, type: propTypes.TAGS },
+			{ name: textProp, type: propTypes.TEXT },
+		],
+		modules: [{
+			name: moduleName,
+			properties: [{ name: moduleProp, type: propTypes.TAGS }],
+		}, {
+			type: presetModules.SEQUENCING,
+			properties: [{ name: presetModuleProp, type: propTypes.TAGS }],
+		}],
+	};
+	describe.each([
+		['the property is a root tags property', rootProp, true, `properties.${rootProp}`],
+		['the property is a module tags property', encodeURIComponent(`${moduleName}::${moduleProp}`), true, `modules.${moduleName}.${moduleProp}`],
+		['the property is a preset module tags property', encodeURIComponent(`${presetModules.SEQUENCING}::${presetModuleProp}`), true, `modules.${presetModules.SEQUENCING}.${presetModuleProp}`],
+		['the property does not exist', generateRandomString(), false, templates.invalidArguments],
+		['the property is not a tags property', textProp, false, templates.invalidArguments],
+		['the property path has too many module delimiters', `${moduleName}::${moduleProp}::${rootProp}`, false, templates.invalidArguments],
+	])('Validate tag property', (desc, property, success, expectedOutput) => {
+		test(`Should ${success ? 'call next()' : `respond with ${expectedOutput.code}`} if ${desc}`, async () => {
+			const req = { params: { property }, templateData: template };
+			const res = {};
+			const next = jest.fn();
+
+			await Tickets.validateTagProperty(req, res, next);
+
+			if (success) {
+				expect(next).toHaveBeenCalledTimes(1);
+				expect(req.tagProperty).toEqual(expectedOutput);
+				expect(Responder.respond).not.toHaveBeenCalled();
+			} else {
+				expect(next).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledWith(
+					req, res, expect.objectContaining({ code: expectedOutput.code }));
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	testValidateNewTicket();
 	testValidateImportTickets();
 	testValidateUpdateTicket();
 	testValidateUpdateMultipleTickets();
+	testValidateTagProperty();
 });

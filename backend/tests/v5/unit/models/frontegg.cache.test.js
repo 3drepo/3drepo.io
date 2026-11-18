@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const FronteggCache = require(`${src}/models/frontegg.cache`);
 

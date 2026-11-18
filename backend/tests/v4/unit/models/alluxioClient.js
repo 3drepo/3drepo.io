@@ -15,8 +15,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const expect = require("chai").expect;
 const config = require("../../../../src/v4/config");
 const utils = require("../../../../src/v4/utils");
 const responseCodes = require("../../../../src/v4/response_codes");
@@ -29,7 +27,7 @@ const fileList = [];
 const uuid = utils.generateUUID({string: true});
 let fileId;
 
-before(function(done) {
+beforeAll(function(done) {
 	if (config.alluxio) {
 		const {hostname, port} = config.alluxio;
 		client = new AlluxioClient(`${hostname}:${port}`);
@@ -42,11 +40,11 @@ before(function(done) {
 	describe("getInfo", function () {
 		it("get info should succeed", async function() {
 			const result = await client.getInfo();
-			expect(result).to.exist;
-			expect(result).to.have.property("version");
-			expect(result).to.have.property("configuration");
-			expect(result).to.have.property("startTimeMs");
-			expect(result).to.have.property("uptimeMs");
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("version");
+			expect(result).toHaveProperty("configuration");
+			expect(result).toHaveProperty("startTimeMs");
+			expect(result).toHaveProperty("uptimeMs");
 			console.log(`========== ALLUXIO VERSION: ${result.version} ==========`);
 		});
 	});
@@ -55,11 +53,11 @@ before(function(done) {
 		it("get URL should succeed", async function() {
 			const basePath = "test";
 			const url = client.getURL(basePath);
-			expect(config.alluxio).to.exist;
-			expect(config.alluxio.hostname).to.exist;
-			expect(config.alluxio.port).to.exist;
+			expect(config.alluxio).toBeTruthy();
+			expect(config.alluxio.hostname).toBeTruthy();
+			expect(config.alluxio.port).toBeTruthy();
 			const {hostname, port} = config.alluxio;
-			expect(url).to.equal(`http://${hostname}:${port}/api/v1/${basePath}`);
+			expect(url).toBe(`http://${hostname}:${port}/api/v1/${basePath}`);
 		});
 	});
 
@@ -68,7 +66,7 @@ before(function(done) {
 			const action = "act1";
 			const path = "test1";
 			const url = client.getPathsURL(action, path);
-			expect(url).to.equal(`${client.getURL("paths")}/${path}/${action}`);
+			expect(url).toBe(`${client.getURL("paths")}/${path}/${action}`);
 		});
 	});
 
@@ -77,7 +75,7 @@ before(function(done) {
 			const action = "act1";
 			const id = "test1";
 			const url = client.getStreamsURL(action, id);
-			expect(url).to.equal(`${client.getURL("streams")}/${id}/${action}`);
+			expect(url).toBe(`${client.getURL("streams")}/${id}/${action}`);
 		});
 	});
 
@@ -86,7 +84,7 @@ before(function(done) {
 			const path = "/";
 			const action = "list-status";
 			const result = await client.postToPathRoute(path, undefined, action);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("POST to path with stream action should fail", async function() {
@@ -96,7 +94,7 @@ before(function(done) {
 				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -107,7 +105,7 @@ before(function(done) {
 				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -118,7 +116,7 @@ before(function(done) {
 				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -130,7 +128,7 @@ before(function(done) {
 				await client.postToPathRoute(path, opts, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -139,8 +137,8 @@ before(function(done) {
 		it("ls should succeed", async function() {
 			const path = "/";
 			const result = await client.ls(path, undefined);
-			expect(result).to.exist;
-			expect(result).to.be.an("array");
+			expect(result).toBeTruthy();
+			expect(Array.isArray(result)).toBe(true);
 		});
 
 		it("ls with non-existent dir should fail", async function() {
@@ -149,7 +147,7 @@ before(function(done) {
 				await client.ls(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -158,7 +156,7 @@ before(function(done) {
 		it("create dir should succeed", async function() {
 			const path = `/${uuid}`;
 			const result = await client.createDirectory(path, undefined);
-			expect(result).to.equal("");
+			expect(result).toBe("");
 		});
 
 		it("create same dir again should fail", async function() {
@@ -167,7 +165,7 @@ before(function(done) {
 				await client.createDirectory(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -177,7 +175,7 @@ before(function(done) {
 				await client.createDirectory(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -186,7 +184,7 @@ before(function(done) {
 		it("create file should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.createFile(path, undefined);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 			fileId = result;
 		});
 
@@ -196,7 +194,7 @@ before(function(done) {
 				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -206,7 +204,7 @@ before(function(done) {
 				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -216,7 +214,7 @@ before(function(done) {
 				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -227,8 +225,8 @@ before(function(done) {
 			const id = await client.createFile(path, undefined);
 			const action = "close";
 			const result = await client.postToStreamRoute(id, undefined, action);
-			expect(result).to.exist;
-			expect(result).to.equal("");
+			expect(result).toBeTruthy();
+			expect(result).toBe("");
 		});
 
 		it("POST to path with non-stream action should fail", async function() {
@@ -239,7 +237,7 @@ before(function(done) {
 				await client.postToStreamRoute(id, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -251,7 +249,7 @@ before(function(done) {
 				await client.postToStreamRoute(id, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -260,79 +258,79 @@ before(function(done) {
 		it("get status should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.getStatus(path, undefined);
-			expect(result).to.exist;
-			expect(result).to.have.property("owner");
-			expect(result).to.have.property("ttl");
-			expect(result).to.have.property("defaultAcl");
-			expect(result).to.have.property("blockIds");
-			expect(result).to.have.property("creationTimeMs");
-			expect(result).to.have.property("inMemoryPercentage");
-			expect(result).to.have.property("inAlluxioPercentage");
-			expect(result).to.have.property("lastModificationTimeMs");
-			expect(result).to.have.property("ttlAction");
-			expect(result).to.have.property("cacheable");
-			expect(result).to.have.property("pinnedMediumTypes");
-			expect(result).to.have.property("mountPoint");
-			expect(result).to.have.property("ufsFingerprint");
-			expect(result).to.have.property("blockSizeBytes");
-			expect(result).to.have.property("pinned");
-			expect(result).to.have.property("lastAccessTimeMs");
-			expect(result).to.have.property("group");
-			expect(result).to.have.property("fileBlockInfos");
-			expect(result).to.have.property("folder");
-			expect(result).to.have.property("completed");
-			expect(result).to.have.property("ufsPath");
-			expect(result).to.have.property("mountId");
-			expect(result).to.have.property("acl");
-			expect(result).to.have.property("persisted");
-			expect(result).to.have.property("persistenceState");
-			expect(result).to.have.property("replicationMin");
-			expect(result).to.have.property("mode");
-			expect(result).to.have.property("replicationMax");
-			expect(result).to.have.property("fileId");
-			expect(result).to.have.property("length");
-			expect(result).to.have.property("name");
-			expect(result).to.have.property("path");
-			expect(result.folder).to.equal(false);
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("owner");
+			expect(result).toHaveProperty("ttl");
+			expect(result).toHaveProperty("defaultAcl");
+			expect(result).toHaveProperty("blockIds");
+			expect(result).toHaveProperty("creationTimeMs");
+			expect(result).toHaveProperty("inMemoryPercentage");
+			expect(result).toHaveProperty("inAlluxioPercentage");
+			expect(result).toHaveProperty("lastModificationTimeMs");
+			expect(result).toHaveProperty("ttlAction");
+			expect(result).toHaveProperty("cacheable");
+			expect(result).toHaveProperty("pinnedMediumTypes");
+			expect(result).toHaveProperty("mountPoint");
+			expect(result).toHaveProperty("ufsFingerprint");
+			expect(result).toHaveProperty("blockSizeBytes");
+			expect(result).toHaveProperty("pinned");
+			expect(result).toHaveProperty("lastAccessTimeMs");
+			expect(result).toHaveProperty("group");
+			expect(result).toHaveProperty("fileBlockInfos");
+			expect(result).toHaveProperty("folder");
+			expect(result).toHaveProperty("completed");
+			expect(result).toHaveProperty("ufsPath");
+			expect(result).toHaveProperty("mountId");
+			expect(result).toHaveProperty("acl");
+			expect(result).toHaveProperty("persisted");
+			expect(result).toHaveProperty("persistenceState");
+			expect(result).toHaveProperty("replicationMin");
+			expect(result).toHaveProperty("mode");
+			expect(result).toHaveProperty("replicationMax");
+			expect(result).toHaveProperty("fileId");
+			expect(result).toHaveProperty("length");
+			expect(result).toHaveProperty("name");
+			expect(result).toHaveProperty("path");
+			expect(result.folder).toBe(false);
 		});
 
 		it("get status on directory should succeed", async function() {
 			const path = `/${uuid}`;
 			const result = await client.getStatus(path, undefined);
-			expect(result).to.exist;
-			expect(result).to.have.property("owner");
-			expect(result).to.have.property("ttl");
-			expect(result).to.have.property("defaultAcl");
-			expect(result).to.have.property("blockIds");
-			expect(result).to.have.property("creationTimeMs");
-			expect(result).to.have.property("inMemoryPercentage");
-			expect(result).to.have.property("inAlluxioPercentage");
-			expect(result).to.have.property("lastModificationTimeMs");
-			expect(result).to.have.property("ttlAction");
-			expect(result).to.have.property("cacheable");
-			expect(result).to.have.property("pinnedMediumTypes");
-			expect(result).to.have.property("mountPoint");
-			expect(result).to.have.property("ufsFingerprint");
-			expect(result).to.have.property("blockSizeBytes");
-			expect(result).to.have.property("pinned");
-			expect(result).to.have.property("lastAccessTimeMs");
-			expect(result).to.have.property("group");
-			expect(result).to.have.property("fileBlockInfos");
-			expect(result).to.have.property("folder");
-			expect(result).to.have.property("completed");
-			expect(result).to.have.property("ufsPath");
-			expect(result).to.have.property("mountId");
-			expect(result).to.have.property("acl");
-			expect(result).to.have.property("persisted");
-			expect(result).to.have.property("persistenceState");
-			expect(result).to.have.property("replicationMin");
-			expect(result).to.have.property("mode");
-			expect(result).to.have.property("replicationMax");
-			expect(result).to.have.property("fileId");
-			expect(result).to.have.property("length");
-			expect(result).to.have.property("name");
-			expect(result).to.have.property("path");
-			expect(result.folder).to.equal(true);
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("owner");
+			expect(result).toHaveProperty("ttl");
+			expect(result).toHaveProperty("defaultAcl");
+			expect(result).toHaveProperty("blockIds");
+			expect(result).toHaveProperty("creationTimeMs");
+			expect(result).toHaveProperty("inMemoryPercentage");
+			expect(result).toHaveProperty("inAlluxioPercentage");
+			expect(result).toHaveProperty("lastModificationTimeMs");
+			expect(result).toHaveProperty("ttlAction");
+			expect(result).toHaveProperty("cacheable");
+			expect(result).toHaveProperty("pinnedMediumTypes");
+			expect(result).toHaveProperty("mountPoint");
+			expect(result).toHaveProperty("ufsFingerprint");
+			expect(result).toHaveProperty("blockSizeBytes");
+			expect(result).toHaveProperty("pinned");
+			expect(result).toHaveProperty("lastAccessTimeMs");
+			expect(result).toHaveProperty("group");
+			expect(result).toHaveProperty("fileBlockInfos");
+			expect(result).toHaveProperty("folder");
+			expect(result).toHaveProperty("completed");
+			expect(result).toHaveProperty("ufsPath");
+			expect(result).toHaveProperty("mountId");
+			expect(result).toHaveProperty("acl");
+			expect(result).toHaveProperty("persisted");
+			expect(result).toHaveProperty("persistenceState");
+			expect(result).toHaveProperty("replicationMin");
+			expect(result).toHaveProperty("mode");
+			expect(result).toHaveProperty("replicationMax");
+			expect(result).toHaveProperty("fileId");
+			expect(result).toHaveProperty("length");
+			expect(result).toHaveProperty("name");
+			expect(result).toHaveProperty("path");
+			expect(result.folder).toBe(true);
 		});
 
 		it("get status on non-existent directory should fail", async function() {
@@ -341,7 +339,7 @@ before(function(done) {
 				await client.getStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -351,7 +349,7 @@ before(function(done) {
 				await client.getStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -360,13 +358,13 @@ before(function(done) {
 		it("exists should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.exists(path, undefined);
-			expect(result).to.equal(true);
+			expect(result).toBe(true);
 		});
 
 		it("exists on non-existent file should return false", async function() {
 			const path = `/${uuid}-badDir/nope`;
 			const result = await client.exists(path, undefined);
-			expect(result).to.equal(false);
+			expect(result).toBe(false);
 		});
 	});
 
@@ -374,16 +372,16 @@ before(function(done) {
 		it("list status should succeed", async function() {
 			const path = "/";
 			const result = await client.listStatus(path, undefined);
-			expect(result).to.exist;
-			expect(result).to.be.an("array");
+			expect(result).toBeTruthy();
+			expect(Array.isArray(result)).toBe(true);
 		});
 
 		it("list status on single file should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.listStatus(path, undefined);
-			expect(result).to.exist;
-			expect(result).to.be.an("array");
-			expect(result).to.have.lengthOf(1);
+			expect(result).toBeTruthy();
+			expect(Array.isArray(result)).toBe(true);
+			expect(result).toHaveLength(1);
 		});
 
 		it("list status on non-existent directory should fail", async function() {
@@ -392,7 +390,7 @@ before(function(done) {
 				await client.listStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -402,7 +400,7 @@ before(function(done) {
 				await client.listStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -412,38 +410,38 @@ before(function(done) {
 			const id = fileId;
 			const data = "abcdefg";
 			const result = await client.write(id, data);
-			expect(result).to.exist;
-			expect(result).to.have.property("status");
-			expect(result).to.have.property("statusText");
-			expect(result).to.have.property("data");
-			expect(result.status).to.equal(200);
-			expect(result.statusText).to.equal("OK");
-			expect(result.data).to.equal(data.length);
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("status");
+			expect(result).toHaveProperty("statusText");
+			expect(result).toHaveProperty("data");
+			expect(result.status).toBe(200);
+			expect(result.statusText).toBe("OK");
+			expect(result.data).toBe(data.length);
 		});
 
 		it("write buffer should succeed", async function() {
 			const id = fileId;
 			const data = Buffer.alloc(8);
 			const result = await client.write(id, data);
-			expect(result).to.exist;
-			expect(result).to.have.property("status");
-			expect(result).to.have.property("statusText");
-			expect(result).to.have.property("data");
-			expect(result.status).to.equal(200);
-			expect(result.statusText).to.equal("OK");
-			expect(result.data).to.equal(data.length);
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("status");
+			expect(result).toHaveProperty("statusText");
+			expect(result).toHaveProperty("data");
+			expect(result.status).toBe(200);
+			expect(result.statusText).toBe("OK");
+			expect(result.data).toBe(data.length);
 		});
 
 		it("write date should succeed", async function() {
 			const id = fileId;
 			const data = new Date();
 			const result = await client.write(id, data);
-			expect(result).to.exist;
-			expect(result).to.have.property("status");
-			expect(result).to.have.property("statusText");
-			expect(result).to.have.property("data");
-			expect(result.status).to.equal(200);
-			expect(result.statusText).to.equal("OK");
+			expect(result).toBeTruthy();
+			expect(result).toHaveProperty("status");
+			expect(result).toHaveProperty("statusText");
+			expect(result).toHaveProperty("data");
+			expect(result.status).toBe(200);
+			expect(result.statusText).toBe("OK");
 		});
 
 		it("write number should fail", async function() {
@@ -453,7 +451,7 @@ before(function(done) {
 				await client.write(id, data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -464,7 +462,7 @@ before(function(done) {
 				await client.write(id, data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -475,7 +473,7 @@ before(function(done) {
 				const result = await client.write(id, data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -484,8 +482,8 @@ before(function(done) {
 		it("close file should succeed", async function() {
 			const id = fileId;
 			const result = await client.closeFile(id, undefined);
-			expect(result).to.exist;
-			expect(result).to.equal("");
+			expect(result).toBeTruthy();
+			expect(result).toBe("");
 		});
 
 		it("close file again should fail", async function() {
@@ -494,7 +492,7 @@ before(function(done) {
 				await client.closeFile(id, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -504,7 +502,7 @@ before(function(done) {
 				await client.closeFile(id, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -513,13 +511,13 @@ before(function(done) {
 		it("open file should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.openFile(path, undefined);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("open file again should succeed", async function() {
 			const path = `/${uuid}/test1`;
 			const result = await client.openFile(path, undefined);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("open file that has existing stream should fail", async function() {
@@ -531,7 +529,7 @@ before(function(done) {
 				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -541,7 +539,7 @@ before(function(done) {
 				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -551,7 +549,7 @@ before(function(done) {
 				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -587,7 +585,7 @@ before(function(done) {
 				await client.uploadFile(link, data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -598,7 +596,7 @@ before(function(done) {
 				await client.uploadFile(link, data);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -607,7 +605,7 @@ before(function(done) {
 		it("get file should succeed", async function() {
 			const fileInfo = fileList[0];
 			const file = await client.downloadFile(fileInfo.link);
-			expect(file.toString("utf8")).to.equal(fileInfo.data);
+			expect(file.toString("utf8")).toBe(fileInfo.data);
 		});
 
 		it("get file with incorrect key should fail", async function() {
@@ -615,7 +613,7 @@ before(function(done) {
 				await client.downloadFile("badKey");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -627,7 +625,7 @@ before(function(done) {
 			const fileInfo = fileList[1];
 			const stream = await client.downloadFileStream(fileInfo.link);
 			console.log(stream);
-			expect(stream).to.have.lengthOf(fileInfo.size);
+			expect(stream).toHaveLength(fileInfo.size);
 		});
 		*/
 
@@ -636,7 +634,7 @@ before(function(done) {
 				await client.downloadFileStream("badLink");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -647,14 +645,14 @@ before(function(done) {
 		it("remove file should succeed", async function() {
 			fileInfo = fileList.pop();
 			const result = await client.delete(fileInfo.link);
-			expect(result).to.exist;
+			expect(result).toBeTruthy();
 		});
 
 		it("remove more files should succeed", async function() {
 			while (fileList.length > 0) {
 				fileInfo = fileList.pop();
 				const result = await client.delete(fileInfo.link);
-				expect(result).to.exist;
+				expect(result).toBeTruthy();
 			}
 		});
 
@@ -663,7 +661,7 @@ before(function(done) {
 				await client.delete(fileInfo.link);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -672,7 +670,7 @@ before(function(done) {
 				await client.delete("notexist");
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});
@@ -682,13 +680,13 @@ before(function(done) {
 			const path = `/${uuid}-emptyDir/`;
 			await client.createDirectory(path, undefined);
 			const result = await client.free(path, undefined);
-			expect(result).to.equal("");
+			expect(result).toBe("");
 		});
 
 		it("free again should succeed", async function() {
 			const path = `/${uuid}-emptyDir/`;
 			const result = await client.free(path, undefined);
-			expect(result).to.equal("");
+			expect(result).toBe("");
 		});
 
 		it("free non-empty directory should fail", async function() {
@@ -697,7 +695,7 @@ before(function(done) {
 				await client.free(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 
@@ -707,7 +705,7 @@ before(function(done) {
 				await client.free(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
-				expect(err).to.exist;
+				expect(err).toBeTruthy();
 			}
 		});
 	});

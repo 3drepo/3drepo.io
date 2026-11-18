@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { getColorTriggerPropName, getPinColorHexForProperty, NEW_TICKET_ID, toPin, getPinId, getPinIconForProperty } from './coordsProperty.helpers';
+import { getColorTriggerPropName, getIconTriggerPropName, getPinColorHexForProperty, NEW_TICKET_ID, toPin, getPinId, getPinIconForProperty } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -36,6 +36,7 @@ import { get, isEqual, set } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { Pin } from '../../../pin';
+import { hexToRgb } from '@/v5/helpers/colors.helper';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
@@ -61,16 +62,26 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		colorTriggerPropValue = get(ticket, colorTriggerPropPath);
 	}
 
+	let iconTriggerPropPath = '';
+	let iconTriggerPropValue = '';
+
+	iconTriggerPropPath = getIconTriggerPropName(name, template);
+	iconTriggerPropValue = useWatch({ name: iconTriggerPropPath });
+	if (!iconTriggerPropValue) {
+		iconTriggerPropValue = get(ticket, iconTriggerPropPath);
+	}
+
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
-	const minimumPinTicket = set({ _id: ticketId }, colorTriggerPropPath, colorTriggerPropValue) as ITicket;
+	let minimumPinTicket = set({ _id: ticketId }, colorTriggerPropPath, colorTriggerPropValue) as ITicket;
+	minimumPinTicket = set(minimumPinTicket, iconTriggerPropPath, iconTriggerPropValue) as ITicket;
 	
 	const pinId = getPinId(name, ticket);
 	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
 	const colorHex = getPinColorHexForProperty(name, template, minimumPinTicket);
-	const pinIcon = getPinIconForProperty(name, template);
+	const pinIcon = getPinIconForProperty(name, template, minimumPinTicket);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -115,22 +126,20 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const refreshPin = () => {
 		if (!isViewer) return;
 
-		if (prevValue.current) {
+		if (prevValue.current && !hasPin) {
 			ViewerService.removePin(pinId);
 		}
 
 		if (hasPin) {
 			ViewerService.showPin(toPin(name, template, minimumPinTicket, false, value));
 		}
-
-		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	};
 
-	// Update pin when colour changes
+	// Update pin when colour or icon changes
 	useEffect(() => {
 		if (!prevValue.current) return;
 		refreshPin();
-	}, [colorHex]);
+	}, [colorHex, pinIcon]);
 
 	// Update pin when position changes
 	useEffect(() => {
@@ -212,7 +221,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
 						>
-							<Pin pinIcon={pinIcon}/>
+							<Pin pinIcon={pinIcon} selected={isSelected} colour={hexToRgb(colorHex) as any} />
 						</SelectPinButton>
 					</Tooltip>
 				)}

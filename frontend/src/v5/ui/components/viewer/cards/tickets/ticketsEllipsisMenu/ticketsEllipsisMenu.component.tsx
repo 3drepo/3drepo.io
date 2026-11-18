@@ -30,7 +30,9 @@ import { SortingOrderMenu } from './sortingOrderMenu/sortingOrderMenu.component'
 
 export const TicketsEllipsisMenu = () => {
 	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
+	const isExpandedTicketView = TicketsCardHooksSelectors.selectIsExpandedTicketView();
 	const onClickShowPins = () => TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
+	const onClickExpandedTicketView = () => TicketsCardActionsDispatchers.setIsExpandedTicketView(!isExpandedTicketView);
 
 	return (
 		<ActionMenu
@@ -43,6 +45,15 @@ export const TicketsEllipsisMenu = () => {
 			)}
 		>
 			<MenuList>
+				<EllipsisMenuItem
+					onClick={onClickExpandedTicketView}
+					title={
+						<SwitchContainer>
+							{formatMessage({ id: 'viewer.cards.tickets.expandedTicketView', defaultMessage: 'Expanded Ticket View' })}
+							{isExpandedTicketView && <TickIcon />}
+						</SwitchContainer>
+					}
+				/>
 				<EllipsisMenuItem
 					onClick={onClickShowPins}
 					title={

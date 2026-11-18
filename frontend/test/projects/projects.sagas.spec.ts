@@ -59,7 +59,7 @@ describe('Teamspaces: sagas', () => {
 	afterAll(() => { spy.mockClear(); });
 
 	describe('fetch', () => {
-		const addOns = { modules: [AddOnModule.Risks], usersProvisioned: false, disablePermissionsOnUI: false };
+		const addOns = { modules: [AddOnModule.Issues], usersProvisioned: false, disablePermissionsOnUI: false };
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [mockProject];
 

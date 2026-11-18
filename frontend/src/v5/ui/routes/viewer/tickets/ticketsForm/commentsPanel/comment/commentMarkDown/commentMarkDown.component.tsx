@@ -16,12 +16,43 @@
  */
 
 import ReactMarkdown from 'react-markdown';
+import { Children } from 'react';
 import { CommentMessage } from '../basicComment/basicComment.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
+import { Mention } from '../mention/mention.component';
+import { MENTION_PATTERN } from '../../commentBox/mentionsHelper';
+
+const renderMentions = (value: string) => {
+	const content = [];
+	let lastIndex = 0;
+	let match = MENTION_PATTERN.exec(value);
+
+	while (match) {
+		content.push(value.slice(lastIndex, match.index));
+		content.push(match[1]);
+		content.push(<Mention key={`${match.index}-${match[2]}`} userId={match[2]} />);
+		lastIndex = match.index + match[0].length;
+		match = MENTION_PATTERN.exec(value);
+	}
+
+	content.push(value.slice(lastIndex));
+	return content;
+};
+
+const renderTextChildren = (children) => Children.toArray(children).map((child) => (
+	typeof child === 'string' ? renderMentions(child) : child
+));
 
 const COMPONENTS = {
-	p: CommentMessage,
+	p: ({ children, ...props }) => (
+		<CommentMessage {...props}>
+			{renderTextChildren(children)}
+		</CommentMessage>
+	),
+	code: ({ children, ...props }) => (
+		<code {...props}>{renderTextChildren(children)}</code>
+	),
 	img: ({ src }) => `![img](${src})`,
 	blockquote: QuotedMessage,
 } as any;

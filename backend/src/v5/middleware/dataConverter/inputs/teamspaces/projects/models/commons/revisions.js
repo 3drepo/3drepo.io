@@ -28,7 +28,8 @@ const Revisions = {};
 
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	const schema = Yup.object().strict(true).noUnknown().shape({
-		void: Yup.bool('void must be of type boolean')
+		void: Yup.bool()
+			.typeError('void must be of type boolean')
 			.required()
 			.strict(true),
 	});

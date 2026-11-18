@@ -49,11 +49,6 @@ export const selectViewProps = createSelector(
 	(ticketCardState) => ticketCardState.viewProps,
 );
 
-export const selectReadOnly = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.readOnly,
-);
-
 export const selectIsEditingGroups = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.isEditingGroups,
@@ -86,17 +81,12 @@ export const selectSelectedTicketPinId = createSelector(
 
 export const selectTicketOverridesDict = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {}, transformations: {} },
+	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {} },
 );
 
 export const selectTicketOverrides = createSelector(
 	selectTicketOverridesDict,
 	(overridesDicts) => overridesDicts.overrides,
-);
-
-export const selectTicketTransparencies = createSelector(
-	selectTicketOverridesDict,
-	(overridesDicts) => overridesDicts.transparencies,
 );
 
 export const selectTicketHasClearedOverrides = createSelector(
@@ -138,6 +128,10 @@ export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
+export const selectIsExpandedTicketView = createSelector(
+	selectTicketsCardDomain, (state) => state.isExpandedTicketView,
+);
+
 export const selectGroupBy = createSelector(
 	selectTicketsCardDomain, (state) => state.groupByField || NONE_OPTION,
 );
@@ -151,10 +145,15 @@ export const selectTicketPins = createSelector(
 	selectSelectedDate,
 	selectIsShowingPins,
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate, isShowingPins): IPin[] => {
-		if (view === TicketsCardViews.New || !tickets.length || (view === TicketsCardViews.List && !isShowingPins)) return [];
 		if (view === TicketsCardViews.Details) {
-			return getTicketPins(templates, selectedTicket, selectedTicketPinId);
+			const pins = getTicketPins(templates, selectedTicket, selectedTicketPinId);
+			return pins;
 		}
+
+		if (view === TicketsCardViews.New || !tickets.length || (view === TicketsCardViews.List && !isShowingPins)) {
+			return [];
+		}
+		
 		return tickets.reduce(
 			(accum, ticket) => {
 				const pin = ticket.properties?.Pin;

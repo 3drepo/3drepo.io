@@ -28,7 +28,7 @@ import {
 	Container,
 	FieldsRow,
 	StyledFormControl,
-} from '../../../risks/components/riskDetails/riskDetails.styles';
+} from '../../../issues/components/issueDetails/issueDetails.styles';
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
 import { IssueSchema } from '../issueDetails/issueDetails.schema';

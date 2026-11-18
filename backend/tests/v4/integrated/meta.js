@@ -21,7 +21,6 @@
 
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
@@ -49,7 +48,7 @@ describe("Metadata", function () {
 	const groupModel = "4ec71fdd-0450-4b6f-8478-c46633bb66e3";
 	const groupFederation = "80bc4290-0f94-11eb-970b-03c55a1e1b3a";
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
@@ -67,7 +66,7 @@ describe("Metadata", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 
 		server.close(function() {
 			console.log("API test server is closed");
@@ -85,9 +84,9 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(659);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(659);
+				expect(res.body.data[0]).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -101,9 +100,9 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/master/head/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(659);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(659);
+				expect(res.body.data[0]).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -118,9 +117,9 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/myTag/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(659);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(659);
+				expect(res.body.data[0]).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -128,7 +127,7 @@ describe("Metadata", function () {
 	it("get metadata of invalid revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/findObjsWith/Category.json`)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -138,7 +137,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/blahblah.json`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body).toEqual(goldenData);
 				done(err);
 			});
 	});
@@ -148,7 +147,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body).toEqual(goldenData);
 				done(err);
 			});
 	});
@@ -191,9 +190,9 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/master/head/meta/all.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(675);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -212,9 +211,9 @@ describe("Metadata", function () {
 		const filterString = 'filter=IFC%20Type,IFC%20GUID,Meta%20With%2C%20Comma';
 		agent.get(`/${username}/${model}/revision/master/head/meta/all.json?${filterString}`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(675);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -257,9 +256,9 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/myTag/meta/all.json`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(675);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -277,9 +276,9 @@ describe("Metadata", function () {
 		const filterString = 'filter=IFC%20Type,IFC%20GUID,Meta%20With%2C%20Comma';
 		agent.get(`/${username}/${model}/revision/myTag/meta/all.json?${filterString}`)
 			.expect(200, function(err, res) {
-				expect(res.body.data).to.exist;
-				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
+				expect(res.body.data).toBeTruthy();
+				expect(res.body.data.length).toBe(675);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).toEqual(goldenData0);
 				done(err);
 			});
 	});
@@ -287,7 +286,7 @@ describe("Metadata", function () {
 	it("all metadata of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/all.json`)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -297,7 +296,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/master/head/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body).toEqual(goldenData);
 				done(err);
 			});
 	});
@@ -307,7 +306,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/revision/myTag/meta/4DTaskSequence.json`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body).toEqual(goldenData);
 				done(err);
 			});
 	});
@@ -315,7 +314,7 @@ describe("Metadata", function () {
 	it("4D Task Sequence search of non existent revision should fail", function(done) {
 		agent.get(`/${username}/${model}/revision/blahblah123/meta/4DTaskSequence.json`)
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+				expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 				done(err);
 			});
 	});
@@ -323,7 +322,7 @@ describe("Metadata", function () {
 	it("4D Task Sequence search of a model with no Sequence Tag should fail", function(done) {
 		agent.get(`/${username}/${model2}/revision/master/head/meta/4DTaskSequence.json`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.SEQ_TAG_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.SEQ_TAG_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -367,7 +366,7 @@ describe("Metadata", function () {
 		};
 		agent.get(`/${username}/${model}/meta/60fa0851-2fc1-4906-b50d-b9bb9db98db8.json`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body).toEqual(goldenData);
 				done(err);
 			});
 	});
@@ -375,7 +374,7 @@ describe("Metadata", function () {
 	it("retrieving metadata by non-existing ID should fail", function(done) {
 		agent.get(`/${username}/${model}/meta/60fa0851-2fc1-4906-b50d-000000000000.json`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -383,7 +382,7 @@ describe("Metadata", function () {
 	it("retrieving metadata by invalid ID should fail", function(done) {
 		agent.get(`/${username}/${model}/meta/dslfkdjslkfjsd.json`)
 			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.METADATA_NOT_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.METADATA_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -443,7 +442,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/meta/keys`)
 			.expect(200, function(err, res) {
-				expect(res.body.sort()).to.deep.equal(goldenData.sort());
+				expect(res.body.sort()).toEqual(goldenData.sort());
 				done(err);
 			});
 	});
@@ -495,7 +494,7 @@ describe("Metadata", function () {
 				.expect(200, function(err, res) {
 					res.body[0].mesh_ids.sort();
 					goldenIfcStairFlight[0].mesh_ids.sort();
-					expect(res.body).to.deep.equal(goldenIfcStairFlight);
+					expect(res.body).toEqual(goldenIfcStairFlight);
 					done(err);
 				});
 		});
@@ -522,7 +521,7 @@ describe("Metadata", function () {
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
-					expect(res.body[0].mesh_ids.length).to.equal(200);
+					expect(res.body[0].mesh_ids.length).toBe(200);
 					done(err);
 				});
 		});
@@ -593,7 +592,7 @@ describe("Metadata", function () {
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 		});
@@ -653,7 +652,7 @@ describe("Metadata", function () {
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body).toEqual(goldenData);
 					done(err);
 				});
 		});
@@ -664,8 +663,8 @@ describe("Metadata", function () {
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules`)
 				.send(query)
 				.expect(200, function(err, res) {
-					expect(res.body.data).to.exist;
-					expect(res.body.data.length).to.equal(1166);
+					expect(res.body.data).toBeTruthy();
+					expect(res.body.data.length).toBe(1166);
 					done(err);
 				});
 		});

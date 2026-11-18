@@ -166,7 +166,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: returns a png of the thumbnail
 	 *         content:
-	 *           image/png:
+	 *           image/*:
 	 *             schema:
 	 *               type: string
 	 *               format: binary

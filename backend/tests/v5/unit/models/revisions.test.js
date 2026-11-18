@@ -25,7 +25,12 @@ const Revisions = require(`${src}/models/revisions`);
 const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const {
+	generateUUID,
+	generateRandomString,
+	generateRandomObject,
+	generateRandomNumber,
+} = require('../../helper/dataGen');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -455,7 +460,8 @@ const testUpdateProcessingStatus = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`,
-				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ $and: [{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { incomplete: true }] },
+				{ $set: { status } },
 				{ projection: { _id: 1 } },
 			);
 
@@ -473,7 +479,8 @@ const testUpdateProcessingStatus = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${modelType}s.history`,
-				{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { $set: { status } },
+				{ $and: [{ $or: [{ _id: revisionId }, { tag: revisionId }] }, { incomplete: true }] },
+				{ $set: { status } },
 				{ projection: { _id: 1 } },
 			);
 

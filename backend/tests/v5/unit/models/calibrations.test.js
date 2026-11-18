@@ -18,7 +18,10 @@
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+} = require('../../helper/dataGen');
 
 const Calibrations = require(`${src}/models/calibrations`);
 const db = require(`${src}/handler/db`);

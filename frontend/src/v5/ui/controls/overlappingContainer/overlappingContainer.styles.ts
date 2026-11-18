@@ -21,12 +21,10 @@ export const OverlappingContainer = styled.div`
 	position: relative;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	cursor: pointer;
+	display: grid;
 
 	& > * {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+		grid-area: 1 / 1;
+		margin: 0;
 	}
 `;

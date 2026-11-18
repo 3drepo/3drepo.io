@@ -65,7 +65,7 @@ export const selectPins = createSelector(
 			const colour = customColor || measure.color;
 			return ({
 				id: measure.uuid,
-				type: 'point',
+				type: 'MARKER',
 				isSelected: false,
 				position: measure.position,
 				colour,

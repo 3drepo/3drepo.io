@@ -18,7 +18,6 @@
 "use strict";
 
 const request = require("supertest");
-const expect = require("chai").expect;
 const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
@@ -132,7 +131,7 @@ describe("Sequences", function () {
 	const stateId = oldGoldenData.frames[0].state;
 	const customSequenceId = customGoldenData._id;
 
-	before(async function() {
+	beforeAll(async function() {
 		const app = await createAppAsync();
 
 		await new Promise((resolve) => {
@@ -145,7 +144,7 @@ describe("Sequences", function () {
 
 	});
 
-	after(function(done) {
+	afterAll(function(done) {
 		server.close(function() {
 			console.log("API test server is closed");
 			done();
@@ -155,14 +154,14 @@ describe("Sequences", function () {
 	describe("List all sequences", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(3);
-				expect(res.body[1]._id).to.equal(latestGoldenData._id);
-				expect(res.body[1].teamspace).to.equal(latestGoldenData.teamspace);
-				expect(res.body[1].model).to.equal(latestGoldenData.model);
-				expect(res.body[1].rev_id).to.equal(latestGoldenData.rev_id);
-				expect(res.body[1].name).to.equal(latestGoldenData.name);
-				expect(res.body[1].startDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[1].endDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
+				expect(res.body.length).toBe(3);
+				expect(res.body[1]._id).toBe(latestGoldenData._id);
+				expect(res.body[1].teamspace).toBe(latestGoldenData.teamspace);
+				expect(res.body[1].model).toBe(latestGoldenData.model);
+				expect(res.body[1].rev_id).toBe(latestGoldenData.rev_id);
+				expect(res.body[1].name).toBe(latestGoldenData.name);
+				expect(res.body[1].startDate).toBe(latestGoldenData.frames[0].dateTime);
+				expect(res.body[1].endDate).toBe(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -170,14 +169,14 @@ describe("Sequences", function () {
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(2);
-				expect(res.body[0]._id).to.equal(oldGoldenData._id);
-				expect(res.body[0].teamspace).to.equal(oldGoldenData.teamspace);
-				expect(res.body[0].model).to.equal(oldGoldenData.model);
-				expect(res.body[0].rev_id).to.equal(oldGoldenData.rev_id);
-				expect(res.body[0].name).to.equal(oldGoldenData.name);
-				expect(res.body[0].startDate).to.equal(oldGoldenData.frames[0].dateTime);
-				expect(res.body[0].endDate).to.equal(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
+				expect(res.body.length).toBe(2);
+				expect(res.body[0]._id).toBe(oldGoldenData._id);
+				expect(res.body[0].teamspace).toBe(oldGoldenData.teamspace);
+				expect(res.body[0].model).toBe(oldGoldenData.model);
+				expect(res.body[0].rev_id).toBe(oldGoldenData.rev_id);
+				expect(res.body[0].name).toBe(oldGoldenData.name);
+				expect(res.body[0].startDate).toBe(oldGoldenData.frames[0].dateTime);
+				expect(res.body[0].endDate).toBe(oldGoldenData.frames[oldGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -185,14 +184,14 @@ describe("Sequences", function () {
 
 		it("from federation should succeed", function(done) {
 			agent.get(`/${username}/${federation}/sequences?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(res.body.length).to.equal(3);
-				expect(res.body[1]._id).to.equal(latestGoldenData._id);
-				expect(res.body[1].teamspace).to.equal(latestGoldenData.teamspace);
-				expect(res.body[1].model).to.equal(latestGoldenData.model);
-				expect(res.body[1].rev_id).to.equal(latestGoldenData.rev_id);
-				expect(res.body[1].name).to.equal(latestGoldenData.name);
-				expect(res.body[1].startDate).to.equal(latestGoldenData.frames[0].dateTime);
-				expect(res.body[1].endDate).to.equal(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
+				expect(res.body.length).toBe(3);
+				expect(res.body[1]._id).toBe(latestGoldenData._id);
+				expect(res.body[1].teamspace).toBe(latestGoldenData.teamspace);
+				expect(res.body[1].model).toBe(latestGoldenData.model);
+				expect(res.body[1].rev_id).toBe(latestGoldenData.rev_id);
+				expect(res.body[1].name).toBe(latestGoldenData.name);
+				expect(res.body[1].startDate).toBe(latestGoldenData.frames[0].dateTime);
+				expect(res.body[1].endDate).toBe(latestGoldenData.frames[latestGoldenData.frames.length - 1].dateTime);
 
 				return done(err);
 			});
@@ -203,8 +202,8 @@ describe("Sequences", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.expect(200, function(err, res) {
-					expect(res.body.name).to.equal(oldGoldenData.name);
-					expect(res.body.frames).to.deep.equal(oldGoldenData.frames);
+					expect(res.body.name).toBe(oldGoldenData.name);
+					expect(res.body.frames).toEqual(oldGoldenData.frames);
 
 					return done(err);
 				});
@@ -213,9 +212,9 @@ describe("Sequences", function () {
 		it("custom sequence should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
 				.expect(200, function(err, res) {
-					expect(res.body.customSequence).to.equal(true);
-					expect(res.body.name).to.equal(customGoldenData.name);
-					expect(res.body.frames).to.deep.equal(customGoldenData.frames);
+					expect(res.body.customSequence).toBe(true);
+					expect(res.body.name).toBe(customGoldenData.name);
+					expect(res.body.frames).toEqual(customGoldenData.frames);
 
 					return done(err);
 				});
@@ -224,7 +223,7 @@ describe("Sequences", function () {
 		it("with invalid ID should fail", function(done) {
 			agent.get(`/${username}/${model}/sequences/invalidId?key=${userApiKey}`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 
 					return done(err);
 				});
@@ -234,7 +233,7 @@ describe("Sequences", function () {
 	describe("Get sequence state", function() {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(200, function(err , res) {
-				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
+				expect(Object.keys(res.body)).toEqual(["transparency", "color"]);
 
 				return done(err);
 			});
@@ -242,7 +241,7 @@ describe("Sequences", function () {
 
 		it("from revision should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/${stateId}?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-				expect(Object.keys(res.body)).to.deep.equal(["transparency", "color"]);
+				expect(Object.keys(res.body)).toEqual(["transparency", "color"]);
 
 				return done(err);
 			});
@@ -250,7 +249,7 @@ describe("Sequences", function () {
 
 		it("from federation should fail", function(done) {
 			agent.get(`/${username}/${federation}/sequences/${sequenceId}/state/${stateId}?key=${userApiKey}`).expect(404, function(err , res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
 			});
@@ -258,7 +257,7 @@ describe("Sequences", function () {
 
 		it("with invalid state ID should fail", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/state/invalidId?key=${userApiKey}`).expect(404, function(err , res) {
-				expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+				expect(res.body.value).toBe(responseCodes.NO_FILE_FOUND.value);
 
 				return done(err);
 			});
@@ -276,16 +275,16 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences?rev_id=${oldRevision}&key=${userApiKey}`).expect(200, function(err , res) {
-						expect(res.body.length).to.equal(2);
+						expect(res.body.length).toBe(2);
 						const updatedData = {...oldGoldenData, ...update};
 
-						expect(res.body[0]._id).to.equal(updatedData._id);
-						expect(res.body[0].teamspace).to.equal(updatedData.teamspace);
-						expect(res.body[0].model).to.equal(updatedData.model);
-						expect(res.body[0].rev_id).to.equal(updatedData.rev_id);
-						expect(res.body[0].name).to.equal(updatedData.name);
-						expect(res.body[0].startDate).to.equal(updatedData.frames[0].dateTime);
-						expect(res.body[0].endDate).to.equal(updatedData.frames[updatedData.frames.length - 1].dateTime);
+						expect(res.body[0]._id).toBe(updatedData._id);
+						expect(res.body[0].teamspace).toBe(updatedData.teamspace);
+						expect(res.body[0].model).toBe(updatedData.model);
+						expect(res.body[0].rev_id).toBe(updatedData.rev_id);
+						expect(res.body[0].name).toBe(updatedData.name);
+						expect(res.body[0].startDate).toBe(updatedData.frames[0].dateTime);
+						expect(res.body[0].endDate).toBe(updatedData.frames[updatedData.frames.length - 1].dateTime);
 
 						done(err);
 					});
@@ -298,7 +297,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
 				});
 		});
@@ -308,7 +307,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_READ_ONLY.value);
 					done(err);
 				});
 		});
@@ -323,7 +322,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.name).to.equal(update.name);
+						expect(res.body.name).toBe(update.name);
 						done(err);
 					});
 				}
@@ -340,8 +339,8 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.name).to.equal(update.name);
-						expect(res.body.frames).to.deep.equal(update.frames);
+						expect(res.body.name).toBe(update.name);
+						expect(res.body.frames).toEqual(update.frames);
 						done(err);
 					});
 				}
@@ -358,7 +357,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.frames).to.deep.equal(update.frames);
+						expect(res.body.frames).toEqual(update.frames);
 						done(err);
 					});
 				}
@@ -434,7 +433,7 @@ describe("Sequences", function () {
 						delete res.body.frames[0].viewpoint.override_group_ids;
 						delete update.frames[0].viewpoint.override_groups;
 
-						expect(res.body.frames).to.deep.equal(update.frames);
+						expect(res.body.frames).toEqual(update.frames);
 
 						done(err);
 					});
@@ -442,32 +441,32 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${highlightedGroupId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
-							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							expect(res.body.objects).toEqual(highlighted_group.objects);
+							expect(res.body.color).toEqual(highlighted_group.color);
 							done(err);
 						});
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${hiddenGroupId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(hidden_group.objects);
-							expect(res.body.color).to.deep.equal(hidden_group.color);
+							expect(res.body.objects).toEqual(hidden_group.objects);
+							expect(res.body.color).toEqual(hidden_group.color);
 							done(err);
 						});
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[0]}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(override_groups[0].objects);
-							expect(res.body.color).to.deep.equal(override_groups[0].color);
+							expect(res.body.objects).toEqual(override_groups[0].objects);
+							expect(res.body.color).toEqual(override_groups[0].color);
 							done(err);
 						});
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[1]}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(override_groups[1].objects);
-							expect(res.body.color).to.deep.equal(override_groups[1].color);
+							expect(res.body.objects).toEqual(override_groups[1].objects);
+							expect(res.body.color).toEqual(override_groups[1].color);
 							done(err);
 						});
 				}
@@ -500,7 +499,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
 						delete res.body.frames[0].viewpoint.screenshot_ref;
-						expect(res.body.frames[0]).to.deep.equal(customGoldenData.frames[0]);
+						expect(res.body.frames[0]).toEqual(customGoldenData.frames[0]);
 						done(err);
 					});
 				}
@@ -583,7 +582,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
 						delete res.body.frames[0].viewpoint.screenshot_ref;
-						expect(res.body.frames[0]).to.deep.equal({
+						expect(res.body.frames[0]).toEqual({
 							...customGoldenData.frames[0],
 							viewpoint: {
 								...customGoldenData.frames[0].viewpoint,
@@ -604,7 +603,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					return done(err);
 				});
 		});
@@ -635,7 +634,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					return done(err);
 				});
 		});
@@ -651,7 +650,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.rev_id).to.deep.equal(update.rev_id);
+						expect(res.body.rev_id).toEqual(update.rev_id);
 						done(err);
 					});
 				}
@@ -677,7 +676,7 @@ describe("Sequences", function () {
 				},
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`).expect(200, function(err, res) {
-						expect(res.body.rev_id).to.not.exist;
+						expect(res.body.rev_id).toBeFalsy();
 						done(err);
 					});
 				}
@@ -690,7 +689,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/${customSequenceId}?key=${userApiKey}`)
 				.send(update)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 					return done(err);
 				});
 		});
@@ -700,7 +699,7 @@ describe("Sequences", function () {
 			agent.patch(`/${username}/${model}/sequences/invalidSequence?key=${userApiKey}`)
 				.send(update)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -722,7 +721,7 @@ describe("Sequences", function () {
 		it("read only sequence should fail", function(done) {
 			agent.delete(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_READ_ONLY.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_READ_ONLY.value);
 					return done(err);
 				});
 		});
@@ -730,7 +729,7 @@ describe("Sequences", function () {
 		it("non-existent sequence should fail", function(done) {
 			agent.delete(`/${username}/${model}/sequences/invalidId?key=${userApiKey}`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 					return done(err);
 				});
 		});
@@ -745,7 +744,7 @@ describe("Sequences", function () {
 		it("from a sequence that does not exist should fail", function(done) {
 			agent.get(`/${username}/${model}/sequences/invalidSequence/legend?key=${userApiKey}`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -753,7 +752,7 @@ describe("Sequences", function () {
 		it("from a sequence that already has a legend should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/legend?key=${userApiKey}`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
+					expect(res.body).toEqual(goldenLegendData);
 					done(err);
 				});
 		});
@@ -761,7 +760,7 @@ describe("Sequences", function () {
 		it("from a sequence that already has a legend as a viewer should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${sequenceId}/legend?key=${viewerApiKey}`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
+					expect(res.body).toEqual(goldenLegendData);
 					done(err);
 				});
 		});
@@ -769,7 +768,7 @@ describe("Sequences", function () {
 		it("from a sequence that does not have a legend should succeed", function(done) {
 			agent.get(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal({});
+					expect(res.body).toEqual({});
 					done(err);
 				});
 		});
@@ -792,7 +791,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}.json?key=${userApiKey}`)
 						.expect(200, (err, res) => {
-							expect(res.body.defaultLegend).to.equal(sequenceId);
+							expect(res.body.defaultLegend).toBe(sequenceId);
 							done(err);
 						});
 				}
@@ -802,7 +801,7 @@ describe("Sequences", function () {
 		it("sequences with no legend should get be getting the default legend instead of empty legend", function(done) {
 			agent.get(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.expect(200, (err, res) => {
-					expect(res.body).to.deep.equal(goldenLegendData);
+					expect(res.body).toEqual(goldenLegendData);
 					done(err);
 				});
 		});
@@ -820,7 +819,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 					.expect(200, (err, res) => {
-						expect(res.body).to.deep.equal(newLegend);
+						expect(res.body).toEqual(newLegend);
 						done(err);
 					});
 				}
@@ -833,7 +832,7 @@ describe("Sequences", function () {
 			agent.put(`/${username}/${model}/sequences/invalidSequenceID/legend?key=${userApiKey}`)
 				.send(newLegend)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -843,7 +842,7 @@ describe("Sequences", function () {
 			agent.put(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.send(newLegend)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -853,7 +852,7 @@ describe("Sequences", function () {
 			agent.put(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 				.send(newLegend)
 				.expect(400, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -875,7 +874,7 @@ describe("Sequences", function () {
 		it("of an invalid sequence ID should fail", function(done) {
 			agent.delete(`/${username}/${model}/sequences/aaa/legend?key=${userApiKey}`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.SEQUENCE_NOT_FOUND.value);
+					expect(res.body.value).toBe(responseCodes.SEQUENCE_NOT_FOUND.value);
 					done(err);
 				});
 		});
@@ -889,7 +888,7 @@ describe("Sequences", function () {
 				(done) => {
 					agent.get(`/${username}/${model}/sequences/${latestGoldenData._id}/legend?key=${userApiKey}`)
 					.expect(200, (err, res) => {
-						expect(res.body).to.deep.equal(goldenLegendData);
+						expect(res.body).toEqual(goldenLegendData);
 						done(err);
 					});
 				}
@@ -947,9 +946,9 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(sequence.frames);
+							expect(res.body.customSequence).toBe(true);
+							expect(res.body.name).toBe(sequence.name);
+							expect(res.body.frames).toEqual(sequence.frames);
 
 							return done(err);
 						});
@@ -1022,8 +1021,8 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
+							expect(res.body.customSequence).toBe(true);
+							expect(res.body.name).toBe(sequence.name);
 
 							highlightedGroupId = res.body.frames[0].viewpoint.highlighted_group_id;
 							delete res.body.frames[0].viewpoint.highlighted_group_id;
@@ -1037,7 +1036,7 @@ describe("Sequences", function () {
 							delete res.body.frames[0].viewpoint.override_group_ids;
 							delete sequence.frames[0].viewpoint.override_groups;
 
-							expect(res.body.frames).to.deep.equal(sequence.frames);
+							expect(res.body.frames).toEqual(sequence.frames);
 
 							return done(err);
 						});
@@ -1045,32 +1044,32 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${highlightedGroupId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(highlighted_group.objects);
-							expect(res.body.color).to.deep.equal(highlighted_group.color);
+							expect(res.body.objects).toEqual(highlighted_group.objects);
+							expect(res.body.color).toEqual(highlighted_group.color);
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${hiddenGroupId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(hidden_group.objects);
-							expect(res.body.color).to.deep.equal(hidden_group.color);
+							expect(res.body.objects).toEqual(hidden_group.objects);
+							expect(res.body.color).toEqual(hidden_group.color);
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[0]}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(override_groups[0].objects);
-							expect(res.body.color).to.deep.equal(override_groups[0].color);
+							expect(res.body.objects).toEqual(override_groups[0].objects);
+							expect(res.body.color).toEqual(override_groups[0].color);
 							return done(err);
 						});
 				},
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${overrideGroupIds[1]}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.objects).to.deep.equal(override_groups[1].objects);
-							expect(res.body.color).to.deep.equal(override_groups[1].color);
+							expect(res.body.objects).toEqual(override_groups[1].objects);
+							expect(res.body.color).toEqual(override_groups[1].color);
 							return done(err);
 						});
 				}
@@ -1110,9 +1109,9 @@ describe("Sequences", function () {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
 							delete res.body.frames[0].viewpoint.screenshot_ref;
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(baseCustomSequence.frames);
+							expect(res.body.customSequence).toBe(true);
+							expect(res.body.name).toBe(sequence.name);
+							expect(res.body.frames).toEqual(baseCustomSequence.frames);
 
 							return done(err);
 						});
@@ -1151,7 +1150,7 @@ describe("Sequences", function () {
 			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 				.send(sequence)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_ARGUMENTS.value);
 					return done(err);
 				});
 		});
@@ -1172,9 +1171,9 @@ describe("Sequences", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/sequences/${sequenceId}?key=${userApiKey}`)
 						.expect(200, function(err, res) {
-							expect(res.body.customSequence).to.equal(true);
-							expect(res.body.name).to.equal(sequence.name);
-							expect(res.body.frames).to.deep.equal(sequence.frames);
+							expect(res.body.customSequence).toBe(true);
+							expect(res.body.name).toBe(sequence.name);
+							expect(res.body.frames).toEqual(sequence.frames);
 
 							return done(err);
 						});
@@ -1188,7 +1187,7 @@ describe("Sequences", function () {
 			agent.post(`/${username}/${model}/sequences?key=${userApiKey}`)
 				.send(sequence)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.value).toBe(responseCodes.INVALID_TAG_NAME.value);
 					return done(err);
 				});
 		});

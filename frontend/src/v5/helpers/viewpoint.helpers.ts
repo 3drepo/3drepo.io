@@ -449,8 +449,22 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 	let v4Viewpoint:any = {};
 	if (viewpoint.camera) {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
-		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
+		const { position, up, forward: view_dir, type, size: orthographicSize, zoomTo } = viewpoint.camera;
+		v4Viewpoint = {
+			position,
+			up,
+			view_dir,
+			type,
+			orthographicSize,
+			zoomTo: zoomTo?.map(({ container: modelId, _ids }) => ({
+				modelId,
+				teamspace: selectCurrentTeamspace(getState()),
+				meshes: _ids,
+			})),
+			look_at: null,
+			account: null,
+			model: null,
+		};
 	}
 
 	if (!isEmpty(viewpoint.state)) {
@@ -499,7 +513,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
-		const color = current.color ? getGroupHexColor(current.color) : undefined;
+		const color = current.color ? getGroupHexColor(current.color.concat( Math.round(current.opacity * 255))) : undefined;
 		const v4Objects = convertToV4GroupNodes(current.group as Group);
 
 		return v4Objects.reduce((dict, objects) => {

@@ -104,8 +104,8 @@ describe('viewpoint helpers', () => {
 
 		expect(result).toEqual({
 			overrides: {
-				[meshB.shared_id]: '#B6BCC1',
-				[meshC.shared_id]: '#B6BCC1',
+				[meshB.shared_id]: '#B6BCC105',
+				[meshC.shared_id]: '#B6BCC105',
 			},
 			transparencies: {
 				[meshB.shared_id]: 0.02,
@@ -139,5 +139,25 @@ describe('viewpoint helpers', () => {
 			overrides: { [meshA.shared_id]: '#FF0000' },
 			transparencies: { [meshA.shared_id]: 1 },
 		});
+	});
+
+	it('converts camera zoom targets to viewer entries', () => {
+		const zoomTo = [{ container: modelA, _ids: [meshA._id] }];
+
+		const result = viewpointV5ToV4({
+			camera: {
+				type: 'perspective',
+				position: [0, 0, 0],
+				forward: [0, 0, 1],
+				up: [0, 1, 0],
+				zoomTo,
+			},
+		});
+
+		expect(result.viewpoint.zoomTo).toEqual([{
+			modelId: modelA,
+			teamspace,
+			meshes: [meshA._id],
+		}]);
 	});
 });

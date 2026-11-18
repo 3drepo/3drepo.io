@@ -17,7 +17,7 @@
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ImageButton } from '../imageButton/imageButton.component';
 import PinButton from '../pinButton/pinButton.container';
-import { FieldsRow } from '../risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow } from '../issues/components/issueDetails/issueDetails.styles';
 import { ViewpointButton } from '../viewpointButton/viewpointButton.component';
 import { UpdateButtonsContainer } from './updateButtons.styles';
 

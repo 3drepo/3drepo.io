@@ -22,3 +22,28 @@ export const useHandleBubbling = (isSelected: boolean) => {
     }
     return { onMouseDown, onTouchStart: onMouseDown };
 }
+
+export const cursorStylesEvents = () => {
+    const onMouseEnterDrawing = (e) => {
+        e.target.getStage().container().style.cursor = 'move';
+    };
+
+    const onMouseLeaveDrawing = (e) => {
+        e.target.getStage().container().style.cursor = 'default';
+    };
+
+    const onMouseDownDrawing = (e) => {
+        e.target.getStage().container().style.cursor = 'grabbing';
+    };
+
+    const onMouseUpDrawing = (e) => {
+        e.target.getStage().container().style.cursor = 'move';
+    };
+
+    return {
+        onMouseEnter: onMouseEnterDrawing,
+        onMouseLeave: onMouseLeaveDrawing,
+        onMouseDown: onMouseDownDrawing,
+        onMouseUp: onMouseUpDrawing
+    };
+}

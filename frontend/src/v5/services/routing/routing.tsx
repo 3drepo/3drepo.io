@@ -39,7 +39,6 @@ type ViewerSearchParams = {
 	isCalibrating?: boolean,
 	ticketId?: string,
 	issueId?: string,
-	riskId?: string,
 };
 
 export const viewerRoute = (

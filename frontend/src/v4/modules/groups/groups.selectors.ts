@@ -18,7 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getTransparency, hasTransparency } from '@/v5/helpers/colors.helper';
-import { addToGroupDictionary } from '../../helpers/colorOverrides';
+import { addToGroupDictionary, ColorOverrides } from '../../helpers/colorOverrides';
 import { searchByFilters } from '../../helpers/searching';
 import { selectFocusedIssueOverrideGroups } from '../issues';
 import { IGroupState } from './groups.redux';
@@ -97,7 +97,7 @@ export const selectFilteredGroups = createSelector(
 			return isSmart ? showSmart : showStandard;
 		});
 
-		return searchByFilters(filteredByType, selectedFilters);
+		return searchByFilters(filteredByType, selectedFilters, false, ['name']);
 	}
 );
 
@@ -155,9 +155,5 @@ export const selectOverridesDict = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectOverridesDict, (overrides) => overrides.colors
-);
-
-export const selectTransparencies = createSelector(
-	selectOverridesDict, (overrides) => overrides.transparencies
+	selectOverridesDict, (overrides): ColorOverrides => overrides.colors
 );

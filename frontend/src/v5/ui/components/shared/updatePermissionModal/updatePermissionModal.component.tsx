@@ -34,13 +34,21 @@ export const UpdatePermissionModal = ({ onConfirm, permissionsType, permissionsC
 		closeButtonLabel='Cancel'
 		actionButtonLabel='Continue'
 		onClickAction={onConfirm}
-		message={formatMessage({
-			id: 'permissionsModal.message',
-			defaultMessage: `
-				You are about to change {permissionsCount, plural, one {a user} other {{permissionsCount} users}}
-				permissions to {permissionsType}.{br}Are you sure you would like to proceed?
-			`,
-		}, { permissionsCount, permissionsType, br: <br /> })}
+		message={formatMessage(
+			{
+				id: 'permissionsModal.message',
+				defaultMessage: `
+					You are about to change
+					{permissionsCount, plural,
+						one {a user's permissions}
+						other {{permissionsCount} users' permissions}
+					}
+					to {permissionsType}.{br}
+					Are you sure you would like to proceed?
+					`,
+			},
+			{ permissionsCount, permissionsType, br: <br /> },
+		)}
 		{...props}
 	/>
 );

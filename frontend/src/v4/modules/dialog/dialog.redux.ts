@@ -18,7 +18,7 @@
 import { DialogProps as IDialogProps } from '@mui/material/Dialog';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import uuid from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { ErrorDialog } from '@/v4/routes/components/dialogContainer/components/errorDialog/errorDialog.component';
 import { ConfirmDialog } from '@/v4/routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
 import { RevisionsDialog } from '@/v4/routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.component';

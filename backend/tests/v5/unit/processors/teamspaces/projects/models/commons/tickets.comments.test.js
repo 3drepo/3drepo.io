@@ -19,7 +19,13 @@ const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const {
+	generateRandomString,
+	generateRandomObject,
+	generateUUID,
+	generateUUIDString,
+	generateRandomBuffer,
+} = require('../../../../../../helper/dataGen');
 
 const Comments = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 

@@ -90,7 +90,7 @@ const USERS_PERMISSIONS_TABLE_CELLS = [{
 	name: 'User',
 	...SHARED_TABLE_CELLS_PROPS,
 	CellComponent: UserItem,
-	searchBy: ['firstName', 'lastName', 'user', 'company']
+	searchBy: ['firstName', 'lastName', 'company']
 }];
 
 const MODEL_PERMISSIONS_TABLE_CELLS = [{

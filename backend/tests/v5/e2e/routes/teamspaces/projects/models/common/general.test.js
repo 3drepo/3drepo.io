@@ -18,6 +18,15 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
+const {
+	generateUUID,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateCalibration,
+	generateTemplate,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
@@ -34,92 +43,92 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const viewer = ServiceHelper.generateUserCredentials();
-	const commenter = ServiceHelper.generateUserCredentials();
-	const collaborator = ServiceHelper.generateUserCredentials();
+	const viewer = generateUserCredentials();
+	const commenter = generateUserCredentials();
+	const collaborator = generateUserCredentials();
 	const data = {
 		users: {
-			tsAdmin: ServiceHelper.generateUserCredentials(),
-			noProjectAccess: ServiceHelper.generateUserCredentials(),
-			nobody: ServiceHelper.generateUserCredentials(),
-			projectAdmin: ServiceHelper.generateUserCredentials(),
+			tsAdmin: generateUserCredentials(),
+			noProjectAccess: generateUserCredentials(),
+			nobody: generateUserCredentials(),
+			projectAdmin: generateUserCredentials(),
 			viewer,
 			commenter,
 			collaborator,
 		},
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel({
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		con: generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 		}),
-		fed: ServiceHelper.generateRandomModel({
+		fed: generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 			modelType: modelTypes.FEDERATION,
 		}),
-		draw: ServiceHelper.generateRandomModel({
+		draw: generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 			modelType: modelTypes.DRAWING,
 		}),
-		calibration: ServiceHelper.generateCalibration(),
+		calibration: generateCalibration(),
 		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
 	data.jobs = [
-		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+		{ _id: generateRandomString(), users: [viewer.user] },
+		{ _id: generateRandomString(), users: [collaborator.user] },
+		{ _id: generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
 	];
 
 	return data;
 };
 
 const generateMultipleModelsBasicData = () => {
-	const viewer = ServiceHelper.generateUserCredentials();
-	const commenter = ServiceHelper.generateUserCredentials();
-	const collaborator = ServiceHelper.generateUserCredentials();
+	const viewer = generateUserCredentials();
+	const commenter = generateUserCredentials();
+	const collaborator = generateUserCredentials();
 	const data = {
 		users: {
-			tsAdmin: ServiceHelper.generateUserCredentials(),
-			noProjectAccess: ServiceHelper.generateUserCredentials(),
-			nobody: ServiceHelper.generateUserCredentials(),
-			projectAdmin: ServiceHelper.generateUserCredentials(),
+			tsAdmin: generateUserCredentials(),
+			noProjectAccess: generateUserCredentials(),
+			nobody: generateUserCredentials(),
+			projectAdmin: generateUserCredentials(),
 			viewer,
 			commenter,
 			collaborator,
 		},
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		cons: times(3, () => ServiceHelper.generateRandomModel({
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		cons: times(3, () => generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 		})),
-		feds: times(3, () => ServiceHelper.generateRandomModel({
+		feds: times(3, () => generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 			modelType: modelTypes.FEDERATION,
 		})),
-		draws: times(3, () => ServiceHelper.generateRandomModel({
+		draws: times(3, () => generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
 			modelType: modelTypes.DRAWING,
 		})),
-		calibration: ServiceHelper.generateCalibration(),
+		calibration: generateCalibration(),
 		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
 	data.jobs = [
-		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+		{ _id: generateRandomString(), users: [viewer.user] },
+		{ _id: generateRandomString(), users: [collaborator.user] },
+		{ _id: generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
 	];
 
 	return data;
@@ -221,7 +230,7 @@ const testGetModelList = (isInternal) => {
 			}
 
 			return {
-				...ServiceHelper.generateRandomModel({ modelType }),
+				...generateRandomModel({ modelType }),
 				isFavourite: n % 5 === 0,
 				modelType,
 			};
@@ -251,12 +260,12 @@ const testGetModelList = (isInternal) => {
 			const modelList = models.flatMap(({ _id, isFavourite, name, modelType: type }) => (type === modelType ? { _id, isFavourite: !isInternal && !!isFavourite, name, role: 'admin' } : []));
 
 			const generalTests = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
 				[`the user has access to some ${modelType}s`, getRoute(), true, { [`${modelType}s`]: modelList }],
 			];
 
 			const noRouteTests = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.pageNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.pageNotFound],
 				[`the user has access to some ${modelType}s`, getRoute(), false, templates.pageNotFound],
 			];
 
@@ -298,16 +307,16 @@ const testGetModelList = (isInternal) => {
 };
 
 const addTickets = async (teamspace, project, model) => {
-	const template = ServiceHelper.generateTemplate();
+	const template = generateTemplate();
 
 	const customStatuses = [
-		{ name: ServiceHelper.generateRandomString(), type: statusTypes.OPEN },
-		{ name: ServiceHelper.generateRandomString(), type: statusTypes.ACTIVE },
-		{ name: ServiceHelper.generateRandomString(), type: statusTypes.VOID },
-		{ name: ServiceHelper.generateRandomString(), type: statusTypes.DONE },
+		{ name: generateRandomString(), type: statusTypes.OPEN },
+		{ name: generateRandomString(), type: statusTypes.ACTIVE },
+		{ name: generateRandomString(), type: statusTypes.VOID },
+		{ name: generateRandomString(), type: statusTypes.DONE },
 	];
 
-	const customStatusesTemplate = ServiceHelper.generateTemplate(false, false, {
+	const customStatusesTemplate = generateTemplate(false, false, {
 		status: {
 			values: customStatuses,
 			default: customStatuses[0].name,
@@ -360,14 +369,14 @@ const testGetModelStats = (isInternal = false) => {
 	describe('Get model stats', () => {
 		const { users, teamspace, project, con, fed, draw, calibration } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
-			2, () => ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			2, () => generateRandomModel({ modelType: modelTypes.FEDERATION }),
 		);
 
-		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+		const drawNoRev = generateRandomModel({ modelType: modelTypes.DRAWING });
 
 		const [
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
-		] = times(3, () => ServiceHelper.generateRandomModel());
+		] = times(3, () => generateRandomModel());
 
 		fed.properties.subModels = [{ _id: con._id }, { _id: conNoRev._id }];
 		fedWithNoRevInSubModel.properties.subModels = [{ _id: conNoRev._id }];
@@ -376,7 +385,7 @@ const testGetModelStats = (isInternal = false) => {
 			...conFailedProcessing1.properties,
 			status: 'failed',
 			errorReason: {
-				message: ServiceHelper.generateRandomString(),
+				message: generateRandomString(),
 				timestamp: new Date(),
 			},
 		};
@@ -384,7 +393,7 @@ const testGetModelStats = (isInternal = false) => {
 		conFailedProcessing2.properties = {
 			...conFailedProcessing2.properties,
 			errorReason: {
-				message: ServiceHelper.generateRandomString(),
+				message: generateRandomString(),
 				errorCode: 1,
 			},
 
@@ -438,11 +447,11 @@ const testGetModelStats = (isInternal = false) => {
 			}
 
 			const basicCases = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 			];
 
@@ -499,12 +508,12 @@ const testAppendFavourites = () => {
 	describe('Append Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const favFed = {
-			...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			...generateRandomModel({ modelType: modelTypes.FEDERATION }),
 			isFavourite: true,
 		};
-		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
+		const favCon = { ...generateRandomModel(), isFavourite: true };
 		const favDraw = {
-			...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
+			...generateRandomModel({ modelType: modelTypes.DRAWING }),
 			isFavourite: true,
 		};
 
@@ -554,12 +563,12 @@ const testAppendFavourites = () => {
 			return [
 				['the user does not have a valid session', generateRouteParams({ key: null }), false, templates.notLoggedIn, standardPayload],
 				['the user is not a member of the teamspace', generateRouteParams({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound, standardPayload],
-				['the project does not exist', generateRouteParams({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound, standardPayload],
+				['the project does not exist', generateRouteParams({ projectId: generateRandomString() }), false, templates.projectNotFound, standardPayload],
 				[`the user does not have access to the ${modelType}`, generateRouteParams({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments, standardPayload],
 				[`the ${modelType} list provided contains a ${wrongModelType}`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [wrongTypeModel._id] }],
 				[`the ${modelType} list provided isEmpty`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [] }],
 				['the payload is empty', generateRouteParams(), false, templates.invalidArguments, {}],
-				[`the ${modelType} list contains a ${modelType} that does not exist`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [ServiceHelper.generateRandomString()] }],
+				[`the ${modelType} list contains a ${modelType} that does not exist`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [generateRandomString()] }],
 				[`the ${modelType} list is valid`, generateRouteParams(), true, undefined, standardPayload],
 				[`the ${modelType} list contains ${modelType} that is already a favourite`, generateRouteParams(), true, undefined, { [`${modelType}s`]: [favModel._id] }],
 			];
@@ -596,12 +605,12 @@ const testDeleteFavourites = () => {
 	describe('Remove Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const favFed = {
-			...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			...generateRandomModel({ modelType: modelTypes.FEDERATION }),
 			isFavourite: true,
 		};
-		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
+		const favCon = { ...generateRandomModel(), isFavourite: true };
 		const favDraw = {
-			...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
+			...generateRandomModel({ modelType: modelTypes.DRAWING }),
 			isFavourite: true,
 		};
 
@@ -650,7 +659,7 @@ const testDeleteFavourites = () => {
 			return [
 				['the user does not have a valid session', generateRouteParams({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', generateRouteParams({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', generateRouteParams({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the project does not exist', generateRouteParams({ projectId: generateRandomString() }), false, templates.projectNotFound],
 				[`the user does not have access to the ${modelType}`, generateRouteParams({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments],
 				[`the ${modelType} list provided has a ${wrongModelType}`, generateRouteParams({ modelIds: [wrongTypeModel._id] }), false, templates.invalidArguments],
 				[`the ${modelType} list is not provided`, generateRouteParams({ modelIds: null }), false, templates.invalidArguments],
@@ -737,12 +746,12 @@ const testAddModel = (isInternal) => {
 				key = users.tsAdmin.apiKey,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s${key ? `?key=${key}` : ''}`;
 
-			const generatePayload = (name = ServiceHelper.generateRandomString()) => ({
+			const generatePayload = (name = generateRandomString()) => ({
 				name,
-				number: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString() : undefined,
+				number: modelType === modelTypes.DRAWING ? generateRandomString() : undefined,
 				unit: modelType === modelTypes.DRAWING ? undefined : 'mm',
 				calibration: modelType === modelTypes.DRAWING ? { verticalRange: [0, 5], units: 'mm' } : undefined,
-				type: modelType === modelTypes.FEDERATION ? undefined : ServiceHelper.generateRandomString(),
+				type: modelType === modelTypes.FEDERATION ? undefined : generateRandomString(),
 			});
 
 			if (isInternal && modelType !== modelTypes.CONTAINER) {
@@ -752,7 +761,7 @@ const testAddModel = (isInternal) => {
 			}
 
 			const general = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, generatePayload(), templates.projectNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, generatePayload(), templates.projectNotFound],
 				[`the name has been taken by another ${modelType}`, getRoute(), false, generatePayload(model.name), templates.invalidArguments],
 				[`the name has been taken by another ${modelType} (case insensitive)`, getRoute(), false, generatePayload(model.name.toUpperCase()), templates.invalidArguments],
 				[`the name has been taken by a ${wrongModelType}`, getRoute(), false, generatePayload(wrongTypeModel.name), templates.invalidArguments],
@@ -796,8 +805,8 @@ const testAddModel = (isInternal) => {
 const testDeleteModel = (isInternal = false) => {
 	describe('Delete Model', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const conIsSubModel = ServiceHelper.generateRandomModel();
-		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const conIsSubModel = generateRandomModel();
+		const fedOfSubModelCon = generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
@@ -840,10 +849,10 @@ const testDeleteModel = (isInternal = false) => {
 			}
 
 			const commonCases = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 				[`the ${modelType} exists and the user has sufficient permissions`, getRoute(), true],
 			];
@@ -894,15 +903,15 @@ const testDeleteModel = (isInternal = false) => {
 const testUpdateModelSettings = (isInternal = false) => {
 	describe('Update Settings', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const conIsSubModel = ServiceHelper.generateRandomModel();
-		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const conIsSubModel = generateRandomModel();
+		const fedOfSubModelCon = generateRandomModel({ modelType: modelTypes.FEDERATION });
 
 		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
-		fed.legend = { _id: ServiceHelper.generateUUID() };
-		con.legend = { _id: ServiceHelper.generateUUID() };
-		fed.view = { _id: ServiceHelper.generateUUID() };
-		con.view = { _id: ServiceHelper.generateUUID() };
+		fed.legend = { _id: generateUUID() };
+		con.legend = { _id: generateUUID() };
+		fed.view = { _id: generateUUID() };
+		con.view = { _id: generateUUID() };
 
 		beforeAll(async () => {
 			const models = [con, fed, conIsSubModel, fedOfSubModelCon, draw];
@@ -938,7 +947,7 @@ const testUpdateModelSettings = (isInternal = false) => {
 				modelId = model._id,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${ServiceHelper.createQueryString({ key: isInternal ? null : key })}`;
 
-			const dummyPayload = { name: ServiceHelper.generateRandomString() };
+			const dummyPayload = { name: generateRandomString() };
 
 			if (isInternal && modelType !== modelTypes.CONTAINER) {
 				return [
@@ -947,20 +956,20 @@ const testUpdateModelSettings = (isInternal = false) => {
 			}
 
 			const commonCases = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, dummyPayload, templates.projectNotFound],
-				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, dummyPayload, modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, dummyPayload, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: generateRandomString() }), false, dummyPayload, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, dummyPayload, modelNotFound],
 				['the payload does not conform to the schema', getRoute(), false, { name: 123 }, templates.invalidArguments],
-				['the payload contains unrecognised data', getRoute(), false, { name: 123, [ServiceHelper.generateRandomString()]: true }, templates.invalidArguments],
+				['the payload contains unrecognised data', getRoute(), false, { name: 123, [generateRandomString()]: true }, templates.invalidArguments],
 				['the user is trying to toggle federate', getRoute(), false, { federate: modelType !== modelTypes.FEDERATION }, templates.invalidArguments],
 				...(modelType !== modelTypes.DRAWING ? [
-					['the defaultView is not recognised', getRoute(), false, { defaultView: ServiceHelper.generateRandomString() }, templates.invalidArguments],
+					['the defaultView is not recognised', getRoute(), false, { defaultView: generateRandomString() }, templates.invalidArguments],
 					['the defaultView is set to a valid view', getRoute(), true, { defaultView: UUIDToString(model.view._id) }],
-					['the defaultLegend is not recognised', getRoute(), false, { defaultLegend: ServiceHelper.generateRandomString() }, templates.invalidArguments],
+					['the defaultLegend is not recognised', getRoute(), false, { defaultLegend: generateRandomString() }, templates.invalidArguments],
 					['the defaultLegend is set to a valid legend', getRoute(), true, { defaultLegend: UUIDToString(model.legend._id) }],
 					['the defaultView is set to null', getRoute(), true, { defaultView: null }],
 					['the defaultLegend is set to null', getRoute(), true, { defaultLegend: null }],
-					['the code and units are updated', getRoute(), true, { code: ServiceHelper.generateRandomString(), unit: 'm' }],
+					['the code and units are updated', getRoute(), true, { code: generateRandomString(), unit: 'm' }],
 					['the code is unset and units are updated', getRoute(), true, { code: null, unit: 'm' }],
 				] : []),
 				['the payload is valid', getRoute(), true, dummyPayload],
@@ -1004,8 +1013,8 @@ const testGetSettings = (isInternal = false) => {
 
 		fed.properties = {
 			...fed.properties,
-			defaultView: ServiceHelper.generateUUID(),
-			defaultLegend: ServiceHelper.generateUUID(),
+			defaultView: generateUUID(),
+			defaultLegend: generateUUID(),
 			timestamp: new Date(),
 			errorReason: {
 				message: 'error reason',
@@ -1016,8 +1025,8 @@ const testGetSettings = (isInternal = false) => {
 
 		con.properties = {
 			...con.properties,
-			defaultView: ServiceHelper.generateUUID(),
-			defaultLegend: ServiceHelper.generateUUID(),
+			defaultView: generateUUID(),
+			defaultLegend: generateUUID(),
 			timestamp: new Date(),
 			status: 'failed',
 			errorReason: {
@@ -1027,9 +1036,9 @@ const testGetSettings = (isInternal = false) => {
 			},
 		};
 
-		const fed2 = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
-		const con2 = ServiceHelper.generateRandomModel();
-		const draw2 = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+		const fed2 = generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const con2 = generateRandomModel();
+		const draw2 = generateRandomModel({ modelType: modelTypes.DRAWING });
 
 		beforeAll(async () => {
 			const models = [con, fed, draw, fed2, con2, draw2];
@@ -1069,8 +1078,8 @@ const testGetSettings = (isInternal = false) => {
 			}
 
 			const commonCases = [
-				['the project does not exist', modelType, getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, modelType, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the project does not exist', modelType, getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, modelType, getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, modelType, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 				['the model exists and the user has access', modelType, getRoute(), true, model],
 				['the model exists and the user has access (2)', modelType, getRoute({ modelId: model2._id }), true, model2],
@@ -1137,7 +1146,7 @@ const testGetSettings = (isInternal = false) => {
 const testGetThumbnail = () => {
 	describe('Get drawing thumbnail', () => {
 		const { users, teamspace, project, draw, fed } = generateBasicData();
-		const drawNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING });
+		const drawNoRev = generateRandomModel({ modelType: modelTypes.DRAWING });
 
 		beforeAll(async () => {
 			const models = [draw, drawNoRev, fed];
@@ -1159,9 +1168,9 @@ const testGetThumbnail = () => {
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
 				['the user does not have access to the drawing', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['the drawing does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the drawing does not exist', getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				['the model is not a drawing', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 				['the drawing has a thumbnail and user has access', getRoute(), true, model],
 				['the drawing does not have a thumbnail and user has access', getRoute({ modelId: drawNoRev._id }), false, templates.fileNotFound],
@@ -1219,9 +1228,9 @@ const testGetUsersWithPermissions = () => {
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model does not exist', getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 				['excludeViewers is set to false', getRoute(), true, { users: [teamspace, users.tsAdmin.user, users.projectAdmin.user, users.viewer.user, users.commenter.user, users.collaborator.user] }],
 				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { users: [teamspace, users.tsAdmin.user, users.projectAdmin.user, users.commenter.user, users.collaborator.user] }],
@@ -1281,9 +1290,9 @@ const testGetJobsWithAccess = () => {
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				['the model does not exist', getRoute({ modelId: generateRandomString() }), false, modelNotFound],
 				['the model is of wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 				['excludeViewers is set to false', getRoute(), true, { jobs: ['Admin', ...jobs.map(({ _id }) => _id)] }],
 				['excludeViewers is set to true', getRoute({ excludeViewers: true }), true, { jobs: ['Admin', ...jobs.slice(1).map(({ _id }) => _id)] }],
@@ -1361,16 +1370,16 @@ const testGetModelStatsInBulk = () => {
 			return [
 				['the user does not have a valid session', generateRoute(modelType, modelIds, null), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', generateRoute(modelType, modelIds, users.nobody.apiKey), false, templates.teamspaceNotFound],
-				['the teamspace does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, ServiceHelper.generateRandomString(), project.id), false, templates.teamspaceNotFound],
-				['the project does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.projectNotFound],
+				['the teamspace does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, generateRandomString(), project.id), false, templates.teamspaceNotFound],
+				['the project does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, teamspace, generateRandomString()), false, templates.projectNotFound],
 				['the models exist and the user has access', generateRoute(modelType, modelIds, users.tsAdmin.apiKey), true, models],
-				['some models do not exist', generateRoute(modelType, [...modelIds, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models do not exist', generateRoute(modelType, [...modelIds, generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
 				['!modelQuery string is not provided', `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/stats?key=${users.tsAdmin.apiKey}`, false, templates.invalidArguments],
-				['all models do not exist', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
-				['some models are of wrong type', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models do not exist', generateRoute(modelType, [generateRandomString(), generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models are of wrong type', generateRoute(modelType, [models[0]._id, generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
 				['all models are of wrong type', generateRoute(modelType, [models[0]._id, models[0]._id], users.tsAdmin.apiKey), false, templates.modelNotFound],
-				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
-				['all models do not belong to the project', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models do not belong to the project', generateRoute(modelType, [generateRandomString(), generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
 			];
 		};
 

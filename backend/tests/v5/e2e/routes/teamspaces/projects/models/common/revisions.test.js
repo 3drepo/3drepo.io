@@ -17,6 +17,15 @@
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateRandomEmail,
+	generateUserCredentials,
+	generateRandomProject,
+	generateCalibration,
+	generateRandomModelProperties,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
 const { writeFileSync, unlinkSync, copyFileSync } = require('fs');
@@ -36,62 +45,62 @@ let agent;
 
 const generateBasicData = () => {
 	const users = {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		commenter: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		commenter: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 	};
 
-	const teamspace = ServiceHelper.generateRandomString();
-	const project = ServiceHelper.generateRandomProject();
+	const teamspace = generateRandomString();
+	const project = generateRandomProject();
 
 	const models = {
 		drawWithRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
 			properties: {
-				...ServiceHelper.generateRandomModelProperties(modelTypes.DRAWING),
+				...generateRandomModelProperties(modelTypes.DRAWING),
 				permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			},
 		},
 		drawWithNoRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.DRAWING),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: generateRandomModelProperties(modelTypes.DRAWING),
 		},
 		conWithRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
 			properties: {
-				...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+				...generateRandomModelProperties(modelTypes.CONTAINER),
 				permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			},
 		},
 		conWithNoRev: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 		conWithNoRev2: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: generateRandomModelProperties(modelTypes.CONTAINER),
 		},
 		queuedStatusCont: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: { ...ServiceHelper.generateRandomModelProperties(), status: 'queued' },
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: { ...generateRandomModelProperties(), status: 'queued' },
 		},
 		processingStatusCont: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: { ...ServiceHelper.generateRandomModelProperties(), status: 'processing' },
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: { ...generateRandomModelProperties(), status: 'processing' },
 		},
 		federation: {
-			_id: ServiceHelper.generateUUIDString(),
-			name: ServiceHelper.generateRandomString(),
-			properties: { ...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION) },
+			_id: generateUUIDString(),
+			name: generateRandomString(),
+			properties: { ...generateRandomModelProperties(modelTypes.FEDERATION) },
 		},
 	};
 
@@ -113,7 +122,7 @@ const generateBasicData = () => {
 		},
 	};
 
-	const calibration = ServiceHelper.generateCalibration();
+	const calibration = generateCalibration();
 
 	const conRevisions = {
 		nonVoidRevision: ServiceHelper.generateRevisionEntry(),
@@ -215,9 +224,9 @@ const testGetRevisions = (isInternal = false) => {
 			}
 
 			const commonCases = [
-				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the teamspace does not exist', { ...params, ts: generateRandomString() }, false, templates.teamspaceNotFound],
+				['the project does not exist', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
 				['the user has adequate permissions (non void revisions)', params, true],
 				['the user has adequate permissions (all revisions)', { ...params, showVoid: true }, true],
@@ -269,8 +278,8 @@ const testCreateNewRevision = (internal = false) => {
 
 		beforeAll(async () => {
 			await setupData(basicData);
-			writeFileSync(oversizedDwgPath, Buffer.from(ServiceHelper.generateRandomString(20000000)));
-			writeFileSync(exceedQuotaDwgPath, Buffer.from(ServiceHelper.generateRandomString(6000000)));
+			writeFileSync(oversizedDwgPath, Buffer.from(generateRandomString(20000000)));
+			writeFileSync(exceedQuotaDwgPath, Buffer.from(generateRandomString(6000000)));
 		});
 
 		afterAll(() => {
@@ -301,27 +310,27 @@ const testCreateNewRevision = (internal = false) => {
 				modelId: model._id,
 				modelType,
 				file: dwgModel,
-				tag: modelType === modelTypes.CONTAINER ? ServiceHelper.generateRandomString(10) : undefined,
+				tag: modelType === modelTypes.CONTAINER ? generateRandomString(10) : undefined,
 				statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
-				revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+				revCode: modelType === modelTypes.DRAWING ? generateRandomString(10) : undefined,
 				owner: users.tsAdmin.basicData.email,
 			});
 
 			const drawingCases = [
-				['the statusCode is invalid', { ...generateParams(), statusCode: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
-				['the revCode is invalid', { ...generateParams(), revCode: ServiceHelper.generateRandomString(11) }, false, templates.invalidArguments],
+				['the statusCode is invalid', { ...generateParams(), statusCode: generateRandomString() }, false, templates.invalidArguments],
+				['the revCode is invalid', { ...generateParams(), revCode: generateRandomString(11) }, false, templates.invalidArguments],
 				['the revCode and statusCode are already used', { ...generateParams(), revCode: drawRevisions.nonVoidRevision.revCode, statusCode: drawRevisions.nonVoidRevision.statusCode }, false, templates.invalidArguments],
 			];
 
 			const containerCases = [
 				['model status is queued', { ...generateParams(), modelId: models.queuedStatusCont._id }, false, templates.invalidArguments],
 				['model status is processing', { ...generateParams(), modelId: models.processingStatusCont._id }, false, templates.invalidArguments],
-				['tag is invalid', { ...generateParams(), tag: ServiceHelper.generateRandomString(51) }, false, templates.invalidArguments],
+				['tag is invalid', { ...generateParams(), tag: generateRandomString(51) }, false, templates.invalidArguments],
 				['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
 				...(internal ? [
 					['owner is not provided', { ...generateParams(), owner: undefined }, false, templates.invalidArguments],
-					['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2?._id }, true],
-					['owner not an email', { ...generateParams(), owner: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+					['owner not a known user', { ...generateParams(), owner: generateRandomEmail(), modelId: modelWithNoRev2?._id }, true],
+					['owner not an email', { ...generateParams(), owner: generateRandomString() }, false, templates.invalidArguments],
 				] : []),
 			];
 
@@ -334,9 +343,9 @@ const testCreateNewRevision = (internal = false) => {
 			];
 
 			const commonCases = [
-				['the teamspace does not exist', { ...generateParams(), ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...generateParams(), projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist', { ...generateParams(), modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the teamspace does not exist', { ...generateParams(), ts: generateRandomString() }, false, templates.teamspaceNotFound],
+				['the project does not exist', { ...generateParams(), projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...generateParams(), modelId: generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...generateParams(), modelId: models.federation._id }, false, modelNotFound],
 				['the file is missing', { ...generateParams(), file: undefined }, false, templates.invalidArguments],
 				['the file has incorrect format', { ...generateParams(), file: image }, false, templates.unsupportedFileFormat],
@@ -452,17 +461,17 @@ const testUpdateRevisionStatus = () => {
 
 			return [
 				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the teamspace does not exist', { ...params, ts: generateRandomString() }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the user is viewer', { ...params, key: users.viewer.apiKey }, false, templates.notAuthorized],
 				['the user is commenter', { ...params, key: users.commenter.apiKey }, false, templates.notAuthorized],
-				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the project does not exist', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
-				['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, false, templates.revisionNotFound],
-				['the body of the request is no boolean', { ...params, setVoid: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
-				['the body of the request contains extra data', { ...params, extraData: { extraProp: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
+				['the revision does not exist', { ...params, revisionId: generateRandomString() }, false, templates.revisionNotFound],
+				['the body of the request is no boolean', { ...params, setVoid: generateRandomString() }, false, templates.invalidArguments],
+				['the body of the request contains extra data', { ...params, extraData: { extraProp: generateRandomString() } }, false, templates.invalidArguments],
 				['the body of the request is valid and set to true', params, true],
 				['the body of the request is valid and set to false', { ...params, setVoid: false, revisionId: voidRevision._id }, true],
 			];
@@ -535,13 +544,13 @@ const testDownloadRevisionFiles = () => {
 
 			return [
 				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the teamspace does not exist', { ...params, ts: generateRandomString() }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the user is viewer', { ...params, key: users.viewer.apiKey }, false, templates.notAuthorized],
 				['the user is commenter', { ...params, key: users.commenter.apiKey }, false, templates.notAuthorized],
-				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the project does not exist', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
 				['the revision does not exist', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
 				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],
@@ -605,13 +614,13 @@ const testGetRevisionMD5Hash = () => {
 
 			return [
 				['the user does not have a valid session.', { ...params, key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist.', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+				['the teamspace does not exist.', { ...params, ts: generateRandomString() }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace.', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model.', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the user is viewer.', { ...params, key: users.viewer.apiKey }, true],
 				['the user is commenter.', { ...params, key: users.commenter.apiKey }, true],
-				['the project does not exist.', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.modelNotFound],
+				['the project does not exist.', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist.', { ...params, modelId: generateRandomString() }, false, templates.modelNotFound],
 				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.modelNotFound],
 				['the revision does not exist.', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
 				['the revision has a file.', params, true],
@@ -666,8 +675,8 @@ const testGetImage = () => {
 				['the teamspace does not exist', { ...params, ts: 'notAvalidTS' }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
+				['the project does not exist', { ...params, projectId: generateRandomString() }, false, templates.projectNotFound],
+				['the model does not exist', { ...params, modelId: generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
 				['the revision does not exist', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.fileNotFound],
 				['the revision has no file', { ...params, revision: noFileRevision }, false, templates.fileNotFound],

@@ -142,6 +142,9 @@ export class Notifications extends PureComponent<IProps, any> {
 			this.props.unsubscribeFromChanges();
 			this.props.subscribeOnChanges();
 		}
+		if (prevProps.notifications.length <  this.props.notifications.length) {
+			this.props.sendGetNotifications();
+		}
 	}
 
 	public toggleDrawer = () => {

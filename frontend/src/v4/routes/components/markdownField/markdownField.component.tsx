@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, forwardRef, Ref } from 'react';
-import linkify from 'markdown-linkify';
+import linkify from '../../../helpers/linkify';
 
 import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
 
@@ -27,7 +27,7 @@ interface IProps {
 export const MarkdownField = forwardRef(
 	({ className, children }: IProps, ref: Ref<HTMLSpanElement>) => (
 		<span ref={ref}>
-			<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>
+			<MarkdownMessage className={className}>{typeof children === 'string' ? linkify(children) : children}</MarkdownMessage>
 		</span>
 	)
 );

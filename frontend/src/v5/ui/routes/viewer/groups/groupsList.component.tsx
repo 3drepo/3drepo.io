@@ -20,6 +20,7 @@ import { GroupsListContainer, GroupsTreeList } from './groupsLists.styles';
 import { GroupSetItem } from './groupItem/groupSetItem.component';
 import { GroupItem } from './groupItem/groupItem.component';
 import { groupsToTree } from './groupsList.helpers';
+import { GROUPS_LIST_CLASS } from '@/v4/services/viewer/multiSelect';
 
 interface Props {
 	groups: any [];
@@ -55,7 +56,7 @@ export const GroupsListComponent = ({ groups, collapse, disabled }:Props) => {
 	}, [groups]);
 
 	return (
-		<GroupsListContainer>
+		<GroupsListContainer className={GROUPS_LIST_CLASS}>
 			<GroupTree tree={tree} collapse={collapse} disabled={disabled} />
 		</GroupsListContainer>
 	);

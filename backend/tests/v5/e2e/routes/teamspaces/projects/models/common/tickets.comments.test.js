@@ -18,6 +18,13 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
+const {
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateTemplate,
+} = require('../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
@@ -30,16 +37,16 @@ let agent;
 
 const generateBasicData = () => ({
 	users: {
-		tsAdmin: ServiceHelper.generateUserCredentials(),
-		tsAdmin2: ServiceHelper.generateUserCredentials(),
-		viewer: ServiceHelper.generateUserCredentials(),
-		noProjectAccess: ServiceHelper.generateUserCredentials(),
-		nobody: ServiceHelper.generateUserCredentials(),
+		tsAdmin: generateUserCredentials(),
+		tsAdmin2: generateUserCredentials(),
+		viewer: generateUserCredentials(),
+		noProjectAccess: generateUserCredentials(),
+		nobody: generateUserCredentials(),
 	},
-	teamspace: ServiceHelper.generateRandomString(),
-	project: ServiceHelper.generateRandomProject(),
-	con: ServiceHelper.generateRandomModel(),
-	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+	teamspace: generateRandomString(),
+	project: generateRandomProject(),
+	con: generateRandomModel(),
+	fed: generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
 const setupBasicData = async (users, teamspace, project, models) => {
@@ -66,7 +73,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 const testGetComment = () => {
 	describe('Get comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -102,12 +109,12 @@ const testGetComment = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
+				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
 			];
 		};
@@ -145,7 +152,7 @@ const testGetComment = () => {
 const testGetCommentsList = () => {
 	describe('Get comments list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -193,11 +200,11 @@ const testGetCommentsList = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the ticket id is valid', baseRouteParams, true],
 				['the ticket id is valid and updatedSince is specified to a future date', { ...baseRouteParams, options: { updatedSince: Date.now() + 10000 } }, true, []],
 				['the ticket id is valid and comments are sorted by updated date in ascending order', { ...baseRouteParams, options: { sortBy: 'updatedAt', sortDesc: false }, orderChecker: orderCheck('updatedAt', false) }, true],
@@ -257,10 +264,10 @@ const testGetCommentsList = () => {
 const testCreateComment = () => {
 	describe('Create comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true });
 		const comment = ServiceHelper.generateComment();
 
-		const noCommentTemplate = ServiceHelper.generateTemplate(false, false, { comments: false });
+		const noCommentTemplate = generateTemplate(false, false, { comments: false });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -297,11 +304,11 @@ const testCreateComment = () => {
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
 				['the ticket does not allow comments', { ...baseRouteParams, allowComments: false }, false, templates.invalidArguments],
 				['the ticket id is valid', baseRouteParams, true],
 			];
@@ -338,7 +345,7 @@ const testCreateComment = () => {
 const testUpdateComment = () => {
 	describe('Update comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -374,12 +381,12 @@ const testUpdateComment = () => {
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user is not the author of the comment', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
+				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
 			];
 		};
@@ -396,7 +403,7 @@ const testUpdateComment = () => {
 				});
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 
-				const updateData = { message: ServiceHelper.generateRandomString(), images: model.comment?.images };
+				const updateData = { message: generateRandomString(), images: model.comment?.images };
 				const res = await agent.put(endpoint).send(updateData).expect(expectedStatus);
 
 				if (success) {
@@ -432,7 +439,7 @@ const testUpdateComment = () => {
 const testDeleteComment = () => {
 	describe('Delete comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const template = generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -467,12 +474,12 @@ const testDeleteComment = () => {
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user is not the author of the comment', { ...baseRouteParams, key: users.tsAdmin2.apiKey }, false, templates.notAuthorized],
-				['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
+				['the project does not exist', { ...baseRouteParams, projectId: generateRandomString() }, false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, { ...baseRouteParams, model: generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the comment does not exist', { ...baseRouteParams, commentId: ServiceHelper.generateRandomString() }, false, templates.commentNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketId: generateRandomString() }, false, templates.ticketNotFound],
+				['the comment does not exist', { ...baseRouteParams, commentId: generateRandomString() }, false, templates.commentNotFound],
 				['the comment id is valid', baseRouteParams, true],
 			];
 		};

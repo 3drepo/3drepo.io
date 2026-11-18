@@ -20,7 +20,10 @@ const { times } = require('lodash');
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateUUID } = require('../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+} = require('../../helper/dataGen');
 
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);

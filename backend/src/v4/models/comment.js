@@ -32,7 +32,6 @@ const fieldTypes = {
 	"guid": "[object Object]",
 	"from": "[object String]",
 	"likelihood": "[object Number]",
-	"mitigation": "[object String]",
 	"owner": "[object String]",
 	"pinPosition": "[object Array]",
 	"sealed": "[object Boolean]",
@@ -97,28 +96,9 @@ class SystemCommentGenerator extends CommentGenerator {
 	}
 }
 
-class MitigationCommentGenerator extends TextCommentGenerator {
-	constructor(owner, likelihood, consequence, mitigation, viewpoint, pinPosition) {
-		super(owner, mitigation, viewpoint, pinPosition);
-
-		likelihood = parseInt(likelihood);
-		consequence = parseInt(consequence);
-
-		if ((isNaN(likelihood) || fieldTypes.likelihood === Object.prototype.toString.call(likelihood)) &&
-			(isNaN(consequence) || fieldTypes.consequence === Object.prototype.toString.call(consequence)) &&
-			(undefined === mitigation || fieldTypes.mitigation === Object.prototype.toString.call(mitigation))) {
-			this.likelihood = (isNaN(likelihood)) ? undefined : likelihood;
-			this.consequence = (isNaN(consequence)) ? undefined : consequence;
-			this.mitigation = mitigation;
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-	}
-}
-
 const identifyReferences = (comment) => {
 	const userRefs = new Set();
-	const ticketRefs =  new Set();
+	const ticketRefs = new Set();
 
 	if (comment) {
 		let inQuotes = false;
@@ -133,7 +113,7 @@ const identifyReferences = (comment) => {
 				users && users.forEach((x) => userRefs.add(x.substr(1)));
 
 				const tickets = line.match(/#\d+/g);
-				tickets && tickets.forEach((x) => ticketRefs.add(parseInt(x.substr(1),10)));
+				tickets && tickets.forEach((x) => ticketRefs.add(parseInt(x.substr(1), 10)));
 			}
 		});
 	}
@@ -142,15 +122,15 @@ const identifyReferences = (comment) => {
 
 };
 
-const addComment = async function(account, model, colName, id, user, data, routePrefix, ticketType) {
+const addComment = async function (account, model, colName, id, user, data, routePrefix, ticketType) {
 
-	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
-		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
+	if (!(data.comment || "").trim() && !get(data, "viewpoint.screenshot")) {
+		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT };
 	}
 
 	// 1. Fetch comments
-	const _id = utils.stringToUUID(id) ;
-	const items = await db.find(account, model + "." + colName, { _id }, {comments: 1});
+	const _id = utils.stringToUUID(id);
+	const items = await db.find(account, model + "." + colName, { _id }, { comments: 1 });
 	if (items.length === 0) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
 	}
@@ -173,20 +153,20 @@ const addComment = async function(account, model, colName, id, user, data, route
 	comments.push(comment);
 
 	// 5. Update the item.
-	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
+	const viewpointPush = viewpoint ? { $push: { viewpoints: viewpoint } } : {};
 
-	await db.updateOne(account, model + "." + colName, { _id }, {...viewpointPush, $set : {comments}});
+	await db.updateOne(account, model + "." + colName, { _id }, { ...viewpointPush, $set: { comments } });
 
 	cleanViewpoint(routePrefix, viewpoint);
 
 	// 6. Return the new comment.
-	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
+	return { comment: { ...comment, viewpoint, guid: utils.uuidToString(comment.guid) }, ...references };
 };
 
-const deleteComment =  async function(account, model, colName, id, guid, user) {
+const deleteComment = async function (account, model, colName, id, guid, user) {
 	// 1. Fetch comments
-	const _id = utils.stringToUUID(id) ;
-	const item = await db.findOne(account, model + "." + colName, { _id }, {comments: 1, viewpoints: 1});
+	const _id = utils.stringToUUID(id);
+	const item = await db.findOne(account, model + "." + colName, { _id }, { comments: 1, viewpoints: 1 });
 
 	if (item === 0) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
@@ -199,16 +179,16 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 
 	// 3. Filter out the particular comment
 	comments = comments.filter(c => {
-		if(utils.uuidToString(c.guid) !== guid) {
+		if (utils.uuidToString(c.guid) !== guid) {
 			return true;
 		}
 
 		if (c.sealed) {
-			throw { resCode: responseCodes.ISSUE_COMMENT_SEALED};
+			throw { resCode: responseCodes.ISSUE_COMMENT_SEALED };
 		}
 
 		if (c.owner !== user) {
-			throw { resCode: responseCodes.NOT_AUTHORIZED};
+			throw { resCode: responseCodes.NOT_AUTHORIZED };
 		}
 
 		if (c.viewpoint) {
@@ -219,7 +199,7 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 					return true;
 				}
 
-				screenshot_ref =  v.screenshot_ref;
+				screenshot_ref = v.screenshot_ref;
 				return false;
 			});
 
@@ -230,32 +210,32 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 		return false;
 	});
 
-	if(count === comments.length) {
-		throw { resCode: responseCodes.ISSUE_COMMENT_INVALID_GUID};
+	if (count === comments.length) {
+		throw { resCode: responseCodes.ISSUE_COMMENT_INVALID_GUID };
 	}
 
 	// 4. Update the issue;
 	await Promise.all([
-		db.updateOne(account, model + "." + colName, { _id }, {$set : {comments, viewpoints}}),
+		db.updateOne(account, model + "." + colName, { _id }, { $set: { comments, viewpoints } }),
 		deleteScreenshotPromise
 	]);
 
 	// 5. Return which comment was deleted
-	return {guid};
+	return { guid };
 };
 
-const clean = (routePrefix, comment) =>  {
+const clean = (routePrefix, comment) => {
 	["rev_id", "guid"].forEach((key) => {
 		if (comment[key]) {
 			comment[key] = utils.uuidToString(comment[key]);
 		}
 	});
-	if(comment.viewpoint) {
+	if (comment.viewpoint) {
 		cleanViewpoint(routePrefix, comment.viewpoint);
 	}
 };
 
-const addPreExistingComment =  (owner, commentText, viewpoint, pinPosition, created, guid) => {
+const addPreExistingComment = (owner, commentText, viewpoint, pinPosition, created, guid) => {
 	const obj = new TextCommentGenerator(owner, commentText, viewpoint, pinPosition);
 	obj.created = created ? created : obj.created;
 	obj.guid = guid ? guid : obj.guid;
@@ -264,8 +244,7 @@ const addPreExistingComment =  (owner, commentText, viewpoint, pinPosition, crea
 
 module.exports = {
 	addPreExistingComment,
-	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
-	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
+	newSystemComment: (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	addComment,
 	deleteComment,
 	clean

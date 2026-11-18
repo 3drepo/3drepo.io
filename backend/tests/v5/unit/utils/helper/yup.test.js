@@ -16,7 +16,11 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
+const {
+	generateRandomString,
+	generateUUID,
+	generateRandomBuffer,
+} = require('../../../helper/dataGen');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
 const Yup = require('yup');
@@ -165,7 +169,12 @@ const testEmbeddedImage = () => {
 		[null, false, false],
 	])('Image validator', (data, isNullable, res) => {
 		test(`${data} characters should return ${res}`, async () => {
-			await expect(YupHelper.types.embeddedImage(isNullable).isValid(data)).resolves.toBe(res);
+			const schema = YupHelper.types.embeddedImage(isNullable);
+
+			await expect(schema.isValid(data)).resolves.toBe(res);
+			if (!res) {
+				await expect(schema.validate(data)).rejects.toThrow('Image cannot be null');
+			}
 		});
 	});
 };

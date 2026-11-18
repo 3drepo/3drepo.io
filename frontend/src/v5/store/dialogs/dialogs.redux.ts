@@ -19,7 +19,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { errorNeedsRedirecting, getErrorCode, isNotAuthed, isRequestAborted } from '@/v5/validation/errors.helpers';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import uuid from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 
 import { Constants } from '../../helpers/actions.helper';
 import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';

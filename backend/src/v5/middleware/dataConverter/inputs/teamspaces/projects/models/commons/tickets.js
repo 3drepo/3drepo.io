@@ -19,10 +19,12 @@ const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helpe
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
+const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
+const { propTypes } = require('../../../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 const { validateTickets } = require('../../../../../../../schemas/tickets');
@@ -174,6 +176,44 @@ const checkAllTicketsExist = async (req, res, next) => {
 
 		req.ticketsData = ticketIdStrs.map((id) => idToData[id]);
 
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const deserialisePropertyPath = (propertyPath) => {
+	let decodedPath = propertyPath;
+	try {
+		decodedPath = decodeURIComponent(propertyPath);
+	} catch {
+		// Express normally decodes params. If this is not encoded, use it as provided.
+	}
+
+	const pathParts = decodedPath.split('::');
+	if (pathParts.length > 2) {
+		throw createResponseCode(templates.invalidArguments, 'Property name cannot have more than one module delimiter');
+	}
+
+	return pathParts.length === 2
+		? { module: pathParts[0], property: pathParts[1] }
+		: { property: decodedPath };
+};
+
+TicketsMiddleware.validateTagProperty = async (req, res, next) => {
+	try {
+		const { module, property } = deserialisePropertyPath(req.params.property);
+		const fullTemplate = generateFullSchema(req.templateData);
+		const propertyCollection = module
+			? fullTemplate.modules.find(({ name, type }) => (name ?? type) === module)?.properties
+			: fullTemplate.properties;
+
+		const tagProperty = propertyCollection?.find(({ name, type }) => name === property && type === propTypes.TAGS);
+		if (!tagProperty) {
+			throw createResponseCode(templates.invalidArguments, `Tag property "${req.params.property}" could not be found in the template`);
+		}
+
+		req.tagProperty = `${module ? `modules.${module}` : 'properties'}.${property}`;
 		await next();
 	} catch (err) {
 		respond(req, res, err);

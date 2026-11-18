@@ -27,7 +27,7 @@ const ProjectsModel = require(`${src}/models/projectSettings`);
 const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString } = require('../../../../../../helper/services');
+const { generateRandomString } = require('../../../../../../helper/dataGen');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);

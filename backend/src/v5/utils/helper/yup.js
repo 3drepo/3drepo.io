@@ -67,6 +67,9 @@ YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
 // This is used for longer descriptions such as groups, issues, risks
 YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
+// This is used for even longer descriptions (long text property) in tickets
+YupHelper.types.strings.ultralongDescription = Yup.string().min(1).max(60000);
+
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {
 		if (originalValue === null) return null;
@@ -143,12 +146,13 @@ const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity
 });
 
 YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
-	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	Yup.mixed().nullable()
+		.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
 	isNullable,
 );
 
 YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
-	Yup.mixed()
+	Yup.mixed().nullable()
 		.transform((currValue, orgVal) => {
 			if (isString(orgVal)) {
 				return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');

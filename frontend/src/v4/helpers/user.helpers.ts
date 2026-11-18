@@ -19,7 +19,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 
-const UNKNOWN_USER = formatMessage({ id: 'v4.unknownUser', defaultMessage: 'Unknown user' });
+export const UNKNOWN_USER = formatMessage({ id: 'v4.unknownUser', defaultMessage: 'Unknown user' });
 
 export const getUserLastName = (username) => {
 	const user = selectCurrentTeamspaceUsersByIds(getState())[username];

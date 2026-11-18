@@ -34,6 +34,8 @@ import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.s
 import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
 import { getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
 import { formatMessage } from '@/v5/services/intl';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { permissionSelectorFunction } from '@/v5/store/tickets/templatesPermissions/templatesPermissions.selectors';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -64,7 +66,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	const notNullable = templates.every((template) =>  {
 		const propDef = findPropertyDefinition(template, name);
 		isArrayType = isArrayType && (['oneOf', 'manyOf'].includes(propDef?.type));
-		return propDef?.required;
+		return propDef?.required
+			|| [`properties.${BaseProperties.STATUS}`, `properties.${IssueProperties.PRIORITY}`].includes(name);
 	});
 
 	const defaultValues: FormType = {
@@ -115,8 +118,10 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 			}
 		});
 
-		const finalSelectedIds = selectedTickets.filter((ticket) => 
-			appliesToTemplate[ticket.type]).map((ticket) => ticket._id);
+		const finalSelectedIds = selectedTickets.filter((ticket) => {
+			const hasPermission = permissionSelectorFunction(name)(getState(), ticket.modelId, ticket.type);
+			return appliesToTemplate[ticket.type] && hasPermission;
+		}).map((ticket) => ticket._id);
 		
 		let partialTicket = {};
 		set(partialTicket, name, values);

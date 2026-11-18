@@ -18,6 +18,17 @@
 const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
+const {
+	generateUUIDString,
+	generateRandomString,
+	generateUserCredentials,
+	generateRandomProject,
+	generateRandomModel,
+	generateRandomObject,
+	generateBasicNode,
+	generateMeshNode,
+	generateTextureNode,
+} = require('../../../../../../../helper/dataGen');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
 
@@ -29,34 +40,34 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const viewer = ServiceHelper.generateUserCredentials();
-	const commenter = ServiceHelper.generateUserCredentials();
-	const collaborator = ServiceHelper.generateUserCredentials();
+	const viewer = generateUserCredentials();
+	const commenter = generateUserCredentials();
+	const collaborator = generateUserCredentials();
 	const perms = { viewers: [viewer.user],
 		commenters: [commenter.user],
 		collaborators: [collaborator.user] };
 	const data = {
 		users: {
-			tsAdmin: ServiceHelper.generateUserCredentials(),
-			noProjectAccess: ServiceHelper.generateUserCredentials(),
-			nobody: ServiceHelper.generateUserCredentials(),
-			projectAdmin: ServiceHelper.generateUserCredentials(),
+			tsAdmin: generateUserCredentials(),
+			noProjectAccess: generateUserCredentials(),
+			nobody: generateUserCredentials(),
+			projectAdmin: generateUserCredentials(),
 			viewer,
 			commenter,
 			collaborator,
 		},
-		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel(perms),
-		conNoRev: ServiceHelper.generateRandomModel(perms),
-		fedNoRev: ServiceHelper.generateRandomModel({
+		teamspace: generateRandomString(),
+		project: generateRandomProject(),
+		con: generateRandomModel(perms),
+		conNoRev: generateRandomModel(perms),
+		fedNoRev: generateRandomModel({
 			...perms,
 			modelType: modelTypes.FEDERATION }),
 
 		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
-	data.fed = ServiceHelper.generateRandomModel({
+	data.fed = generateRandomModel({
 		...perms,
 		modelType: modelTypes.FEDERATION,
 		properties: { subModels: [{ _id: data.con._id }, { _id: data.conNoRev._id }] },
@@ -90,8 +101,8 @@ const testGetTree = (internalService) => {
 	describe('Get tree', () => {
 		const { users, teamspace, project, con, fed, revisions, conNoRev } = generateBasicData();
 
-		const rev1Content = JSON.stringify(ServiceHelper.generateRandomObject());
-		const rev2Content = JSON.stringify(ServiceHelper.generateRandomObject());
+		const rev1Content = JSON.stringify(generateRandomObject());
+		const rev2Content = JSON.stringify(generateRandomObject());
 
 		beforeAll(async () => {
 			const models = [con, conNoRev, fed];
@@ -122,12 +133,12 @@ const testGetTree = (internalService) => {
 			];
 
 			const internalTests = modelType === modelTypes.CONTAINER ? [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
 				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
-				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
+				['an invalid revision is provided by the user', getRoute({ revId: generateUUIDString() }), false, templates.revisionNotFound],
 				['a revision is not provided by the user', getRoute(), true, rev2Content],
 			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
 
@@ -158,8 +169,8 @@ const testGetModelProperties = (internalService) => {
 	describe('Get model properties', () => {
 		const { users, teamspace, project, con, fed, revisions, conNoRev, fedNoRev } = generateBasicData();
 
-		const rev1Content = ServiceHelper.generateRandomObject();
-		const rev2Content = ServiceHelper.generateRandomObject();
+		const rev1Content = generateRandomObject();
+		const rev2Content = generateRandomObject();
 
 		const fedRevisions = times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.FEDERATION));
 		fed.properties.subModels = [{ _id: con._id }];
@@ -214,11 +225,11 @@ const testGetModelProperties = (internalService) => {
 			];
 
 			const commonTests = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['model does not exist', getRoute({ modelId: generateRandomString() }), false, modelNotFoundErr],
 				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
 				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
-				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
+				['an invalid revision is provided by the user', getRoute({ revId: generateUUIDString() }), false, templates.revisionNotFound],
 				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
 				['a revision is not provided by the user', getRoute(), true, rev2FullContent],
 			];
@@ -251,8 +262,8 @@ const testGetMesh = (isInternal) => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const revEntry = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER);
 
-		const rootNode = ServiceHelper.generateBasicNode('transformation', revEntry._id);
-		const mesh1 = ServiceHelper.generateMeshNode(revEntry._id, [rootNode.shared_id]);
+		const rootNode = generateBasicNode('transformation', revEntry._id);
+		const mesh1 = generateMeshNode(revEntry._id, [rootNode.shared_id]);
 
 		const nodes = [rootNode, mesh1];
 
@@ -294,10 +305,10 @@ const testGetMesh = (isInternal) => {
 			];
 
 			const commonTests = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
-				['the mesh does not exist', getRoute({ meshIdParam: ServiceHelper.generateRandomString() }), false, templates.meshNotFound],
+				['the mesh does not exist', getRoute({ meshIdParam: generateRandomString() }), false, templates.meshNotFound],
 				['the mesh exists', getRoute(), true],
 			];
 
@@ -336,7 +347,7 @@ const testGetTexture = (isInternal) => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const revEntry = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER);
 
-		const textureNode = ServiceHelper.generateTextureNode(revEntry._id, []);
+		const textureNode = generateTextureNode(revEntry._id, []);
 
 		const nodes = [textureNode];
 
@@ -377,10 +388,10 @@ const testGetTexture = (isInternal) => {
 			];
 
 			const commonTests = [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the project does not exist', getRoute({ projectId: generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: generateRandomString() }), false, templates.modelNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
-				['the texture does not exist', getRoute({ textureIdParam: ServiceHelper.generateRandomString() }), false, templates.textureNotFound],
+				['the texture does not exist', getRoute({ textureIdParam: generateRandomString() }), false, templates.textureNotFound],
 				['the texture exists', getRoute(), true],
 			];
 

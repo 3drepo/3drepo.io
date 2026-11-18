@@ -17,7 +17,10 @@
 
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { generateUUIDString, generateUUID } = require('../../../helper/services');
+const {
+	generateUUIDString,
+	generateUUID,
+} = require('../../../helper/dataGen');
 
 const UUIDHelper = require(`${src}/utils/helper/uuids`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -108,10 +111,29 @@ const testLookUpTable = () => {
 	});
 };
 
+const testUnique = () => {
+	describe('Unique UUIDs', () => {
+		test('should return unique IDs preserving the first occurrence', () => {
+			const uuidA = generateUUID();
+			const uuidB = generateUUID();
+			const uuidC = generateUUID();
+			const uuidCString = UUIDHelper.UUIDToString(uuidC);
+
+			expect(UUIDHelper.unique([uuidA, uuidB, UUIDHelper.UUIDToString(uuidA), uuidB, uuidCString, uuidC]))
+				.toEqual([uuidA, uuidB, uuidCString]);
+		});
+
+		test('should return an empty array if no IDs are provided', () => {
+			expect(UUIDHelper.unique()).toEqual([]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testStringToUUID();
 	testUUIDToString();
 	testGenerateUUID();
 	testGenerateUUIDString();
 	testLookUpTable();
+	testUnique();
 });

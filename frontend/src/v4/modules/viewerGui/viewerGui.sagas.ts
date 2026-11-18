@@ -41,7 +41,6 @@ import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
-import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
@@ -102,7 +101,6 @@ function* fetchData({ teamspace, model }) {
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
-			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
 			put(SequencesActions.fetchSequenceList()),
 			put(StarredActions.fetchStarredMeta())
@@ -117,7 +115,6 @@ function* resetPanelsStates() {
 		yield all([
 			put(ViewerGuiActions.setCoordView(false)),
 			put(IssuesActions.reset()),
-			put(RisksActions.reset()),
 			put(GroupsActions.resetComponentState()),
 			put(CompareActions.resetComponentState()),
 			put(BimActions.resetBimState()),
@@ -170,14 +167,8 @@ function* stopListenOnModelLoaded() {
 
 function* handlePinClick({ id }) {
 	try {
-		const risksMap = yield select(selectRisksMap);
 		const issuesMap = yield select(selectIssuesMap);
-		const risk = risksMap[id];
 		const issue = issuesMap[id];
-
-		if (risk) {
-			yield put(RisksActions.goToRisk(risk));
-		}
 
 		if (issue) {
 			yield put(IssuesActions.goToIssue(issue));
@@ -301,8 +292,7 @@ function* setClippingMode({ mode }) {
 		if (currentClipMode !== mode) {
 			yield put(ViewerGuiActions.setClipModeSuccess(mode));
 			if (!mode) {
-				yield Viewer.clipToolDelete();
-				yield put(ViewerGuiActions.setClipEdit(false));
+				yield put(ViewerGuiActions.resetClipping());
 			}
 		}
 	} catch (error) {
@@ -345,6 +335,17 @@ function* setClipEdit({ isClipEdit }) {
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clip edit', error));
+	}
+}
+
+function* resetClipping() {
+	try {
+		yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
+		yield Viewer.clipToolDelete();
+		yield put(ViewerGuiActions.setClipEdit(false));
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'clipping', error));
 	}
 }
 
@@ -431,6 +432,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.SET_GIZMO_MODE, setGizmoMode);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
+	yield takeLatest(ViewerGuiTypes.RESET_CLIPPING, resetClipping);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);

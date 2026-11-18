@@ -17,8 +17,14 @@
 import { getState } from '@/v5/helpers/redux.helpers';
 import { hexToGLColor } from '@/v5/helpers/colors.helper';
 import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds,
-	selectTreeNodesList } from '../modules/tree';
+	selectGetAllMeshes, selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
+
+
+type MeshId = string;
+type HexColor = string;
+
+export type ColorOverrides = Record<MeshId, HexColor>;
 
 // Adds to a dictionary of shared_id -> value a new group with
 // its share_ids from 'objects' field pointing to value
@@ -31,76 +37,110 @@ export const addToGroupDictionary = (dict, group, value) => {
 	return dict;
 };
 
-export const overridesDiff = (field) => (overrideA, overrideB) => {
-	const keys = Object.keys(overrideA);
-	const diff = {};
+export const overridesColorAddedOrUpdated = (prev, curr) => {
+	const keys = Object.keys(curr);
+	const diffDict = {};
 	const result = [];
 	let value = null;
 
 	keys.forEach((key) => {
-		if (overrideA[key] !== overrideB[key]) {
-			value = overrideA[key];
+		if (curr[key] !== prev[key]) {
+			value = curr[key];
 
-			if (!diff[value]) {
-				const overrideByColor = {[field]: value, shared_ids: []};
-				diff[value] = overrideByColor;
+			if (!diffDict[value]) {
+				const overrideByColor = {color: value, shared_ids: []};
+				diffDict[value] = overrideByColor;
 				result.push(overrideByColor);
 			}
 
-			diff[value].shared_ids.push(key);
+			diffDict[value].shared_ids.push(key);
 		}
 	});
 
 	return result;
 };
 
-export const overridesColorDiff = overridesDiff('color');
+export const overridesColorRemoved = (prev, curr) => {
+	const keys = Object.keys(prev);
+	const removedDict = {};
+	const result = [];
+	let value = null;
 
-export const overridesTransparencyDiff = overridesDiff('transparency');
+	keys.forEach((key) => {
+		if (prev[key] && !curr[key]) {
+			value = prev[key];
 
-export const addOverrides = (field, valueConvert, addOverride) => async (overrides) => {
+			if (!removedDict[value]) {
+				const changedValue = {color: value, shared_ids: []};
+				removedDict[value] = changedValue;
+				result.push(changedValue);
+			}
+
+			removedDict[value].shared_ids.push(key);
+		}
+	});
+
+	return result;
+};
+
+// This function return the meshes if the amount is larger than half of the total meshes in the model
+// it returns the complement and excludeIds flag set to true if the majority of meshes are included
+const getMeshesForOverride = (meshesOverrides, allMeshes) => meshesOverrides.map((modelMeshes) => {
+	const modelKey = `${modelMeshes.teamspace}__${modelMeshes.modelId}`;
+	const allModelMeshes = allMeshes.find(({ teamspace, model }) =>
+		`${teamspace}__${model}` === modelKey
+	);
+
+	if (!allModelMeshes || modelMeshes.meshes.length <= allModelMeshes.meshes.length / 2) {
+		return { ...modelMeshes, excludeIds: false };
+	}
+
+	const meshesToExclude = new Set(modelMeshes.meshes);
+	return {
+		...modelMeshes,
+		meshes: allModelMeshes.meshes.filter((meshId) => !meshesToExclude.has(meshId)),
+		excludeIds: true,
+	};
+});
+
+export const addColorOverrides = async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
 	const state = getState();
 	const treeNodes = selectTreeNodesList(state);
+	const allMeshes = selectGetAllMeshes(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
-		const value = valueConvert(override[field]);
+		const value = hexToGLColor(override['color']);
 
 		if (treeNodes.length) {
 			const selectNodesFn = selectGetNodesIdsFromSharedIds([override]);
 			const nodes = selectNodesFn(state);
 
 			if (nodes) {
-				const modelsList = selectGetMeshesByIds(nodes)(state);
+				const originalMeshesOverrides = selectGetMeshesByIds(nodes)(state);
+				const meshesForOverride = getMeshesForOverride(originalMeshesOverrides, allMeshes);
 
-				for (let j = 0; j < modelsList.length; j++) {
-					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					addOverride(teamspace, modelId, meshes, value);
+				for (let j = 0; j < meshesForOverride.length; j++) {
+					const { meshes, teamspace, modelId, excludeIds } = meshesForOverride[j] as any;
+					Viewer.overrideMeshOpacity(teamspace, modelId, meshes, value[3], excludeIds);
+					Viewer.overrideMeshColor(teamspace, modelId, meshes, value, excludeIds);
 				}
 			}
 		}
 	}
 };
 
-export const addColorOverrides = addOverrides('color', hexToGLColor, Viewer.overrideMeshColor.bind(Viewer));
-
-export const addTransparencyOverrides = addOverrides('transparency', parseFloat,
-	(teamspace, modelId, meshes, transparency) => {
-		if (transparency !== 0) {
-			Viewer.overrideMeshOpacity(teamspace, modelId, meshes, transparency);
-		}
-	});
-
-export const removeOverrides = (resetMesh) => async (overrides) => {
+export const removeColorOverrides = async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
 
 	const state = getState();
 	const treeNodes = selectTreeNodesList(state);
+	const allMeshes = selectGetAllMeshes(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
@@ -110,18 +150,15 @@ export const removeOverrides = (resetMesh) => async (overrides) => {
 			const nodes = selectNodes(state);
 
 			if (nodes) {
-				const modelsList = selectGetMeshesByIds(nodes)(state);
+				const originalMeshesOverrides = selectGetMeshesByIds(nodes)(state);
+				const meshesForOverride = getMeshesForOverride(originalMeshesOverrides, allMeshes);
 
-				for (let j = 0; j < modelsList.length; j++) {
-					const { meshes, teamspace, modelId } = modelsList[j] as any;
-					resetMesh(teamspace, modelId, meshes);
+				for (let j = 0; j < meshesForOverride.length; j++) {
+					const { meshes, teamspace, modelId, excludeIds } = meshesForOverride[j] as any;
+					Viewer.resetMeshOpacity(teamspace, modelId, meshes, excludeIds);
+					Viewer.resetMeshColor(teamspace, modelId, meshes, excludeIds);
 				}
 			}
 		}
 	}
 };
-
-export const removeColorOverrides = removeOverrides(Viewer.resetMeshColor.bind(Viewer));
-export const removeTransparencyOverrides = removeOverrides((teamspace, modelId, meshes) => {
-	Viewer.resetMeshOpacity(teamspace, modelId, meshes);
-});

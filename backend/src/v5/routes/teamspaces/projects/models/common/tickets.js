@@ -17,6 +17,7 @@
 
 const {
 	addTicket: addConTicket,
+	getTagPropertyValues: getConTagPropertyValues,
 	getTicketById: getConTicketById,
 	getTicketHistory: getConTicketHistory,
 	getTicketList: getConTicketList,
@@ -27,6 +28,7 @@ const {
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
 	addTicket: addFedTicket,
+	getTagPropertyValues: getFedTagPropertyValues,
 	getTicketById: getFedTicketById,
 	getTicketHistory: getFedTicketHistory,
 	getTicketList: getFedTicketList,
@@ -35,7 +37,7 @@ const {
 	updateTicket: updateFedTicket,
 	updateManyTickets: updateManyFedTickets,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { checkTicketExists, templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { checkTicketExists, templateExists, validateImportTickets, validateNewTicket, validateTagProperty, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -118,6 +120,20 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
 
 		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTagPropertyValues = (isFed) => async (req, res) => {
+	const { teamspace, project, model } = req.params;
+
+	try {
+		const getValues = isFed ? getFedTagPropertyValues : getConTagPropertyValues;
+		const values = await getValues(teamspace, project, model, req.templateData._id, req.tagProperty);
+
+		respond(req, res, templates.ok, { values });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -344,6 +360,72 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates/{template}/properties/{property}/values:
+	 *   get:
+	 *     description: Get existing values for a tag ticket property in this model
+	 *     tags: [v:external, Tickets]
+	 *     operationId: getTicketTagPropertyValues
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: template
+	 *         description: Template ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: property
+	 *         description: URL-encoded property path. Use property name for root properties or module::propertyName for module properties.
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns existing tag property values
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 values:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 */
+	router.get('/templates/:template/properties/:property/values',
+		hasReadAccess, templateExists, validateTagProperty, getTagPropertyValues(isFed));
+
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/import:
 	 *   post:
 	 *     description: Import multiple existing tickets into the model
@@ -447,7 +529,7 @@ const establishRoutes = (isFed) => {
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *                             view:
-	 *                               $ref: "#components/schemas/ticketCommentView"
+	 *                               $ref: "#/components/schemas/ticketCommentView"
 	 *
 	 *
 	 *     responses:
@@ -790,7 +872,7 @@ const establishRoutes = (isFed) => {
 	 *                                 type: string
 	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *                             view:
-	 *                               $ref: "#components/schemas/ticketCommentView"
+	 *                               $ref: "#/components/schemas/ticketCommentView"
 	 *
 	 *
 	 *     responses:

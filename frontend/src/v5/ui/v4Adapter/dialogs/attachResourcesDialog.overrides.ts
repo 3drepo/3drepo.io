@@ -16,7 +16,7 @@
  */
 import { css } from 'styled-components';
 import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ResourceIconContainer, IconButton } from '@/v4/routes/components/resources/resources.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
 import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';

@@ -19,14 +19,15 @@ const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
-	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
 	generateUUID,
 	generateUUIDString,
 	generateRandomDate,
 	generateTemplate,
-	generateTicket } = require('../../../helper/services');
+	generateGroup,
+} = require('../../../helper/dataGen');
+const { generateTicket } = require('../../../helper/dataGen.tickets');
 
 const FS = require('fs');
 
@@ -642,14 +643,18 @@ const testAllProperties = () => {
 
 		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
-			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
+			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(60001)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
-			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
+			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), new Date('3000-01-01T00:00:00.000Z').getTime()],
 			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
 			['Many Of', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], ['b', generateRandomString()]],
+			['Many Of min length', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, ['a'], []],
+			['Tags', { type: propTypes.TAGS }, ['a', 'b']],
+			['Tags max length', { type: propTypes.TAGS }, [generateRandomString(120)], [generateRandomString(121)]],
+			['Tags min length', { type: propTypes.TAGS }, ['a'], []],
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
 			['Image List', { type: propTypes.IMAGE_LIST }, times(5, FS.readFileSync(image, { encoding: 'base64' })), generateRandomString()],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
@@ -688,6 +693,7 @@ const testAllProperties = () => {
 			['Coordinates (unset)', { type: propTypes.COORDS }, null],
 			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
 			['Many Of (unset)', { type: propTypes.MANY_OF, values: ['a', 'b', 'c'] }, null],
+			['Tags (unset)', { type: propTypes.TAGS }, null],
 			['Image (unset)', { type: propTypes.IMAGE }, null],
 			['Image List (unset)', { type: propTypes.IMAGE_LIST }, null],
 		];
@@ -887,6 +893,61 @@ const testCompositeTypes = () => {
 			};
 
 			await validateTicket(teamspace, project, model, template, input);
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, modules: {}, type: template._id });
+		});
+
+		test('Should succeed if a required view has a group camera', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+					required: true,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: {
+						camera: {
+							zoomTo: [{ group: generateGroup(false, { hasId: false, serialised: true }) }],
+						},
+					},
+				},
+			};
+
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, modules: {}, type: template._id });
+		});
+
+		test('Should succeed if an optional view has a group camera', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.VIEW,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: {
+						camera: {
+							zoomTo: [{ group: generateGroup(false, { hasId: false, serialised: true }) }],
+						},
+					},
+				},
+			};
+
 			await expect(validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, modules: {}, type: template._id });
 		});
@@ -1211,7 +1272,7 @@ const testValidateTicket = () => {
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
-		test(`[New ticket] Should strip the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+		test(`[New ticket] Should reject the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
 			const propName = generateRandomString();
 			const template = {
 				_id: generateUUID(),
@@ -1232,10 +1293,10 @@ const testValidateTicket = () => {
 				modules: {},
 			};
 			await expect(validateTicket(teamspace, project, model, template, input))
-				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+				.rejects.not.toBeUndefined();
 		});
 
-		test(`[Update ticket] Should nullify the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
+		test(`[Update ticket] Should reject the value of a ${propTypes.MANY_OF} property if it is empty array`, async () => {
 			const propName = generateRandomString();
 			const template = {
 				_id: generateUUID(),
@@ -1263,14 +1324,55 @@ const testValidateTicket = () => {
 				},
 			};
 
-			const expected = {
+			await expect(validateTicket(teamspace, project, model, template, input, old))
+				.rejects.not.toBeUndefined();
+		});
+
+		test(`Should strip duplicated values from a ${propTypes.MANY_OF} property`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.MANY_OF,
+					values: ['a', 'b'],
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
 				properties: {
-					[propName]: null,
+					[propName]: ['a', 'b', 'a'],
 				},
 				modules: {},
 			};
-			await expect(validateTicket(teamspace, project, model, template, input, old))
-				.resolves.toEqual(expected);
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: { [propName]: ['a', 'b'] }, modules: {} });
+		});
+
+		test(`Should strip duplicated values from a ${propTypes.TAGS} property`, async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{
+					name: propName,
+					type: propTypes.TAGS,
+				}],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: ['a', 'b', 'a'],
+				},
+				modules: {},
+			};
+			await expect(validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual({ ...input, properties: { [propName]: ['a', 'b'] }, modules: {} });
 		});
 	});
 };
@@ -1772,6 +1874,73 @@ const testSerialiseTicket = () => {
 			};
 
 			expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
+		});
+
+		describe('Views', () => {
+			test('Should serialise a UUID camera and state groups to strings', () => {
+				const viewProp = generateRandomString();
+				const cameraUUIDString = generateUUIDString();
+				const groupUUIDString = generateUUIDString();
+				const template = {
+					_id: generateUUID(),
+					properties: [{
+						type: propTypes.VIEW,
+						name: viewProp,
+					}],
+					modules: [],
+				};
+				const ticket = {
+					properties: {
+						[viewProp]: {
+							camera: { zoomTo: [{ group: stringToUUID(cameraUUIDString) }] },
+							state: {
+								[viewGroups.HIDDEN]: [{ group: stringToUUID(groupUUIDString) }],
+							},
+						},
+					},
+					modules: {},
+				};
+
+				expect(TicketSchema.serialiseTicket(ticket, template)).toEqual({
+					properties: {
+						[viewProp]: {
+							camera: { zoomTo: [{ group: cameraUUIDString }] },
+							state: {
+								[viewGroups.HIDDEN]: [{ group: groupUUIDString }],
+							},
+						},
+					},
+					modules: {},
+				});
+			});
+
+			test('Should pass through a regular camera object unchanged', () => {
+				const viewProp = generateRandomString();
+				const camera = {
+					position: [-71589.0508593757, 18926.52733612061, 33778.59533505258],
+					up: [0.10712166130542755, 0.9851195216178894, -0.13440410792827606],
+					forward: [0.6139947175979614, -0.1718706339597702, -0.7703707218170166],
+					type: 'perspective',
+				};
+				const template = {
+					_id: generateUUID(),
+					properties: [{
+						type: propTypes.VIEW,
+						name: viewProp,
+					}],
+					modules: [],
+				};
+				const ticket = {
+					properties: {
+						[viewProp]: {
+							camera,
+						},
+					},
+					modules: {},
+				};
+
+				expect(TicketSchema.serialiseTicket(ticket, template)).toEqual(ticket);
+			});
 		});
 	});
 };

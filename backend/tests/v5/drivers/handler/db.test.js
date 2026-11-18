@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../helper/utils');
+const { determineTestGroup, outOfOrderArrayEqual } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
@@ -23,9 +23,10 @@ const {
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
-	outOfOrderArrayEqual,
-	db: dbHelper,
 	generateRandomNumber,
+} = require('../../helper/dataGen');
+const {
+	db: dbHelper,
 } = require('../../helper/services');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
@@ -431,6 +432,32 @@ const testFind = () => {
 
 		test('Should return empty array if database doesn\'t exist', async () => {
 			await expect(DB.find(generateRandomString(), col, { })).resolves.toEqual([]);
+		});
+	});
+};
+
+const testFindCursor = () => {
+	describe('Find Cursor', () => {
+		const data = generateBSONData(10);
+		const dbName = generateRandomString();
+		const col = generateRandomString();
+		beforeAll(async () => {
+			await DB.insertMany(dbName, col, data);
+		});
+
+		test('Should return matching documents', async () => {
+			const cursor = await DB.findCursor(dbName, col, { _id: data[3]._id });
+			await expect(cursor.toArray()).resolves.toEqual([data[3]]);
+		});
+
+		test('Should return matching documents (sort, projection, skip and limit)', async () => {
+			const cursor = await DB.findCursor(dbName, col, {}, { n: 1, _id: 0 }, { n: 1 }, 2, 3);
+			await expect(cursor.toArray()).resolves.toEqual(data.slice(3, 5).map(({ n }) => ({ n })));
+		});
+
+		test('Should return an empty cursor if no document is found', async () => {
+			const cursor = await DB.findCursor(dbName, col, { [generateRandomString()]: generateRandomString() });
+			await expect(cursor.toArray()).resolves.toEqual([]);
 		});
 	});
 };
@@ -1009,6 +1036,7 @@ describe(determineTestGroup(__filename), () => {
 	testAggregate();
 	testDistinct();
 	testFind();
+	testFindCursor();
 	testFindOne();
 	testFindOneAndUpdate();
 	testFindOneAndDelete();

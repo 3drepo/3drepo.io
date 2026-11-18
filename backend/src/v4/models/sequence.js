@@ -135,10 +135,10 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 			if (view) {
 				viewpoint = view.viewpoint;
 
-				["highlighted_group_id",
+				let updateGroupsProm = ["highlighted_group_id",
 					"hidden_group_id",
 					"shown_group_id"
-				].forEach(async (groupIDName) => {
+				].map(async (groupIDName) => {
 					if (viewpoint[groupIDName]) {
 						await updateGroup(
 							account,
@@ -148,13 +148,13 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 							undefined,
 							undefined,
 							viewpoint[groupIDName],
-							{ sequence_id: sequenceId }
+							{ sequence_id:  utils.stringToUUID(sequenceId) }
 						);
 					}
 				});
 
 				if (viewpoint["override_group_ids"]) {
-					viewpoint["override_group_ids"].forEach(async (overrideGroupId) => {
+					updateGroupsProm = [...updateGroupsProm, ...viewpoint["override_group_ids"].map(async (overrideGroupId) => {
 						await updateGroup(
 							account,
 							model,
@@ -163,10 +163,12 @@ const handleFrames = async (account, model, sequenceId, sequenceFrames) => {
 							undefined,
 							undefined,
 							overrideGroupId,
-							{ sequence_id: sequenceId }
+							{ sequence_id: utils.stringToUUID(sequenceId) }
 						);
-					});
+					})];
 				}
+
+				await Promise.all(updateGroupsProm);
 			} else {
 				throw responseCodes.INVALID_ARGUMENTS;
 			}

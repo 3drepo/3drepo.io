@@ -33,8 +33,8 @@ const { getTeamspaceList } = require('../../utils');
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
 const { updateMany } = require(`${v5Path}/handler/db`);
-const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
-const { CLASH_RUNS_COL, clashRunStatus } = require(`${v5Path}/models/clashes.constants`);
+const { SETTINGS_COL, processStatuses, terminalProcessStatuses } = require(`${v5Path}/models/modelSettings.constants`);
+const { CLASH_RUNS_COL, clashRunStatus, terminalClashRunStatuses } = require(`${v5Path}/models/clashes.constants`);
 const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const Path = require('path');
 
@@ -52,10 +52,7 @@ const processTeamspace = async (teamspace, id, type) => {
 	const drawingStatusQuery = {
 		status: {
 			$exists: true,
-			$nin: [
-				processStatuses.OK,
-				processStatuses.FAILED,
-			],
+			$nin: terminalProcessStatuses,
 		},
 	};
 	const modelQuery = deleteIfUndefined({ _id: id });
@@ -63,15 +60,11 @@ const processTeamspace = async (teamspace, id, type) => {
 	const clashRunQuery = deleteIfUndefined({
 		_id: stringToUUID(id),
 		status: {
-			$nin: [
-				clashRunStatus.COMPLETED,
-				clashRunStatus.FAILED,
-				clashRunStatus.ABORTED,
-			],
+			$nin: terminalClashRunStatuses,
 		},
 	});
 
-	const modelAction = { $unset: { status: 1 } };
+	const modelAction = { $unset: { status: 1, corID: 1, lastProcessingUpdate: 1 } };
 	const drawingAction = { $set: { status: processStatuses.FAILED } };
 	const clashRunAction = {
 		$set: {

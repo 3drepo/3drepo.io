@@ -17,7 +17,7 @@
 
 const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { generateRandomString } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/dataGen');
 const isHtml = require('is-html-content');
 
 const ClashError = require(`${src}/services/mailer/templates/clashError`);
@@ -39,6 +39,8 @@ const testHtml = () => {
 
 const testSubject = () => {
 	describe.each([
+		['data is undefined', undefined],
+		['data is null', null],
 		['data object is empty', {}],
 		['data object is not empty', { domain: generateRandomString(), title: generateRandomString(), logExcerpt: generateRandomString() }],
 	])('get subject', (desc, data) => {

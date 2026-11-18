@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import DrawIcon from '@assets/icons/outlined/draw-outlined.svg';
 import EraserIcon from '@assets/icons/outlined/eraser-outlined.svg';
@@ -121,9 +122,11 @@ export const MarkupToolbar = ({
 				disabled={!hasFutureHistory && !hasPastHistory}
 			/>
 			<Divider />
-			<SaveButton onClick={onSave} disabled={!hasPastHistory && !allowSaveWithoutChanges}>
-				<SaveIcon />
-			</SaveButton>
+			<Tooltip title={formatMessage({ id: 'imageMarkup.icon.title.save', defaultMessage: 'Save' })}>
+				<SaveButton onClick={onSave} disabled={!hasPastHistory && !allowSaveWithoutChanges}>
+					<SaveIcon />
+				</SaveButton>
+			</Tooltip>
 		</Toolbar>
 	);
 };

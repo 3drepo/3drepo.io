@@ -15,17 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, triggerOptions } = require('../../../../../models/clashes.constants');
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, clashRunStatus, triggerOptions } = require('../../../../../models/clashes.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getClashRunById, getClashRunByQuery } = require('../../../../../models/clashes.runs');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
 const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray }, utils: { stripWhen } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
+const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { getUsersWithAccess } = require('../../../../../processors/teamspaces/projects');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
 const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
@@ -40,7 +43,7 @@ const Clashes = {};
 
 const statusEvents = ['onNew', 'onResolved', 'onReopened'];
 
-const generatePlanSchema = (teamspace, project, user, isUpdate) => {
+const generatePlanSchema = async (teamspace, project, user, isUpdate) => {
 	const modelExistsTest = (isFederation) => async (id) => {
 		if (!id) {
 			return true;
@@ -58,6 +61,10 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		}
 		return required ? schema.required() : schema;
 	};
+
+	const usersWithAccess = await getUsersWithAccess(teamspace, project);
+	const jobsWithAccess = await getJobsByUsers(teamspace, usersWithAccess);
+	const jobsAndUsers = [...usersWithAccess, ...jobsWithAccess];
 
 	const selectionEntrySchema = Yup.object().shape({
 		container: types.id.test('container-validation', 'Container must exist within the project', modelExistsTest(false)).required(),
@@ -91,12 +98,15 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		type: imposeCondition(Yup.string().oneOf(Object.values(CLASH_TYPES)), true, false),
 		tolerance: imposeCondition(Yup.number().min(0), true, false),
 		selfIntersectionsCheck: imposeCondition(
-			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, true),
+			Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).default(false), false, false),
 		trigger: imposeCondition(uniqueArray(Yup.array().of(Yup.string()
 			.oneOf(Object.values(triggerOptions))).min(1)), true, false),
 		selectionA: imposeCondition(selectionSchema, true, false),
 		selectionB: imposeCondition(selectionSchema, true, false),
 		tickets: imposeCondition(ticketSchema.default(undefined), false, true),
+		notify: imposeCondition(uniqueArray(Yup.array().of(
+			Yup.string().oneOf(jobsAndUsers, 'You can only notify users/jobs with users who have access to this project.'),
+		).min(1)), false, true),
 	}).noUnknown(true).required();
 };
 
@@ -187,8 +197,16 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTickets(teamspace, project, ticketData.federation,
+		const [{ newTicket: validatedTicket }] = await validateTickets(teamspace, project, ticketData.federation,
 			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
+
+		if (updateData.valuesAtCreation?.length) {
+			// Ticket validation may deserialise values, e.g. date fields, so keep the validated values.
+			updateData.valuesAtCreation = updateData.valuesAtCreation.map((entry) => {
+				const target = entry.module ? validatedTicket.modules[entry.module] : validatedTicket.properties;
+				return { ...entry, value: target[entry.property] };
+			});
+		}
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -210,8 +228,9 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 const validatePlanData = async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const schema = generatePlanSchema(teamspace, project,
-			getUserFromSession(req.session), !!req.planData);
+		const user = getUserFromSession(req.session);
+		const schema = await generatePlanSchema(teamspace, project, user, !!req.planData);
+
 		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
 			req.body.tickets = await validateTicketConfiguration(
@@ -257,11 +276,37 @@ Clashes.planExists = async (req, res, next) => {
 	}
 };
 
+Clashes.clashRunInPlan = async (req, res, next) => {
+	const { teamspace, project, planId, runId } = req.params;
+
+	try {
+		req.outputData = await getClashRunByQuery(
+			teamspace, project, { _id: runId, 'plan._id': planId }, { project: 0 });
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
 Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
 
 		await setLastRevForSelections(teamspace, req.planData.selectionA, req.planData.selectionB);
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Clashes.clashRunCompleted = async (req, res, next) => {
+	const { teamspace, project, runId } = req.params;
+
+	try {
+		const { status } = await getClashRunById(teamspace, project, runId);
+		if (status !== clashRunStatus.COMPLETED) {
+			throw createResponseCode(templates.clashRunNotCompleted);
+		}
 		await next();
 	} catch (err) {
 		respond(req, res, err);

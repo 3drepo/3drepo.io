@@ -29,8 +29,6 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { Activities } from './components/activities/';
-import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
 import Gis from './components/gis/gis.container';
@@ -40,12 +38,10 @@ import { Legend } from './components/legend';
 import { PANEL_DEFAULT_WIDTH } from './components/legend/legend.constants';
 import { Measurements } from './components/measurements';
 import { PanelButton } from './components/panelButton/panelButton.component';
-import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
-import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
-import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
+import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
@@ -65,11 +61,9 @@ interface IProps {
 	};
 	queryParams: {
 		issueId?: string;
-		riskId?: string;
 		presenter?: string;
 	};
 	leftPanels: string[];
-	rightPanels: string[];
 	draggablePanels: string[];
 	selectedTicket: ITicket | undefined;
 	treeNodesList: any;
@@ -77,7 +71,6 @@ interface IProps {
 	isEditingGroups: boolean;
 	isCalibrating: boolean;
 	issuesEnabled: boolean;
-	risksEnabled: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -85,6 +78,7 @@ interface IProps {
 	fetchTeamspaces: (username) => void;
 	resetPanelsStates: () => void;
 	resetModel: () => void;
+	resetClipping: () => void;
 	setPanelVisibility: (panelName, visibility?) => void;
 	removeMeasurement: (uuid) => void;
 	resetViewerGui: () => void;
@@ -92,8 +86,6 @@ interface IProps {
 	joinPresentation: (code) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
-	subscribeOnRiskChanges: (teamspace, modelId) => void;
-	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	setProjectionModeSuccess: (mode) => void;
 	clearCurrentlySelected: () => void;
 }
@@ -127,9 +119,8 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const {
-			queryParams: { issueId, riskId, presenter },
+			queryParams: { issueId, presenter },
 			match: { params },
-			viewer,
 			leftPanels,
 			currentTeamspace,
 			fetchTeamspaces,
@@ -139,14 +130,9 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
 
-		if (riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
-		}
-
 		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
 		this.props.subscribeOnIssueChanges(params.teamspace, params.model);
-		this.props.subscribeOnRiskChanges(params.teamspace, params.model);
 		this.toggleViewerListeners(true);
 
 		if (presenter) {
@@ -165,22 +151,18 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
 		const presentationActivityChanged = prevProps.isPresentationActive !== this.props.isPresentationActive;
 
-		const { issueId, riskId } = queryParams;
+		const { issueId } = queryParams;
 
 		if (issueId !== prevProps.queryParams.issueId && issueId && !leftPanels.includes(VIEWER_PANELS.ISSUES)) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
-		}
-		if (riskId !== prevProps.queryParams.riskId && riskId && !leftPanels.includes(VIEWER_PANELS.RISKS)) {
-			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
 			this.props.resetPanelsStates();
 			this.props.unsubscribeOnIssueChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
-			this.props.unsubscribeOnRiskChanges(prevProps.match.params.teamspace, prevProps.match.params.model);
 			this.props.fetchData(params.teamspace, params.model);
 			this.props.subscribeOnIssueChanges(params.teamspace, params.model);
-			this.props.subscribeOnRiskChanges(params.teamspace, params.model);
+			this.props.resetClipping();
 		}
 
 		if (!isEmpty(changes)) {
@@ -195,9 +177,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		if (this.props.isEditingGroups) {
 			return;
 		}
-
-		const prevView = prevProps.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		const currView = this.props.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 	}
 
 	public componentWillUnmount() {
@@ -205,7 +184,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 		MultiSelect.removeKeyWatchers();
 		this.props.unsubscribeOnIssueChanges(params.teamspace, params.model);
-		this.props.unsubscribeOnRiskChanges(params.teamspace, params.model);
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();
@@ -213,6 +191,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		this.props.viewer.destroy();
 		this.props.resetModel();
 		this.props.resetViewerGui();
+		this.props.resetClipping();
 		this.toggleViewerListeners(false);
 		this.props.clearCurrentlySelected();
 	}
@@ -227,16 +206,14 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private handleMeasureRemoved = (measurementId) => this.props.removeMeasurement(measurementId);
 
 	public render() {
-		const { leftPanels, rightPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
+		const { leftPanels, draggablePanels, isFocusMode, viewer, isCalibrating } = this.props;
 
 		return (
 			<GuiContainer $isCalibrating={isCalibrating}>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
-					<RevisionsSwitch />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
-					{this.renderRightPanels(rightPanels)}
 					{this.renderDraggablePanels(draggablePanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
@@ -269,7 +246,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		}
 		return (
 			<LeftPanelsButtons>
-				{getViewerLeftPanels(this.props.issuesEnabled, this.props.risksEnabled).map(({ name, type }) => (
+				{getViewerLeftPanels(this.props.issuesEnabled).map(({ name, type }) => (
 					<PanelButton
 						key={type}
 						onClick={this.handleTogglePanel}
@@ -285,7 +262,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 	private panelsMap = {
 		[VIEWER_PANELS.ISSUES]: Issues,
-		[VIEWER_PANELS.RISKS]: Risks,
 		[VIEWER_PANELS.TICKETS]: Tickets,
 		[VIEWER_PANELS.GROUPS]: Groups,
 		[VIEWER_PANELS.VIEWS]: Views,
@@ -301,19 +277,12 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				if (panel === AddOnModule.Issues && !this.props.issuesEnabled || panel === AddOnModule.Risks && !this.props.risksEnabled) {
+				if (panel === AddOnModule.Issues && !this.props.issuesEnabled) {
 					return null;
 				}
 				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;
 			})}
 		</LeftPanels>
-	)
-
-	private renderRightPanels = (panels) => (
-		<RightPanels>
-			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
-			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
-		</RightPanels>
 	)
 
 	private renderDraggablePanels = (panels) => (

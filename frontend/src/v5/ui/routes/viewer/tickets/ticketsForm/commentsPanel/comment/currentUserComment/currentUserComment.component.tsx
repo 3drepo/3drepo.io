@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TemplatesPermissionsHooksSelectors, TicketsCardHooksSelectors, TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-
+import { TicketContext } from '../../../../ticket.context';
 
 export type CurrentUserCommentProps = ITicketComment & {
 	metadata?: TicketCommentReplyMetadata;
@@ -46,9 +46,24 @@ export const CurrentUserComment = ({
 	onReply,
 	...props
 }: CurrentUserCommentProps) => {
+	const { containerOrFederation } = useContext(TicketContext);
+	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+
 	const [isEditMode, setIsEditMode] = useState(false);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, templateId);
 	const [commentReply, setCommentReply] = useState(metadata);
+
+
+	// It uses the unsaved comment only to determine if the comment should be in edit mode here.
+	// That way the commentbox receives the original comment data and internally  the unsaved
+	// comment to know if it changed or not.
+	const unsavedComment = TicketCommentsHooksSelectors.selectUnsavedCommentById(_id);
+	useEffect(() => {
+		if (unsavedComment) {
+			setIsEditMode(true);
+		}
+	}, [unsavedComment]);
+
 
 	if (deleted) return (<DeletedComment author={author} />);
 

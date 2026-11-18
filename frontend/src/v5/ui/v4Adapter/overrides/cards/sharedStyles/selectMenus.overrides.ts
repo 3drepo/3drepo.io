@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { Header } from '@/v4/routes/viewerGui/components/risks/components/levelOfRisk/levelOfRisk.styles';
-import { DateFieldContainer as RisksDateFieldContainer } from '@/v4/routes/viewerGui/components/risks/components/mainRiskFormTab/mainRiskFormTab.styles';
 import { DateFieldContainer as IssuesDateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
-import { StyledFormControl, FieldsContainer, FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { StyledFormControl, FieldsRow } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 
 export const EditableFieldStyles = css`
@@ -135,8 +133,7 @@ export const FieldsRowStyles = css`
 				margin-right: 5px;
 				margin-left: 0;
 			}
-			${IssuesDateFieldContainer},
-			${RisksDateFieldContainer} {
+			${IssuesDateFieldContainer} {
 				margin: 0;
 				input, fieldset {
 					margin-top: 0;
@@ -149,24 +146,6 @@ export const FieldsRowStyles = css`
 				label {
 					top: -19px;
 				}
-			}
-		}
-		${FieldsContainer} {
-			width: calc(50% - 5px);
-			${StyledFormControl} {
-				margin: 0;
-				/* Level of risk */
-				${Header} {
-					font-size: 10px;
-					color: ${({ theme }) => theme.palette.base.main};
-				}
-				label {
-					top: 5px;
-				}
-			}
-			label {
-				font-size: 10px;
-				top: -10px;
 			}
 		}
 	}

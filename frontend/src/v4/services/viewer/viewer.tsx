@@ -21,6 +21,7 @@ import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
+import { getPinImages } from '@/v5/ui/routes/viewer/tickets/pinIcons.helper';
 import { SLOPE_UNITS } from '@/v4/constants/measure';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
@@ -39,7 +40,7 @@ interface IViewerConstructor {
 	name?: string;
 }
 
-export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+export type PinType = 'issue' | 'bookmark' | 'ticket' | string | null;
 
 export interface IPin {
 	id: string;
@@ -49,6 +50,10 @@ export interface IPin {
 	colour: number[];
 	isSelected?: boolean;
 }
+
+// Tracks which custom pin icon codes have already been registered with Unity
+// via createPinIcon, so we don't recreate/refetch them on every pin drop.
+const createdPinIcons: Record<string, boolean> = {};
 
 export class ViewerService {
 	public element: HTMLElement;
@@ -84,6 +89,8 @@ export class ViewerService {
 	public isSnappingCursorEnabled: boolean;
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
+		this.setInitialisePromise();
+		UnityUtil.viewer = this;
 		this.name = name;
 
 		this.unityLoaderReady = false;
@@ -101,6 +108,7 @@ export class ViewerService {
 	}
 
 	public setupInstance = async (container, onError) => {
+		this.setInitialisePromise();
 		this.element = container;
 
 		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
@@ -129,6 +137,8 @@ export class ViewerService {
 		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
+
+		this.init();
 	}
 
 	/**
@@ -139,6 +149,7 @@ export class ViewerService {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
+
 
 		this.setInitialisePromise();
 		UnityUtil.viewer = this;
@@ -254,7 +265,7 @@ export class ViewerService {
 	public pickPointEvent(pointInfo) {
 		this.emit(VIEWER_EVENTS.PICK_POINT, pointInfo);
 
-		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT) {
+		if (this.measureMode !== VIEWER_MEASURING_MODE.POINT || !(pointInfo.position?.length)) {
 			return;
 		}
 
@@ -285,7 +296,7 @@ export class ViewerService {
 
 	public async isModelLoaded() {
 		await UnityUtil.onReady();
-		return UnityUtil.onLoaded();
+		await UnityUtil.onLoaded();
 	}
 
 	public getDefaultHighlightColor() {
@@ -297,7 +308,7 @@ export class ViewerService {
 	}
 
 	public getCurrentViewpointInfo() {
-		return UnityUtil.requestViewpoint('', '');
+		return UnityUtil.requestViewpoint();
 	}
 
 	public hideHiddenByDefaultObjects() {
@@ -345,6 +356,7 @@ export class ViewerService {
 		this.isInitialised = false;
 		this.removeAllListeners();
 		this.clearMeasureMode();
+		this.initialisedPromise = null;
 	}
 
 	/**
@@ -673,14 +685,14 @@ export class ViewerService {
 		return this.currentNavMode;
 	}
 
-	public async overrideMeshOpacity(account, model, meshIDs, opacity) {
+	public async overrideMeshOpacity(account, model, meshIDs, opacity, excludeIds = false) {
 		await this.isViewerReady();
-		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity);
+		UnityUtil.overrideMeshOpacity(account, model, meshIDs, opacity, excludeIds);
 	}
 
-	public async resetMeshOpacity(account, model, meshIDs) {
+	public async resetMeshOpacity(account, model, meshIDs, excludeIds = false) {
 		await this.isViewerReady();
-		UnityUtil.resetMeshOpacity(account, model, meshIDs);
+		UnityUtil.resetMeshOpacity(account, model, meshIDs, excludeIds);
 	}
 
 	/**
@@ -706,23 +718,17 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public showPin = async ({id, position, norm, colour, type}: IPin) => {
+	public showPin = async ({ id, position,  colour, type }: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
-		switch (type) {
-			case 'risk':
-				UnityUtil.dropRiskPin(id, position, norm, colour);
-				break;
-			case 'issue':
-				UnityUtil.dropIssuePin(id, position, norm, colour);
-				break
-			case 'ticket':
-				UnityUtil.dropTicketPin(id, position, norm, colour);
-				break
-			default:
-				UnityUtil.dropBookmarkPin(id, position, norm, colour);
-				break;
+
+		if (type && !createdPinIcons[type]) {
+			const images = await getPinImages(type);
+			UnityUtil.createPinIcon(images, type);
+			createdPinIcons[type] = true;
 		}
+
+		UnityUtil.dropPin(id, position, colour, type);
 	}
 
 	public setSelectionPin = async ({id, isSelected}) => {
@@ -782,15 +788,13 @@ export class ViewerService {
 	 */
 
 	public setInitialisePromise() {
+		if (this.initialisedPromise) return;
+
 		const initialised = {} as any;
 		initialised.promise = new Promise((resolve, reject) => {
 			initialised.resolve = resolve;
 			initialised.reject = reject;
 		});
-
-		if (this.initialisedPromise) {
-			this.initialisedPromise.reject();
-		}
 
 		this.initialisedPromise = initialised;
 	}
@@ -823,19 +827,22 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(teamspace, project, model, revision, isFederation, viewpoint);
-
-		await UnityUtil.onLoaded().then((bbox) => {
+		try {
+			await UnityUtil.loadModel(
+				teamspace,
+				project,
+				model,
+				revision,
+				isFederation,
+				viewpoint);
 			document.body.style.cursor = 'initial';
-
 			this.emit(VIEWER_EVENTS.MODEL_LOADED, 1);
-			this.emit(VIEWER_EVENTS.BBOX_READY, bbox);
-		}).catch((error) => {
+		} catch (error) {
 			document.body.style.cursor = 'initial';
 			if (error !== 'cancel') {
 				console.error('Unity error loading model= ', error);
 			}
-		});
+		};
 
 		return UnityUtil.onLoading();
 	}
@@ -856,12 +863,12 @@ export class ViewerService {
 	 * Mesh Color
 	 */
 
-	public overrideMeshColor(teamspace, model, meshIDs, color) {
-		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color);
+	public overrideMeshColor(teamspace, model, meshIDs, color, excludeIds = false) {
+		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color, excludeIds);
 	}
 
-	public resetMeshColor(teamspace, model, meshIDs) {
-		UnityUtil.resetMeshColor(teamspace, model, meshIDs);
+	public resetMeshColor(teamspace, model, meshIDs, excludeIds = false) {
+		UnityUtil.resetMeshColor(teamspace, model, meshIDs, excludeIds);
 	}
 
 	/**
@@ -1197,14 +1204,6 @@ export class ViewerService {
 	 * Controlling
 	 */
 
-	public pauseRendering() {
-		UnityUtil.pauseRendering();
-	}
-
-	public resumeRendering() {
-		UnityUtil.resumeRendering();
-	}
-
 	public setModelCache = (cache: boolean) => {
 		if (cache) {
 			UnityUtil.enableExternalWebRequestHandler();
@@ -1213,8 +1212,8 @@ export class ViewerService {
 		}
 	}
 
-	public switchObjectVisibility(account, model, ids, visibility) {
-		UnityUtil.toggleVisibility(account, model, ids, visibility);
+	public switchObjectVisibility(account, model, ids, visibility, excludeIds = false) {
+		UnityUtil.toggleVisibility(account, model, ids, visibility, excludeIds);
 	}
 
 	public setShadows = (type: string) => {
