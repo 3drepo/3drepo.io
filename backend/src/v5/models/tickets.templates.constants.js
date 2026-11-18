@@ -17,11 +17,10 @@
 
 const { modulePropertyLabels, presetModules, riskLevels } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
-const { validate } = require('../schemas/tickets/templates');
 
 const TemplateConsts = {};
 
-const defaultTemplates = [
+TemplateConsts.defaultTemplates = [
 	{
 		_id: stringToUUID('39fa1042-67a2-4097-ba55-82cfced25909'),
 		name: 'SafetiBase (Default template)',
@@ -66,12 +65,11 @@ const defaultTemplates = [
 				},
 			},
 		},
+		properties: [],
 		modules: [
-			{ type: presetModules.SAFETIBASE },
+			{ type: presetModules.SAFETIBASE, properties: [] },
 		],
 	},
 ];
-
-TemplateConsts.defaultTemplates = defaultTemplates.map(({ _id, ...template }) => ({ ...validate(template), _id }));
 
 module.exports = TemplateConsts;

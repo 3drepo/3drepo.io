@@ -18,7 +18,7 @@
 import { debounce } from 'lodash';
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '../actionsDispatchers';
-import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
+import { combineSubscriptions, subscribeToTicketEvent } from './realtime.service';
 import { enableRealtimeNewTicket, ticketEvent, UPDATE_TICKETS_BATCH_INTERVAL, UPDATE_TICKETS_BATCH_SIZE } from './ticketTable.events';
 import { addUpdatedAtTime, normalizeViewsInTicket } from '@/v5/store/tickets/tickets.helpers';
 import { selectTemplateById, selectTicketByIdRaw } from '@/v5/store/tickets/tickets.selectors';
@@ -27,7 +27,14 @@ import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { fetchTicketGroup } from '../api/tickets';
 
-const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision: string) => {
+const enableRealtimeUpdateTicket = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: string,
+	isFed:boolean,
+	revision: string,
+	templates: string[],
+) => {
 
 	let queuedTickets: Partial<ITicket>[] = [];
 	// Bulk updated tickets will fire an event for every ticket
@@ -44,8 +51,8 @@ const enableRealtimeUpdateTicket = (teamspace: string, project: string, containe
 		queuedTickets = [];
 	}, UPDATE_TICKETS_BATCH_INTERVAL);
 
-	return subscribeToRoomEvent(
-		{ teamspace, project, model: containerOrFederation },
+	return subscribeToTicketEvent(
+		{ teamspace, project, model: containerOrFederation, templates },
 		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
 			const fullTicket = selectTicketByIdRaw(getState(), containerOrFederation, (ticket as any)._id);
@@ -61,9 +68,9 @@ const enableRealtimeUpdateTicket = (teamspace: string, project: string, containe
 	);
 };
 
-const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: containerOrFederation },
+const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, templates: string[]) => (
+	subscribeToTicketEvent(
+		{ teamspace, project, model: containerOrFederation, templates },
 		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
  			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
@@ -71,9 +78,16 @@ const enableRealtimeNewTicketFilter = (teamspace: string, project: string, conta
 	)
 );
 
-export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerOrFederation: string, isFed:boolean, revision: string) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: containerOrFederation },
+export const enableRealtimeUpdateTicketGroup = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: string,
+	isFed:boolean,
+	revision: string,
+	templates: string[],
+) => (
+	subscribeToTicketEvent(
+		{ teamspace, project, model: containerOrFederation, templates },
 		ticketEvent(isFed, 'UpdateTicketGroup'),
 
 		async (group: Group) => {
@@ -91,10 +105,17 @@ export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: stri
 	)
 );
 
-export const enableRealtimeTickets = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision?: string) => 
+export const enableRealtimeTickets = (
+	teamspace: string,
+	project: string,
+	containerOrFederation: string,
+	isFederation: boolean,
+	templates: string[],
+	revision?: string,
+) =>
 	combineSubscriptions(
-		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision),
-		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
+		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, templates, revision),
+		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, revision, templates),
+		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision, templates),
+		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation, templates),
 	);

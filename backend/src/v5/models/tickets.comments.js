@@ -107,7 +107,7 @@ const getUpdatedComment = (oldComment, updateData) => {
 	return formattedComment;
 };
 
-TicketComments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
+TicketComments.updateComment = async (teamspace, project, model, ticket, template, oldComment, updateData) => {
 	const formattedComment = getUpdatedComment(oldComment, updateData);
 
 	const updateObj = {
@@ -125,6 +125,7 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 		teamspace,
 		project,
 		model,
+		template,
 		data: {
 			ticket,
 			_id: oldComment._id,
@@ -137,7 +138,7 @@ TicketComments.updateComment = async (teamspace, project, model, ticket, oldComm
 	});
 };
 
-TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComment) => {
+TicketComments.deleteComment = async (teamspace, project, model, ticket, template, oldComment) => {
 	const formattedComment = getUpdatedComment(oldComment, { deleted: true });
 	await updateOne(teamspace, { _id: oldComment._id },
 		{ $set: { ...formattedComment }, $unset: { message: 1, images: 1, view: 1 } });
@@ -145,6 +146,7 @@ TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComm
 	publish(events.UPDATE_COMMENT, { teamspace,
 		project,
 		model,
+		template,
 		data: { ticket, _id: oldComment._id, deleted: true, updatedAt: formattedComment.updatedAt } });
 };
 

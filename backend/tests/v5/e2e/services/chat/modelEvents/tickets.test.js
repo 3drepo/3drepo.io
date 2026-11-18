@@ -98,7 +98,7 @@ const ticketAddedTest = () => {
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET} event when a new container ticket has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: template._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -123,9 +123,9 @@ const ticketAddedTest = () => {
 						...newTicket.properties,
 						[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
 						[basePropertyLabels.UPDATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+							new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 						[basePropertyLabels.CREATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+							new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
 						[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 					},
 					number: 1,
@@ -138,7 +138,7 @@ const ticketAddedTest = () => {
 		test(`should trigger a ${EVENTS.FEDERATION_NEW_TICKET} event when a new federation ticket has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: template._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -163,9 +163,9 @@ const ticketAddedTest = () => {
 						...newTicket.properties,
 						[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
 						[basePropertyLabels.UPDATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+							new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 						[basePropertyLabels.CREATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+							new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
 						[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 					},
 					number: 1,
@@ -221,7 +221,7 @@ const ticketsImportedTest = () => {
 		test(`should trigger ${EVENTS.CONTAINER_NEW_TICKET} events when a list of new container tickets have been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: template._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const newTickets = times(10, () => generateTicket(template));
@@ -253,9 +253,9 @@ const ticketsImportedTest = () => {
 							...newTickets[i].properties,
 							[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
 							[basePropertyLabels.UPDATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+								new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 							[basePropertyLabels.CREATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+								new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
 							[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 						},
 						number: 1 + i,
@@ -267,10 +267,11 @@ const ticketsImportedTest = () => {
 
 			socket.close();
 		});
+
 		test(`should trigger ${EVENTS.FEDERATION_NEW_TICKET} events when a list of new federation tickets have been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: template._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const newTickets = times(10, () => generateTicket(template));
@@ -302,9 +303,9 @@ const ticketsImportedTest = () => {
 							...newTickets[i].properties,
 							[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
 							[basePropertyLabels.UPDATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+								new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 							[basePropertyLabels.CREATED_AT]:
-                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+								new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
 							[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 						},
 						number: 1 + i,
@@ -321,11 +322,13 @@ const ticketsImportedTest = () => {
 		test(`should trigger ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} events when a ticket with comments has been imported`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
-			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
-				comments: times(10, () => ServiceHelper.generateImportedComment()) }));
+			const newTickets = times(1, () => ({
+				...generateTicket(templateWithComments),
+				comments: times(10, () => ServiceHelper.generateImportedComment()),
+			}));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.CONTAINER_NEW_TICKET_COMMENT, (eventData) => {
@@ -380,11 +383,13 @@ const ticketsImportedTest = () => {
 		test(`should trigger ${EVENTS.FEDERATION_NEW_TICKET_COMMENT} events when a ticket with comments has been imported`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
-			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
-				comments: times(10, () => ServiceHelper.generateImportedComment()) }));
+			const newTickets = times(1, () => ({
+				...generateTicket(templateWithComments),
+				comments: times(10, () => ServiceHelper.generateImportedComment()),
+			}));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.FEDERATION_NEW_TICKET_COMMENT, (eventData) => {
@@ -482,7 +487,7 @@ const ticketUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET} event when a container ticket has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: template._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -491,13 +496,13 @@ const ticketUpdatedTest = () => {
 			});
 
 			const propToUpdate = template.properties.find((p) => p.type === propTypes.NUMBER
-                && !p.deprecated).name;
+				&& !p.deprecated).name;
 			const newPropValue = generateRandomNumber();
 			const modToUpdate = template.modules.find((m) => m.properties.length > 0);
 			const modPropToUpdate = modToUpdate.properties.find((p) => p.type === propTypes.TEXT
-                && !p.deprecated).name;
+				&& !p.deprecated).name;
 			const modPropToUnset = modToUpdate.properties.find((p) => p.type === propTypes.NUMBER
-                && !p.deprecated).name;
+				&& !p.deprecated).name;
 			const newModPropValue = generateRandomString();
 
 			const updateData = {
@@ -593,7 +598,7 @@ const ticketsUpdatedTest = () => {
 			test(`should trigger ${updateEvent} events when ${type} tickets has been updated`, async () => {
 				const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-				const data = { teamspace, project: project.id, model };
+				const data = { teamspace, project: project.id, model, template: templateWithComments._id };
 				await ServiceHelper.socket.joinRoom(socket, data);
 
 				const socketPromise = new Promise((resolve, reject) => {
@@ -606,13 +611,13 @@ const ticketsUpdatedTest = () => {
 				});
 
 				const propToUpdate = templateWithComments.properties.find((p) => p.type === propTypes.NUMBER
-                && !p.deprecated).name;
+					&& !p.deprecated).name;
 
 				const modToUpdate = templateWithComments.modules.find((m) => m.properties.length > 0);
 				const modPropToUpdate = modToUpdate.properties.find((p) => p.type === propTypes.TEXT
-                && !p.deprecated).name;
+					&& !p.deprecated).name;
 				const modPropToUnset = modToUpdate.properties.find((p) => p.type === propTypes.NUMBER
-                && !p.deprecated).name;
+					&& !p.deprecated).name;
 
 				const expectedData = [];
 
@@ -667,7 +672,7 @@ const ticketsUpdatedTest = () => {
 			test(`should NOT trigger ${updateEvent} events when ${type} tickets has been updated with only comments`, async () => {
 				const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-				const data = { teamspace, project: project.id, model };
+				const data = { teamspace, project: project.id, model, template: templateWithComments._id };
 				await ServiceHelper.socket.joinRoom(socket, data);
 
 				const nComments = 2;
@@ -745,12 +750,12 @@ const commentAddedTest = () => {
 				containerComment);
 			await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
 				federationComment);
-		},
-		);
+		});
+
 		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} event when a new container ticket comment has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -770,13 +775,15 @@ const commentAddedTest = () => {
 			const { createdAt, author, images, message } = getRes.body;
 			await expect(socketPromise).resolves.toEqual({
 				...data,
-				data: { _id: commentId,
+				data: {
+					_id: commentId,
 					ticket: containerTicket._id,
 					createdAt,
 					updatedAt: createdAt,
 					author,
 					images,
-					message },
+					message,
+				},
 			});
 
 			socket.close();
@@ -785,7 +792,7 @@ const commentAddedTest = () => {
 		test(`should trigger a ${EVENTS.FEDERATION_NEW_TICKET_COMMENT} event when a new federation ticket comment has been added`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -805,13 +812,15 @@ const commentAddedTest = () => {
 			const { createdAt, author, images, message } = getRes.body;
 			await expect(socketPromise).resolves.toEqual({
 				...data,
-				data: { _id: commentId,
+				data: {
+					_id: commentId,
 					ticket: federationTicket._id,
 					createdAt,
 					updatedAt: createdAt,
 					author,
 					images,
-					message },
+					message,
+				},
 			});
 
 			socket.close();
@@ -862,7 +871,7 @@ const commentUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -896,7 +905,7 @@ const commentUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.FEDERATION_UPDATE_TICKET_COMMENT} event when a federation ticket comment has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -929,7 +938,7 @@ const commentUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been deleted`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: templateWithComments._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -1019,7 +1028,7 @@ const groupUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_GROUP} event when a container ticket group has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: container._id };
+			const data = { teamspace, project: project.id, model: container._id, template: templateWithView._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {
@@ -1047,7 +1056,7 @@ const groupUpdatedTest = () => {
 		test(`should trigger a ${EVENTS.FEDERATION_UPDATE_TICKET_GROUP} event when a federation ticket group has been updated`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
-			const data = { teamspace, project: project.id, model: federation._id };
+			const data = { teamspace, project: project.id, model: federation._id, template: templateWithView._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const socketPromise = new Promise((resolve, reject) => {

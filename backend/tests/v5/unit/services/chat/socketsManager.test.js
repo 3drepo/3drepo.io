@@ -18,13 +18,16 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const _ = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/dataGen');
+const { generateRandomString, generateRandomObject } = require('../../../helper/dataGen');
 
 jest.mock('../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
 
 jest.mock('../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
+
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const Templates = require(`${src}/models/tickets.templates`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -146,6 +149,7 @@ const testSocketsEvents = () => {
 				const teamspace = generateRandomString();
 				const project = generateRandomString();
 				const model = generateRandomString();
+				const template = generateRandomString();
 
 				const data = { teamspace, project };
 				eventFns.leave(data);
@@ -157,10 +161,15 @@ const testSocketsEvents = () => {
 				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data2);
 
-				const data3 = { notifications: true };
+				const data3 = { teamspace, model, project, template };
 				eventFns.leave(data3);
-				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				expect(socket.leave).toHaveBeenCalledWith(`${teamspace}::${project}::${model}::ticket::${template}`);
 				checkMessageCall(socket.emit, ACTIONS.LEAVE, data3);
+
+				const data4 = { notifications: true };
+				eventFns.leave(data4);
+				expect(socket.leave).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				checkMessageCall(socket.emit, ACTIONS.LEAVE, data4);
 			});
 
 			test('should process the leave function appropriately (v4)', async () => {
@@ -343,6 +352,177 @@ const testSocketsEvents = () => {
 					Permissions.hasReadAccessToModel.mockRejectedValueOnce(templates.projectNotFound);
 
 					const data = { teamspace, model, project };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if project was not found (v4)', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const account = generateRandomString();
+					const model = generateRandomString();
+
+					Projects.findProjectByModelId.mockRejectedValueOnce(templates.projectNotFound);
+
+					const data = { account, model };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if findProjectByModelId failed with generic error (v4)', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const account = generateRandomString();
+					const model = generateRandomString();
+
+					Projects.findProjectByModelId.mockRejectedValueOnce(templates.unknown);
+
+					const data = { account, model };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+			});
+
+			describe('Template room', () => {
+				afterEach(SocketsManager.reset);
+
+				test('should join successfully if the user is authorised to do so', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockResolvedValueOnce({
+						config: { permissions: generateRandomObject() },
+					});
+					Permissions.hasTemplatePermissions.mockResolvedValueOnce(true);
+					Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+
+					const data = { teamspace, model, project, template };
+					await eventFns.join(data);
+					expect(socket.join).toHaveBeenCalledWith(`${teamspace}::${project}::${model}::ticket::${template}`);
+					checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+				});
+
+				test('should join successfully if the user is authorised to do so (v4)', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					const account = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+
+					Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+					Projects.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+
+					const data = { account, model };
+					await eventFns.join(data);
+					expect(socket.join).toHaveBeenCalledWith(`${account}::${project}::${model}`);
+					checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+				});
+
+				test('should fail to join the room if the user does not have read access', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockResolvedValueOnce({ config: { } });
+					Permissions.hasTemplatePermissions.mockResolvedValueOnce(true);
+					Permissions.hasReadAccessToModel.mockResolvedValueOnce(false);
+
+					const data = { teamspace, model, project, template };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail to join the room if the user does not have template permissions', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockResolvedValueOnce({ config: { } });
+					Permissions.hasTemplatePermissions.mockResolvedValueOnce(false);
+					Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+
+					const data = { teamspace, model, project, template };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if hasReadAccessToModel() threw an error', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockResolvedValueOnce({ config: { } });
+					Permissions.hasTemplatePermissions.mockResolvedValueOnce(true);
+					Permissions.hasReadAccessToModel.mockRejectedValueOnce(templates.projectNotFound);
+
+					const data = { teamspace, model, project, template };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if getTemplateById() threw an error', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockRejectedValueOnce(templates.unknown);
+
+					const data = { teamspace, model, project, template };
+					await eventFns.join(data);
+					expect(socket.join).not.toHaveBeenCalled();
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
+				});
+
+				test('should fail gracefully if hasTemplatePermissions() threw an error', async () => {
+					const { eventFns, socket } = createSocketWithEvents();
+					SocketsManager.addSocket(socket);
+
+					socket.join.mockClear();
+					const teamspace = generateRandomString();
+					const project = generateRandomString();
+					const model = generateRandomString();
+					const template = generateRandomString();
+
+					Templates.getTemplateById.mockResolvedValueOnce({ config: { } });
+					Permissions.hasTemplatePermissions.mockRejectedValueOnce(templates.unknown);
+
+					const data = { teamspace, model, project, template };
 					await eventFns.join(data);
 					expect(socket.join).not.toHaveBeenCalled();
 					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);

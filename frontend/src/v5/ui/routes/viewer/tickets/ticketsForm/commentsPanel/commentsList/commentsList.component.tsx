@@ -41,6 +41,7 @@ export const CommentsList = () => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const ticketTemplate = ticketFromStore?.type;
 	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasCommentPermissionForTemplate(containerOrFederation, ticketFromStore?.type);
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const [commentToShow, setCommentToShow] = useSearchParam('commentId');
@@ -74,7 +75,7 @@ export const CommentsList = () => {
 	};
 
 	useEffect(() => {
-		if (!ticketId) return;
+		if (!ticketId || !ticketTemplate) return;
 		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
@@ -84,15 +85,15 @@ export const CommentsList = () => {
 		);
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation),
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation),
-			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation),
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, [ticketTemplate]),
 		);
-	}, [ticketId]);
+	}, [ticketId, ticketTemplate]);
 
 	const tableHandle = useRef<VListHandle>(null);
 

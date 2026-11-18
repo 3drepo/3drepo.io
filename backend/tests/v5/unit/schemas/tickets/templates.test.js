@@ -22,9 +22,17 @@ const {
 	generateRandomString,
 	generateCustomStatusValues,
 } = require('../../../helper/dataGen');
-const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { supportedPatterns } = require(`${src}/schemas/tickets/templates.constants`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { statusTypes, statuses, DEFAULT_PIN_ICONS } = require(`${src}/schemas/tickets/templates.constants`);
+
+jest.mock('../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/users');
+const UsersModel = require(`${src}/models/users`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1398,6 +1406,25 @@ const testValidate = () => {
 		['module image list property type with default true', generateBasicSchema({ modules: [{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }] }), false],
 	];
 
+	const users = times(5, () => ({ user: generateRandomString(), customData: { email: generateRandomString() } }));
+	const jobs = times(5, () => ({ _id: generateRandomString() }));
+
+	const permissionTests = [
+		['permissions is an empty object', generateBasicSchema({ config: { permissions: { } } }), false],
+		['create permissions are populated', generateBasicSchema({ config: { permissions: { create: [users[0].user, jobs[0]._id] } } }), true],
+		['create permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { create: [generateRandomString()] } } }), false],
+		['create permissions are populated with emails', generateBasicSchema({ config: { permissions: { create: [users[0].customData.email, users[1].customData.email] } } }), true, { config: { permissions: { create: [users[0].user, users[1].user] } }, modules: [], properties: [] }],
+		['create permissions are empty', generateBasicSchema({ config: { permissions: { create: [] } } }), false],
+		['view permissions are populated', generateBasicSchema({ config: { permissions: { view: [users[1].user, jobs[1]._id] } } }), true],
+		['view permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { view: [generateRandomString()] } } }), false],
+		['view permissions are populated with emails', generateBasicSchema({ config: { permissions: { view: [users[1].customData.email, users[2].customData.email] } } }), true, { config: { permissions: { view: [users[1].user, users[2].user] } }, modules: [], properties: [] }],
+		['view permissions are empty', generateBasicSchema({ config: { permissions: { view: [] } } }), false],
+		['comment permissions are populated', generateBasicSchema({ config: { permissions: { comment: [users[2].user, jobs[2]._id] } } }), true],
+		['comment permissions include an invalid job/user', generateBasicSchema({ config: { permissions: { comment: [generateRandomString()] } } }), false],
+		['comment permissions are populated with emails', generateBasicSchema({ config: { permissions: { comment: [users[2].customData.email, users[3].customData.email] } } }), true, { config: { permissions: { comment: [users[2].user, users[3].user] } }, modules: [], properties: [] }],
+		['comment permissions are empty', generateBasicSchema({ config: { permissions: { comment: [] } } }), false],
+	];
+
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
@@ -1409,16 +1436,31 @@ const testValidate = () => {
 		...moduleSchemaTest,
 		...tabularColumnsTest,
 		...complexTypesDefaultTest,
+		...permissionTests,
+	])('Validate ticket template', (desc, data, success, expectedOutput) => {
+		afterEach(() => {
+			jest.restoreAllMocks();
+			jest.clearAllMocks();
+		});
 
-	])('Validate ticket template', (desc, data, output) => {
-		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, () => {
-			const testCase = expect(() => TemplateSchema.validate(data));
-			if (output) testCase.not.toThrow();
-			else testCase.toThrow();
+		test(`Validation should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			UsersModel.getUsersByQuery.mockResolvedValue(users);
+			JobsModel.getJobs.mockResolvedValue(jobs);
+
+			const testCase = TemplateSchema.validate(data);
+			if (success) {
+				if (expectedOutput !== undefined) {
+					await expect(testCase).resolves.toEqual(deleteIfUndefined({ ...data, ...expectedOutput }));
+				} else {
+					await expect(testCase).resolves.toBeDefined();
+				}
+			} else {
+				await expect(testCase).rejects.toThrow();
+			}
 		});
 	});
 
-	test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
+	test('Any unknown properties should be stripped from the schema and necessary properties filled in', async () => {
 		const data = generateBasicSchema({
 			config: {
 				defaultView: true,
@@ -1454,12 +1496,12 @@ const testValidate = () => {
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
 		expectedData.config = { defaultView: true };
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
 	});
 
-	test('hiddenOnUI should be preserved when true and stripped when false', () => {
+	test('hiddenOnUI should be preserved when true and stripped when false', async () => {
 		const data = generateBasicSchema({
 			properties: [{
 				name: generateRandomString(),
@@ -1472,7 +1514,7 @@ const testValidate = () => {
 			}],
 		});
 
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output.properties[0].hiddenOnUI).toEqual(true);
 		expect(output.properties[1].hiddenOnUI).toBeUndefined();
@@ -1482,7 +1524,7 @@ const testValidate = () => {
 
 	describe('Test every built-in pin icon in direct and conditional mappings', () => {
 		defaultPinIconsNames.forEach((icon) => {
-			test(`should accept ${icon}`, () => {
+			test(`should accept ${icon}`, async () => {
 				const testIconTemplate = generateBasicSchema({
 					config: {
 						pin: {
@@ -1503,12 +1545,12 @@ const testValidate = () => {
 						}],
 				});
 
-				expect(() => TemplateSchema.validate(testIconTemplate)).not.toThrow();
+				await expect(TemplateSchema.validate(testIconTemplate)).resolves.not.toThrow();
 			});
 		});
 	});
 
-	test('Icon mapping default entries strip conditional value and icon fields', () => {
+	test('Icon mapping default entries strip conditional value and icon fields', async () => {
 		const data = generateBasicSchema({
 			config: {
 				pin: {
@@ -1528,7 +1570,7 @@ const testValidate = () => {
 			properties: [{ name: 'reference', type: propTypes.TEXT }],
 		});
 
-		const output = TemplateSchema.validate(data);
+		const output = await TemplateSchema.validate(data);
 
 		expect(output.config.pin.icon.mapping).toEqual([
 			{ default: defaultPinIconsNames[0] },

@@ -222,7 +222,7 @@ export const TicketDetailsCard = () => {
 								</Tooltip>
 							</>}
 						/>
-						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded />}>
+						<ExpandableCard isExpanded={isExpanded} ExpandedComponent={<CommentsExpanded ticket={ticket} />}>
 							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
 						</ExpandableCard>
 					</>

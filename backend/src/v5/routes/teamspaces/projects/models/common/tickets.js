@@ -18,7 +18,6 @@
 const {
 	addTicket: addConTicket,
 	getTagPropertyValues: getConTagPropertyValues,
-	getTicketById: getConTicketById,
 	getTicketHistory: getConTicketHistory,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
@@ -29,7 +28,6 @@ const {
 const {
 	addTicket: addFedTicket,
 	getTagPropertyValues: getFedTagPropertyValues,
-	getTicketById: getFedTicketById,
 	getTicketHistory: getFedTicketHistory,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
@@ -37,7 +35,7 @@ const {
 	updateTicket: updateFedTicket,
 	updateManyTickets: updateManyFedTickets,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { checkTicketExists, templateExists, validateImportTickets, validateNewTicket, validateTagProperty, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { checkTicketExists, hasTemplateViewPermission, templateExists, validateImportTickets, validateNewTicket, validateTagProperty, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -96,14 +94,9 @@ const getAllTemplates = async (req, res, next) => {
 	}
 };
 
-const getTicket = (isFed) => async (req, res, next) => {
-	const { teamspace, project, model, ticket } = req.params;
-
+const getTicket = async (req, res, next) => {
 	try {
-		const getTicketById = isFed ? getFedTicketById : getConTicketById;
-		req.ticket = await getTicketById(teamspace, project, model, ticket);
 		req.showDeprecated = req.query.showDeprecated === 'true';
-
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -115,9 +108,10 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
 
 	try {
+		const user = getUserFromSession(req.session);
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
-		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
+		req.tickets = await getTicketList(teamspace, project, model, user, req.listOptions);
 
 		await next();
 	} catch (err) {
@@ -422,7 +416,7 @@ const establishRoutes = (isFed) => {
 	 *                     type: string
 	 */
 	router.get('/templates/:template/properties/:property/values',
-		hasReadAccess, templateExists, validateTagProperty, getTagPropertyValues(isFed));
+		hasReadAccess, templateExists, hasTemplateViewPermission, validateTagProperty, getTagPropertyValues(isFed));
 
 	/**
 	 * @openapi
@@ -969,7 +963,7 @@ const establishRoutes = (isFed) => {
 	 *                   description: ticket modules and their properties
 	 *
 	 */
-	router.get('/:ticket', hasReadAccess, getTicket(isFed), serialiseTicket);
+	router.get('/:ticket', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicket, serialiseTicket);
 
 	/**
 	 * @openapi
@@ -1044,7 +1038,7 @@ const establishRoutes = (isFed) => {
 	 *                             description: properties that were changed
 	 *
 	 */
-	router.get('/:ticket/history', hasReadAccess, checkTicketExists, getTicketHistory(isFed), serialiseTicketHistory);
+	router.get('/:ticket/history', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicketHistory(isFed), serialiseTicketHistory);
 
 	/**
 	 * @openapi
@@ -1104,7 +1098,7 @@ const establishRoutes = (isFed) => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:ticket/resources/:resource', hasReadAccess, getTicketResource(isFed));
+	router.get('/:ticket/resources/:resource', hasReadAccess, checkTicketExists, hasTemplateViewPermission, getTicketResource(isFed));
 
 	/**
 	 * @openapi

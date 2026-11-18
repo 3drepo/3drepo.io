@@ -434,6 +434,7 @@ const testUpdateGroup = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const ticket = generateRandomString();
+	const template = generateRandomString();
 	const groupId = generateRandomString();
 	const author = generateRandomString();
 
@@ -447,11 +448,11 @@ const testUpdateGroup = () => {
 				SceneProcessor.sharedIdsToExternalIds.mockResolvedValueOnce(convertedResults);
 			}
 
-			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, group, author);
+			await Groups.updateTicketGroup(teamspace, project, container, ticket, template, groupId, group, author);
 
 			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
 			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container,
-				ticket, groupId, convertedGroup ?? group, author);
+				ticket, template, groupId, convertedGroup ?? group, author);
 
 			if (containsMeshIds) {
 				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(1);

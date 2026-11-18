@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { checkTicketExists, hasTemplateEditPermission, hasTemplateViewPermission } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	getTicketGroupById: getConGroup,
 	updateTicketGroup: updateConGroup,
@@ -31,7 +32,6 @@ const {
 } = require('../../../../../middleware/permissions');
 
 const { Router } = require('express');
-const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getAccessibleContainers } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
@@ -58,13 +58,13 @@ const getGroup = (isFed) => async (req, res, next) => {
 };
 
 const updateGroup = (isFed) => async (req, res) => {
-	const { params, body: updateData } = req;
+	const { params, body: updateData, templateData } = req;
 	const { teamspace, project, model, ticket, group } = params;
 	const user = getUserFromSession(req.session);
 
 	try {
 		const updateFn = isFed ? updateFedGroup : updateConGroup;
-		await updateFn(teamspace, project, model, ticket, group, updateData, user);
+		await updateFn(teamspace, project, model, ticket, templateData._id, group, updateData, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -146,7 +146,7 @@ const establishRoutes = (isFed) => {
 	 *             schema:
    	 *               $ref: "#/components/schemas/ticketGroup"
 	 */
-	router.get('/:group', hasReadAccess, checkTicketExists, verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getGroup(isFed), serialiseGroup);
+	router.get('/:group', hasReadAccess, checkTicketExists, hasTemplateViewPermission, verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getGroup(isFed), serialiseGroup);
 
 	/**
 	 * @openapi
@@ -206,7 +206,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: group has been successfully updated
 	 */
-	router.patch('/:group', hasCommenterAccess, checkTicketExists, validateUpdateGroup, updateGroup(isFed));
+	router.patch('/:group', hasCommenterAccess, checkTicketExists, hasTemplateEditPermission(false), validateUpdateGroup, updateGroup(isFed));
 	return router;
 };
 

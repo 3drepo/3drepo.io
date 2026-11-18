@@ -52,6 +52,7 @@ export const useRealtimeFiltering = (
 	}, [callback]);
 
 	useEffect(() => {
+		if (!template?._id) return undefined;
 		const properties = filters?.map(toTicketPath);
 		let active = true;
 		const subscriptions = containersAndFederations.map((modelId) => {
@@ -80,8 +81,8 @@ export const useRealtimeFiltering = (
 			};
 
 			return combineSubscriptions(
-				enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFederation, properties, onNewOrUpdate),
-				enableRealtimeWatchPropertiesNewTicket(teamspace, project, modelId, isFederation, onNewOrUpdate),
+				enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFederation, properties, onNewOrUpdate, [template._id]),
+				enableRealtimeWatchPropertiesNewTicket(teamspace, project, modelId, isFederation, onNewOrUpdate, [template._id]),
 				() => debouncedApplyFilters.cancel(),
 			);
 		});

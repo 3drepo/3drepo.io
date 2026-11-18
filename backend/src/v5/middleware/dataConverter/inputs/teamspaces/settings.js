@@ -66,7 +66,7 @@ const validateUpdateTemplateSchema = async (req, res, next) => {
 	const { teamspace } = req.params;
 
 	try {
-		const data = validate(req.body);
+		const data = await validate(req.body, teamspace);
 
 		const oldTemplate = req.templateData;
 
@@ -95,7 +95,7 @@ Settings.validateNewTicketSchema = async (req, res, next) => {
 	const data = req.body;
 
 	try {
-		req.body = validate(data);
+		req.body = await validate(data, teamspace);
 
 		if (await nameExists(teamspace, data.name)) throw new Error('Name already in use');
 		if (await codeExists(teamspace, data.code)) throw new Error('Code already in use');

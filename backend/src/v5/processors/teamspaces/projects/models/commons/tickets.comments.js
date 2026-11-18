@@ -65,12 +65,11 @@ const processCommentsGroups = (comments) => {
 	return groupChanges;
 };
 
-Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
+Comments.addComment = async (teamspace, project, model, ticket, template, commentData, author) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, commentData.images);
 	const groupsDelta = processCommentsGroups([{ comment: commentData }]);
 
 	const res = await addComment(teamspace, project, model, ticket, commentData, author);
-
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
 	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
 
@@ -78,22 +77,23 @@ Comments.addComment = async (teamspace, project, model, ticket, commentData, aut
 		teamspace,
 		project,
 		model,
+		template,
 		data: res,
 	});
 
 	return res._id;
 };
 
-Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
+Comments.updateComment = async (teamspace, project, model, ticket, template, oldComment, updateData) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, updateData.images);
 	const groupsDelta = processCommentsGroups([{ comment: updateData, oldComment }]);
 
-	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
+	await updateComment(teamspace, project, model, ticket, template, oldComment, updateData);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
 	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
 };
 
-Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
+Comments.importComments = async (teamspace, project, model, template, commentsByTickets, author) => {
 	const refsAndBinaries = commentsByTickets.flatMap(({ ticket, comments }) => comments.flatMap(
 		({ images }) => processCommentImages(teamspace, project, model, ticket, images)));
 
@@ -117,6 +117,7 @@ Comments.importComments = async (teamspace, project, model, commentsByTickets, a
 			teamspace,
 			project,
 			model,
+			template,
 			data,
 		});
 

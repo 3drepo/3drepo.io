@@ -61,7 +61,7 @@ Tickets.serialiseFullTicketTemplate = (req, res) => {
 Tickets.serialiseTicket = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
-		const { ticket, showDeprecated } = req;
+		const { ticketData: ticket, showDeprecated } = req;
 		const template = generateFullSchema(await getTemplateById(teamspace, ticket.type));
 		respond(req, res, templates.ok, serialiseTicket(ticket, template, !showDeprecated));
 	} catch (err) {

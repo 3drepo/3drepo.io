@@ -53,9 +53,18 @@ export const TicketFiltersSetter = () => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
 	}, [JSON.stringify(cardFilters), JSON.stringify(jobsAndUsers), JSON.stringify(riskCategories)]);
 
-	useEffect(() => 
-		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
-	, [containerOrFederation, revision, isFed]);
+	useEffect(() => {
+		if (!templates.length) return undefined;
+		return enableRealtimeTickets(
+			teamspace,
+			project,
+			containerOrFederation,
+			isFed,
+			templates.map(({ _id }) => _id),
+			revision,
+		);
+	}
+	, [containerOrFederation, revision, isFed, JSON.stringify(templates)]);
 
 	useEffect(() => {
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);

@@ -242,14 +242,14 @@ TicketGroups.deleteGroups = deleteGroups;
 
 TicketGroups.getGroupsByIds = getGroupsByIds;
 
-TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
+TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, template, groupId, data, author) => {
 	const convertedData = { ...data };
 
 	if (data.objects) {
 		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects);
 	}
 
-	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
+	await updateGroup(teamspace, project, model, ticket, template, groupId, convertedData, author);
 };
 
 TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, returnMeshIds,

@@ -1407,8 +1407,8 @@ const testUpdateTicket = () => {
 			},
 			template,
 		);
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+		expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 			event,
 			{
 				_id: data.ticket._id,
@@ -1417,6 +1417,7 @@ const testUpdateTicket = () => {
 			data.teamspace,
 			data.project,
 			data.model,
+			template._id,
 		);
 	};
 	describe(events.UPDATE_TICKET, () => {
@@ -1578,13 +1579,14 @@ const testNewTicket = () => {
 
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
-				expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-				expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 					event,
 					data.ticket,
 					data.teamspace,
 					data.project,
 					data.model,
+					template._id,
 				);
 			});
 
@@ -1631,15 +1633,16 @@ const testNewTicket = () => {
 
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, type);
-				expect(ChatService.createModelMessage).toHaveBeenCalledTimes(data.tickets.length);
+				expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(data.tickets.length);
 
 				data.tickets.forEach((ticket) => {
-					expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+					expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 						event,
 						ticket,
 						data.teamspace,
 						data.project,
 						data.model,
+						template._id,
 					);
 				});
 			});
@@ -1667,7 +1670,7 @@ const testNewTicket = () => {
 
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
-				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+				expect(ChatService.createTicketMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
 				expectErrorNotification();
 			});
@@ -1695,7 +1698,7 @@ const testNewTicket = () => {
 
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, template._id);
-				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+				expect(ChatService.createTicketMessage).not.toHaveBeenCalled();
 				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
 				expectErrorNotification();
 			});
@@ -1736,6 +1739,7 @@ const testNewComment = () => {
 				[generateRandomString()]: generateRandomString(),
 				[generateRandomString()]: generateRandomString(),
 			},
+			template: generateRandomString(),
 		};
 
 		CommentSchemas.serialiseComment.mockImplementationOnce(() => data.data);
@@ -1751,13 +1755,14 @@ const testNewComment = () => {
 
 		expect(CommentSchemas.serialiseComment).toHaveBeenCalledTimes(1);
 		expect(CommentSchemas.serialiseComment).toHaveBeenCalledWith(data.data);
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+		expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(1);
+		expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 			event,
 			data.data,
 			data.teamspace,
 			data.project,
 			data.model,
+			data.template,
 		);
 	};
 
@@ -1788,7 +1793,7 @@ const testNewComment = () => {
 			await waitOnEvent;
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
-			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expect(ChatService.createTicketMessage).not.toHaveBeenCalled();
 			expectErrorNotification();
 		});
 
@@ -1824,6 +1829,7 @@ const testUpdateComment = () => {
 					[generateRandomString()]: generateRandomString(),
 					[generateRandomString()]: generateRandomString(),
 				},
+				template: generateRandomString(),
 			};
 
 			CommentSchemas.serialiseComment.mockImplementationOnce(() => data.data);
@@ -1839,13 +1845,14 @@ const testUpdateComment = () => {
 
 			expect(CommentSchemas.serialiseComment).toHaveBeenCalledTimes(1);
 			expect(CommentSchemas.serialiseComment).toHaveBeenCalledWith(data.data);
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 				event,
 				data.data,
 				data.teamspace,
 				data.project,
 				data.model,
+				data.template,
 			);
 		};
 
@@ -1875,7 +1882,7 @@ const testUpdateComment = () => {
 			await waitOnEvent;
 			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
-			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expect(ChatService.createTicketMessage).not.toHaveBeenCalled();
 			expectErrorNotification();
 		});
 
@@ -1914,6 +1921,7 @@ const testUpdateTicketGroup = () => {
 				timestamp: generateRandomDate(),
 				changes,
 				_id: generateRandomString(),
+				template: generateRandomString(),
 			};
 
 			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
@@ -1938,13 +1946,14 @@ const testUpdateTicketGroup = () => {
 				...data.changes,
 			});
 
-			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+			expect(ChatService.createTicketMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createTicketMessage).toHaveBeenCalledWith(
 				event,
 				expectedData,
 				data.teamspace,
 				data.project,
 				data.model,
+				data.template,
 			);
 		};
 
@@ -1978,7 +1987,7 @@ const testUpdateTicketGroup = () => {
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledTimes(1);
 			expect(TicketLogs.addGroupUpdateLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 				data.ticket._id, data._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
-			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+			expect(ChatService.createTicketMessage).not.toHaveBeenCalled();
 			expectErrorNotification();
 		});
 

@@ -21,6 +21,7 @@ import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { AccordionSummary } from '@mui/material';
 import { ExpandedContainer } from './commentsExpanded.styles';
 import { FormattedMessage } from 'react-intl';
+
 export const CommentsExpanded = () => (
 	<ExpandedContainer>
 		<AccordionSummary expandIcon={null}>

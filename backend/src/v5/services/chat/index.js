@@ -129,6 +129,23 @@ ChatService.createModelMessage = async (event, data, teamspace, projectId, model
 	}
 };
 
+ChatService.createTicketMessage = async (event, data, teamspace, projectId, model, templateId, sender) => {
+	try {
+		const template = UUIDToString(templateId);
+		const project = UUIDToString(projectId);
+		const recipients = [`${teamspace}::${project}::${model}::ticket::${template}`];
+		const message = JSON.stringify({ event,
+			data: { data, teamspace, project, model, template },
+			recipients,
+			sender });
+
+		await broadcastMessage(eventExchange, message);
+	} catch (err) {
+		// istanbul ignore next
+		logger.logError(`Failed to send a ticket message: ${err?.message}`);
+	}
+};
+
 ChatService.createProjectMessage = async (event, data, teamspace, projectId, sender) => {
 	try {
 		const project = UUIDToString(projectId);

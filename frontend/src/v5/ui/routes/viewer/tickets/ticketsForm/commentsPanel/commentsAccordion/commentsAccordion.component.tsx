@@ -23,6 +23,7 @@ import { TicketCommentsHooksSelectors } from '@/v5/services/selectorsHooks';
 type CommentsAccordionProps = {
 	scrollPanelIntoView?: (event, isExpanding) => void,
 };
+
 export const CommentsAccordion = ({ scrollPanelIntoView }: CommentsAccordionProps) => {
 	const hasUnsavedComments = TicketCommentsHooksSelectors.selectUnsavedComments().length > 0;
 	return (
@@ -32,7 +33,7 @@ export const CommentsAccordion = ({ scrollPanelIntoView }: CommentsAccordionProp
 			onChange={scrollPanelIntoView}
 			defaultExpanded={hasUnsavedComments}
 		>
-			<CommentsList />
+			<CommentsList/>
 		</Accordion>
 	);
 };
