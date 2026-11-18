@@ -37,7 +37,6 @@ export const Views = () => {
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
 
-
 	if (isPending) {
 		return (
 			<CardContainer>
