@@ -38,7 +38,7 @@ const userWithNoTemplatePerm = generateUserCredentials();
 const teamspace = generateRandomString();
 const project = generateRandomProject();
 const container = generateRandomModel();
-const template = generateTemplate();
+const template = generateTemplate(false, false, { permissions: { view: [tsAdmin.user] } });
 
 let agent;
 const setupData = async () => {
@@ -181,7 +181,7 @@ const testTSAdmin = () => {
 			['should be able to join a project room', { teamspace, project: project.id }],
 			['should not be able to join a project room that doesn\'t exist', { teamspace, project: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should not be able to join a room with jibberish', { [generateRandomString()]: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to join a template room', { teamspace, project: project.id, model: container._id, template: template._id }],
+			['should be able to join a template room if the user is ts admin', { teamspace, project: project.id, model: container._id, template: template._id }],
 			['should not be able to join a template room that doesn\'t exist', { teamspace, project: project.id, model: container._id, template: generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
