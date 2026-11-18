@@ -58,20 +58,20 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 			if (prop.values) {
 				let values;
 				switch (prop.values) {
-				case presetEnumValues.JOBS_AND_USERS:
-					{
-						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
-						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
-						const accessibleJobs = await getJobsByUsers(teamspace, users);
+					case presetEnumValues.JOBS_AND_USERS:
+						{
+							const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
+							const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
+							const accessibleJobs = await getJobsByUsers(teamspace, users);
 
-						values = [...accessibleJobs, ...users];
-					}
-					break;
-				case presetEnumValues.RISK_CATEGORIES:
-					values = await getRiskCategories(teamspace);
-					break;
-				default:
-					values = prop.values;
+							values = [...accessibleJobs, ...users];
+						}
+						break;
+					case presetEnumValues.RISK_CATEGORIES:
+						values = await getRiskCategories(teamspace);
+						break;
+					default:
+						values = prop.values;
 				}
 
 				if (prop.type === propTypes.ONE_OF) {
@@ -382,6 +382,8 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						[viewGroups.COLORED]: groupCast,
 						[viewGroups.HIDDEN]: groupCast,
 						[viewGroups.TRANSFORMED]: groupCast,
+						[viewGroups.SELECTED]: groupCast,
+						[viewGroups.SHOWN]: groupCast,
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
