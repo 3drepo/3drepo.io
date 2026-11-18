@@ -25,10 +25,6 @@ export const selectComponentState = createSelector(
 		selectActivitiesDomain, (state) => state.componentState
 );
 
-export const selectActiveViewpoint = createSelector(
-	selectComponentState, (state) => state.activeActivity
-);
-
 export const selectSearchQuery = createSelector(
 	selectComponentState, (state) => state.searchQuery || ''
 );
