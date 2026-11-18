@@ -185,14 +185,16 @@ const createGroupsByTransformations = (transformations) => {
 };
 
 export const mergeGroupsDataFromViewpoint = (viewpointTarget, viewpointOrigin) => {
+	const viewpoint = { ...viewpointTarget };
 	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
 		const groupPropName =  groupPropNameMap[groupPropNameById];
 
 		if (viewpointTarget[groupPropNameById] && viewpointOrigin[groupPropName]) {
-			viewpointTarget[groupPropName] = viewpointOrigin[groupPropName];
+			viewpoint[groupPropName] = viewpointOrigin[groupPropName];
 		}
 	});
 
+	return viewpoint;
 };
 
 const createGroupsArray = (groupIds, groupsMaps) => {
@@ -641,17 +643,6 @@ export const getLoadedGroupsIds = (viewpoint: IViewpoint) => {
 	}
 
 	return ids;
-};
-
-export const isViewpointReady = (viewpoint: IViewpoint) => {
-	const loadedGroupsIds = getLoadedGroupsIds(viewpoint);
-	let areGroupsLoaded = true;
-
-	getGroupsIDsOfViewpoint(viewpoint).forEach((id) => {
-		areGroupsLoaded =  areGroupsLoaded && loadedGroupsIds.has(id);
-	});
-
-	return areGroupsLoaded;
 };
 
 export const getScreenshotFromView = (viewpoint: IViewpoint): string | null => {

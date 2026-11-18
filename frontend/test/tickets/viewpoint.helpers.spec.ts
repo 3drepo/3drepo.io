@@ -18,9 +18,35 @@
 import TreeProcessing from '@/v4/modules/tree/treeProcessing/treeProcessing';
 import { NODE_TYPES } from '@/v4/constants/tree';
 import { setStore } from '@/v5/helpers/redux.helpers';
-import { convertToV4GroupNodes, toGroupPropertiesDicts, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, mergeGroupsDataFromViewpoint, toGroupPropertiesDicts, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 
 describe('viewpoint helpers', () => {
+	describe('mergeGroupsDataFromViewpoint', () => {
+		it.each([
+			['highlighted_group_id', 'highlighted_group', 'highlighted', { objects: [] }],
+			['hidden_group_id', 'hidden_group', 'hidden', { objects: [] }],
+			['shown_group_id', 'shown_group', 'shown', { objects: [] }],
+			['override_group_ids', 'override_groups', ['override'], [{ objects: [] }]],
+			['transformation_group_ids', 'transformation_groups', ['transform'], [{ objects: [] }]],
+		])('merges %s without mutating a frozen viewpoint', (idProperty, groupProperty, ids, groups) => {
+			const target = Object.freeze({ [idProperty]: ids, type: 'perspective' });
+			const origin = Object.freeze({ [groupProperty]: groups });
+
+			const result = mergeGroupsDataFromViewpoint(target, origin);
+
+			expect(result).toEqual({ ...target, ...origin });
+			expect(result).not.toBe(target);
+			expect(target).not.toHaveProperty(groupProperty);
+		});
+
+		it('preserves embedded groups and ignores groups without matching ID properties', () => {
+			const target = Object.freeze({ hidden_group: { objects: [] }, override_group_ids: ['override'] });
+			const result = mergeGroupsDataFromViewpoint(target, { shown_group: { objects: [] } });
+
+			expect(result).toEqual(target);
+		});
+	});
+
 	const teamspace = 'teamspace';
 	const modelA = 'model-a';
 	const modelB = 'model-b';
