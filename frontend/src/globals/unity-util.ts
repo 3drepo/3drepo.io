@@ -3423,6 +3423,33 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the point cloud point budget. This controls the maximum number of points rendered.
+	 * @param newBudget The new point budget.
+	 */
+	public static setPointCloudPointBudget(newBudget: number)
+	{
+		UnityUtil.toUnity('SetPointCloudPointBudget', UnityUtil.LoadingState.VIEWER_READY, newBudget);
+	}
+
+	/**
+	 * Sets the point cloud point size.
+	 * @param newSize The new point size.
+	 */
+	public static setPointCloudPointSize(newSize: number)
+	{
+		UnityUtil.toUnity('SetPointCloudPointSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+	}
+
+	/**
+	 * Sets whether the point cloud points should be rendered as round points.
+	 * @param roundPoints True to render points as round, false otherwise.
+	 */
+	public static SetPointCloudRoundPoints(roundPoints: boolean)
+	{
+		UnityUtil.toUnity('SetPointCloudRoundPoints', UnityUtil.LoadingState.VIEWER_READY, roundPoints ? 1 : 0);
+	}
+
+	/**
 	 * @hidden
 	 */
 	static randomiseDrawOrder() {
