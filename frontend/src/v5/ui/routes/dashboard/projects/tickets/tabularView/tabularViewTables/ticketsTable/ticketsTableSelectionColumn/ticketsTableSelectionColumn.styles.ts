@@ -15,20 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Checkbox as CheckboxBase } from '@mui/material';
 import styled from 'styled-components';
 import { HeaderCell } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Group } from '../ticketsTable.styles';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
 import { SELECTION_COLUMN_WIDTH } from '../ticketsTable.constants';
-
-export const Checkbox = styled(CheckboxBase)<{ disabled?: boolean }>`
-	margin: 0 auto;
-	padding: 0;
-	${({ disabled }) => disabled && `
-		opacity: 0.4;
-	`}
-`;
 
 export const CheckboxHeaderCell = styled(HeaderCell).attrs({
 	draggable: false,

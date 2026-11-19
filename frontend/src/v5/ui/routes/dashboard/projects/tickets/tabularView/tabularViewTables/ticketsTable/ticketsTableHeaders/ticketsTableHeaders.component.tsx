@@ -23,7 +23,8 @@ import { TabularViewContext } from '../../../tabularViewContext/tabularViewConte
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TemplatesPermissionsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { uniq } from 'lodash';
 import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';
 
 type TicketsTableHeadersProps = {
@@ -39,11 +40,12 @@ export const TicketsTableHeaders = ({ ticketsIds }: TicketsTableHeadersProps) =>
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
 	const groupSelectedIds = new Set(ticketsIds.filter((id) => selectedIds.has(id)));
-
+	const selectedTicketsModelIds = uniq(TicketsHooksSelectors.selectTicketsById(Array.from(groupSelectedIds)).map((t) => t.modelId));
+	const editableProperties = TemplatesPermissionsHooksSelectors.selectEditableProperties([template], selectedTicketsModelIds);
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				canBulkEditProperty(template, name) && groupSelectedIds.size > 0 ? 
+				editableProperties.includes(name) && canBulkEditProperty(template, name) && groupSelectedIds.size > 0 ? 
 					<TicketsTableHeaderBulkEdit key={name} name={name} groupSelectedIds={groupSelectedIds}/> : <TicketsTableHeader key={name} name={name} />
 			))}
 		</Headers>

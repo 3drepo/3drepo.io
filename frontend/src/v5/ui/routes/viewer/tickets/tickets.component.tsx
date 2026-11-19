@@ -17,9 +17,8 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
@@ -31,17 +30,8 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 
 export const Tickets = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
-
-	const readOnly = isFederation
-		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
-		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.setReadOnly(readOnly);
-	}, []);
 
 	useEffect(() => {
 		if (view !== TicketsCardViews.New) {
