@@ -222,9 +222,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	if (isLoading) return (<Loader />);
 	return (
 		<Container onClick={clearHighlightedKey}>
-			{state.colored && (
+			{state.colored?.length > 0 && (
 				<TicketGroupsContextComponent
-					groupType="colored"
+					groupType={OverrideType.COLORED}
 					onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
 					onSelectedGroupsChange={setSelectedColorKeys}
 					overrides={state.colored}
@@ -238,9 +238,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					/>
 				</TicketGroupsContextComponent>
 			)}
-			{state.selected && (
+			{state.selected?.length > 0 && (
 				<TicketGroupsContextComponent
-					groupType="colored"
+					groupType={OverrideType.SELECTED}
 					onDeleteGroups={onDeleteGroups(OverrideType.SELECTED)}
 					onSelectedGroupsChange={() => {}}
 					overrides={state.selected}
@@ -254,9 +254,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					/>
 				</TicketGroupsContextComponent>
 			)}
-			{state.shown && (
+			{state.shown?.length > 0 && (
 				<TicketGroupsContextComponent
-					groupType="hidden"
+					groupType={OverrideType.SHOWN}
 					onDeleteGroups={onDeleteGroups(OverrideType.SHOWN)}
 					onSelectedGroupsChange={() => {}}
 					overrides={state.shown}
@@ -271,9 +271,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 				</TicketGroupsContextComponent>
 			)}
 
-			{state.hidden && (
+			{state.hidden?.length > 0 && (
 				<TicketGroupsContextComponent
-					groupType="hidden"
+					groupType={OverrideType.HIDDEN}
 					onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
 					onSelectedGroupsChange={onSelectedHiddenGroupChange}
 					overrides={state.hidden}

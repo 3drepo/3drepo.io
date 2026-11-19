@@ -19,6 +19,7 @@ import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
@@ -41,7 +42,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const keys = overrides.map(({ key }) => key);
 	const overridesCount = overrides.length;
 	const state = getCollectionState(keys);
-	const isColored = groupType === 'colored';
+	const isColored = groupType === OverrideType.COLORED;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();

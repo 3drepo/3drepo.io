@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import { createContext } from 'react';
 import { GroupState } from './ticketGroupsContext.helper';
 
 type TicketGroupsContextType = {
 	overrides: GroupOverride[],
-	groupType: 'colored' | 'hidden',
+	groupType: OverrideType,
 	editGroup: (key?: string) => void,
 	deleteGroup: (key: string) => void,
 	deleteCollection: (keys: string[]) => void,

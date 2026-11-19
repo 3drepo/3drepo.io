@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
@@ -24,7 +24,7 @@ import { GroupState } from './ticketGroupsContext.helper';
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
 	overrides: GroupOverride[],
-	groupType: 'colored' | 'hidden',
+	groupType: OverrideType,
 	children: any,
 	onSelectedGroupsChange?: (keys: string[]) => void,
 	onDeleteGroups?: (keys: string[]) => void,

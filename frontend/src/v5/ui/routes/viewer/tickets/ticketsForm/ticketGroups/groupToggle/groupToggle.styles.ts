@@ -15,12 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Checkbox as CheckboxBase } from '@mui/material';
+import { Checkbox as CheckboxBase, IconButton } from '@mui/material';
 import styled from 'styled-components';
 import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 
 
 export const Checkbox = styled(CheckboxBase)`
+	margin-left: auto;
+	margin-right: 0;
+`;
+
+export const SelectedButton = styled(IconButton)`
 	margin-left: auto;
 	margin-right: 0;
 `;
