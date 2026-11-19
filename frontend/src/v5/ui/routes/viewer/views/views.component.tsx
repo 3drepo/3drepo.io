@@ -15,20 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import { SearchBar } from './views.styles';
-import { CardContainer } from '@components/viewer/cards/card.styles';
+import { forwardRef, useState } from 'react';
+import { CardContainer, CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { formatMessage } from '@/v5/services/intl';
-import { ViewsList } from './viewsList/viewsList.component';
 import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
 import { ViewsCardActions } from './viewsCardActions/viewsCardActions.component';
 import { ViewsCardFooter } from './viewsCardFooter/viewsCardFooter.component';
-import { SearchContextComponent } from '@controls/search/searchContext';
 import { ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { CentredContainer } from '@controls/centredContainer';
 import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
+import { FillerRow, TableRow, VirtualisedList } from '../drawings/drawingsList/drawingsList.styles';
+import { ViewItem } from './viewItem/viewItem.component';
+import { NewViewpointItem } from './viewItem/viewItem.styles';
+import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { FormattedMessage } from 'react-intl';
+
+const Table = forwardRef(({ children, ...props }: any, ref: any) => { 
+	const queries = ViewpointsHooksSelectors.selectQueries();
+	return (
+		<div ref={ref} {...props}>
+			<CardContent>
+				<AutocompleteSearchInput
+					value={queries}
+					onChange={ViewpointsActionsDispatchers.setQueries}
+				/>
+				{children}
+			</CardContent>
+		</div>
+	);
+});
+
+const EmptyPlaceholder = forwardRef((props, ref: any) => {
+	const queries = ViewpointsHooksSelectors.selectQueries();
+	if (!queries.length) return (
+		<div ref={ref} {...props}>
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.views.noViewsCreated" defaultMessage="No viewpoints have been created." />
+			</EmptyListMessage>
+		</div>
+	);
+	return (
+		<div ref={ref} {...props}>
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.views.noViewsFound" defaultMessage="No viewpoints found. Please try another search." />
+			</EmptyListMessage>
+		</div>
+	);
+});
 
 export const Views = () => {
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
@@ -36,6 +73,7 @@ export const Views = () => {
 	const [createMode, setCreateMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
+	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 
 	if (isPending) {
 		return (
@@ -53,17 +91,43 @@ export const Views = () => {
 				title={formatMessage({ id: 'viewer.cards.views.title', defaultMessage: 'Views' })}
 				actions={(<ViewsCardActions />)}
 			/>
-			<SearchContextComponent items={viewpoints} fieldsToFilter={['name']}>
-				<SearchBar placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search views...' })} />
-				<ViewsList
-					editMode={editMode}
-					activeViewpoint={activeViewpoint}
-					setActiveViewpoint={setActiveViewpoint}
-					setEditMode={setEditMode}
-					createMode={createMode}
-					setCreateMode={setCreateMode}
-				/>
-			</SearchContextComponent>
+			<VirtualisedList
+				data={viewpoints}
+				totalCount={viewpoints.length}
+				components={{
+					Table,
+					TableBody: CardList,
+					TableRow,
+					FillerRow,
+					EmptyPlaceholder,
+				} as any}
+				itemContent={(_, viewpoint: IViewpoint) => (
+					<ViewItem
+						viewpoint={viewpoint}
+						key={viewpoint._id}
+						active={activeViewpoint?._id === viewpoint._id}
+						editMode={editMode}
+						setActiveViewpoint={setActiveViewpoint}
+						setEditMode={setEditMode}
+						createMode={createMode}
+						setCreateMode={setCreateMode}
+					/>
+				)}
+			/>
+			{createMode && newViewpoint && (
+				<NewViewpointItem>
+					<ViewItem
+						key={newViewpoint._id}
+						viewpoint={newViewpoint}
+						active
+						editMode
+						setActiveViewpoint={setActiveViewpoint}
+						setEditMode={setEditMode}
+						createMode={createMode}
+						setCreateMode={setCreateMode}
+					/>
+				</NewViewpointItem>
+			)}
 			<ViewsCardFooter setActiveViewpoint={setActiveViewpoint} createMode={createMode} setCreateMode={setCreateMode} />
 		</CardContainer>
 	);

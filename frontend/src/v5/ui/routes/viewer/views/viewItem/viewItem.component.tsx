@@ -27,7 +27,7 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import { Highlight } from '@controls/highlight';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ModelHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ModelHooksSelectors, ProjectsHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import {
@@ -46,7 +46,6 @@ import { FormattedMessage } from 'react-intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
-import { SearchContext } from '@controls/search/searchContext';
 import { ViewItemSchema } from '@/v5/validation/viewpointSchemes/viewpointSchemes';
 import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 import { getScreenshotFromView } from '@/v5/helpers/viewpoint.helpers';
@@ -62,11 +61,11 @@ interface IViewItem {
 }
 
 const ViewpointNameLabel = ({ name, defaultView }) => {
-	const { query } = useContext(SearchContext);
+	const queries = ViewpointsHooksSelectors.selectQueries();
 	return (
 		<Tooltip title={name} placement="bottom">
 			<ViewpointName>
-				<Highlight search={query}>{name}</Highlight>
+				<Highlight search={queries}>{name}</Highlight>
 				{defaultView && (
 					<Subtitle>
 						<FormattedMessage id="viewsCard.viewItem.homeView" defaultMessage="(Home View)" />

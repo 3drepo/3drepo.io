@@ -47,6 +47,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
 	showPreset: ['preset'],
 	toggleSortOrder: [],
+	setQueries: ['queries'],
 	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
 	addViewpointGroupsBeingLoaded: ['ids'],
 	viewpointReady: [],
@@ -63,6 +64,7 @@ export interface IViewpointsState {
 	sortOrder: SortingDirection;
 	selectedViewpoint: IViewpoint | null;
 	newViewpoint: IViewpoint | null;
+	queries: string[];
 }
 
 export const INITIAL_STATE: IViewpointsState = {
@@ -73,6 +75,7 @@ export const INITIAL_STATE: IViewpointsState = {
 	sortOrder: SortingDirection.ASCENDING,
 	selectedViewpoint: null,
 	newViewpoint: null,
+	queries: [],
 };
 
 const prepareViewpointGroups = (viewpoint: IViewpoint): IViewpoint => {
@@ -126,6 +129,10 @@ const toggleSortOrder = (state: IViewpointsState) => {
 	state.sortOrder = newSortOrder;
 };
 
+const setQueries = (state: IViewpointsState, { queries }: SetQueriesAction) => {
+	state.queries = queries;
+};
+
 const reset = () => ({ ...INITIAL_STATE, viewpointsGroupsBeingLoaded: new Set<string>() });
 
 export const viewpointsReducer = createReducer(INITIAL_STATE, produceAll({
@@ -138,11 +145,13 @@ export const viewpointsReducer = createReducer(INITIAL_STATE, produceAll({
 	[ViewpointsTypes.SET_NEW_VIEWPOINT]: setNewViewpoint,
 	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
 	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[ViewpointsTypes.SET_QUERIES]: setQueries,
 	[ViewpointsTypes.RESET]: reset,
 }));
 
 // Action Types
 export type SetPendingStateAction = Action<'SET_PENDING_STATE'> & { pendingState: boolean };
+export type SetQueriesAction = Action<'SET_QUERIES'> & { queries: string[] };
 export type FetchViewpointsAction = Action<'FETCH_VIEWPOINTS'> & { teamspace: string; modelId: string };
 export type FetchViewpointsSuccessAction = Action<'FETCH_VIEWPOINTS_SUCCESS'> & { viewpoints: IViewpoint[] };
 export type CreateViewpointAction = Action<'CREATE_VIEWPOINT'> & { teamspace: string; modelId: string; viewpoint: any };
@@ -188,6 +197,7 @@ export interface IViewpointsActionCreators {
 	cacheGroupsFromViewpoint: (viewpoint: any, groupsData: any) => CacheGroupsFromViewpointAction;
 	showPreset: (preset: string) => ShowPresetAction;
 	toggleSortOrder: () => Action;
+	setQueries: (queries: string[]) => SetQueriesAction;
 	fetchViewpointGroups: (teamspace: string, modelId: string, view: any) => FetchViewpointGroupsAction;
 	viewpointReady: () => Action;
 	clearColorOverrides: () => Action;

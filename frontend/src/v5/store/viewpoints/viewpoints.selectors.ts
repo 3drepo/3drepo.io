@@ -39,18 +39,30 @@ export const selectSortOrder = createSelector(
 	selectViewpointsDomain, (state) => state.sortOrder,
 );
 
+export const selectQueries = createSelector(
+	selectViewpointsDomain, (state) => state.queries,
+);
+
+export const selectViewpointsMap = createSelector(
+	selectViewpointsDomain, (state) => state.viewpointsMap,
+);
+
 export const selectViewpointsList = createSelector(
-	selectViewpointsDomain,
+	selectViewpointsMap,
+	selectQueries,
 	selectSortOrder,
-	(state, sortOrder) => {
-		return values(state.viewpointsMap).sort(getSortingFunction({ column: ['name'], direction:[sortOrder] }));
+	(viewpoints, queries, sortOrder) => {
+		return values(viewpoints).sort(getSortingFunction({ column: ['name'], direction:[sortOrder] })).filter((viewpoint) => {
+			if (!queries.length) return true;
+			return queries.some((query) => viewpoint.name.includes(query));
+		});
 	},
 );
 
 export const selectViewpointById = createSelector(
-	selectViewpointsDomain,
+	selectViewpointsMap,
 	(state, id) => id,
-	(state, id) => state.viewpointsMap[id],
+	(viewpoints, id) => viewpoints[id],
 );
 
 export const selectSelectedViewpoint = createSelector(

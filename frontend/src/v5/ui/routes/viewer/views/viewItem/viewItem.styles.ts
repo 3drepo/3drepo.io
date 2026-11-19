@@ -27,7 +27,6 @@ export const ViewpointItem = styled.div<{ active?: boolean }>`
 	display: grid;
     grid-template-columns: ${THUMBNAIL_SIZE}px auto;
 	padding: 8px;
-	border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	box-sizing: border-box;
 	background-color: ${({ active, theme }) => active ? theme.palette.primary.lightest : theme.palette.primary.contrast};
 
@@ -35,6 +34,10 @@ export const ViewpointItem = styled.div<{ active?: boolean }>`
 		padding: ${active ? '12px 15px' : '12px 40px 12px 15px'};
 	`}
 ` as any;
+
+export const NewViewpointItem = styled.div<{ active?: boolean }>`
+	border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
+`;
 
 export const IconButton = styled(CircleButton)`
 	margin: 0;
