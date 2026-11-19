@@ -30,17 +30,13 @@ const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOv
 export const createStateWithGroup = (state: ViewpointState, groups: Record<string, Group>) => {
 	const stateToReturn = { ...state };
 
-	if (state.colored) {
-		stateToReturn.colored = stateToReturn.colored.map(overrideWithGroups(groups));
-	}
+	const groupFields = ['colored', 'selected', 'transformed', 'hidden', 'shown'];
 
-	if (state.transformed) {
-		stateToReturn.transformed = stateToReturn.transformed.map(overrideWithGroups(groups));
-	}
-
-	if (state.hidden) {
-		stateToReturn.hidden = stateToReturn.hidden.map(overrideWithGroups(groups));
-	}
+	groupFields.forEach((field) => {
+		if (state[field]) {
+			stateToReturn[field] = stateToReturn[field].map(overrideWithGroups(groups));
+		}
+	});
 
 	return stateToReturn;
 };

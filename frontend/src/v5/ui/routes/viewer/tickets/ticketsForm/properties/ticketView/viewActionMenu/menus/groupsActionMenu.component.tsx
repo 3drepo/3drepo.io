@@ -36,7 +36,8 @@ export const GroupsActionMenu = ({
 	onClick,
 	disabled,
 }: IGroupsActionMenu) => {
-	const hasGroups = value?.colored?.length || value?.hidden?.length;
+	const groupFields = ['colored', 'selected', 'hidden', 'shown'];
+	const hasGroups = groupFields.some((field) => value?.[field]?.length);
 
 	return (
 		<ViewActionMenu
