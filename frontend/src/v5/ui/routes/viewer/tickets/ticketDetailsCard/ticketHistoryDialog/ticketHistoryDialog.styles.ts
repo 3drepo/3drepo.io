@@ -56,7 +56,7 @@ export const ItemContainer = styled.li<{ selected?: boolean }>`
 
 	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const TimestampContainer = styled.div`
@@ -68,9 +68,9 @@ export const Author = styled.div`
 	flex-shrink: 0;
 	width: ${ColumnWidths.Author}px;
 	display: inline-flex;
-	gap: 5px;
+	gap: 10px;
+	padding-right: 10px;
 	align-items: center;
-	font-size: 15px;
 `;
 
 export const ActionType = styled.div`
@@ -78,14 +78,18 @@ export const ActionType = styled.div`
 	width: ${ColumnWidths.ActionType}px;
 `;
 
-export const UpdateChip = styled(ChipContainer)`
+const HistoryChip = styled(ChipContainer)`
+	pointer-events: none;
+	padding-right: 6px;
+`;
+
+export const UpdateChip = styled(HistoryChip)`
 	color: ${({ theme }) => theme.palette.tertiary.mid};
 	border-color: ${({ theme }) => theme.palette.tertiary.mid};
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	pointer-events: none;
 `;
 
-export const ImportChip = styled(UpdateChip)`
+export const ImportChip = styled(HistoryChip)`
 	color: ${({ theme }) => theme.palette.success.dark};
 	border-color: ${({ theme }) => theme.palette.success.dark};
 	background-color: ${({ theme }) => theme.palette.success.lightest};

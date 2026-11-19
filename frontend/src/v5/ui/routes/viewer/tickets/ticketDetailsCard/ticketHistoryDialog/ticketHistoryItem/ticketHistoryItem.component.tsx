@@ -21,23 +21,9 @@ import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigne
 import { ItemContainer, Author, TimestampContainer, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
 import { ChangesTable } from './changesTable/changesTable.component';
 import { FormattedMessage } from 'react-intl';
-import { formatDate, formatTime } from '@/v5/services/intl';
 import type { ITemplate, ITicketHistory } from '@/v5/store/tickets/tickets.types';
-
-const Timestamp = ({ timestamp }) => {
-	const formattedDate = formatDate(timestamp);
-	const formattedTime = formatTime(timestamp);
-	return (
-		<TimestampContainer>
-			<div>
-				{formattedDate}
-			</div>
-			<div>
-				{formattedTime}
-			</div>
-		</TimestampContainer>
-	);
-};
+import { TextOverflow } from '@controls/textOverflow/textOverflow.component';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
 
 export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, template }: ITicketHistory & { template: ITemplate }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -45,7 +31,7 @@ export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, t
 	const fullname = getFullnameFromUser(user);
 	if (imported)  return (
 		<ItemContainer>
-			<Timestamp timestamp={timestamp} />
+			<TimestampContainer>{formatDateTime(timestamp)}</TimestampContainer>
 			<Author />
 			<ActionType>
 				<ImportChip>
@@ -57,10 +43,10 @@ export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, t
 
 	return (
 		<ItemContainer>
-			<Timestamp timestamp={timestamp} />
+			<TimestampContainer>{formatDateTime(timestamp)}</TimestampContainer>
 			<Author>
 				<AssigneeCircle assignee={author} />
-				{fullname}
+				<TextOverflow>{fullname}</TextOverflow>
 			</Author>
 			<ActionType>
 				<UpdateChip>

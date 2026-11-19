@@ -30,7 +30,7 @@ export const ChangeRow = styled.div`
 	grid-template-columns: ${ColumnWidths.ChangePropertyName}px minmax(0, 1fr);
 `;
 
-export const ChangePropertyName = styled.div`
+export const ChangePropertyName = styled(TextOverflow)`
 	font-weight: bold;
 `;
 
@@ -48,5 +48,4 @@ export const ErrorMessage = styled.span`
 export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
 	flex-grow: 0;
-	color: ${({ theme }) => theme.palette.secondary.main};
 `;
