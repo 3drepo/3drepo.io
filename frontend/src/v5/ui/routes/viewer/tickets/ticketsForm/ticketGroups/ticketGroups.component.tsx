@@ -78,6 +78,8 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 			...currentState,
 			colored: currentState.colored && addKeysToGroups(currentState.colored),
 			hidden: currentState.hidden && addKeysToGroups(currentState.hidden),
+			selected: currentState.selected && addKeysToGroups(currentState.selected),
+			shown: currentState.shown && addKeysToGroups(currentState.shown),
 		};
 	}, [value]);
 	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
@@ -213,7 +215,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 
 	useEffect(() => {
 		const stateWithGroupsWithKeys = { ...state };
-		const hasMissingKeys = [...(state.colored || []), ...(state.hidden || [])]
+		const hasMissingKeys = [...(state.colored || []), ...(state.selected || []), ...(state.shown || []), ...(state.hidden || [])]
 			.some((override) => !override.key || getGroupKey(override) !== override.key);
 		if (isEmpty(stateWithGroupsWithKeys) || !hasMissingKeys) return;
 		onChange({ ...value, state: stateWithGroupsWithKeys });

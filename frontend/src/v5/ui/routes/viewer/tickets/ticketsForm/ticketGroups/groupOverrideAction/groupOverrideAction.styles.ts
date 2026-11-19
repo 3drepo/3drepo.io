@@ -28,6 +28,11 @@ export const Checkbox = styled(CheckboxBase)`
 export const SelectedButton = styled(IconButton)`
 	margin-left: auto;
 	margin-right: 0;
+	padding: 9px;
+
+	&&:hover {
+		background-color: transparent;
+	}
 `;
 
 export const EyeCheckbox = styled(Checkbox)`

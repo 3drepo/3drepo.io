@@ -18,7 +18,7 @@
 import { groupBy, isString, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
@@ -34,7 +34,7 @@ import {
 	Name,
 	Buttons,
 } from './groups.styles';
-import { GroupToggle } from '../groupToggle/groupToggle.component';
+import { GroupOverrideAction } from '../groupOverrideAction/groupOverrideAction.component';
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
@@ -43,7 +43,7 @@ import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.h
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
-	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
+	const { getCollectionState, setCollectionIsChecked, deleteCollection, groupType } = useContext(TicketGroupsContext);
 
 	const overrideKeys = overrides.map(({ key }) => key);
 	const state = getCollectionState(overrideKeys);
@@ -55,6 +55,15 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 
 	const handleCheckboxClick = (e) => {
 		e.stopPropagation();
+		if (groupType === OverrideType.SELECTED) {
+			dispatch(TreeActions.clearCurrentlySelected());
+			overrides.forEach(({ group, color }) => {
+				const objects = convertToV4GroupNodes(group as Group);
+				dispatch(TreeActions.showNodesBySharedIds(objects));
+				dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((value) => value / 255)));
+			});
+			return;
+		}
 		// setting the state for all the groups descendants of this collection
 		setCollectionIsChecked(overrideKeys, state !== GroupState.CHECKED);
 	};
@@ -96,7 +105,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 							<ShowIcon />
 						</TicketButton>
 					</Buttons>
-					<GroupToggle
+					<GroupOverrideAction
 						onClick={handleCheckboxClick}
 						{...getCollectionCheckboxState(state)}
 					/>

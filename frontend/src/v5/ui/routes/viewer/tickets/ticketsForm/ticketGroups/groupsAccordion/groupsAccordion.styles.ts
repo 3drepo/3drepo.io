@@ -22,7 +22,7 @@ import { Button } from '@controls/button';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
-import { GroupToggle } from '../groupToggle/groupToggle.component';
+import { GroupOverrideAction } from '../groupOverrideAction/groupOverrideAction.component';
 
 export const Accordion = styled(AccordionBase)<{ $overridesCount?: number, $isHiddenGroups: boolean }>`
 	background: transparent;
@@ -99,7 +99,7 @@ export const NumberContainer = styled(CircledNumber)`
 	font-size: 10px;
 `;
 
-export const Checkbox = styled(GroupToggle)`
+export const Checkbox = styled(GroupOverrideAction)`
 	margin: 0 8px 0 auto;
 `;
 

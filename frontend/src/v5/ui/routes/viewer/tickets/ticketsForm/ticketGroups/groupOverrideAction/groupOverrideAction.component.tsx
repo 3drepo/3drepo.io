@@ -21,10 +21,10 @@ import HighlightIcon from '@assets/icons/outlined/highlight-outlined.svg';
 import { CheckboxProps } from '@mui/material';
 import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
-import { Checkbox, EyeCheckbox, IndeterminateEye, SelectedButton } from './groupToggle.styles';
+import { Checkbox, EyeCheckbox, IndeterminateEye, SelectedButton } from './groupOverrideAction.styles';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 
-export const GroupToggle = (props: CheckboxProps) => {
+export const GroupOverrideAction = (props: CheckboxProps) => {
 	const { groupType } = useContext(TicketGroupsContext);
 
 	if (groupType === OverrideType.COLORED) return (<Checkbox {...props} />);
