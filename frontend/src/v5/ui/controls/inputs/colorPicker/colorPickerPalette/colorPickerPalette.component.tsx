@@ -31,13 +31,15 @@ type ColorPickerPaletteProps = {
 	onChange: (value: HexGroupColor) => void,
 	onClose?: () => void,
 	disableTransparent?: boolean,
+	disableOpacity?: boolean,
 };
-export const ColorPickerPalette = ({ disableTransparent = false, value, onChange, onClose }: ColorPickerPaletteProps) => {
+export const ColorPickerPalette = ({ disableTransparent = false, disableOpacity = false, value, onChange, onClose }: ColorPickerPaletteProps) => {
 	const [color, setColor] = useState<string>(value.color);
-	const [opacity, setOpacity] = useState<number>(value.opacity);
+	const [opacity, setOpacity] = useState<number>(disableOpacity ? 1 : value.opacity);
 	const ref = useRef(null);
 
 	const colorisValid = getColorHexIsValid(color);
+	const hasColor = Boolean(color);
 	const opacityInPercentage = Math.round((opacity ?? 1) * 100);
 
 	const handleColorChange = (newColor) => setColor(`#${newColor}`);
@@ -75,19 +77,24 @@ export const ColorPickerPalette = ({ disableTransparent = false, value, onChange
 						error={!colorisValid}
 						onChange={(e) => handleColorChange(e.currentTarget.value)}
 					/>
-					<PercentageTextField
-						label={formatMessage({ id: 'colorPicker.palette.opacity', defaultMessage: 'Opacity' })}
-						// stringify to remove leading 0
-						value={opacityInPercentage.toString()}
-						onKeyDown={handleOpacityKeyDown}
-						onChange={handleOpacityChange}
-					/>
+					{!disableOpacity && (
+						<PercentageTextField
+							label={formatMessage({ id: 'colorPicker.palette.opacity', defaultMessage: 'Opacity' })}
+							// stringify to remove leading 0
+							value={opacityInPercentage.toString()}
+							onKeyDown={handleOpacityKeyDown}
+							onChange={handleOpacityChange}
+						/>
+					)}
 					<ColorActionMenu TriggerButton={<GradientButton />}>
 						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onChange={setColor} />
 					</ColorActionMenu>
 				</BottomBar>
 				<ActionMenuItem>
-					<UpdateButton onClick={() => onChange({ color, opacity })} disabled={!colorisValid || isEqual({ color, opacity }, value)}>
+					<UpdateButton
+						onClick={() => onChange({ color, opacity: disableOpacity ? 1 : opacity })}
+						disabled={!hasColor || !colorisValid || isEqual({ color, opacity: disableOpacity ? 1 : opacity }, value)}
+					>
 						<FormattedMessage id="colorPicker.update" defaultMessage="Update" />
 					</UpdateButton>
 				</ActionMenuItem>
