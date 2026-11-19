@@ -39,7 +39,7 @@ import {
 	Name,
 	GroupsCount,
 } from './groupItem.styles';
-import { GroupToggle } from '../../groupToggle/groupToggle.component';
+import { GroupOverrideAction } from '../../groupOverrideAction/groupOverrideAction.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { RgbArray, rgbToHex } from '@/v5/helpers/colors.helper';
 import { TicketContext } from '../../../../ticket.context';
@@ -167,7 +167,7 @@ export const GroupItem = ({ override }: GroupProps) => {
 					</Tooltip>
 				</Buttons>
 			</Headline>
-			<GroupToggle
+			<GroupOverrideAction
 				checked={checked}
 				onClick={handleToggleClick}
 			/>
