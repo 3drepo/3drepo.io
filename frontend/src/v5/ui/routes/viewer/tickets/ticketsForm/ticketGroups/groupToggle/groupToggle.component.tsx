@@ -17,14 +17,23 @@
 
 import EyeIcon from '@assets/icons/outlined/eye-outlined.svg';
 import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
+import HighlightIcon from '@assets/icons/outlined/highlight-outlined.svg';
 import { CheckboxProps } from '@mui/material';
+import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
-import { Checkbox, EyeCheckbox, IndeterminateEye } from './groupToggle.styles';
+import { Checkbox, EyeCheckbox, IndeterminateEye, SelectedButton } from './groupToggle.styles';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 
 export const GroupToggle = (props: CheckboxProps) => {
 	const { groupType } = useContext(TicketGroupsContext);
 
-	if (groupType === 'colored') return (<Checkbox {...props} />);
+	if (groupType === OverrideType.COLORED) return (<Checkbox {...props} />);
+	if (groupType === OverrideType.SELECTED) {
+		return (
+			<SelectedButton onClick={props.onClick} disabled={props.disabled}>
+				<HighlightIcon />
+			</SelectedButton>
+		);
+	}
 	return (<EyeCheckbox icon={<EyeIcon />} checkedIcon={<EyeDisabledIcon />} indeterminateIcon={<IndeterminateEye />} {...props} />);
 };

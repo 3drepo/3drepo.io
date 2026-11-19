@@ -17,7 +17,7 @@
 
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import { useContext, useEffect } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
@@ -63,7 +63,7 @@ export const GroupItem = ({ override }: GroupProps) => {
 	const { group, color, opacity, key } = override;
 	const checked = getGroupIsChecked(key);
 
-	const isHidden = groupType === 'hidden';
+	const isHidden = groupType === OverrideType.HIDDEN;
 	const isHighlighted = highlightedKey === key;
 
 	const sharedIds = convertToV4GroupNodes(group as Group).flatMap(({ shared_ids }) => shared_ids);
@@ -102,6 +102,10 @@ export const GroupItem = ({ override }: GroupProps) => {
 
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
+		if (groupType === OverrideType.SELECTED) {
+			setHighlightedKey(key);
+			return;
+		}
 		setGroupIsChecked(key, !checked);
 		if (isHidden && !checked && isHighlighted) {
 			clearHighlightedKey();
