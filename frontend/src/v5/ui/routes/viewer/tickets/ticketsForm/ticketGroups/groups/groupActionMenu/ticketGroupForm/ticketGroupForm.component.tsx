@@ -75,6 +75,7 @@ type TicketGroupFormProps = {
 	onCancel?: () => void,
 	prefixes: string[][],
 	isColored?: boolean,
+	disableOpacity?: boolean,
 };
 
 const subPrefixes = (path:string[]) => {
@@ -97,7 +98,7 @@ const mergePrefixes = (prefixesA: string[][], prefixesB: string[][]) => {
 	return uniqBy(prefixesA.concat(prefixesB).sort(), JSON.stringify);
 };
  
-export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored }: TicketGroupFormProps) => {
+export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored, disableOpacity }: TicketGroupFormProps) => {
 	const [isSmart, setIsSmart] = useState(true);
 	const [isGroupDefinitionValid, setIsGroupDefinitionValid] = useState(true);
 	const [isGroupDefinitionDirty, setIsGroupDefinitionDirty] = useState(false);
@@ -143,6 +144,10 @@ export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored
 	};
 
 	const onClickSubmit = async (newValues:TicketGroupFormValue) => {
+		if (disableOpacity) {
+			newValues.opacity = 1;
+		}
+
 		if (!isSmart) {
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		} else {
@@ -230,7 +235,7 @@ export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored
 		delete newValue.group.objects;
 		delete newValue.group.rules;
 	
-		newValue.opacity = newValue.opacity ?? 1;
+		newValue.opacity = disableOpacity ? 1 : (newValue.opacity ?? 1);
 
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
@@ -322,6 +327,7 @@ export const TicketGroupForm = ({ value, onSubmit, onCancel, prefixes, isColored
 									setValue('opacity', opacity, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
 								}}
 								value={({ color: watch('color'), opacity: watch('opacity') })}
+								disableOpacity={disableOpacity}
 								disabled={readOnly}
 							/>
 						)}

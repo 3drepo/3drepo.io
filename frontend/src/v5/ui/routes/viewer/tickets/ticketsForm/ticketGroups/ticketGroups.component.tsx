@@ -302,6 +302,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					onCancel={cancelEdition}
 					prefixes={getPossiblePrefixes(state[editingOverride.type])}
 					isColored={editingOverride.type === OverrideType.COLORED || editingOverride.type === OverrideType.SELECTED}
+					disableOpacity={editingOverride.type === OverrideType.SELECTED}
 				/>
 			</Popper>
 		</Container>

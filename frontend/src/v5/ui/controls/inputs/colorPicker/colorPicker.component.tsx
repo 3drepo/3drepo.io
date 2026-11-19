@@ -33,8 +33,14 @@ const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewPro
 	</Container>
 );
 
-type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void, disabled?: boolean };
-export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled }: ColorPickerProps) => {
+type ColorPickerProps = {
+	value?: RgbGroupColor,
+	defaultValue?: RgbGroupColor,
+	onChange?: (newVal: RgbGroupColor) => void,
+	disabled?: boolean,
+	disableOpacity?: boolean
+};
+export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled, disableOpacity }: ColorPickerProps) => {
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
@@ -60,7 +66,12 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 			}}
 			disabled={disabled}
 		>
-			<ColorPickerPalette value={value} onChange={handleChange} />
+			<ColorPickerPalette
+				value={disableOpacity ? { ...value, opacity: 1 } : value}
+				onChange={handleChange}
+				disableTransparent={disableOpacity}
+				disableOpacity={disableOpacity}
+			/>
 		</ActionMenu>
 	);
 };
