@@ -17,11 +17,11 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { Group, GroupOverride, OverrideType, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, isEmpty, isString, uniqBy, xor } from 'lodash';
+import { cloneDeep, differenceBy, isEmpty, isString, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -65,6 +65,7 @@ const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED, 
 
 const getGroupId = ({ group }: GroupOverride) => (isString(group) ? undefined : group._id);
 const getGroupKey = ({ group, key }: GroupOverride): string => getGroupId({ group, key }) || key || '';
+const getGroupIdentity = ({ group }: GroupOverride) => (isString(group) ? group : group._id || JSON.stringify(group));
 const addKeysToGroups = (groups: GroupOverride[] = []) => groups.map((groupOverride) => ({
 	...groupOverride,
 	key: getGroupId(groupOverride) || groupOverride.key || uuid(),
@@ -86,6 +87,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedHiddenKeys, setSelectedHiddenKeys] = useState<string[]>(() => (state.hidden || []).map(({ key }) => key));
 	const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>(() => (state.colored || []).map(({ key }) => key));
+	const previousSelectedGroups = useRef<GroupOverride[]>([]);
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const [isLoading, setIsLoading] = useState(hasClearedOverrides);
 
@@ -195,6 +197,24 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		if (colored.some(({ group }) => isString(group))) return;
 		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
 	}, [selectedColorKeys, value]);
+
+	useEffect(() => {
+		const selected = state.selected || [];
+		const previousGroups = previousSelectedGroups.current;
+		const groupsToHighlight = differenceBy(selected, previousGroups || [], getGroupIdentity);
+
+		if (!previousGroups) {
+			dispatch(TreeActions.clearCurrentlySelected());
+		}
+
+		groupsToHighlight.forEach(({ group, color }) => {
+			if (isString(group)) return;
+			const objects = convertToV4GroupNodes(group);
+			dispatch(TreeActions.showNodesBySharedIds(objects));
+			dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((component) => component / 255)));
+		});
+		previousSelectedGroups.current = selected;
+	}, [state.selected]);
 
 	useEffect(() => {
 		if (!isLoading || !hasClearedOverrides) return;
