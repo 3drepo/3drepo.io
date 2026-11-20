@@ -218,6 +218,11 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 			window.dispatchEvent(new Event('resize'));
 		}
 
+		// This handles multiple highlighted groups, which is a V5 feature.
+		for (const highlightedGroup of viewpoint.highlighted_groups || []) {
+			yield put(TreeActions.selectNodesBySharedIds(highlightedGroup.objects, highlightedGroup.color));
+		}
+
 		// Because the viewpoint is set here instead of derived from the selectors,
 		// the viewpoint stays as a reference in the state.
 		// Thats why we need to wait for the groups to be fetched before proceeding.
