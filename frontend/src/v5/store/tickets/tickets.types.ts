@@ -217,7 +217,7 @@ export type GroupOverride = GroupProperties & {
 export enum OverrideType {
 	COLORED = 'colored',
 	HIDDEN = 'hidden',
-	SHOWN = 'shownw',
+	SHOWN = 'shown',
 	SELECTED = 'selected',
 }
 

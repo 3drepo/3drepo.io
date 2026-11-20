@@ -43,6 +43,12 @@ export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 	const { formatMessage } = useIntl();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const [groupFunction, setGroupFunction] = useState('');
+	const groupFunctionLabels = {
+		[OverrideType.COLORED]: formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.coloured', defaultMessage: 'Coloured' }),
+		[OverrideType.SELECTED]: formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.selected', defaultMessage: 'Selected' }),
+		[OverrideType.HIDDEN]: formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.hidden', defaultMessage: 'Hidden' }),
+		[OverrideType.SHOWN]: formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.shown', defaultMessage: 'Shown' }),
+	};
 
 	const createGroup = () => {
 		if (!groupFunction) return;
@@ -89,21 +95,21 @@ export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 						onChange={(event) => setGroupFunction(event.target.value as string)}
 						displayEmpty
 						renderValue={(value) =>
-							(value as string) ||
+							groupFunctionLabels[value as OverrideType] ||
 							formatMessage({ id: 'ticketCard.groups.addGroup.groupFunction.placeholder', defaultMessage: 'Select group function' })
 						}
 					>
 						<MenuItem value={OverrideType.COLORED}>
-							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.coloured" defaultMessage="Coloured" />
+							{groupFunctionLabels[OverrideType.COLORED]}
 						</MenuItem>
 						<MenuItem value={OverrideType.SELECTED}>
-							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.selected" defaultMessage="Selected" />
+							{groupFunctionLabels[OverrideType.SELECTED]}
 						</MenuItem>
 						<MenuItem value={OverrideType.HIDDEN}>
-							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.hidden" defaultMessage="Hidden" />
+							{groupFunctionLabels[OverrideType.HIDDEN]}
 						</MenuItem>
 						<MenuItem value={OverrideType.SHOWN}>
-							<FormattedMessage id="ticketCard.groups.addGroup.groupFunction.shown" defaultMessage="Shown" />
+							{groupFunctionLabels[OverrideType.SHOWN]}
 						</MenuItem>
 					</GroupFunctionSelect>
 				</FormBox>

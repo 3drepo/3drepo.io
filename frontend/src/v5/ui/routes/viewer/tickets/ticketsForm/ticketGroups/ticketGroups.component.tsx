@@ -85,6 +85,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	}, [value]);
 	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
+	const [selectedShownKeys, setSelectedShownKeys] = useState<string[]>(() => (state.shown || []).map(({ key }) => key));
 	const [selectedHiddenKeys, setSelectedHiddenKeys] = useState<string[]>(() => (state.hidden || []).map(({ key }) => key));
 	const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>(() => (state.colored || []).map(({ key }) => key));
 	const previousSelectedGroups = useRef<GroupOverride[]>([]);
@@ -142,6 +143,24 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		} else {
 			dispatch(TreeActions.showNodesBySharedIds(objects));
+		}
+	};
+
+	const onSelectedShownGroupChange = (keys: string[]) => {
+		setSelectedShownKeys(keys);
+		if (highlightedOverride.type === OverrideType.SHOWN && keys.includes(highlightedOverride.key)) {
+			setHighlightedOverride(NO_OVERRIDE_SELECTED);
+		}
+		const diffKeys = xor(keys, selectedShownKeys);
+		const showNodes = keys.length > selectedShownKeys.length;
+		const objects = diffKeys.flatMap((key) => {
+			const override = getGroupsByKey(OverrideType.SHOWN).get(key)?.groupOverride;
+			return override ? convertToV4GroupNodes(override.group as Group) : [];
+		});
+		if (showNodes) {
+			dispatch(TreeActions.showNodesBySharedIds(objects));
+		} else {
+			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		}
 	};
 
@@ -280,7 +299,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 				<TicketGroupsContextComponent
 					groupType={OverrideType.SHOWN}
 					onDeleteGroups={onDeleteGroups(OverrideType.SHOWN)}
-					onSelectedGroupsChange={() => {}}
+					onSelectedGroupsChange={onSelectedShownGroupChange}
 					overrides={state.shown}
 					onEditGroup={onSetEditGroup(OverrideType.SHOWN)}
 					highlightedKey={getHighlightedKeyByType(OverrideType.SHOWN)}
