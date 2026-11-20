@@ -3450,6 +3450,54 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets whether the point cloud points should be rendered with paraboloid shading.
+	 * Only has an effect if the point cloud points are rendered as round points.
+	 * @param enabled True to enable paraboloid shading, false to disable it.
+	 */
+	public static SetPointCloudParaboloidShading(enabled: boolean)
+	{
+		UnityUtil.toUnity('SetPointCloudParaboloidShading', UnityUtil.LoadingState.VIEWER_READY, enabled ? 1 : 0);
+	}
+
+	/**
+	 * Sets the strength of the paraboloid depth effect for point cloud points.
+	 * Only has an effect if the point cloud points are rendered with paraboloid shading.
+	 * @param strength The strength of the paraboloid depth effect ranging from 0 to 1.
+	 */
+	public static SetPointCloudParaboloidDepthStrength(strength: number)
+	{
+		UnityUtil.toUnity('SetPointCloudParaboloidDepthStrength', UnityUtil.LoadingState.VIEWER_READY, strength);
+	}
+
+	/**
+	 * Sets whether Eye Dome Lighting is enabled for the point cloud.
+	 * @param enabled True to enable Eye Dome Lighting, false to disable it.
+	 */
+	public static SetPointCloudEDLEnabled(enabled: boolean)
+	{
+		UnityUtil.toUnity('SetPointCloudEDLEnabled', UnityUtil.LoadingState.VIEWER_READY, enabled ? 1 : 0);
+	}
+
+	/**
+	 * Sets the Eye Dome Lighting strength.
+	 * This influences how strongly depth discontinuities are darkened by the Eye Dome Lighting effect.
+	 * @param strength The Eye Dome Lighting strength (>= 0).
+	 */
+	public static SetPointCloudEDLStrength(strength: number)
+	{
+		UnityUtil.toUnity('SetPointCloudEDLStrength', UnityUtil.LoadingState.VIEWER_READY, strength);
+	}
+
+	/**
+	 * Sets the Eye Dome Lighting neighbour sampling radius in pixels.
+	 * @param radius The Eye Dome Lighting neighbour sampling radius in pixels (>= 0).
+	 */
+	public static SetPointCloudEDLRadius(radius: number)
+	{
+		UnityUtil.toUnity('SetPointCloudEDLRadius', UnityUtil.LoadingState.VIEWER_READY, radius);
+	}
+
+	/**
 	 * @hidden
 	 */
 	static randomiseDrawOrder() {
