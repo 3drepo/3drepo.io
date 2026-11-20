@@ -206,6 +206,17 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 		v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
 	}
 
+	// V5 supports multiple selected groups, while V4's highlighted_group supports only one.
+	if (!isEmpty(viewpoint.state?.selected)) {
+		v4Viewpoint.highlighted_groups = viewpoint.state.selected.map((selectedGroup) => {
+			const highlightedGroup = convertToV4Group(selectedGroup);
+			if (selectedGroup.color) {
+				highlightedGroup.color = selectedGroup.color.map((value) => value / 255);
+			}
+			return highlightedGroup;
+		});
+	}
+
 	return { viewpoint: v4Viewpoint };
 };
 
