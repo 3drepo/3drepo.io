@@ -37,9 +37,11 @@ import { OverrideType } from '@/v5/store/tickets/tickets.types';
 
 type AddGroupButtonProps = {
 	newGroupsHandle: React.RefObject<any>;
+	hasHiddenGroups: boolean;
+	hasShownGroups: boolean;
 };
 
-export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
+export const AddGroupButton = ({ newGroupsHandle, hasHiddenGroups, hasShownGroups }: AddGroupButtonProps) => {
 	const { formatMessage } = useIntl();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const [groupFunction, setGroupFunction] = useState('');
@@ -51,7 +53,7 @@ export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 	};
 
 	const createGroup = () => {
-		if (!groupFunction) return;
+		if (!groupFunction || (groupFunction === OverrideType.HIDDEN && hasShownGroups) || (groupFunction === OverrideType.SHOWN && hasHiddenGroups)) return;
 		newGroupsHandle.current?.triggerNewGroup(groupFunction as OverrideType)();
 		setAnchorEl(null);
 	};
@@ -105,10 +107,10 @@ export const AddGroupButton = ({ newGroupsHandle }: AddGroupButtonProps) => {
 						<MenuItem value={OverrideType.SELECTED}>
 							{groupFunctionLabels[OverrideType.SELECTED]}
 						</MenuItem>
-						<MenuItem value={OverrideType.HIDDEN}>
+						<MenuItem value={OverrideType.HIDDEN} disabled={hasShownGroups}>
 							{groupFunctionLabels[OverrideType.HIDDEN]}
 						</MenuItem>
-						<MenuItem value={OverrideType.SHOWN}>
+						<MenuItem value={OverrideType.SHOWN} disabled={hasHiddenGroups}>
 							{groupFunctionLabels[OverrideType.SHOWN]}
 						</MenuItem>
 					</GroupFunctionSelect>
