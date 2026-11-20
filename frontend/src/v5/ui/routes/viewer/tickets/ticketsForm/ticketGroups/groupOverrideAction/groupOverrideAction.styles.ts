@@ -18,6 +18,7 @@
 import { Checkbox as CheckboxBase, IconButton } from '@mui/material';
 import styled from 'styled-components';
 import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
+import HighlightIconBase from '@assets/icons/outlined/highlight-outlined.svg';
 
 
 export const Checkbox = styled(CheckboxBase)`
@@ -29,10 +30,15 @@ export const SelectedButton = styled(IconButton)`
 	margin-left: auto;
 	margin-right: 0;
 	padding: 9px;
+	color: ${({ theme }) => theme.palette.secondary.main};
 
 	&&:hover {
 		background-color: transparent;
 	}
+`;
+
+export const HighlightIcon = styled(HighlightIconBase)`
+	color: inherit;
 `;
 
 export const EyeCheckbox = styled(Checkbox)`
