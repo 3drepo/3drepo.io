@@ -25,8 +25,8 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const NOTIFICATIONS_COL = 'notifications';
 
 const run = async () => {
-	const date = new Date();
-	date.setMonth(date.getMonth() - 1);
+	// the current date minus 30 days
+	const date = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 	logger.logInfo(`Removing notifications older than ${date.toISOString()}`);
 
 	await deleteMany(INTERNAL_DB, NOTIFICATIONS_COL, { timestamp: { $lt: date } });
