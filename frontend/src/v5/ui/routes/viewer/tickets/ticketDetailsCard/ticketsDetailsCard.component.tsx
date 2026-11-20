@@ -192,6 +192,7 @@ export const TicketDetailsCard = () => {
 
 
 	const groupsHandle = useRef(null);
+	const groupsViewpoint = formData.watch(viewProps?.name);
 
 	const readOnlyGroups = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, ticket.type);
 
@@ -209,7 +210,13 @@ export const TicketDetailsCard = () => {
 								<BreakableText>{ticket.title}</BreakableText>
 								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 							</>}
-							actions={readOnlyGroups ? null : <AddGroupButton newGroupsHandle={groupsHandle} />}
+							actions={readOnlyGroups ? null : (
+								<AddGroupButton
+									newGroupsHandle={groupsHandle}
+									hasHiddenGroups={groupsViewpoint?.state?.hidden?.length > 0}
+									hasShownGroups={groupsViewpoint?.state?.shown?.length > 0}
+								/>
+							)}
 						/>
 						<ExpandableCard ExpandedComponent={null}>
 							<InputController

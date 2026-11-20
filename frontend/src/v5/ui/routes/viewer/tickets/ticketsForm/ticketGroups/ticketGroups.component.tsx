@@ -158,9 +158,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 			return override ? convertToV4GroupNodes(override.group as Group) : [];
 		});
 		if (showNodes) {
-			dispatch(TreeActions.showNodesBySharedIds(objects));
+			dispatch(TreeActions.isolateNodesBySharedIds(objects));
 		} else {
-			dispatch(TreeActions.hideNodesBySharedIds(objects));
+			dispatch(TreeActions.showAllNodes());
 		}
 	};
 
