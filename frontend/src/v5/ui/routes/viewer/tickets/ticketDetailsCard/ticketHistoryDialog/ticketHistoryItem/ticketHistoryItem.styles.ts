@@ -17,24 +17,29 @@
 
 import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
-import { ColumnWidths } from '../../ticketHistory.helpers';
+import { ColumnWidths } from '../ticketHistory.helpers';
 
-export const ChangesContainer = styled.div`
-	flex: 1;
-	min-width: 0;
-`;
-
-export const ChangeRow = styled.div`
+export const ChangePropertyColumn = styled.div`
 	flex-shrink: 0;
-	display: grid;
-	grid-template-columns: ${ColumnWidths.ChangePropertyName}px minmax(0, 1fr);
+	display: block;
+	width: ${ColumnWidths.ChangePropertyName}px;
 `;
 
-export const ChangePropertyName = styled(TextOverflow)`
+export const ChangeDetailsColumn = styled.div`
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+`;
+
+const ChangeRow = styled.div`
+	height: 24px;
+`;
+
+export const ChangePropertyRow = styled(ChangeRow)`
 	font-weight: bold;
 `;
 
-export const DetailContainer = styled.div`
+export const ChangeDetailRow = styled(ChangeRow)`
 	display: inline-flex;
 	min-width: 0;
 	white-space: nowrap;
@@ -49,4 +54,5 @@ export const ErrorMessage = styled.span`
 export const ChangeValue = styled(TextOverflow)`
 	font-weight: bold;
 	flex-grow: 0;
+	align-content: center;
 `;

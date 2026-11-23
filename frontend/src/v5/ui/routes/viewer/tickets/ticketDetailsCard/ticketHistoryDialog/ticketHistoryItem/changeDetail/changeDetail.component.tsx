@@ -17,7 +17,7 @@
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { difference, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { ChangeValue, ErrorMessage } from './changesTable.styles';
+import { ChangeValue, ErrorMessage } from '../ticketHistoryItem.styles';
 import { isArrayChange, isDateChange, isDescribableChange } from '../../ticketHistory.helpers';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { ITemplate, TicketChange } from '@/v5/store/tickets/tickets.types';

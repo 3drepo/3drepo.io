@@ -19,11 +19,15 @@ import { memo } from 'react';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
 import { ItemContainer, Author, TimestampContainer, ActionType, ImportChip, UpdateChip } from '../ticketHistoryDialog.styles';
-import { ChangesTable } from './changesTable/changesTable.component';
 import { FormattedMessage } from 'react-intl';
 import type { ITemplate, ITicketHistory } from '@/v5/store/tickets/tickets.types';
 import { TextOverflow } from '@controls/textOverflow/textOverflow.component';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { getPathsOfChanges } from '../ticketHistory.helpers';
+import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
+import { ChangePropertyColumn, ChangeDetailsColumn, ChangeDetailRow, ChangePropertyRow } from './ticketHistoryItem.styles';
+import { ChangeDetail } from './changeDetail/changeDetail.component';
+import { get } from 'lodash';
 
 export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, template }: ITicketHistory & { template: ITemplate }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -39,8 +43,9 @@ export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, t
 				</ImportChip>
 			</ActionType>
 		</ItemContainer>
-	); 
+	);
 
+	const paths = getPathsOfChanges(changes);
 	return (
 		<ItemContainer>
 			<TimestampContainer>{formatDateTime(timestamp)}</TimestampContainer>
@@ -53,7 +58,18 @@ export const TicketHistoryItem = memo(({ author, timestamp, changes, imported, t
 					<FormattedMessage id="ticketHistoryDialog.listItem.update" defaultMessage="Update" />
 				</UpdateChip>
 			</ActionType>
-			<ChangesTable template={template} changes={changes} />
+			<ChangePropertyColumn>
+				{paths.map((propertyName) => (
+					<ChangePropertyRow>{getPropertyLabel(propertyName)}</ChangePropertyRow>
+				))}
+			</ChangePropertyColumn>
+			<ChangeDetailsColumn>
+				{paths.map((propertyName) => (
+					<ChangeDetailRow>
+						<ChangeDetail template={template} propertyName={propertyName} change={get(changes, propertyName)} />
+					</ChangeDetailRow>
+				))}
+			</ChangeDetailsColumn>
 		</ItemContainer>
 	);
 });
