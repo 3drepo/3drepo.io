@@ -20,19 +20,35 @@ import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import { CheckboxProps } from '@mui/material';
 import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
-import { Checkbox, EyeCheckbox, HighlightIcon, IndeterminateEye, SelectedButton } from './groupOverrideAction.styles';
+import { ActionButton, Checkbox, HighlightIcon } from './groupOverrideAction.styles';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 
+
+// The props for checkbox is only used when the group type is COLORED
 export const GroupOverrideAction = (props: CheckboxProps) => {
 	const { groupType } = useContext(TicketGroupsContext);
 
 	if (groupType === OverrideType.COLORED) return (<Checkbox {...props} />);
+
 	if (groupType === OverrideType.SELECTED) {
 		return (
-			<SelectedButton onClick={props.onClick} disabled={props.disabled}>
+			<ActionButton onClick={props.onClick} disabled={props.disabled}>
 				<HighlightIcon />
-			</SelectedButton>
+			</ActionButton>
 		);
 	}
-	return (<EyeCheckbox icon={<EyeIcon />} checkedIcon={<EyeDisabledIcon />} indeterminateIcon={<IndeterminateEye />} {...props} />);
+	if (groupType === OverrideType.HIDDEN) {
+		return (
+			<ActionButton onClick={props.onClick} disabled={props.disabled}>
+				<EyeDisabledIcon />
+			</ActionButton>
+		);
+	}
+	if (groupType === OverrideType.SHOWN) {
+		return (
+			<ActionButton onClick={props.onClick} disabled={props.disabled}>
+				<EyeIcon />
+			</ActionButton>
+		);
+	}
 };

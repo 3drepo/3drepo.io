@@ -16,13 +16,10 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Group, OverrideType } from '@/v5/store/tickets/tickets.types';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { TreeActions } from '@/v4/modules/tree';
+import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
 import { Accordion, NumberContainer, TitleContainer } from './groupsAccordion.styles';
@@ -41,7 +38,6 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		highlightedKey,
 		clearHighlightedKey,
 	} = useContext(TicketGroupsContext);
-	const dispatch = useDispatch();
 	
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const keys = overrides.map(({ key }) => key);
@@ -51,15 +47,6 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		if (groupType === OverrideType.SELECTED) {
-			dispatch(TreeActions.clearCurrentlySelected());
-			overrides.forEach(({ group, color }) => {
-				const objects = convertToV4GroupNodes(group as Group);
-				dispatch(TreeActions.showNodesBySharedIds(objects));
-				dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((value) => value / 255)));
-			});
-			return;
-		}
 		setCollectionIsChecked(keys, state !== GroupState.CHECKED);
 	};
 

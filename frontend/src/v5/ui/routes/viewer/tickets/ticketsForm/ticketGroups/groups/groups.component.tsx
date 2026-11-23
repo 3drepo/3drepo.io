@@ -18,7 +18,7 @@
 import { groupBy, isString, partition } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Group, GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
@@ -43,7 +43,7 @@ import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.h
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
-	const { getCollectionState, setCollectionIsChecked, deleteCollection, groupType } = useContext(TicketGroupsContext);
+	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
 
 	const overrideKeys = overrides.map(({ key }) => key);
 	const state = getCollectionState(overrideKeys);
@@ -55,15 +55,6 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 
 	const handleCheckboxClick = (e) => {
 		e.stopPropagation();
-		if (groupType === OverrideType.SELECTED) {
-			dispatch(TreeActions.clearCurrentlySelected());
-			overrides.forEach(({ group, color }) => {
-				const objects = convertToV4GroupNodes(group as Group);
-				dispatch(TreeActions.showNodesBySharedIds(objects));
-				dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((value) => value / 255)));
-			});
-			return;
-		}
 		// setting the state for all the groups descendants of this collection
 		setCollectionIsChecked(overrideKeys, state !== GroupState.CHECKED);
 	};

@@ -27,14 +27,12 @@ import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
 import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
 import { ROUTES } from '../../constants/routes';
-import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
-	mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
+	mergeGroupsDataFromViewpoint } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { ModelActions } from '../model';
-import { selectCurrentRevisionId } from '../model';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';

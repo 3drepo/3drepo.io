@@ -112,6 +112,18 @@ export const GroupItem = ({ override }: GroupProps) => {
 		}
 	};
 
+	const handleGroupAction = (e) => {
+		preventPropagation(e);
+		const objects = convertToV4GroupNodes(group as Group);
+		if (groupType === OverrideType.HIDDEN) {
+			dispatch(TreeActions.hideNodesBySharedIds(objects));
+		} else if (groupType === OverrideType.SHOWN) {
+			dispatch(TreeActions.isolateNodesBySharedIds(objects));
+		} else {
+			handleToggleClick(e);
+		}
+	};
+
 	const alphaColor = (color || [255, 255, 255]).concat(opacity) as RgbArray;
 	const alphaHexColor = rgbToHex(alphaColor);
 
@@ -169,7 +181,7 @@ export const GroupItem = ({ override }: GroupProps) => {
 			</Headline>
 			<GroupOverrideAction
 				checked={checked}
-				onClick={handleToggleClick}
+				onClick={handleGroupAction}
 			/>
 		</Container>
 	);

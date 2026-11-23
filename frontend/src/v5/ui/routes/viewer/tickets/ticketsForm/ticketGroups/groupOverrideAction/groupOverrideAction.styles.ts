@@ -17,7 +17,6 @@
 
 import { Checkbox as CheckboxBase, IconButton } from '@mui/material';
 import styled from 'styled-components';
-import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import HighlightIconBase from '@assets/icons/outlined/highlight-outlined.svg';
 
 
@@ -26,7 +25,7 @@ export const Checkbox = styled(CheckboxBase)`
 	margin-right: 0;
 `;
 
-export const SelectedButton = styled(IconButton)`
+export const ActionButton = styled(IconButton)`
 	margin-left: auto;
 	margin-right: 0;
 	padding: 9px;
@@ -39,14 +38,4 @@ export const SelectedButton = styled(IconButton)`
 
 export const HighlightIcon = styled(HighlightIconBase)`
 	color: inherit;
-`;
-
-export const EyeCheckbox = styled(Checkbox)`
-	&, &.Mui-checked {
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-`;
-
-export const IndeterminateEye = styled(EyeDisabledIcon)`
-	color: ${({ theme }) => theme.palette.base.light};
 `;

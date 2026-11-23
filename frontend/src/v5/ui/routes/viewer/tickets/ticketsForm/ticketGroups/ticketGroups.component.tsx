@@ -21,7 +21,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, differenceBy, isEmpty, isString, uniqBy, xor } from 'lodash';
+import { cloneDeep, differenceBy, isEmpty, isString, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -83,11 +83,10 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 			shown: currentState.shown && addKeysToGroups(currentState.shown),
 		};
 	}, [value]);
-	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
-	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
-	const [selectedShownKeys, setSelectedShownKeys] = useState<string[]>(() => (state.shown || []).map(({ key }) => key));
-	const [selectedHiddenKeys, setSelectedHiddenKeys] = useState<string[]>(() => (state.hidden || []).map(({ key }) => key));
+	const [selectedColouredKeys, setColouredKeys] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedColorKeys, setSelectedColorKeys] = useState<string[]>(() => (state.colored || []).map(({ key }) => key));
+	
+	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
 	const previousSelectedGroups = useRef<GroupOverride[]>([]);
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const [isLoading, setIsLoading] = useState(hasClearedOverrides);
@@ -96,20 +95,20 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
 
-	const clearHighlightedKey = () => setHighlightedOverride(NO_OVERRIDE_SELECTED);
+	const clearHighlightedKey = () => setColouredKeys(NO_OVERRIDE_SELECTED);
 
-	const onSetHighlightedKey = (type) => (key) => setHighlightedOverride({ type, key });
+	const onSetHighlightedKey = (type) => (key) => setColouredKeys({ type, key });
 
 	const getHighlightedKeyByType = (type) => {
-		if (highlightedOverride.type !== type) return null;
-		return highlightedOverride.key;
+		if (selectedColouredKeys.type !== type) return null;
+		return selectedColouredKeys.key;
 	};
 
 	const onDeleteGroups = (type) => (keys: string[]) => {
 		const newVal = cloneDeep(value);
 		newVal.state[type] = state[type].filter((override) => !keys.includes(getGroupKey(override)));
 		onChange?.(newVal);
-		if (highlightedOverride.type === type && keys.includes(highlightedOverride.key)) {
+		if (selectedColouredKeys.type === type && keys.includes(selectedColouredKeys.key)) {
 			clearHighlightedKey();
 		}
 	};
@@ -129,38 +128,24 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	}, [onSetEditGroup, newGroupsHandle]);
 
 	const onSelectedHiddenGroupChange = (keys: string[]) => {
-		setSelectedHiddenKeys(keys);
-		if (highlightedOverride.type === OverrideType.HIDDEN && keys.includes(highlightedOverride.key)) {
-			setHighlightedOverride(NO_OVERRIDE_SELECTED);
-		}
-		const diffKeys = xor(keys, selectedHiddenKeys);
-		const hideNodes = keys.length > selectedHiddenKeys.length;
-		const objects = diffKeys.flatMap((key) => {
+		const objects = keys.flatMap((key) => {
 			const override = getGroupsByKey(OverrideType.HIDDEN).get(key)?.groupOverride;
 			return override ? convertToV4GroupNodes(override.group as Group) : [];
 		});
-		if (hideNodes) {
+
+		if (objects.length) {
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
-		} else {
-			dispatch(TreeActions.showNodesBySharedIds(objects));
 		}
 	};
 
 	const onSelectedShownGroupChange = (keys: string[]) => {
-		setSelectedShownKeys(keys);
-		if (highlightedOverride.type === OverrideType.SHOWN && keys.includes(highlightedOverride.key)) {
-			setHighlightedOverride(NO_OVERRIDE_SELECTED);
-		}
-		const diffKeys = xor(keys, selectedShownKeys);
-		const showNodes = keys.length > selectedShownKeys.length;
-		const objects = diffKeys.flatMap((key) => {
+		const objects = keys.flatMap((key) => {
 			const override = getGroupsByKey(OverrideType.SHOWN).get(key)?.groupOverride;
 			return override ? convertToV4GroupNodes(override.group as Group) : [];
 		});
-		if (showNodes) {
+
+		if (objects.length) {
 			dispatch(TreeActions.isolateNodesBySharedIds(objects));
-		} else {
-			dispatch(TreeActions.showAllNodes());
 		}
 	};
 
@@ -194,7 +179,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		onChange?.(newVal);
 		cancelEdition();
 
-		if (highlightedOverride.key === overrideValue.key && editingOverride.type === highlightedOverride.type) {
+		if (selectedColouredKeys.key === overrideValue.key && editingOverride.type === selectedColouredKeys.type) {
 			clearHighlightedKey();
 		}
 	};
@@ -204,10 +189,10 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	}, [value, isDirty]);
 
 	useEffect(() => {
-		if (highlightedOverride.key === NO_OVERRIDE_SELECTED.key) {
+		if (selectedColouredKeys.key === NO_OVERRIDE_SELECTED.key) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
-	}, [highlightedOverride]);
+	}, [selectedColouredKeys]);
 
 	useEffect(() => {
 		const colored = selectedColorKeys
