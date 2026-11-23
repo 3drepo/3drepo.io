@@ -21,7 +21,10 @@ import { ChangeValue, ErrorMessage } from './changesTable.styles';
 import { isArrayChange, isDateChange, isDescribableChange } from '../../ticketHistory.helpers';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { ITemplate, TicketChange } from '@/v5/store/tickets/tickets.types';
-import { JobOrUserValue } from './jobOrUserValue.component';
+import { Tooltip } from '@mui/material';
+import { AssigneesValuesDisplay } from '@controls/assigneesSelect/assigneeValuesDisplay/assigneeValuesDisplay.component';
+
+const MAX_LIST_LENGTH = 5;
 
 type ChangeDetailProps = {
 	propertyName: string;
@@ -29,29 +32,23 @@ type ChangeDetailProps = {
 	template: ITemplate;
 };
 
-const Value = ({ value, propertyDef }) => {
-	if (propertyDef?.values === 'jobsAndUsers') {
-		return <JobOrUserValue jobOrUserId={value} />;
-	}
-	if (isDateChange(propertyDef?.type)) {
-		return <ChangeValue>{formatDateTime(value)}</ChangeValue>;
-	}
-	return <ChangeValue>{value?.toString() ?? ''}</ChangeValue>;
-};
-
-const CommaSeparatedList = ({ value, propertyDef }) =>{
-	if (!isArrayChange(propertyDef?.type)) return <Value value={value} propertyDef={propertyDef} />;
-	return (
-		<>
-			{value.reduce((acc, item, index) => {
-				acc.push(<Value key={`value-${index}`} value={item} propertyDef={propertyDef} />);
-				if (index < value.length - 1) {
-					acc.push(<span key={`comma-${index}`}>,&nbsp;</span>);
-				}
-				return acc;
-			}, [])}
-		</>
+const ParseValues = ({ value, propertyDef }) =>{
+	if (propertyDef?.values === 'jobsAndUsers') return <AssigneesValuesDisplay value={value} maxItems={MAX_LIST_LENGTH} />;
+	if (isDateChange(propertyDef?.type)) return <ChangeValue>{formatDateTime(value)}</ChangeValue>;
+	if (!isArrayChange(propertyDef?.type)) return <ChangeValue>{value.toString()}</ChangeValue>;
+	if (value.length > MAX_LIST_LENGTH) return (
+		<Tooltip title={value.join(',\n ')} placement="bottom">
+			<span>
+				<ChangeValue>
+					<FormattedMessage
+						id="ticketHistory.changesTable.items"
+						defaultMessage="{count} items"
+						values={{ count: value.length }} />
+				</ChangeValue>
+			</span>
+		</Tooltip>
 	);
+	return <ChangeValue>{value.join(', ')}</ChangeValue>;
 };
 
 export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailProps) => {
@@ -78,7 +75,7 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 		if (isDescribableChange(propertyDef.type)) {
 			return <FormattedMessage
 				id="ticketHistory.changesTable.deleted.specific"
-				defaultMessage="Deleted&nbsp;{from}" values={{ from: <CommaSeparatedList value={from} propertyDef={propertyDef} /> }} />;
+				defaultMessage="Deleted&nbsp;{from}" values={{ from: <ParseValues value={from} propertyDef={propertyDef} /> }} />;
 		}
 		// If value is complex return a generic deleted message
 		return <FormattedMessage
@@ -88,7 +85,7 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 		if (isDescribableChange(propertyDef.type)) {
 			return <FormattedMessage
 				id="ticketHistory.changesTable.set.specific"
-				defaultMessage="Set to&nbsp;{to}" values={{ to: <CommaSeparatedList value={to} propertyDef={propertyDef} /> }} />;
+				defaultMessage="Set to&nbsp;{to}" values={{ to: <ParseValues value={to} propertyDef={propertyDef} /> }} />;
 		}
 		// If value is complex return a generic set message
 		return <FormattedMessage
@@ -105,12 +102,12 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 							<FormattedMessage
 								id="ticketHistory.changesTable.array.removed"
 								defaultMessage="Removed&nbsp;{removed}&nbsp;"
-								values={{ removed: <CommaSeparatedList value={removed} propertyDef={propertyDef} /> }} />}
+								values={{ removed: <ParseValues value={removed} propertyDef={propertyDef} /> }} />}
 						{added.length > 0 &&
 							<FormattedMessage
 								id="ticketHistory.changesTable.array.added"
 								defaultMessage="Added&nbsp;{added}"
-								values={{ added: <CommaSeparatedList value={added} propertyDef={propertyDef} /> }} />}
+								values={{ added: <ParseValues value={added} propertyDef={propertyDef} /> }} />}
 					</>
 				);
 			}
@@ -119,8 +116,8 @@ export const ChangeDetail = ({ propertyName, change, template }: ChangeDetailPro
 				id="ticketHistory.changesTable.changed.specific"
 				defaultMessage="Changed from&nbsp;{from}&nbsp;to&nbsp;{to}"
 				values={{
-					from: <Value value={from} propertyDef={propertyDef} />,
-					to: <Value value={to} propertyDef={propertyDef} />,
+					from: <ParseValues value={from} propertyDef={propertyDef} />,
+					to: <ParseValues value={to} propertyDef={propertyDef} />,
 				}}
 			/>;
 		}

@@ -38,6 +38,7 @@ export const DetailContainer = styled.div`
 	display: inline-flex;
 	min-width: 0;
 	white-space: nowrap;
+	align-items: center;
 `;
 
 export const ErrorMessage = styled.span`
