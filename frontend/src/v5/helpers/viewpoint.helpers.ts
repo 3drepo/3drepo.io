@@ -310,7 +310,7 @@ export const generateViewpointV4 = async (name = '', withScreenshot = false) => 
 	return generatedObject;
 };
 
-export const toSharedIds = (node_ids: string[]) => selectGetSharedIdsFromNodeIds(getState(), node_ids);
+const toSharedIds = (node_ids: string[]) => selectGetSharedIdsFromNodeIds(getState(), node_ids);
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
