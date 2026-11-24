@@ -74,6 +74,7 @@ const addKeysToGroups = (groups: GroupOverride[] = []) => groups.map((groupOverr
 export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
 	const colouredContextRef = useRef<TicketGroupsContextType | null>(null);
+	const [initialized, setInitialized] = useState(false);
 
 	const state: Partial<ViewpointState> = useMemo(() => {
 		const currentState: Partial<ViewpointState> = value?.state || {};
@@ -203,10 +204,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	}, [value, isDirty]);
 
 	useEffect(() => {
-		if (!hasClearedOverrides && !isLoading) {
-			colouredContextRef.current?.clearAllChecks();
-		}
-
 		if (!isLoading || !hasClearedOverrides) return;
 		setIsLoading(false);
 	}, [hasClearedOverrides, isLoading]);
@@ -214,9 +211,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 
 	useEffect(() => {
 		ViewpointsActionsDispatchers.clearColorOverrides();
-
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedKey);
-
 		TicketsCardActionsDispatchers.setEditingGroups(true);
 		return () => {
 			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedKey);
@@ -249,7 +244,14 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		if (state.selected?.length > 0) onSelectedGroupsAction(state.selected?.map((override) => override.key));
 		if (state.shown?.length > 0) onShownGroupsAction(state.shown?.map((override) => override.key));
 		if (state.hidden?.length > 0) onHiddenGroupsAction(state.hidden?.map((override) => override.key));
+		setInitialized(true);
 	}, [isLoading]);
+
+
+	useEffect(() => {
+		if (!hasClearedOverrides || !initialized) return;
+		colouredContextRef.current?.clearAllChecks();
+	}, [hasClearedOverrides, initialized]);
 
 	if (isLoading) return (<Loader />);
 	return (
