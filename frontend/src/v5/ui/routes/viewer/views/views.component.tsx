@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { CardContainer, CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { formatMessage } from '@/v5/services/intl';
@@ -33,6 +33,8 @@ import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
+import { ViewerParams } from '../../routes.constants';
+import { useParams } from 'react-router-dom';
 
 const Table = forwardRef(({ children, ...props }: any, ref: any) => { 
 	const queries = ViewpointsHooksSelectors.selectQueries();
@@ -68,12 +70,20 @@ const EmptyPlaceholder = forwardRef((props, ref: any) => {
 });
 
 export const Views = () => {
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 	const [editMode, setEditMode] = useState(false);
 	const [createMode, setCreateMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
 	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
+
+	useEffect(() => {
+		ViewpointsActionsDispatchers.subscribeOnViewpointChanges(teamspace, containerOrFederation);
+		return () => {
+			ViewpointsActionsDispatchers.unsubscribeOnViewpointChanges(teamspace, containerOrFederation);
+		};
+	}, [teamspace, containerOrFederation]);
 
 	if (isPending) {
 		return (
