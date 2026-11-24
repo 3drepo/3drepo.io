@@ -19,9 +19,10 @@ import { GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import { createContext } from 'react';
 import { GroupState } from './ticketGroupsContext.helper';
 
-type TicketGroupsContextType = {
+export type TicketGroupsContextType = {
 	overrides: GroupOverride[],
 	groupType: OverrideType,
+	onOverrideAction: (keys: string[]) => void,
 	editGroup: (key?: string) => void,
 	deleteGroup: (key: string) => void,
 	deleteCollection: (keys: string[]) => void,
@@ -29,20 +30,23 @@ type TicketGroupsContextType = {
 	setGroupIsChecked: (key: string, isChecked: boolean) => void,
 	getCollectionState: (keys: string[]) => GroupState,
 	highlightedKey: string | null,
-	setCollectionIsChecked: (keys: string[], isChecked: boolean) => void,
+	toggleCollectionCheck: (keys: string[]) => string[],
 	setHighlightedKey: (key: string) => void,
 	clearHighlightedKey: () => void,
+	clearAllChecks: () => void,
 };
 
 export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	overrides: [],
 	groupType: null,
+	onOverrideAction: () => {},
 	deleteGroup: () => {},
 	deleteCollection: () => {},
 	editGroup: () => {},
 	setGroupIsChecked: () => {},
 	getGroupIsChecked: () => null,
-	setCollectionIsChecked: () => {},
+	toggleCollectionCheck: () => [],
+	clearAllChecks: () => {},
 	getCollectionState: () => null,
 	highlightedKey: null,
 	setHighlightedKey: () => {},

@@ -18,7 +18,7 @@
 import { GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
-import { TicketGroupsContext } from './ticketGroupsContext';
+import { TicketGroupsContext, TicketGroupsContextType } from './ticketGroupsContext';
 import { GroupState } from './ticketGroupsContext.helper';
 
 /* eslint-disable no-param-reassign */
@@ -26,21 +26,23 @@ type TicketGroupsContextComponentProps = {
 	overrides: GroupOverride[],
 	groupType: OverrideType,
 	children: any,
-	onSelectedGroupsChange?: (keys: string[]) => void,
+	onOverrideAction?: (keys: string[]) => void,
 	onDeleteGroups?: (keys: string[]) => void,
 	onEditGroup?: (key?: string) => void,
 	highlightedKey: string,
 	setHighlightedKey: (key: string) => void,
 	clearHighlightedKey: () => void,
+	ref?: React.RefObject<TicketGroupsContextType | null>
 };
 export const TicketGroupsContextComponent = ({
 	children,
 	overrides,
+	onOverrideAction = () => {},
 	onDeleteGroups,
-	onSelectedGroupsChange,
 	onEditGroup,
 	highlightedKey,
 	clearHighlightedKey,
+	ref,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
 	const [checkedKeys, setCheckedKeys] = useState<string[]>(overrides.map(({ key }) => key).filter(Boolean));
@@ -59,9 +61,12 @@ export const TicketGroupsContextComponent = ({
 		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const setCollectionIsChecked = (keys: string[], state: boolean) => setCheckedKeys(
-		state ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys),
-	);
+	const toggleCollectionCheck = (keys: string[]) =>  {
+		const checked = getCollectionState(keys) !== GroupState.CHECKED;
+		const newCheckedKeys = checked ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys);
+		setCheckedKeys(newCheckedKeys);
+		return newCheckedKeys;
+	};
 
 	useEffect(() => {
 		const keys = overrides.map(({ key }) => key).filter(Boolean);
@@ -73,25 +78,29 @@ export const TicketGroupsContextComponent = ({
 		previousKeys.current = new Set(keys);
 	}, [overrides]);
 
-	useEffect(() => {
-		onSelectedGroupsChange(checkedKeys);
-	}, [checkedKeys]);
+	const value = {
+		...contextValue,
+		onOverrideAction,
+		deleteGroup: (key) => onDeleteGroups([key]),
+		deleteCollection: onDeleteGroups,
+		editGroup: onEditGroup,
+		getGroupIsChecked,
+		setGroupIsChecked,
+		toggleCollectionCheck,
+		getCollectionState,
+		overrides: _.sortBy(overrides || [], 'prefix'),
+		highlightedKey,
+		clearHighlightedKey,
+		clearAllChecks: () => setCheckedKeys([]),
+	};
+
+	if (ref) {
+		ref.current = value;
+	}
 
 	return (
 		<TicketGroupsContext.Provider
-			value={{
-				...contextValue,
-				deleteGroup: (key) => onDeleteGroups([key]),
-				deleteCollection: onDeleteGroups,
-				editGroup: onEditGroup,
-				getGroupIsChecked,
-				setGroupIsChecked,
-				setCollectionIsChecked,
-				getCollectionState,
-				overrides: _.sortBy(overrides || [], 'prefix'),
-				highlightedKey,
-				clearHighlightedKey,
-			}}
+			value={value}
 		>
 			{children}
 		</TicketGroupsContext.Provider>

@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { OverrideType } from '@/v5/store/tickets/tickets.types';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
@@ -26,37 +25,27 @@ import { Accordion, NumberContainer, TitleContainer } from './groupsAccordion.st
 import { Groups } from '../groups/groups.component';
 import { GroupOverrideAction } from '../groupOverrideAction/groupOverrideAction.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
-import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import { getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
-		setCollectionIsChecked,
 		overrides,
 		groupType,
-		highlightedKey,
-		clearHighlightedKey,
+		onOverrideAction,
 	} = useContext(TicketGroupsContext);
 	
-	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
+	// const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const keys = overrides.map(({ key }) => key);
 	const overridesCount = overrides.length;
 	const state = getCollectionState(keys);
 	const isColored = groupType === OverrideType.COLORED;
 
-	const toggleCheckbox = (e) => {
+	const onOverrideClick = (e) => {
 		e.stopPropagation();
-		setCollectionIsChecked(keys, state !== GroupState.CHECKED);
+		onOverrideAction(keys);
 	};
-
-	useEffect(() => {
-		if (!isColored || !hasClearedOverrides) return;
-		setCollectionIsChecked(keys, false);
-		if (highlightedKey) {
-			clearHighlightedKey();
-		}
-	}, [hasClearedOverrides]);
 
 	return (
 		<Accordion
@@ -65,7 +54,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 				<TitleContainer>
 					{title}
 					<NumberContainer>{overridesCount}</NumberContainer>
-					<GroupOverrideAction {...getCollectionCheckboxState(state)} onClick={toggleCheckbox} />
+					<GroupOverrideAction {...getCollectionCheckboxState(state)} onClick={onOverrideClick} />
 				</TitleContainer>
 			)}
 			$overridesCount={overridesCount}

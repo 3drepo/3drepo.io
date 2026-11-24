@@ -39,11 +39,15 @@ import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { TicketContext } from '../../../ticket.context';
-import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import { getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
-	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
+	const {
+		getCollectionState,
+		deleteCollection,
+		onOverrideAction,
+	} = useContext(TicketGroupsContext);
 
 	const overrideKeys = overrides.map(({ key }) => key);
 	const state = getCollectionState(overrideKeys);
@@ -53,11 +57,11 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 
 	const dispatch = useDispatch();
 
-	const handleCheckboxClick = (e) => {
+	const handleGroupAction = (e) => {
 		e.stopPropagation();
-		// setting the state for all the groups descendants of this collection
-		setCollectionIsChecked(overrideKeys, state !== GroupState.CHECKED);
+		onOverrideAction(overrideKeys);
 	};
+
 	const handleDeleteCollection = (e) => {
 		e.stopPropagation();
 		DialogsActionsDispatchers.open('delete', {
@@ -97,7 +101,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 						</TicketButton>
 					</Buttons>
 					<GroupOverrideAction
-						onClick={handleCheckboxClick}
+						onClick={handleGroupAction}
 						{...getCollectionCheckboxState(state)}
 					/>
 				</>
