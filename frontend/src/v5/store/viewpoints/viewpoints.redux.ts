@@ -22,7 +22,7 @@ import { prepareGroup } from '@/v4/helpers/groups';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { IViewpoint } from './viewpoints.types';
+import { IViewpoint, IViewpointDetails } from './viewpoints.types';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -62,7 +62,7 @@ export interface IViewpointsState {
 	viewpointsGroups: Record<string, any>;
 	viewpointsGroupsBeingLoaded: Set<string>;
 	sortOrder: SortingDirection;
-	selectedViewpoint: IViewpoint | null;
+	selectedViewpoint: IViewpointDetails | null;
 	newViewpoint: IViewpoint | null;
 	queries: string[];
 }
@@ -87,6 +87,11 @@ const prepareViewpointGroups = (viewpoint: IViewpoint): IViewpoint => {
 			override_groups: viewpoint.viewpoint.override_groups.map(prepareGroup),
 		},
 	};
+};
+
+const addViewpointGroupsBeingLoaded = (state: IViewpointsState, { ids }: AddViewpointGroupsBeingLoadedAction) => {
+	const viewpointsGroupsBeingLoaded = new Set([...state.viewpointsGroupsBeingLoaded, ...ids]);
+	return { ...state, viewpointsGroupsBeingLoaded };
 };
 
 const setPendingState = (state: IViewpointsState, { pendingState }: SetPendingStateAction) => {
@@ -146,6 +151,7 @@ export const viewpointsReducer = createReducer(INITIAL_STATE, produceAll({
 	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
 	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[ViewpointsTypes.SET_QUERIES]: setQueries,
+	[ViewpointsTypes.ADD_VIEWPOINT_GROUPS_BEING_LOADED]: addViewpointGroupsBeingLoaded,
 	[ViewpointsTypes.RESET]: reset,
 }));
 
@@ -162,6 +168,7 @@ export type DeleteViewpointAction = Action<'DELETE_VIEWPOINT'> & { teamspace: st
 export type DeleteViewpointSuccessAction = Action<'DELETE_VIEWPOINT_SUCCESS'> & { viewpointId: string };
 export type SubscribeOnViewpointChangesAction = Action<'SUBSCRIBE_ON_VIEWPOINT_CHANGES'> & { teamspace: string; modelId: string };
 export type UnsubscribeOnViewpointChangesAction = Action<'UNSUBSCRIBE_ON_VIEWPOINT_CHANGES'> & { teamspace: string; modelId: string };
+export type AddViewpointGroupsBeingLoadedAction = Action<'ADD_VIEWPOINT_GROUPS_BEING_LOADED'> & { ids: string[] };
 export type PrepareNewViewpointAction = Action<'PREPARE_NEW_VIEWPOINT'> & { teamspace: string; modelId: string; viewpointName: string };
 export type SetNewViewpointAction = Action<'SET_NEW_VIEWPOINT'> & { newViewpoint: any };
 export type ShareViewpointLinkAction = Action<'SHARE_VIEWPOINT_LINK'> & { teamspace: string; modelId: string; viewpointId: string; project?: string; revision?: string };
@@ -202,5 +209,6 @@ export interface IViewpointsActionCreators {
 	viewpointReady: () => Action;
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
+	addViewpointGroupsBeingLoaded: (ids: string[]) => AddViewpointGroupsBeingLoadedAction;
 	reset: () => Action;
 }

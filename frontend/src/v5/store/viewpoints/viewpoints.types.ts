@@ -28,7 +28,7 @@ interface IScreenshot {
 	thumbnailUrl?: string;
 }
 
-interface IViewpointDetails {
+export interface IViewpointDetails {
 	right: number[];
 	up: number[];
 	view_dir: number[];
@@ -44,6 +44,8 @@ interface IViewpointDetails {
 	highlighted_group_id: string;
 	override_group_ids: string[];
 	override_groups?: any[];
+	transformation_group_ids: string[];
+	transformation_groups?: any[];
 	clippingPlanes?: ClippingPlane[];
 }
 

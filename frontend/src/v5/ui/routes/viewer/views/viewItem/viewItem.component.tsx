@@ -16,7 +16,7 @@
  */
 
 import { SyntheticEvent, useContext } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Tooltip } from '@mui/material';
 import { useParams } from 'react-router-dom';
@@ -156,7 +156,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 		}
 	};
 
-	const { register, handleSubmit, formState: { errors } } = useForm({
+	const { control, handleSubmit, formState: { errors } } = useForm({
 		mode: 'onChange',
 		defaultValues: { name: viewpoint._id ? viewpoint.name : '' },
 		resolver: yupResolver(ViewItemSchema),
@@ -179,15 +179,25 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 			<ViewThumbnail src={screenshot} alt={viewpoint.name} />
 			{active && editMode && (
 				<StyledForm onSubmit={handleSubmit(onSubmit)}>
-					<NewViewpointName
-						{...register('name')}
-						fullWidth
-						error={Boolean(errors.name)}
-						helperText={errors.name?.message}
-						label={formatMessage({ id: 'views.viewItem.nameFieldLabel', defaultMessage: 'View name' })}
-						placeholder={viewpoint.name}
-						autoFocus
-						onKeyDown={(e) => e.stopPropagation()}
+					<Controller
+						name="name"
+						control={control}
+						render={({ field: { ref, onBlur, onChange, value } }) => (
+							<NewViewpointName
+								fullWidth
+								error={Boolean(errors.name)}
+								helperText={errors.name?.message}
+								label={formatMessage({ id: 'views.viewItem.nameFieldLabel', defaultMessage: 'View name' })}
+								placeholder={viewpoint.name}
+								autoFocus
+								name="name"
+								value={value}
+								inputRef={ref}
+								onChange={onChange}
+								onBlur={onBlur}
+								onKeyDown={(e) => e.stopPropagation()}
+							/>
+						)}
 					/>
 					<IconsGroup>
 						<IconButton onClick={onClickCancelEdit}>

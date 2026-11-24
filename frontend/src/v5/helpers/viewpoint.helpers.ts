@@ -646,6 +646,7 @@ export const getLoadedGroupsIds = (viewpoint: IViewpoint) => {
 };
 
 export const getScreenshotFromView = (viewpoint: IViewpoint): string | null => {
+	// @ts-ignore
 	const screenshot = viewpoint?.screenshot || viewpoint?.viewpoint?.screenshot;
 	if (!screenshot) return null;
 	if (screenshot.thumbnailUrl) return screenshot.thumbnailUrl;
