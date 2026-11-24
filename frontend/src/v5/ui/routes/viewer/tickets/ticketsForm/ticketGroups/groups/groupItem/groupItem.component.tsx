@@ -101,25 +101,9 @@ export const GroupItem = ({ override }: GroupProps) => {
 
 	const onEditGroup = () => editGroup(key);
 
-	const handleToggleClick = (e) => {
-		preventPropagation(e);
-		if (groupType === OverrideType.SELECTED) {
-			setHighlightedKey(key);
-			return;
-		}
-		setGroupIsChecked(key, !checked);
-		if (isHidden && !checked && isHighlighted) {
-			clearHighlightedKey();
-		}
-	};
-
 	const handleGroupAction = (e) => {
 		preventPropagation(e);
-		if (groupType === OverrideType.HIDDEN || groupType === OverrideType.SHOWN) {
-			onOverrideAction([key]);
-			return;
-		}
-		handleToggleClick(e);
+		onOverrideAction([key]);
 	};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity) as RgbArray;
