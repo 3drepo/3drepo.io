@@ -3374,10 +3374,15 @@ export class UnityUtil {
 		UnityUtil.loadingResolve = undefined;
 		UnityUtil.rejectModelLoadedPromises();
 
+		// This makes sure if there is *not* a 'firstModel' promise, then one
+		// is created, ready to be resolved when the autorecovery logic in
+		// the viewer initiates the load.
+		UnityUtil.onLoaded();
+
 		UnityUtil.hideProgressBar();
 
 		// Tear down and rebuild the viewer.
-		await UnityUtil._loadUnity(newCanvas, undefined);
+		await UnityUtil._loadUnity(newCanvas, UnityUtil.unityDomain);
 
 		UnityUtil.getAutorecoveryCapture = () => {
 			return state;
