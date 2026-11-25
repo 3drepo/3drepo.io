@@ -35,6 +35,7 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { ViewerParams } from '../../routes.constants';
 import { useParams } from 'react-router-dom';
+import { NewView } from './viewItem/newView.component';
 
 const Table = forwardRef(({ children, ...props }: any, ref: any) => { 
 	const queries = ViewpointsHooksSelectors.selectQueries();
@@ -72,11 +73,11 @@ const EmptyPlaceholder = forwardRef((props, ref: any) => {
 export const Views = () => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
+	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 	const [editMode, setEditMode] = useState(false);
-	const [createMode, setCreateMode] = useState(false);
+	const [createMode, setCreateMode] = useState(!!newViewpoint);
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
-	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 
 	useEffect(() => {
 		ViewpointsActionsDispatchers.subscribeOnViewpointChanges(teamspace, containerOrFederation);
@@ -126,16 +127,7 @@ export const Views = () => {
 			/>
 			{createMode && newViewpoint && (
 				<NewViewpointItem>
-					<ViewItem
-						key={newViewpoint._id}
-						viewpoint={newViewpoint}
-						active
-						editMode
-						setActiveViewpoint={setActiveViewpoint}
-						setEditMode={setEditMode}
-						createMode={createMode}
-						setCreateMode={setCreateMode}
-					/>
+					<NewView viewpoint={newViewpoint} setCreateMode={setCreateMode}/>
 				</NewViewpointItem>
 			)}
 			<ViewsCardFooter setActiveViewpoint={setActiveViewpoint} createMode={createMode} setCreateMode={setCreateMode} />

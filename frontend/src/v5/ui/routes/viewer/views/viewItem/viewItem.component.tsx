@@ -107,7 +107,7 @@ const ViewEllipsisMenu = ({ onSetAsDefault, onDelete, isAdmin, defaultView }) =>
 	</EllipsisMenu>
 );
 
-export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setEditMode, createMode, setCreateMode }: IViewItem) => {
+export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setEditMode }: IViewItem) => {
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const isCommenter = isFederation
@@ -128,7 +128,6 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	const onClickCancelEdit = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		setEditMode(false);
-		setCreateMode(false);
 	};
 
 	const handleShareLink = (e: SyntheticEvent) => {
@@ -145,7 +144,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	};
 
 	const onClickItem = () => {
-		if (!editMode && !createMode) {
+		if (!editMode) {
 			const vp = { ...viewpoint };
 			if (isCalibrating && calibrationStep === 2) {
 				delete vp.viewpoint?.clippingPlanes;
@@ -164,14 +163,8 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 
 	const onSubmit = (values) => {
 		const newName = values.name || viewpoint.name;
-		if (createMode) {
-			const newViewpoint = { ...viewpoint, name: newName };
-			ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
-			setCreateMode(false);
-		} else {
-			ViewpointsActionsDispatchers.updateViewpointName(teamspace, containerOrFederation, viewpoint._id, newName);
-			setEditMode(false);
-		}
+		ViewpointsActionsDispatchers.updateViewpointName(teamspace, containerOrFederation, viewpoint._id, newName);
+		setEditMode(false);
 	};
 
 	return (
