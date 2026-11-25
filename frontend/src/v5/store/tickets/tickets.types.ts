@@ -195,6 +195,8 @@ export enum ViewpointGroupOverrideType {
 	COLORED,
 	HIDDEN,
 	TRANSFORMED,
+	SELECTED,
+	SHOWN,
 }
 
 export type TransformMatrix = [number, number, number, number,
