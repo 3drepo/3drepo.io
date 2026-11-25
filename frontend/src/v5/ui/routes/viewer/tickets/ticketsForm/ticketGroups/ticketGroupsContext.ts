@@ -32,7 +32,6 @@ export type TicketGroupsContextType = {
 	highlightedKey: string | null,
 	toggleCollectionCheck: (keys: string[]) => string[],
 	setHighlightedKey: (key: string) => void,
-	clearHighlightedKey: () => void,
 	clearAllChecks: () => void,
 };
 
@@ -50,6 +49,5 @@ export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	getCollectionState: () => null,
 	highlightedKey: null,
 	setHighlightedKey: () => {},
-	clearHighlightedKey: () => {},
 });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

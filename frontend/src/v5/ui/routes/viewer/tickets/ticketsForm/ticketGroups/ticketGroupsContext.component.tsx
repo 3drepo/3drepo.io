@@ -31,7 +31,6 @@ type TicketGroupsContextComponentProps = {
 	onEditGroup?: (key?: string) => void,
 	highlightedKey: string,
 	setHighlightedKey: (key: string) => void,
-	clearHighlightedKey: () => void,
 	ref?: React.RefObject<TicketGroupsContextType | null>
 };
 export const TicketGroupsContextComponent = ({
@@ -41,7 +40,6 @@ export const TicketGroupsContextComponent = ({
 	onDeleteGroups,
 	onEditGroup,
 	highlightedKey,
-	clearHighlightedKey,
 	ref,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
@@ -90,7 +88,6 @@ export const TicketGroupsContextComponent = ({
 		getCollectionState,
 		overrides: _.sortBy(overrides || [], 'prefix'),
 		highlightedKey,
-		clearHighlightedKey,
 		clearAllChecks: () => setCheckedKeys([]),
 	};
 
@@ -99,9 +96,7 @@ export const TicketGroupsContextComponent = ({
 	}
 
 	return (
-		<TicketGroupsContext.Provider
-			value={value}
-		>
+		<TicketGroupsContext.Provider value={value}>
 			{children}
 		</TicketGroupsContext.Provider>
 	);

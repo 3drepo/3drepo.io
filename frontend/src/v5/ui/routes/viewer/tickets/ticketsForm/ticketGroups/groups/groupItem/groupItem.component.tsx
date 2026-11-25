@@ -52,9 +52,7 @@ export const GroupItem = ({ override }: GroupProps) => {
 		onOverrideAction,
 		highlightedKey,
 		setHighlightedKey,
-		clearHighlightedKey,
 		getGroupIsChecked,
-		setGroupIsChecked,
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);

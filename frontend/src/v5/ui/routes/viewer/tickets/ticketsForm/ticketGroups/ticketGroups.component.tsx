@@ -239,7 +239,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	
 	useEffect(() => {
 		if (isLoading) return;
-
 		if (state.colored?.length > 0) onColouredGroupsAction(state.colored.map((override) => override.key), true);
 		if (state.selected?.length > 0) onSelectedGroupsAction(state.selected?.map((override) => override.key));
 		if (state.shown?.length > 0) onShownGroupsAction(state.shown?.map((override) => override.key));
@@ -265,7 +264,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					overrides={state.colored}
 					onEditGroup={onSetEditGroup(OverrideType.COLORED)}
 					highlightedKey={getHighlightedKeyByType(OverrideType.COLORED)}
-					clearHighlightedKey={clearHighlightedKey}
 					setHighlightedKey={onSetHighlightedKey(OverrideType.COLORED)}
 				>
 					<GroupsAccordion
@@ -281,7 +279,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					overrides={state.selected}
 					onEditGroup={onSetEditGroup(OverrideType.SELECTED)}
 					highlightedKey={getHighlightedKeyByType(OverrideType.SELECTED)}
-					clearHighlightedKey={clearHighlightedKey}
 					setHighlightedKey={onSetHighlightedKey(OverrideType.SELECTED)}
 				>
 					<GroupsAccordion
@@ -297,7 +294,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					overrides={state.shown}
 					onEditGroup={onSetEditGroup(OverrideType.SHOWN)}
 					highlightedKey={getHighlightedKeyByType(OverrideType.SHOWN)}
-					clearHighlightedKey={clearHighlightedKey}
 					setHighlightedKey={onSetHighlightedKey(OverrideType.SHOWN)}
 				>
 					<GroupsAccordion
@@ -315,7 +311,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 					onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
 					highlightedKey={getHighlightedKeyByType(OverrideType.HIDDEN)}
 					setHighlightedKey={onSetHighlightedKey(OverrideType.HIDDEN)}
-					clearHighlightedKey={clearHighlightedKey}
 				>
 					<GroupsAccordion
 						title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
