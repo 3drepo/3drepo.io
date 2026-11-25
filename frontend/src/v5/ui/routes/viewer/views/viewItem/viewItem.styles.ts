@@ -25,7 +25,7 @@ const THUMBNAIL_SIZE = 80;
 
 export const ViewpointItem = styled.div<{ active?: boolean }>`
 	display: grid;
-    grid-template-columns: ${THUMBNAIL_SIZE}px auto;
+	grid-template-columns: ${THUMBNAIL_SIZE}px auto;
 	padding: 8px;
 	box-sizing: border-box;
 	background-color: ${({ active, theme }) => active ? theme.palette.primary.lightest : theme.palette.primary.contrast};
