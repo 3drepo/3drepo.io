@@ -34,6 +34,7 @@ import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableHeaders/ticketsTableHeaders.helpers';
+import { templatePropertiesToTicketProperties } from './ticketsTemplates.helpers';
 export { templateAlreadyFetched } from './ticketsTemplates.helpers';
 
 
@@ -52,29 +53,6 @@ export const getEditableProperties = (template) => {
 		})),
 	};
 };
-
-const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
-	if (defaultValue != null) return defaultValue;
-	switch (type) {
-		case 'manyOf':
-		case 'tags': return [];
-		case 'boolean': return false;
-		case 'text':
-		case 'longText':
-		case 'oneOf': return '';
-		default: return null;
-	}
-};
-
-const templatePropertiesToTicketProperties = (properties = []) => (
-	properties.reduce(
-		(ticketProperties, prop) => ({
-			...ticketProperties,
-			[prop.name]: prop.default ?? getPropertyDefault(prop),
-		}),
-		{},
-	)
-);
 
 export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 	const properties = templatePropertiesToTicketProperties(template.properties);
