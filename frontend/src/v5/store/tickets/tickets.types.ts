@@ -191,14 +191,6 @@ export type V4GroupObjects = {
 	shared_ids: string[],
 };
 
-export enum ViewpointGroupOverrideType {
-	COLORED,
-	HIDDEN,
-	TRANSFORMED,
-	SELECTED,
-	SHOWN,
-}
-
 export type TransformMatrix = [number, number, number, number,
 	number, number, number, number,
 	number, number, number, number,
@@ -221,6 +213,7 @@ export enum OverrideType {
 	HIDDEN = 'hidden',
 	SHOWN = 'shown',
 	SELECTED = 'selected',
+	TRANSFORMED = 'transformed',
 }
 
 export type ViewpointState = {

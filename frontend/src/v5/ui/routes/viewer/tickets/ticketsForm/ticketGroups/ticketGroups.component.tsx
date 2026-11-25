@@ -74,7 +74,6 @@ const addKeysToGroups = (groups: GroupOverride[] = []) => groups.map((groupOverr
 export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
 	const colouredContextRef = useRef<TicketGroupsContextType | null>(null);
-	const [initialized, setInitialized] = useState(false);
 
 	const state: Partial<ViewpointState> = useMemo(() => {
 		const currentState: Partial<ViewpointState> = value?.state || {};
@@ -227,9 +226,11 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 	
-	const onColouredGroupsAction = (overrideKeys, initializing = false) => {
+	const onColouredGroupsAction = (overrideKeys, set = false) => {
+		const colorContext = colouredContextRef.current;
 		// When initializing the coloured context already has all the keys checked, so we don't need to toggle them.
-		const checkedKeys = !initializing ? colouredContextRef.current?.toggleCollectionCheck(overrideKeys) : overrideKeys;
+		const checkedKeys = set ?  colorContext?.setCollectionCheck(overrideKeys, true) : colorContext?.toggleCollectionCheck(overrideKeys);
+		
 		const colored = checkedKeys
 			.map((key) => getGroupsByKey(OverrideType.COLORED).get(key)?.groupOverride)
 			.filter(Boolean);
@@ -243,14 +244,12 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		if (state.selected?.length > 0) onSelectedGroupsAction(state.selected?.map((override) => override.key));
 		if (state.shown?.length > 0) onShownGroupsAction(state.shown?.map((override) => override.key));
 		if (state.hidden?.length > 0) onHiddenGroupsAction(state.hidden?.map((override) => override.key));
-		setInitialized(true);
 	}, [isLoading]);
 
-
 	useEffect(() => {
-		if (!hasClearedOverrides || !initialized) return;
+		if (!hasClearedOverrides) return;
 		colouredContextRef.current?.clearAllChecks();
-	}, [hasClearedOverrides, initialized]);
+	}, [hasClearedOverrides]);
 
 	if (isLoading) return (<Loader />);
 	return (

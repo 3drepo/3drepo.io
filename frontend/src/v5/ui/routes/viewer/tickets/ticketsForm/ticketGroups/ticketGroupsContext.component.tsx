@@ -48,9 +48,11 @@ export const TicketGroupsContextComponent = ({
 
 	const getGroupIsChecked = (key: string) => checkedKeys.includes(key);
 
-	const setGroupIsChecked = (key: string, state: boolean) => setCheckedKeys(
-		state ? _.union(checkedKeys, [key]) : _.without(checkedKeys, key),
-	);
+	const setCollectionCheck = (keys: string[], state: boolean) => {
+		const newKeys = state ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys);
+		setCheckedKeys(newKeys);
+		return newKeys;
+	};
 
 	const getCollectionState = (keys: string[] = []) => {
 		if (!keys.length) return GroupState.UNCHECKED;
@@ -61,9 +63,7 @@ export const TicketGroupsContextComponent = ({
 
 	const toggleCollectionCheck = (keys: string[]) =>  {
 		const checked = getCollectionState(keys) !== GroupState.CHECKED;
-		const newCheckedKeys = checked ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys);
-		setCheckedKeys(newCheckedKeys);
-		return newCheckedKeys;
+		return setCollectionCheck(keys, checked);
 	};
 
 	useEffect(() => {
@@ -83,7 +83,7 @@ export const TicketGroupsContextComponent = ({
 		deleteCollection: onDeleteGroups,
 		editGroup: onEditGroup,
 		getGroupIsChecked,
-		setGroupIsChecked,
+		setCollectionCheck,
 		toggleCollectionCheck,
 		getCollectionState,
 		overrides: _.sortBy(overrides || [], 'prefix'),
