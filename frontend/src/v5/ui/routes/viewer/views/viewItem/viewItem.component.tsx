@@ -56,8 +56,6 @@ interface IViewItem {
 	editMode?: boolean;
 	setActiveViewpoint: (viewpoint: IViewpoint | null) => void;
 	setEditMode: (mode: boolean) => void;
-	createMode: boolean;
-	setCreateMode: (mode: boolean) => void;
 }
 
 const ViewpointNameLabel = ({ name, defaultView }) => {
@@ -115,6 +113,8 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 		: ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const defaultViewSetting = ModelHooksSelectors.selectDefaultView();
+	// const newView = ViewpointsHooksSelectors.selectNewViewpoint();
+	const createMode = !!ViewpointsHooksSelectors.selectNewViewpoint();
 	const defaultView = defaultViewSetting ? viewpoint._id === defaultViewSetting.id : false;
 	const { isCalibrating, step: calibrationStep } = useContext(CalibrationContext);
 
@@ -144,7 +144,8 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	};
 
 	const onClickItem = () => {
-		if (!editMode) {
+		// console.log('@@ onClickItem', { editMode, createMode, newView });
+		if (!editMode && !createMode) {
 			const vp = { ...viewpoint };
 			if (isCalibrating && calibrationStep === 2) {
 				delete vp.viewpoint?.clippingPlanes;

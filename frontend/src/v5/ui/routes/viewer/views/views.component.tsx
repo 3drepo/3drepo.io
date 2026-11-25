@@ -75,7 +75,7 @@ export const Views = () => {
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 	const [editMode, setEditMode] = useState(false);
-	const [createMode, setCreateMode] = useState(!!newViewpoint);
+	// const [createMode, setCreateMode] = useState(!!newViewpoint);
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
 
@@ -120,17 +120,15 @@ export const Views = () => {
 						editMode={editMode}
 						setActiveViewpoint={setActiveViewpoint}
 						setEditMode={setEditMode}
-						createMode={createMode}
-						setCreateMode={setCreateMode}
 					/>
 				)}
 			/>
-			{createMode && newViewpoint && (
+			{newViewpoint && (
 				<NewViewpointItem>
-					<NewView viewpoint={newViewpoint} setCreateMode={setCreateMode}/>
+					<NewView viewpoint={newViewpoint} />
 				</NewViewpointItem>
 			)}
-			<ViewsCardFooter setActiveViewpoint={setActiveViewpoint} createMode={createMode} setCreateMode={setCreateMode} />
+			<ViewsCardFooter setActiveViewpoint={setActiveViewpoint} />
 		</CardContainer>
 	);
 };

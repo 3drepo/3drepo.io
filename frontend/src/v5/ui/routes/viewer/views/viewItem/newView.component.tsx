@@ -39,10 +39,9 @@ import { getScreenshotFromView } from '@/v5/helpers/viewpoint.helpers';
 
 interface IViewItem {
 	viewpoint: IViewpoint;
-	setCreateMode: (mode: boolean) => void;
 }
 
-export const NewView = ({ viewpoint, setCreateMode }: IViewItem) => {
+export const NewView = ({ viewpoint }: IViewItem) => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const screenshot = getScreenshotFromView(viewpoint);
 	const preserveDraft = useRef(true);
@@ -56,7 +55,6 @@ export const NewView = ({ viewpoint, setCreateMode }: IViewItem) => {
 	const onClickCancelEdit = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		preserveDraft.current = false;
-		setCreateMode(false);
 		ViewpointsActionsDispatchers.setNewViewpoint(null);
 	};
 
@@ -65,7 +63,6 @@ export const NewView = ({ viewpoint, setCreateMode }: IViewItem) => {
 		const newName = values.name || viewpoint.name;
 		const newViewpoint = { ...viewpoint, name: newName };
 		ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
-		setCreateMode(false);
 	};
 
 	useEffect(() => () => {
