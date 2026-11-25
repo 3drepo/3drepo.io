@@ -54,7 +54,7 @@ export const selectViewpointsList = createSelector(
 	(viewpoints, queries, sortOrder) => {
 		return values(viewpoints).sort(getSortingFunction({ column: ['name'], direction:[sortOrder] })).filter((viewpoint) => {
 			if (!queries.length) return true;
-			return queries.some((query) => viewpoint.name.includes(query));
+			return queries.some((query) => viewpoint.name.toLowerCase().includes(query.toLowerCase()));
 		});
 	},
 );
