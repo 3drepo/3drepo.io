@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SyntheticEvent, useEffect, useRef } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useParams } from 'react-router-dom';
@@ -45,10 +45,11 @@ export const NewView = ({ viewpoint }: IViewItem) => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const screenshot = getScreenshotFromView(viewpoint);
 	const preserveDraft = useRef(true);
+	const [hasEditedName, setHasEditedName] = useState(false);
 
-	const { control, handleSubmit, formState: { errors }, getValues } = useForm({
+	const { control, handleSubmit, formState: { errors }, getValues, clearErrors } = useForm({
 		mode: 'onChange',
-		defaultValues: { name: viewpoint.name ?? '' },
+		defaultValues: { name: '' },
 		resolver: yupResolver(ViewItemSchema),
 	});
 
@@ -69,7 +70,7 @@ export const NewView = ({ viewpoint }: IViewItem) => {
 		if (preserveDraft.current) {
 			ViewpointsActionsDispatchers.setNewViewpoint({
 				...viewpoint,
-				name: getValues('name'),
+				name: getValues('name') || viewpoint.name,
 			});
 		}
 	}, [getValues]);
@@ -77,7 +78,12 @@ export const NewView = ({ viewpoint }: IViewItem) => {
 	return (
 		<ViewpointItem active>
 			<ViewThumbnail src={screenshot} alt={viewpoint.name} />
-			<StyledForm onSubmit={handleSubmit(onSubmit)}>
+			<StyledForm onSubmit={handleSubmit(onSubmit, () => {
+				if (!hasEditedName) {
+					clearErrors('name');
+					onSubmit({ name: viewpoint.name });
+				}
+			})}>
 				<Controller
 					name="name"
 					control={control}
@@ -92,7 +98,10 @@ export const NewView = ({ viewpoint }: IViewItem) => {
 							name="name"
 							value={value}
 							inputRef={ref}
-							onChange={onChange}
+							onChange={(event) => {
+								setHasEditedName(true);
+								onChange(event);
+							}}
 							onBlur={onBlur}
 							onKeyDown={(e) => e.stopPropagation()}
 						/>
@@ -102,7 +111,7 @@ export const NewView = ({ viewpoint }: IViewItem) => {
 					<IconButton onClick={onClickCancelEdit}>
 						<CancelIcon />
 					</IconButton>
-					<SaveButton disabled={Boolean(errors.name)} type="submit">{formatMessage({ id: 'views.viewItem.saveButton', defaultMessage: 'Save' })}</SaveButton>
+					<SaveButton disabled={hasEditedName && Boolean(errors.name)} type="submit">{formatMessage({ id: 'views.viewItem.saveButton', defaultMessage: 'Save' })}</SaveButton>
 				</IconsGroup>
 			</StyledForm>
 		</ViewpointItem>
