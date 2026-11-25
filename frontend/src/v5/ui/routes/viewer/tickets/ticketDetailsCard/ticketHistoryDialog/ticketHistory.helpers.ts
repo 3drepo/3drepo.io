@@ -19,7 +19,7 @@ import { PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { has } from 'lodash';
 
 export const ColumnWidths = {
-	Timestamp: 104,
+	Timestamp: 108,
 	Author: 196,
 	ActionType: 70,
 	ChangePropertyName: 250,

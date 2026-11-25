@@ -68,8 +68,8 @@ export const Author = styled.div`
 	flex-shrink: 0;
 	width: ${ColumnWidths.Author}px;
 	display: inline-flex;
-	gap: 10px;
-	padding-right: 10px;
+	gap: 7px;
+	padding-right: 15px;
 	align-items: center;
 `;
 
