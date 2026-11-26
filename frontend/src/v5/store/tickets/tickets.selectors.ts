@@ -20,7 +20,7 @@ import { orderBy, get, isEmpty } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
-import { ITemplate, ITicket } from './tickets.types';
+import { ITemplate, ITicket, ITicketHistory } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProject, selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
@@ -259,3 +259,14 @@ export const selectTicketsTableLink = createSelector(
 		return ({ pathname, search });
 	},
 );
+
+export const selectTicketHistoryByTicketId = createSelector(
+	selectTicketsDomain,
+	(state, ticketId: string) => ticketId,
+	(state, ticketId) => state.ticketHistoryByTicketId[ticketId] || [],
+) as (state: any, ticketId: string) => ITicketHistory[];
+
+export const selectIsTicketHistoryPending = createSelector(
+	selectTicketsDomain,
+	(state) => state.isTicketHistoryPending,
+) as (state: any) => boolean;

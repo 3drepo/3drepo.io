@@ -238,3 +238,15 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict,
 };
+
+export type ITicketHistory = {
+	author: string;
+	timestamp: number;
+	changes?: any;
+	imported?: any;
+};
+
+export type TicketChange = {
+	from: any;
+	to: any;
+};

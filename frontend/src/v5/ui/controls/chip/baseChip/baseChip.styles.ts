@@ -52,7 +52,7 @@ export const selectedOrHoveredStyles = css`
 	}
 `;
 
-export const ChipContainer = styled.div<{ selected: boolean }>`
+export const ChipContainer = styled.div<{ selected?: boolean }>`
 	box-sizing: border-box;
 	height: 24px;
 	border-radius: 12px;
