@@ -17,8 +17,8 @@
 
 const Path = require('path');
 const { v5Path } = require('../../../interop');
-const { getUserByUsername } = require('../../../v5/models/users');
 
+const { getUserByUsername } = require(`${v5Path}/models/users`);
 const { ADMIN_DB } = require(`${v5Path}/handler/db.constants`);
 const { find } = require(`${v5Path}/handler/db`);
 const { sendEmail } = require(`${v5Path}/services/mailer`);

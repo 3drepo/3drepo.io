@@ -21,7 +21,7 @@ const { generateTemplateFn } = require('./common');
 const TEMPLATE_PATH = `${__dirname}/html/inviteeReminder.html`;
 
 const dataSchema = Yup.object({
-	daysToExpire: Yup.number().required(),
+	daysToExpire: Yup.number().min(1).required(),
 	teamspace: Yup.string().required(),
 }).required(true);
 
