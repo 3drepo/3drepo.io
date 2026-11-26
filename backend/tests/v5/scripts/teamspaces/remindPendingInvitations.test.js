@@ -112,7 +112,7 @@ const runTest = () => {
 			);
 
 			const expectedInvitees = [...activeInvitations, unknownUserInvitation]
-				.filter(({ teamSpaces }) => teamSpaces[0] === teamspace)
+				.filter(({ teamSpaces }) => teamSpaces[0].teamspace === teamspace)
 				.map(({ _id }) => _id);
 			const inviteeEmails = calls.filter(([name]) => name === templates.INVITEE_REMINDER.name);
 			expect(inviteeEmails.length).toBe(5);
