@@ -38,16 +38,17 @@ import { GroupOverrideAction } from '../groupOverrideAction/groupOverrideAction.
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
+import { TicketGroupsColouredContext } from '../ticketGroupsColouredContext';
 import { TicketContext } from '../../../ticket.context';
 import { getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
 	const {
-		getCollectionState,
 		deleteCollection,
 		onOverrideAction,
 	} = useContext(TicketGroupsContext);
+	const { getCollectionState } = useContext(TicketGroupsColouredContext);
 
 	const overrideKeys = overrides.map(({ key }) => key);
 	const state = getCollectionState(overrideKeys);

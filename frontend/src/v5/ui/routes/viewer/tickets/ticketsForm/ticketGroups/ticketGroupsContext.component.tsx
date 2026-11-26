@@ -16,10 +16,8 @@
  */
 
 import { GroupOverride, OverrideType } from '@/v5/store/tickets/tickets.types';
-import _ from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+import { sortBy } from 'lodash';
 import { TicketGroupsContext, TicketGroupsContextType } from './ticketGroupsContext';
-import { GroupState } from './ticketGroupsContext.helper';
 
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
@@ -43,52 +41,14 @@ export const TicketGroupsContextComponent = ({
 	ref,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
-	const [checkedKeys, setCheckedKeys] = useState<string[]>(overrides.map(({ key }) => key).filter(Boolean));
-	const previousKeys = useRef(new Set(checkedKeys));
-
-	const getGroupIsChecked = (key: string) => checkedKeys.includes(key);
-
-	const setCollectionCheck = (keys: string[], state: boolean) => {
-		const newKeys = state ? _.union(checkedKeys, keys) : _.without(checkedKeys, ...keys);
-		setCheckedKeys(newKeys);
-		return newKeys;
-	};
-
-	const getCollectionState = (keys: string[] = []) => {
-		if (!keys.length) return GroupState.UNCHECKED;
-		const firstDescendantState = getGroupIsChecked(keys[0]);
-		if (!keys.every((key) => getGroupIsChecked(key) === firstDescendantState)) return GroupState.INDETERMINATE;
-		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
-	};
-
-	const toggleCollectionCheck = (keys: string[]) =>  {
-		const checked = getCollectionState(keys) !== GroupState.CHECKED;
-		return setCollectionCheck(keys, checked);
-	};
-
-	useEffect(() => {
-		const keys = overrides.map(({ key }) => key).filter(Boolean);
-		const newKeys = keys.filter((key) => !previousKeys.current.has(key));
-		setCheckedKeys((currentKeys) => _.union(
-			_.intersection(currentKeys, keys),
-			newKeys,
-		));
-		previousKeys.current = new Set(keys);
-	}, [overrides]);
-
-	const value = {
+	const value: TicketGroupsContextType = {
 		...contextValue,
 		onOverrideAction,
 		deleteGroup: (key) => onDeleteGroups([key]),
 		deleteCollection: onDeleteGroups,
 		editGroup: onEditGroup,
-		getGroupIsChecked,
-		setCollectionCheck,
-		toggleCollectionCheck,
-		getCollectionState,
-		overrides: _.sortBy(overrides || [], 'prefix'),
+		overrides: sortBy(overrides || [], 'prefix'),
 		highlightedKey,
-		clearAllChecks: () => setCheckedKeys([]),
 	};
 
 	if (ref) {

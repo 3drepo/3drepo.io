@@ -25,16 +25,17 @@ import { Accordion, NumberContainer, TitleContainer } from './groupsAccordion.st
 import { Groups } from '../groups/groups.component';
 import { GroupOverrideAction } from '../groupOverrideAction/groupOverrideAction.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
+import { TicketGroupsColouredContext } from '../ticketGroupsColouredContext';
 import { getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
-		getCollectionState,
 		overrides,
 		groupType,
 		onOverrideAction,
 	} = useContext(TicketGroupsContext);
+	const { getCollectionState } = useContext(TicketGroupsColouredContext);
 	
 	// const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const keys = overrides.map(({ key }) => key);

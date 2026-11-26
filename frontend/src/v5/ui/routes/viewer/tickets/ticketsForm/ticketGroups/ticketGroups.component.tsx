@@ -17,10 +17,10 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { Group, GroupOverride, OverrideType, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep, isEmpty, isString, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
@@ -31,11 +31,11 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
+import { ColouredGroupsContextComponent } from './colouredGroupsContext.component';
 import { TicketGroupForm } from './groups/groupActionMenu/ticketGroupForm/ticketGroupForm.component';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { v4 as uuid } from 'uuid';
-import { TicketGroupsContextType } from './ticketGroupsContext';
 
 export const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
@@ -73,9 +73,6 @@ const addKeysToGroups = (groups: GroupOverride[] = []) => groups.map((groupOverr
 
 export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
-	const colouredContextRef = useRef<TicketGroupsContextType | null>(null);
-
-	const [overridesToAdd, setOverridesToAdd] = useState([]);
 
 	const state: Partial<ViewpointState> = useMemo(() => {
 		const currentState: Partial<ViewpointState> = value?.state || {};
@@ -106,12 +103,12 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		return selectedColouredKeys.key;
 	};
 
-	const getGroupsByKey = (type: OverrideType) => new Map<string, { groupOverride: GroupOverride, index: number }>(
-		(state?.[type] || []).map((groupOverride, index) => [getGroupKey(groupOverride), { groupOverride, index }]),
+	const getGroupsByKey = (type: OverrideType) => new Map<string, GroupOverride>(
+		(state?.[type] || []).map((groupOverride) => [getGroupKey(groupOverride), groupOverride]),
 	);
 
 	const onSetEditGroup = (type) => (key?: string) => {
-		const override = key ? getGroupsByKey(type).get(key)?.groupOverride : null;
+		const override = key ? getGroupsByKey(type).get(key) : null;
 		setEditingOverride({ override: cloneDeep(override), type, editing: true });
 	};
 
@@ -127,22 +124,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		}
 	};
 
-	const onColouredOverridesAction = (overrides: GroupOverride[]) => {
-		const colored = overrides.filter(({ group }) => !isString(group));
-		unhighlightOverrides(colored);
-		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
-	};
-
 	const onDeleteGroups = (type) => (keys: string[]) => {
 		const newVal = cloneDeep(value);
 		newVal.state[type] = state[type].filter((override) => !keys.includes(getGroupKey(override)));
-
-		if (type === OverrideType.COLORED) {
-			const checkedKeys = colouredContextRef.current?.setCollectionCheck(keys, false) || [];
-			onColouredOverridesAction(newVal.state[type]
-				.filter(({ group }) => !isString(group))
-				.filter((override) => checkedKeys.includes(getGroupKey(override))));
-		}
 
 		onChange?.(newVal);
 		if (selectedColouredKeys.type === type && keys.includes(selectedColouredKeys.key)) {
@@ -207,10 +191,9 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 			showHidden: state.showHidden ?? selectHiddenGeometryVisible(store.getState()),
 		};
 		const groupsOfType = state[editingOverride.type] || [];
-		const groupsByKey = getGroupsByKey(editingOverride.type);
 		const groupId = getGroupId(overrideValue);
 		const key = groupId || overrideValue.key || editingOverride.override?.key || uuid();
-		let index = groupsByKey.get(key)?.index ?? -1;
+		let index = groupsOfType.findIndex((override) => getGroupKey(override) === key);
 
 		if (index === -1 && groupId) {
 			delete overrideValue.group._id; 
@@ -225,7 +208,19 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		newVal.state[editingOverride.type] ||= [];
 		newVal.state[editingOverride.type][index] = overrideValue;
 
-		setOverridesToAdd((prev) => [...prev, editingOverride.type + '.' + index]);
+		switch (editingOverride.type) {
+			case OverrideType.SELECTED:
+				onSelectedOverridesAction([overrideValue], false);
+				break;
+			case OverrideType.HIDDEN:
+				onHiddenOverridesAction([overrideValue]);
+				break;
+			case OverrideType.SHOWN:
+				onShownOverridesAction((newVal.state.shown || []).filter(({ group }) => !isString(group)));
+				break;
+			default:
+				break;
+		}
 
 		onChange?.(newVal);
 		cancelEdition();
@@ -263,86 +258,30 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 	
-	const onColouredGroupsAction = (overrideKeys, set = false) => {
-		const colorContext = colouredContextRef.current;
-		// When initializing the coloured context already has all the keys checked, so we don't need to toggle them.
-		const checkedKeys = set ?  colorContext?.setCollectionCheck(overrideKeys, true) : colorContext?.toggleCollectionCheck(overrideKeys);
-		
-		const colored = checkedKeys
-			.map((key) => getGroupsByKey(OverrideType.COLORED).get(key)?.groupOverride)
-			.filter(Boolean);
-		onColouredOverridesAction(colored);
-	};
-
-	useEffect(() => {
-		if (overridesToAdd.length === 0) return;
-
-		const overridesApplied = [];
-		overridesToAdd.forEach((overrideToAdd) => {
-			const [type, index] = overrideToAdd.split('.');
-			const overrideType = type as OverrideType;
-			const override = state[overrideType]?.[Number(index)];
-
-			// After the group was created, this waits for the group data to be loaded
-			// and applies the override once the group data is available.
-			if (!override || isString(override.group)) return;
-
-			switch (overrideType) {
-				case OverrideType.COLORED:
-					onColouredOverridesAction((state.colored || []).filter(({ group }) => !isString(group)));
-					break;
-				case OverrideType.SELECTED:
-					onSelectedOverridesAction([override], false);
-					break;
-				case OverrideType.HIDDEN:
-					onHiddenOverridesAction([override]);
-					break;
-				case OverrideType.SHOWN:
-					onShownOverridesAction((state.shown || []).filter(({ group }) => !isString(group)));
-					break;
-				default:
-					break;
-			}
-			overridesApplied.push(overrideToAdd);
-		});
-
-		if (overridesApplied.length > 0) {
-			setOverridesToAdd((pending) => pending.filter((item) => !overridesApplied.includes(item)));
-		}
-	}, [overridesToAdd, state]);
-	
 	useEffect(() => {
 		if (isLoading) return;
-		if (state.colored?.length > 0) onColouredGroupsAction(state.colored.map((override) => override.key), true);
 		if (state.selected?.length > 0) onSelectedGroupsAction(state.selected?.map((override) => override.key));
 		if (state.shown?.length > 0) onShownGroupsAction(state.shown?.map((override) => override.key));
 		if (state.hidden?.length > 0) onHiddenGroupsAction(state.hidden?.map((override) => override.key));
 	}, [isLoading]);
 
-	useEffect(() => {
-		if (!hasClearedOverrides) return;
-		colouredContextRef.current?.clearAllChecks();
-	}, [hasClearedOverrides]);
-
 	if (isLoading) return (<Loader />);
 	return (
 		<Container onClick={clearHighlightedKey}>
-			{state.colored?.length > 0 && (
-				<TicketGroupsContextComponent
-					groupType={OverrideType.COLORED}
-					onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
-					ref={colouredContextRef}
-					onOverrideAction={onColouredGroupsAction}
-					overrides={state.colored}
-					onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-					highlightedKey={getHighlightedKeyByType(OverrideType.COLORED)}
-					setHighlightedKey={onSetHighlightedKey(OverrideType.COLORED)}
-				>
+			<ColouredGroupsContextComponent
+				onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
+				overrides={state.colored || []}
+				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
+				highlightedKey={getHighlightedKeyByType(OverrideType.COLORED)}
+				setHighlightedKey={onSetHighlightedKey(OverrideType.COLORED)}
+				hasClearedOverrides={hasClearedOverrides}
+			>
+				{state.colored?.length > 0 && (
 					<GroupsAccordion
 						title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 					/>
-				</TicketGroupsContextComponent>
-			)}
+				)}
+			</ColouredGroupsContextComponent>
 			{state.selected?.length > 0 && (
 				<TicketGroupsContextComponent
 					groupType={OverrideType.SELECTED}

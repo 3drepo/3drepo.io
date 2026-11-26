@@ -41,6 +41,7 @@ import {
 } from './groupItem.styles';
 import { GroupOverrideAction } from '../../groupOverrideAction/groupOverrideAction.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
+import { TicketGroupsColouredContext } from '../../ticketGroupsColouredContext';
 import { RgbArray, rgbToHex } from '@/v5/helpers/colors.helper';
 import { TicketContext } from '../../../../ticket.context';
 
@@ -52,10 +53,10 @@ export const GroupItem = ({ override }: GroupProps) => {
 		onOverrideAction,
 		highlightedKey,
 		setHighlightedKey,
-		getGroupIsChecked,
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);
+	const { getGroupIsChecked } = useContext(TicketGroupsColouredContext);
 	const { containerOrFederation } = useContext(TicketContext);
 	const templateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
 	const readOnly = !TemplatesPermissionsHooksSelectors.selectHasDefaultEditPermissionForTemplate(containerOrFederation, templateId);

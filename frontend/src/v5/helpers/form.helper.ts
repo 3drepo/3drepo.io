@@ -77,7 +77,7 @@ export const nullifyEmptyObjects = (tree, parentKey?: string) => Object.fromEntr
 		const value = tree[key];
 		const isEmptyArray = Array.isArray(value) && value.length === 0;
 
-		if (isEmptyArray && isViewpointStateParentKey(parentKey) && VIEWPOINT_STATE_ARRAY_KEYS.includes(key)) {
+		if (isEmptyArray && isViewpointStateParentKey(parentKey) && VIEWPOINT_STATE_ARRAY_KEYS.includes(key as OverrideType)) {
 			return [[key, value]];
 		}
 
