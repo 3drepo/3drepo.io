@@ -64,7 +64,7 @@ interface TicketGroupsProps {
 const NO_OVERRIDE_SELECTED = { key: null, type: OverrideType.COLORED };
 const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED, editing: false };
 
-const getGroupId = ({ group }: GroupOverride) => (isString(group) ? undefined : group._id);
+const getGroupId = ({ group }: GroupOverride) => (isString(group) ? group : group._id);
 const getGroupKey = ({ group, key }: GroupOverride): string => getGroupId({ group, key }) || key || '';
 const addKeysToGroups = (groups: GroupOverride[] = []) => groups.map((groupOverride) => ({
 	...groupOverride,
@@ -106,15 +106,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		return selectedColouredKeys.key;
 	};
 
-	const onDeleteGroups = (type) => (keys: string[]) => {
-		const newVal = cloneDeep(value);
-		newVal.state[type] = state[type].filter((override) => !keys.includes(getGroupKey(override)));
-		onChange?.(newVal);
-		if (selectedColouredKeys.type === type && keys.includes(selectedColouredKeys.key)) {
-			clearHighlightedKey();
-		}
-	};
-
 	const getGroupsByKey = (type: OverrideType) => new Map<string, { groupOverride: GroupOverride, index: number }>(
 		(state?.[type] || []).map((groupOverride, index) => [getGroupKey(groupOverride), { groupOverride, index }]),
 	);
@@ -133,6 +124,29 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
 		if (objects.length) {
 			dispatch(TreeActions.deselectNodesBySharedIds(objects));
+		}
+	};
+
+	const onColouredOverridesAction = (overrides: GroupOverride[]) => {
+		const colored = overrides.filter(({ group }) => !isString(group));
+		unhighlightOverrides(colored);
+		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
+	};
+
+	const onDeleteGroups = (type) => (keys: string[]) => {
+		const newVal = cloneDeep(value);
+		newVal.state[type] = state[type].filter((override) => !keys.includes(getGroupKey(override)));
+
+		if (type === OverrideType.COLORED) {
+			const checkedKeys = colouredContextRef.current?.setCollectionCheck(keys, false) || [];
+			onColouredOverridesAction(newVal.state[type]
+				.filter(({ group }) => !isString(group))
+				.filter((override) => checkedKeys.includes(getGroupKey(override))));
+		}
+
+		onChange?.(newVal);
+		if (selectedColouredKeys.type === type && keys.includes(selectedColouredKeys.key)) {
+			clearHighlightedKey();
 		}
 	};
 
@@ -249,12 +263,6 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 	
-	const onColouredOverridesAction = (overrides: GroupOverride[]) => {
-		const colored = overrides.filter(({ group }) => !isString(group));
-		unhighlightOverrides(colored);
-		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
-	};
-
 	const onColouredGroupsAction = (overrideKeys, set = false) => {
 		const colorContext = colouredContextRef.current;
 		// When initializing the coloured context already has all the keys checked, so we don't need to toggle them.
