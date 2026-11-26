@@ -138,14 +138,13 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
 
 		if (objects.length) {
-			unhighlightOverrides(overrides);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		}
 	};
 
 	const onHiddenGroupsAction = (keys: string[]) => {
 		onHiddenOverridesAction(keys
-			.map((key) => getGroupsByKey(OverrideType.HIDDEN).get(key)?.groupOverride)
+			.map((key) => getGroupsByKey(OverrideType.HIDDEN).get(key))
 			.filter(Boolean));
 	};
 
@@ -153,14 +152,13 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
 
 		if (objects.length) {
-			unhighlightOverrides(overrides);
 			dispatch(TreeActions.isolateNodesBySharedIds(objects));
 		}
 	};
 
 	const onShownGroupsAction = (keys: string[]) => {
 		onShownOverridesAction(keys
-			.map((key) => getGroupsByKey(OverrideType.SHOWN).get(key)?.groupOverride)
+			.map((key) => getGroupsByKey(OverrideType.SHOWN).get(key))
 			.filter(Boolean));
 	};
 
@@ -178,7 +176,7 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 
 	const onSelectedGroupsAction = (keys: string[]) => {
 		onSelectedOverridesAction(keys
-			.map((key) => getGroupsByKey(OverrideType.SELECTED).get(key)?.groupOverride)
+			.map((key) => getGroupsByKey(OverrideType.SELECTED).get(key))
 			.filter(Boolean));
 	};
 
@@ -213,9 +211,11 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 				onSelectedOverridesAction([overrideValue], false);
 				break;
 			case OverrideType.HIDDEN:
+				unhighlightOverrides([overrideValue]);
 				onHiddenOverridesAction([overrideValue]);
 				break;
 			case OverrideType.SHOWN:
+				unhighlightOverrides([overrideValue]);
 				onShownOverridesAction((newVal.state.shown || []).filter(({ group }) => !isString(group)));
 				break;
 			default:

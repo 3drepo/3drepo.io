@@ -51,6 +51,7 @@ export const ColouredGroupsContextComponent = ({
 	const keys = overrides.map(getGroupKey).filter(Boolean);
 	const previousKeys = useRef(new Set(keys));
 	const [checkedKeys, setCheckedKeys] = useState(keys);
+	const [initialized, setInitialized] = useState(false);
 
 	const applyOverrides = (activeKeys: string[]) => {
 		const activeOverrides = overrides
@@ -72,11 +73,14 @@ export const ColouredGroupsContextComponent = ({
 
 	useEffect(() => {
 		applyOverrides(checkedKeys);
+		if (initialized) return;
+		setInitialized(overrides.every((override) => checkedKeys.includes(getGroupKey(override)) && !isString(override.group)));
 	}, [checkedKeys, overrides]);
 
 	useEffect(() => {
-		if (hasClearedOverrides) setCheckedKeys([]);
-	}, [hasClearedOverrides]);
+		if (!hasClearedOverrides || !initialized) return;
+		setCheckedKeys([]);
+	}, [hasClearedOverrides, initialized]);
 
 	const getGroupIsChecked = (key: string) => checkedKeys.includes(key);
 	const setCollectionCheck = (collectionKeys: string[], isChecked: boolean) => {
