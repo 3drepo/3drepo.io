@@ -17,6 +17,7 @@
 
 import _ from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
+import { OverrideType } from '@/v5/store/tickets/tickets.types';
 
 export const dirtyValues = (
 	allValues: object,
@@ -59,7 +60,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
  *     }
  *  }
  *
- * Exception: ViewpointState arrays (hidden/colored/transformed groups overrides) are never turned
+ * Exception: ViewpointState group override arrays are never turned
  * into null; the backend rejects null for these and requires an actual array (never absent),
  * so an empty array must be sent through as-is (e.g. to persist deleting all overrides).
  */
@@ -68,7 +69,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
 // across the tickets store/schemas), so a tree is a ViewpointState tree if its parent key is 'state'.
 // out sibling keys that didn't change (e.g. showHidden), so we can't rely on sibling keys being
 // present here - the parent key name is the only reliable signal left at this point.
-const VIEWPOINT_STATE_ARRAY_KEYS = ['hidden', 'colored', 'transformed'];
+const VIEWPOINT_STATE_ARRAY_KEYS = Object.values(OverrideType);
 const isViewpointStateParentKey = (parentKey) => parentKey === 'state';
 
 export const nullifyEmptyObjects = (tree, parentKey?: string) => Object.fromEntries(

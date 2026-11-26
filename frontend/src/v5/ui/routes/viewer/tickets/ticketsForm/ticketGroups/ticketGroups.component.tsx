@@ -75,6 +75,8 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 	const dispatch = useDispatch();
 	const colouredContextRef = useRef<TicketGroupsContextType | null>(null);
 
+	const [overridesToAdd, setOverridesToAdd] = useState([]);
+
 	const state: Partial<ViewpointState> = useMemo(() => {
 		const currentState: Partial<ViewpointState> = value?.state || {};
 		return {
@@ -127,40 +129,59 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		newGroupsHandle.current = { triggerNewGroup: onSetEditGroup };
 	}, [onSetEditGroup, newGroupsHandle]);
 
-	const onHiddenGroupsAction = (keys: string[]) => {
-		const objects = keys.flatMap((key) => {
-			const override = getGroupsByKey(OverrideType.HIDDEN).get(key)?.groupOverride;
-			return override ? convertToV4GroupNodes(override.group as Group) : [];
-		});
+	const unhighlightOverrides = (overrides: GroupOverride[]) => {
+		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
+		if (objects.length) {
+			dispatch(TreeActions.deselectNodesBySharedIds(objects));
+		}
+	};
+
+	const onHiddenOverridesAction = (overrides: GroupOverride[]) => {
+		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
 
 		if (objects.length) {
+			unhighlightOverrides(overrides);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		}
 	};
 
-	const onShownGroupsAction = (keys: string[]) => {
-		const objects = keys.flatMap((key) => {
-			const override = getGroupsByKey(OverrideType.SHOWN).get(key)?.groupOverride;
-			return override ? convertToV4GroupNodes(override.group as Group) : [];
-		});
+	const onHiddenGroupsAction = (keys: string[]) => {
+		onHiddenOverridesAction(keys
+			.map((key) => getGroupsByKey(OverrideType.HIDDEN).get(key)?.groupOverride)
+			.filter(Boolean));
+	};
+
+	const onShownOverridesAction = (overrides: GroupOverride[]) => {
+		const objects = overrides.flatMap(({ group }) => convertToV4GroupNodes(group as Group));
 
 		if (objects.length) {
+			unhighlightOverrides(overrides);
 			dispatch(TreeActions.isolateNodesBySharedIds(objects));
 		}
 	};
 
-	const onSelectedGroupsAction = (keys: string[]) => {
-		dispatch(TreeActions.clearCurrentlySelected());
-		keys.forEach((key) => {
-			const override = getGroupsByKey(OverrideType.SELECTED).get(key)?.groupOverride;
-			if (!override || isString(override.group)) return;
-			const objects = convertToV4GroupNodes(override.group);
+	const onShownGroupsAction = (keys: string[]) => {
+		onShownOverridesAction(keys
+			.map((key) => getGroupsByKey(OverrideType.SHOWN).get(key)?.groupOverride)
+			.filter(Boolean));
+	};
+
+	const onSelectedOverridesAction = (overrides: GroupOverride[], clearSelection = true) => {
+		if (clearSelection) dispatch(TreeActions.clearCurrentlySelected());
+		overrides.forEach((override) => {
+			const objects = convertToV4GroupNodes(override.group as Group);
 			dispatch(TreeActions.showNodesBySharedIds(objects));
 			dispatch(TreeActions.selectNodesBySharedIds(
 				objects,
 				override.color?.map((component) => component / 255),
 			));
 		});
+	};
+
+	const onSelectedGroupsAction = (keys: string[]) => {
+		onSelectedOverridesAction(keys
+			.map((key) => getGroupsByKey(OverrideType.SELECTED).get(key)?.groupOverride)
+			.filter(Boolean));
 	};
 
 	const cancelEdition = () => setEditingOverride(NO_EDIT_OVERRIDE_SELECTED);
@@ -189,6 +210,8 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 
 		newVal.state[editingOverride.type] ||= [];
 		newVal.state[editingOverride.type][index] = overrideValue;
+
+		setOverridesToAdd((prev) => [...prev, editingOverride.type + '.' + index]);
 
 		onChange?.(newVal);
 		cancelEdition();
@@ -226,6 +249,12 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 	
+	const onColouredOverridesAction = (overrides: GroupOverride[]) => {
+		const colored = overrides.filter(({ group }) => !isString(group));
+		unhighlightOverrides(colored);
+		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
+	};
+
 	const onColouredGroupsAction = (overrideKeys, set = false) => {
 		const colorContext = colouredContextRef.current;
 		// When initializing the coloured context already has all the keys checked, so we don't need to toggle them.
@@ -234,9 +263,45 @@ export const TicketGroups = ({ value, onChange, onBlur, isDirty, newGroupsHandle
 		const colored = checkedKeys
 			.map((key) => getGroupsByKey(OverrideType.COLORED).get(key)?.groupOverride)
 			.filter(Boolean);
-		if (colored.some(({ group }) => isString(group))) return;
-		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
+		onColouredOverridesAction(colored);
 	};
+
+	useEffect(() => {
+		if (overridesToAdd.length === 0) return;
+
+		const overridesApplied = [];
+		overridesToAdd.forEach((overrideToAdd) => {
+			const [type, index] = overrideToAdd.split('.');
+			const overrideType = type as OverrideType;
+			const override = state[overrideType]?.[Number(index)];
+
+			// After the group was created, this waits for the group data to be loaded
+			// and applies the override once the group data is available.
+			if (!override || isString(override.group)) return;
+
+			switch (overrideType) {
+				case OverrideType.COLORED:
+					onColouredOverridesAction((state.colored || []).filter(({ group }) => !isString(group)));
+					break;
+				case OverrideType.SELECTED:
+					onSelectedOverridesAction([override], false);
+					break;
+				case OverrideType.HIDDEN:
+					onHiddenOverridesAction([override]);
+					break;
+				case OverrideType.SHOWN:
+					onShownOverridesAction((state.shown || []).filter(({ group }) => !isString(group)));
+					break;
+				default:
+					break;
+			}
+			overridesApplied.push(overrideToAdd);
+		});
+
+		if (overridesApplied.length > 0) {
+			setOverridesToAdd((pending) => pending.filter((item) => !overridesApplied.includes(item)));
+		}
+	}, [overridesToAdd, state]);
 	
 	useEffect(() => {
 		if (isLoading) return;
