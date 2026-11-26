@@ -134,18 +134,24 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 	email = email.toLowerCase();
 	await db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 }, { runInBackground: true });
 	const result = await db.findOne("admin", "invitations", { _id: email });
-	const teamspaceEntry = { teamspace, job, permissions };
+	const teamspaceEntry = { teamspace, job, permissions, invitedAt: new Date(), invitedBy: username };
 
 	if (result) {
+		const existingEntry = result.teamSpaces.find(entry => entry.teamspace === teamspace);
 
 		// if its a new teamspace that the user has been invited send an invitation email
-		if (result.teamSpaces.every(t => t.teamspace !== teamspace)) {
+		if (!existingEntry) {
 			if (checkLicenceLimit) {
 				await User.hasReachedLicenceLimitCheck(teamspace);
 			}
 			await sendInvitationEmail(email, username, teamspace);
 			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions });
+		} else {
+			// If the same invitation exists we want to preserve the original date and invitee
+			teamspaceEntry.invitedAt = existingEntry.invitedAt;
+			teamspaceEntry.invitedBy = existingEntry.invitedBy;
 		}
+
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
 		teamSpaces.push(teamspaceEntry);
 
