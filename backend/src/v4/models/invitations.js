@@ -134,7 +134,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 	email = email.toLowerCase();
 	await db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 }, { runInBackground: true });
 	const result = await db.findOne("admin", "invitations", { _id: email });
-	const teamspaceEntry = { teamspace, job, permissions };
+	const teamspaceEntry = { teamspace, job, permissions, invitedAt: new Date(), invitedBy: username };
 
 	if (result) {
 
