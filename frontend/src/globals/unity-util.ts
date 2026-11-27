@@ -2494,6 +2494,8 @@ export class UnityUtil {
 	 * the screenshot or the length of the screenshot data in shared memory.
 	 * @param useSharedMemory - If true, the screenshot will be written to shared memory and the promise will resolve with the length of the data in shared memory.
 	 * If false, the promise will resolve with a base64 encoded string of the screenshot.
+	 * @mimeType image/png
+	 * @encoding base64
 	 */
 	public static requestScreenShot(useSharedMemory = false): Promise<string | number> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
