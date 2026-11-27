@@ -3431,6 +3431,11 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetPointCloudPointBudget', UnityUtil.LoadingState.VIEWER_READY, newBudget);
 	}
 
+	public static setPointCloudCacheBudgetFactor(factor: number)
+	{
+		UnityUtil.toUnity('SetPointCloudCacheBudgetFactor', UnityUtil.LoadingState.VIEWER_READY, factor);
+	}
+
 	/**
 	 * Sets the point cloud point size.
 	 * @param newSize The new point size.
@@ -3438,6 +3443,25 @@ export class UnityUtil {
 	public static setPointCloudPointSize(newSize: number)
 	{
 		UnityUtil.toUnity('SetPointCloudPointSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+	}
+
+	/**
+	 * Sets the point cloud point size mode.
+	 * At 0, the point size is fixed in screen space. At 1, the point size is fixed in world space.
+	 * @param mode The point size mode, where 0 is screen space and 1 is world space.
+	 */
+	public static SetPointCloudPointSizeMode(mode: number)
+	{
+		UnityUtil.toUnity('SetPointCloudPointSizeMode', UnityUtil.LoadingState.VIEWER_READY, mode);
+	}
+
+	/**
+	 * Sets the world space point size for the point cloud.
+	 * @param size The new world space point size in world units.
+	 */
+	public static SetPointCloudWorldPointSize(size: number)
+	{
+		UnityUtil.toUnity('SetPointCloudWorldPointSize', UnityUtil.LoadingState.VIEWER_READY, size);
 	}
 
 	/**
