@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import Checkbox from '@mui/material/Checkbox';
+import { Form } from 'formik';
 
 import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
@@ -29,7 +30,6 @@ import {
 	StyledLinkableField,
 	StyledMarkdownField,
 } from '../../../../../components/textField/textField.styles';
-import { StyledForm as StyledFormComponent } from '../../../views/components/viewItem/viewItem.styles';
 
 export const MeasurementPoint = styled.div`
 	display: flex;
@@ -93,8 +93,11 @@ export const StyledCheckboxCell = styled(CheckboxCell)`
 	padding: 0;
 	margin-left: 30px;
 `;
-
-export const StyledForm = styled(StyledFormComponent)`
+export const StyledForm = styled(Form)`
+	display: flex;
+	align-items: center;
+	flex: 1;
+	justify-content: space-between;
 	overflow: hidden;
 `;
 

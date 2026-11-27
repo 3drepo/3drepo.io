@@ -51,3 +51,26 @@ export const removeHiddenPropertiesFromTemplates = (templates: ITemplate[]) => t
 
 	return parsedTemplate;
 });
+
+const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
+	if (defaultValue != null) return defaultValue;
+	switch (type) {
+		case 'manyOf':
+		case 'tags': return [];
+		case 'boolean': return false;
+		case 'text':
+		case 'longText':
+		case 'oneOf': return '';
+		default: return null;
+	}
+};
+
+export const templatePropertiesToTicketProperties = (properties = []) => (
+	properties.reduce(
+		(ticketProperties, prop) => ({
+			...ticketProperties,
+			[prop.name]: prop.default ?? getPropertyDefault(prop),
+		}),
+		{},
+	)
+);

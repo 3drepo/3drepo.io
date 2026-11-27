@@ -23,7 +23,7 @@ import { SelectProps } from '@controls/inputs/select/select.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, Select } from './selectView.styles';
 
-const getThumbnailBasicPath = (
+export const getThumbnailBasicPath = (
 	teamspace: string,
 	projectId: string,
 	containerOrFederationId: string,

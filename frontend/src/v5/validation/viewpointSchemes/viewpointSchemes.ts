@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const getViewNameFieldErrorMsg = (error) => error ? error.replace('newName', 'Name') : '';
+import * as Yup from 'yup';
+import { trimmedString } from '../shared/validators';
+import { formatMessage } from '@/v5/services/intl';
+
+export const ViewItemSchema = Yup.object().shape({
+	name: trimmedString
+		.required(
+			formatMessage({
+				id: 'validation.viewItem.name.error.required',
+				defaultMessage: 'Name is a required field',
+			}),
+		)
+		.max(37, formatMessage({
+			id: 'validation.viewItem.name.error.max',
+			defaultMessage: 'Name must be at most 37 characters',
+		})),
+});

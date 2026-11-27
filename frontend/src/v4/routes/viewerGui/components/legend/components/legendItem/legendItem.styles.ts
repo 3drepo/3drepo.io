@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Form } from 'formik';
 
 import { COLOR } from '../../../../../../styles';
 import {
@@ -24,7 +25,6 @@ import {
 	StyledMarkdownField
 } from '../../../../../components/textField/textField.styles';
 import { StyledTextField as TextField  } from '../../../measurements/components/measureItem/measureItem.styles';
-import { StyledForm as Form } from '../../../views/components/viewItem/viewItem.styles';
 
 export const Container = styled.li`
 	color: ${COLOR.BLACK_60};
@@ -58,6 +58,9 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const StyledForm = styled(Form)`
+	display: flex;
+	flex: 1;
+	justify-content: space-between;
 	height: 100%;
 	align-items: flex-start;
 	overflow: hidden;

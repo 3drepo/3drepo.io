@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import TextField from '@mui/material/TextField';
 
 import { COLOR } from '../../../../styles';
 import { SequenceTasksListItem } from '../sequences/sequences.styles';
@@ -31,5 +32,11 @@ export const Container = styled(ViewerPanelContent)`
 
 	${SequenceTasksListItem} {
 		background-color: ${COLOR.LIGHT_GRAY};
+	}
+`;
+
+export const SearchField = styled(TextField)`
+	&& {
+		flex: none;
 	}
 `;

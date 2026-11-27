@@ -16,13 +16,13 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectOverrides as selectViewsOverrides } from '@/v5/store/viewpoints/viewpoints.selectors';
 import { selectTicketOverrides } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { ColorOverrides } from '../../helpers/colorOverrides';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides } from '../groups/groups.selectors';
 import { selectIsTreeProcessed } from '../tree';
-import { selectOverrides as selectViewsOverrides } from '../viewpoints';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 

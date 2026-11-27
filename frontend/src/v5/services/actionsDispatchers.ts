@@ -43,7 +43,7 @@ import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawings/revisions/drawingRevisions.redux';
 import { CompareActions } from '@/v4/modules/compare';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { ViewpointsActions, IViewpointsActionCreators } from '@/v5/store/viewpoints/viewpoints.redux';
 import { DrawingsCardActions, IDrawingsCardActionCreators } from '../store/drawings/card/drawingsCard.redux';
 import { ICriteriaFieldState } from '@/v4/modules/groups/groups.redux';
 
@@ -112,12 +112,6 @@ interface IViewerGuiActionCreators {
 	clearColorOverrides: () => Action;
 	clearTransformations: () => Action;
 	resetPanels: () => Action;
-}
-
-interface IViewpointsActionCreators {
-	showViewpoint: (teamspace: string, modelId: string, view: any, ignoreCamera?: boolean) => Action,
-	clearColorOverrides: () => Action,
-	clearTransformations: () => Action,
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

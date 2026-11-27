@@ -97,7 +97,6 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], un
 	useEffect(() => {
 		if (isEmpty(unsavedState)) {
 			reset(defaultValues);
-
 		}
 	}, [rule]);
 

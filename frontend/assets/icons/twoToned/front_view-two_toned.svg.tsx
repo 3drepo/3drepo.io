@@ -15,27 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tooltip } from '@mui/material';
-import { DEFAULT_VIEWPOINTS } from './presetViews.constants';
-import { StyledSvgIcon } from './presetViews.styles';
-
-interface IProps {
-	showPreset: (preset) => void;
-}
-
-export const PresetViews = ({ showPreset }: IProps) => {
-
-	const handleViewpointClick = (preset) => () => showPreset(preset);
-
-	return (
-			<>
-				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, name, preset }) => (
-					<Tooltip title={name} key={`${_id}_tooltip`}>
-						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(preset)} key={_id}>
-							{icon()}
-						</StyledSvgIcon>
-					</Tooltip>
-				))}
-			</>
-	);
+type IProps = {
+	className?: any;
 };
+
+const wallStyle = { fill: '#dadada' };
+const cubeStyle = { fill: 'none', stroke: '#b2b2b2', strokeMiterlimit: 10, strokeWidth: 8 } as const;
+
+export default ({ className }: IProps) => (
+	<svg viewBox="0 0 327.5 358" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<g style={wallStyle}>
+			<rect x="1.5" y="105.7" width="248.3" height="248.3" />
+		</g>
+		<g style={cubeStyle}>
+			<polyline points="252.3 354 252.3 105.7 323.5 4 252.3 105.7 4 105.7" />
+			<polygon points="75.2 4 4 105.7 4 354 252.3 354 323.5 252.3 323.5 4 75.2 4" />
+		</g>
+	</svg>
+);

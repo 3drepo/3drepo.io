@@ -17,16 +17,10 @@
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
 
-import { selectSearchEnabled } from '../../../../../modules/viewpoints';
 import { Dialog } from './dialog.component';
-
-const mapStateToProps = createStructuredSelector({
-	searchEnabled: selectSearchEnabled,
-});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Dialog);
+export default connect(null, mapDispatchToProps)(Dialog);

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Views } from '@/v5/ui/routes/viewer/views/views.component';
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty } from 'lodash';
 import { PureComponent, useContext } from 'react';
@@ -40,7 +41,6 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import Sequences from './components/sequences/sequences.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
-import { Views } from './components/views';
 import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
 
 interface IProps {

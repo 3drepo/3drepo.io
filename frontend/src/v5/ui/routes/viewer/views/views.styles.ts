@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const PRESET_VIEW = {
-	TOP: 'top',
-	BOTTOM: 'bottom',
-	FRONT: 'front',
-	BACK: 'back',
-	LEFT: 'LEFT',
-	RIGHT: 'RIGHT'
-};
+import { SearchInput } from '@controls/search/searchInput';
+import styled from 'styled-components';
+
+export const SearchBar = styled(SearchInput)`
+	margin: 0;
+	padding: 10px 8px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	width: auto;
+`;

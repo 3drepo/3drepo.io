@@ -21,6 +21,7 @@ import { call, all, put, select, take, takeLatest } from 'redux-saga/effects';
 import { takeEveryInOrder } from '@/v5/helpers/sagas.helpers';
 import { dispatch, getState } from '@/v5/helpers/redux.helpers';
 import { getRandomRgbColor, hexToGLColor } from '@/v5/helpers/colors.helper';
+import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { normalizeGroup, prepareGroup, prepareGroupWithCount } from '../../helpers/groups';
@@ -33,7 +34,6 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions, TreeTypes } from '../tree';
-import { ViewpointsActions } from '../viewpoints';
 import { selectNodesBySharedIds, showNodesBySharedIds } from '../tree/tree.sagas';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {

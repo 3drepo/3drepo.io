@@ -29,8 +29,7 @@ import { PanelBarActions } from '../panelBarActions';
 import { TaskItem } from '../sequences/components/tasksList/sequenceTaskItem.component';
 import { SequenceTasksListItem } from '../sequences/sequences.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { SearchField } from '../views/views.styles';
-import { Container } from './activities.styles';
+import { Container, SearchField } from './activities.styles';
 import { ActivityDetails } from './components/activityDetails/';
 
 interface IProps {

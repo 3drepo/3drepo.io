@@ -14,19 +14,303 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
-import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, setGroupData, toSharedIds } from '@/v4/helpers/viewpoints';
+import { Viewpoint as ITicketViewpoint, Group, ViewpointGroupOverrideType as TicketViewpointOverride, GroupOverride as TicketGroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
 import { formatMessage } from '@/v5/services/intl';
-import { isEmpty, isString } from 'lodash';
+import { isEmpty, isEqual, isString } from 'lodash';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { ViewpointsActionsDispatchers } from '../services/actionsDispatchers';
 import { getState, dispatch } from './redux.helpers';
-import { getGroupHexColor, rgbToHex } from './colors.helper';
-import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded, ViewpointsActions } from '@/v4/modules/viewpoints';
+import { getGroupHexColor, hexToRgb, rgbToHex } from './colors.helper';
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
-import { selectGetAllMeshes, selectIsTreeProcessed } from '@/v4/modules/tree';
+import { selectGetAllMeshes, selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectIsTreeProcessed, selectNodesBySharedIdsMap } from '@/v4/modules/tree';
+import { selectTransformations, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '../store/viewpoints/viewpoints.selectors';
+import { ViewpointsActions } from '../store/viewpoints/viewpoints.redux';
+import { IViewpoint } from '../store/viewpoints/viewpoints.types';
+import { UnityUtil } from '@/globals/unity-util';
+import { selectColorOverrides } from '@/v4/modules/viewerGui';
+import { Viewer } from '@/v4/services/viewer/viewer';
+
+const groupPropNameMap = {
+	highlighted_group_id : 'highlighted_group',
+	hidden_group_id : 'hidden_group',
+	shown_group_id : 'shown_group',
+	override_group_ids : 'override_groups',
+	transformation_group_ids: 'transformation_groups',
+};
+
+export const getNodesIdsFromSharedIds = (objects) => {
+	const nodesBySharedIds = selectNodesBySharedIdsMap(getState());
+
+	if (!objects.length) {
+		return [];
+	}
+
+	const ids = new Set<string>();
+	objects.forEach((obj) => {
+		obj.shared_ids.forEach((sharedId) => {
+			const id = nodesBySharedIds[sharedId];
+			if (id) {
+				ids.add(id);
+			}
+		});
+	});
+	return Array.from(ids);
+};
+
+const createModelBySharedIdDictionary = (sharedIdNodes) => {
+	const state = getState();
+	// Converts shareIds to nodeIds
+	const nodes = getNodesIdsFromSharedIds([{ shared_ids: sharedIdNodes }]);
+	const meshesInfo: any[] = selectGetMeshesByIds(nodes)(state);
+
+	// This generates a dictionary to get the teamspace and model from the sharedId: sharedId => {teamspace, modelId}
+	return meshesInfo.reduce((dict, meshesByModel) => {
+		const { teamspace, modelId } = meshesByModel;
+		const model = { teamspace, modelId };
+		return meshesByModel.meshes.reduce((d, mesh) => {
+			const index = nodes.indexOf(mesh);
+			d[sharedIdNodes[index]] = model;
+			return d;
+		}, dict);
+	}, {});
+};
+
+const createGroupsByColor = (overrides) => {
+	const sharedIdNodes = Object.keys(overrides);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdNodes);
+
+	/* This creates an array of groups grouped by colour
+	for example:
+	[
+		{
+			"color": [
+				149,
+				0,
+				255,
+				103
+			],
+			"objects": [
+				{
+					"shared_ids": [
+						"375b918f-0b25-4f3a-8edc-239ef5abf2e4",
+						"3a9cfe9d-e96f-4242-979a-26ddbbc5226d",
+						"e7a69a79-fe94-4fce-9ce2-60e999e3e1d4"
+					],
+					"account": "carmen",
+					"model": "81b0b900-f80c-11ea-970b-03c55a1e1b3a"
+				}
+			],
+			"totalSavedMeshes": 1
+		},
+		{
+			"color": [
+				0,
+				255,
+				0
+			],
+			"objects": [
+				{
+					"shared_ids": [
+						"cab0b20f-a0e1-439a-9982-67bf032583ca",
+						"997a1909-0cf6-43a9-af2b-bb232ce887c7",
+						"525f8fd6-19b4-4739-96f6-cef8c7bac55b"
+					],
+					"account": "carmen",
+					"model": "81b0b900-f80c-11ea-970b-03c55a1e1b3a"
+				}
+			],
+			"totalSavedMeshes": 1
+		}
+	]
+	 */
+	return sharedIdNodes
+		.filter((objectId) => objectId in modelsDict)
+		.reduce((arr, objectId) =>  {
+			const { teamspace, modelId } = modelsDict[objectId];
+
+			// if there is a group with that color already use that one
+			let colorGroup = arr.find(({ color }) => color.join(',') === hexToRgb(overrides[objectId]).join(','));
+
+			if (!colorGroup) {
+				// Otherwise create a group with that color
+				colorGroup = { color: hexToRgb(overrides[objectId]), objects: [], totalSavedMeshes: 0 };
+
+				arr.push(colorGroup);
+			}
+
+			let sharedIdsItem =  colorGroup.objects.find(({ model, account }) => model === modelId && account === teamspace);
+
+			if (!sharedIdsItem) {
+				sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId };
+				colorGroup.objects.push(sharedIdsItem);
+				colorGroup.totalSavedMeshes ++;
+			}
+
+			sharedIdsItem.shared_ids.push(objectId);
+			return arr;
+		}, []);
+};
+
+const createGroupsByTransformations = (transformations) => {
+	const sharedIdNodes = Object.keys(transformations);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdNodes);
+
+	return sharedIdNodes.reduce((arr, objectId) =>  {
+		const { teamspace, modelId } = modelsDict[objectId];
+
+		// 1 . Use or create the transform group with that transformation value
+
+		// if there is group with that transformation already use that one
+		let transformGroup = arr.find(({ transformation }) => isEqual(transformation, transformations[objectId]));
+
+		if (!transformGroup) {
+			transformGroup = { transformation: transformations[objectId], objects: [] };
+			arr.push(transformGroup);
+		}
+
+		// 2. Add to objects the new or existing model/teamspace objects object
+		let sharedIdsItem =  transformGroup.objects.find(({ model, account }) => model === modelId && account === teamspace);
+
+		if (!sharedIdsItem) {
+			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId };
+			transformGroup.objects.push(sharedIdsItem);
+		}
+
+		sharedIdsItem.shared_ids.push(objectId);
+		return arr;
+	}, []);
+
+};
+
+export const mergeGroupsDataFromViewpoint = (viewpointTarget, viewpointOrigin) => {
+	const viewpoint = { ...viewpointTarget };
+	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
+		const groupPropName =  groupPropNameMap[groupPropNameById];
+
+		if (viewpointTarget[groupPropNameById] && viewpointOrigin[groupPropName]) {
+			viewpoint[groupPropName] = viewpointOrigin[groupPropName];
+		}
+	});
+
+	return viewpoint;
+};
+
+const createGroupsArray = (groupIds, groupsMaps) => {
+	const groupsArray = [];
+
+	groupIds.forEach((id) => {
+		if (groupsMaps[id]) {
+			groupsArray.push(groupsMaps[id]);
+		}
+	});
+
+	return groupsArray;
+};
+
+// Creates an object with properties: 'highlighted_group', 'hidden_group',
+// 'override_groups' or  'transformation_groups' corresponding to the ones defined in the groups ids in viewpoint.
+// using the information from groupsMaps
+export const setGroupData = (viewpoint, groupsMaps): any => {
+	const groupsData = {};
+
+	if (viewpoint) {
+		Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
+			const groupPropName =  groupPropNameMap[groupPropNameById];
+			const propValue = viewpoint[groupPropNameById];
+			if (propValue) {
+				if (Array.isArray(propValue)) {
+					groupsData[groupPropName] = createGroupsArray(propValue, groupsMaps);
+				} else if (groupsMaps[propValue]) {
+					groupsData[groupPropName] = groupsMaps[propValue];
+				}
+			}
+		});
+	}
+
+	return groupsData;
+};
+
+export const createGroupsFromViewpoint = (viewpoint, groupsData) => {
+	const groups = [];
+
+	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
+		const groupPropName =  groupPropNameMap[groupPropNameById];
+		const propValue = viewpoint[groupPropNameById];
+
+		if (propValue && groupsData[groupPropName]) {
+			const groupsDataValue = groupsData[groupPropName];
+
+			if (Array.isArray(propValue)) {
+				propValue.forEach((id, i) => {
+					groups.push({ _id: id, ...groupsDataValue[i] });
+				});
+			} else {
+				groups.push({ _id: propValue, ...groupsDataValue });
+			}
+		}
+	});
+
+	return groups;
+};
+
+export const generateViewpointV4 = async (name = '', withScreenshot = false) => {
+	const state = getState();
+
+	const hiddenGeometryVisible = selectHiddenGeometryVisible(state);
+
+	const viewpoint = await Viewer.getCurrentViewpoint();
+
+	const generatedObject = {
+		name,
+		viewpoint:  {
+			...viewpoint,
+			hideIfc: !hiddenGeometryVisible,
+		},
+	} as any;
+
+	if (withScreenshot) {
+		generatedObject.viewpoint.screenshot = await Viewer.getScreenshot();
+	}
+
+	const objectInfo: any = await Viewer.getObjectsStatus();
+
+	const colorOverrides = selectColorOverrides(state);
+	const newOverrideGroups = createGroupsByColor(colorOverrides);
+
+	const transformations = selectTransformations(state);
+	const newTransformationsGroups = createGroupsByTransformations(transformations);
+
+	if (newOverrideGroups.length) {
+		generatedObject.viewpoint.override_groups = newOverrideGroups;
+	}
+
+	if (newTransformationsGroups.length) {
+		generatedObject.viewpoint.transformation_groups = newTransformationsGroups;
+	}
+
+	if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
+		const { highlightedNodes, hiddenNodes } = objectInfo;
+
+		if (highlightedNodes.length > 0) {
+			generatedObject.viewpoint.highlighted_group = {
+				objects: highlightedNodes,
+				color: UnityUtil.defaultHighlightColor.map((c) => c * 255),
+			} ;
+		}
+
+		if (hiddenNodes.length > 0) {
+			generatedObject.viewpoint.hidden_group = {
+				objects: hiddenNodes,
+			};
+		}
+
+	}
+	return generatedObject;
+};
+
+const toSharedIds = (node_ids: string[]) => selectGetSharedIdsFromNodeIds(getState(), node_ids);
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -63,16 +347,16 @@ export const convertToV4GroupNodes = (group?: Group) => {
 	}));
 };
 
-const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType): GroupOverride => {
+const convertToV5GroupOverride = (group: any, type: TicketViewpointOverride): TicketGroupOverride => {
 	let description = '';
 	let name = '';
 	switch (type) {
-		case ViewpointGroupOverrideType.COLORED:
+		case TicketViewpointOverride.COLORED:
 			const color = rgbToHex(group.color);
 			description = formatMessage({ id: 'viewpoint.autogeneratedColoredGroup.description', defaultMessage: 'Autogenerated group from viewer for colour {color}' }, { color });
 			name = formatMessage({ id: 'viewpoint.autogeneratedColoredGroup.name', defaultMessage: 'Default {color} group' }, { color });
 			break;
-		case ViewpointGroupOverrideType.TRANSFORMED:
+		case TicketViewpointOverride.TRANSFORMED:
 			description = formatMessage({ id: 'viewpoint.autogeneratedTransformedGroup.description', defaultMessage: 'Autogenerated group from viewer for transform' });
 			name = formatMessage({ id: 'viewpoint.autogeneratedTransformedGroup.name', defaultMessage: 'Default transform' });
 			break;
@@ -82,16 +366,16 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 			break;
 	}
 
-	const override:GroupOverride = { group: { description, name } };
+	const override: TicketGroupOverride = { group: { description, name } };
 
 	(override.group as Group).objects = convertToV5GroupNodes(group.objects);
 
 	if (group.color) {
 		const { color } = group;
 		if (color.length > 3) {
-			override.opacity = color.pop() / 255;
+			override.opacity = color[3] / 255;
 		}
-		override.color = color;
+		override.color = color.slice(0, 3);
 	}
 
 	if (group.opacity) {
@@ -114,28 +398,28 @@ export const getViewerState = async () => {
 	const state: ViewpointState = { showHidden: !viewpointV4.hideIfc };
 
 	if (viewpointV4.override_groups?.length) {
-		state.colored = viewpointV4.override_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.COLORED));
+		state.colored = viewpointV4.override_groups.map((group) => convertToV5GroupOverride(group, TicketViewpointOverride.COLORED));
 	}
 
 	if (viewpointV4.highlighted_group) {
 		state.colored = (state.colored || [])
-			.concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED))
+			.concat(convertToV5GroupOverride(viewpointV4.highlighted_group, TicketViewpointOverride.COLORED))
 			// eslint-disable-next-line no-underscore-dangle
 			.filter(({ group }) => !!(group as Group).objects.filter((obj) => obj._ids.length).length);
 	}
 
 	if (viewpointV4.hidden_group) {
-		state.hidden = [convertToV5GroupOverride(viewpointV4.hidden_group, ViewpointGroupOverrideType.HIDDEN)];
+		state.hidden = [convertToV5GroupOverride(viewpointV4.hidden_group, TicketViewpointOverride.HIDDEN)];
 	}
 
 	if (viewpointV4.transformation_groups) {
-		state.transformed = viewpointV4.transformation_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.TRANSFORMED));
+		state.transformed = viewpointV4.transformation_groups.map((group) => convertToV5GroupOverride(group, TicketViewpointOverride.TRANSFORMED));
 	}
 
 	return state;
 };
 
-const convertToV4Group = (groupOverride: GroupOverride) => {
+const convertToV4Group = (groupOverride: TicketGroupOverride) => {
 	const { color, opacity, transformation, group: v5Group } = groupOverride;
 
 	if (isString(v5Group)) {
@@ -163,7 +447,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 
 const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
 
-export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
+export const viewpointV5ToV4 = (viewpoint: ITicketViewpoint) => {
 	let v4Viewpoint:any = {};
 	if (viewpoint.camera) {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -214,7 +498,7 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 	_ids: obj.mesh_ids,
 }));
 
-export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDicts => {
+export const toGroupPropertiesDicts = (overrides: TicketGroupOverride[]): OverridesDicts => {
 	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => 
 		objects.shared_ids.reduce((dict, id) => {
 			if (color !== undefined) {
@@ -247,7 +531,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 };
 
-export const goToView = async (view: Viewpoint) => {
+export const goToView = async (view: ITicketViewpoint) => {
 	if (
 		isEmpty(view?.state?.colored) && 
 		isEmpty(view?.state?.hidden) && 
@@ -277,6 +561,30 @@ export const goToView = async (view: Viewpoint) => {
 	ViewpointsActionsDispatchers.showViewpoint(null, null, viewpointV5ToV4(view));
 };
 
+const getGroupsIDsOfViewpoint = (viewpoint: IViewpoint) => {
+	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+		'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	const ids = new Set<string>();
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds: string[] = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					ids.add(groupsIds[j]);
+				}
+			} else {// if the property is just a groupId
+				ids.add(viewpoint[prop]);
+			}
+		}
+	}
+
+	return ids;
+};
 
 export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 	if (!view.viewpoint) {
@@ -311,4 +619,39 @@ export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 
 	const groupsMap = selectViewpointsGroups(getState());
 	return setGroupData(viewpoint, groupsMap);
+};
+
+export const getLoadedGroupsIds = (viewpoint: IViewpoint) => {
+	const groupsProperties = ['highlighted_group', 'hidden_group', 'shown_group', 'override_groups', 'transformation_groups'];
+
+	const ids = new Set<string>();
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					ids.add(groupsIds[j]._id);
+				}
+			} else {// if the property is just a groupId
+				ids.add(viewpoint[prop]._id);
+			}
+		}
+	}
+
+	return ids;
+};
+
+export const getScreenshotFromView = (viewpoint: IViewpoint): string | null => {
+	// @ts-ignore
+	const screenshot = viewpoint?.screenshot || viewpoint?.viewpoint?.screenshot;
+	if (!screenshot) return null;
+	if (screenshot.thumbnailUrl) return screenshot.thumbnailUrl;
+	if (!screenshot.startsWith('data:image/png;base64,') && !screenshot.startsWith('https://')) {
+		return 'data:image/png;base64,' + screenshot;
+	}
+	return screenshot;
 };

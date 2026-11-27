@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { SearchField } from '@/v4/routes/viewerGui/components/views/views.styles';
+import { SearchField } from '@/v4/routes/viewerGui/components/activities/activities.styles';
 import sequencesTab from './sequencesTab.overrides';
 import selectMenus from './selectMenus.overrides';
 import shapes from './shapes.overrides';

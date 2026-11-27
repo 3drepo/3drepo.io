@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,24 +17,22 @@
 
 import styled from 'styled-components';
 
-import SvgIcon from '@mui/material/SvgIcon';
+export const PresetViewsContainer = styled.div`
+	height: 100%;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	width: 100%;
+`;
 
-export const StyledSvgIcon = styled(SvgIcon)`
+export const StyledPresetIcon = styled.span`
 	cursor: pointer;
 	margin: 0 3px;
+	display: inline-flex;
 
-	.wall {
-		fill: #dadada;
-	}
-
-	.cube {
-		fill: none;
-		stroke: #b2b2b2;
-		stroke-miterlimit: 10;
-		stroke-width: 8px;
-	}
-
-	.stroke-dash {
-		stroke-dasharray: 12;
+	svg {
+		width: 24px;
+		height: 24px;
+		overflow: visible;
 	}
 `;
