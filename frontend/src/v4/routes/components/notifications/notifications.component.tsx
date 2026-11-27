@@ -158,9 +158,7 @@ export class Notifications extends PureComponent<IProps, any> {
 
 	public markAllNotifications = (read) => (e: SyntheticEvent) => {
 		this.toggleMenu(e);
-		this.props.notifications.forEach((notification) => {
-			this.props.sendUpdateAllNotificationsRead(read);
-		});
+		this.props.sendUpdateAllNotificationsRead(read);
 	}
 
 	public deleteAllNotifications = (e: SyntheticEvent) => {
