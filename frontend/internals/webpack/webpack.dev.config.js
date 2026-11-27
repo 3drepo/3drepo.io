@@ -22,6 +22,10 @@ module.exports = getWebpackConfig({
     unityutil: { // This entry creates the dev unity-util.js that is usually constructed by webpack.prod.config in production environments
       import: './src/globals/unity-util-external.ts', 
 			filename: '../unity/unity-util.js' 
+    },
+    unityrpc: {
+      import: './src/globals/unity-util-rpc.ts',
+      filename: '../unity/unity-util-rpc.js'
     }
   },
   output: {

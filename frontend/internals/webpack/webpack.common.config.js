@@ -5,6 +5,7 @@ const path = require('path');
 
 const PATHS = require('./tools/paths');
 const loaders = require('./tools/loaders');
+const { RuntimeMetadataPlugin } = require('./tools/runtimeMetadataGenerator.ts');
 
 module.exports = (options) => ({
 	mode: options.mode,
@@ -57,6 +58,11 @@ module.exports = (options) => ({
 		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser',
+		}),
+		new RuntimeMetadataPlugin({
+			inputFile: path.resolve(PATHS.SRC_DIR, 'globals/unity-util.ts'),
+			outputFile: path.resolve(PATHS.PUBLIC_DIR, 'unity/unity-util-api.js'),
+			primaryClass: 'UnityUtil'
 		}),
 		...(options.plugins || []),
 	],
